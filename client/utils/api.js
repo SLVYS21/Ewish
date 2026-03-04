@@ -22,3 +22,29 @@ export const uploadFile = (file) => {
 };
 
 export default api;
+
+// ── Auth ──
+export const login = (email, password) => api.post('/auth/login', { email, password }, { withCredentials: true });
+export const logout = () => api.post('/auth/logout', {}, { withCredentials: true });
+export const getMe = () => api.get('/auth/me', { withCredentials: true });
+
+// ── Orders ──
+export const getOrders = (params) => api.get('/orders', { params, withCredentials: true });
+export const updateOrder = (id, data) => api.patch(`/orders/${id}`, data, { withCredentials: true });
+
+// ── Analytics ──
+export const getAnalytics = (period) => api.get('/analytics', { params: { period }, withCredentials: true });
+
+// ── Promos ──
+export const getPromos = () => api.get('/promo', { withCredentials: true });
+export const createPromo = (data) => api.post('/promo', data, { withCredentials: true });
+export const updatePromo = (id, data) => api.patch(`/promo/${id}`, data, { withCredentials: true });
+export const deletePromo = (id) => api.delete(`/promo/${id}`, { withCredentials: true });
+
+// ── Wishes (admin moderation) ──
+export const getWishes    = (pubId)       => api.get(`/wishes/${pubId}`,         { withCredentials: true });
+export const updateWish   = (id, data)    => api.patch(`/wishes/${id}`, data,     { withCredentials: true });
+export const deleteWish   = (id)          => api.delete(`/wishes/${id}`,          { withCredentials: true });
+
+// ── Templates (admin update) ──
+export const updateTemplate = (name, data) => api.patch(`/templates/${name}`, data, { withCredentials: true });

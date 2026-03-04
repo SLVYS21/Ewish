@@ -1,0 +1,142 @@
+/* ── Admin dark theme tokens ── */
+.adminRoot {
+  --a-bg:       #0e0f11;
+  --a-surface:  #15171b;
+  --a-surface2: #1c1f25;
+  --a-border:   rgba(255,255,255,0.07);
+  --a-border-h: rgba(255,255,255,0.14);
+  --a-gold:     #c8963e;
+  --a-gold-l:   #e8b86a;
+  --a-green:    #3ecf8e;
+  --a-red:      #e05757;
+  --a-blue:     #4e9eff;
+  --a-amber:    #f0a030;
+  --a-text:     #e8e4dc;
+  --a-text2:    #9a9488;
+  --a-text3:    #5a554e;
+  --a-font:     'Syne', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --a-font-d:   'DM Serif Display', Georgia, serif;
+  --a-r:        10px;
+  --a-sidebar:  220px;
+
+  font-family: var(--a-font);
+  background: var(--a-bg);
+  color: var(--a-text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+
+/* ── Shared utility classes used across admin pages ── */
+.spinner {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--a-border);
+  border-top-color: var(--a-gold);
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loadingWrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 20px;
+  color: var(--a-text3); font-size: 0.8rem;
+}
+
+.emptyWrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 20px;
+  color: var(--a-text3); font-size: 0.85rem; text-align: center;
+}
+.emptyIcon { font-size: 2.2rem; margin-bottom: 12px; opacity: 0.5; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 99px;
+  font-size: 0.63rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.badgePending   { background: rgba(240,160,48,0.12); color: var(--a-amber); }
+.badgeConfirmed { background: rgba(78,158,255,0.12); color: var(--a-blue);  }
+.badgeProgress  { background: rgba(200,150,62,0.12); color: var(--a-gold);  }
+.badgeDelivered { background: rgba(62,207,142,0.12); color: var(--a-green); }
+.badgeCancelled { background: rgba(224,87,87,0.12);  color: var(--a-red);   }
+.badgeApproved  { background: rgba(62,207,142,0.12); color: var(--a-green); }
+.badgeHidden    { background: rgba(90,85,78,0.18);   color: var(--a-text3); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--a-r); border: none;
+  font-family: var(--a-font); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn:hover   { opacity: 0.82; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btnGold    { background: linear-gradient(135deg, var(--a-gold), #e8a84a); color: #fff; box-shadow: 0 4px 14px rgba(200,150,62,0.3); }
+.btnGhost   { background: var(--a-surface2); color: var(--a-text2); border: 1px solid var(--a-border); }
+.btnGhost:hover { color: var(--a-text); border-color: var(--a-border-h); opacity: 1; }
+.btnDanger  { background: rgba(224,87,87,0.1); color: var(--a-red); border: 1px solid rgba(224,87,87,0.18); }
+.btnDanger:hover { background: rgba(224,87,87,0.2); opacity: 1; }
+.btnSm      { padding: 5px 10px; font-size: 0.72rem; }
+.btnIcon    { padding: 6px 8px; }
+
+.tableWrap {
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 14px; overflow: hidden;
+}
+.table { width: 100%; border-collapse: collapse; }
+.table thead th {
+  padding: 10px 14px; text-align: left;
+  font-size: 0.62rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--a-text3); border-bottom: 1px solid var(--a-border);
+  background: var(--a-surface2);
+}
+.table tbody tr { border-bottom: 1px solid var(--a-border); transition: background 0.12s; cursor: pointer; }
+.table tbody tr:last-child { border-bottom: none; }
+.table tbody tr:hover { background: var(--a-surface2); }
+.table tbody td { padding: 11px 14px; font-size: 0.82rem; color: var(--a-text2); vertical-align: middle; }
+.table tbody td.bold { font-weight: 600; color: var(--a-text); }
+.table tbody td.muted { font-size: 0.7rem; color: var(--a-text3); }
+
+.statCard {
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 14px; padding: 18px 20px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.statCard:hover { border-color: var(--a-border-h); }
+.statLabel { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--a-text3); margin-bottom: 8px; }
+.statValue { font-family: var(--a-font-d); font-size: 1.9rem; color: var(--a-text); line-height: 1; margin-bottom: 4px; }
+.statValueGold  { color: var(--a-gold); }
+.statValueGreen { color: var(--a-green); }
+.statValueRed   { color: var(--a-red); }
+.statMeta  { font-size: 0.68rem; color: var(--a-text3); }
+.statIcon  { position: absolute; top: 16px; right: 16px; font-size: 1.3rem; opacity: 0.3; }
+
+.sectionHead {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sectionTitle {
+  font-size: 0.72rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--a-text2);
+}
+
+.formGroup { display: flex; flex-direction: column; gap: 5px; }
+.formLabel { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--a-text3); }
+.formInput, .formSelect, .formTextarea {
+  background: var(--a-bg); border: 1px solid var(--a-border);
+  border-radius: 8px; padding: 9px 12px;
+  font-family: var(--a-font); font-size: 0.85rem; color: var(--a-text);
+  transition: border-color 0.2s; width: 100%;
+}
+.formInput:focus, .formSelect:focus, .formTextarea:focus { outline: none; border-color: var(--a-gold); }
+.formTextarea { resize: vertical; min-height: 80px; }
+.formSelect option { background: var(--a-surface2); }
+.formGrid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.formGrid1 { display: grid; grid-template-columns: 1fr; gap: 12px; }

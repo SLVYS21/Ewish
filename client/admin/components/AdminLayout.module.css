@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+
+.shell {
+  display: flex; height: 100vh; overflow: hidden;
+  font-family: 'Syne', 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #0e0f11; color: #e8e4dc;
+  --a-bg:       #0e0f11;
+  --a-surface:  #15171b;
+  --a-surface2: #1c1f25;
+  --a-border:   rgba(255,255,255,0.07);
+  --a-border-h: rgba(255,255,255,0.14);
+  --a-gold:     #c8963e;
+  --a-green:    #3ecf8e;
+  --a-red:      #e05757;
+  --a-blue:     #4e9eff;
+  --a-amber:    #f0a030;
+  --a-text:     #e8e4dc;
+  --a-text2:    #9a9488;
+  --a-text3:    #5a554e;
+  --a-font:     'Syne', system-ui, sans-serif;
+  --a-font-d:   'DM Serif Display', Georgia, serif;
+  --a-r:        10px;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--a-surface);
+  border-right: 1px solid var(--a-border);
+  display: flex; flex-direction: column;
+}
+.sidebarHead {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--a-border);
+}
+.logo {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.15rem; color: var(--a-text);
+  margin-bottom: 3px;
+}
+.logo span { color: var(--a-gold); }
+.adminBadge {
+  font-size: 0.6rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--a-text3);
+}
+
+.nav {
+  flex: 1; padding: 10px 8px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.navItem {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--a-text2); text-decoration: none;
+  transition: background 0.13s, color 0.13s;
+  position: relative;
+}
+.navItem:hover { background: var(--a-surface2); color: var(--a-text); }
+.navItem.active { background: rgba(200,150,62,0.11); color: var(--a-gold); }
+.navIcon { font-size: 0.95rem; width: 18px; text-align: center; flex-shrink: 0; }
+.navLabel { flex: 1; }
+.navBadge {
+  background: var(--a-amber); color: #fff;
+  font-size: 0.6rem; font-weight: 700;
+  padding: 1px 5px; border-radius: 99px;
+  min-width: 16px; text-align: center;
+}
+
+.sidebarFoot {
+  padding: 12px 8px;
+  border-top: 1px solid var(--a-border);
+}
+.adminUser {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px;
+}
+.avatar {
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--a-gold), #e8a84a);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700; color: #fff;
+}
+.userInfo { flex: 1; min-width: 0; }
+.userName { font-size: 0.76rem; font-weight: 600; color: var(--a-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.userRole { font-size: 0.63rem; color: var(--a-text3); }
+.logoutBtn {
+  background: none; border: none; color: var(--a-text3);
+  cursor: pointer; padding: 4px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s;
+}
+.logoutBtn:hover { color: var(--a-red); }
+
+/* ── Main ── */
+.main {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column;
+  background: var(--a-bg);
+}

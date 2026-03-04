@@ -1,0 +1,58 @@
+.toolbar { display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap; }
+.pubSelect { background:#1c1f25;border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:.82rem;color:#e8e4dc;min-width:280px;cursor:pointer;transition:border-color .2s; }
+.pubSelect:focus { outline:none;border-color:#c8963e; }
+
+.filterTabs { display:flex;gap:3px;background:#15171b;border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:3px; }
+.filterBtn { padding:6px 13px;border-radius:6px;border:none;background:none;font-family:inherit;font-size:.74rem;font-weight:600;color:#9a9488;cursor:pointer;transition:all .15s;white-space:nowrap; }
+.filterBtn.active { background:#1c1f25;color:#e8e4dc;box-shadow:0 1px 3px rgba(0,0,0,.3); }
+.filterBtn:hover:not(.active) { color:#e8e4dc; }
+
+.loadingWrap { display:flex;justify-content:center;padding:60px; }
+.spinner { width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.07);border-top-color:#c8963e;animation:spin .75s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.emptyWrap { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:#5a554e;font-size:.85rem;text-align:center;gap:10px; }
+.emptyIcon { font-size:2.2rem;opacity:.5; }
+
+/* ── Card grid ── */
+.grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px; }
+
+.card { background:#15171b;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;transition:border-color .2s; }
+.card:hover { border-color:rgba(255,255,255,.14); }
+.cardApproved { border-color:rgba(62,207,142,.2); }
+.cardHidden   { opacity:.5; }
+
+.cardHead { display:flex;align-items:flex-start;gap:10px;margin-bottom:12px; }
+.avatar { width:38px;height:38px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,#c8963e,#e8a84a);display:flex;align-items:center;justify-content:center;font-size:.92rem;font-weight:700;color:#fff;overflow:hidden; }
+.avatarImg { width:100%;height:100%;object-fit:cover; }
+.authorInfo { flex:1;min-width:0; }
+.authorName { font-weight:700;font-size:.86rem;color:#e8e4dc; }
+.authorRole { font-size:.67rem;color:#c8963e;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-top:1px; }
+.authorDate { font-size:.65rem;color:#5a554e;margin-top:2px; }
+.statusDot  { flex-shrink:0; }
+
+.message { font-size:.83rem;color:#9a9488;line-height:1.65;font-style:italic;margin-bottom:12px;padding-left:10px;border-left:2px solid rgba(255,255,255,.08); }
+
+.photoPreview { width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:12px; }
+
+.actions { display:flex;gap:6px;flex-wrap:wrap; }
+
+/* ── Badges ── */
+.badge { display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em; }
+.badge::before { content:'';width:5px;height:5px;border-radius:50%;background:currentColor; }
+.badgeApproved { background:rgba(62,207,142,.12);color:#3ecf8e; }
+.badgePending  { background:rgba(240,160,48,.12);color:#f0a030; }
+.badgeHidden   { background:rgba(90,85,78,.18);  color:#5a554e; }
+
+/* ── Buttons ── */
+.btn { display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:none;font-family:inherit;font-size:.74rem;font-weight:600;cursor:pointer;transition:opacity .15s,transform .15s;white-space:nowrap; }
+.btn:hover { opacity:.82;transform:translateY(-1px); }
+.btnGold   { background:linear-gradient(135deg,#c8963e,#e8a84a);color:#fff; }
+.btnGhost  { background:#1c1f25;color:#9a9488;border:1px solid rgba(255,255,255,.07); }
+.btnGhost:hover { color:#e8e4dc;border-color:rgba(255,255,255,.14);opacity:1; }
+.btnDanger { background:rgba(224,87,87,.1);color:#e05757;border:1px solid rgba(224,87,87,.18); }
+.btnDanger:hover { background:rgba(224,87,87,.2);opacity:1; }
+.btnSm   { padding:5px 10px;font-size:.72rem; }
+.btnIcon { padding:5px 8px; }
+
+.toast { position:fixed;bottom:24px;right:24px;z-index:9999;background:#15171b;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 18px;font-size:.82rem;font-weight:500;color:#e8e4dc;box-shadow:0 12px 40px rgba(0,0,0,.4);animation:slideUp .3s ease; }
+@keyframes slideUp { from { opacity:0;transform:translateY(10px); } to { opacity:1;transform:translateY(0); } }
