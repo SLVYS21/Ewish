@@ -36,6 +36,24 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PATCH /api/templates/:name — admin update (price, description, highlights…)
+const { requireAdmin } = require('../middleware/auth');
+router.patch('/:name', requireAdmin, async (req, res) => {
+  try {
+    const allowed = ['label','price','priceLabel','description','highlights','active','featured','tags','sortOrder'];
+    const update = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
+    const template = await Template.findOneAndUpdate(
+      { name: req.params.name },
+      { $set: update },
+      { new: true }
+    );
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+    res.json(template);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
 
 
 module.exports = router;
