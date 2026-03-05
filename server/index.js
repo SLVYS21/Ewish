@@ -18,6 +18,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use('/templates/shared',    express.static(path.join(__dirname, '../templates/shared')));
+
 // Template static assets
 app.use('/site/birthday',          express.static(path.join(__dirname, '../templates/birthday')));
 app.use('/site/special',           express.static(path.join(__dirname, '../templates/special')));

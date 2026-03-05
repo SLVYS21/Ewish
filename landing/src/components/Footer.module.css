@@ -1,0 +1,11 @@
+.footer { background: var(--ink); padding: 60px 40px 40px; }
+.inner { max-width: 1080px; margin: 0 auto; }
+.brand { margin-bottom: 40px; }
+.logo { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 300; color: var(--ivory); margin-bottom: 8px; }
+.logo em { font-style: italic; color: var(--gold-l); }
+.tagline { font-size: 0.82rem; color: rgba(250,248,244,0.4); }
+.nav { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 40px; }
+.nav a { font-size: 0.82rem; color: rgba(250,248,244,0.55); transition: color 0.2s; }
+.nav a:hover { color: var(--gold-l); }
+.legal { font-size: 0.72rem; color: rgba(250,248,244,0.25); padding-top: 24px; border-top: 1px solid rgba(250,248,244,0.08); }
+@media (max-width: 600px) { .footer { padding: 50px 20px 32px; } }

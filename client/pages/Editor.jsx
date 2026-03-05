@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPublications, updatePublication, publishPublication, uploadFile } from '../utils/api';
 import ContentTab from '../components/ContentTab';
 import StyleTab from '../components/StyleTab';
+import JarTab from '../components/JarTab';
 import styles from './Editor.module.css';
 import WishesManager from '../components/WishesManager';
 
@@ -157,6 +158,12 @@ export default function Editor() {
                 onClick={() => setActiveTab('wishes')}
               >💌 Vœux</button>
             )}
+            {(pub.templateName === 'birthday' || pub.templateName === 'special') && (
+              <button
+                className={`${styles.tab} ${activeTab === 'jar' ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab('jar')}
+              >🫙 Jar</button>
+            )}
           </div>
 
           {/* Tab content */}
@@ -172,6 +179,12 @@ export default function Editor() {
               <StyleTab
                 style={style}
                 onChange={handleStyleChange}
+              />
+            ) : activeTab === 'jar' ? (
+              <JarTab
+                data={data}
+                onChange={handleDataChange}
+                templateName={pub.templateName}
               />
             ) : (
               <WishesManager

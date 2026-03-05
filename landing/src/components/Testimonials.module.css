@@ -1,0 +1,33 @@
+.section { padding: 100px 40px; background: var(--ivory); }
+.container { max-width: 1080px; margin: 0 auto; }
+.header { text-align: center; margin-bottom: 64px; }
+.eyebrow { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 300; color: var(--ink); }
+.title em { font-style: italic; color: var(--gold); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+
+.card {
+  background: var(--ivory-2); border: 1px solid var(--ivory-3);
+  border-radius: 18px; padding: 28px 24px;
+  transition: box-shadow 0.3s;
+}
+.card:hover { box-shadow: 0 16px 48px rgba(26,20,16,0.07); }
+
+.stars { color: var(--gold); font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 14px; }
+.quote {
+  font-family: var(--font-serif); font-size: 0.95rem; font-style: italic;
+  color: var(--ink-2); line-height: 1.7; margin-bottom: 20px;
+}
+.author { display: flex; align-items: center; gap: 12px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gold), var(--gold-l));
+  color: #fff; font-family: var(--font-serif);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 600;
+}
+.name { font-size: 0.82rem; font-weight: 500; color: var(--ink); }
+.role { font-size: 0.72rem; color: var(--ink-3); margin-top: 1px; }
+
+@media (max-width: 600px) { .section { padding: 80px 20px; } }

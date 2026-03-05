@@ -254,62 +254,6 @@
       background: linear-gradient(135deg, #ffb3c6, var(--primary));
       display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
     }
-    .photo-placeholder, .six .photo-grid > * {
-      position: relative;
-      overflow: visible;
-    }
-
-    /* Cadre pellicule */
-    .film-frame {
-      position: relative;
-      background: #1a1a1a;
-      border-radius: 4px;
-      padding: 10px 6px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-    }
-    /* Perforations haut et bas */
-    .film-frame::before,
-    .film-frame::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      height: 10px;
-      background-image: repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 4px,
-        #1a1a1a 4px,
-        #1a1a1a 6px,
-        #fff8 6px,
-        #fff8 10px,
-        #1a1a1a 10px,
-        #1a1a1a 12px
-      );
-      z-index: 2;
-    }
-    .film-frame::before { top: 0; border-radius: 4px 4px 0 0; }
-    .film-frame::after  { bottom: 0; border-radius: 0 0 4px 4px; }
-
-    .film-frame .film-inner {
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem;
-      overflow: hidden;
-    }
-    .film-frame .film-inner img {
-      width: 100%; height: 100%; object-fit: cover;
-    }
-    /* Numéro de frame style pellicule */
-    .film-frame .film-num {
-      position: absolute;
-      bottom: -18px; left: 50%;
-      transform: translateX(-50%);
-      font-family: 'Courier New', monospace;
-      font-size: 0.6rem; color: #888;
-      letter-spacing: 2px;
-      white-space: nowrap;
-    }
     .six .hat { position: absolute; width: 80px; top: -35px; left: 41.5%; }
     .wish { margin-top: 8px; }
     .wish-hbd { font-size: 3em; margin: 0; text-transform: uppercase; }
@@ -362,16 +306,31 @@
     #close-wishes:hover { color: var(--primary); transform: rotate(90deg); }
 
     /* ===== WISH BUTTONS ===== */
-    #open-wishes-btn, #open-wishes-btn-outro {
-      display: none;
+    /* ===== WISHES BUTTONS — fixed, outside GSAP reach ===== */
+    #wishes-float {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 8500;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      pointer-events: none;
+    }
+    #wishes-float button {
+      pointer-events: all;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       color: #fff; border: none; border-radius: 50px;
-      padding: 12px 28px; font-family: var(--font); font-size: 1rem;
-      cursor: pointer; box-shadow: 0 8px 25px rgba(255,105,180,0.35);
-      transition: transform 0.2s, box-shadow 0.2s; margin-top: 16px;
+      padding: 13px 30px; font-family: var(--font);
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(255,105,180,.4);
+      transition: transform .2s, box-shadow .2s;
+      animation: wpulse 2s ease-in-out infinite;
     }
-    #open-wishes-btn:hover, #open-wishes-btn-outro:hover {
-      transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,105,180,0.45);
+    #wishes-float button:hover {
+      transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,105,180,.55);
+      animation: none;
+    }
+    @keyframes wpulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.04) translateY(-2px); }
     }
 
     /* ===== OUTRO ===== */
@@ -565,22 +524,15 @@
 
   <!-- 6. BIRTHDAY -->
   <div class="six">
-<div class="photo-grid" id="photo-grid">
-      <div class="film-frame" style="width:120px; height:145px; transform:rotate(-6deg)">
-        <div class="film-inner" data-photo="1">📸</div>
-        <span class="film-num">◼ 01 ◼</span>
-      </div>
+    <div class="photo-grid" id="photo-grid">
+      <div class="photo-placeholder" data-photo="1">📸</div>
       <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath">
-      <div class="film-frame" style="width:120px; height:138px; transform:rotate(5deg)">
-        <div class="film-inner" data-photo="2">🎂</div>
-        <span class="film-num">◼ 02 ◼</span>
-      </div>
+      <div class="photo-placeholder" data-photo="2">🎂</div>
     </div>
     <img src="img/hat.svg" alt="" class="hat">
     <div class="wish">
       <h3 class="wish-hbd" data-node-name="wishHeading">Joyeux Anniversaire !</h3>
       <h5 data-node-name="wishText">Le #1 résultat de ma vie 🏆</h5>
-      <button id="open-wishes-btn" onclick="openWishes()">💌 Mes vœux pour toi</button>
     </div>
   </div>
 
@@ -615,12 +567,18 @@
   </div>
 
   <!-- 9. OUTRO -->
-    <div class="nine">
-        <p data-node-name="outroText">Okay, now come back and tell me if you liked it.</p>
-        <p id="replay" data-node-name="replayText">Or click, if you want to watch it again.</p>
-        <p class="last-smile" data-node-name="outroSmiley">:)</p>
-    </div>
+  <div class="nine">
+    <p data-node-name="outroText">Reviens me dire si tu as aimé.</p>
+    <p id="replay" data-node-name="replayText">Clique pour revoir.</p>
+    <p class="last-smile" data-node-name="outroSmiley">:)</p>
+  </div>
 
+</div>
+
+<!-- ✅ Wishes buttons OUTSIDE .container — GSAP never touches them -->
+<div id="wishes-float">
+  <button id="open-wishes-btn"       onclick="openWishes()" style="display:none">💌 Voir mes vœux</button>
+  <button id="open-wishes-btn-outro" onclick="openWishes()" style="display:none">💌 Voir mes vœux</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
@@ -743,11 +701,12 @@ const fetchData = () => {
 
   if (window.__WW_DATA__) {
     run(window.__WW_DATA__);
+    if (window._jarInit) window._jarInit();
   } else {
     fetch("customize.json")
       .then(r => r.json())
-      .then(run)
-      .catch(() => animationTimeline());
+      .then(d => { run(d); if (window._jarInit) window._jarInit(); })
+      .catch(() => { if (window._jarInit) window._jarInit(); animationTimeline(); });
   }
 };
 
@@ -876,24 +835,30 @@ const animationTimeline = () => {
     .from('.wish h5', 0.5, { opacity: 0, y: 10, skewX: '-15deg' }, 'party')
     .add(() => {
       startConfetti();
-      document.getElementById('open-wishes-btn').style.display = 'inline-block';
-      TweenMax.from('#open-wishes-btn', 0.5, { opacity: 0, y: 20, scale: 0.8 });
+      const b = document.getElementById('open-wishes-btn');
+      b.style.display = 'inline-block';
+      b.style.opacity = '1';
     }, 'party')
 
     .staggerTo('.eight svg', 1.5, { visibility: 'visible', opacity: 0, scale: 80, repeat: 3, repeatDelay: 1.4 }, 0.3)
-    .to('.six', 0.5, { opacity: 0, y: 30, zIndex: '-1' })
+    .to('.six', 0.5, { opacity: 0, y: 30 })
+    .add(() => {
+      document.getElementById('open-wishes-btn').style.display = 'none';
+      if (window._showJar) window._showJar();
+    })
 
     // --- OUTRO ---
     .staggerFrom('.nine p', 1, ideaIn, 1.2)
     .add(() => {
-    //   document.getElementById('open-wishes-btn-outro').style.display = 'inline-block';
-    //   TweenMax.from('#open-wishes-btn-outro', 0.5, { opacity: 0, y: 20 });
+      const b2 = document.getElementById('open-wishes-btn-outro');
+      b2.style.display = 'inline-block';
+      b2.style.opacity = '1';
     })
     .to('.last-smile', 0.5, { rotation: 90 }, '+=1');
 
   document.getElementById('replay').addEventListener('click', () => {
     document.getElementById('open-wishes-btn').style.display = 'none';
-    // document.getElementById('open-wishes-btn-outro').style.display = 'none';
+    document.getElementById('open-wishes-btn-outro').style.display = 'none';
     // Reset typewriter
     document.getElementById('g-typed-query').textContent = '';
     document.getElementById('g-stats').style.opacity = '0';
@@ -920,6 +885,364 @@ window.addEventListener('message', (e) => {
   }
   if (data) { Object.keys(data).forEach(k => applyField(k, data[k])); }
 });
+</script>
+<!-- JAR OF WORDS — 3 designs, inline -->
+<script>
+(function() {
+  /* ─── Default data ─── */
+  const DEF_CLASSIC = [
+    "Tu es une force tranquille qui inspire 🌿",
+    "Chaque jour avec toi est un cadeau 🎁",
+    "Ta présence est un bonheur rare ✨",
+    "Je suis tellement fier(e) de toi 🌟",
+    "Tu mérites tout ce que la vie a de beau 🌺",
+    "Merci d'exister exactement comme tu es 🙏",
+    "Tu es irremplaçable — et tu le sais 👑",
+    "Ta lumière guide ceux qui t'entourent 🕯️",
+  ];
+  const DEF_CATS = [
+    { id:'sad',    label:"Quand tu te sens triste",      color:'#4e9eff', bg:'#d0e8ff', words:["Tu n'es pas seul(e) 💙","Cette douleur est temporaire 🌊","Je suis là pour toi 🤝"] },
+    { id:'happy',  label:"Quand tu es heureuse",         color:'#f0a030', bg:'#fff3cd', words:["Continue de briller ☀️","Tu mérites cette joie 🌻","Ta joie me rend heureux aussi 🎉"] },
+    { id:'faith',  label:"Quand tu as besoin de foi",    color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon — ça va aller 🌟"] },
+    { id:'lonely', label:"Quand tu te sens seul(e)",     color:'#c8963e', bg:'#f5e9c8', words:["Tu comptes tellement pour moi 💛","Je pense à toi souvent 🌸","Tu n'es jamais vraiment seul(e) 🤍"] },
+    { id:'doubt',  label:"Quand tu doutes de toi",       color:'#a78bfa', bg:'#f3d9ff', words:["Tu es capable de grandes choses ✨","Je crois en toi, même quand tu n'y crois pas 🌙"] },
+  ];
+  const SLIP_COLORS = [
+    {bg:'#ffd6e0',text:'#c2185b'},{bg:'#fff3cd',text:'#b8860b'},
+    {bg:'#d4f1c8',text:'#2e7d32'},{bg:'#d0e8ff',text:'#1565c0'},
+    {bg:'#f3d9ff',text:'#7b1fa2'},{bg:'#ffe0b2',text:'#e65100'},
+  ];
+
+  let design='classic', words=[], cats=[], drawn=[];
+
+  /* ─── Inject styles once ─── */
+  const css = document.createElement('style');
+  css.textContent = `
+    #jar-btn{position:fixed;bottom:28px;right:28px;z-index:8000;
+      background:linear-gradient(135deg,#ff9eb5,#ffcf77);
+      border:none;border-radius:99px;padding:12px 20px 12px 14px;
+      font-size:.88rem;font-weight:700;color:#fff;cursor:pointer;
+      display:none;align-items:center;gap:7px;
+      box-shadow:0 8px 28px rgba(255,120,160,.4);
+      animation:jpulse 2.5s ease-in-out infinite;
+      font-family:'Work Sans',sans-serif;}
+    #jar-btn:hover{transform:translateY(-3px) scale(1.04);animation:none;}
+    @keyframes jpulse{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.03)}}
+
+    #jar-ov{position:fixed;inset:0;z-index:9000;
+      background:rgba(20,10,30,.58);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;padding:20px;
+      opacity:0;pointer-events:none;transition:opacity .3s;}
+    #jar-ov.open{opacity:1;pointer-events:all;}
+
+    /* ── Shared modal box ── */
+    #jar-box{background:#fffaf5;border-radius:28px;padding:28px 24px 24px;
+      width:100%;max-width:400px;position:relative;text-align:center;
+      box-shadow:0 40px 100px rgba(0,0,0,.25);overflow:hidden;
+      transform:scale(.92) translateY(24px);
+      transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+    #jar-ov.open #jar-box{transform:scale(1) translateY(0);}
+    #jar-box::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;
+      background:linear-gradient(90deg,#ff9eb5,#ffcf77,#a8edea,#fed6e3);}
+    #jar-x{position:absolute;top:13px;right:15px;background:none;border:none;
+      font-size:1.1rem;color:#ccc;cursor:pointer;line-height:1;
+      transition:color .2s,transform .2s;}
+    #jar-x:hover{color:#ff6b9d;transform:rotate(90deg);}
+
+    /* ── Classic / Scroll ── */
+    #jar-svg-wrap{cursor:pointer;margin:0 auto 6px;display:block;width:110px;height:138px;}
+    #jar-title{font-family:Georgia,serif;font-size:1.25rem;font-weight:700;
+      color:#2d1b3d;margin-bottom:3px;font-style:italic;}
+    #jar-sub{font-size:.73rem;color:#b0a0b8;margin-bottom:14px;}
+    #jar-dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
+    .jdot{width:7px;height:7px;border-radius:50%;background:#e8e0ef;transition:background .3s,transform .2s;}
+    .jdot.hit{background:linear-gradient(135deg,#ff9eb5,#ffcf77);transform:scale(1.25);}
+    #jar-slip{min-height:84px;border-radius:16px;padding:15px 18px;margin-bottom:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.92rem;font-weight:500;line-height:1.55;
+      opacity:0;transition:opacity .25s,transform .28s;}
+    #jar-slip.show{opacity:1;}
+    #jar-slip.exit{opacity:0;transform:translateY(-10px) rotate(3deg);}
+    #jar-empty{display:none;font-size:.82rem;color:#b0a0b8;margin-bottom:12px;}
+    #jar-refill{background:none;border:none;color:#ff9eb5;font-size:.8rem;
+      font-weight:700;text-decoration:underline;cursor:pointer;font-family:inherit;margin-top:4px;display:block;}
+    #jar-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    #jar-pick{background:linear-gradient(135deg,#ff9eb5,#ffcf77);border:none;
+      border-radius:99px;padding:11px 26px;font-family:inherit;font-size:.87rem;
+      font-weight:700;color:#fff;cursor:pointer;
+      box-shadow:0 6px 20px rgba(255,120,160,.35);transition:transform .2s;}
+    #jar-pick:hover{transform:translateY(-2px);}
+    #jar-pick:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+    #jar-shake-btn{background:#f5eeff;border:1.5px solid #ddd0f0;border-radius:99px;
+      padding:10px 18px;font-family:inherit;font-size:.8rem;font-weight:600;
+      color:#9b59b6;cursor:pointer;transition:background .2s;}
+    #jar-shake-btn:hover{background:#ede0ff;}
+    @keyframes jshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) scale(1.06)}40%{transform:rotate(9deg) scale(1.06)}60%{transform:rotate(-5deg)}80%{transform:rotate(5deg)}}
+    #jar-svg-wrap.shaking{animation:jshake .5s ease;}
+
+    /* ── Read Me When ── */
+    #rmw-box{display:none;flex-direction:column;gap:0;margin-bottom:14px;border-radius:14px;overflow:hidden;border:1px solid #f0e0e8;}
+    #rmw-box.visible{display:flex;}
+    .rmw-cat{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:10px;
+      transition:filter .15s;border-bottom:1px solid rgba(255,255,255,.4);}
+    .rmw-cat:last-child{border-bottom:none;}
+    .rmw-cat:hover{filter:brightness(.96);}
+    .rmw-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .rmw-cat-label{flex:1;font-size:.83rem;font-weight:600;text-align:left;}
+    .rmw-cat-count{font-size:.7rem;opacity:.7;}
+    .rmw-slip{display:none;padding:12px 16px 14px;border-top:1px solid rgba(255,255,255,.5);}
+    .rmw-slip.show{display:block;}
+    .rmw-slip-text{font-size:.9rem;font-weight:500;line-height:1.6;font-style:italic;}
+    .rmw-slip-actions{margin-top:10px;display:flex;gap:8px;justify-content:center;}
+    .rmw-next{background:none;border:1.5px solid currentColor;border-radius:99px;
+      padding:6px 16px;font-family:inherit;font-size:.75rem;font-weight:600;
+      cursor:pointer;transition:background .15s,color .15s;}
+    .rmw-next:hover{background:rgba(255,255,255,.5);}
+    .rmw-close-cat{background:none;border:none;font-size:.75rem;color:rgba(0,0,0,.4);cursor:pointer;}
+  `;
+  document.head.appendChild(css);
+
+  /* ─── Floating trigger button ─── */
+  const btn = document.createElement('button');
+  btn.id = 'jar-btn';
+  btn.innerHTML = '🫙 Jar of Words';
+  btn.addEventListener('click', openJar);
+  document.body.appendChild(btn);
+
+  /* ─── Overlay ─── */
+  const ov = document.createElement('div');
+  ov.id = 'jar-ov';
+  ov.addEventListener('click', e => { if (e.target === ov) closeJar(); });
+  ov.innerHTML = `<div id="jar-box"><button id="jar-x">✕</button><div id="jar-inner"></div></div>`;
+  document.body.appendChild(ov);
+
+  ov.querySelector('#jar-x').addEventListener('click', closeJar);
+
+  /* ─── Build inner HTML by design ─── */
+  function buildInner() {
+    const inner = ov.querySelector('#jar-inner');
+    if (design === 'readmewhen') {
+      buildReadMeWhen(inner);
+    } else if (design === 'scroll') {
+      buildScroll(inner);
+    } else {
+      buildClassic(inner);
+    }
+  }
+
+  /* ═══════════════════════════════════
+     DESIGN 1 — CLASSIC
+  ═══════════════════════════════════ */
+  function buildClassic(inner) {
+    inner.innerHTML = `
+      <div id="jar-svg-wrap" title="Secoue le bocal !">
+        <svg viewBox="0 0 130 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:110px;height:138px">
+          <rect x="28" y="8" width="74" height="22" rx="8" fill="#d4a843" opacity=".9"/>
+          <rect x="32" y="12" width="66" height="14" rx="5" fill="#e8c060"/>
+          <path d="M22 34 Q18 40 18 50 L18 140 Q18 152 30 152 L100 152 Q112 152 112 140 L112 50 Q112 40 108 34 Z" fill="#fff8f0" stroke="#f0d9b0" stroke-width="2"/>
+          <path d="M30 50 Q28 70 28 100" stroke="rgba(255,255,255,.7)" stroke-width="5" stroke-linecap="round"/>
+          <rect x="35" y="110" width="38" height="14" rx="4" fill="#ffd6e0" opacity=".85"/>
+          <rect x="58" y="118" width="32" height="12" rx="4" fill="#d0e8ff" opacity=".85"/>
+          <rect x="40" y="124" width="30" height="10" rx="3" fill="#d4f1c8" opacity=".85"/>
+          <rect x="65" y="105" width="28" height="11" rx="3" fill="#fff3cd" opacity=".85"/>
+          <rect x="38" y="98"  width="25" height="10" rx="3" fill="#f3d9ff" opacity=".85"/>
+          <rect x="60" y="94"  width="32" height="10" rx="3" fill="#ffe0b2" opacity=".8"/>
+          <rect x="30" y="62"  width="70" height="22" rx="6" fill="rgba(255,200,150,.22)" stroke="#f0d0a0" stroke-width="1"/>
+          <text x="65" y="77" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#c8860a" font-style="italic">mots doux</text>
+        </svg>
+      </div>
+      <div id="jar-title">Ton bocal de mots 💛</div>
+      <div id="jar-sub">Pioche un message, un à la fois</div>
+      <div id="jar-dots"></div>
+      <div id="jar-slip"></div>
+      <div id="jar-empty">🌸 Tous les mots ont été piochés !<br><button id="jar-refill">Remettre tous les mots</button></div>
+      <div id="jar-acts">
+        <button id="jar-pick">🎲 Piocher un mot</button>
+        <button id="jar-shake-btn">🫙 Secouer</button>
+      </div>`;
+    drawn = [];
+    renderDots();
+    inner.querySelector('#jar-svg-wrap').addEventListener('click', shakeJar);
+    inner.querySelector('#jar-shake-btn').addEventListener('click', shakeJar);
+    inner.querySelector('#jar-pick').addEventListener('click', pick);
+    inner.querySelector('#jar-refill').addEventListener('click', () => {
+      drawn = []; renderDots();
+      inner.querySelector('#jar-empty').style.display = 'none';
+      inner.querySelector('#jar-slip').classList.remove('show');
+      inner.querySelector('#jar-pick').disabled = false;
+    });
+  }
+
+  /* ═══════════════════════════════════
+     DESIGN 2 — READ ME WHEN
+  ═══════════════════════════════════ */
+  function buildReadMeWhen(inner) {
+    // Hearts SVG jar
+    inner.innerHTML = `
+      <svg viewBox="0 0 110 130" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:110px;margin:0 auto 8px;display:block">
+        <rect x="20" y="4" width="70" height="18" rx="7" fill="#e91e8c" opacity=".85"/>
+        <path d="M14 26 Q12 31 12 38 L12 114 Q12 122 21 122 L89 122 Q98 122 98 114 L98 38 Q98 31 96 26 Z" fill="#fff0f5" stroke="#f0c0d0" stroke-width="1.5"/>
+        <text x="55" y="55"  text-anchor="middle" font-size="13">♥</text>
+        <text x="38" y="68"  text-anchor="middle" font-size="11">♥</text>
+        <text x="72" y="66"  text-anchor="middle" font-size="10">♥</text>
+        <text x="47" y="82"  text-anchor="middle" font-size="12">♥</text>
+        <text x="67" y="80"  text-anchor="middle" font-size="9">♥</text>
+        <text x="55" y="96"  text-anchor="middle" font-size="10">♥</text>
+        <text x="35" y="94"  text-anchor="middle" font-size="8">♥</text>
+        <text x="76" y="95"  text-anchor="middle" font-size="8">♥</text>
+      </svg>
+      <div id="jar-title">Lis-moi quand… 💌</div>
+      <div id="jar-sub">Choisie une humeur, reçois un message</div>
+      <div id="rmw-box" class="visible"></div>`;
+
+    const box = inner.querySelector('#rmw-box');
+    cats.forEach(cat => {
+      const row = document.createElement('div');
+      row.className = 'rmw-cat';
+      row.style.background = cat.bg;
+      row.innerHTML = `
+        <div class="rmw-cat-dot" style="background:${cat.color}"></div>
+        <div class="rmw-cat-label" style="color:${cat.color}">${cat.label}</div>
+        <div class="rmw-cat-count" style="color:${cat.color}">${cat.words.length}</div>`;
+
+      const slip = document.createElement('div');
+      slip.className = 'rmw-slip';
+      slip.style.background = cat.bg;
+      slip.innerHTML = `
+        <div class="rmw-slip-text" style="color:${cat.color}"></div>
+        <div class="rmw-slip-actions">
+          <button class="rmw-next" style="color:${cat.color};border-color:${cat.color}">✦ Suivant</button>
+          <button class="rmw-close-cat">✕ Fermer</button>
+        </div>`;
+
+      const catDrawn = [];
+      let currentSlip = null;
+
+      const showNext = () => {
+        const avail = cat.words.filter(w => !catDrawn.includes(w));
+        const pool  = avail.length ? avail : cat.words; // loop when exhausted
+        if (!avail.length) catDrawn.length = 0;
+        const w = pool[Math.floor(Math.random() * pool.length)];
+        catDrawn.push(w);
+        slip.querySelector('.rmw-slip-text').textContent = `"${w}"`;
+        slip.classList.add('show');
+        currentSlip = w;
+      };
+
+      row.addEventListener('click', () => {
+        if (slip.classList.contains('show')) return;
+        showNext();
+      });
+      slip.querySelector('.rmw-next').addEventListener('click', e => { e.stopPropagation(); showNext(); });
+      slip.querySelector('.rmw-close-cat').addEventListener('click', e => { e.stopPropagation(); slip.classList.remove('show'); });
+
+      box.appendChild(row);
+      box.appendChild(slip);
+    });
+  }
+
+  /* ═══════════════════════════════════
+     DESIGN 3 — SCROLL (parchemins)
+  ═══════════════════════════════════ */
+  function buildScroll(inner) {
+    inner.innerHTML = `
+      <svg viewBox="0 0 110 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:115px;margin:0 auto 6px;display:block">
+        <path d="M30 30 Q22 40 20 52 L18 115 Q18 124 28 124 L82 124 Q92 124 90 115 L88 52 Q86 40 78 30 Z" fill="#fdf6e3" stroke="#d4a843" stroke-width="1.5"/>
+        <ellipse cx="54" cy="30" rx="14" ry="6" fill="#e8c060" stroke="#d4a843" stroke-width="1"/>
+        <rect x="18" y="70" width="72" height="3" fill="#d4a843" opacity=".4"/>
+        <rect x="42" y="10" width="9" height="26" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1" transform="rotate(-12 46 23)"/>
+        <rect x="50" y="6"  width="9" height="30" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1"/>
+        <rect x="58" y="10" width="9" height="24" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1" transform="rotate(10 62 22)"/>
+        <rect x="33" y="13" width="8" height="22" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1" transform="rotate(-20 37 24)"/>
+      </svg>
+      <div id="jar-title" style="font-family:'Cormorant Garamond',Georgia,serif;color:#8B6914">Vase des parchemins ✦</div>
+      <div id="jar-sub">Déplie un rouleau et lis ton message</div>
+      <div id="jar-dots"></div>
+      <div id="jar-slip" style="background:#fdf6e3;color:#7a5c14;border:1px solid #e8c060;font-style:italic"></div>
+      <div id="jar-empty">🌿 Tous les parchemins ont été lus !<br><button id="jar-refill" style="color:#d4a843">Replacer les parchemins</button></div>
+      <div id="jar-acts">
+        <button id="jar-pick" style="background:linear-gradient(135deg,#d4a843,#e8c060);box-shadow:0 6px 20px rgba(212,168,67,.35)">📜 Déplie un rouleau</button>
+      </div>`;
+    drawn = [];
+    renderDots();
+    inner.querySelector('#jar-pick').addEventListener('click', pick);
+    inner.querySelector('#jar-refill').addEventListener('click', () => {
+      drawn = []; renderDots();
+      inner.querySelector('#jar-empty').style.display = 'none';
+      inner.querySelector('#jar-slip').classList.remove('show');
+      inner.querySelector('#jar-pick').disabled = false;
+    });
+  }
+
+  /* ─── Shared pick / dots (classic & scroll) ─── */
+  function renderDots() {
+    const el = ov.querySelector('#jar-dots');
+    if (!el) return;
+    el.innerHTML = '';
+    words.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'jdot' + (i < drawn.length ? ' hit' : '');
+      el.appendChild(d);
+    });
+  }
+
+  function pick() {
+    const avail = words.filter(w => !drawn.includes(w));
+    if (!avail.length) { ov.querySelector('#jar-empty').style.display = 'block'; return; }
+    const slip = ov.querySelector('#jar-slip');
+    const doShow = () => {
+      const w = avail[Math.floor(Math.random() * avail.length)];
+      drawn.push(w);
+      const c = SLIP_COLORS[(drawn.length - 1) % SLIP_COLORS.length];
+      if (design === 'scroll') {
+        slip.textContent = w;
+      } else {
+        slip.style.background = c.bg; slip.style.color = c.text;
+        slip.textContent = w;
+      }
+      slip.style.transform = `rotate(${(Math.random() - .5) * 3}deg)`;
+      slip.classList.add('show'); renderDots();
+      if (drawn.length === words.length) setTimeout(() => {
+        const pickBtn = ov.querySelector('#jar-pick');
+        if (pickBtn) pickBtn.disabled = true;
+        ov.querySelector('#jar-empty').style.display = 'block';
+      }, 500);
+    };
+    if (slip && slip.classList.contains('show')) {
+      slip.classList.add('exit');
+      setTimeout(() => { slip.classList.remove('exit', 'show'); doShow(); }, 270);
+    } else { doShow(); }
+  }
+
+  function shakeJar() {
+    const el = ov.querySelector('#jar-svg-wrap');
+    if (!el) return;
+    el.classList.remove('shaking'); void el.offsetWidth;
+    el.classList.add('shaking');
+    el.addEventListener('animationend', () => el.classList.remove('shaking'), { once: true });
+  }
+
+  /* ─── Open / Close ─── */
+  function openJar() { ov.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(shakeJar, 350); }
+  function closeJar() { ov.classList.remove('open'); document.body.style.overflow = ''; }
+
+  /* ─── Init ─── */
+  window._jarInit = function() {
+    const cfg = (window.__WW_DATA__ || {}).jarConfig || {};
+    design = cfg.design || 'classic';
+    // Words for classic/scroll
+    words = Array.isArray(cfg.words) && cfg.words.length ? cfg.words : DEF_CLASSIC;
+    // Categories for readmewhen
+    cats  = Array.isArray(cfg.categories) && cfg.categories.length ? cfg.categories : DEF_CATS;
+    drawn = [];
+    // Update button label by design
+    btn.innerHTML = design === 'readmewhen' ? '💌 Lis-moi quand…' : design === 'scroll' ? '📜 Vase des parchemins' : '🫙 Jar of Words';
+    buildInner();
+  };
+
+  window._showJar = function() { btn.style.display = 'inline-flex'; };
+
+})();
 </script>
 </body>
 </html>
