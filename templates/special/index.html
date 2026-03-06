@@ -16,7 +16,7 @@
     body { margin: 0; font-family: var(--font); background: #fff; overflow: hidden; }
 
     .container {
-      height: 100vh; width: 100vh; margin: 0 auto;
+      height: 100vh; width: 100vw; margin: 0 auto;
       text-align: center; visibility: hidden;
       position: relative; overflow: hidden;
     }
@@ -45,8 +45,8 @@
     .pill-label { font-size: 0.78rem; }
 
     /* ===== GREETING ===== */
-    .one { font-size: 4.5rem; }
-    .two { font-size: 1.2rem; font-weight: 300; }
+    .one { font-size: clamp(2.5rem, 8vw, 4.5rem); }
+    .two { font-size: clamp(1rem, 3vw, 1.2rem); font-weight: 300; }
 
     /* ===== MUSIC INTERLUDE ===== */
     .music-interlude {
@@ -87,7 +87,7 @@
     .music-hint { font-size: 0.88rem; color: #c48aaa; margin-top: 22px; font-weight: 300; }
 
     /* ===== THREE ===== */
-    .three { font-size: 3rem; }
+    .three { font-size: clamp(1.8rem, 5vw, 3rem); }
 
     /* ===== GOOGLE SEARCH SECTION ===== */
     .google-section {
@@ -105,6 +105,7 @@
       background: #f1f3f4;
       border-bottom: 1px solid #ddd;
       display: flex; align-items: center; padding: 0 12px; gap: 8px;
+      margin-bottom: 20vh;
     }
     .chrome-dots { display: flex; gap: 6px; }
     .chrome-dots span {
@@ -125,6 +126,7 @@
 
     /* Google logo */
     .g-logo {
+      margin-top: 120px;
       margin-bottom: 20px;
       font-size: 2.8rem;
       font-weight: 700;
@@ -225,11 +227,11 @@
     .g-rating-text { font-size: 0.75rem; color: #70757a; }
 
     /* ===== IDEAS (same as birthday) ===== */
-    .five p { font-size: 2rem; position: absolute; left: 0; right: 0; }
+    .five p { font-size: clamp(1.4rem, 4vw, 2rem); position: absolute; left: 0; right: 0; }
     .idea-3 strong { padding: 3px 5px; border-radius: 3px; display: inline-block; }
-    .five .idea-5 { font-size: 4rem; }
+    .five .idea-5 { font-size: clamp(2.5rem, 7vw, 4rem); }
     .idea-5 span, .idea-6 span, .wish-hbd span { display: inline-block; }
-    .idea-6 span { font-size: 15rem; }
+    .idea-6 span { font-size: clamp(6rem, 20vw, 15rem); }
 
     /* ===== BIRTHDAY CELEBRATION ===== */
     .six { position: relative; }
@@ -239,25 +241,35 @@
       box-shadow: 0 0 0 8px rgba(255,105,180,0.2);
     }
     .six .photo-grid {
-      display: flex; justify-content: center; align-items: flex-end; gap: 12px; margin-bottom: 10px;
+      display: flex; justify-content: center; align-items: flex-end;
+      gap: clamp(6px, 2vw, 12px); margin-bottom: 10px;
     }
     .six .photo-grid img, .six .photo-grid .photo-placeholder {
       border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     }
     .six .photo-grid img:first-child,
-    .six .photo-grid .photo-placeholder:first-child { width: 120px; height: 140px; transform: rotate(-6deg); }
+    .six .photo-grid .photo-placeholder:first-child {
+      width: clamp(80px, 18vw, 120px); height: clamp(95px, 21vw, 140px);
+      transform: rotate(-6deg);
+    }
     .six .photo-grid img:nth-child(2),
-    .six .photo-grid .photo-placeholder:nth-child(2) { width: 140px; height: 160px; }
+    .six .photo-grid .photo-placeholder:nth-child(2) {
+      width: clamp(90px, 20vw, 140px); height: clamp(105px, 23vw, 160px);
+    }
     .six .photo-grid img:nth-child(3),
-    .six .photo-grid .photo-placeholder:nth-child(3) { width: 120px; height: 135px; transform: rotate(5deg); }
+    .six .photo-grid .photo-placeholder:nth-child(3) {
+      width: clamp(80px, 17vw, 120px); height: clamp(90px, 20vw, 135px);
+      transform: rotate(5deg);
+    }
     .photo-placeholder {
       background: linear-gradient(135deg, #ffb3c6, var(--primary));
-      display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
     }
-    .six .hat { position: absolute; width: 80px; top: -35px; left: 41.5%; }
+    .six .hat { position: absolute; width: clamp(50px, 10vw, 80px); top: -35px; left: 41.5%; }
     .wish { margin-top: 8px; }
-    .wish-hbd { font-size: 3em; margin: 0; text-transform: uppercase; }
-    .wish h5 { font-weight: 300; font-size: 2rem; margin: 10px 0 0; }
+    .wish-hbd { font-size: clamp(2em, 6vw, 3em); margin: 0; text-transform: uppercase; }
+    .wish h5 { font-weight: 300; font-size: clamp(1.2rem, 4vw, 2rem); margin: 10px 0 0; }
 
     /* ===== CONFETTI ===== */
     #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; }
@@ -334,21 +346,27 @@
     }
 
     /* ===== OUTRO ===== */
-    .nine p { font-size: 2rem; font-weight: 300; }
+    .nine p { font-size: clamp(1.3rem, 4vw, 2rem); font-weight: 300; }
     #replay { z-index: 3; cursor: pointer; }
 
     /* ===== MEDIA ===== */
     @media screen and (max-width: 500px) {
-      .container { width: 90%; }
+      .container { width: 100vw; padding: 0 10px; }
       .idea-5 span { display: block; }
-      .idea-6 span { font-size: 10rem; }
-      .six .hat { width: 50px; top: -20px; }
-      .wish-hbd { font-size: 2.2em; }
-      .wish h5 { font-size: 1.4rem; }
-      .nine p { font-size: 1.5rem; }
+      .six .hat { top: -20px; }
       .iphone-player { width: 240px; }
       .g-results { gap: 12px; }
       .g-result-title { font-size: 0.95rem; }
+      .g-logo { font-size: 2rem; }
+      .g-search-wrap { padding: 0 10px; }
+      .chrome-url { font-size: 0.7rem; }
+      #wishes-card { padding: 28px 20px; }
+      #wishes-card h2 { font-size: 1.4rem; }
+    }
+    @media screen and (max-height: 700px) {
+      .container > div { top: 12vh; }
+      .iphone-player { width: 230px; }
+      .album-art-placeholder { width: 150px; height: 150px; font-size: 3rem; margin-bottom: 14px; }
     }
   </style>
 </head>
@@ -421,7 +439,7 @@
     </div>
 
     <!-- Google logo -->
-    <div class="g-logo" style="margin-top: 44px;">
+    <div class="g-logo">
       <span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-g">g</span><span class="g-b">l</span><span class="g-r">e</span>
     </div>
 
@@ -701,7 +719,8 @@ const fetchData = () => {
 
   if (window.__WW_DATA__) {
     run(window.__WW_DATA__);
-    if (window._jarInit) window._jarInit();
+    // Defer so the jar <script> tag (which runs after this one) has time to define _jarInit
+    setTimeout(() => { if (window._jarInit) window._jarInit(); }, 0);
   } else {
     fetch("customize.json")
       .then(r => r.json())
@@ -938,7 +957,8 @@ window.addEventListener('message', (e) => {
     /* ── Shared modal box ── */
     #jar-box{background:#fffaf5;border-radius:28px;padding:28px 24px 24px;
       width:100%;max-width:400px;position:relative;text-align:center;
-      box-shadow:0 40px 100px rgba(0,0,0,.25);overflow:hidden;
+      box-shadow:0 40px 100px rgba(0,0,0,.25);
+      max-height:calc(100vh - 48px);overflow-y:auto;overflow-x:hidden;
       transform:scale(.92) translateY(24px);
       transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
     #jar-ov.open #jar-box{transform:scale(1) translateY(0);}
@@ -1223,7 +1243,13 @@ window.addEventListener('message', (e) => {
   }
 
   /* ─── Open / Close ─── */
-  function openJar() { ov.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(shakeJar, 350); }
+  function openJar() {
+    // Safety net: if _jarInit was never called (e.g. no server data), build content now
+    if (!ov.querySelector('#jar-inner').children.length) buildInner();
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(shakeJar, 350);
+  }
   function closeJar() { ov.classList.remove('open'); document.body.style.overflow = ''; }
 
   /* ─── Init ─── */
@@ -1241,6 +1267,10 @@ window.addEventListener('message', (e) => {
   };
 
   window._showJar = function() { btn.style.display = 'inline-flex'; };
+
+  // Self-call: ensures content is built even if fetchData's synchronous path
+  // ran before this script executed (window.__WW_DATA__ server-injection case).
+  window._jarInit();
 
 })();
 </script>
