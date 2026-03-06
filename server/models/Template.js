@@ -8,6 +8,7 @@ const fieldSchema = new mongoose.Schema({
   options: [String],   // for select
   section: String,     // Content section grouping e.g. "Intro", "Story", "Wishes"
   required: { type: Boolean, default: false },
+  price: { type: Number, default: 0 },
 });
 
 const templateSchema = new mongoose.Schema({
