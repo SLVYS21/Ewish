@@ -131,7 +131,7 @@
       align-items: center;
       justify-content: center;
       top: 10vh;
-      background: linear-gradient(160deg, #fff0f6 0%, #fff8ec 60%, #ffeef8 100%);
+      /* background controlled by ww-engine via data-section="music" */
       color: #333;
     }
 
@@ -838,7 +838,7 @@
   <div class="container">
 
     <!-- 1. GREETING -->
-    <div class="one">
+    <div class="one" data-section="greeting">
       <h1 class="one">
         <span data-node-name="greeting">Hiya</span>
         <span data-node-name="name">Lydia</span>
@@ -847,7 +847,7 @@
     </div>
 
     <!-- 2. MUSIC INTERLUDE -->
-    <div class="music-interlude">
+    <div class="music-interlude" data-section="music">
       <div class="iphone-player">
         <div class="album-art-placeholder" id="main-album-art" data-node-name="albumArt">🎵</div>
         <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
@@ -866,12 +866,12 @@
     </div>
 
     <!-- 3. IT'S YOUR BIRTHDAY -->
-    <div class="three">
+    <div class="three" data-section="message">
       <p data-node-name="text1">It's your birthday!!! :D</p>
     </div>
 
     <!-- 4. WHATSAPP MESSAGE -->
-    <div class="four">
+    <div class="four" data-section="message">
       <div class="wa-wrap">
         <div class="wa-header">
           <div class="wa-avatar" data-node-name="waAvatar">L</div>
@@ -896,7 +896,7 @@
     </div>
 
     <!-- 5. IDEAS -->
-    <div class="five">
+    <div class="five" data-section="ideas">
       <p class="idea-1" data-node-name="text2">That's what I was going to do.</p>
       <p class="idea-2" data-node-name="text3">But then I stopped.</p>
       <p class="idea-3">
@@ -915,7 +915,7 @@
     </div>
 
     <!-- 6. BIRTHDAY WISH + POLAROID BOARD -->
-    <div class="six">
+    <div class="six" data-section="celebration">
 
       <!-- ░░░ POLAROID BOARD ░░░ -->
       <div class="polaroid-board" id="polaroid-board">
@@ -1038,7 +1038,7 @@
     </div>
 
     <!-- 9. OUTRO -->
-    <div class="nine">
+    <div class="nine" data-section="outro">
       <p data-node-name="outroText">Okay, now come back and tell me if you liked it.</p>
       <p id="replay" data-node-name="replayText">Or click, if you want to watch it again.</p>
       <p class="last-smile" data-node-name="outroSmiley">:)</p>
@@ -1046,6 +1046,7 @@
 
   </div><!-- .container -->
 
+  <script src="/templates/shared/ww-engine.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
   <script>
     /* ============================================================
