@@ -14,7 +14,7 @@ const TABS = [
   { key: 'content',     label: 'Contenu',         icon: '✏️' },
   { key: 'style',       label: 'Style',            icon: '🎨' },
   { key: 'background',  label: 'Fond',             icon: '🖼' },
-  { key: 'decorations', label: 'Décorations',      icon: '🌸' },
+  { key: 'decorations', label: 'Décos',      icon: '🌸' },
   { key: 'jar',         label: 'Jar',              icon: '🫙',  templates: ['birthday', 'special'] },
   { key: 'wishes',      label: 'Vœux',             icon: '💌',  templatePrefix: 'collective' },
 ];

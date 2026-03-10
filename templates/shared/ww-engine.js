@@ -217,10 +217,29 @@
 
   /* ─── Live update handler (from editor postMessage) ────────────── */
   function handleLiveUpdate(event) {
-    if (!event.data || event.data.type !== 'WW_DECO_UPDATE') return;
+    // Accept both WW_UPDATE (main editor message) and legacy WW_DECO_UPDATE
+    if (!event.data) return;
+    const t = event.data.type;
+    if (t !== 'WW_UPDATE' && t !== 'WW_DECO_UPDATE') return;
+
     const { decorations, style } = event.data;
-    if (decorations !== undefined) applyDecorations(decorations);
-    if (style && style.backgrounds) applyBackgrounds(style);
+
+    // Apply per-section backgrounds from incoming style
+    if (style && style.backgrounds) {
+      // Merge into __WW_STYLE__ so sections revealed later pick it up
+      window.__WW_STYLE__ = window.__WW_STYLE__ || {};
+      window.__WW_STYLE__.backgrounds = {
+        ...(window.__WW_STYLE__.backgrounds || {}),
+        ...style.backgrounds,
+      };
+      applyBackgrounds({ backgrounds: style.backgrounds });
+    }
+
+    // Update decorations
+    if (decorations !== undefined) {
+      window.__WW_DECO__ = decorations;
+      applyDecorations(decorations);
+    }
   }
 
   /* ─── Bootstrap ─────────────────────────────────────────────────── */
@@ -240,6 +259,7 @@
       applyBackgrounds,
       applyDecorations,
       applyBackground,
+      handleLiveUpdate,   // useful for testing
     };
   });
 

@@ -75,8 +75,9 @@ const DEFAULT_CATS = [
   { id:'doubt',  label:"Quand tu doutes de toi",     color:'#a78bfa', bg:'#f3d9ff', words:["Tu es capable de grandes choses ✨","Je crois en toi, même quand tu n'y crois pas 🌙"] },
 ];
 
-export default function JarTab({ data, onChange, templateName }) {
-  const cfg    = data.jarConfig || {};
+export default function JarTab({ jarConfig: jarConfigProp, onChange, templateName }) {
+  if (!onChange) return null;  // guard: editor not ready
+  const cfg    = jarConfigProp ?? {};
   const design = cfg.design     || 'classic';
   const words  = cfg.words      || DEFAULT_WORDS[templateName] || DEFAULT_WORDS.birthday;
   const cats   = cfg.categories || DEFAULT_CATS;
@@ -87,7 +88,7 @@ export default function JarTab({ data, onChange, templateName }) {
   const [openCatId,  setOpenCatId] = useState(null);
   const [newCatWord, setNewCatWord]= useState('');
 
-  const save = (patch) => onChange('jarConfig', { ...cfg, ...patch });
+  const save = (patch) => onChange({ ...cfg, ...patch });
 
   // Classic/scroll words
   const addWord    = () => { const v=newWord.trim(); if(!v) return; save({words:[...words,v]}); setNewWord(''); };
