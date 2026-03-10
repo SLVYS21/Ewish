@@ -522,7 +522,7 @@ const fetchData = () => {
     const keys = Object.keys(data);
     if (!keys.length) { await loadWishes(''); animationTimeline(); return; }
     keys.forEach(k => { if (data[k] !== '' && data[k] != null) applyField(k, data[k]); });
-    const pubId = window.__WW_META__?.id || '';
+    const pubId = window.__WW_META__?.id || window.__WW_META__?._id ||'';
     await loadWishes(pubId);
     animationTimeline();
   };

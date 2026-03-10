@@ -45,6 +45,7 @@ export const deletePromo = (id) => api.delete(`/promo/${id}`, { withCredentials:
 export const getWishes    = (pubId)       => api.get(`/wishes/${pubId}`,         { withCredentials: true });
 export const updateWish   = (id, data)    => api.patch(`/wishes/${id}`, data,     { withCredentials: true });
 export const deleteWish   = (id)          => api.delete(`/wishes/${id}`,          { withCredentials: true });
+export const getApprovedWishes = (pubId) => api.get(`/wishes/${pubId}/approved`, { withCredentials: true });
 
 // ── Templates (admin update) ──
 export const updateTemplate = (name, data) => api.patch(`/templates/${name}`, data, { withCredentials: true });

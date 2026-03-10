@@ -543,7 +543,7 @@ const applyField=(key,val)=>{
 const fetchData=()=>{
   const run=async(data)=>{
     Object.keys(data).forEach(k=>{if(data[k]!==''&&data[k]!=null) applyField(k,data[k]);});
-    const pubId=window.__WW_META__?.id||'';
+    const pubId = window.__WW_META__?.id || window.__WW_META__?._id ||'';
     await loadWishes(pubId);
     animationTimeline();
   };

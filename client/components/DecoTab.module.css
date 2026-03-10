@@ -1,0 +1,168 @@
+.root { padding: 0 0 40px; }
+
+.addArea {
+  padding: 16px 16px 0;
+}
+.addBtn {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, #5b4fcf, #7c6fe0);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 0.85rem; font-family: inherit; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.addBtn:hover { opacity: 0.9; transform: translateY(-1px); }
+.addBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.hint { font-size: 0.7rem; color: #aaa; margin: 6px 0 0; text-align: center; }
+
+.empty {
+  padding: 40px 16px; text-align: center; color: #aaa;
+}
+.emptyIcon { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+.empty p { margin: 4px 0; font-size: 0.85rem; }
+.emptyHint { font-size: 0.75rem; }
+
+.decoList {
+  padding: 12px 16px 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.decoCard {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 10px;
+  border: 1.5px solid #e8e8e8; background: #fff;
+  cursor: pointer; text-align: left; transition: all 0.15s;
+  position: relative;
+}
+.decoCard:hover { border-color: #ccc; background: #fafafa; }
+.decoCardActive { border-color: #5b4fcf; background: #f5f3ff; }
+.decoThumbWrap {
+  width: 44px; height: 44px; border-radius: 8px;
+  background: #f0f0f0; overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.decoThumb { width: 100%; height: 100%; object-fit: contain; }
+.decoMeta { flex: 1; }
+.decoSection { display: block; font-size: 0.75rem; font-weight: 600; color: #333; }
+.decoAnim { display: block; font-size: 0.7rem; color: #888; margin-top: 2px; }
+.decoRemove {
+  position: absolute; top: 6px; right: 6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fce8e8; border: none; color: #c0392b;
+  font-size: 0.65rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s;
+}
+.decoCard:hover .decoRemove { opacity: 1; }
+
+/* Editor panel */
+.editor {
+  margin: 12px 16px 0;
+  padding: 16px; border-radius: 12px;
+  border: 1.5px solid #e0dcff;
+  background: #faf9ff;
+}
+.editorHeader {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8e8;
+}
+.editorThumb {
+  width: 40px; height: 40px; border-radius: 6px;
+  object-fit: contain; background: #f0f0f0;
+}
+.editorTitle { font-size: 0.85rem; font-weight: 700; color: #333; }
+
+.field { margin-bottom: 14px; }
+.fieldLabel {
+  display: block; font-size: 0.7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: #999; margin-bottom: 7px;
+}
+.select {
+  width: 100%; padding: 8px 10px;
+  border: 1.5px solid #e0e0e0; border-radius: 8px;
+  font-size: 0.82rem; font-family: inherit; background: #fff;
+  outline: none; cursor: pointer; transition: border-color 0.15s;
+}
+.select:focus { border-color: #5b4fcf; }
+
+/* Animation grid */
+.animGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
+}
+.animBtn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 8px 4px;
+  border: 1.5px solid #e5e5e5; border-radius: 8px;
+  background: #fff; cursor: pointer;
+  transition: all 0.15s;
+}
+.animBtn:hover { border-color: #bbb; }
+.animBtnActive { border-color: #5b4fcf; background: #f0edff; }
+.animIcon { font-size: 1.1rem; }
+.animLabel { font-size: 0.62rem; color: #666; font-family: inherit; }
+.animBtnActive .animLabel { color: #5b4fcf; font-weight: 600; }
+
+/* Position picker */
+.posPicker {
+  width: 100%; height: 90px;
+  background: repeating-linear-gradient(
+    0deg, #f0f0f0, #f0f0f0 1px, transparent 1px, transparent 20px
+  ),
+  repeating-linear-gradient(
+    90deg, #f0f0f0, #f0f0f0 1px, transparent 1px, transparent 20px
+  );
+  background-color: #fafafa;
+  border: 1.5px solid #e0e0e0; border-radius: 8px;
+  position: relative; cursor: crosshair; overflow: hidden;
+  margin-bottom: 8px;
+}
+.posHandle {
+  position: absolute;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #5b4fcf;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(91,79,207,0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: left 0.1s, top 0.1s;
+}
+.posHint {
+  position: absolute; bottom: 5px; right: 8px;
+  font-size: 0.6rem; color: #bbb;
+}
+.posInputs { display: flex; gap: 8px; }
+.posInputGroup { display: flex; align-items: center; gap: 5px; flex: 1; }
+.posLabel { font-size: 0.72rem; color: #888; font-weight: 600; width: 12px; }
+.posInput {
+  flex: 1; padding: 6px 8px;
+  border: 1.5px solid #e0e0e0; border-radius: 6px;
+  font-size: 0.78rem; font-family: inherit; outline: none;
+  transition: border-color 0.15s;
+}
+.posInput:focus { border-color: #5b4fcf; }
+.posUnit { font-size: 0.7rem; color: #aaa; }
+
+/* Sliders */
+.sliderHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.sliderVal { font-size: 0.72rem; color: #5b4fcf; font-weight: 700; }
+.slider { width: 100%; accent-color: #5b4fcf; cursor: pointer; }
+
+.btnDanger {
+  width: 100%; padding: 9px;
+  border: 1.5px solid #fce8e8; border-radius: 8px;
+  background: #fff5f5; cursor: pointer; font-size: 0.76rem;
+  font-family: inherit; color: #c0392b;
+  transition: all 0.15s; margin-top: 8px;
+}
+.btnDanger:hover { background: #fce8e8; }

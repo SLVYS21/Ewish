@@ -1,39 +1,61 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPublications, updatePublication, publishPublication, uploadFile } from '../utils/api';
-import ContentTab from '../components/ContentTab';
-import StyleTab from '../components/StyleTab';
-import JarTab from '../components/JarTab';
+import ContentTab     from '../components/ContentTab';
+import StyleTab       from '../components/StyleTab';
+import BackgroundTab  from '../components/BackgroundTab';
+import DecoTab from '../components/DecoTab';
+import JarTab         from '../components/JarTab';
+import WishesManager  from '../components/WishesManager';
 import styles from './Editor.module.css';
-import WishesManager from '../components/WishesManager';
+
+/* ─── Tab definitions ────────────────────────────────────────── */
+const TABS = [
+  { key: 'content',     label: 'Contenu',         icon: '✏️' },
+  { key: 'style',       label: 'Style',            icon: '🎨' },
+  { key: 'background',  label: 'Fond',             icon: '🖼' },
+  { key: 'decorations', label: 'Décorations',      icon: '🌸' },
+  { key: 'jar',         label: 'Jar',              icon: '🫙',  templates: ['birthday', 'special'] },
+  { key: 'wishes',      label: 'Vœux',             icon: '💌',  templatePrefix: 'collective' },
+];
 
 export default function Editor() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [pub, setPub] = useState(null);
-  const [template, setTemplate] = useState(null);
-  const [data, setData] = useState({});
-  const [style, setStyle] = useState({});
-  const [activeTab, setActiveTab] = useState('content');
-  const [saveStatus, setSaveStatus] = useState('saved'); // saved | saving | unsaved
-  const [publishing, setPublishing] = useState(false);
-  const [publishedUrl, setPublishedUrl] = useState('');
-  const iframeRef = useRef(null);
-  const saveTimer = useRef(null);
+  const { id }     = useParams();
+  const navigate   = useNavigate();
 
-  // Load publication
+  /* ── State ─────────────────────────────────────────────────── */
+  const [pub,         setPub]         = useState(null);
+  const [template,    setTemplate]    = useState(null);
+  const [data,        setData]        = useState({});
+  const [style,       setStyle]       = useState({});
+  const [backgrounds, setBackgrounds] = useState({});   // style.backgrounds extracted
+  const [decorations, setDecorations] = useState([]);
+  const [jarConfig,   setJarConfig]   = useState(null);
+  const [activeTab,   setActiveTab]   = useState('content');
+  const [saveStatus,  setSaveStatus]  = useState('saved');
+  const [publishing,  setPublishing]  = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState('');
+
+  const iframeRef  = useRef(null);
+  const saveTimer  = useRef(null);
+
+  /* ── Load publication ───────────────────────────────────────── */
   useEffect(() => {
     const load = async () => {
       try {
-        const r = await getPublications();
+        const r     = await getPublications();
         const found = r.data.find(p => p._id === id);
         if (!found) { navigate('/'); return; }
+
         setPub(found);
         setData(found.data || {});
-        setStyle(found.style || {});
+        const st = found.style || {};
+        setStyle(st);
+        setBackgrounds(st.backgrounds || {});
+        setDecorations(found.decorations || []);
+        setJarConfig(found.jarConfig || null);
         if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
 
-        // Load template definition
         try {
           const tr = await fetch(`/api/templates/${found.templateName}`);
           if (tr.ok) setTemplate(await tr.json());
@@ -43,43 +65,81 @@ export default function Editor() {
     load();
   }, [id]);
 
-  // Auto-save with debounce
-  const autoSave = useCallback(async (newData, newStyle) => {
+  /* ── Auto-save (debounced 1s) ───────────────────────────────── */
+  const autoSave = useCallback(async (newData, newStyle, newBgs, newDecos, newJar) => {
     clearTimeout(saveTimer.current);
     setSaveStatus('unsaved');
     saveTimer.current = setTimeout(async () => {
       setSaveStatus('saving');
       try {
-        await updatePublication(id, { data: newData, style: newStyle });
+        const fullStyle = { ...newStyle, backgrounds: newBgs };
+        await updatePublication(id, {
+          data:        newData,
+          style:       fullStyle,
+          decorations: newDecos,
+          jarConfig:   newJar,
+        });
         setSaveStatus('saved');
       } catch { setSaveStatus('unsaved'); }
     }, 1000);
   }, [id]);
 
+  /* ── Live iframe refresh ────────────────────────────────────── */
+  const refreshPreview = useCallback((d, st, bgs, decos) => {
+    const iframe = iframeRef.current;
+    if (!iframe?.contentWindow) return;
+    try {
+      // Update data/style fields
+      iframe.contentWindow.postMessage({
+        type:  'WW_UPDATE',
+        data:  d,
+        style: { ...st, backgrounds: bgs },
+      }, '*');
+      // Update decorations + backgrounds via engine
+      iframe.contentWindow.postMessage({
+        type:        'WW_DECO_UPDATE',
+        decorations: decos,
+        style:       { backgrounds: bgs },
+      }, '*');
+    } catch {}
+  }, []);
+
+  /* ── Change handlers ────────────────────────────────────────── */
   const handleDataChange = (key, value) => {
     const next = { ...data, [key]: value };
     setData(next);
-    autoSave(next, style);
-    refreshPreview(next, style);
+    autoSave(next, style, backgrounds, decorations, jarConfig);
+    refreshPreview(next, style, backgrounds, decorations);
   };
 
   const handleStyleChange = (key, value) => {
     const next = { ...style, [key]: value };
     setStyle(next);
-    autoSave(data, next);
-    refreshPreview(data, next);
+    autoSave(data, next, backgrounds, decorations, jarConfig);
+    refreshPreview(data, next, backgrounds, decorations);
   };
 
-  // Inject updated data into live iframe without reloading
-  const refreshPreview = useCallback((d, s) => {
-    const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentWindow) return;
-    try {
-      iframe.contentWindow.postMessage({ type: 'WW_UPDATE', data: d, style: s }, '*');
-    } catch {}
-  }, []);
+  const handleBackgroundsChange = (newBgs) => {
+    setBackgrounds(newBgs);
+    autoSave(data, style, newBgs, decorations, jarConfig);
+    refreshPreview(data, style, newBgs, decorations);
+  };
 
-  // Handle file uploads from within the editor
+  const handleDecorationsChange = (newDecos) => {
+    setDecorations(newDecos);
+    autoSave(data, style, backgrounds, newDecos, jarConfig);
+    refreshPreview(data, style, backgrounds, newDecos);
+  };
+
+  const handleJarChange = (newJar) => {
+    setJarConfig(newJar);
+    autoSave(data, style, backgrounds, decorations, newJar);
+    const iframe = iframeRef.current;
+    if (iframe?.contentWindow) {
+      try { iframe.contentWindow.postMessage({ type: 'WW_UPDATE', data: { ...data, jarConfig: newJar }, style }, '*'); } catch {}
+    }
+  };
+
   const handleUpload = async (file, fieldKey) => {
     try {
       const r = await uploadFile(file);
@@ -89,11 +149,12 @@ export default function Editor() {
     }
   };
 
+  /* ── Publish ────────────────────────────────────────────────── */
   const handlePublish = async () => {
     setPublishing(true);
     try {
-      // Save first
-      await updatePublication(id, { data, style });
+      const fullStyle = { ...style, backgrounds };
+      await updatePublication(id, { data, style: fullStyle, decorations, jarConfig });
       const r = await publishPublication(id);
       setPublishedUrl(r.data.url);
       setPub(p => ({ ...p, published: true }));
@@ -102,12 +163,19 @@ export default function Editor() {
     } finally { setPublishing(false); }
   };
 
+  /* ── Visible tabs ───────────────────────────────────────────── */
+  const visibleTabs = TABS.filter(tab => {
+    if (tab.templates && !tab.templates.includes(pub?.templateName)) return false;
+    if (tab.templatePrefix && !pub?.templateName?.startsWith(tab.templatePrefix)) return false;
+    return true;
+  });
+
   const previewSrc = pub ? `/site/${pub.templateName}/${pub.customName}` : '';
 
   if (!pub) return (
     <div className={styles.loading}>
       <div className={styles.spinner} />
-      <p>Loading editor…</p>
+      <p>Chargement…</p>
     </div>
   );
 
@@ -118,23 +186,23 @@ export default function Editor() {
         <div className={styles.topbarLeft}>
           <Link to="/" className={styles.back}>← Dashboard</Link>
           <span className={styles.divider} />
-          <span className={styles.pubTitle}>{pub.title || 'Untitled'}</span>
+          <span className={styles.pubTitle}>{pub.title || 'Sans titre'}</span>
         </div>
         <div className={styles.topbarCenter}>
           <span className={`${styles.saveStatus} ${styles[saveStatus]}`}>
-            {saveStatus === 'saving' && '↻ Saving…'}
-            {saveStatus === 'saved' && '✓ Saved'}
-            {saveStatus === 'unsaved' && '● Unsaved'}
+            {saveStatus === 'saving'  && '↻ Sauvegarde…'}
+            {saveStatus === 'saved'   && '✓ Sauvegardé'}
+            {saveStatus === 'unsaved' && '● Non sauvegardé'}
           </span>
         </div>
         <div className={styles.topbarRight}>
           {publishedUrl && (
             <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>
-              View live ↗
+              Voir en live ↗
             </a>
           )}
           <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
-            {publishing ? 'Publishing…' : pub.published ? 'Update' : 'Publish'}
+            {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
           </button>
         </div>
       </header>
@@ -144,49 +212,56 @@ export default function Editor() {
         <aside className={styles.panel}>
           {/* Tabs */}
           <div className={styles.tabs}>
-            <button
-              className={`${styles.tab} ${activeTab === 'content' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('content')}
-            >Content</button>
-            <button
-              className={`${styles.tab} ${activeTab === 'style' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('style')}
-            >Style</button>
-            {pub.templateName?.startsWith('collective') && (
+            {visibleTabs.map(tab => (
               <button
-                className={`${styles.tab} ${activeTab === 'wishes' ? styles.tabActive : ''}`}
-                onClick={() => setActiveTab('wishes')}
-              >💌 Vœux</button>
-            )}
-            {(pub.templateName === 'birthday' || pub.templateName === 'special') && (
-              <button
-                className={`${styles.tab} ${activeTab === 'jar' ? styles.tabActive : ''}`}
-                onClick={() => setActiveTab('jar')}
-              >🫙 Jar</button>
-            )}
+                key={tab.key}
+                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+                title={tab.label}
+              >
+                <span className={styles.tabIcon}>{tab.icon}</span>
+                <span className={styles.tabLabel}>{tab.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Tab content */}
           <div className={styles.panelBody}>
-            {activeTab === 'content' ? (
+            {activeTab === 'content' && (
               <ContentTab
                 fields={template?.fields || []}
                 data={data}
                 onChange={handleDataChange}
                 onUpload={handleUpload}
               />
-            ) : activeTab === 'style' ? (
+            )}
+            {activeTab === 'style' && (
               <StyleTab
                 style={style}
                 onChange={handleStyleChange}
               />
-            ) : activeTab === 'jar' ? (
+            )}
+            {activeTab === 'background' && (
+              <BackgroundTab
+                templateName={pub.templateName}
+                backgrounds={backgrounds}
+                onChange={handleBackgroundsChange}
+              />
+            )}
+            {activeTab === 'decorations' && (
+              <DecoTab
+                decorations={decorations}
+                onChange={handleDecorationsChange}
+              />
+            )}
+            {activeTab === 'jar' && (
               <JarTab
-                data={data}
-                onChange={handleDataChange}
+                jarConfig={jarConfig}
+                onChange={handleJarChange}
                 templateName={pub.templateName}
               />
-            ) : (
+            )}
+            {activeTab === 'wishes' && (
               <WishesManager
                 publicationId={pub._id}
                 templateName={pub.templateName}
@@ -200,7 +275,10 @@ export default function Editor() {
           <div className={styles.previewBar}>
             <span className={styles.previewLabel}>Preview</span>
             <div className={styles.previewNav}>
-              <button className={styles.previewBtn} onClick={() => iframeRef.current?.contentWindow?.location.reload()}>↺ Restart</button>
+              <button
+                className={styles.previewBtn}
+                onClick={() => iframeRef.current?.contentWindow?.location.reload()}
+              >↺ Restart</button>
             </div>
             <span className={styles.previewUrl}>/site/{pub.templateName}/{pub.customName}</span>
           </div>
@@ -216,10 +294,9 @@ export default function Editor() {
         </div>
       </div>
 
-      {/* Publish success toast */}
       {publishedUrl && pub.published && (
         <div className={styles.toast}>
-          🎉 Live at{' '}
+          🎉 En ligne sur{' '}
           <a href={publishedUrl} target="_blank" rel="noreferrer">
             {window.location.origin}{publishedUrl}
           </a>

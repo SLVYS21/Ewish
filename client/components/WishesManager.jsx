@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './WishesManager.module.css';
+const BACKEND_LINK = 'http://localhost:5000'; //http://localhost:3000/collect/69ade570ab269a9ece198141
 
 export default function WishesManager({ publicationId, templateName }) {
   const [wishes, setWishes] = useState([]);
@@ -10,7 +11,7 @@ export default function WishesManager({ publicationId, templateName }) {
 
   useEffect(() => {
     if (!publicationId || !isCollective) return;
-    setCollectLink(`${window.location.origin}/collect/${publicationId}`);
+    setCollectLink(`${BACKEND_LINK}/collect/${publicationId}`);
     loadWishes();
   }, [publicationId]);
 
