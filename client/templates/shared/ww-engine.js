@@ -59,14 +59,14 @@
       .ww-deco.ww-global {
         position: fixed;
       }
-      .ww-bg-overlay {
+      .ww-bg-wrap {
         position: absolute;
         inset: 0;
         pointer-events: none;
         z-index: 0;
       }
       /* All section direct children above background */
-      [data-section] > *:not(.ww-bg-overlay):not(.ww-deco) {
+      [data-section] > *:not(.ww-bg-wrap):not(.ww-deco) {
         position: relative;
         z-index: 1;
       }
@@ -78,44 +78,71 @@
   function applyBackground(el, bg) {
     if (!bg || !bg.value) return;
 
-    // Remove any previous overlay
-    const old = el.querySelector(':scope > .ww-bg-overlay');
-    if (old) old.remove();
+    // Remove any previous ww-bg wrappers
+    el.querySelectorAll(':scope > .ww-bg-wrap').forEach(n => n.remove());
+
+    const isBody    = el === document.body;
+    const isSection = !isBody && el.hasAttribute('data-section');
+
+    // Sections are position:absolute with auto height — give them full viewport coverage
+    if (isSection) {
+      el.style.top      = '0';
+      el.style.left     = '0';
+      el.style.right    = '0';
+      el.style.bottom   = '0';
+      el.style.width    = '100%';
+      el.style.height   = '100vh';
+      el.style.position = 'absolute';
+      el.style.overflow = 'hidden';
+    }
+
+    // We always use a wrapper div so we can layer image + overlay cleanly
+    // and not fight with the element's own background property
+    const wrap = document.createElement('div');
+    wrap.className = 'ww-bg-wrap';
+    wrap.style.cssText = [
+      'position:absolute',
+      'inset:0',
+      'z-index:0',
+      'pointer-events:none',
+    ].join(';');
 
     if (bg.type === 'color') {
-      el.style.background = bg.value;
+      wrap.style.background = bg.value;
     } else if (bg.type === 'gradient') {
-      el.style.background = bg.value;
+      wrap.style.background = bg.value;
     } else if (bg.type === 'image') {
-      // Build layered background: optional dark overlay on top of image
+      const blurPx     = bg.blur    != null ? bg.blur    : 0;
       const overlayAlpha = bg.overlay != null ? bg.overlay : 0;
-      const blurPx       = bg.blur    != null ? bg.blur    : 0;
 
-      if (blurPx > 0) {
-        // Use a pseudo-element-style div for blur (CSS backdrop-filter on bg not supported)
-        el.style.position = el.style.position || 'relative';
-        el.style.overflow = 'hidden';
-        const imgDiv = document.createElement('div');
-        imgDiv.className = 'ww-bg-overlay';
-        imgDiv.style.cssText = `
-          background: url("${bg.value}") center/cover no-repeat;
-          filter: blur(${blurPx}px);
-          transform: scale(1.05); /* prevent blur edge artifacts */
-        `;
-        el.insertBefore(imgDiv, el.firstChild);
-      } else {
-        el.style.background = `url("${bg.value}") center/cover no-repeat`;
-      }
+      // Image layer
+      const imgLayer = document.createElement('div');
+      imgLayer.style.cssText = [
+        'position:absolute', 'inset:0',
+        `background:url("${bg.value}") center/cover no-repeat`,
+        blurPx > 0 ? `filter:blur(${blurPx}px);transform:scale(1.05)` : '',
+      ].filter(Boolean).join(';');
+      wrap.appendChild(imgLayer);
 
+      // Dark overlay layer
       if (overlayAlpha > 0) {
-        const overlay = document.createElement('div');
-        overlay.className = 'ww-bg-overlay';
-        overlay.style.cssText = `
-          background: rgba(0,0,0,${overlayAlpha});
-          z-index: 1;
-        `;
-        el.appendChild(overlay);
+        const ov = document.createElement('div');
+        ov.style.cssText = `position:absolute;inset:0;background:rgba(0,0,0,${overlayAlpha})`;
+        wrap.appendChild(ov);
       }
+    }
+
+    // Insert as first child so content sits on top
+    el.insertBefore(wrap, el.firstChild);
+
+    // Ensure direct children (content) are above the bg wrapper
+    if (!isBody) {
+      el.querySelectorAll(':scope > *:not(.ww-bg-wrap):not(.ww-deco)').forEach(child => {
+        if (!child.style.position || child.style.position === 'static') {
+          child.style.position = 'relative';
+        }
+        if (!child.style.zIndex) child.style.zIndex = '1';
+      });
     }
   }
 
@@ -124,11 +151,19 @@
     const bgs = (style && style.backgrounds) ? style.backgrounds : {};
     const globalBg = bgs['global'];
 
-    // All sections with data-section attribute
+    // Apply global bg to body (affects all sections that don't have their own bg)
+    if (globalBg && globalBg.value) {
+      applyBackground(document.body, globalBg);
+    }
+
+    // Apply per-section backgrounds (override global)
     document.querySelectorAll('[data-section]').forEach(el => {
       const key = el.getAttribute('data-section');
-      const bg  = bgs[key] || globalBg;
-      if (bg) applyBackground(el, bg);
+      if (key === 'global') return;
+      const bg = bgs[key];
+      if (bg && bg.value) {
+        applyBackground(el, bg);
+      }
     });
   }
 
@@ -242,6 +277,62 @@
     }
   }
 
+  /* ─── Editor preview mode ──────────────────────────────────────── */
+  // When running inside the editor iframe, GSAP animations make sections
+  // invisible (opacity:0). We inject a style override to make all sections
+  // visible so backgrounds and decorations can be previewed.
+  var _editorModeActive = false;
+  function enterEditorPreviewMode() {
+    if (_editorModeActive) return;
+    // Only activate when inside an iframe (editor context)
+    if (window.self === window.top) return;
+    _editorModeActive = true;
+
+    // Pause any GSAP timeline running on the page
+    if (window.TweenMax) { try { TweenMax.pauseAll(true, true); } catch(e){} }
+    if (window.TimelineMax) {
+      try {
+        // Find all tweens and pause them
+        var tweens = TweenMax.getAllTweens ? TweenMax.getAllTweens() : [];
+        tweens.forEach(function(t){ try{ t.pause(); }catch(e){} });
+      } catch(e) {}
+    }
+
+    // Inject CSS that makes all sections fully visible regardless of GSAP inline styles
+    if (!document.getElementById('ww-editor-mode')) {
+      var st = document.createElement('style');
+      st.id = 'ww-editor-mode';
+      st.textContent = [
+        '.container { visibility: visible !important; }',
+        '.container > div {',
+        '  opacity: 1 !important;',
+        '  transform: none !important;',
+        '  visibility: visible !important;',
+        '  pointer-events: all !important;',
+        '}',
+        // Stack sections vertically so all are visible, not overlapping
+        '.container {',
+        '  height: auto !important;',
+        '  overflow: visible !important;',
+        '  position: relative !important;',
+        '}',
+        '.container > div {',
+        '  position: relative !important;',
+        '  top: auto !important;',
+        '  left: auto !important;',
+        '  right: auto !important;',
+        '  height: 100vh !important;',
+        '  width: 100% !important;',
+        '  display: flex !important;',
+        '  align-items: center !important;',
+        '  justify-content: center !important;',
+        '  border-bottom: 1px solid rgba(0,0,0,0.06) !important;',
+        '}',
+      ].join('\n');
+      document.head.appendChild(st);
+    }
+  }
+
   /* ─── Bootstrap ─────────────────────────────────────────────────── */
   ready(function () {
     injectKeyframes();
@@ -255,12 +346,45 @@
     window.addEventListener('message', handleLiveUpdate);
 
     // Expose for manual re-runs (e.g. after GSAP reveals a section)
-    window._wwEngine = {
+    // Expose as window.wwEngine — all templates call window.wwEngine.init() / .applyLiveUpdate()
+    window.wwEngine = {
+      init: function() {
+        var style = window.__WW_STYLE__ || {};
+        var decos = window.__WW_DECO__  || [];
+        var bgs   = style.backgrounds   || {};
+        // If there are any backgrounds or section-specific decos, enter editor preview mode
+        var hasSectionContent = Object.keys(bgs).some(function(k){ return bgs[k] && bgs[k].value; })
+          || decos.some(function(d){ return d.section && d.section !== 'global'; });
+        if (hasSectionContent) enterEditorPreviewMode();
+        applyBackgrounds(style);
+        applyDecorations(decos);
+      },
+      // applyLiveUpdate: called with the WW_UPDATE payload directly (templates do: applyLiveUpdate(e.data))
+      // Payload shape: { type, data:{...pubFields}, style:{primaryColor,...,backgrounds:{...}}, decorations:[] }
+      applyLiveUpdate: function(payload) {
+        if (!payload || !payload.type) return;  // must have type field to be a valid WW message
+        const { style, decorations } = payload;
+        if (style && style.backgrounds) {
+          window.__WW_STYLE__ = window.__WW_STYLE__ || {};
+          window.__WW_STYLE__.backgrounds = { ...(window.__WW_STYLE__.backgrounds || {}), ...style.backgrounds };
+          // In editor (iframe) context: make all sections visible so bg preview works
+          enterEditorPreviewMode();
+          applyBackgrounds({ backgrounds: style.backgrounds });
+        }
+        if (decorations !== undefined) {
+          window.__WW_DECO__ = decorations;
+          // In editor context: ensure sections are visible for deco preview
+          if (decorations.some(d => d.section && d.section !== 'global')) {
+            enterEditorPreviewMode();
+          }
+          applyDecorations(decorations);
+        }
+      },
       applyBackgrounds,
       applyDecorations,
       applyBackground,
-      handleLiveUpdate,   // useful for testing
     };
+    window._wwEngine = window.wwEngine; // legacy alias
   });
 
 })();

@@ -71,6 +71,7 @@ ${bgCssLines.join('\n')}
   /* ── Decorations (read by ww-engine.js) ── */
   window.__WW_DECO__ = ${JSON.stringify(pub.decorations || [])};
 <\/script>`;
+console.log(pub);
 
     /* ── Inject engine script tag if not already present ───── */
     if (!html.includes('ww-engine.js')) {

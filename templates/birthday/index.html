@@ -1,281 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happy Birthday!!! :)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400&family=Caveat:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400&display=swap" rel="stylesheet">
   <style>
     /* ===== BASE ===== */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; }
     :root {
-      --primary: #e91e8c;
-      --accent: #ff6b9d;
+      --primary: var(--primary);
+      --accent: var(--accent);
       --font: 'Work Sans', sans-serif;
       --fs-scale: 1;
     }
-
-    body {
-      margin: 0;
-      font-family: var(--font);
-      background: #fff;
-      overflow: hidden;
-    }
+    body { margin: 0; font-family: var(--font); background: #fff; overflow: hidden; }
 
     .container {
-      height: 100vh;
-      width: 100%;
-      margin: 0 auto;
-      text-align: center;
-      visibility: hidden;
-      position: relative;
-      overflow: hidden;
+      height: 100vh; width: 100vh; margin: 0 auto;
+      text-align: center; visibility: hidden;
+      position: relative; overflow: hidden;
     }
-
     .container > div {
-      position: absolute;
-      left: 0;
-      right: 0;
+      position: absolute; left: 0; right: 0; top: 20vh;
     }
 
     /* ===== MUSIC PLAYER (floating pill) ===== */
     #music-pill {
-      position: fixed;
-      top: 16px;
-      right: 16px;
+      position: fixed; top: 16px; right: 16px;
       z-index: 9999;
       display: none;
     }
-
     .pill-btn {
       background: linear-gradient(135deg, var(--primary), var(--accent));
       border: none;
       border-radius: 50px;
       color: #fff;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
       padding: 7px 14px 7px 7px;
       font-family: "Work Sans", sans-serif;
       font-size: 0.8rem;
       font-weight: 400;
-      box-shadow: 0 4px 18px rgba(255, 105, 180, 0.45);
+      box-shadow: 0 4px 18px rgba(255,105,180,0.45);
       transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .pill-btn:hover {
-      transform: scale(1.06);
-      box-shadow: 0 6px 24px rgba(255, 105, 180, 0.55);
-    }
-
+    .pill-btn:hover { transform: scale(1.06); box-shadow: 0 6px 24px rgba(255,105,180,0.55); }
     .pill-cover-wrap {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
       font-size: 0.9rem;
-      overflow: hidden;
-      flex-shrink: 0;
+      overflow: hidden; flex-shrink: 0;
     }
-
     .pill-cover-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
+      width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
       animation: spin 8s linear infinite paused;
     }
-
-    .pill-cover-wrap img.playing {
-      animation-play-state: running;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
+    .pill-cover-wrap img.playing { animation-play-state: running; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .pill-icon { font-size: 0.85rem; }
     .pill-label { font-size: 0.78rem; letter-spacing: 0.02em; }
 
     /* ===== SECTIONS ===== */
-    .one {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
-      top: 20vh;
-    }
-
-    .two {
-      font-size: clamp(1rem, 3vw, 1.2rem);
-      font-weight: 300;
-      top: 32vh;
-    }
-
-    .three {
-      font-size: clamp(2rem, 6vw, 3rem);
-      top: 20vh;
-    }
+    .one { font-size: 4.5rem; }
+    .two { font-size: 1.2rem; font-weight: 300; }
+    .three { font-size: 3rem; }
 
     /* ===== MUSIC INTERLUDE ===== */
-    .music-interlude {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      top: 10vh;
-      /* background controlled by ww-engine via data-section="music" */
+    /* .music-interlude {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      top: 0; height: 100vh;
+      background: linear-gradient(160deg, #fff0f6 0%, #fff8ec 60%, #ffeef8 100%);
       color: #333;
-    }
-
+    } */
+    .music-interlude {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    /* Retrait du height: 100vh si tu ne veux pas que la div prenne toute la page */
+    padding: 40px 0; 
+    background: transparent; /* Ou background: #ffffff; */
+  }
     .iphone-player {
       background: #fff;
-      border: 1.5px solid rgba(255, 105, 180, 0.18);
+      border: 1.5px solid rgba(255,105,180,0.18);
       border-radius: 28px;
       padding: 28px 24px;
       width: 280px;
-      box-shadow: 0 20px 60px rgba(255, 105, 180, 0.18), 0 4px 16px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 20px 60px rgba(255,105,180,0.18), 0 4px 16px rgba(0,0,0,0.06);
     }
-
     .album-art-placeholder {
-      width: 200px;
-      height: 200px;
+      width: 200px; height: 200px;
       border-radius: 20px;
       margin: 0 auto 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 4rem;
       background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      box-shadow: 0 12px 35px rgba(255, 105, 180, 0.35);
+      box-shadow: 0 12px 35px rgba(255,105,180,0.35);
     }
-
     .track-title { font-size: 1.05rem; font-weight: 400; margin: 0 0 4px; color: #222; }
     .track-artist { font-size: 0.82rem; color: #aaa; margin: 0 0 22px; }
-
     .progress-bar {
-      width: 100%;
-      height: 3px;
+      width: 100%; height: 3px;
       background: #f0d6e8;
-      border-radius: 2px;
-      margin-bottom: 8px;
-      position: relative;
-      overflow: hidden;
+      border-radius: 2px; margin-bottom: 8px;
+      position: relative; overflow: hidden;
     }
-
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--primary), var(--accent));
-      border-radius: 2px;
-      width: 0%;
+      border-radius: 2px; width: 0%;
       transition: width 0.5s linear;
     }
-
-    .time-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.68rem;
-      color: #bbb;
-      margin-bottom: 20px;
-    }
-
+    .time-row { display: flex; justify-content: space-between; font-size: 0.68rem; color: #bbb; margin-bottom: 20px; }
     .controls { display: flex; align-items: center; justify-content: center; gap: 24px; }
-
     .ctrl-btn {
-      background: none;
-      border: none;
-      color: var(--primary);
-      cursor: pointer;
-      font-size: 1.4rem;
-      padding: 0;
+      background: none; border: none; color: var(--primary);
+      cursor: pointer; font-size: 1.4rem; padding: 0;
       transition: transform 0.2s;
     }
-
     .ctrl-btn:hover { transform: scale(1.12); }
-
     .ctrl-play {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
+      width: 52px; height: 52px; border-radius: 50%;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 1.3rem;
-      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+      box-shadow: 0 6px 20px rgba(255,105,180,0.4);
       transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .ctrl-play:hover {
-      transform: scale(1.08);
-      box-shadow: 0 8px 25px rgba(255, 105, 180, 0.5);
-    }
-
-    .music-hint {
-      font-size: 0.88rem;
-      color: #c48aaa;
-      margin-top: 22px;
-      font-weight: 300;
-    }
+    .ctrl-play:hover { transform: scale(1.08); box-shadow: 0 8px 25px rgba(255,105,180,0.5); }
+    .music-hint { font-size: 0.88rem; color: #c48aaa; margin-top: 22px; font-weight: 300; }
 
     /* ===== WHATSAPP CHAT ===== */
-    .four { top: 8vh; }
-
     .four .wa-wrap {
-      max-width: min(340px, 90vw);
-      margin: 20px auto;
-      height: min(400px, 80vh);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-      display: flex;
-      flex-direction: column;
+      max-width: 340px; margin: 0 auto;
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     }
-
     .wa-header {
-      background: #075e54;
-      color: #fff;
+      background: #075e54; color: #fff;
       padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-
     .wa-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #25d366;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      font-weight: bold;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #25d366; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: bold;
     }
-
     .wa-name { font-size: 0.9rem; font-weight: 500; }
     .wa-status { font-size: 0.7rem; opacity: 0.8; }
-
     .wa-body {
       background: #ece5dd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ctext y='50' font-size='30' opacity='0.04'%3E🎂%3C/text%3E%3C/svg%3E");
       padding: 14px 10px 60px;
-      flex: 1;
-      overflow-y: auto;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding-bottom: 10px;
+      min-height: 160px; position: relative;
     }
-
     .wa-bubble {
       background: #dcf8c6;
       border-radius: 8px 8px 0 8px;
@@ -283,1122 +165,1016 @@
       margin-left: auto;
       max-width: 85%;
       font-size: 0.85rem;
-      bottom: 0;
       position: relative;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-      opacity: 0;
-      transform: translateY(8px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
     }
-
     .wa-bubble .wa-time {
-      position: absolute;
-      bottom: 3px;
-      right: 8px;
-      font-size: 0.65rem;
-      color: rgba(0, 0, 0, 0.45);
+      position: absolute; bottom: 3px; right: 8px;
+      font-size: 0.65rem; color: rgba(0,0,0,0.45);
     }
-
     .wa-ticks { color: #4fc3f7; }
-
     .wa-input-bar {
-      background: #f0f0f0;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      background: #f0f0f0; padding: 8px 10px;
+      display: flex; align-items: center; gap: 8px;
     }
-
     .wa-input {
-      flex: 1;
-      background: #fff;
-      border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 0.8rem;
-      border: none;
-      outline: none;
-      font-family: inherit;
+      flex: 1; background: #fff; border-radius: 20px;
+      padding: 8px 14px; font-size: 0.8rem;
+      border: none; outline: none; font-family: inherit;
       color: #333;
     }
-
     .wa-send {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #075e54;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: background 0.2s;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #075e54; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: background 0.2s;
     }
-
     .wa-send:hover { background: #128c7e; }
     .wa-send svg { width: 18px; height: 18px; fill: #fff; }
-    .wa-bubble-text span { visibility: visible; }
+    .wa-bubble-text span { visibility: hidden; }
 
     /* ===== ORIGINAL SECTIONS ===== */
-    .five p {
-      top: 20vh;
-      font-size: clamp(1.4rem, 4vw, 2rem);
-      position: absolute;
-      left: 0;
-      right: 0;
+    .five p { font-size: 2rem; position: absolute; left: 0; right: 0; }
+    .idea-3 strong { padding: 3px 5px; border-radius: 3px; display: inline-block; }
+    .five .idea-5 { font-size: 4rem; }
+    .idea-5 span, .idea-6 span, .wish-hbd span { display: inline-block; }
+    .idea-6 span { font-size: 15rem; }
+
+    /* ===== BIRTHDAY CELEBRATION ===== */
+    .six { position: relative; }
+    .six .lydia-dp {
+      display: inline-block; max-width: 100%; height: auto;
+      border-radius: 50%; border: 4px solid var(--primary);
+      box-shadow: 0 0 0 8px rgba(255,105,180,0.2);
     }
-
-    .idea-3 strong {
-      padding: 3px 5px;
-      border-radius: 3px;
-      display: inline-block;
+    .six .photo-grid {
+      display: flex; justify-content: center;
+      align-items: flex-end; gap: 12px; margin-bottom: 10px;
     }
-
-    .five .idea-5 { font-size: clamp(2.5rem, 7vw, 4rem); }
-
-    .idea-5 span,
-    .idea-6 span,
-    .wish-hbd span {
-      display: inline-block;
+    .six .photo-grid img, .six .photo-grid .photo-placeholder {
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     }
-
-    .idea-6 span { font-size: clamp(6rem, 20vw, 15rem); }
-
-    /* ===== SECTION 6 — POLAROID BOARD ===== */
-    .six {
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Full-viewport board */
-    .polaroid-board {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      background: #e1dcca;
-      overflow: hidden;
-    }
-
-    /* ── ZONE MAP ────────────────────────────────────────────
-       TOP-LEFT   (x: 0–52%, y: 0–44%)  → TITLE ONLY
-       TOP-RIGHT  (x: 56%–98%, y: 3%–68%) → Polaroid A (portrait)
-       MID-LEFT   (x: 3%–32%, y: 50%–80%) → Polaroid B (photo1)
-       MID-CENTER (x: 35%–57%, y: 44%–64%) → Polaroid C (photo2)
-       BOT-RIGHT  (x: 64%–86%, y: 70%–90%) → Number card
-       BOTTOM     (centered, y: 88%+)    → Wish text
-    ─────────────────────────────────────────────────────── */
-
-    /* Individual polaroid frames */
-    .polaroid-item {
-      position: absolute;
-      background: #fcfcfc;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.13);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: default;
-    }
-
-    .polaroid-item:hover {
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25) !important;
-      z-index: 50 !important;
-    }
-
-    .polaroid-item .p-img-wrap {
-      width: 100%;
-      overflow: hidden;
-      background: #d8d4c8;
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .polaroid-item .p-img-wrap img,
-    .polaroid-item .p-img-wrap .p-placeholder {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: contrast(1.1) saturate(1.15) sepia(0.15);
-      opacity: 0.95;
-      display: block;
-      transition: transform 0.7s ease;
-    }
-
-    .polaroid-item:hover .p-img-wrap img { transform: scale(1.05); }
-
-    .polaroid-item .p-placeholder {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .six .photo-grid img:first-child,
+    .six .photo-grid .photo-placeholder:first-child { width: 120px; height: 140px; transform: rotate(-6deg); }
+    .six .photo-grid img:nth-child(2),
+    .six .photo-grid .photo-placeholder:nth-child(2) { width: 140px; height: 160px; }
+    .six .photo-grid img:nth-child(3),
+    .six .photo-grid .photo-placeholder:nth-child(3) { width: 120px; height: 135px; transform: rotate(5deg); }
+    .photo-placeholder {
+      background: linear-gradient(135deg, #ffb3c6, var(--primary));
+      display: flex; align-items: center; justify-content: center;
       font-size: 2.5rem;
-      background: linear-gradient(135deg, #d0c8b8, #b8b0a0);
     }
-
-    .polaroid-item .p-caption {
-      font-family: 'Caveat', cursive;
-      font-size: clamp(0.95rem, 1.8vw, 1.3rem);
-      font-weight: 600;
-      color: #463220;
-      text-align: center;
-      padding: 6px 4px 2px;
-      line-height: 1;
+    .six .hat {
+      position: absolute; width: 80px; top: -35px; left: 41.5%;
     }
-
-    /* ── POLAROID A — Portrait, TOP-RIGHT zone ── */
-    .p-a {
-      top: 4%;
-      right: 3%;
-      width: clamp(130px, 22vw, 280px);
-      padding: clamp(6px, 1.2vw, 14px);
-      transform: rotate(1.5deg);
-      z-index: 20;
-    }
-    .p-a:hover { transform: scale(1.04) rotate(1.5deg) !important; }
-    .p-a .p-img-wrap { aspect-ratio: 2 / 3; }
-
-    /* Hat on polaroid A */
-    .p-a .hat {
-      position: absolute;
-      width: clamp(44px, 4.5vw, 72px);
-      height: clamp(44px, 4.5vw, 72px);
-      top: 2%;
-      right: 2%;
-      transform: translate(30%, -72%) rotate(25deg);
-      transform-origin: bottom left;
-      z-index: 30;
-      pointer-events: none;
-    }
-
-    /* ── POLAROID B — Landscape, MID-LEFT zone ── */
-    .p-b {
-      left: 3%;
-      top: 38%;
-      width: clamp(120px, 24vw, 300px);
-      padding: clamp(6px, 1.2vw, 14px);
-      padding-bottom: clamp(10px, 2vw, 22px);
-      transform: rotate(-2.5deg);
-      z-index: 30;
-    }
-    .p-b:hover { transform: scale(1.04) rotate(-2.5deg) !important; }
-    .p-b .p-img-wrap { aspect-ratio: 4 / 3; }
-
-    /* ── POLAROID C — Landscape, MID-CENTER zone ── */
-    .p-c {
-      left: 35%;
-      top: 34%;
-      width: clamp(100px, 19vw, 240px);
-      padding: clamp(6px, 1vw, 12px);
-      transform: rotate(2deg);
-      z-index: 10;
-    }
-    .p-c:hover { transform: scale(1.04) rotate(2deg) !important; }
-    .p-c .p-img-wrap { aspect-ratio: 3 / 2; }
-
-    /* ── NUMBER CARD — BOT-RIGHT zone ── */
-    .p-num {
-      right: 4%;
-      bottom: 8%;
-      width: clamp(100px, 18vw, 220px);
-      padding: clamp(6px, 1vw, 12px);
-      padding-bottom: clamp(22px, 4.5vw, 48px);
-      transform: rotate(1deg);
-      z-index: 25;
-    }
-    .p-num:hover { transform: scale(1.04) rotate(1deg) !important; }
-    .p-num .p-num-face {
-      aspect-ratio: 4 / 3;
-      background: #eae6de;
-      border: 1px solid rgba(0,0,0,0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .p-num .p-num-face .num-text {
-      font-family: 'Work Sans', sans-serif;
-      font-size: clamp(2.8rem, 6vw, 6rem);
-      font-weight: 900;
-      color: #dcb15b;
-      text-shadow: 2px 2px 0 #b8860b, 4px 4px 10px rgba(0,0,0,0.3);
-      letter-spacing: -0.04em;
-      line-height: 1;
-      user-select: none;
-    }
-    .p-num .p-num-face .pin {
-      position: absolute;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.18);
-    }
-    .p-num .p-num-face .pin-tl { top: 7%; left: 7%; }
-    .p-num .p-num-face .pin-tr { top: 7%; right: 7%; }
-    .p-num .p-num-face .pin-bl { bottom: 7%; left: 7%; }
-    .p-num .p-num-face .pin-br { bottom: 7%; right: 7%; }
-    .p-num .p-caption-bottom {
-      position: absolute;
-      bottom: 3%;
-      left: 0; right: 0;
-      text-align: center;
-      font-family: 'Caveat', cursive;
-      font-size: clamp(0.8rem, 1.5vw, 1.15rem);
-      font-weight: 600;
-      color: #2a1f16;
-    }
-
-    /* ── BOARD TITLE — TOP-LEFT zone (exclusive) ── */
-    .board-title {
-      position: absolute;
-      top: 7%;
-      left: 5%;
-      /* Hard cap: never wider than 46% so it can't reach the portrait zone */
-      max-width: 46%;
-      transform: rotate(-6deg);
-      transform-origin: left top;
-      /* Highest z-index on the board — always on top */
-      z-index: 60;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    .board-title h2 {
-      font-family: 'Caveat', cursive;
-      /* Two words wrap onto two lines, keeping the block tall & narrow */
-      font-size: clamp(3rem, 6.5vw, 5.5rem);
-      font-weight: 600;
-      color: #463220;
-      line-height: 1.05;
-      margin: 0;
-      /* Let "Birthday" wrap below "Happy" */
-      white-space: normal;
-      word-break: keep-all;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.09);
-    }
-
-    /* Decorative leaf — bottom-left corner */
-    .board-leaf {
-      position: absolute;
-      bottom: 0;
-      left: -1%;
-      width: clamp(120px, 22vw, 280px);
-      opacity: 0.55;
-      z-index: 1;
-      color: #968269;
-      pointer-events: none;
-    }
-
-    /* Decorative flower — mid-right, behind portrait */
-    .board-flower {
-      position: absolute;
-      top: 30%;
-      right: -3%;
-      width: clamp(80px, 16vw, 200px);
-      opacity: 0.4;
-      z-index: 1;
-      color: #a89076;
-      pointer-events: none;
-    }
-
-    /* Wish text — anchored bottom-center inside the board */
-    .wish {
-      position: absolute;
-      bottom: 14%;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 40;
-      text-align: center;
-      width: max-content;
-      max-width: 60%;
-    }
-
-    .wish-hbd {
-      font-size: clamp(1.4rem, 3.5vw, 2.8rem);
-      margin: 0;
-      text-transform: uppercase;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .wish h5 {
-      font-weight: 300;
-      font-size: clamp(0.8rem, 1.6vw, 1.2rem);
-      margin: 5px 0 0;
-      color: #58534a;
-    }
+    .wish { margin-top: 8px; }
+    .wish-hbd { font-size: 3em; margin: 0; text-transform: uppercase; }
+    .wish h5 { font-weight: 300; font-size: 2rem; margin: 10px 0 0; }
 
     /* ===== CONFETTI CANVAS ===== */
     #confetti-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 100;
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 100;
       display: none;
     }
 
     /* ===== BALLOONS ===== */
-    .seven,
-    .eight {
-      width: fit-content;
-      height: 100vh;
-      position: fixed;
-      top: 20vh;
-    }
-
-    .baloons img {
-      display: inline-block;
-      position: absolute;
-      width: 500px;
-    }
-
+    .seven, .eight { width: 100vw; height: 100vh; position: fixed; top: 0; }
+    .baloons img { display: inline-block; position: absolute; }
     .baloons img:nth-child(even) { left: -10%; }
-    .baloons img:nth-child(odd)  { right: -10%; }
+    .baloons img:nth-child(odd) { right: -10%; }
     .baloons img:nth-child(3n+0) { left: 30%; }
-
-    .eight svg {
-      width: 25px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      visibility: hidden;
-      z-index: -1;
-    }
-
-    .eight svg:nth-child(1) { top:  7vh; left:  5vw; fill: #bd6ecf; }
-    .eight svg:nth-child(2) { top: 23vh; left: 35vw; fill: #7dd175; }
-    .eight svg:nth-child(3) { top: 33vh; left: 23vw; fill: #349d8b; }
-    .eight svg:nth-child(4) { top: 43vh; left: 57vw; fill: #347a9d; }
-    .eight svg:nth-child(5) { top: 68vh; left:  7vw; fill: #c66053; }
-    .eight svg:nth-child(6) { top: 42vh; left: 77vw; fill: #bfaa40; }
-    .eight svg:nth-child(7) { top: 68vh; left: 83vw; fill: #e3bae8; }
-    .eight svg:nth-child(8) { top: 86vh; left: 37vw; fill: #8762cb; }
-    .eight svg:nth-child(9) { top: 94vh; left: 87vw; fill: #9a90da; }
+    .eight svg { width: 25px; position: absolute; top: 0; left: 0; visibility: hidden; z-index: -1; }
+    .eight svg:nth-child(1) { top:7vh; left:5vw; fill:#bd6ecf; }
+    .eight svg:nth-child(2) { top:23vh; left:35vw; fill:#7dd175; }
+    .eight svg:nth-child(3) { top:33vh; left:23vw; fill:#349d8b; }
+    .eight svg:nth-child(4) { top:43vh; left:57vw; fill:#347a9d; }
+    .eight svg:nth-child(5) { top:68vh; left:7vw; fill:#c66053; }
+    .eight svg:nth-child(6) { top:42vh; left:77vw; fill:#bfaa40; }
+    .eight svg:nth-child(7) { top:68vh; left:83vw; fill:#e3bae8; }
+    .eight svg:nth-child(8) { top:86vh; left:37vw; fill:#8762cb; }
+    .eight svg:nth-child(9) { top:94vh; left:87vw; fill:#9a90da; }
 
     /* ===== WISHES MODAL ===== */
     #wishes-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 5000;
-      background: rgba(0, 0, 0, 0);
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; inset: 0; z-index: 5000;
+      background: rgba(0,0,0,0); pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
       transition: background 0.5s;
     }
-
-    #wishes-overlay.open {
-      background: rgba(0, 0, 0, 0.7);
-      pointer-events: all;
-    }
-
+    #wishes-overlay.open { background: rgba(0,0,0,0.7); pointer-events: all; }
     #wishes-card {
       background: #fff8f5;
       border-radius: 24px;
       padding: 40px 36px;
-      max-width: 480px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+      max-width: 480px; width: 90%;
+      max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.3);
       transform: scale(0.7) translateY(60px);
       opacity: 0;
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+      transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
       position: relative;
     }
-
-    #wishes-overlay.open #wishes-card {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-
+    #wishes-overlay.open #wishes-card { transform: scale(1) translateY(0); opacity: 1; }
     #wishes-card h2 { font-size: 1.8rem; margin: 0 0 16px; color: #e91e8c; }
     #wishes-card p { font-size: 1rem; line-height: 1.8; color: #444; margin: 0 0 12px; font-weight: 300; }
-
     #close-wishes {
-      position: absolute;
-      top: 14px;
-      right: 18px;
-      background: none;
-      border: none;
-      font-size: 1.6rem;
-      cursor: pointer;
-      color: #aaa;
-      transition: color 0.2s, transform 0.2s;
+      position: absolute; top: 14px; right: 18px;
+      background: none; border: none; font-size: 1.6rem;
+      cursor: pointer; color: #aaa; transition: color 0.2s, transform 0.2s;
     }
-
     #close-wishes:hover { color: #e91e8c; transform: rotate(90deg); }
-
-    #open-wishes-btn {
-      display: none;
-      background: linear-gradient(135deg, #e91e8c, #ff6b9d);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 12px 28px;
-      font-family: "Work Sans", sans-serif;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 8px 25px rgba(233, 30, 140, 0.35);
-      transition: transform 0.2s, box-shadow 0.2s;
-      margin-top: 16px;
-    }
-
-    #open-wishes-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(233, 30, 140, 0.45); }
-
     /* ===== OUTRO ===== */
-    .nine { top: 40vh; }
+    .nine p { font-size: 2rem; font-weight: 300; }
 
-    .nine p {
-      font-size: clamp(1.3rem, 4vw, 2rem);
-      font-weight: 300;
-      margin: 0 auto 1rem;
-      padding: 0 20px;
+    /* Wishes buttons — fixed, completely outside GSAP's reach */
+    #wishes-float {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 8500;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      pointer-events: none;
     }
-
+    #wishes-float button {
+      pointer-events: all;
+      background: linear-gradient(135deg, #f1d5e4, #ff6b9d);
+      color: #fff; border: none; border-radius: 50px;
+      padding: 13px 30px; font-family: "Work Sans", sans-serif;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(233,30,140,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: wishes-pulse 2s ease-in-out infinite;
+    }
+    #wishes-float button:hover {
+      transform: translateY(-2px); box-shadow: 0 12px 30px rgba(233,30,140,0.55);
+      animation: none;
+    }
+    @keyframes wishes-pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.04) translateY(-2px); }
+    }
     #replay { z-index: 3; cursor: pointer; }
 
-    #open-wishes-btn-outro {
-      display: none;
-      background: linear-gradient(135deg, #e91e8c, #ff6b9d);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 12px 28px;
-      font-family: "Work Sans", sans-serif;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 8px 25px rgba(233, 30, 140, 0.35);
-      transition: transform 0.2s;
-    }
-
-    #open-wishes-btn-outro:hover { transform: translateY(-2px); }
-
     /* ===== MEDIA QUERIES ===== */
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 500px) {
+      .container { width: 90%; }
       .idea-5 span { display: block; }
-
-      .p-a  { width: clamp(110px, 30vw, 180px); right: 2%; }
-      /* Raised: sit just below the title block (~28% down) */
-      .p-b  { width: clamp(110px, 34vw, 200px); left: 2%;  top: 34%; }
-      .p-c  { width: clamp(90px,  28vw, 160px); left: 36%; top: 30%; }
-      .p-num{ width: clamp(90px,  26vw, 160px); right: 2%; bottom: 4%; }
-
-      /* Wish stays above the number card */
-      .wish { bottom: 16%; max-width: 82%; }
-
-      .board-title h2 { font-size: clamp(2.2rem, 9vw, 3.2rem); }
-      .nine p { font-size: 1.3rem; }
-    }
-
-    @media screen and (max-height: 650px) {
-      .one   { top: 15vh; }
-      .two   { top: 26vh; }
-      .three { top: 15vh; }
-      .four  { top: 2vh; }
-      .nine  { top: 12vh; }
-
-      .four .wa-wrap { height: min(320px, 75vh); }
-      .iphone-player { padding: 18px; }
-      .album-art-placeholder { width: 150px; height: 150px; }
-
-      .p-b  { top: 38%; }
-      .p-c  { top: 34%; }
-      .wish { bottom: 14%; }
+      .idea-6 span { font-size: 10rem; }
+      .six .hat { width: 50px; top: -20px; }
+      .wish-hbd { font-size: 2.2em; }
+      .wish h5 { font-size: 1.4rem; }
+      .nine p { font-size: 1.5rem; }
+      .iphone-player { width: 240px; }
     }
   </style>
 </head>
-
 <body>
 
-  <!-- Confetti Canvas -->
-  <canvas id="confetti-canvas"></canvas>
+<!-- Confetti Canvas -->
+<canvas id="confetti-canvas"></canvas>
 
-  <!-- Floating Music Pill -->
-  <div id="music-pill">
-    <button class="pill-btn" onclick="toggleMusic()">
-      <div class="pill-cover-wrap" id="pill-cover">🎵</div>
-      <span id="pill-icon" class="pill-icon">▶</span>
-      <span id="pill-label" class="pill-label">Play</span>
-    </button>
+<!-- Floating Music Pill -->
+<div id="music-pill">
+  <button class="pill-btn" onclick="toggleMusic()">
+    <div class="pill-cover-wrap" id="pill-cover">🎵</div>
+    <span id="pill-icon" class="pill-icon">▶</span>
+    <span id="pill-label" class="pill-label">Play</span>
+  </button>
+</div>
+
+<!-- Wishes Modal -->
+<div id="wishes-overlay" onclick="closeWishesIfBg(event)">
+  <div id="wishes-card">
+    <button id="close-wishes" onclick="closeWishes()">✕</button>
+    <h2>💌 Mes vœux pour toi</h2>
+    <p data-node-name="wish1">Que cette nouvelle année de ta vie soit remplie de joie, de lumière et de toutes ces petites choses qui font sourire.</p>
+    <p data-node-name="wish2">Tu mérites tout le bonheur du monde, et je souhaite que chaque journée t'apporte quelque chose de beau.</p>
+    <p data-node-name="wish3">Joyeux anniversaire du fond du cœur. 🎂✨</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 1. GREETING -->
+  <div class="one">
+    <h1 class="one">
+      <span data-node-name="greeting">Hiya</span>
+      <span data-node-name="name">Lydia</span>
+    </h1>
+    <p class="two" data-node-name="greetingText">I really like your name btw!</p>
   </div>
 
-  <!-- Wishes Modal -->
-  <div id="wishes-overlay" onclick="closeWishesIfBg(event)">
-    <div id="wishes-card">
-      <button id="close-wishes" onclick="closeWishes()">✕</button>
-      <h2>💌 Mes vœux pour toi</h2>
-      <p data-node-name="wish1">Que cette nouvelle année de ta vie soit remplie de joie, de lumière et de toutes ces petites choses qui font sourire.</p>
-      <p data-node-name="wish2">Tu mérites tout le bonheur du monde, et je souhaite que chaque journée t'apporte quelque chose de beau.</p>
-      <p data-node-name="wish3">Joyeux anniversaire du fond du cœur. 🎂✨</p>
+  <!-- 2. MUSIC INTERLUDE (new) -->
+  <div class="music-interlude">
+    <div class="iphone-player">
+      <div class="album-art-placeholder" id="main-album-art" data-node-name="albumArt">🎵</div>
+      <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
+      <p class="track-artist" data-node-name="trackArtist">Artiste</p>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="time-row"><span id="cur-time">0:00</span><span id="dur-time">3:30</span></div>
+      <div class="controls">
+        <button class="ctrl-btn" onclick="skipTrack(-15)">⏮</button>
+        <button class="ctrl-btn ctrl-play" id="main-play-btn" onclick="toggleMusic()">▶</button>
+        <button class="ctrl-btn" onclick="skipTrack(15)">⏭</button>
+      </div>
+    </div>
+    <p class="music-hint" data-node-name="musicHint">C'est mieux avec de la musique 🎶</p>
+  </div>
+
+  <!-- 3. IT'S YOUR BIRTHDAY -->
+  <div class="three">
+    <p data-node-name="text1">It's your birthday!!! :D</p>
+  </div>
+
+  <!-- 4. WHATSAPP MESSAGE (replaced chat box) -->
+  <div class="four">
+    <div class="wa-wrap">
+      <div class="wa-header">
+        <div class="wa-avatar" data-node-name="waAvatar">L</div>
+        <div>
+          <div class="wa-name" data-node-name="waName">Lydia</div>
+          <div class="wa-status">en ligne</div>
+        </div>
+      </div>
+      <div class="wa-body">
+        <div class="wa-bubble">
+          <p class="hbd-chatbox wa-bubble-text" data-node-name="textInChatBox">Happy birthday to you!! Yeee! Many many happy blah...</p>
+          <span class="wa-time">maintenant <span class="wa-ticks">✓✓</span></span>
+        </div>
+      </div>
+      <div class="wa-input-bar">
+        <input class="wa-input" type="text" placeholder="Message" readonly>
+        <button class="wa-send" id="wa-send-btn">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="container">
+  <!-- 5. IDEAS -->
+  <div class="five">
+    <p class="idea-1" data-node-name="text2">That's what I was going to do.</p>
+    <p class="idea-2" data-node-name="text3">But then I stopped.</p>
+    <p class="idea-3">
+      <span data-node-name="text4">I realised, I wanted to do something</span>
+      <strong data-node-name="text4Adjective">special</strong>.
+    </p>
+    <p class="idea-4" data-node-name="text5Entry">Because,</p>
+    <p class="idea-5">
+      <span data-node-name="text5Content">You are Special</span>
+      <span class="smiley" data-node-name="smiley">:)</span>
+    </p>
+    <p class="idea-6">
+      <span data-node-name="bigTextPart1">S</span>
+      <span data-node-name="bigTextPart2">O</span>
+    </p>
+  </div>
 
-    <!-- 1. GREETING -->
-    <div class="one" data-section="greeting">
-      <h1 class="one">
-        <span data-node-name="greeting">Hiya</span>
-        <span data-node-name="name">Lydia</span>
-      </h1>
-      <p class="two" data-node-name="greetingText">I really like your name btw!</p>
+    <!-- 6. BIRTHDAY WISH + PHOTOS -->
+  <div class="six">
+    <div class="photo-grid" id="photo-grid">
+      <!-- Photos injected via JS from customize.json or placeholders -->
+      <div class="photo-placeholder" data-photo="1">📸</div>
+      <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath">
+      <div class="photo-placeholder" data-photo="2">🎂</div>
     </div>
-
-    <!-- 2. MUSIC INTERLUDE -->
-    <div class="music-interlude" data-section="music">
-      <div class="iphone-player">
-        <div class="album-art-placeholder" id="main-album-art" data-node-name="albumArt">🎵</div>
-        <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
-        <p class="track-artist" data-node-name="trackArtist">Artiste</p>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <div class="time-row"><span id="cur-time">0:00</span><span id="dur-time">3:30</span></div>
-        <div class="controls">
-          <button class="ctrl-btn" onclick="skipTrack(-15)">⏮</button>
-          <button class="ctrl-btn ctrl-play" id="main-play-btn" onclick="toggleMusic()">▶</button>
-          <button class="ctrl-btn" onclick="skipTrack(15)">⏭</button>
-        </div>
-      </div>
-      <p class="music-hint" data-node-name="musicHint">C'est mieux avec de la musique 🎶</p>
+    <img src="img/hat.svg" alt="" class="hat">
+    <div class="wish">
+      <h3 class="wish-hbd" data-node-name="wishHeading">Happy Birthday!</h3>
+      <h5 data-node-name="wishText">May the js.prototypes always be with you! ;)</h5>
     </div>
+  </div>
 
-    <!-- 3. IT'S YOUR BIRTHDAY -->
-    <div class="three" data-section="message">
-      <p data-node-name="text1">It's your birthday!!! :D</p>
+  <!-- 7. BALLOONS -->
+  <div class="seven">
+    <div class="baloons">
+      <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
+      <img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt="">
+      <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt="">
+      <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon2.svg" alt="">
+      <img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon2.svg" alt="">
+      <img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt="">
+      <img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon3.svg" alt="">
+      <img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt="">
+      <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
+      <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt="">
+      <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
     </div>
+  </div>
 
-    <!-- 4. WHATSAPP MESSAGE -->
-    <div class="four" data-section="message">
-      <div class="wa-wrap">
-        <div class="wa-header">
-          <div class="wa-avatar" data-node-name="waAvatar">L</div>
-          <div>
-            <div class="wa-name" data-node-name="waName">Lydia</div>
-            <div class="wa-status">en ligne</div>
-          </div>
-        </div>
-        <div class="wa-body">
-          <div class="wa-bubble">
-            <p class="hbd-chatbox wa-bubble-text" data-node-name="textInChatBox">Happy birthday to you!! Yeee! Many many happy blah...</p>
-            <span class="wa-time">maintenant <span class="wa-ticks">✓✓</span></span>
-          </div>
-        </div>
-        <div class="wa-input-bar">
-          <input class="wa-input" type="text" placeholder="Message" readonly>
-          <button class="wa-send" id="wa-send-btn">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
+  <!-- 8. FIREWORKS CIRCLES -->
+  <div class="eight">
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
+  </div>
 
-    <!-- 5. IDEAS -->
-    <div class="five" data-section="ideas">
-      <p class="idea-1" data-node-name="text2">That's what I was going to do.</p>
-      <p class="idea-2" data-node-name="text3">But then I stopped.</p>
-      <p class="idea-3">
-        <span data-node-name="text4">I realised, I wanted to do something</span>
-        <strong data-node-name="text4Adjective">special</strong>.
-      </p>
-      <p class="idea-4" data-node-name="text5Entry">Because,</p>
-      <p class="idea-5">
-        <span data-node-name="text5Content">You are Special</span>
-        <span class="smiley" data-node-name="smiley">:)</span>
-      </p>
-      <p class="idea-6">
-        <span data-node-name="bigTextPart1">S</span>
-        <span data-node-name="bigTextPart2">O</span>
-      </p>
-    </div>
+  <!-- 10. OUTRO -->
+  <div class="nine">
+    <p data-node-name="outroText">Okay, now come back and tell me if you liked it.</p>
+    <p id="replay" data-node-name="replayText">Or click, if you want to watch it again.</p>
+    <p class="last-smile" data-node-name="outroSmiley">:)</p>
+  </div>
 
-    <!-- 6. BIRTHDAY WISH + POLAROID BOARD -->
-    <div class="six" data-section="celebration">
+</div><!-- .container -->
 
-      <!-- ░░░ POLAROID BOARD ░░░ -->
-      <div class="polaroid-board" id="polaroid-board">
+<!-- ✅ Wishes buttons OUTSIDE .container so GSAP never touches them -->
+<div id="wishes-float">
+  <button id="open-wishes-btn"       onclick="openWishes()" style="display:none">Voir mes vœux</button>
+  <button id="open-wishes-btn-outro" onclick="openWishes()" style="display:none">Voir mes vœux</button>
+</div>
 
-        <!-- Decorative leaf (bottom-left) -->
-        <svg class="board-leaf" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-          <path d="M 0 100 Q 30 70 80 20" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          <path d="M 20 85 C 10 70 20 50 35 65 Z"/>
-          <path d="M 40 65 C 30 50 40 30 55 45 Z"/>
-          <path d="M 60 45 C 50 30 60 10 75 25 Z"/>
-          <path d="M 25 80 C 40 90 60 80 45 65 Z"/>
-          <path d="M 45 60 C 60 70 80 60 65 45 Z"/>
-          <path d="M 65 40 C 80 50 100 40 85 25 Z"/>
-          <path d="M 80 20 C 90 15 95 5 85 5 C 75 5 70 15 80 20 Z"/>
-        </svg>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+<script>
+/* ============================================================
+   MUSIC
+   ============================================================ */
+const audio = new Audio();
+let isPlaying = false;
 
-        <!-- Decorative flower (middle-right) -->
-        <svg class="board-flower" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-          <g transform="translate(100,100)">
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(0)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(22.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(45)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(67.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(90)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(112.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(135)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(157.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(180)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(202.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(225)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(247.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(270)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(292.5)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(315)"/>
-            <ellipse cx="0" cy="-35" rx="12" ry="45" transform="rotate(337.5)"/>
-            <circle cx="0" cy="0" r="18" fill="#8a7052"/>
-          </g>
-        </svg>
+function toggleMusic() {
+  if (!audio.src) return;
+  if (isPlaying) {
+    audio.pause();
+    isPlaying = false;
+    document.getElementById('main-play-btn').textContent = '▶';
+    document.getElementById('pill-icon').textContent = '▶';
+    document.getElementById('pill-label').textContent = 'Play';
+    document.getElementById('pill-cover').style.animationPlayState = 'paused';
+  } else {
+    audio.play().catch(() => {});
+    isPlaying = true;
+    document.getElementById('main-play-btn').textContent = '⏸';
+    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('pill-label').textContent = 'Pause';
+    document.getElementById('pill-cover').style.animationPlayState = 'running';
+  }
+}
 
-        <!-- Board title -->
-        <div class="board-title">
-          <h2>Happy<br>Birthday</h2>
-        </div>
+function skipTrack(sec) {
+  if (!audio.src) return;
+  audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + sec));
+}
 
-        <!-- Polaroid A — main image (data-node-name="imagePath") + hat -->
-        <div class="polaroid-item p-a">
-          <div class="p-img-wrap">
-            <img src="img/lydia2.png" alt="Portrait" data-node-name="imagePath">
-          </div>
-          <!-- Hat pinned to top-right of this polaroid -->
-          <img src="img/hat.svg" alt="" class="hat">
-        </div>
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('cur-time').textContent = fmtTime(audio.currentTime);
+  document.getElementById('dur-time').textContent = fmtTime(audio.duration);
+});
 
-        <!-- Polaroid B — data-photo="1" with caption -->
-        <div class="polaroid-item p-b">
-          <div class="p-img-wrap">
-            <div class="p-placeholder" data-photo="1">📸</div>
-          </div>
-          <p class="p-caption" data-node-name="photo1Caption">Queen of the day</p>
-        </div>
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
 
-        <!-- Polaroid C — data-photo="2" -->
-        <div class="polaroid-item p-c">
-          <div class="p-img-wrap">
-            <div class="p-placeholder" data-photo="2">🎂</div>
-          </div>
-        </div>
+/* ============================================================
+   WISHES MODAL
+   ============================================================ */
+function openWishes() {
+  document.getElementById('wishes-overlay').classList.add('open');
+  setTimeout(() => {
+    document.getElementById('wishes-card').scrollTop = 0;
+  }, 100);
+}
+function closeWishes() {
+  document.getElementById('wishes-overlay').classList.remove('open');
+}
+function closeWishesIfBg(e) {
+  if (e.target === document.getElementById('wishes-overlay')) closeWishes();
+}
 
-        <!-- Number card — bottom-right -->
-        <div class="polaroid-item p-num">
-          <div class="p-num-face">
-            <span class="num-text" data-node-name="birthdayNumber">22</span>
-            <span class="pin pin-tl"></span>
-            <span class="pin pin-tr"></span>
-            <span class="pin pin-bl"></span>
-            <span class="pin pin-br"></span>
-          </div>
-          <span class="p-caption-bottom">Happy Birthday</span>
-        </div>
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+const confettiCanvas = document.getElementById('confetti-canvas');
+const ctx = confettiCanvas.getContext('2d');
+let confettiActive = false;
+let confettiPieces = [];
 
-        <!-- Wish text — overlaid bottom-center -->
-        <div class="wish">
-          <h3 class="wish-hbd" data-node-name="wishHeading">Happy Birthday!</h3>
-          <h5 data-node-name="wishText">May the js.prototypes always be with you! ;)</h5>
-          <button id="open-wishes-btn" onclick="openWishes()">💌 Mes vœux pour toi</button>
-        </div>
-
-      </div><!-- /.polaroid-board -->
-
-    </div>
-
-    <!-- 7. BALLOONS -->
-    <div class="seven">
-      <div class="baloons">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon2.svg" alt="">
-        <img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon2.svg" alt="">
-        <img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt="">
-        <img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
-      </div>
-    </div>
-
-    <!-- 8. FIREWORKS CIRCLES -->
-    <div class="eight">
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20"/></svg>
-    </div>
-
-    <!-- 9. OUTRO -->
-    <div class="nine" data-section="outro">
-      <p data-node-name="outroText">Okay, now come back and tell me if you liked it.</p>
-      <p id="replay" data-node-name="replayText">Or click, if you want to watch it again.</p>
-      <p class="last-smile" data-node-name="outroSmiley">:)</p>
-    </div>
-
-  </div><!-- .container -->
-
-  <script src="/templates/shared/ww-engine.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
-  <script>
-    /* ============================================================
-       MUSIC
-       ============================================================ */
-    const audio = new Audio();
-    let isPlaying = false;
-
-    function toggleMusic() {
-      if (!audio.src) return;
-      if (isPlaying) {
-        audio.pause();
-        isPlaying = false;
-        document.getElementById('main-play-btn').textContent = '▶';
-        document.getElementById('pill-icon').textContent = '▶';
-        document.getElementById('pill-label').textContent = 'Play';
-        document.getElementById('pill-cover').style.animationPlayState = 'paused';
-      } else {
-        audio.play().catch(() => {});
-        isPlaying = true;
-        document.getElementById('main-play-btn').textContent = '⏸';
-        document.getElementById('pill-icon').textContent = '⏸';
-        document.getElementById('pill-label').textContent = 'Pause';
-        document.getElementById('pill-cover').style.animationPlayState = 'running';
-      }
-    }
-
-    function skipTrack(sec) {
-      if (!audio.src) return;
-      audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + sec));
-    }
-
-    audio.addEventListener('timeupdate', () => {
-      if (!audio.duration) return;
-      const pct = (audio.currentTime / audio.duration) * 100;
-      document.getElementById('progress-fill').style.width = pct + '%';
-      document.getElementById('cur-time').textContent = fmtTime(audio.currentTime);
-      document.getElementById('dur-time').textContent = fmtTime(audio.duration);
+function startConfetti() {
+  confettiCanvas.style.display = 'block';
+  confettiActive = true;
+  confettiPieces = [];
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+  for (let i = 0; i < 180; i++) {
+    confettiPieces.push({
+      x: Math.random() * confettiCanvas.width,
+      y: Math.random() * -confettiCanvas.height,
+      w: Math.random() * 10 + 5,
+      h: Math.random() * 6 + 3,
+      color: `hsl(${Math.random()*360},90%,60%)`,
+      rot: Math.random() * 360,
+      vx: (Math.random() - 0.5) * 2,
+      vy: Math.random() * 3 + 2,
+      vr: (Math.random() - 0.5) * 6
     });
+  }
+  animateConfetti();
+}
 
-    function fmtTime(s) {
-      const m = Math.floor(s / 60);
-      const sec = Math.floor(s % 60);
-      return `${m}:${sec.toString().padStart(2, '0')}`;
-    }
+function animateConfetti() {
+  if (!confettiActive) return;
+  ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  let alive = false;
+  confettiPieces.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    if (p.y < confettiCanvas.height + 20) alive = true;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    ctx.restore();
+  });
+  if (alive) requestAnimationFrame(animateConfetti);
+  else { confettiActive = false; confettiCanvas.style.display = 'none'; }
+}
 
-    /* ============================================================
-       WISHES MODAL
-       ============================================================ */
-    function openWishes() {
-      document.getElementById('wishes-overlay').classList.add('open');
-      setTimeout(() => { document.getElementById('wishes-card').scrollTop = 0; }, 100);
-    }
-    function closeWishes() {
-      document.getElementById('wishes-overlay').classList.remove('open');
-    }
-    function closeWishesIfBg(e) {
-      if (e.target === document.getElementById('wishes-overlay')) closeWishes();
-    }
-
-    /* ============================================================
-       CONFETTI
-       ============================================================ */
-    const confettiCanvas = document.getElementById('confetti-canvas');
-    const ctx = confettiCanvas.getContext('2d');
-    let confettiActive = false;
-    let confettiPieces = [];
-
-    function startConfetti() {
-      confettiCanvas.style.display = 'block';
-      confettiActive = true;
-      confettiPieces = [];
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-      for (let i = 0; i < 180; i++) {
-        confettiPieces.push({
-          x: Math.random() * confettiCanvas.width,
-          y: Math.random() * -confettiCanvas.height,
-          w: Math.random() * 10 + 5,
-          h: Math.random() * 6 + 3,
-          color: `hsl(${Math.random() * 360},90%,60%)`,
-          rot: Math.random() * 360,
-          vx: (Math.random() - 0.5) * 2,
-          vy: Math.random() * 3 + 2,
-          vr: (Math.random() - 0.5) * 6
-        });
-      }
-      animateConfetti();
-    }
-
-    function animateConfetti() {
-      if (!confettiActive) return;
-      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      let alive = false;
-      confettiPieces.forEach(p => {
-        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
-        if (p.y < confettiCanvas.height + 20) alive = true;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot * Math.PI / 180);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-        ctx.restore();
-      });
-      if (alive) requestAnimationFrame(animateConfetti);
-      else { confettiActive = false; confettiCanvas.style.display = 'none'; }
-    }
-
-    /* ============================================================
-       DATA HELPERS — photo injection for polaroid board
-       ============================================================ */
-    function injectPhoto(slot, src) {
-      const el = document.querySelector(`[data-photo="${slot}"]`);
-      if (!el) return;
-      el.innerHTML = '';
-      el.style.background = 'none';
+/* ============================================================
+   DATA + ANIMATION
+   ============================================================ */
+const applyFieldBirthday = (key, val) => {
+  if (!val) return;
+  if (key === "imagePath") {
+    document.querySelector(`[data-node-name="${key}"]`)?.setAttribute("src", val);
+  } else if (key === "musicSrc") {
+    audio.src = val;
+  } else if (key === "albumArt") {
+    const placeholder = document.getElementById('main-album-art');
+    if (placeholder) {
       const img = document.createElement('img');
-      img.src = src;
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;filter:contrast(1.1) saturate(1.15) sepia(0.15);opacity:0.95;display:block;transition:transform 0.7s ease;';
-      el.appendChild(img);
+      img.src = val;
+      img.style.cssText = 'width:200px;height:200px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 20px;box-shadow:0 12px 35px rgba(255,105,180,0.35);';
+      placeholder.replaceWith(img);
     }
+    const pillCover = document.getElementById('pill-cover');
+    if (pillCover) { pillCover.innerHTML = ''; const pimg = document.createElement('img'); pimg.src = val; pillCover.appendChild(pimg); }
+  } else if (key === "photo1") {
+    const el = document.querySelector('[data-photo="1"]');
+    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+  } else if (key === "photo2") {
+    const el = document.querySelector('[data-photo="2"]');
+    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+  } else if (key === "waAvatar") {
+    const el = document.querySelector('[data-node-name="waAvatar"]');
+    if (el) el.textContent = val.charAt(0).toUpperCase();
+  } else {
+    const el = document.querySelector(`[data-node-name="${key}"]`);
+    if (el) el.innerText = val;
+  }
+};
 
-    /* ============================================================
-       DATA + ANIMATION
-       ============================================================ */
-    const applyFieldBirthday = (key, val) => {
+const fetchData = () => {
+  const run = (data) => {
+    const dataArr = Object.keys(data);
+    if (dataArr.length === 0) { animationTimeline(); return; }
+    dataArr.forEach((key, i) => {
+      if (data[key] !== "" && data[key] != null) applyFieldBirthday(key, data[key]);
+      if (i === dataArr.length - 1) animationTimeline();
+    });
+  };
+
+  if (window.__WW_DATA__) {
+    run(window.__WW_DATA__);
+    if (window._jarInit) window._jarInit();
+  } else {
+    fetch("customize.json")
+      .then(r => r.json())
+      .then(d => { run(d); if (window._jarInit) window._jarInit(); })
+      .catch(() => { if (window._jarInit) window._jarInit(); animationTimeline(); });
+  }
+};
+
+/* ============================================================
+   ANIMATION TIMELINE
+   ============================================================ */
+const animationTimeline = () => {
+  const textBoxChars = document.querySelector(".hbd-chatbox");
+  const hbd = document.querySelector(".wish-hbd");
+
+  textBoxChars.innerHTML = `<span>${textBoxChars.innerHTML.split("").join("</span><span>")}</span>`;
+  hbd.innerHTML = `<span>${hbd.innerHTML.split("").join("</span><span>")}</span>`;
+
+  const ideaIn  = { opacity: 0, y: -20, rotationX: 5, skewX: "15deg" };
+  const ideaOut = { opacity: 0, y: 20, rotationY: 5, skewX: "-15deg" };
+
+  const tl = new TimelineMax();
+
+  tl
+    // show container
+    .to(".container", 0.1, { visibility: "visible" })
+
+    // --- GREETING ---
+    .from(".one", 0.7, { opacity: 0, y: 10 })
+    .from(".two", 0.4, { opacity: 0, y: 10 })
+    .to(".one", 0.7, { opacity: 0, y: 10 }, "+=2.5")
+    .to(".two", 0.7, { opacity: 0, y: 10 }, "-=1")
+
+    // --- MUSIC INTERLUDE ---
+    .from(".music-interlude", 0.7, { opacity: 0, scale: 0.95 })
+    .add(() => {
+      document.getElementById('music-pill').style.display = 'block';
+      TweenMax.from('#music-pill', 0.5, { opacity: 0, x: 60 });
+    })
+    .to(".music-interlude", 0.7, { opacity: 0, scale: 0.95 }, "+=4")
+
+    // --- THREE ---
+    .from(".three", 0.7, { opacity: 0, y: 10 })
+    .to(".three", 0.7, { opacity: 0, y: 10 }, "+=2")
+
+    // --- FOUR (WhatsApp) ---
+    .from(".four", 0.7, { scale: 0.2, opacity: 0 })
+    .staggerTo(".wa-bubble-text span", 0.5, { visibility: "visible" }, 0.04)
+    .add(() => {
+      // animate send button
+      TweenMax.to('#wa-send-btn', 0.15, { scale: 0.85 });
+      setTimeout(() => TweenMax.to('#wa-send-btn', 0.15, { scale: 1 }), 150);
+    })
+    .to(".four", 0.5, { scale: 0.2, opacity: 0, y: -150 }, "+=1.5")
+
+    // --- FIVE ideas ---
+    .from(".idea-1", 0.7, ideaIn)
+    .to(".idea-1", 0.7, ideaOut, "+=1.5")
+    .from(".idea-2", 0.7, ideaIn)
+    .to(".idea-2", 0.7, ideaOut, "+=1.5")
+    .from(".idea-3", 0.7, ideaIn)
+    .to(".idea-3 strong", 0.5, { scale: 1.2, x: 10, backgroundColor: "rgb(21,161,237)", color: "#fff" })
+    .to(".idea-3", 0.7, ideaOut, "+=1.5")
+    .from(".idea-4", 0.7, ideaIn)
+    .to(".idea-4", 0.7, ideaOut, "+=1.5")
+    .from(".idea-5", 0.7, { rotationX: 15, rotationZ: -10, skewY: "-5deg", y: 50, z: 10, opacity: 0 }, "+=0.5")
+    .to(".idea-5 .smiley", 0.7, { rotation: 90, x: 8 }, "+=0.4")
+    .to(".idea-5", 0.7, { scale: 0.2, opacity: 0 }, "+=2")
+    .staggerFrom(".idea-6 span", 0.8, { scale: 3, opacity: 0, rotation: 15, ease: Expo.easeOut }, 0.2)
+    .staggerTo(".idea-6 span", 0.8, { scale: 3, opacity: 0, rotation: -15, ease: Expo.easeOut }, 0.2, "+=1")
+
+    // --- SIX balloons + birthday ---
+    .staggerFromTo(".baloons img", 2.5, { opacity: 0.9, y: 1400 }, { opacity: 1, y: -1000 }, 0.2)
+    .from(".photo-grid", 0.6, { scale: 0.4, opacity: 0, y: 30 }, "-=2")
+    .from(".hat", 0.5, { x: -100, y: 350, rotation: -180, opacity: 0 })
+    .staggerFrom(".wish-hbd span", 0.7, { opacity: 0, y: -50, rotation: 150, skewX: "30deg", ease: Elastic.easeOut.config(1, 0.5) }, 0.1)
+    .staggerFromTo(".wish-hbd span", 0.7, { scale: 1.4, rotationY: 150 }, { scale: 1, rotationY: 0, color: "var(--primary)", ease: Expo.easeOut }, 0.1, "party")
+    .from(".wish h5", 0.5, { opacity: 0, y: 10, skewX: "-15deg" }, "party")
+    .add(() => {
+      startConfetti();
+      // Button is in fixed #wishes-float — just show it, no TweenMax needed
+      const b = document.getElementById('open-wishes-btn');
+      b.style.display = 'inline-block';
+      b.style.opacity = '1';
+    }, "party")
+
+    // fireworks circles
+    .staggerTo(".eight svg", 1.5, { visibility: "visible", opacity: 0, scale: 80, repeat: 3, repeatDelay: 1.4 }, 0.3)
+
+    .to(".six", 0.5, { opacity: 0, y: 30 })
+    .add(() => {
+      // Hide the "party" button, show jar trigger instead
+      document.getElementById('open-wishes-btn').style.display = 'none';
+      if (window._showJar) window._showJar();
+    })
+
+    // --- OUTRO ---
+    .staggerFrom(".nine p", 1, ideaIn, 1.2)
+    .add(() => {
+      const b2 = document.getElementById('open-wishes-btn-outro');
+      b2.style.display = 'inline-block';
+      b2.style.opacity = '1';
+    })
+    .to(".last-smile", 0.5, { rotation: 90 }, "+=1");
+
+  document.getElementById("replay").addEventListener("click", () => {
+    document.getElementById('open-wishes-btn').style.display = 'none';
+    document.getElementById('open-wishes-btn-outro').style.display = 'none';
+    tl.restart();
+  });
+};
+
+fetchData();
+
+// ── Live update from editor via postMessage ──
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'WW_UPDATE') return;
+  const { data, style } = e.data;
+
+  // Apply style variables
+  if (style) {
+    const root = document.documentElement;
+    if (style.primaryColor) root.style.setProperty('--primary', style.primaryColor);
+    if (style.accentColor)  root.style.setProperty('--accent', style.accentColor);
+    if (style.fontFamily)   root.style.setProperty('--font', `'${style.fontFamily}', sans-serif`);
+    const scale = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
+    root.style.setProperty('--fs-scale', scale);
+    // Apply font to body
+    document.body.style.fontFamily = `'${style.fontFamily}', sans-serif`;
+  }
+
+  // Apply data fields
+  if (data) {
+    Object.keys(data).forEach(key => {
+      const val = data[key];
       if (!val) return;
       if (key === 'imagePath') {
-        document.querySelector(`[data-node-name="${key}"]`)?.setAttribute('src', val);
-      } else if (key === 'musicSrc') {
-        audio.src = val;
+        document.querySelector('[data-node-name="imagePath"]')?.setAttribute('src', val);
       } else if (key === 'albumArt') {
-        const placeholder = document.getElementById('main-album-art');
-        if (placeholder) {
-          const img = document.createElement('img');
-          img.src = val;
-          img.style.cssText = 'width:200px;height:200px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 20px;box-shadow:0 12px 35px rgba(255,105,180,0.35);';
-          placeholder.replaceWith(img);
-        }
+        // update pill cover
         const pillCover = document.getElementById('pill-cover');
         if (pillCover) {
-          pillCover.innerHTML = '';
-          const pimg = document.createElement('img');
-          pimg.src = val;
-          pillCover.appendChild(pimg);
+          if (!pillCover.querySelector('img')) {
+            pillCover.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = val;
+            pillCover.appendChild(img);
+          } else {
+            pillCover.querySelector('img').src = val;
+          }
         }
+      } else if (key === 'musicSrc') {
+        if (audio && val !== audio.src) { audio.src = val; }
       } else if (key === 'photo1') {
-        injectPhoto('1', val);
+        const el = document.querySelector('[data-photo="1"]');
+        if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
       } else if (key === 'photo2') {
-        injectPhoto('2', val);
-      } else if (key === 'waAvatar') {
-        const el = document.querySelector('[data-node-name="waAvatar"]');
-        if (el) el.textContent = val.charAt(0).toUpperCase();
+        const el = document.querySelector('[data-photo="2"]');
+        if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
       } else {
         const el = document.querySelector(`[data-node-name="${key}"]`);
         if (el) el.innerText = val;
       }
-    };
+    });
+  }
+});
 
-    const fetchData = () => {
-      const run = (data) => {
-        const dataArr = Object.keys(data);
-        if (dataArr.length === 0) { animationTimeline(); return; }
-        dataArr.forEach((key, i) => {
-          if (data[key] !== '' && data[key] != null) applyFieldBirthday(key, data[key]);
-          if (i === dataArr.length - 1) animationTimeline();
-        });
+</script>
+<!-- JAR OF WORDS — 3 designs, inline -->
+<script>
+(function() {
+  /* ─── Default data ─── */
+  const DEF_CLASSIC = [
+    "Tu mérites tout le bonheur du monde 🎂",
+    "Une nouvelle année pleine de magie t'attend ✨",
+    "Tu vieillis en beauté — comme du bon vin 🍷",
+    "Que tous tes rêves deviennent réals 🌟",
+    "Tu rends la vie de ceux qui t'entourent plus belle 💛",
+    "Continue d'être exactement toi — c'est parfait 🌸",
+    "Cette année sera la meilleure de toutes 🎉",
+    "Le monde est meilleur avec toi dedans 🌍",
+  ];
+  const DEF_CATS = [
+    { id:'sad',    label:"Quand tu te sens triste",      color:'#4e9eff', bg:'#d0e8ff', words:["Tu n'es pas seul(e) 💙","Cette douleur est temporaire 🌊","Je suis là pour toi 🤝"] },
+    { id:'happy',  label:"Quand tu es heureuse",         color:'#f0a030', bg:'#fff3cd', words:["Continue de briller ☀️","Tu mérites cette joie 🌻","Ta joie me rend heureux aussi 🎉"] },
+    { id:'faith',  label:"Quand tu as besoin de foi",    color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon — ça va aller 🌟"] },
+    { id:'lonely', label:"Quand tu te sens seul(e)",     color:'#c8963e', bg:'#f5e9c8', words:["Tu comptes tellement pour moi 💛","Je pense à toi souvent 🌸","Tu n'es jamais vraiment seul(e) 🤍"] },
+    { id:'doubt',  label:"Quand tu doutes de toi",       color:'#a78bfa', bg:'#f3d9ff', words:["Tu es capable de grandes choses ✨","Je crois en toi, même quand tu n'y crois pas 🌙"] },
+  ];
+  const SLIP_COLORS = [
+    {bg:'#ffd6e0',text:'#c2185b'},{bg:'#fff3cd',text:'#b8860b'},
+    {bg:'#d4f1c8',text:'#2e7d32'},{bg:'#d0e8ff',text:'#1565c0'},
+    {bg:'#f3d9ff',text:'#7b1fa2'},{bg:'#ffe0b2',text:'#e65100'},
+  ];
+
+  let design='classic', words=[], cats=[], drawn=[];
+
+  /* ─── Inject styles once ─── */
+  const css = document.createElement('style');
+  css.textContent = `
+    #jar-btn{position:fixed;bottom:28px;right:28px;z-index:8000;
+      background:linear-gradient(135deg,#ff9eb5,#ffcf77);
+      border:none;border-radius:99px;padding:12px 20px 12px 14px;
+      font-size:.88rem;font-weight:700;color:#fff;cursor:pointer;
+      display:none;align-items:center;gap:7px;
+      box-shadow:0 8px 28px rgba(255,120,160,.4);
+      animation:jpulse 2.5s ease-in-out infinite;
+      font-family:'Work Sans',sans-serif;}
+    #jar-btn:hover{transform:translateY(-3px) scale(1.04);animation:none;}
+    @keyframes jpulse{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.03)}}
+
+    #jar-ov{position:fixed;inset:0;z-index:9000;
+      background:rgba(20,10,30,.58);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;padding:20px;
+      opacity:0;pointer-events:none;transition:opacity .3s;}
+    #jar-ov.open{opacity:1;pointer-events:all;}
+
+    /* ── Shared modal box ── */
+    #jar-box{background:#fffaf5;border-radius:28px;padding:28px 24px 24px;
+      width:100%;max-width:400px;position:relative;text-align:center;
+      box-shadow:0 40px 100px rgba(0,0,0,.25);overflow:hidden;
+      transform:scale(.92) translateY(24px);
+      transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+    #jar-ov.open #jar-box{transform:scale(1) translateY(0);}
+    #jar-box::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;
+      background:linear-gradient(90deg,#ff9eb5,#ffcf77,#a8edea,#fed6e3);}
+    #jar-x{position:absolute;top:13px;right:15px;background:none;border:none;
+      font-size:1.1rem;color:#ccc;cursor:pointer;line-height:1;
+      transition:color .2s,transform .2s;}
+    #jar-x:hover{color:#ff6b9d;transform:rotate(90deg);}
+
+    /* ── Classic / Scroll ── */
+    #jar-svg-wrap{cursor:pointer;margin:0 auto 6px;display:block;width:110px;height:138px;}
+    #jar-title{font-family:Georgia,serif;font-size:1.25rem;font-weight:700;
+      color:#2d1b3d;margin-bottom:3px;font-style:italic;}
+    #jar-sub{font-size:.73rem;color:#b0a0b8;margin-bottom:14px;}
+    #jar-dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
+    .jdot{width:7px;height:7px;border-radius:50%;background:#e8e0ef;transition:background .3s,transform .2s;}
+    .jdot.hit{background:linear-gradient(135deg,#ff9eb5,#ffcf77);transform:scale(1.25);}
+    #jar-slip{min-height:84px;border-radius:16px;padding:15px 18px;margin-bottom:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.92rem;font-weight:500;line-height:1.55;
+      opacity:0;transition:opacity .25s,transform .28s;}
+    #jar-slip.show{opacity:1;}
+    #jar-slip.exit{opacity:0;transform:translateY(-10px) rotate(3deg);}
+    #jar-empty{display:none;font-size:.82rem;color:#b0a0b8;margin-bottom:12px;}
+    #jar-refill{background:none;border:none;color:#ff9eb5;font-size:.8rem;
+      font-weight:700;text-decoration:underline;cursor:pointer;font-family:inherit;margin-top:4px;display:block;}
+    #jar-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    #jar-pick{background:linear-gradient(135deg,#ff9eb5,#ffcf77);border:none;
+      border-radius:99px;padding:11px 26px;font-family:inherit;font-size:.87rem;
+      font-weight:700;color:#fff;cursor:pointer;
+      box-shadow:0 6px 20px rgba(255,120,160,.35);transition:transform .2s;}
+    #jar-pick:hover{transform:translateY(-2px);}
+    #jar-pick:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+    #jar-shake-btn{background:#f5eeff;border:1.5px solid #ddd0f0;border-radius:99px;
+      padding:10px 18px;font-family:inherit;font-size:.8rem;font-weight:600;
+      color:#9b59b6;cursor:pointer;transition:background .2s;}
+    #jar-shake-btn:hover{background:#ede0ff;}
+    @keyframes jshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) scale(1.06)}40%{transform:rotate(9deg) scale(1.06)}60%{transform:rotate(-5deg)}80%{transform:rotate(5deg)}}
+    #jar-svg-wrap.shaking{animation:jshake .5s ease;}
+
+    /* ── Read Me When ── */
+    #rmw-box{display:none;flex-direction:column;gap:0;margin-bottom:14px;border-radius:14px;overflow:hidden;border:1px solid #f0e0e8;}
+    #rmw-box.visible{display:flex;}
+    .rmw-cat{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:10px;
+      transition:filter .15s;border-bottom:1px solid rgba(255,255,255,.4);}
+    .rmw-cat:last-child{border-bottom:none;}
+    .rmw-cat:hover{filter:brightness(.96);}
+    .rmw-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .rmw-cat-label{flex:1;font-size:.83rem;font-weight:600;text-align:left;}
+    .rmw-cat-count{font-size:.7rem;opacity:.7;}
+    .rmw-slip{display:none;padding:12px 16px 14px;border-top:1px solid rgba(255,255,255,.5);}
+    .rmw-slip.show{display:block;}
+    .rmw-slip-text{font-size:.9rem;font-weight:500;line-height:1.6;font-style:italic;}
+    .rmw-slip-actions{margin-top:10px;display:flex;gap:8px;justify-content:center;}
+    .rmw-next{background:none;border:1.5px solid currentColor;border-radius:99px;
+      padding:6px 16px;font-family:inherit;font-size:.75rem;font-weight:600;
+      cursor:pointer;transition:background .15s,color .15s;}
+    .rmw-next:hover{background:rgba(255,255,255,.5);}
+    .rmw-close-cat{background:none;border:none;font-size:.75rem;color:rgba(0,0,0,.4);cursor:pointer;}
+  `;
+  document.head.appendChild(css);
+
+  /* ─── Floating trigger button ─── */
+  const btn = document.createElement('button');
+  btn.id = 'jar-btn';
+  btn.innerHTML = '🫙 Jar of Words';
+  btn.addEventListener('click', openJar);
+  document.body.appendChild(btn);
+
+  /* ─── Overlay ─── */
+  const ov = document.createElement('div');
+  ov.id = 'jar-ov';
+  ov.addEventListener('click', e => { if (e.target === ov) closeJar(); });
+  ov.innerHTML = `<div id="jar-box"><button id="jar-x">✕</button><div id="jar-inner"></div></div>`;
+  document.body.appendChild(ov);
+
+  ov.querySelector('#jar-x').addEventListener('click', closeJar);
+
+  /* ─── Build inner HTML by design ─── */
+  function buildInner() {
+    const inner = ov.querySelector('#jar-inner');
+    if (design === 'readmewhen') {
+      buildReadMeWhen(inner);
+    } else if (design === 'scroll') {
+      buildScroll(inner);
+    } else {
+      buildClassic(inner);
+    }
+  }
+
+  /* ═══════════════════════════════════
+     DESIGN 1 — CLASSIC
+  ═══════════════════════════════════ */
+  function buildClassic(inner) {
+    inner.innerHTML = `
+      <div id="jar-svg-wrap" title="Secoue le bocal !">
+        <svg viewBox="0 0 130 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:110px;height:138px">
+          <rect x="28" y="8" width="74" height="22" rx="8" fill="#d4a843" opacity=".9"/>
+          <rect x="32" y="12" width="66" height="14" rx="5" fill="#e8c060"/>
+          <path d="M22 34 Q18 40 18 50 L18 140 Q18 152 30 152 L100 152 Q112 152 112 140 L112 50 Q112 40 108 34 Z" fill="#fff8f0" stroke="#f0d9b0" stroke-width="2"/>
+          <path d="M30 50 Q28 70 28 100" stroke="rgba(255,255,255,.7)" stroke-width="5" stroke-linecap="round"/>
+          <rect x="35" y="110" width="38" height="14" rx="4" fill="#ffd6e0" opacity=".85"/>
+          <rect x="58" y="118" width="32" height="12" rx="4" fill="#d0e8ff" opacity=".85"/>
+          <rect x="40" y="124" width="30" height="10" rx="3" fill="#d4f1c8" opacity=".85"/>
+          <rect x="65" y="105" width="28" height="11" rx="3" fill="#fff3cd" opacity=".85"/>
+          <rect x="38" y="98"  width="25" height="10" rx="3" fill="#f3d9ff" opacity=".85"/>
+          <rect x="60" y="94"  width="32" height="10" rx="3" fill="#ffe0b2" opacity=".8"/>
+          <rect x="30" y="62"  width="70" height="22" rx="6" fill="rgba(255,200,150,.22)" stroke="#f0d0a0" stroke-width="1"/>
+          <text x="65" y="77" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#c8860a" font-style="italic">mots doux</text>
+        </svg>
+      </div>
+      <div id="jar-title">Ton bocal de mots 💛</div>
+      <div id="jar-sub">Pioche un message, un à la fois</div>
+      <div id="jar-dots"></div>
+      <div id="jar-slip"></div>
+      <div id="jar-empty">🌸 Tous les mots ont été piochés !<br><button id="jar-refill">Remettre tous les mots</button></div>
+      <div id="jar-acts">
+        <button id="jar-pick">🎲 Piocher un mot</button>
+        <button id="jar-shake-btn">🫙 Secouer</button>
+      </div>`;
+    drawn = [];
+    renderDots();
+    inner.querySelector('#jar-svg-wrap').addEventListener('click', shakeJar);
+    inner.querySelector('#jar-shake-btn').addEventListener('click', shakeJar);
+    inner.querySelector('#jar-pick').addEventListener('click', pick);
+    inner.querySelector('#jar-refill').addEventListener('click', () => {
+      drawn = []; renderDots();
+      inner.querySelector('#jar-empty').style.display = 'none';
+      inner.querySelector('#jar-slip').classList.remove('show');
+      inner.querySelector('#jar-pick').disabled = false;
+    });
+  }
+
+  /* ═══════════════════════════════════
+     DESIGN 2 — READ ME WHEN
+  ═══════════════════════════════════ */
+  function buildReadMeWhen(inner) {
+    // Hearts SVG jar
+    inner.innerHTML = `
+      <svg viewBox="0 0 110 130" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:110px;margin:0 auto 8px;display:block">
+        <rect x="20" y="4" width="70" height="18" rx="7" fill="#e91e8c" opacity=".85"/>
+        <path d="M14 26 Q12 31 12 38 L12 114 Q12 122 21 122 L89 122 Q98 122 98 114 L98 38 Q98 31 96 26 Z" fill="#fff0f5" stroke="#f0c0d0" stroke-width="1.5"/>
+        <text x="55" y="55"  text-anchor="middle" font-size="13">♥</text>
+        <text x="38" y="68"  text-anchor="middle" font-size="11">♥</text>
+        <text x="72" y="66"  text-anchor="middle" font-size="10">♥</text>
+        <text x="47" y="82"  text-anchor="middle" font-size="12">♥</text>
+        <text x="67" y="80"  text-anchor="middle" font-size="9">♥</text>
+        <text x="55" y="96"  text-anchor="middle" font-size="10">♥</text>
+        <text x="35" y="94"  text-anchor="middle" font-size="8">♥</text>
+        <text x="76" y="95"  text-anchor="middle" font-size="8">♥</text>
+      </svg>
+      <div id="jar-title">Lis-moi quand… 💌</div>
+      <div id="jar-sub">Choisie une humeur, reçois un message</div>
+      <div id="rmw-box" class="visible"></div>`;
+
+    const box = inner.querySelector('#rmw-box');
+    cats.forEach(cat => {
+      const row = document.createElement('div');
+      row.className = 'rmw-cat';
+      row.style.background = cat.bg;
+      row.innerHTML = `
+        <div class="rmw-cat-dot" style="background:${cat.color}"></div>
+        <div class="rmw-cat-label" style="color:${cat.color}">${cat.label}</div>
+        <div class="rmw-cat-count" style="color:${cat.color}">${cat.words.length}</div>`;
+
+      const slip = document.createElement('div');
+      slip.className = 'rmw-slip';
+      slip.style.background = cat.bg;
+      slip.innerHTML = `
+        <div class="rmw-slip-text" style="color:${cat.color}"></div>
+        <div class="rmw-slip-actions">
+          <button class="rmw-next" style="color:${cat.color};border-color:${cat.color}">✦ Suivant</button>
+          <button class="rmw-close-cat">✕ Fermer</button>
+        </div>`;
+
+      const catDrawn = [];
+      let currentSlip = null;
+
+      const showNext = () => {
+        const avail = cat.words.filter(w => !catDrawn.includes(w));
+        const pool  = avail.length ? avail : cat.words; // loop when exhausted
+        if (!avail.length) catDrawn.length = 0;
+        const w = pool[Math.floor(Math.random() * pool.length)];
+        catDrawn.push(w);
+        slip.querySelector('.rmw-slip-text').textContent = `"${w}"`;
+        slip.classList.add('show');
+        currentSlip = w;
       };
 
-      if (window.__WW_DATA__) {
-        run(window.__WW_DATA__);
-      } else {
-        fetch('customize.json')
-          .then(r => r.json())
-          .then(run)
-          .catch(() => animationTimeline());
-      }
-    };
-
-    /* ============================================================
-       ANIMATION TIMELINE
-       ============================================================ */
-    const animationTimeline = () => {
-      const textBoxChars = document.querySelector('.hbd-chatbox');
-      const hbd = document.querySelector('.wish-hbd');
-
-      textBoxChars.innerHTML = `<span>${textBoxChars.innerHTML.split('').join('</span><span>')}</span>`;
-      hbd.innerHTML = `<span>${hbd.innerHTML.split('').join('</span><span>')}</span>`;
-
-      const ideaIn  = { opacity: 0, y: -20, rotationX: 5,  skewX: '15deg' };
-      const ideaOut = { opacity: 0, y:  20, rotationY: 5,  skewX: '-15deg' };
-
-      const tl = new TimelineMax();
-
-      tl
-        .to('.container', 0.1, { visibility: 'visible' })
-
-        // --- GREETING ---
-        .from('.one', 0.7, { opacity: 0, y: 10 })
-        .from('.two', 0.4, { opacity: 0, y: 10 })
-        .to('.one', 0.7, { opacity: 0, y: 10 }, '+=2.5')
-        .to('.two', 0.7, { opacity: 0, y: 10 }, '-=1')
-
-        // --- MUSIC INTERLUDE ---
-        .from('.music-interlude', 0.7, { opacity: 0, scale: 0.95 })
-        .add(() => {
-          document.getElementById('music-pill').style.display = 'block';
-          TweenMax.from('#music-pill', 0.5, { opacity: 0, x: 60 });
-        })
-        .to('.music-interlude', 0.7, { opacity: 0, scale: 0.95 }, '+=4')
-
-        // --- THREE ---
-        .from('.three', 0.7, { opacity: 0, y: 10 })
-        .to('.three', 0.7, { opacity: 0, y: 10 }, '+=2')
-
-        // --- FOUR (WhatsApp) ---
-        .from('.four', 0.7, { scale: 0.2, opacity: 0 })
-        .add(() => {
-          tl.pause();
-          const fullText = document.querySelector('.wa-bubble-text').innerText;
-          const input = document.querySelector('.wa-input');
-          input.placeholder = '';
-          let i = 0;
-          const interval = setInterval(() => {
-            if (i <= fullText.length) { input.value = fullText.slice(0, i++); }
-            else {
-              clearInterval(interval);
-              TweenMax.to('#wa-send-btn', 0.15, {
-                scale: 0.85, onComplete: () => {
-                  TweenMax.to('#wa-send-btn', 0.15, {
-                    scale: 1, onComplete: () => {
-                      input.value = '';
-                      input.placeholder = 'Message';
-                      TweenMax.to('.wa-bubble', 0.45, {
-                        opacity: 1, y: 0,
-                        ease: Back.easeOut.config(1.4),
-                        onComplete: () => { setTimeout(() => tl.resume(), 1800); }
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          }, 38);
-        })
-        .to('.four', 0.5, { scale: 0.2, opacity: 0, y: -150 })
-
-        // --- FIVE ideas ---
-        .from('.idea-1', 0.7, ideaIn)
-        .to('.idea-1', 0.7, ideaOut, '+=1.5')
-        .from('.idea-2', 0.7, ideaIn)
-        .to('.idea-2', 0.7, ideaOut, '+=1.5')
-        .from('.idea-3', 0.7, ideaIn)
-        .to('.idea-3 strong', 0.5, { scale: 1.2, x: 10, backgroundColor: 'rgb(21,161,237)', color: '#fff' })
-        .to('.idea-3', 0.7, ideaOut, '+=1.5')
-        .from('.idea-4', 0.7, ideaIn)
-        .to('.idea-4', 0.7, ideaOut, '+=1.5')
-        .from('.idea-5', 0.7, { rotationX: 15, rotationZ: -10, skewY: '-5deg', y: 50, z: 10, opacity: 0 }, '+=0.5')
-        .to('.idea-5 .smiley', 0.7, { rotation: 90, x: 8 }, '+=0.4')
-        .to('.idea-5', 0.7, { scale: 0.2, opacity: 0 }, '+=2')
-        .staggerFrom('.idea-6 span', 0.8, { scale: 3, opacity: 0, rotation: 15,  ease: Expo.easeOut }, 0.2)
-        .staggerTo('.idea-6 span',   0.8, { scale: 3, opacity: 0, rotation: -15, ease: Expo.easeOut }, 0.2, '+=1')
-
-        // --- SIX: balloons + polaroid board ---
-        .staggerFromTo('.baloons img', 2.5, { opacity: 0.9, y: 1400 }, { opacity: 1, y: -1000 }, 0.2)
-
-        // Board animates in as a whole unit
-        .from('#polaroid-board', 0.7, { scale: 0.4, opacity: 0, y: 40, ease: Back.easeOut.config(1.2) }, '-=2')
-
-        // Hat flies in
-        .from('.hat', 0.5, { x: -100, y: 350, rotation: -180, opacity: 0 })
-
-        // Wish heading letter-by-letter
-        .staggerFrom('.wish-hbd span', 0.7,
-          { opacity: 0, y: -50, rotation: 150, skewX: '30deg', ease: Elastic.easeOut.config(1, 0.5) }, 0.1)
-        .staggerFromTo('.wish-hbd span', 0.7,
-          { scale: 1.4, rotationY: 150 },
-          { scale: 1, rotationY: 0, color: 'var(--primary)', ease: Expo.easeOut }, 0.1, 'party')
-        .from('.wish h5', 0.5, { opacity: 0, y: 10, skewX: '-15deg' }, 'party')
-
-        .add(() => {
-          startConfetti();
-          document.getElementById('open-wishes-btn').style.display = 'inline-block';
-          TweenMax.from('#open-wishes-btn', 0.5, { opacity: 0, y: 20, scale: 0.8 });
-        }, 'party')
-
-        // fireworks circles
-        .staggerTo('.eight svg', 1.5, { visibility: 'visible', opacity: 0, scale: 80, repeat: 3, repeatDelay: 1.4 }, 0.3)
-
-        .to('.six', 0.5, { opacity: 0, y: 30, zIndex: '-1' })
-
-        // --- OUTRO ---
-        .staggerFrom('.nine p', 1, ideaIn, 1.2)
-        .to('.last-smile', 0.5, { rotation: 90 }, '+=1');
-
-      document.getElementById('replay').addEventListener('click', () => {
-        document.getElementById('open-wishes-btn').style.display = 'none';
-        tl.restart();
+      row.addEventListener('click', () => {
+        if (slip.classList.contains('show')) return;
+        showNext();
       });
-    };
+      slip.querySelector('.rmw-next').addEventListener('click', e => { e.stopPropagation(); showNext(); });
+      slip.querySelector('.rmw-close-cat').addEventListener('click', e => { e.stopPropagation(); slip.classList.remove('show'); });
 
-    fetchData();
-
-    /* ============================================================
-       LIVE UPDATE FROM EDITOR
-       ============================================================ */
-    window.addEventListener('message', (e) => {
-      if (!e.data || e.data.type !== 'WW_UPDATE') return;
-      const { data, style } = e.data;
-
-      if (style) {
-        const root = document.documentElement;
-        if (style.primaryColor) root.style.setProperty('--primary', style.primaryColor);
-        if (style.accentColor)  root.style.setProperty('--accent',  style.accentColor);
-        if (style.fontFamily)   root.style.setProperty('--font', `'${style.fontFamily}', sans-serif`);
-        const scale = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
-        root.style.setProperty('--fs-scale', scale);
-        document.body.style.fontFamily = `'${style.fontFamily}', sans-serif`;
-      }
-
-      if (data) {
-        Object.keys(data).forEach(key => {
-          const val = data[key];
-          if (!val) return;
-          if (key === 'imagePath') {
-            document.querySelector('[data-node-name="imagePath"]')?.setAttribute('src', val);
-          } else if (key === 'albumArt') {
-            const pillCover = document.getElementById('pill-cover');
-            if (pillCover) {
-              if (!pillCover.querySelector('img')) {
-                pillCover.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = val;
-                pillCover.appendChild(img);
-              } else {
-                pillCover.querySelector('img').src = val;
-              }
-            }
-          } else if (key === 'musicSrc') {
-            if (audio && val !== audio.src) audio.src = val;
-          } else if (key === 'photo1') {
-            injectPhoto('1', val);
-          } else if (key === 'photo2') {
-            injectPhoto('2', val);
-          } else {
-            const el = document.querySelector(`[data-node-name="${key}"]`);
-            if (el) el.innerText = val;
-          }
-        });
-      }
+      box.appendChild(row);
+      box.appendChild(slip);
     });
+  }
 
-  </script>
+  /* ═══════════════════════════════════
+     DESIGN 3 — SCROLL (parchemins)
+  ═══════════════════════════════════ */
+  function buildScroll(inner) {
+    inner.innerHTML = `
+      <svg viewBox="0 0 110 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:115px;margin:0 auto 6px;display:block">
+        <path d="M30 30 Q22 40 20 52 L18 115 Q18 124 28 124 L82 124 Q92 124 90 115 L88 52 Q86 40 78 30 Z" fill="#fdf6e3" stroke="#d4a843" stroke-width="1.5"/>
+        <ellipse cx="54" cy="30" rx="14" ry="6" fill="#e8c060" stroke="#d4a843" stroke-width="1"/>
+        <rect x="18" y="70" width="72" height="3" fill="#d4a843" opacity=".4"/>
+        <rect x="42" y="10" width="9" height="26" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1" transform="rotate(-12 46 23)"/>
+        <rect x="50" y="6"  width="9" height="30" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1"/>
+        <rect x="58" y="10" width="9" height="24" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1" transform="rotate(10 62 22)"/>
+        <rect x="33" y="13" width="8" height="22" rx="3.5" fill="#f5e6c8" stroke="#d4a843" stroke-width="1" transform="rotate(-20 37 24)"/>
+      </svg>
+      <div id="jar-title" style="font-family:'Cormorant Garamond',Georgia,serif;color:#8B6914">Vase des parchemins ✦</div>
+      <div id="jar-sub">Déplie un rouleau et lis ton message</div>
+      <div id="jar-dots"></div>
+      <div id="jar-slip" style="background:#fdf6e3;color:#7a5c14;border:1px solid #e8c060;font-style:italic"></div>
+      <div id="jar-empty">🌿 Tous les parchemins ont été lus !<br><button id="jar-refill" style="color:#d4a843">Replacer les parchemins</button></div>
+      <div id="jar-acts">
+        <button id="jar-pick" style="background:linear-gradient(135deg,#d4a843,#e8c060);box-shadow:0 6px 20px rgba(212,168,67,.35)">📜 Déplie un rouleau</button>
+      </div>`;
+    drawn = [];
+    renderDots();
+    inner.querySelector('#jar-pick').addEventListener('click', pick);
+    inner.querySelector('#jar-refill').addEventListener('click', () => {
+      drawn = []; renderDots();
+      inner.querySelector('#jar-empty').style.display = 'none';
+      inner.querySelector('#jar-slip').classList.remove('show');
+      inner.querySelector('#jar-pick').disabled = false;
+    });
+  }
+
+  /* ─── Shared pick / dots (classic & scroll) ─── */
+  function renderDots() {
+    const el = ov.querySelector('#jar-dots');
+    if (!el) return;
+    el.innerHTML = '';
+    words.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'jdot' + (i < drawn.length ? ' hit' : '');
+      el.appendChild(d);
+    });
+  }
+
+  function pick() {
+    const avail = words.filter(w => !drawn.includes(w));
+    if (!avail.length) { ov.querySelector('#jar-empty').style.display = 'block'; return; }
+    const slip = ov.querySelector('#jar-slip');
+    const doShow = () => {
+      const w = avail[Math.floor(Math.random() * avail.length)];
+      drawn.push(w);
+      const c = SLIP_COLORS[(drawn.length - 1) % SLIP_COLORS.length];
+      if (design === 'scroll') {
+        slip.textContent = w;
+      } else {
+        slip.style.background = c.bg; slip.style.color = c.text;
+        slip.textContent = w;
+      }
+      slip.style.transform = `rotate(${(Math.random() - .5) * 3}deg)`;
+      slip.classList.add('show'); renderDots();
+      if (drawn.length === words.length) setTimeout(() => {
+        const pickBtn = ov.querySelector('#jar-pick');
+        if (pickBtn) pickBtn.disabled = true;
+        ov.querySelector('#jar-empty').style.display = 'block';
+      }, 500);
+    };
+    if (slip && slip.classList.contains('show')) {
+      slip.classList.add('exit');
+      setTimeout(() => { slip.classList.remove('exit', 'show'); doShow(); }, 270);
+    } else { doShow(); }
+  }
+
+  function shakeJar() {
+    const el = ov.querySelector('#jar-svg-wrap');
+    if (!el) return;
+    el.classList.remove('shaking'); void el.offsetWidth;
+    el.classList.add('shaking');
+    el.addEventListener('animationend', () => el.classList.remove('shaking'), { once: true });
+  }
+
+  /* ─── Open / Close ─── */
+  function openJar() { ov.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(shakeJar, 350); }
+  function closeJar() { ov.classList.remove('open'); document.body.style.overflow = ''; }
+
+  /* ─── Init ─── */
+  window._jarInit = function() {
+    const cfg = (window.__WW_DATA__ || {}).jarConfig || {};
+    design = cfg.design || 'classic';
+    // Words for classic/scroll
+    words = Array.isArray(cfg.words) && cfg.words.length ? cfg.words : DEF_CLASSIC;
+    // Categories for readmewhen
+    cats  = Array.isArray(cfg.categories) && cfg.categories.length ? cfg.categories : DEF_CATS;
+    drawn = [];
+    // Update button label by design
+    btn.innerHTML = design === 'readmewhen' ? '💌 Lis-moi quand…' : design === 'scroll' ? '📜 Vase des parchemins' : '🫙 Jar of Words';
+    buildInner();
+  };
+
+  window._showJar = function() { btn.style.display = 'inline-flex'; };
+
+})();
+</script>
 </body>
 </html>

@@ -50,12 +50,21 @@
     .two { font-size: clamp(1rem, 3vw, 1.2rem); font-weight: 300; }
 
     /* ===== MUSIC INTERLUDE ===== */
-    .music-interlude {
+    /* .music-interlude {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       top: 0; height: 100vh;
       background: linear-gradient(160deg, #fff0f6 0%, #fff8ec 60%, #ffeef8 100%);
       color: #333;
+    } */
+    .music-interlude {
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+      /* Retrait du height: 100vh si tu ne veux pas que la div prenne toute la page */
+      padding: 40px 0; 
+      background: transparent; /* Ou background: #ffffff; */
     }
     .iphone-player {
       background: #fff; border: 1.5px solid rgba(255,105,180,0.18);
