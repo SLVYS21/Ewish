@@ -275,62 +275,140 @@
       window.__WW_DECO__ = decorations;
       applyDecorations(decorations);
     }
+    if (event.data.widgets !== undefined) {
+      window.__WW_WIDGETS__ = event.data.widgets;
+      applyWidgets(event.data.widgets);
+    }
   }
 
-  /* ─── Editor preview mode ──────────────────────────────────────── */
-  // When running inside the editor iframe, GSAP animations make sections
-  // invisible (opacity:0). We inject a style override to make all sections
-  // visible so backgrounds and decorations can be previewed.
-  var _editorModeActive = false;
-  function enterEditorPreviewMode() {
-    if (_editorModeActive) return;
-    // Only activate when inside an iframe (editor context)
-    if (window.self === window.top) return;
-    _editorModeActive = true;
 
-    // Pause any GSAP timeline running on the page
-    if (window.TweenMax) { try { TweenMax.pauseAll(true, true); } catch(e){} }
-    if (window.TimelineMax) {
-      try {
-        // Find all tweens and pause them
-        var tweens = TweenMax.getAllTweens ? TweenMax.getAllTweens() : [];
-        tweens.forEach(function(t){ try{ t.pause(); }catch(e){} });
-      } catch(e) {}
-    }
+  /* ─── Widget rendering engine ───────────────────────────────────── */
+  function formatDuration(fromDate, unit) {
+    const from = new Date(fromDate);
+    const now   = new Date();
+    const ms    = now - from;
+    if (isNaN(ms) || ms < 0) return '—';
 
-    // Inject CSS that makes all sections fully visible regardless of GSAP inline styles
-    if (!document.getElementById('ww-editor-mode')) {
-      var st = document.createElement('style');
-      st.id = 'ww-editor-mode';
-      st.textContent = [
-        '.container { visibility: visible !important; }',
-        '.container > div {',
-        '  opacity: 1 !important;',
-        '  transform: none !important;',
-        '  visibility: visible !important;',
-        '  pointer-events: all !important;',
-        '}',
-        // Stack sections vertically so all are visible, not overlapping
-        '.container {',
-        '  height: auto !important;',
-        '  overflow: visible !important;',
-        '  position: relative !important;',
-        '}',
-        '.container > div {',
-        '  position: relative !important;',
-        '  top: auto !important;',
-        '  left: auto !important;',
-        '  right: auto !important;',
-        '  height: 100vh !important;',
-        '  width: 100% !important;',
-        '  display: flex !important;',
-        '  align-items: center !important;',
-        '  justify-content: center !important;',
-        '  border-bottom: 1px solid rgba(0,0,0,0.06) !important;',
-        '}',
-      ].join('\n');
-      document.head.appendChild(st);
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours   = Math.floor(minutes / 60);
+    const days    = Math.floor(hours / 24);
+    const months  = Math.floor(days / 30.44);
+    const years   = Math.floor(days / 365.25);
+
+    if (unit === 'hours') return hours.toLocaleString('fr-FR') + ' heures';
+    if (unit === 'days')  return days.toLocaleString('fr-FR') + ' jours';
+    if (unit === 'months') return months + ' mois';
+    if (unit === 'years') return years + ' ans';
+    // auto: pick best unit
+    if (years  >= 1) return years  + (years  === 1 ? ' an'   : ' ans');
+    if (months >= 1) return months + ' mois';
+    if (days   >= 1) return days   + (days   === 1 ? ' jour' : ' jours');
+    return hours + ' heures';
+  }
+
+  function buildWidgetEl(w) {
+    const wrap = document.createElement('div');
+    wrap.className = 'ww-widget ww-widget-' + w.type;
+    wrap.dataset.widgetId = w.id;
+
+    if (w.type === 'countdown' || w.type === 'memories') {
+      const value = formatDuration(w.date, w.unit || 'auto');
+      wrap.innerHTML = `
+        <div class="ww-widget-inner">
+          <div class="ww-widget-label">${w.label || ''}</div>
+          <div class="ww-widget-value" data-ww-countdown="${w.id}">${value}</div>
+        </div>`;
+      // Live tick every minute
+      var ticker = setInterval(function() {
+        var el = document.querySelector('[data-ww-countdown="' + w.id + '"]');
+        if (!el) { clearInterval(ticker); return; }
+        el.textContent = formatDuration(w.date, w.unit || 'auto');
+      }, 60000);
+
+    } else if (w.type === 'age') {
+      const from = new Date(w.date);
+      const now  = new Date();
+      let years  = now.getFullYear() - from.getFullYear();
+      let months = now.getMonth()    - from.getMonth();
+      let days   = now.getDate()     - from.getDate();
+      if (days   < 0) { months--; days   += 30; }
+      if (months < 0) { years--;  months += 12; }
+      wrap.innerHTML = `
+        <div class="ww-widget-inner">
+          <div class="ww-widget-label">${w.label || 'Âge'}</div>
+          <div class="ww-widget-age">
+            <span class="ww-widget-age-num">${years}</span><span class="ww-widget-age-unit"> ans</span>
+            <span class="ww-widget-age-sub">${months} mois et ${days} jours</span>
+          </div>
+        </div>`;
+
+    } else if (w.type === 'quote') {
+      wrap.innerHTML = `
+        <div class="ww-widget-inner ww-widget-quote-inner">
+          <div class="ww-widget-quote-mark">"</div>
+          <div class="ww-widget-quote-text">${w.text || ''}</div>
+          ${w.author ? '<div class="ww-widget-quote-author">— ' + w.author + '</div>' : ''}
+        </div>`;
     }
+    return wrap;
+  }
+
+  function injectWidgetStyles() {
+    if (document.getElementById('ww-widget-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'ww-widget-styles';
+    st.textContent = `
+      .ww-widgets-zone {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        display: flex; flex-wrap: wrap; justify-content: center;
+        gap: 10px; padding: 16px;
+        z-index: 20; pointer-events: none;
+      }
+      .ww-widget {
+        background: rgba(255,255,255,0.88);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 10px 18px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        min-width: 120px; text-align: center;
+        animation: ww-fadein 0.5s both;
+      }
+      .ww-widget-inner { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .ww-widget-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; color: #888; font-weight: 600; }
+      .ww-widget-value { font-size: 1.6rem; font-weight: 800; color: var(--primary, #ff69b4); line-height: 1.1; }
+      .ww-widget-age   { display: flex; flex-direction: column; align-items: center; }
+      .ww-widget-age-num  { font-size: 2rem; font-weight: 900; color: var(--primary, #ff69b4); line-height: 1; }
+      .ww-widget-age-unit { font-size: 0.9rem; font-weight: 600; color: #666; }
+      .ww-widget-age-sub  { font-size: 0.65rem; color: #aaa; margin-top: 2px; }
+      .ww-widget-quote-inner { max-width: 200px; }
+      .ww-widget-quote-mark { font-size: 2.5rem; line-height: 0.6; color: var(--primary, #ff69b4); font-family: Georgia, serif; opacity: 0.5; }
+      .ww-widget-quote-text { font-size: 0.78rem; font-style: italic; color: #333; line-height: 1.4; }
+      .ww-widget-quote-author { font-size: 0.65rem; color: #999; margin-top: 4px; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function applyWidgets(widgets) {
+    injectWidgetStyles();
+    // Remove existing
+    document.querySelectorAll('.ww-widgets-zone').forEach(el => el.remove());
+    if (!widgets || !widgets.length) return;
+
+    // Find the celebration section to attach widgets to
+    var container = document.querySelector('[data-section="celebration"]')
+      || document.querySelector('.six')
+      || document.body;
+
+    var zone = document.createElement('div');
+    zone.className = 'ww-widgets-zone';
+    widgets.forEach(function(w) { zone.appendChild(buildWidgetEl(w)); });
+
+    // Ensure container is relatively positioned
+    var pos = window.getComputedStyle(container).position;
+    if (pos === 'static') container.style.position = 'relative';
+    container.appendChild(zone);
   }
 
   /* ─── Bootstrap ─────────────────────────────────────────────────── */
@@ -355,9 +433,9 @@
         // If there are any backgrounds or section-specific decos, enter editor preview mode
         var hasSectionContent = Object.keys(bgs).some(function(k){ return bgs[k] && bgs[k].value; })
           || decos.some(function(d){ return d.section && d.section !== 'global'; });
-        if (hasSectionContent) enterEditorPreviewMode();
         applyBackgrounds(style);
         applyDecorations(decos);
+        applyWidgets(window.__WW_WIDGETS__ || []);
       },
       // applyLiveUpdate: called with the WW_UPDATE payload directly (templates do: applyLiveUpdate(e.data))
       // Payload shape: { type, data:{...pubFields}, style:{primaryColor,...,backgrounds:{...}}, decorations:[] }
@@ -368,16 +446,16 @@
           window.__WW_STYLE__ = window.__WW_STYLE__ || {};
           window.__WW_STYLE__.backgrounds = { ...(window.__WW_STYLE__.backgrounds || {}), ...style.backgrounds };
           // In editor (iframe) context: make all sections visible so bg preview works
-          enterEditorPreviewMode();
           applyBackgrounds({ backgrounds: style.backgrounds });
         }
         if (decorations !== undefined) {
           window.__WW_DECO__ = decorations;
           // In editor context: ensure sections are visible for deco preview
-          if (decorations.some(d => d.section && d.section !== 'global')) {
-            enterEditorPreviewMode();
-          }
           applyDecorations(decorations);
+        }
+        if (payload.widgets !== undefined) {
+          window.__WW_WIDGETS__ = payload.widgets;
+          applyWidgets(payload.widgets);
         }
       },
       applyBackgrounds,

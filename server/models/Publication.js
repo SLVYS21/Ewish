@@ -80,6 +80,12 @@ const publicationSchema = new mongoose.Schema({
     },
   },
 
+  // Widgets (countdown, age, quote, memories)
+  widgets: { type: [mongoose.Schema.Types.Mixed], default: [] },
+
+  // Per-photo position/rotation/scale transforms
+  photoTransforms: { type: mongoose.Schema.Types.Mixed, default: {} },
+
   // Free-form decoration elements
   decorations: [decorationSchema],
 

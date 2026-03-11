@@ -144,43 +144,17 @@
       display: flex; justify-content: center; align-items: flex-end;
       gap: 16px; margin-bottom: 16px;
     }
-    /* Pro film frames — darker, more editorial */
-    .film-frame {
-      position: relative; background: #0a0a0a; flex-shrink: 0;
-      border-radius: 3px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-      border: 1px solid #222;
-    }
-    .film-frame::before, .film-frame::after {
-      content: '';
-      position: absolute; left: 3px; right: 3px; height: 10px;
-      background-image: repeating-linear-gradient(
-        90deg, transparent 0px, transparent 2px,
-        rgba(255,255,255,0.15) 2px, rgba(255,255,255,0.15) 4px,
-        #111 4px, #111 8px,
-        rgba(255,255,255,0.15) 8px, rgba(255,255,255,0.15) 10px,
-        #111 10px, #111 13px
-      );
-    }
-    .film-frame::before { top: 1px; }
-    .film-frame::after  { bottom: 1px; }
-    .film-inner {
-      overflow: hidden; background: #111;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem;
-    }
-    .film-inner img { width: 100%; height: 100%; object-fit: cover; display: block; filter: contrast(1.05) saturate(0.9); }
-    .film-num {
-      position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-      font-family: 'Courier New', monospace; font-size: 0.5rem;
-      color: #888; letter-spacing: 3px; white-space: nowrap;
-    }
+    
+    
+    
+    
+    
+    
+    
+    
 
     .six .lydia-dp {
-      display: inline-block; width: 140px; height: 140px; object-fit: cover;
-      border-radius: 50%;
-      border: 3px solid var(--gold);
-      box-shadow: 0 0 0 6px rgba(201,168,76,0.15), 0 12px 40px rgba(0,0,0,0.3);
+      display: inline-block; max-width: 100%; height: auto; object-fit: contain;
     }
     .wish { margin-top: 16px; }
     .wish-hbd {
@@ -289,6 +263,25 @@
       .wish-hbd { font-size: 2em; }
       .ws-card { padding: 22px 18px; }
     }
+
+    /* ── Bouton revoir vœux depuis l'outro ── */
+    #revoir-outro-btn {
+      display: none;
+      margin-top: 24px;
+      background: none;
+      border: 2px solid var(--gold); color: var(--gold);
+      border-radius: 99px;
+      padding: 12px 32px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.2s, transform 0.2s;
+      animation: rbpulse 2.5s ease-in-out infinite;
+    }
+    #revoir-outro-btn:hover { opacity: 1; transform: translateY(-2px) scale(1.04); animation: none; }
+
   </style>
 </head>
 <body>
@@ -361,15 +354,9 @@
   <!-- 5. CELEBRATION -->
   <div class="six">
     <div class="photo-grid" id="photo-grid">
-      <div class="film-frame" style="width:108px; height:135px; transform:rotate(-5deg); margin-bottom:22px">
-        <div class="film-inner" style="width:100%;height:100%" data-photo="1">📷</div>
-        <span class="film-num">◼ 01 ◼</span>
-      </div>
+      <div data-photo="1" style="margin-bottom:22px; display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">📷</div>
       <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath">
-      <div class="film-frame" style="width:108px; height:128px; transform:rotate(4deg); margin-bottom:22px">
-        <div class="film-inner" style="width:100%;height:100%" data-photo="2">🏆</div>
-        <span class="film-num">◼ 02 ◼</span>
-      </div>
+      <div data-photo="2" style="margin-bottom:22px; display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">🏆</div>
     </div>
     <div class="wish">
       <h3 class="wish-hbd" data-node-name="wishHeading">Joyeux Anniversaire</h3>
@@ -421,6 +408,7 @@
   <div class="nine">
     <p data-node-name="outroText">Nous espérons que ce moment vous a touché.</p>
     <p id="replay" data-node-name="replayText">↺ Revoir</p>
+    <button id="revoir-outro-btn" onclick="reviwerWishes()">💌 Revoir les vœux</button>
     <p class="last-smile" data-node-name="outroSmiley">✦</p>
   </div>
 
@@ -555,6 +543,7 @@ const fetchData=()=>{
     const pubId = window.__WW_META__?.id || window.__WW_META__?._id ||'';
     await loadWishes(pubId);
     animationTimeline();
+    if(window.__WW_PHOTO_TRANSFORMS__ && Object.keys(window.__WW_PHOTO_TRANSFORMS__).length) applyPhotoTransforms(window.__WW_PHOTO_TRANSFORMS__);
   };
   if(window.__WW_DATA__) run(window.__WW_DATA__);
   else fetch('customize.json').then(r=>r.json()).then(run).catch(()=>{loadWishes('');animationTimeline();});
@@ -609,16 +598,53 @@ const animationTimeline=()=>{
 
     .from('.wishes-section',0.8,{opacity:0,y:40})
     .to('.wishes-section',0.8,{opacity:0,y:-40},'+=5')
+    .add(() => { document.getElementById('revoir-btn').style.display = 'flex'; })
 
     .staggerFrom('.nine p',1,ideaIn,1.2)
+    .add(() => { document.getElementById('revoir-outro-btn').style.display = 'inline-block'; })
     .to('.last-smile',0.5,{rotation:90},'+=1');
 
   document.getElementById('replay').addEventListener('click',()=>tl.restart());
 };
 
+
+  function reviwerWishes() {
+    const ws = document.getElementById('wishes-section');
+    if (!ws) return;
+    // Make visible and scroll/animate to it
+    TweenMax.to(ws, 0.5, { opacity: 1, y: 0, display: 'flex', ease: Power2.easeOut });
+    ws.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('revoir-btn').style.display = 'none';
+    // After a delay, re-hide it and show btn again
+    setTimeout(() => {
+      TweenMax.to(ws, 0.5, { opacity: 0, y: -40, onComplete: () => {
+        document.getElementById('revoir-btn').style.display = 'flex';
+      }});
+    }, 5000);
+  }
+
 fetchData();
 
 /* ===== LIVE PREVIEW ===== */
+
+  /* ─── Photo position/transform engine ─────────────────── */
+  function applyPhotoTransforms(transforms) {
+    if (!transforms) return;
+    const mapping = {
+      photo1: '[data-photo="1"]',
+      photo2: '[data-node-name="imagePath"]',
+      photo3: '[data-photo="2"]',
+    };
+    Object.keys(transforms).forEach(function(key) {
+      const t = transforms[key];
+      const el = document.querySelector(mapping[key]);
+      if (!el) return;
+      el.style.transform = 'translateX(' + (t.x||0) + 'px) translateY(' + (t.y||0) + 'px) rotate(' + (t.rotation||0) + 'deg) scale(' + (t.scale||1) + ')';
+      el.style.zIndex = t.zIndex || 1;
+      el.style.position = 'relative';
+    });
+  }
+
 window.addEventListener('message',(e)=>{
   if(!e.data||e.data.type!=='WW_UPDATE') return;
   const{data,style}=e.data;
@@ -628,8 +654,14 @@ window.addEventListener('message',(e)=>{
     if(style.accentColor)  r.style.setProperty('--accent',style.accentColor);
     if(style.fontFamily){r.style.setProperty('--font',`'${style.fontFamily}', sans-serif`);document.body.style.fontFamily=`'${style.fontFamily}', sans-serif`;}
   }
-  if(data) Object.keys(data).forEach(k=>applyField(k,data[k]));
+  if(data){
+    const{photoTransforms:_pt,..._df}=data;
+    if(_pt) applyPhotoTransforms(_pt);
+    Object.keys(_df).forEach(k=>applyField(k,_df[k]));
+  }
 });
 </script>
+
+<button id="revoir-btn" onclick="reviwerWishes()">💌 Revoir les vœux</button>
 </body>
 </html>

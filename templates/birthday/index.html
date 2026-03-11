@@ -203,24 +203,21 @@
     /* ===== BIRTHDAY CELEBRATION ===== */
     .six { position: relative; }
     .six .lydia-dp {
-      display: inline-block; max-width: 100%; height: auto;
-      border-radius: 50%; border: 4px solid var(--primary);
-      box-shadow: 0 0 0 8px rgba(255,105,180,0.2);
+      display: inline-block; max-width: 100%; height: auto; object-fit: contain;
     }
     .six .photo-grid {
       display: flex; justify-content: center;
       align-items: flex-end; gap: 12px; margin-bottom: 10px;
     }
     .six .photo-grid img, .six .photo-grid .photo-placeholder {
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      /* no forced frame */
     }
     .six .photo-grid img:first-child,
-    .six .photo-grid .photo-placeholder:first-child { width: 120px; height: 140px; transform: rotate(-6deg); }
+    .six .photo-grid .photo-placeholder:first-child { width: 120px; height: 140px;  }
     .six .photo-grid img:nth-child(2),
     .six .photo-grid .photo-placeholder:nth-child(2) { width: 140px; height: 160px; }
     .six .photo-grid img:nth-child(3),
-    .six .photo-grid .photo-placeholder:nth-child(3) { width: 120px; height: 135px; transform: rotate(5deg); }
+    .six .photo-grid .photo-placeholder:nth-child(3) { width: 120px; height: 135px;  }
     .photo-placeholder {
       background: linear-gradient(135deg, #ffb3c6, var(--primary));
       display: flex; align-items: center; justify-content: center;
@@ -230,7 +227,7 @@
       position: absolute; width: 80px; top: -35px; left: 41.5%;
     }
     .wish { margin-top: 8px; }
-    .wish-hbd { font-size: 3em; margin: 0; text-transform: uppercase; }
+    .wish-hbd { font-size: 3em; margin: 0; text-transform: uppercase; color: var(--primary); display: inline-block;}
     .wish h5 { font-weight: 300; font-size: 2rem; margin: 10px 0 0; }
 
     /* ===== CONFETTI CANVAS ===== */
@@ -292,7 +289,7 @@
 
     /* Wishes buttons — fixed, completely outside GSAP's reach */
     #wishes-float {
-      position: fixed; bottom: 32px; left: 50%;
+      position: fixed; bottom: 120px; left: 50%;
       transform: translateX(-50%);
       z-index: 8500;
       display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -302,7 +299,7 @@
       pointer-events: all;
       background: linear-gradient(135deg, #f1d5e4, #ff6b9d);
       color: #fff; border: none; border-radius: 50px;
-      padding: 13px 30px; font-family: "Work Sans", sans-serif;
+      padding: 10px 30px; font-family: "Work Sans", sans-serif;
       font-size: 1rem; font-weight: 600; cursor: pointer;
       box-shadow: 0 8px 25px rgba(233,30,140,0.4);
       transition: transform 0.2s, box-shadow 0.2s;
@@ -617,17 +614,17 @@ const applyFieldBirthday = (key, val) => {
     if (placeholder) {
       const img = document.createElement('img');
       img.src = val;
-      img.style.cssText = 'width:200px;height:200px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 20px;box-shadow:0 12px 35px rgba(255,105,180,0.35);';
+      img.style.cssText = 'max-width:200px;height:auto;display:block;margin:0 auto 20px;';
       placeholder.replaceWith(img);
     }
     const pillCover = document.getElementById('pill-cover');
     if (pillCover) { pillCover.innerHTML = ''; const pimg = document.createElement('img'); pimg.src = val; pillCover.appendChild(pimg); }
   } else if (key === "photo1") {
     const el = document.querySelector('[data-photo="1"]');
-    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
   } else if (key === "photo2") {
     const el = document.querySelector('[data-photo="2"]');
-    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
   } else if (key === "waAvatar") {
     const el = document.querySelector('[data-node-name="waAvatar"]');
     if (el) el.textContent = val.charAt(0).toUpperCase();
@@ -643,7 +640,7 @@ const fetchData = () => {
     if (dataArr.length === 0) { animationTimeline(); return; }
     dataArr.forEach((key, i) => {
       if (data[key] !== "" && data[key] != null) applyFieldBirthday(key, data[key]);
-      if (i === dataArr.length - 1) animationTimeline();
+      if (i === dataArr.length - 1) { if(window.__WW_PHOTO_TRANSFORMS__ && Object.keys(window.__WW_PHOTO_TRANSFORMS__).length) applyPhotoTransforms(window.__WW_PHOTO_TRANSFORMS__); animationTimeline(); }
     });
   };
 
@@ -726,7 +723,7 @@ const animationTimeline = () => {
     .from(".photo-grid", 0.6, { scale: 0.4, opacity: 0, y: 30 }, "-=2")
     .from(".hat", 0.5, { x: -100, y: 350, rotation: -180, opacity: 0 })
     .staggerFrom(".wish-hbd span", 0.7, { opacity: 0, y: -50, rotation: 150, skewX: "30deg", ease: Elastic.easeOut.config(1, 0.5) }, 0.1)
-    .staggerFromTo(".wish-hbd span", 0.7, { scale: 1.4, rotationY: 150 }, { scale: 1, rotationY: 0, color: "var(--primary)", ease: Expo.easeOut }, 0.1, "party")
+    .staggerFromTo(".wish-hbd span", 0.7, { scale: 1.4, rotationY: 150 }, { scale: 1, rotationY: 0, ease: Expo.easeOut }, 0.1, "party")
     .from(".wish h5", 0.5, { opacity: 0, y: 10, skewX: "-15deg" }, "party")
     .add(() => {
       startConfetti();
@@ -738,7 +735,7 @@ const animationTimeline = () => {
 
     // fireworks circles
     .staggerTo(".eight svg", 1.5, { visibility: "visible", opacity: 0, scale: 80, repeat: 3, repeatDelay: 1.4 }, 0.3)
-
+    //.staggerFromTo(".wish-hbd span",
     .to(".six", 0.5, { opacity: 0, y: 30 })
     .add(() => {
       // Hide the "party" button, show jar trigger instead
@@ -765,6 +762,25 @@ const animationTimeline = () => {
 fetchData();
 
 // ── Live update from editor via postMessage ──
+
+  /* ─── Photo position/transform engine ─────────────────── */
+  function applyPhotoTransforms(transforms) {
+    if (!transforms) return;
+    var mapping = {
+      photo1: '[data-photo="1"]',
+      photo2: '[data-node-name="imagePath"]',
+      photo3: '[data-photo="2"]',
+    };
+    Object.keys(transforms).forEach(function(key) {
+      var t = transforms[key];
+      var el = document.querySelector(mapping[key]);
+      if (!el) return;
+      el.style.transform = 'translateX(' + (t.x||0) + 'px) translateY(' + (t.y||0) + 'px) rotate(' + (t.rotation||0) + 'deg) scale(' + (t.scale||1) + ')';
+      el.style.zIndex = t.zIndex || 1;
+      el.style.position = 'relative';
+    });
+  }
+
 window.addEventListener('message', (e) => {
   if (!e.data || e.data.type !== 'WW_UPDATE') return;
   const { data, style } = e.data;
@@ -783,8 +799,10 @@ window.addEventListener('message', (e) => {
 
   // Apply data fields
   if (data) {
-    Object.keys(data).forEach(key => {
-      const val = data[key];
+    const { photoTransforms: _pt, ...dataFields } = data;
+    if (_pt) applyPhotoTransforms(_pt);
+    Object.keys(dataFields).forEach(key => {
+      const val = dataFields[key];
       if (!val) return;
       if (key === 'imagePath') {
         document.querySelector('[data-node-name="imagePath"]')?.setAttribute('src', val);
@@ -805,10 +823,10 @@ window.addEventListener('message', (e) => {
         if (audio && val !== audio.src) { audio.src = val; }
       } else if (key === 'photo1') {
         const el = document.querySelector('[data-photo="1"]');
-        if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+        if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
       } else if (key === 'photo2') {
         const el = document.querySelector('[data-photo="2"]');
-        if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+        if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
       } else {
         const el = document.querySelector(`[data-node-name="${key}"]`);
         if (el) el.innerText = val;
@@ -1155,7 +1173,14 @@ window.addEventListener('message', (e) => {
   }
 
   /* ─── Open / Close ─── */
-  function openJar() { ov.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(shakeJar, 350); }
+  //function openJar() { ov.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(shakeJar, 350); }
+  function openJar() {
+    // Safety net: if _jarInit was never called (e.g. no server data), build content now
+    if (!ov.querySelector('#jar-inner').children.length) buildInner();
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(shakeJar, 350);
+  }
   function closeJar() { ov.classList.remove('open'); document.body.style.overflow = ''; }
 
   /* ─── Init ─── */

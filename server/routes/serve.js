@@ -69,10 +69,11 @@ ${bgCssLines.join('\n')}
   })};
 
   /* ── Decorations (read by ww-engine.js) ── */
-  window.__WW_DECO__ = ${JSON.stringify(pub.decorations || [])};
+  window.__WW_DECO__     = ${JSON.stringify(pub.decorations || [])};
+  window.__WW_WIDGETS__ = ${JSON.stringify(pub.widgets || [])};
+  window.__WW_PHOTO_TRANSFORMS__ = ${JSON.stringify(pub.photoTransforms || {})};
 <\/script>`;
-console.log(pub);
-
+  console.log(JSON.stringify(pub, null, 2));
     /* ── Inject engine script tag if not already present ───── */
     if (!html.includes('ww-engine.js')) {
       html = html.replace('</head>', '<script src="/templates/shared/ww-engine.js"><\/script>\n</head>');

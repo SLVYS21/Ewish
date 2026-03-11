@@ -246,21 +246,17 @@
     /* ===== BIRTHDAY CELEBRATION ===== */
     .six { position: relative; }
     .six .lydia-dp {
-      display: inline-block; max-width: 100%; height: auto;
-      border-radius: 50%; border: 4px solid var(--primary);
-      box-shadow: 0 0 0 8px rgba(255,105,180,0.2);
+      display: inline-block; max-width: 100%; height: auto; object-fit: contain;
     }
     .six .photo-grid {
       display: flex; justify-content: center; align-items: flex-end;
       gap: clamp(6px, 2vw, 12px); margin-bottom: 10px;
     }
-    .six .photo-grid img, .six .photo-grid .photo-placeholder {
-      border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    }
+    .six .photo-grid img, .six .photo-grid .photo-placeholder { /* natural — no forced frame */ }
     .six .photo-grid img:first-child,
     .six .photo-grid .photo-placeholder:first-child {
       width: clamp(80px, 18vw, 120px); height: clamp(95px, 21vw, 140px);
-      transform: rotate(-6deg);
+      
     }
     .six .photo-grid img:nth-child(2),
     .six .photo-grid .photo-placeholder:nth-child(2) {
@@ -269,7 +265,7 @@
     .six .photo-grid img:nth-child(3),
     .six .photo-grid .photo-placeholder:nth-child(3) {
       width: clamp(80px, 17vw, 120px); height: clamp(90px, 20vw, 135px);
-      transform: rotate(5deg);
+      
     }
     .photo-placeholder {
       background: linear-gradient(135deg, #ffb3c6, var(--primary));
@@ -278,7 +274,7 @@
     }
     .six .hat { position: absolute; width: clamp(50px, 10vw, 80px); top: -35px; left: 41.5%; }
     .wish { margin-top: 8px; }
-    .wish-hbd { font-size: clamp(2em, 6vw, 3em); margin: 0; text-transform: uppercase; }
+    .wish-hbd { font-size: clamp(2em, 6vw, 3em); margin: 0; text-transform: uppercase; color: var(--primary); display: inline-block;}
     .wish h5 { font-weight: 300; font-size: clamp(1.2rem, 4vw, 2rem); margin: 10px 0 0; }
 
     /* ===== CONFETTI ===== */
@@ -330,7 +326,7 @@
     /* ===== WISH BUTTONS ===== */
     /* ===== WISHES BUTTONS — fixed, outside GSAP reach ===== */
     #wishes-float {
-      position: fixed; bottom: 32px; left: 50%;
+      position: fixed; bottom: 120px; left: 50%;
       transform: translateX(-50%);
       z-index: 8500;
       display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -340,7 +336,7 @@
       pointer-events: all;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       color: #fff; border: none; border-radius: 50px;
-      padding: 13px 30px; font-family: var(--font);
+      padding: 10px 30px; font-family: var(--font);
       font-size: 1rem; font-weight: 600; cursor: pointer;
       box-shadow: 0 8px 25px rgba(255,105,180,.4);
       transition: transform .2s, box-shadow .2s;
@@ -349,6 +345,23 @@
     #wishes-float button:hover {
       transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,105,180,.55);
       animation: none;
+    }
+    /* Style spécifique pour centrer le bouton de l'outro au milieu de l'écran */
+/* Ce code force le bouton de l'outro à ignorer les autres et à se centrer */
+    #open-wishes-btn-outro {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      bottom: auto !important;
+      right: auto !important;
+      transform: translate(-50%, -50%) !important;
+      z-index: 10000 !important;
+      
+      /* Ajustement de la taille pour qu'il soit bien visible au centre */
+      padding: 15px 35px !important;
+      font-size: 1.1rem !important;
+      white-space: nowrap;
+      margin: 0 !important;
     }
     @keyframes wpulse {
       0%,100% { transform: scale(1); }
@@ -605,8 +618,8 @@
 
 <!-- ✅ Wishes buttons OUTSIDE .container — GSAP never touches them -->
 <div id="wishes-float">
-  <button id="open-wishes-btn"       onclick="openWishes()" style="display:none">💌 Voir mes vœux</button>
-  <button id="open-wishes-btn-outro" onclick="openWishes()" style="display:none">💌 Voir mes vœux</button>
+  <button id="open-wishes-btn"       onclick="openWishes()" style="display:none">Voir mes vœux</button>
+  <button id="open-wishes-btn-outro" onclick="openWishes()" style="display:none">Voir mes vœux</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
@@ -723,7 +736,7 @@ const fetchData = () => {
     if (dataArr.length === 0) { animationTimeline(); return; }
     dataArr.forEach((key, i) => {
       if (data[key] !== "" && data[key] != null) applyField(key, data[key]);
-      if (i === dataArr.length - 1) animationTimeline();
+      if (i === dataArr.length - 1) { if(window.__WW_PHOTO_TRANSFORMS__ && Object.keys(window.__WW_PHOTO_TRANSFORMS__).length) applyPhotoTransforms(window.__WW_PHOTO_TRANSFORMS__); animationTimeline(); }
     });
   };
 
@@ -748,7 +761,7 @@ function applyField(key, val) {
     if (ph) {
       const img = document.createElement('img');
       img.src = val;
-      img.style.cssText = 'width:200px;height:200px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 20px;box-shadow:0 12px 35px rgba(255,105,180,0.35);';
+      img.style.cssText = 'max-width:200px;height:auto;display:block;margin:0 auto 20px;';
       ph.replaceWith(img);
     }
     const pillCover = document.getElementById('pill-cover');
@@ -762,10 +775,10 @@ function applyField(key, val) {
     audio.src = val;
   } else if (key === 'photo1') {
     const el = document.querySelector('[data-photo="1"]');
-    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText = 'max-width:200px;height:auto;display:block;margin:0 auto 20px;'; el.appendChild(img); }
   } else if (key === 'photo2') {
     const el = document.querySelector('[data-photo="2"]');
-    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;'; el.appendChild(img); }
+    if (el) { el.innerHTML=''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText = 'max-width:200px;height:auto;display:block;margin:0 auto 20px;'; el.appendChild(img); }
   } else if (key === 'resultImage') {
     // Main result featured image
     const el = document.getElementById('g-featured-img');
@@ -860,7 +873,7 @@ const animationTimeline = () => {
     .from('.photo-grid', 0.6, { scale: 0.4, opacity: 0, y: 30 }, '-=2')
     .from('.hat', 0.5, { x: -100, y: 350, rotation: -180, opacity: 0 })
     .staggerFrom('.wish-hbd span', 0.7, { opacity: 0, y: -50, rotation: 150, skewX: '30deg', ease: Elastic.easeOut.config(1, 0.5) }, 0.1)
-    .staggerFromTo('.wish-hbd span', 0.7, { scale: 1.4, rotationY: 150 }, { scale: 1, rotationY: 0, color: 'var(--primary)', ease: Expo.easeOut }, 0.1, 'party')
+    .staggerFromTo(".wish-hbd span", 0.7, { scale: 1.4, rotationY: 150 }, { scale: 1, rotationY: 0, ease: Expo.easeOut }, 0.1, "party")
     .from('.wish h5', 0.5, { opacity: 0, y: 10, skewX: '-15deg' }, 'party')
     .add(() => {
       startConfetti();
@@ -877,13 +890,25 @@ const animationTimeline = () => {
     })
 
     // --- OUTRO ---
-    .staggerFrom('.nine p', 1, ideaIn, 1.2)
+    // .staggerFrom('.nine p', 1, ideaIn, 1.2)
+    // .add(() => {
+    //   const b2 = document.getElementById('open-wishes-btn-outro');
+    //   b2.style.display = 'inline-block';
+    //   b2.style.opacity = '1';
+    // })
+    // .to('.last-smile', 0.5, { rotation: 90 }, '+=1');
+
+    .staggerFrom(".nine p", 1, ideaIn, 1.2)
     .add(() => {
       const b2 = document.getElementById('open-wishes-btn-outro');
       b2.style.display = 'inline-block';
-      b2.style.opacity = '1';
+      // On utilise TweenMax pour une apparition fluide au milieu
+      TweenMax.fromTo(b2, 0.8, 
+        { opacity: 0, scale: 0.5 }, 
+        { opacity: 1, scale: 1, ease: Back.easeOut.config(1.7) }
+      );
     })
-    .to('.last-smile', 0.5, { rotation: 90 }, '+=1');
+    .to(".last-smile", 0.5, { rotation: 90 }, "+=1");
 
   document.getElementById('replay').addEventListener('click', () => {
     document.getElementById('open-wishes-btn').style.display = 'none';
@@ -903,6 +928,25 @@ fetchData();
 /* ============================================================
    LIVE PREVIEW postMessage
    ============================================================ */
+
+  /* ─── Photo position/transform engine ─────────────────── */
+  function applyPhotoTransforms(transforms) {
+    if (!transforms) return;
+    var mapping = {
+      photo1: '[data-photo="1"]',
+      photo2: '[data-node-name="imagePath"]',
+      photo3: '[data-photo="2"]',
+    };
+    Object.keys(transforms).forEach(function(key) {
+      var t = transforms[key];
+      var el = document.querySelector(mapping[key]);
+      if (!el) return;
+      el.style.transform = 'translateX(' + (t.x||0) + 'px) translateY(' + (t.y||0) + 'px) rotate(' + (t.rotation||0) + 'deg) scale(' + (t.scale||1) + ')';
+      el.style.zIndex = t.zIndex || 1;
+      el.style.position = 'relative';
+    });
+  }
+
 window.addEventListener('message', (e) => {
   if (!e.data || e.data.type !== 'WW_UPDATE') return;
   const { data, style } = e.data;
@@ -912,7 +956,7 @@ window.addEventListener('message', (e) => {
     if (style.accentColor)  root.style.setProperty('--accent', style.accentColor);
     if (style.fontFamily)   { root.style.setProperty('--font', `'${style.fontFamily}', sans-serif`); document.body.style.fontFamily = `'${style.fontFamily}', sans-serif`; }
   }
-  if (data) { Object.keys(data).forEach(k => applyField(k, data[k])); }
+  if (data) { const{photoTransforms:_pt,..._df}=data; if(_pt) applyPhotoTransforms(_pt); Object.keys(_df).forEach(k=>applyField(k,_df[k])); }
 });
 </script>
 <!-- JAR OF WORDS — 3 designs, inline -->

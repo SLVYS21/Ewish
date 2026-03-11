@@ -59,15 +59,28 @@
 }
 
 .tabs {
-  display: flex; border-bottom: 1px solid var(--border);
+  display: flex;
+  border-bottom: 1px solid var(--border);
   background: var(--surface2);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+  scroll-behavior: smooth;
+  /* fade hint on right edge when content overflows */
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
 }
+.tabs::-webkit-scrollbar { display: none; }   /* Chrome/Safari */
+
 .tab {
-  flex: 1; padding: 12px; border: none; background: none;
+  flex: 0 0 auto;              /* don't shrink — let it scroll */
+  padding: 12px; border: none; background: none;
   font-family: var(--font); font-size: 0.82rem; font-weight: 500;
   color: var(--text-2); cursor: pointer;
   border-bottom: 2px solid transparent; margin-bottom: -1px;
   transition: color var(--transition), border-color var(--transition);
+  white-space: nowrap;
 }
 .tab:hover { color: var(--text); }
 .tabActive { color: var(--brand-dark) !important; border-bottom-color: var(--brand) !important; background: var(--surface); }
@@ -135,3 +148,8 @@
   border-radius: 50%; animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Tab icon+label layout ─────────────────────────────────── */
+.tabIcon  { font-size: 1rem; display: block; text-align: center; }
+.tabLabel { font-size: 0.65rem; display: block; text-align: center; margin-top: 2px; }
+.tab      { flex-direction: column; padding: 8px 4px; min-width: 52px; }

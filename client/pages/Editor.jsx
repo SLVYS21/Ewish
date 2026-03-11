@@ -4,7 +4,9 @@ import { getPublications, updatePublication, publishPublication, uploadFile } fr
 import ContentTab     from '../components/ContentTab';
 import StyleTab       from '../components/StyleTab';
 import BackgroundTab  from '../components/BackgroundTab';
-import DecoTab from '../components/DecoTab';
+import DecoTab         from '../components/DecoTab';
+import WidgetTab       from '../components/WidgetTab';
+import PhotoLayoutTab  from '../components/PhotoLayoutTab';
 import JarTab         from '../components/JarTab';
 import WishesManager  from '../components/WishesManager';
 import styles from './Editor.module.css';
@@ -14,8 +16,10 @@ const TABS = [
   { key: 'content',     label: 'Contenu',         icon: '✏️' },
   { key: 'style',       label: 'Style',            icon: '🎨' },
   { key: 'background',  label: 'Fond',             icon: '🖼' },
-  { key: 'decorations', label: 'Décos',      icon: '🌸' },
+  { key: 'decorations', label: 'Décorations',      icon: '🌸' },
+  { key: 'photos',      label: 'Photos',           icon: '📐' },
   { key: 'jar',         label: 'Jar',              icon: '🫙',  templates: ['birthday', 'special'] },
+  { key: 'widgets',     label: 'Widgets',           icon: '🧩' },
   { key: 'wishes',      label: 'Vœux',             icon: '💌',  templatePrefix: 'collective' },
 ];
 
@@ -31,12 +35,15 @@ export default function Editor() {
   const [backgrounds, setBackgrounds] = useState({});   // style.backgrounds extracted
   const [decorations, setDecorations] = useState([]);
   const [jarConfig,   setJarConfig]   = useState(null);
+  const [widgets,     setWidgets]     = useState([]);
+  const [photoTransforms, setPhotoTransforms] = useState({});
   const [activeTab,   setActiveTab]   = useState('content');
   const [saveStatus,  setSaveStatus]  = useState('saved');
   const [publishing,  setPublishing]  = useState(false);
   const [publishedUrl, setPublishedUrl] = useState('');
 
   const iframeRef  = useRef(null);
+  const tabsBarRef = useRef(null);
   const saveTimer  = useRef(null);
 
   /* ── Load publication ───────────────────────────────────────── */
@@ -54,6 +61,8 @@ export default function Editor() {
         setBackgrounds(st.backgrounds || {});
         setDecorations(found.decorations || []);
         setJarConfig(found.jarConfig || null);
+        setWidgets(found.widgets || []);
+        setPhotoTransforms(found.photoTransforms || {});
         if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
 
         try {
@@ -66,7 +75,7 @@ export default function Editor() {
   }, [id]);
 
   /* ── Auto-save (debounced 1s) ───────────────────────────────── */
-  const autoSave = useCallback(async (newData, newStyle, newBgs, newDecos, newJar) => {
+  const autoSave = useCallback(async (newData, newStyle, newBgs, newDecos, newJar, newWidgets, newPhotoTransforms) => {
     clearTimeout(saveTimer.current);
     setSaveStatus('unsaved');
     saveTimer.current = setTimeout(async () => {
@@ -78,6 +87,8 @@ export default function Editor() {
           style:       fullStyle,
           decorations: newDecos,
           jarConfig:   newJar,
+          widgets:     newWidgets,
+          photoTransforms: newPhotoTransforms,
         });
         setSaveStatus('saved');
       } catch { setSaveStatus('unsaved'); }
@@ -85,21 +96,17 @@ export default function Editor() {
   }, [id]);
 
   /* ── Live iframe refresh ────────────────────────────────────── */
-  const refreshPreview = useCallback((d, st, bgs, decos) => {
+  const refreshPreview = useCallback((d, st, bgs, decos, wids, photoT) => {
     const iframe = iframeRef.current;
     if (!iframe?.contentWindow) return;
     try {
-      // Update data/style fields
+      // Single WW_UPDATE carries everything
       iframe.contentWindow.postMessage({
-        type:  'WW_UPDATE',
-        data:  d,
-        style: { ...st, backgrounds: bgs },
-      }, '*');
-      // Update decorations + backgrounds via engine
-      iframe.contentWindow.postMessage({
-        type:        'WW_DECO_UPDATE',
+        type:        'WW_UPDATE',
+        data:        { ...d, photoTransforms: photoT },
+        style:       { ...st, backgrounds: bgs },
         decorations: decos,
-        style:       { backgrounds: bgs },
+        widgets:     wids,
       }, '*');
     } catch {}
   }, []);
@@ -108,32 +115,44 @@ export default function Editor() {
   const handleDataChange = (key, value) => {
     const next = { ...data, [key]: value };
     setData(next);
-    autoSave(next, style, backgrounds, decorations, jarConfig);
-    refreshPreview(next, style, backgrounds, decorations);
+    autoSave(next, style, backgrounds, decorations, jarConfig, widgets);
+    refreshPreview(next, style, backgrounds, decorations, widgets);
   };
 
   const handleStyleChange = (key, value) => {
     const next = { ...style, [key]: value };
     setStyle(next);
-    autoSave(data, next, backgrounds, decorations, jarConfig);
-    refreshPreview(data, next, backgrounds, decorations);
+    autoSave(data, next, backgrounds, decorations, jarConfig, widgets);
+    refreshPreview(data, next, backgrounds, decorations, widgets);
   };
 
   const handleBackgroundsChange = (newBgs) => {
     setBackgrounds(newBgs);
-    autoSave(data, style, newBgs, decorations, jarConfig);
-    refreshPreview(data, style, newBgs, decorations);
+    autoSave(data, style, newBgs, decorations, jarConfig, widgets);
+    refreshPreview(data, style, newBgs, decorations, widgets);
   };
 
   const handleDecorationsChange = (newDecos) => {
     setDecorations(newDecos);
-    autoSave(data, style, backgrounds, newDecos, jarConfig);
-    refreshPreview(data, style, backgrounds, newDecos);
+    autoSave(data, style, backgrounds, newDecos, jarConfig, widgets);
+    refreshPreview(data, style, backgrounds, newDecos, widgets);
+  };
+
+  const handlePhotoTransformsChange = (newT) => {
+    setPhotoTransforms(newT);
+    autoSave(data, style, backgrounds, decorations, jarConfig, widgets, newT);
+    refreshPreview(data, style, backgrounds, decorations, widgets, newT);
+  };
+
+  const handleWidgetsChange = (newWids) => {
+    setWidgets(newWids);
+    autoSave(data, style, backgrounds, decorations, jarConfig, newWids);
+    refreshPreview(data, style, backgrounds, decorations, newWids);
   };
 
   const handleJarChange = (newJar) => {
     setJarConfig(newJar);
-    autoSave(data, style, backgrounds, decorations, newJar);
+    autoSave(data, style, backgrounds, decorations, newJar, widgets);
     const iframe = iframeRef.current;
     if (iframe?.contentWindow) {
       try { iframe.contentWindow.postMessage({ type: 'WW_UPDATE', data: { ...data, jarConfig: newJar }, style }, '*'); } catch {}
@@ -154,7 +173,7 @@ export default function Editor() {
     setPublishing(true);
     try {
       const fullStyle = { ...style, backgrounds };
-      await updatePublication(id, { data, style: fullStyle, decorations, jarConfig });
+      await updatePublication(id, { data, style: fullStyle, decorations, jarConfig, widgets });
       const r = await publishPublication(id);
       setPublishedUrl(r.data.url);
       setPub(p => ({ ...p, published: true }));
@@ -211,12 +230,25 @@ export default function Editor() {
         {/* ── Left Panel ── */}
         <aside className={styles.panel}>
           {/* Tabs */}
-          <div className={styles.tabs}>
+          <div className={styles.tabs} ref={tabsBarRef}>
             {visibleTabs.map(tab => (
               <button
                 key={tab.key}
+                data-tabkey={tab.key}
                 className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  const bar = tabsBarRef.current;
+                  const btn = bar?.querySelector(`[data-tabkey="${tab.key}"]`);
+                  if (bar && btn) {
+                    const btnLeft = btn.offsetLeft;
+                    const btnRight = btnLeft + btn.offsetWidth;
+                    const barWidth = bar.clientWidth;
+                    const scroll = bar.scrollLeft;
+                    if (btnLeft < scroll + 12) bar.scrollTo({ left: btnLeft - 12, behavior: 'smooth' });
+                    else if (btnRight > scroll + barWidth - 12) bar.scrollTo({ left: btnRight - barWidth + 12, behavior: 'smooth' });
+                  }
+                }}
                 title={tab.label}
               >
                 <span className={styles.tabIcon}>{tab.icon}</span>
@@ -252,6 +284,18 @@ export default function Editor() {
               <DecoTab
                 decorations={decorations}
                 onChange={handleDecorationsChange}
+              />
+            )}
+            {activeTab === 'photos' && (
+              <PhotoLayoutTab
+                transforms={photoTransforms}
+                onChange={handlePhotoTransformsChange}
+              />
+            )}
+            {activeTab === 'widgets' && (
+              <WidgetTab
+                widgets={widgets}
+                onChange={handleWidgetsChange}
               />
             )}
             {activeTab === 'jar' && (

@@ -5,7 +5,7 @@ const fieldSchema = new mongoose.Schema({
   label: String,
   type: { type: String, enum: ['text', 'textarea', 'image', 'url', 'color', 'select'] },
   placeholder: String,
-  options: [String],   // for select
+  options: [{type: mongoose.Schema.Types.Mixed}],   // for select
   section: String,     // Content section grouping e.g. "Intro", "Story", "Wishes"
   required: { type: Boolean, default: false },
   price: { type: Number, default: 0 },

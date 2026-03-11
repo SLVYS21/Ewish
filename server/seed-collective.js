@@ -30,7 +30,15 @@ const COMMON_COLLECTIVE_FIELDS = [
   { key: 'imagePath',   label: 'Photo principale',  type: 'url',  placeholder: 'https://…jpg', section: 'Célébration' },
   { key: 'photo1',      label: 'Photo pellicule 1', type: 'url',  placeholder: 'https://…jpg', section: 'Célébration' },
   { key: 'photo2',      label: 'Photo pellicule 2', type: 'url',  placeholder: 'https://…jpg', section: 'Célébration' },
-  { key: 'wishHeading', label: 'Titre principal',   type: 'text', placeholder: 'Joyeux Anniversaire !', section: 'Célébration', required: true },
+      { key: 'imageLayout',  label: 'Disposition photos', type: 'layout', section: 'Celebration',
+      options: [
+        { value: 'grid',      label: 'Grille',     icon: '▦' },
+        { value: 'stack',     label: 'Pile',       icon: '⧉' },
+        { value: 'spotlight', label: 'Focus',      icon: '◎' },
+        { value: 'row',       label: 'Rangée',     icon: '▬' },
+      ]
+    },
+    { key: 'wishHeading', label: 'Titre principal',   type: 'text', placeholder: 'Joyeux Anniversaire !', section: 'Célébration', required: true },
   { key: 'wishText',    label: 'Sous-titre',        type: 'text', placeholder: 'De toute la famille avec amour 💖', section: 'Célébration' },
   // Carousel vœux
   { key: 'carouselTitle', label: 'Titre du carousel', type: 'text', placeholder: "Ce qu'ils ont voulu te dire 💌", section: 'Vœux collectifs' },

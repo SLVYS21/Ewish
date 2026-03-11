@@ -1,0 +1,72 @@
+.root { display: flex; flex-direction: column; gap: 14px; }
+
+.section {}
+.sectionTitle {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: #999; margin-bottom: 8px;
+}
+
+/* Presets */
+.presetGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.presetBtn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 3px; background: #f5f5f7; border: 1.5px solid transparent;
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+}
+.presetBtn:hover { background: #eeeef2; border-color: #ddd; }
+.presetIcon  { font-size: 1.1rem; line-height: 1; }
+.presetLabel { font-size: 0.58rem; color: #666; font-weight: 600; }
+
+/* Preview canvas */
+.preview {
+  width: 100%; height: 130px;
+  background: linear-gradient(160deg, #f7f5fb 0%, #f0f0f4 100%);
+  border: 1.5px solid #e5e5ea;
+  border-radius: 12px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  user-select: none;
+  touch-action: none;
+}
+.previewItem {
+  width: 48px; height: 62px;
+  border-radius: 5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  position: absolute;
+  border: 2px solid transparent;
+  transition: border-color 0.1s, box-shadow 0.1s;
+  will-change: transform;
+}
+.previewItemActive {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.2);
+}
+.previewEmoji  { font-size: 1.15rem; line-height: 1; pointer-events: none; }
+.previewLabel  { font-size: 0.48rem; font-weight: 700; color: #555; pointer-events: none; }
+
+.hint { font-size: 0.62rem; color: #bbb; text-align: center; margin: 3px 0 0; }
+
+/* Photo tabs + reset */
+.photoHeader   { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.photoTabRow   { display: flex; gap: 4px; flex: 1; }
+.photoTab {
+  flex: 1; padding: 6px 3px; font-size: 0.65rem; font-weight: 600;
+  border: 1.5px solid #e5e5ea; border-radius: 7px;
+  background: #f5f5f7; cursor: pointer; transition: all 0.15s;
+}
+.photoTab:hover  { border-color: #ccc; }
+.photoTabActive  { background: #f0e6ff; border-color: #a855f7; color: #7c3aed; }
+.resetBtn {
+  padding: 6px 9px; background: none; border: 1.5px solid #e5e5ea;
+  border-radius: 7px; font-size: 0.85rem; color: #888; cursor: pointer;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.resetBtn:hover { border-color: #a855f7; color: #a855f7; }
+
+/* Sliders */
+.sliderRow    { margin-bottom: 8px; }
+.sliderHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.sliderLabel  { font-size: 0.7rem; color: #666; font-weight: 500; }
+.sliderValue  { font-size: 0.7rem; color: #a855f7; font-weight: 700; min-width: 42px; text-align: right; }
+.slider       { width: 100%; accent-color: #a855f7; height: 4px; cursor: pointer; }

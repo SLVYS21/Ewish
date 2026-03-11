@@ -80,6 +80,14 @@ const birthdayTemplate = {
     { key: 'imagePath',     label: 'Main Photo',       type: 'url',      placeholder: 'https://... .jpg', section: 'Celebration' },
     { key: 'photo1',        label: 'Side Photo Left',  type: 'url',      placeholder: 'https://... .jpg', section: 'Celebration' },
     { key: 'photo2',        label: 'Side Photo Right', type: 'url',      placeholder: 'https://... .jpg', section: 'Celebration' },
+        { key: 'imageLayout',  label: 'Disposition photos', type: 'layout', section: 'Celebration',
+      options: [
+        { value: 'grid',      label: 'Grille',     icon: '▦' },
+        { value: 'stack',     label: 'Pile',       icon: '⧉' },
+        { value: 'spotlight', label: 'Focus',      icon: '◎' },
+        { value: 'row',       label: 'Rangée',     icon: '▬' },
+      ]
+    },
     { key: 'wishHeading',   label: 'Wish Heading',     type: 'text',     placeholder: 'Happy Birthday!', section: 'Celebration', required: true },
     { key: 'wishText',      label: 'Wish Subtitle',    type: 'text',     placeholder: 'May all your dreams come true!', section: 'Celebration' },
 
@@ -107,4 +115,4 @@ async function seed() {
   process.exit(0);
 }
 
-seed().catch(e => { console.error(e); process.exit(1); });
+seed().catch(e => { console.log(e); console.error(e); process.exit(1); });

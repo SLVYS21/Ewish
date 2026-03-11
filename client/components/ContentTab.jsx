@@ -170,6 +170,20 @@ function Field({ field, value, onChange, onUpload }) {
             </div>
           )}
         </div>
+      ) : field.type === 'layout' ? (
+        <div className={styles.layoutGrid}>
+          {(field.options || []).map(opt => (
+            <button
+              key={opt.value}
+              className={`${styles.layoutBtn} ${value === opt.value ? styles.layoutBtnActive : ''}`}
+              onClick={() => onChange(opt.value)}
+              title={opt.label}
+            >
+              <span className={styles.layoutIcon}>{opt.icon}</span>
+              <span className={styles.layoutLabel}>{opt.label}</span>
+            </button>
+          ))}
+        </div>
       ) : (
         <input
           type="text"

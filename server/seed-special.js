@@ -130,6 +130,14 @@ const specialTemplate = {
     { key: 'imagePath',   label: 'Photo principale',    type: 'url',  placeholder: 'https://... .jpg', section: 'Célébration' },
     { key: 'photo1',      label: 'Photo gauche',        type: 'url',  placeholder: 'https://... .jpg', section: 'Célébration' },
     { key: 'photo2',      label: 'Photo droite',        type: 'url',  placeholder: 'https://... .jpg', section: 'Célébration' },
+        { key: 'imageLayout',  label: 'Disposition photos', type: 'layout', section: 'Celebration',
+      options: [
+        { value: 'grid',      label: 'Grille',     icon: '▦' },
+        { value: 'stack',     label: 'Pile',       icon: '⧉' },
+        { value: 'spotlight', label: 'Focus',      icon: '◎' },
+        { value: 'row',       label: 'Rangée',     icon: '▬' },
+      ]
+    },
     { key: 'wishHeading', label: 'Titre de célébration', type: 'text', placeholder: 'Joyeux Anniversaire !', section: 'Célébration', required: true },
     { key: 'wishText',    label: 'Sous-titre',          type: 'text', placeholder: 'Le #1 résultat de ma vie 🏆', section: 'Célébration' },
 

@@ -41,7 +41,7 @@ router.post('/', async (req, res) => {
 // - jarConfig : replaced entirely when present (it's a self-contained object)
 router.patch('/:id', async (req, res) => {
   try {
-    const { data, style, jarConfig, decorations, ...rest } = req.body;
+    const { data, style, jarConfig, decorations, widgets, photoTransforms, ...rest } = req.body;
 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
@@ -73,6 +73,12 @@ router.patch('/:id', async (req, res) => {
     // decorations: replace entirely (client sends full array)
     if (decorations !== undefined) {
       update.decorations = decorations;
+    }
+    if (widgets !== undefined) {
+      update.widgets = widgets;
+    }
+    if (photoTransforms !== undefined) {
+      update.photoTransforms = photoTransforms;
     }
 
     const pub = await Publication.findByIdAndUpdate(req.params.id, update, { new: true });
