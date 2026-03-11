@@ -30,7 +30,7 @@ export default function Dashboard() {
           <span className={styles.logoIcon}>🎂</span>
           <span className={styles.logoText}>eWishWell</span>
         </div>
-        <Link to="/admin/ewish/new" className={styles.btnPrimary}>
+        <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>
           <span>+</span> New Wish
         </Link>
       </header>
@@ -39,7 +39,7 @@ export default function Dashboard() {
       <section className={styles.hero}>
         <h1>Create magical<br /><span>birthday wishes</span></h1>
         <p>Animated, personalized, unforgettable.</p>
-        <Link to="/admin/ewish/new" className={styles.heroCta}>Get started →</Link>
+        <Link to="/ewish-admin/ewish/new" className={styles.heroCta}>Get started →</Link>
       </section>
 
       {/* My Wishes */}
@@ -57,7 +57,7 @@ export default function Dashboard() {
           <div className={styles.empty}>
             <span className={styles.emptyIcon}>✨</span>
             <p>No wishes yet — create your first one!</p>
-            <Link to="/admin/ewish/new" className={styles.btnPrimary}>Create a wish</Link>
+            <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>Create a wish</Link>
           </div>
         ) : (
           <div className={styles.grid}>
@@ -87,7 +87,7 @@ export default function Dashboard() {
                       title="View live"
                     >↗</a>
                   )}
-                  <button className={styles.btnIcon} onClick={() => navigate(`/admin/ewish/edit/${pub._id}`)}>✏️</button>
+                  <button className={styles.btnIcon} onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>✏️</button>
                   <button className={`${styles.btnIcon} ${styles.btnDanger}`} onClick={e => handleDelete(pub._id, e)}>🗑</button>
                 </div>
               </div>

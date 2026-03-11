@@ -97,7 +97,7 @@ export default function AdminDashboard() {
         {/* ── Recent orders ── */}
         <div className={s.sectionHead}>
           <span className={s.sectionTitle}>Dernières commandes</span>
-          <button className={s.seeAll} onClick={() => navigate('/admin/orders')}>Voir tout →</button>
+          <button className={s.seeAll} onClick={() => navigate('/ewish-admin/orders')}>Voir tout →</button>
         </div>
         <div className={s.tableWrap}>
           {data.recentOrders?.length ? (
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {data.recentOrders.slice(0,8).map(o => (
-                  <tr key={o._id} onClick={() => navigate('/admin/orders')}>
+                  <tr key={o._id} onClick={() => navigate('/ewish-admin/orders')}>
                     <td className={s.bold}>{o.client.firstName} {o.client.lastName || ''}</td>
                     <td>{o.templateLabel || o.templateName}</td>
                     <td className={s.bold}>{fmtPrice(o.finalPrice)}</td>

@@ -17,7 +17,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await login(email, pass);
-      navigate('/admin');
+      navigate('/ewish-admin');
     } catch (e) {
       setError(e.response?.data?.error || 'Identifiants invalides');
     } finally { setLoading(false); }

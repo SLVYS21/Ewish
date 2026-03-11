@@ -21,7 +21,7 @@ function RequireAuth({ children }) {
   if (loading) return <Spinner />;
 
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/ewish-admin/login" replace />;
   }
 
   return children;
@@ -33,7 +33,7 @@ function AdminLoginGate() {
   if (loading) return <Spinner />;
 
   if (user) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/ewish-admin" replace />;
   }
 
   return <AdminLogin />;
@@ -92,11 +92,11 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* Login */}
-          <Route path="/admin/login" element={<AdminLoginGate />} />
+          <Route path="/ewish-admin/login" element={<AdminLoginGate />} />
 
           {/* Protected Admin */}
           <Route
-            path="/admin"
+            path="/ewish-admin"
             element={
               <RequireAuth>
                 <AdminLayout />
@@ -110,15 +110,15 @@ export default function App() {
             <Route path="wishes" element={<AdminWishes />} />
           </Route>
 
-          <Route path="/admin/ewish" element={<RequireAuth><Dashboard /></RequireAuth>} />
-          <Route path="/admin/ewish/new" element={<RequireAuth><NewWish /></RequireAuth>} />
-          <Route path="/admin/ewish/edit/:id" element={<RequireAuth><Editor /></RequireAuth>} />
+          <Route path="/ewish-admin/ewish" element={<RequireAuth><Dashboard /></RequireAuth>} />
+          <Route path="/ewish-admin/ewish/new" element={<RequireAuth><NewWish /></RequireAuth>} />
+          <Route path="/ewish-admin/ewish/edit/:id" element={<RequireAuth><Editor /></RequireAuth>} />
 
           {/* Root redirect */}
-          <Route path="/" element={<Navigate to="/admin" replace />} /> 
+          <Route path="/" element={<Navigate to="/ewish-admin" replace />} /> 
 
           {/* Catch all */}
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to="/ewish-admin" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -3,11 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import s from './AdminLayout.module.css';
 
 const NAV = [
-  { to: '/admin',              icon: '📊', label: 'Dashboard',       end: true },
-  { to: '/admin/orders',       icon: '📦', label: 'Commandes'                  },
-  { to: '/admin/publications', icon: '🎬', label: 'Publications'               },
-  { to: '/admin/templates',    icon: '🎨', label: 'Templates & Prix'           },
-  { to: '/admin/wishes',       icon: '💌', label: 'Vœux collectifs'            },
+  { to: '/ewish-admin',              icon: '📊', label: 'Dashboard',       end: true },
+  { to: '/ewish-admin/orders',       icon: '📦', label: 'Commandes'                  },
+  { to: '/ewish-admin/publications', icon: '🎬', label: 'Publications'               },
+  { to: '/ewish-admin/templates',    icon: '🎨', label: 'Templates & Prix'           },
+  { to: '/ewish-admin/wishes',       icon: '💌', label: 'Vœux collectifs'            },
 ];
 
 export default function AdminLayout({ pendingCount = 0 }) {
@@ -16,7 +16,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/admin/login');
+    navigate('/ewish-admin/login');
   };
 
   return (
