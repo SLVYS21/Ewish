@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './WishesManager.module.css';
-const BACKEND_LINK = 'https://hammerhead-app-mk9qz.ondigitalocean.app/'; //http://localhost:3000/collect/69ade570ab269a9ece198141
+const BACKEND_LINK = 'https://hammerhead-app-mk9qz.ondigitalocean.app'; //http://localhost:3000/collect/69ade570ab269a9ece198141
 
 export default function WishesManager({ publicationId, templateName }) {
   const [wishes, setWishes] = useState([]);

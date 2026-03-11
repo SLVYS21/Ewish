@@ -13,11 +13,11 @@ export default defineConfig({
     proxy: {
       // In dev, proxy API calls to local Express
       '/api': {
-        target: 'https://hammerhead-app-mk9qz.ondigitalocean.app/',
+        target: 'https://hammerhead-app-mk9qz.ondigitalocean.app',
         changeOrigin: true,
       },
       '/preview': {
-        target: 'https://hammerhead-app-mk9qz.ondigitalocean.app/',
+        target: 'https://hammerhead-app-mk9qz.ondigitalocean.app',
         changeOrigin: true,
       },
     },
