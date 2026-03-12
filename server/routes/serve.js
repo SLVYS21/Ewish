@@ -22,6 +22,7 @@ router.get('/:templateName/:customName', async (req, res) => {
       (fs.existsSync(path.join(__dirname, '../templates'))
         ? path.join(__dirname, '../templates')
         : path.join(__dirname, '../../templates'));
+        
     const templatePath = path.join(TMPL_DIR, `${pub.templateName}/index.html`);
     if (!fs.existsSync(templatePath)) {
       return res.status(404).send('<h1>Template introuvable</h1>');
