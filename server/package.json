@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "cp -r ../templates/* ./templates/"
+    "build": "cp -rf ../templates/* ./templates/"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
