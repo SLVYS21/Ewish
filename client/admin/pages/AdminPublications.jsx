@@ -72,7 +72,7 @@ export function AdminPublications() {
                 </div>
                 <div className={s.actions}>
                   {p.published && <a href={url} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}>↗ Voir</a>}
-                  <a href={`/admin/ewish/edit/${p._id}`} className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}>✏ Éditer</a>
+                  <a href={`/ewish-admin/ewish/edit/${p._id}`} className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}>✏ Éditer</a>
                   <button className={`${s.btn} ${s.btnDanger}`} onClick={e=>handleDelete(p._id,e)}>🗑</button>
                 </div>
               </div>
