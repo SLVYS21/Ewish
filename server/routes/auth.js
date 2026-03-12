@@ -27,8 +27,8 @@ router.post('/login', async (req, res) => {
     // httpOnly cookie — not accessible from JS
     res.cookie('ww_admin_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',  // Required for cross-domain cookies
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

@@ -110,9 +110,9 @@ export default function App() {
             <Route path="wishes" element={<AdminWishes />} />
           </Route>
 
-          <Route path="/ewish-admin/ewish" element={<Dashboard />} />
-          <Route path="/ewish-admin/ewish/new" element={<NewWish />} />
-          <Route path="/ewish-admin/ewish/edit/:id" element={<Editor />} />
+          <Route path="/ewish-admin/ewish" element={<RequireAuth><Dashboard /></RequireAuth>} />
+          <Route path="/ewish-admin/ewish/new" element={<RequireAuth><NewWish /></RequireAuth>} />
+          <Route path="/ewish-admin/ewish/edit/:id" element={<RequireAuth><Editor /></RequireAuth>} />
 
           {/* Root redirect */}
           <Route path="/" element={<Navigate to="/ewish-admin" replace />} /> 
