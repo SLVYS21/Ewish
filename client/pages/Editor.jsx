@@ -189,7 +189,7 @@ export default function Editor() {
     return true;
   });
 
-  const previewSrc = pub ? `/site/${pub.templateName}/${pub.customName}` : '';
+  const previewSrc = pub ? `${import.meta.env.VITE_API_URL}/site/${pub.templateName}/${pub.customName}` : '';
 
   if (!pub) return (
     <div className={styles.loading}>
@@ -203,7 +203,7 @@ export default function Editor() {
       {/* ── Top Bar ── */}
       <header className={styles.topbar}>
         <div className={styles.topbarLeft}>
-          <Link to="/" className={styles.back}>← Dashboard</Link>
+          <Link to="/ewish-admin/ewish" className={styles.back}>← Dashboard</Link>
           <span className={styles.divider} />
           <span className={styles.pubTitle}>{pub.title || 'Sans titre'}</span>
         </div>

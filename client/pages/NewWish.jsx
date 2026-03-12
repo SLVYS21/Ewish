@@ -45,7 +45,7 @@ export default function NewWish() {
         },
         style: selected.defaultStyle || {},
       });
-      navigate(`/edit/${res.data._id}`);
+      navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
     } catch (e) {
       setError(e.response?.data?.error || 'Something went wrong');
       setLoading(false);
@@ -55,7 +55,7 @@ export default function NewWish() {
   return (
     <div className={styles.root}>
       <header className={styles.header}>
-        <Link to="/" className={styles.back}>← Back</Link>
+        <Link to="/ewish-admin/ewish" className={styles.back}>← Back</Link>
         <div className={styles.logo}>🎂 eWishWell</div>
         <div />
       </header>

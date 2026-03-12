@@ -6,9 +6,9 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': 'https://hammerhead-app-mk9qz.ondigitalocean.app',
-      '/site': 'https://hammerhead-app-mk9qz.ondigitalocean.app',
-      '/uploads': 'https://hammerhead-app-mk9qz.ondigitalocean.app',
+      '/api': 'http://localhost:5000',
+      '/site': 'http://localhost:5000',
+      '/uploads': 'http://localhost:5000',
     },
   },
 });
