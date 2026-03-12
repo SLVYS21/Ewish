@@ -18,7 +18,11 @@ router.get('/:templateName/:customName', async (req, res) => {
       `);
     }
 
-    const templatePath = path.join(__dirname, `../../templates/${pub.templateName}/index.html`);
+    const TMPL_DIR = process.env.TEMPLATES_DIR ||
+      (fs.existsSync(path.join(__dirname, '../templates'))
+        ? path.join(__dirname, '../templates')
+        : path.join(__dirname, '../../templates'));
+    const templatePath = path.join(TMPL_DIR, `${pub.templateName}/index.html`);
     if (!fs.existsSync(templatePath)) {
       return res.status(404).send('<h1>Template introuvable</h1>');
     }
@@ -73,6 +77,7 @@ ${bgCssLines.join('\n')}
   window.__WW_WIDGETS__ = ${JSON.stringify(pub.widgets || [])};
   window.__WW_PHOTO_TRANSFORMS__ = ${JSON.stringify(pub.photoTransforms || {})};
 <\/script>`;
+
     /* ── Inject engine script tag if not already present ───── */
     if (!html.includes('ww-engine.js')) {
       html = html.replace('</head>', '<script src="/templates/shared/ww-engine.js"><\/script>\n</head>');

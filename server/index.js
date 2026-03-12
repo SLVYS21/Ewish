@@ -39,13 +39,18 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use('/templates/shared',    express.static(path.join(__dirname, '../templates/shared')));
+const TEMPLATES_DIR = process.env.TEMPLATES_DIR ||
+  (fs.existsSync(path.join(__dirname, 'templates')) 
+    ? path.join(__dirname, 'templates')
+    : path.join(__dirname, '../templates'));
+
+app.use('/templates/shared',       express.static(path.join(TEMPLATES_DIR, 'shared')));
 
 // ── Template static assets ────────────────────────────────────
-app.use('/site/birthday',          express.static(path.join(__dirname, '../templates/birthday')));
-app.use('/site/special',           express.static(path.join(__dirname, '../templates/special')));
-app.use('/site/collective-family', express.static(path.join(__dirname, '../templates/collective-family')));
-app.use('/site/collective-pro',    express.static(path.join(__dirname, '../templates/collective-pro')));
+app.use('/site/birthday',          express.static(path.join(TEMPLATES_DIR, 'birthday')));
+app.use('/site/special',           express.static(path.join(TEMPLATES_DIR, 'special')));
+app.use('/site/collective-family', express.static(path.join(TEMPLATES_DIR, 'collective-family')));
+app.use('/site/collective-pro',    express.static(path.join(TEMPLATES_DIR, 'collective-pro')));
 
 // ── API (shared, accessible from both subdomains) ─────────────
 app.use('/api/auth',         require('./routes/auth'));
