@@ -62,7 +62,7 @@ export default function Dashboard() {
         ) : (
           <div className={styles.grid}>
             {pubs.map(pub => (
-              <div key={pub._id} className={styles.card} onClick={() => navigate(`ewish-admin/ewish/edit/${pub._id}`)}>
+              <div key={pub._id} className={styles.card} onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>
                 <div className={styles.cardThumb}>
                   <span>🎂</span>
                   {pub.published && <span className={styles.publishedBadge}>Live</span>}
