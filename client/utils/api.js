@@ -1,8 +1,5 @@
 import axios from 'axios';
 
-// In production: VITE_API_URL must point to the Express backend
-// e.g. https://your-api.ondigitalocean.app or https://api.ewishwell.com
-// In dev: Vite proxy handles '/api' → localhost:5000
 const BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api';
@@ -12,6 +9,7 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,   // Always send cookies (needed for cross-domain auth)
 });
+
 
 export const getTemplates = () => api.get('/templates');
 export const getTemplate = (name) => api.get(`/templates/${name}`);
@@ -53,6 +51,7 @@ export const deletePromo = (id) => api.delete(`/promo/${id}`, { withCredentials:
 export const getWishes    = (pubId)       => api.get(`/wishes/${pubId}`,         { withCredentials: true });
 export const updateWish   = (id, data)    => api.patch(`/wishes/${id}`, data,     { withCredentials: true });
 export const deleteWish   = (id)          => api.delete(`/wishes/${id}`,          { withCredentials: true });
+export const getApprovedWishes = (pubId) => api.get(`/wishes/${pubId}/approved`, { withCredentials: true });
 
 // ── Templates (admin update) ──
 export const updateTemplate = (name, data) => api.patch(`/templates/${name}`, data, { withCredentials: true });
