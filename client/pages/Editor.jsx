@@ -63,7 +63,7 @@ export default function Editor() {
         setJarConfig(found.jarConfig || null);
         setWidgets(found.widgets || []);
         setPhotoTransforms(found.photoTransforms || {});
-        if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
+        if (found.published) setPublishedUrl(`${import.meta.env.VITE_API_URL || ''}/site/${found.templateName}/${found.customName}`);
 
         try {
           const tr = await fetch(`/api/templates/${found.templateName}`);

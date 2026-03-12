@@ -55,7 +55,7 @@ export function AdminPublications() {
           {filtered.map(p => {
             const bg    = THUMB_BG[p.templateName]    || 'linear-gradient(135deg,#333,#444)';
             const emoji = THUMB_EMOJI[p.templateName] || '🎁';
-            const url   = `/site/${p.templateName}/${p.customName}`;
+            const url   = `${import.meta.env.VITE_API_URL || ''}/site/${p.templateName}/${p.customName}`;
             return (
               <div key={p._id} className={s.card}>
                 <div className={s.thumb} style={{ background: bg }}>{emoji}</div>

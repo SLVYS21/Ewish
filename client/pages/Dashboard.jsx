@@ -79,7 +79,7 @@ export default function Dashboard() {
                 <div className={styles.cardActions}>
                   {pub.published && (
                     <a
-                      href={`/site/${pub.templateName}/${pub.customName}`}
+                      href={`${import.meta.env.VITE_API_URL || ''}/site/${pub.templateName}/${pub.customName}`}
                       target="_blank"
                       rel="noreferrer"
                       onClick={e => e.stopPropagation()}
