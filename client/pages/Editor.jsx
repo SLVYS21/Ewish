@@ -70,7 +70,7 @@ export default function Editor() {
         if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
 
         try {
-          const tr = await fetch(`/api/templates/${found.templateName}`);
+          const tr = await fetch(`${import.meta.env.VITE_API_URL}/api/templates/${found.templateName}`);
           if (tr.ok) setTemplate(await tr.json());
         } catch {}
       } catch { navigate('/'); }
