@@ -20,8 +20,8 @@ const APP_HOST = process.env.APP_HOST || 'app.ewishwell.com';   // React app
 const EXTRA_ORIGINS = process.env.EXTRA_ORIGINS ? process.env.EXTRA_ORIGINS.split(',') : [];
 
 const ALLOWED_ORIGINS = PROD
-  ? [`https://${WWW_HOST}`, `https://${APP_HOST}`, 'https://ewish-nxe6b.ondigitalocean.app', ...EXTRA_ORIGINS]
-  : ['http://localhost:3000', 'http://localhost:5000', 'https://ewish-nxe6b.ondigitalocean.app'];
+  ? [`https://${WWW_HOST}`, `https://${APP_HOST}`, 'https://ewish-nxe6b.ondigitalocean.app', 'https://app.mykado.store', ...EXTRA_ORIGINS]
+  : ['http://localhost:3000', 'http://localhost:5000', 'https://ewish-nxe6b.ondigitalocean.app', 'https://app.mykado.store'];
 
 app.use(cors({
   origin: (origin, cb) => {
