@@ -62,8 +62,10 @@ app.use('/api/track',        require('./routes/analytics'));
 app.use('/api/wishes',       require('./routes/wishes'));
 app.use('/api/publications',  require('./routes/publication'));
 app.use('/api/analytics',    require('./routes/analytics'));
+app.use('/api/shortlinks',   require('./routes/shortlinks'));
 
 app.use('/collect', require('./routes/collect'));
+app.use('/s',       require('./routes/shortlinks'));
 app.use('/preview', require('./routes/preview'));
 app.use('/site',    require('./routes/serve'));
 

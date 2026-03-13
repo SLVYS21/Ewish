@@ -95,6 +95,37 @@ router.post('/:id/publish', async (req, res) => {
       { new: true }
     );
     if (!pub) return res.status(404).json({ error: 'Not found' });
+ 
+    // Auto-generate shortCode on first publish
+    if (!pub.shortCode) {
+      try {
+        const { nanoid } = require('nanoid');
+        const slugify = require('slugify');
+        // Try slug from name + template
+        const name = pub.data?.name || pub.data?.recipientName || '';
+        const occasion = pub.templateName?.replace('collective-', '') || '';
+        const raw = [name, occasion].filter(Boolean).join('-');
+        const slug = slugify(raw, { lower: true, strict: true }).slice(0, 30);
+        let code = null;
+        if (slug && slug.length >= 2) {
+          const taken = await Publication.findOne({ shortCode: slug, _id: { $ne: pub._id } }).lean();
+          if (!taken) code = slug;
+        }
+        if (!code) {
+          // Random fallback with collision check
+          for (let i = 0; i < 10; i++) {
+            const c = nanoid(6);
+            const exists = await Publication.findOne({ shortCode: c }).lean();
+            if (!exists) { code = c; break; }
+          }
+        }
+        if (code) {
+          pub.shortCode = code;
+          await pub.save();
+        }
+      } catch (e) { console.warn('shortCode generation failed:', e.message); }
+    }
+ 
     res.json({ ...pub.toObject(), url: `/site/${pub.templateName}/${pub.customName}` });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });

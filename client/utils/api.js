@@ -55,3 +55,7 @@ export const getApprovedWishes = (pubId) => api.get(`/wishes/${pubId}/approved`,
 
 // ── Templates (admin update) ──
 export const updateTemplate = (name, data) => api.patch(`/templates/${name}`, data, { withCredentials: true });
+
+// ── Short links ──
+export const getShortLink   = (id)        => api.post(`/shortlinks/${id}`, {}, { withCredentials: true });
+export const setCustomSlug  = (id, slug)  => api.patch(`/shortlinks/${id}`, { slug }, { withCredentials: true });

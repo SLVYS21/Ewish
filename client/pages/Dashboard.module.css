@@ -148,3 +148,14 @@
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Short link on card ─────────────────────────────────────── */
+.shortLink {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 600;
+  font-family: monospace;
+  font-size: 0.75rem;
+  transition: opacity .15s;
+}
+.shortLink:hover { opacity: .7; }

@@ -153,3 +153,77 @@
 .tabIcon  { font-size: 1rem; display: block; text-align: center; }
 .tabLabel { font-size: 0.65rem; display: block; text-align: center; margin-top: 2px; }
 .tab      { flex-direction: column; padding: 8px 4px; min-width: 52px; }
+
+/* ── Short URL bar ──────────────────────────────────────────── */
+.shortUrlWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+}
+
+.shortUrl {
+  background: none;
+  border: none;
+  color: var(--brand, #c8963e);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 2px;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+  transition: opacity .15s;
+}
+.shortUrl:hover { opacity: .75; }
+
+.slugEdit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0 2px;
+  opacity: .5;
+  transition: opacity .15s;
+}
+.slugEdit:hover { opacity: 1; }
+
+.shortUrlPrefix {
+  color: rgba(255,255,255,.4);
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+
+.slugInput {
+  width: 120px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(200,150,62,.4);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-family: monospace;
+  padding: 2px 6px;
+  outline: none;
+}
+.slugInput:focus { border-color: var(--brand, #c8963e); }
+
+.slugSave, .slugCancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0 3px;
+  color: rgba(255,255,255,.7);
+  transition: color .15s;
+}
+.slugSave:hover  { color: #5cb85c; }
+.slugCancel:hover { color: #d9534f; }
+
+.slugMsg {
+  font-size: 0.72rem;
+  color: #5cb85c;
+  margin-left: 2px;
+}

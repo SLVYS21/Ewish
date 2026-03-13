@@ -91,10 +91,13 @@ const publicationSchema = new mongoose.Schema({
 
   published:   { type: Boolean, default: false },
   publishedAt: { type: Date },
+
+  shortCode:   { type: String, unique: true, sparse: true },
   createdAt:   { type: Date, default: Date.now },
   updatedAt:   { type: Date, default: Date.now },
 }, { timestamps: true });
 
 publicationSchema.index({ templateName: 1, customName: 1 }, { unique: true });
+publicationSchema.index({ shortCode: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Publication', publicationSchema);

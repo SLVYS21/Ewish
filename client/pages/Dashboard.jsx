@@ -70,7 +70,20 @@ export default function Dashboard() {
                 <div className={styles.cardBody}>
                   <h3>{pub.title || pub.data?.name || 'Untitled'}</h3>
                   <p className={styles.cardMeta}>
-                    /{pub.templateName}/{pub.customName}
+                    {pub.shortCode
+                      ? <span
+                          className={styles.shortLink}
+                          title="Copier le lien court"
+                          onClick={e => {
+                            e.stopPropagation();
+                            const origin = import.meta.env.VITE_API_URL || window.location.origin;
+                            navigator.clipboard.writeText(`${origin}/s/${pub.shortCode}`);
+                            e.currentTarget.textContent = '✓ Copié!';
+                            setTimeout(() => e.currentTarget.textContent = `/s/${pub.shortCode} 📋`, 1500);
+                          }}
+                        >/s/{pub.shortCode} 📋</span>
+                      : `/${pub.templateName}/${pub.customName}`
+                    }
                   </p>
                   <p className={styles.cardDate}>
                     {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}

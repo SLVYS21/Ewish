@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPublications, updatePublication, publishPublication, uploadFile } from '../utils/api';
+import { getPublications, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug } from '../utils/api';
 import ContentTab     from '../components/ContentTab';
 import StyleTab       from '../components/StyleTab';
 import BackgroundTab  from '../components/BackgroundTab';
@@ -41,6 +41,10 @@ export default function Editor() {
   const [saveStatus,  setSaveStatus]  = useState('saved');
   const [publishing,  setPublishing]  = useState(false);
   const [publishedUrl, setPublishedUrl] = useState('');
+  const [shortCode,    setShortCode]    = useState('');
+  const [slugEditing,  setSlugEditing]  = useState(false);
+  const [slugDraft,    setSlugDraft]    = useState('');
+  const [slugStatus,   setSlugStatus]   = useState('');
 
   const iframeRef  = useRef(null);
   const tabsBarRef = useRef(null);
@@ -177,6 +181,11 @@ export default function Editor() {
       const r = await publishPublication(id);
       setPublishedUrl(r.data.url);
       setPub(p => ({ ...p, published: true }));
+      // Get or generate short code
+      try {
+        const sl = await getShortLink(id);
+        setShortCode(sl.data.shortCode);
+      } catch {}
     } catch (e) {
       alert(e.response?.data?.error || 'Publish failed');
     } finally { setPublishing(false); }
@@ -215,10 +224,68 @@ export default function Editor() {
           </span>
         </div>
         <div className={styles.topbarRight}>
-          {publishedUrl && (
-            <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>
-              Voir en live ↗
-            </a>
+          {shortCode && (
+            <div className={styles.shortUrlWrap}>
+              {slugEditing ? (
+                <>
+                  <span className={styles.shortUrlPrefix}>/s/</span>
+                  <input
+                    className={styles.slugInput}
+                    value={slugDraft}
+                    onChange={e => setSlugDraft(e.target.value)}
+                    onKeyDown={async e => {
+                      if (e.key === 'Enter') {
+                        setSlugStatus('saving');
+                        try {
+                          const r = await setCustomSlug(id, slugDraft);
+                          setShortCode(r.data.shortCode);
+                          setSlugStatus('saved');
+                          setSlugEditing(false);
+                        } catch(err) {
+                          setSlugStatus(err.response?.data?.error || 'error');
+                        }
+                      }
+                      if (e.key === 'Escape') setSlugEditing(false);
+                    }}
+                    autoFocus
+                  />
+                  <button className={styles.slugSave} onClick={async () => {
+                    setSlugStatus('saving');
+                    try {
+                      const r = await setCustomSlug(id, slugDraft);
+                      setShortCode(r.data.shortCode);
+                      setSlugStatus('saved');
+                      setSlugEditing(false);
+                    } catch(err) {
+                      setSlugStatus(err.response?.data?.error || 'error');
+                    }
+                  }}>✓</button>
+                  <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}>✕</button>
+                  {slugStatus && slugStatus !== 'saving' && (
+                    <span className={styles.slugMsg}>{slugStatus === 'saved' ? '✓' : slugStatus}</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    className={styles.shortUrl}
+                    title="Copier le lien court"
+                    onClick={() => {
+                      const origin = import.meta.env.VITE_API_URL || window.location.origin;
+                      navigator.clipboard.writeText(`${origin}/s/${shortCode}`);
+                    }}
+                  >
+                    /s/{shortCode} 📋
+                  </button>
+                  <button
+                    className={styles.slugEdit}
+                    title="Modifier le slug"
+                    onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
+                  >✏️</button>
+                  <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>↗</a>
+                </>
+              )}
+            </div>
           )}
           <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
             {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
