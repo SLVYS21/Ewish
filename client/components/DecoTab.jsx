@@ -294,7 +294,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
               <label className={s.fieldLabel}>Délai d'animation</label>
               <span className={s.sliderVal}>{selectedDeco.delay || 0}s</span>
             </div>
-            <input type="range" min="0" max="5" step="0.25"
+            <input type="range" min="0" max="30" step="0.25"
               className={s.slider}
               value={selectedDeco.delay || 0}
               onChange={e => updateDeco(selectedDeco.id, { delay: parseFloat(e.target.value) })}
