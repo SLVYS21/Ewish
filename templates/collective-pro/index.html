@@ -625,7 +625,10 @@ const animationTimeline=()=>{
     .add(() => { document.getElementById('revoir-outro-btn').style.display = 'inline-block'; })
     .to('.last-smile',0.5,{rotation:90},'+=1');
 
-  document.getElementById('replay').addEventListener('click',()=>tl.restart());
+  document.getElementById('replay').addEventListener('click',()=> {
+    if (window.wwEngine) window.wwEngine.applyDecorations(window.__WW_DECO__ || []);
+    tl.restart()
+  });
 };
 
 

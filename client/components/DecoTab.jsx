@@ -66,6 +66,8 @@ const DEFAULT_DECO = {
   zIndex: 10,
   delay: 0,
   rotate: 0,
+  showAfter: 0,   // seconds before appearing (0 = from start)
+  hideAfter: 0,   // seconds before disappearing (0 = never)
 };
 
 export default function DecoTab({ templateName, decorations = [], onChange }) {
@@ -294,11 +296,43 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
               <label className={s.fieldLabel}>Délai d'animation</label>
               <span className={s.sliderVal}>{selectedDeco.delay || 0}s</span>
             </div>
-            <input type="range" min="0" max="30" step="0.25"
+            <input type="range" min="0" max="5" step="0.25"
               className={s.slider}
               value={selectedDeco.delay || 0}
               onChange={e => updateDeco(selectedDeco.id, { delay: parseFloat(e.target.value) })}
             />
+          </div>
+
+          {/* Show After */}
+          <div className={s.field}>
+            <div className={s.sliderHeader}>
+              <label className={s.fieldLabel}>⏱ Apparaît après</label>
+              <span className={s.sliderVal}>
+                {(selectedDeco.showAfter || 0) === 0 ? 'Dès le début' : `${selectedDeco.showAfter}s`}
+              </span>
+            </div>
+            <input type="range" min="0" max="60" step="1"
+              className={s.slider}
+              value={selectedDeco.showAfter || 0}
+              onChange={e => updateDeco(selectedDeco.id, { showAfter: parseFloat(e.target.value) })}
+            />
+            <p className={s.sliderHint}>La décoration n'apparaît qu'après ce délai depuis le début</p>
+          </div>
+
+          {/* Hide After */}
+          <div className={s.field}>
+            <div className={s.sliderHeader}>
+              <label className={s.fieldLabel}>⏱ Disparaît après</label>
+              <span className={s.sliderVal}>
+                {(selectedDeco.hideAfter || 0) === 0 ? 'Jamais' : `${selectedDeco.hideAfter}s`}
+              </span>
+            </div>
+            <input type="range" min="0" max="60" step="1"
+              className={s.slider}
+              value={selectedDeco.hideAfter || 0}
+              onChange={e => updateDeco(selectedDeco.id, { hideAfter: parseFloat(e.target.value) })}
+            />
+            <p className={s.sliderHint}>0 = reste visible jusqu'à la fin</p>
           </div>
 
           {/* Z-index */}

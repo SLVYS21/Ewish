@@ -46,7 +46,8 @@
       @keyframes ww-shake  { 0%,100%{transform:rotate(var(--ww-rot,0deg))} 20%{transform:rotate(calc(var(--ww-rot,0deg) - 8deg))} 40%{transform:rotate(calc(var(--ww-rot,0deg) + 8deg))} 60%{transform:rotate(calc(var(--ww-rot,0deg) - 4deg))} 80%{transform:rotate(calc(var(--ww-rot,0deg) + 4deg))} }
       @keyframes ww-swing  { 0%,100%{transform-origin:top center;transform:rotate(var(--ww-rot,0deg))} 25%{transform:rotate(calc(var(--ww-rot,0deg) + 12deg))} 75%{transform:rotate(calc(var(--ww-rot,0deg) - 12deg))} }
       @keyframes ww-bounce { 0%,100%{transform:translateY(0) rotate(var(--ww-rot,0deg))} 40%{transform:translateY(-20px) rotate(var(--ww-rot,0deg))} 60%{transform:translateY(-10px) rotate(var(--ww-rot,0deg))} }
-      @keyframes ww-fadein { from{opacity:0;transform:scale(0.7) rotate(var(--ww-rot,0deg))} to{opacity:var(--ww-opacity,0.85);transform:scale(1) rotate(var(--ww-rot,0deg))} }
+      @keyframes ww-fadein  { from{opacity:0;transform:scale(0.7) rotate(var(--ww-rot,0deg))} to{opacity:var(--ww-opacity,0.85);transform:scale(1) rotate(var(--ww-rot,0deg))} }
+      @keyframes ww-fadeout { from{opacity:var(--ww-opacity,0.85)} to{opacity:0;transform:scale(0.8) rotate(var(--ww-rot,0deg))} }
 
       .ww-deco {
         position: absolute;
@@ -167,6 +168,21 @@
     });
   }
 
+  /* ─── Hide a decoration with fadeout ───────────────────────────── */
+  function _scheduleHide(img, deco) {
+    const fadeoutDur = 0.8;
+    img.style.animation = `ww-fadeout ${fadeoutDur}s ease-in-out both`;
+    img._wwHideTimer = setTimeout(() => {
+      if (img.parentNode) img.style.display = 'none';
+    }, fadeoutDur * 1000);
+  }
+
+  /* ─── Clear all timers on a deco element ────────────────────────── */
+  function _clearDecoTimers(el) {
+    if (el._wwShowTimer) { clearTimeout(el._wwShowTimer); el._wwShowTimer = null; }
+    if (el._wwHideTimer) { clearTimeout(el._wwHideTimer); el._wwHideTimer = null; }
+  }
+
   /* ─── Build a single decoration element ────────────────────────── */
   function buildDecoElement(deco) {
     const img = document.createElement('img');
@@ -217,6 +233,36 @@
     }
 
     img.dataset.decoId = deco.id;
+
+    // ── Visibility timing ────────────────────────────────────
+    const showAfter = deco.showAfter != null ? deco.showAfter : 0;
+    const hideAfter = deco.hideAfter != null ? deco.hideAfter : 0; // 0 = never hide
+
+    if (showAfter > 0) {
+      // Start hidden, reveal after showAfter seconds
+      img.style.opacity = '0';
+      img.style.animation = 'none';
+      img._wwShowTimer = setTimeout(() => {
+        img.style.animation = '';  // restore
+        const anim2 = deco.animation || 'float';
+        const DURATIONS2 = { float:'3s', spin:'6s', pulse:'2s', drift:'5s', pop:'0.6s', shake:'0.6s', swing:'3s', bounce:'2s' };
+        const ITERATES2  = { float:'infinite', spin:'infinite', pulse:'infinite', drift:'infinite', pop:'1', shake:'1', swing:'infinite', bounce:'infinite' };
+        if (anim2 !== 'none') {
+          img.style.animation = `ww-fadein 0.6s both, ww-${anim2} ${DURATIONS2[anim2]||'3s'} 0.6s ${ITERATES2[anim2]||'infinite'} ease-in-out`;
+        } else {
+          img.style.animation = 'ww-fadein 0.6s both';
+        }
+        // Schedule hide if needed
+        if (hideAfter > 0) {
+          img._wwHideTimer = setTimeout(() => _scheduleHide(img, deco), 0);
+        }
+      }, showAfter * 1000);
+    } else if (hideAfter > 0) {
+      // Visible from start, hide after hideAfter seconds
+      const totalDelay = (hideAfter - delay) * 1000;
+      img._wwHideTimer = setTimeout(() => _scheduleHide(img, deco), Math.max(0, totalDelay));
+    }
+
     return img;
   }
 
@@ -224,8 +270,8 @@
   function applyDecorations(decos) {
     if (!decos || !decos.length) return;
 
-    // Remove any previously mounted decos (useful for live-update from editor)
-    document.querySelectorAll('.ww-deco').forEach(el => el.remove());
+    // Remove any previously mounted decos — clear timers first to avoid stale callbacks
+    document.querySelectorAll('.ww-deco').forEach(el => { _clearDecoTimers(el); el.remove(); });
 
     decos.forEach(deco => {
       const el = buildDecoElement(deco);

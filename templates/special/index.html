@@ -944,6 +944,7 @@ const animationTimeline = () => {
     document.getElementById('g-result-1').style.opacity = '0';
     document.getElementById('g-result-2').style.opacity = '0';
     document.getElementById('g-result-3').style.opacity = '0';
+    if (window.wwEngine) window.wwEngine.applyDecorations(window.__WW_DECO__ || []);
     tl.restart();
   });
 };
