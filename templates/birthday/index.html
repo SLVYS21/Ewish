@@ -197,7 +197,7 @@
     .wa-bubble-text span { visibility: hidden; }
 
     /* ===== ORIGINAL SECTIONS ===== */
-    .five p { font-size: 2rem; position: absolute; left: 0; right: 0; color: (--text-color); }
+    .five p { font-size: 2rem; position: absolute; left: 0; right: 0; color: var(--text-color);  }
     .idea-3 strong { padding: 3px 5px; border-radius: 3px; display: inline-block; }
     .five .idea-5 { font-size: 4rem; }
     .idea-5 span, .idea-6 span, .wish-hbd span { display: inline-block; }
@@ -350,7 +350,7 @@
 <div id="wishes-overlay" onclick="closeWishesIfBg(event)">
   <div id="wishes-card">
     <button id="close-wishes" onclick="closeWishes()">✕</button>
-    <h2>💌 Mes vœux pour toi</h2>
+    <h2>Mes vœux pour toi</h2>
     <p data-node-name="wish1">Que cette nouvelle année de ta vie soit remplie de joie, de lumière et de toutes ces petites choses qui font sourire.</p>
     <p data-node-name="wish2">Tu mérites tout le bonheur du monde, et je souhaite que chaque journée t'apporte quelque chose de beau.</p>
     <p data-node-name="wish3">Joyeux anniversaire du fond du cœur. 🎂✨</p>
@@ -906,11 +906,11 @@ window.addEventListener('message', (e) => {
     #jar-btn{position:fixed;bottom:28px;right:28px;z-index:8000;
       background:linear-gradient(135deg,var(--primary),var(--accent));
       border:none;border-radius:99px;padding:12px 20px 12px 14px;
-      font-size:.88rem;font-weight:700;color:#fff;cursor:pointer;
+      font-size:.88rem;font-weight:700;color:var(--text-muted);cursor:pointer;
       display:none;align-items:center;gap:7px;
       box-shadow:0 8px 28px rgba(255,120,160,.4);
       animation:jpulse 2.5s ease-in-out infinite;
-      font-family:'Work Sans',sans-serif;}
+      font-family:var(--font)}
     #jar-btn:hover{transform:translateY(-3px) scale(1.04);animation:none;}
     @keyframes jpulse{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.03)}}
 
