@@ -21,7 +21,7 @@
     .container {
       height: 100vh; width: 100vw; margin: 0 auto;
       text-align: center; visibility: hidden;
-      position: relative; overflow: hidden;
+      position: relative; /*overflow: hidden;*/
     }
     .container > div {
       position: absolute; left: 0; right: 0; top: 20vh;
@@ -65,9 +65,9 @@
     .pill-label { font-size: 0.78rem; letter-spacing: 0.02em; font-family: var(--font);}
 
     /* ===== SECTIONS ===== */
-    .one { font-size: 4.5rem; }
+    .one { font-size: 4.5rem; color: var(--text-color);}
     .two { font-size: 1.2rem; font-weight: 300; }
-    .three { font-size: 3rem; }
+    .three { font-size: 3rem; color: var(--text-color); }
 
     /* ===== MUSIC INTERLUDE ===== */
     /* .music-interlude {
@@ -231,7 +231,7 @@
     }
     .wish { margin-top: 8px; }
     .wish-hbd { font-size: 3em; margin: 0; text-transform: uppercase; color: var(--primary); display: inline-block;}
-    .wish h5 { font-weight: 300; font-size: 2rem; margin: 10px 0 0; }
+    .wish h5 { font-weight: 300; font-size: 2rem; margin: 10px 0 0; color: var(--text-color)}
 
     /* ===== CONFETTI CANVAS ===== */
     #confetti-canvas {
