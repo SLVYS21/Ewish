@@ -12,7 +12,8 @@ router.post('/', async (req, res) => {
   try {
     const { templateName, client, recipientName, occasion, notes, promoCode, fbp, fbc } = req.body;
 
-    const template = await Template.findOne({ name: templateName, active: true });
+    // console.log(await Template.find().select('name active').lean());
+    const template = await Template.findOne({ name: templateName });
     if (!template) return res.status(404).json({ error: 'Template introuvable' });
 
     let basePrice = template.price;

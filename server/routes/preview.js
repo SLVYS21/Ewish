@@ -64,34 +64,37 @@ const DEMO_DATA = {
 function minifyHtml(html) {
   return html
     .replace(/<!--(?!FB_PIXEL_ID)[\s\S]*?-->/g, '')        // strip HTML comments
-    .replace(/\s{2,}/g, ' ')                                // collapse whitespace
-    .replace(/>\s+</g, '><')                                // trim between tags
-    .replace(/\/\*[\s\S]*?\*\//g, '');                      // strip CSS comments
+    // .replace(/\s{2,}/g, ' ')                                // collapse whitespace
+    // .replace(/>\s+</g, '><')                                // trim between tags
+    // .replace(/\/\*[\s\S]*?\*\//g, '');                      // strip CSS comments
 }
 
 // Inject protection layer into the HTML
 function injectProtection(html, templateName) {
   const watermarkCss = `
 <style id="ww-demo-style">
-  /* Demo watermark */
-  body::after {
-    content: 'DÉMO EWISHWELL • DÉMO EWISHWELL • DÉMO EWISHWELL • DÉMO EWISHWELL • DÉMO EWISHWELL • DÉMO EWISHWELL • DÉMO EWISHWELL •';
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.9rem; font-family: sans-serif; font-weight: 700;
-    color: rgba(0,0,0,0.06); letter-spacing: 0.1em;
-    word-break: break-all; line-height: 2.8;
-    pointer-events: none; z-index: 9999;
-    background: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 60px,
-      rgba(255,105,180,0.03) 60px,
-      rgba(255,105,180,0.03) 120px
-    );
-  }
   /* Block text selection */
   * { -webkit-user-select: none !important; user-select: none !important; }
+
+  /* Demo watermark robuste */
+  body::after {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; 
+    /* z-index maximal autorisé par les navigateurs pour être au-dessus de TOUT (même des modales) */
+    z-index: 2147483647; 
+    background: 
+      /* Le texte SVG répété */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' fill='rgba(0,0,0,0.07)' font-family='sans-serif' font-weight='bold' font-size='22' letter-spacing='2' text-anchor='middle' transform='rotate(-45 150 150)'%3ED%C3%89MO EWISHWELL%3C/text%3E%3C/svg%3E"),
+      /* Tes rayures roses */
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 60px,
+        rgba(255,105,180,0.03) 60px,
+        rgba(255,105,180,0.03) 120px
+      );
+  }
 </style>`;
 
   const protectionScript = `
@@ -99,7 +102,8 @@ function injectProtection(html, templateName) {
 (function(){
   // Block right-click
   document.addEventListener('contextmenu', e => e.preventDefault());
-  // Block F12, Ctrl+U, Ctrl+S, Ctrl+Shift+I/J, Cmd+U/S
+  
+  // Block shortcuts (F12, Ctrl+U, Ctrl+S, Ctrl+Shift+I/J, Cmd+U/S)
   document.addEventListener('keydown', function(e) {
     var blocked = e.key === 'F12'
       || (e.ctrlKey && ['u','s','i','j','p'].includes(e.key.toLowerCase()))
@@ -107,6 +111,7 @@ function injectProtection(html, templateName) {
       || (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase()));
     if (blocked) e.preventDefault();
   });
+
   // Detect DevTools open (basic heuristic)
   var threshold = 160;
   setInterval(function() {
@@ -114,6 +119,7 @@ function injectProtection(html, templateName) {
       document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#aaa;font-size:1rem;">🔒 Démo indisponible</div>';
     }
   }, 1000);
+
   // Disable drag
   document.addEventListener('dragstart', e => e.preventDefault());
 })();
@@ -125,7 +131,6 @@ function injectProtection(html, templateName) {
   html = html.replace('</body>', protectionScript + '\n</body>');
   return html;
 }
-
 // GET /preview/:templateName
 router.get('/:templateName', async (req, res) => {
   const { templateName } = req.params;
@@ -137,7 +142,7 @@ router.get('/:templateName', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
 
   try {
-    const template = await Template.findOne({ name: templateName, active: true }).lean();
+    const template = await Template.findOne({ name: templateName }).lean();
     if (!template) return res.status(404).send('<h1>Template not found</h1>');
 
     const templatePath = path.join(__dirname, `../../templates/${templateName}/index.html`);
@@ -150,20 +155,20 @@ router.get('/:templateName', async (req, res) => {
     const scale = '1';
 
     const injection = `
-<style>
-  :root {
-    --primary: ${demoStyle.primaryColor || '#ff69b4'};
-    --accent:  ${demoStyle.accentColor  || '#ffb347'};
-    --font:    '${demoStyle.fontFamily  || 'Work Sans'}', sans-serif;
-    --fs-scale: ${scale};
-  }
-  body { font-family: var(--font) !important; }
-</style>
-<script>
-  window.__WW_DATA__  = ${JSON.stringify(demoData)};
-  window.__WW_STYLE__ = ${JSON.stringify(demoStyle)};
-  window.__WW_META__  = { id: '', demo: true };
-</script>`;
+    <style>
+      :root {
+        --primary: ${demoStyle.primaryColor || '#ff69b4'};
+        --accent:  ${demoStyle.accentColor  || '#ffb347'};
+        --font:    '${demoStyle.fontFamily  || 'Work Sans'}', sans-serif;
+        --fs-scale: ${scale};
+      }
+      body { font-family: var(--font) !important; }
+    </style>
+    <script>
+      window.__WW_DATA__  = ${JSON.stringify(demoData)};
+      window.__WW_STYLE__ = ${JSON.stringify(demoStyle)};
+      window.__WW_META__  = { id: '', demo: true };
+    </script>`;
 
     html = html.replace('</head>', injection + '\n</head>');
     html = injectProtection(html, templateName);

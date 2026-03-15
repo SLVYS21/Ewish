@@ -17,6 +17,8 @@
       --navy:       #1e3a5f;
       --cream:      #faf8f3;
       --fs-scale: 1;
+      --text-color: #333333;
+      --text-muted: #888888;
     }
     body { margin: 0; font-family: var(--font-sans); background: var(--cream); overflow: hidden; }
 
@@ -419,6 +421,19 @@
 <script>
 /* ===== MUSIC ===== */
 const audio = new Audio();
+let _musicStartTime = 0;
+function setAudioSrc(src) {
+  if (!src || audio.src === src) return;
+  audio.src = src;
+  if (_musicStartTime > 0) {
+    const applyStart = () => {
+      audio.currentTime = _musicStartTime;
+      audio.removeEventListener('loadedmetadata', applyStart);
+    };
+    audio.addEventListener('loadedmetadata', applyStart);
+  }
+}
+
 let isPlaying = false;
 function toggleMusic() {
   if (!audio.src) return;
@@ -519,10 +534,15 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 const applyField=(key,val)=>{
   if(!val) return;
   if(key==='imagePath'){document.querySelector('[data-node-name="imagePath"]')?.setAttribute('src',val);}
-  else if(key==='musicSrc'){audio.src=val;}
+  else if (key === 'musicSrc') {
+    setAudioSrc(val);
+  } else if (key === 'musicStartTime') {
+    _musicStartTime = parseFloat(val) || 0;
+    if (audio.src /*&& audio.readyState >= 1*/) audio.currentTime = _musicStartTime;
+  }
   else if(key==='albumArt'){
     const ph=document.getElementById('main-album-art');
-    if(ph){const img=document.createElement('img');img.src=val;img.style.cssText='width:200px;height:200px;border-radius:12px;object-fit:cover;display:block;margin:0 auto 20px;border:1px solid rgba(201,168,76,0.3)';ph.replaceWith(img);}
+    if(ph){const img=document.createElement('img');img.src=val;img.style.cssText='max-width:200px;height:200px;border-radius:12px;object-fit:cover;display:block;margin:0 auto 20px;border:1px solid rgba(201,168,76,0.3)';ph.replaceWith(img);}
     const pc=document.getElementById('pill-cover');
     if(pc){pc.innerHTML='';const pi=document.createElement('img');pi.src=val;pc.appendChild(pi);}
   } else if(key==='photo1'){

@@ -224,74 +224,74 @@ export default function Editor() {
           </span>
         </div>
         <div className={styles.topbarRight}>
-          {shortCode && (
-            <div className={styles.shortUrlWrap}>
-              {slugEditing ? (
-                <>
-                  <span className={styles.shortUrlPrefix}>/s/</span>
-                  <input
-                    className={styles.slugInput}
-                    value={slugDraft}
-                    onChange={e => setSlugDraft(e.target.value)}
-                    onKeyDown={async e => {
-                      if (e.key === 'Enter') {
-                        setSlugStatus('saving');
-                        try {
-                          const r = await setCustomSlug(id, slugDraft);
-                          setShortCode(r.data.shortCode);
-                          setSlugStatus('saved');
-                          setSlugEditing(false);
-                        } catch(err) {
-                          setSlugStatus(err.response?.data?.error || 'error');
+            {shortCode && (
+              <div className={styles.shortUrlWrap}>
+                {slugEditing ? (
+                  <>
+                    <span className={styles.shortUrlPrefix}>/s/</span>
+                    <input
+                      className={styles.slugInput}
+                      value={slugDraft}
+                      onChange={e => setSlugDraft(e.target.value)}
+                      onKeyDown={async e => {
+                        if (e.key === 'Enter') {
+                          setSlugStatus('saving');
+                          try {
+                            const r = await setCustomSlug(id, slugDraft);
+                            setShortCode(r.data.shortCode);
+                            setSlugStatus('saved');
+                            setSlugEditing(false);
+                          } catch(err) {
+                            setSlugStatus(err.response?.data?.error || 'error');
+                          }
                         }
+                        if (e.key === 'Escape') setSlugEditing(false);
+                      }}
+                      autoFocus
+                    />
+                    <button className={styles.slugSave} onClick={async () => {
+                      setSlugStatus('saving');
+                      try {
+                        const r = await setCustomSlug(id, slugDraft);
+                        setShortCode(r.data.shortCode);
+                        setSlugStatus('saved');
+                        setSlugEditing(false);
+                      } catch(err) {
+                        setSlugStatus(err.response?.data?.error || 'error');
                       }
-                      if (e.key === 'Escape') setSlugEditing(false);
-                    }}
-                    autoFocus
-                  />
-                  <button className={styles.slugSave} onClick={async () => {
-                    setSlugStatus('saving');
-                    try {
-                      const r = await setCustomSlug(id, slugDraft);
-                      setShortCode(r.data.shortCode);
-                      setSlugStatus('saved');
-                      setSlugEditing(false);
-                    } catch(err) {
-                      setSlugStatus(err.response?.data?.error || 'error');
-                    }
-                  }}>✓</button>
-                  <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}>✕</button>
-                  {slugStatus && slugStatus !== 'saving' && (
-                    <span className={styles.slugMsg}>{slugStatus === 'saved' ? '✓' : slugStatus}</span>
-                  )}
-                </>
-              ) : (
-                <>
-                  <button
-                    className={styles.shortUrl}
-                    title="Copier le lien court"
-                    onClick={() => {
-                      const origin = import.meta.env.VITE_API_URL || window.location.origin;
-                      navigator.clipboard.writeText(`${origin}/s/${shortCode}`);
-                    }}
-                  >
-                    /s/{shortCode} 📋
-                  </button>
-                  <button
-                    className={styles.slugEdit}
-                    title="Modifier le slug"
-                    onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
-                  >✏️</button>
-                  <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>↗</a>
-                </>
-              )}
-            </div>
-          )}
-          <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
-            {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
-          </button>
-        </div>
-      </header>
+                    }}>✓</button>
+                    <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}>✕</button>
+                    {slugStatus && slugStatus !== 'saving' && (
+                      <span className={styles.slugMsg}>{slugStatus === 'saved' ? '✓' : slugStatus}</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className={styles.shortUrl}
+                      title="Copier le lien court"
+                      onClick={() => {
+                        const origin = import.meta.env.VITE_API_URL || window.location.origin;
+                        navigator.clipboard.writeText(`${origin}/s/${shortCode}`);
+                      }}
+                    >
+                      /s/{shortCode} 📋
+                    </button>
+                    <button
+                      className={styles.slugEdit}
+                      title="Modifier le slug"
+                      onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
+                    >✏️</button>
+                    <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>↗</a>
+                  </>
+                )}
+              </div>
+            )}
+            <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
+              {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
+            </button>
+          </div>
+        </header>
 
       <div className={styles.workspace}>
         {/* ── Left Panel ── */}
@@ -388,7 +388,8 @@ export default function Editor() {
             <div className={styles.previewNav}>
               <button
                 className={styles.previewBtn}
-                onClick={() => iframeRef.current?.contentWindow?.location.reload()}
+                onClick={() => { const f = iframeRef.current; if (f) { const s = f.src; f.src = ''; f.src = s; } }}
+                //onClick={() => iframeRef.current?.contentWindow?.location.reload()}
               >↺ Restart</button>
             </div>
             <span className={styles.previewUrl}>/site/{pub.templateName}/{pub.customName}</span>

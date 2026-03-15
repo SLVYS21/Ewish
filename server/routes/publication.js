@@ -57,6 +57,7 @@ router.patch('/:id', async (req, res) => {
         mergedStyle.backgrounds = { ...(mergedStyle.backgrounds || {}), ...newBgs };
       }
     }
+    console.log('mergedStyle', mergedStyle);
 
     const update = {
       ...rest,

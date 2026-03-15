@@ -97,7 +97,7 @@ export default function Templates({ onSelectTemplate }) {
                   <button className={s.btnOrder} onClick={() => onSelectTemplate(t.name)}>
                     Commander
                   </button>
-                  <a href={`/preview/${t.name}`} target="_blank" rel="noreferrer" className={s.btnPreview}>
+                  <a href={`${import.meta.env.VITE_API_URL}/preview/${t.name}`} target="_blank" rel="noreferrer" className={s.btnPreview}>
                     Aperçu →
                   </a>
                 </div>

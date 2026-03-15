@@ -17,6 +17,7 @@ const DEFAULT_FIELDS = [
   { key:'name', label:"Recipient's Name", type:'text', section:'Intro', placeholder:'Lydia', required:true },
   { key:'greetingText', label:'Personal Note', type:'text', section:'Intro', placeholder:'I really like your name btw!' },
   { key:'musicSrc', label:'Music File URL', type:'url', section:'Music', placeholder:'https://... .mp3' },
+  { key:'musicStartTime', label:'Démarrer à', type:'starttime', section:'Music' },
   { key:'albumArt', label:'Album Cover URL', type:'url', section:'Music', placeholder:'https://... .jpg' },
   { key:'trackTitle', label:'Track Title', type:'text', section:'Music', placeholder:'Notre chanson' },
   { key:'trackArtist', label:'Artist', type:'text', section:'Music', placeholder:'Artiste' },
@@ -35,9 +36,69 @@ const DEFAULT_FIELDS = [
   { key:'replayText', label:'Replay Text', type:'text', section:'Outro' },
 ];
 
+
+/* ── Start Time Field ────────────────────────────────────────── */
+function StartTimeField({ value, onChange }) {
+  const seconds = parseInt(value) || 0;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  const fmtTime = (s) => {
+    const m = Math.floor(s / 60);
+    const ss = s % 60;
+    return `${m}:${ss.toString().padStart(2, '0')}`;
+  };
+
+  const handleSlider = (e) => onChange(parseInt(e.target.value));
+  const handleMins  = (e) => onChange(Math.max(0, parseInt(e.target.value) || 0) * 60 + secs);
+  const handleSecs  = (e) => onChange(mins * 60 + Math.max(0, Math.min(59, parseInt(e.target.value) || 0)));
+
+  return (
+    <div className={styles.startTimeField}>
+      <div className={styles.startTimeDisplay}>
+        <span className={styles.startTimeIcon}>⏱</span>
+        <span className={styles.startTimeValue}>{fmtTime(seconds)}</span>
+        <span className={styles.startTimeHint}>depuis le début</span>
+      </div>
+      <input
+        type="range"
+        min={0} max={600} step={1}
+        value={seconds}
+        onChange={handleSlider}
+        className={styles.startTimeSlider}
+      />
+      <div className={styles.startTimeMMS}>
+        <div className={styles.startTimeMM}>
+          <label>min</label>
+          <input type="number" min={0} max={10} value={mins}
+            onChange={handleMins} className={styles.startTimeNum} />
+        </div>
+        <span className={styles.startTimeSep}>:</span>
+        <div className={styles.startTimeMM}>
+          <label>sec</label>
+          <input type="number" min={0} max={59} value={secs}
+            onChange={handleSecs} className={styles.startTimeNum} />
+        </div>
+        {seconds > 0 && (
+          <button className={styles.startTimeReset} onClick={() => onChange(0)} title="Remettre à 0">✕</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ContentTab({ fields, data, onChange, onUpload }) {
   const [openSections, setOpenSections] = useState({ Intro: true, Music: true, Story: true, Message: true, Celebration: true, Wishes: true, Outro: false });
-  const effectiveFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
+  const baseFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
+
+  // Always inject musicStartTime after musicSrc, regardless of DB fields
+  const effectiveFields = baseFields.reduce((acc, f) => {
+    acc.push(f);
+    if (f.key === 'musicSrc' && !baseFields.find(x => x.key === 'musicStartTime')) {
+      acc.push({ key: 'musicStartTime', label: 'Démarrer à', type: 'starttime', section: f.section });
+    }
+    return acc;
+  }, []);
 
   // Group by section
   const sections = {};
@@ -170,6 +231,8 @@ function Field({ field, value, onChange, onUpload }) {
             </div>
           )}
         </div>
+      ) : field.type === 'starttime' ? (
+        <StartTimeField value={value} onChange={onChange} />
       ) : field.type === 'layout' ? (
         <div className={styles.layoutGrid}>
           {(field.options || []).map(opt => (

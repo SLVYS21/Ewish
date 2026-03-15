@@ -12,6 +12,8 @@
       --accent:  #ffb347;
       --font:    'Work Sans', sans-serif;
       --fs-scale: 1;
+      --text-color: #333333;
+      --text-muted: #888888;
     }
     body { margin: 0; font-family: var(--font); background: #fff; overflow: hidden; }
 
@@ -75,8 +77,8 @@
       box-shadow: 0 12px 35px rgba(255,105,180,0.35);
       overflow: hidden;
     }
-    .track-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 4px; color: #222; }
-    .track-artist { font-size: 0.82rem; color: #aaa; margin: 0 0 22px; }
+    .track-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 4px; color: var(--text-color); }
+    .track-artist { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 22px; }
     .progress-bar { width: 100%; height: 3px; background: #f0d6e8; border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 2px; width: 0%; transition: width 0.5s linear; }
     .time-row { display: flex; justify-content: space-between; font-size: 0.68rem; color: #bbb; margin-bottom: 20px; }
@@ -170,9 +172,9 @@
       border: 3px solid #fff; box-shadow: 0 4px 14px rgba(255,105,180,0.3);
     }
     .ws-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .ws-name { font-weight: 700; font-size: 1rem; color: #222; margin-bottom: 2px; }
+    .ws-name { font-weight: 700; font-size: 1rem; color: var(--text-color); margin-bottom: 2px; }
     .ws-role { font-size: 0.75rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
-    .ws-message { font-size: 0.95rem; color: #444; line-height: 1.75; font-weight: 300; font-style: italic; }
+    .ws-message { font-size: 0.95rem; color: var(--text-color); line-height: 1.75; font-weight: 300; font-style: italic; }
     .ws-message::before { content: '\201C'; font-size: 2rem; color: var(--primary); line-height: 0; vertical-align: -0.5em; margin-right: 2px; }
     .ws-message::after  { content: '\201D'; font-size: 2rem; color: var(--primary); line-height: 0; vertical-align: -0.5em; margin-left: 2px; }
     .ws-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; }
@@ -187,7 +189,7 @@
     .ws-dot { width: 8px; height: 8px; border-radius: 50%; background: #f0d6e8; transition: background 0.2s; }
     .ws-dot.active { background: var(--primary); }
     .ws-count { font-size: 0.75rem; color: #bbb; margin-top: 8px; }
-    .ws-empty { font-size: 0.9rem; color: #aaa; font-style: italic; }
+    .ws-empty { font-size: 0.9rem; color: var(--text-muted); font-style: italic; }
 
     /* ===== CONFETTI ===== */
     #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; }
@@ -376,6 +378,20 @@
 <script>
 /* ===== MUSIC ===== */
 const audio = new Audio();
+
+let _musicStartTime = 0;
+function setAudioSrc(src) {
+  if (!src || audio.src === src) return;
+  audio.src = src;
+  if (_musicStartTime > 0) {
+    const applyStart = () => {
+      audio.currentTime = _musicStartTime;
+      audio.removeEventListener('loadedmetadata', applyStart);
+    };
+    audio.addEventListener('loadedmetadata', applyStart);
+  }
+}
+
 let isPlaying = false;
 function toggleMusic() {
   if (!audio.src) return;
@@ -487,10 +503,13 @@ const applyField = (key, val) => {
   if (key === 'imagePath') {
     document.querySelector('[data-node-name="imagePath"]')?.setAttribute('src', val);
   } else if (key === 'musicSrc') {
-    audio.src = val;
+    setAudioSrc(val);
+  } else if (key === 'musicStartTime') {
+    _musicStartTime = parseFloat(val) || 0;
+    if (audio.src /*&& audio.readyState >= 1*/) audio.currentTime = _musicStartTime;
   } else if (key === 'albumArt') {
     const ph = document.getElementById('main-album-art');
-    if (ph) { const img=document.createElement('img'); img.src=val; img.style.cssText='width:200px;height:200px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 20px;box-shadow:0 12px 35px rgba(255,105,180,.35);'; ph.replaceWith(img); }
+    if (ph) { const img=document.createElement('img'); img.src=val; img.style.cssText='max-width:200px;height:200px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 20px;box-shadow:0 12px 35px rgba(255,105,180,.35);'; ph.replaceWith(img); }
     const pc = document.getElementById('pill-cover');
     if (pc) { pc.innerHTML=''; const pi=document.createElement('img'); pi.src=val; pc.appendChild(pi); }
   } else if (key === 'photo1') {
@@ -630,6 +649,8 @@ window.addEventListener('message', (e) => {
     if (style.primaryColor) r.style.setProperty('--primary', style.primaryColor);
     if (style.accentColor)  r.style.setProperty('--accent',  style.accentColor);
     if (style.fontFamily)   { r.style.setProperty('--font', `'${style.fontFamily}', sans-serif`); document.body.style.fontFamily=`'${style.fontFamily}', sans-serif`; }
+    if (style.textColor)    root.style.setProperty('--text-color', style.textColor);
+    if (style.textMuted)    root.style.setProperty('--text-muted', style.textMuted);
   }
   if (data) {
     const{photoTransforms:_pt,..._df}=data;

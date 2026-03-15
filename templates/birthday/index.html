@@ -13,6 +13,8 @@
       --accent: var(--accent);
       --font: 'Work Sans', sans-serif;
       --fs-scale: 1;
+      --text-color: #333333;
+      --text-muted: #888888;
     }
     body { margin: 0; font-family: var(--font); background: #fff; overflow: hidden; }
 
@@ -73,7 +75,7 @@
       align-items: center; justify-content: center;
       top: 0; height: 100vh;
       background: linear-gradient(160deg, #fff0f6 0%, #fff8ec 60%, #ffeef8 100%);
-      color: #333;
+      color: var(--text-color);
     } */
     .music-interlude {
     display: flex; 
@@ -102,8 +104,8 @@
       box-shadow: 0 12px 35px rgba(255,105,180,0.35);
       overflow: hidden;
     }
-    .track-title { font-size: 1.05rem; font-weight: 400; margin: 0 0 4px; color: #222; }
-    .track-artist { font-size: 0.82rem; color: #aaa; margin: 0 0 22px; }
+    .track-title { font-size: 1.05rem; font-weight: 400; margin: 0 0 4px; color: var(--text-color); }
+    .track-artist { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 22px; }
     .progress-bar {
       width: 100%; height: 3px;
       background: #f0d6e8;
@@ -182,7 +184,7 @@
       flex: 1; background: #fff; border-radius: 20px;
       padding: 8px 14px; font-size: 0.8rem;
       border: none; outline: none; font-family: inherit;
-      color: #333;
+      color: var(--text-color);
     }
     .wa-send {
       width: 36px; height: 36px; border-radius: 50%;
@@ -278,11 +280,11 @@
     }
     #wishes-overlay.open #wishes-card { transform: scale(1) translateY(0); opacity: 1; }
     #wishes-card h2 { font-size: 1.8rem; margin: 0 0 16px; color: #e91e8c; }
-    #wishes-card p { font-size: 1rem; line-height: 1.8; color: #444; margin: 0 0 12px; font-weight: 300; }
+    #wishes-card p { font-size: 1rem; line-height: 1.8; color: var(--text-color); margin: 0 0 12px; font-weight: 300; }
     #close-wishes {
       position: absolute; top: 14px; right: 18px;
       background: none; border: none; font-size: 1.6rem;
-      cursor: pointer; color: #aaa; transition: color 0.2s, transform 0.2s;
+      cursor: pointer; color: var(--text-muted); transition: color 0.2s, transform 0.2s;
     }
     #close-wishes:hover { color: #e91e8c; transform: rotate(90deg); }
     /* ===== OUTRO ===== */
@@ -318,7 +320,8 @@
 
     /* ===== MEDIA QUERIES ===== */
     @media screen and (max-width: 500px) {
-      .container { width: 90%; }
+      .container > div { top: 12vh; }
+      /*.container { width: 90%; }*/
       .idea-5 span { display: block; }
       .idea-6 span { font-size: 10rem; }
       .six .hat { width: -50000px; top: -20000px; }
@@ -497,6 +500,21 @@
    MUSIC
    ============================================================ */
 const audio = new Audio();
+
+// ── Audio start time helper ──────────────────────────────────
+let _musicStartTime = 0;
+function setAudioSrc(src) {
+  if (!src || audio.src === src) return;
+  audio.src = src;
+  if (_musicStartTime > 0) {
+    const applyStart = () => {
+      audio.currentTime = _musicStartTime;
+      audio.removeEventListener('loadedmetadata', applyStart);
+    };
+    audio.addEventListener('loadedmetadata', applyStart);
+  }
+}
+
 let isPlaying = false;
 
 function toggleMusic() {
@@ -801,6 +819,8 @@ window.addEventListener('message', (e) => {
     if (style.primaryColor) root.style.setProperty('--primary', style.primaryColor);
     if (style.accentColor)  root.style.setProperty('--accent', style.accentColor);
     if (style.fontFamily)   root.style.setProperty('--font', `'${style.fontFamily}', sans-serif`);
+    if (style.textColor)    root.style.setProperty('--text-color', style.textColor);
+    if (style.textMuted)    root.style.setProperty('--text-muted', style.textMuted);
     const scale = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
     root.style.setProperty('--fs-scale', scale);
     // Apply font to body
@@ -830,7 +850,11 @@ window.addEventListener('message', (e) => {
           }
         }
       } else if (key === 'musicSrc') {
-        if (audio && val !== audio.src) { audio.src = val; }
+        setAudioSrc(val);
+      } else if (key === 'musicStartTime') {
+        _musicStartTime = parseFloat(val) || 0;
+        if (audio.src /*&& audio.readyState >= 1*/)
+          audio.currentTime = _musicStartTime;
       } else if (key === 'photo1') {
         const el = document.querySelector('[data-photo="1"]');
         if (el) { el.innerHTML = ''; el.style.background='none'; const img=document.createElement('img'); img.src=val; img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }

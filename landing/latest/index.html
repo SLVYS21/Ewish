@@ -768,7 +768,7 @@ function openPreview(templateName) {
 
   // Load iframe after CSS transition starts
   setTimeout(() => {
-    iframe.src = `/preview/${templateName}`;
+    iframe.src = `${import.meta.env.API_URL}/preview/${templateName}`;
     iframe.onload = () => {
       iframe.classList.add('loaded');
       setTimeout(() => document.getElementById('preview-loader').classList.add('hidden'), 200);

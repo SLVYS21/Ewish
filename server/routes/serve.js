@@ -2,6 +2,19 @@ const router = require('express').Router();
 const path   = require('path');
 const fs     = require('fs');
 const Publication = require('../models/Publication');
+const Font        = require('../models/Font');
+
+
+/* ── Cloudinary URL optimizer ─────────────────────────────────
+   Inserts transformation params into Cloudinary upload URLs.
+   Non-Cloudinary URLs pass through unchanged.
+   ──────────────────────────────────────────────────────────── */
+function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_limit') {
+  if (!url || !url.includes('res.cloudinary.com')) return url;
+  // Already has transforms → don't double-add
+  if (url.includes('/upload/f_') || url.includes('/upload/q_') || url.includes('/upload/w_')) return url;
+  return url.replace('/upload/', `/upload/${transforms}/`);
+}
 
 router.get('/:templateName/:customName', async (req, res) => {
   try {
@@ -22,13 +35,23 @@ router.get('/:templateName/:customName', async (req, res) => {
       (fs.existsSync(path.join(__dirname, '../templates'))
         ? path.join(__dirname, '../templates')
         : path.join(__dirname, '../../templates'));
-        
     const templatePath = path.join(TMPL_DIR, `${pub.templateName}/index.html`);
     if (!fs.existsSync(templatePath)) {
       return res.status(404).send('<h1>Template introuvable</h1>');
     }
 
     let html = fs.readFileSync(templatePath, 'utf8');
+
+    // Load custom fonts from DB and inject @font-face declarations
+    let fontFaceCSS = '';
+    try {
+      const customFonts = await Font.find({}).lean();
+      if (customFonts.length) {
+        fontFaceCSS = customFonts.map(f =>
+          `@font-face { font-family: '${f.name}'; src: url('${f.url}') format('${f.format}'); font-display: swap; }`
+        ).join('\n');
+      }
+    } catch {}
     const s     = pub.style || {};
     const scale = s.fontSize === 'small' ? '0.85' : s.fontSize === 'large' ? '1.15' : '1';
     const bgs   = s.backgrounds || {};
@@ -40,7 +63,7 @@ router.get('/:templateName/:customName', async (req, res) => {
       let bgValue;
       if      (bg.type === 'color')    bgValue = bg.value;
       else if (bg.type === 'gradient') bgValue = bg.value;
-      else if (bg.type === 'image')    bgValue = `url("${bg.value}") center/cover no-repeat`;
+      else if (bg.type === 'image')    bgValue = `url("${optimizeCloudinaryUrl(bg.value)}") center/cover no-repeat`;
       if (bgValue) {
         bgCssLines.push(`  --bg-${key}: ${bgValue};`);
         if (bg.overlay != null) bgCssLines.push(`  --bg-${key}-overlay: ${bg.overlay};`);
@@ -50,11 +73,13 @@ router.get('/:templateName/:customName', async (req, res) => {
 
     const injection = `
 <style>
-  :root {
-    --primary:  ${s.primaryColor || '#ff69b4'};
-    --accent:   ${s.accentColor  || '#ffb347'};
-    --font:     '${s.fontFamily || 'Work Sans'}', sans-serif;
-    --fs-scale: ${scale};
+${fontFaceCSS ? fontFaceCSS + '\n' : ''}  :root {
+    --primary:    ${s.primaryColor  || '#ff69b4'};
+    --accent:     ${s.accentColor   || '#ffb347'};
+    --font:       '${s.fontFamily   || 'Work Sans'}', sans-serif;
+    --fs-scale:   ${scale};
+    --text-color: ${s.textColor     || '#333333'};
+    --text-muted: ${s.textMuted     || '#888888'};
 ${bgCssLines.join('\n')}
   }
   body { font-family: var(--font) !important; }

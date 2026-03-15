@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 5000;
 const PROD = process.env.NODE_ENV === 'production';
 
 // Domains (override via .env)
-const WWW_HOST = process.env.WWW_HOST || 'www.ewishwell.com';   // landing
-const APP_HOST = process.env.APP_HOST || 'app.ewishwell.com';   // React app
+const WWW_HOST = process.env.WWW_HOST || 'www.mykado.store';   // landing
+const APP_HOST = process.env.APP_HOST || 'app.mykado.store';   // React app
 
 // ── CORS ─────────────────────────────────────────────────────
 // Allow both subdomains in production, Vite dev server locally
@@ -63,6 +63,7 @@ app.use('/api/wishes',       require('./routes/wishes'));
 app.use('/api/publications',  require('./routes/publication'));
 app.use('/api/analytics',    require('./routes/analytics'));
 app.use('/api/shortlinks',   require('./routes/shortlinks'));
+app.use('/api/fonts',        require('./routes/fonts.js'));
 
 app.use('/collect', require('./routes/collect'));
 app.use('/s',       require('./routes/shortlinks'));

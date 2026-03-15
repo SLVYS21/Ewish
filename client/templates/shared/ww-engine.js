@@ -442,11 +442,24 @@
       applyLiveUpdate: function(payload) {
         if (!payload || !payload.type) return;  // must have type field to be a valid WW message
         const { style, decorations } = payload;
-        if (style && style.backgrounds) {
+        if (style) {
           window.__WW_STYLE__ = window.__WW_STYLE__ || {};
-          window.__WW_STYLE__.backgrounds = { ...(window.__WW_STYLE__.backgrounds || {}), ...style.backgrounds };
-          // In editor (iframe) context: make all sections visible so bg preview works
-          applyBackgrounds({ backgrounds: style.backgrounds });
+          // Apply CSS variables live for instant preview
+          const root = document.documentElement;
+          if (style.primaryColor) root.style.setProperty('--primary',    style.primaryColor);
+          if (style.accentColor)  root.style.setProperty('--accent',     style.accentColor);
+          if (style.fontFamily)   root.style.setProperty('--font',       `'${style.fontFamily}', sans-serif`);
+          if (style.textColor)    root.style.setProperty('--text-color', style.textColor);
+          if (style.textMuted)    root.style.setProperty('--text-muted', style.textMuted);
+          if (style.fontSize) {
+            const scale = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
+            root.style.setProperty('--fs-scale', scale);
+          }
+          if (style.backgrounds) {
+            window.__WW_STYLE__.backgrounds = { ...(window.__WW_STYLE__.backgrounds || {}), ...style.backgrounds };
+            // In editor (iframe) context: make all sections visible so bg preview works
+            applyBackgrounds({ backgrounds: style.backgrounds });
+          }
         }
         if (decorations !== undefined) {
           window.__WW_DECO__ = decorations;

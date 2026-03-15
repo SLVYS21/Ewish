@@ -82,3 +82,98 @@
 .layoutBtnActive { background: #f0e6ff !important; border-color: #a855f7 !important; }
 .layoutIcon { font-size: 1.4rem; line-height: 1; }
 .layoutLabel { font-size: 0.6rem; color: #666; font-weight: 500; text-align: center; white-space: nowrap; }
+
+/* ── Start Time Field ────────────────────────────────────────── */
+.startTimeField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.startTimeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface, rgba(255,255,255,.05));
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 8px;
+}
+
+.startTimeIcon { font-size: 1rem; }
+
+.startTimeValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--brand, #c8963e);
+  letter-spacing: 0.04em;
+}
+
+.startTimeHint {
+  font-size: 0.7rem;
+  color: var(--text-3, rgba(255,255,255,.35));
+  margin-left: auto;
+}
+
+.startTimeSlider {
+  width: 100%;
+  accent-color: var(--brand, #c8963e);
+  cursor: pointer;
+  height: 4px;
+}
+
+.startTimeMMS {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.startTimeMM {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.startTimeMM label {
+  font-size: 0.62rem;
+  color: var(--text-3, rgba(255,255,255,.35));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.startTimeNum {
+  width: 52px;
+  text-align: center;
+  padding: 5px 6px;
+  border: 1.5px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 6px;
+  background: var(--surface, rgba(255,255,255,.05));
+  color: var(--text, #fff);
+  font-size: 0.9rem;
+  font-family: monospace;
+  font-weight: 600;
+}
+.startTimeNum:focus { outline: none; border-color: var(--brand, #c8963e); }
+
+.startTimeSep {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-2, rgba(255,255,255,.6));
+  margin-top: 14px;
+}
+
+.startTimeReset {
+  margin-top: 14px;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-3, rgba(255,255,255,.3));
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color .15s, background .15s;
+}
+.startTimeReset:hover { color: #e74c3c; background: rgba(231,76,60,.1); }
