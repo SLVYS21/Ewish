@@ -543,15 +543,15 @@ function toggleMusic() {
   if (isPlaying) {
     audio.pause();
     isPlaying = false;
-    document.getElementById('main-play-btn').textContent = svgPlay;
-    document.getElementById('pill-icon').textContent = svgPlay;
+    document.getElementById('main-play-btn').innerHtml = svgPlay;
+    document.getElementById('pill-icon').innerHtml = svgPlay;
     document.getElementById('pill-label').textContent = 'Play';
     document.getElementById('pill-cover').style.animationPlayState = 'paused';
   } else {
     audio.play().catch(() => {});
     isPlaying = true;
-    document.getElementById('main-play-btn').textContent = svgPause;
-    document.getElementById('pill-icon').textContent = svgPause;
+    document.getElementById('main-play-btn').innerHtml = svgPause;
+    document.getElementById('pill-icon').innerHtml = svgPause;
     document.getElementById('pill-label').textContent = 'Pause';
     document.getElementById('pill-cover').style.animationPlayState = 'running';
   }
