@@ -407,7 +407,11 @@
 <div id="music-pill">
   <button class="pill-btn" onclick="toggleMusic()">
     <div class="pill-cover-wrap" id="pill-cover">🎵</div>
-    <span id="pill-icon" class="pill-icon">▶</span>
+    <span id="pill-icon" class="pill-icon">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </span>
     <span id="pill-label" class="pill-label">Play</span>
   </button>
 </div>
@@ -444,7 +448,11 @@
       <div class="time-row"><span id="cur-time">0:00</span><span id="dur-time">3:30</span></div>
       <div class="controls">
         <button class="ctrl-btn" onclick="skipTrack(-15)">⏮</button>
-        <button class="ctrl-btn ctrl-play" id="main-play-btn" onclick="toggleMusic()">▶</button>
+        <button class="ctrl-btn ctrl-play" id="main-play-btn" onclick="toggleMusic()">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
         <button class="ctrl-btn" onclick="skipTrack(15)">⏭</button>
       </div>
     </div>
@@ -649,19 +657,22 @@ function setAudioSrc(src) {
 }
 
 let isPlaying = false;
+const svgPlay = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const svgPause = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
 
+// Tu injecterais ces variables via innerHTML au lieu de modifier le textContent
 function toggleMusic() {
   if (!audio.src) return;
   if (isPlaying) {
     audio.pause(); isPlaying = false;
-    document.getElementById('main-play-btn').textContent = '▶';
-    document.getElementById('pill-icon').textContent = '▶';
+    document.getElementById('main-play-btn').textContent = svgPlay;
+    document.getElementById('pill-icon').textContent = svgPlay;
     document.getElementById('pill-label').textContent = 'Play';
   } else {
     audio.play().catch(() => {});
     isPlaying = true;
-    document.getElementById('main-play-btn').textContent = '⏸';
-    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('main-play-btn').textContent = svgPause;
+    document.getElementById('pill-icon').textContent = svgPause;
     document.getElementById('pill-label').textContent = 'Pause';
   }
 }
@@ -1107,7 +1118,7 @@ window.addEventListener('message', (e) => {
   /* ─── Floating trigger button ─── */
   const btn = document.createElement('button');
   btn.id = 'jar-btn';
-  btn.innerHTML = '🫙 Jar of Words';
+  btn.innerHTML = 'Jar of Words';
   btn.addEventListener('click', openJar);
   document.body.appendChild(btn);
 
@@ -1344,7 +1355,7 @@ window.addEventListener('message', (e) => {
     cats  = Array.isArray(cfg.categories) && cfg.categories.length ? cfg.categories : DEF_CATS;
     drawn = [];
     // Update button label by design
-    btn.innerHTML = design === 'readmewhen' ? '💌 Lis-moi quand…' : design === 'scroll' ? '📜 Vase des parchemins' : '🫙 Jar of Words';
+    btn.innerHTML = design === 'readmewhen' ? 'Lis-moi quand…' : design === 'scroll' ? 'Vase des parchemins' : 'Jar of Words';
     buildInner();
   };
 

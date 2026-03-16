@@ -236,7 +236,7 @@ window.JarOfWords = (() => {
     /* Trigger button */
     const trigger = document.createElement('button');
     trigger.id = 'jar-trigger';
-    trigger.innerHTML = '🫙 Jar of Words';
+    trigger.innerHTML = 'Jar of Words';
     trigger.style.display = 'none';
     trigger.addEventListener('click', open);
     document.body.appendChild(trigger);
