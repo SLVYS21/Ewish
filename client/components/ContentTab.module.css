@@ -177,3 +177,43 @@
   transition: color .15s, background .15s;
 }
 .startTimeReset:hover { color: #e74c3c; background: rgba(231,76,60,.1); }
+
+/* ── Date Field ─────────────────────────────────────────────── */
+.dateField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dateInput {
+  width: 100%;
+  border: 1.5px solid var(--border, rgba(255,255,255,.1));
+  border-radius: var(--radius-sm, 7px);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--surface, rgba(255,255,255,.05));
+  color: var(--text, #fff);
+  outline: none;
+  cursor: pointer;
+}
+.dateInput:focus { border-color: var(--brand, #c8963e); }
+.dateDays {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--surface, rgba(255,255,255,.05));
+  border-radius: 6px;
+  border: 1px solid var(--border, rgba(255,255,255,.08));
+}
+.dateDaysNum {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--brand, #c8963e);
+  font-family: monospace;
+}
+.dateDaysLabel {
+  font-size: 0.72rem;
+  color: var(--text-3, rgba(255,255,255,.4));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}

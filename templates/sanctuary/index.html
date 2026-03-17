@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanctuary</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:    #7b5e3a;
+      --accent:     #c9a96e;
+      --font:       'Crimson Text', Georgia, serif;
+      --font-ui:    'Lato', sans-serif;
+      --fs-scale:   1;
+      --text-color: #2c1f0e;
+      --text-muted: #8a6a4a;
+      --bg:         #f9f4ec;
+      --paper:      #fdf8f0;
+      --paper-edge: #e8d9c0;
+      --gold:       #c9a96e;
+      --spine:      #5a3e24;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text-color);
+    }
+
+    /* ══════════════════════════════════
+       INTRO — Couverture
+    ══════════════════════════════════ */
+    #intro {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    #intro .cover-book {
+      width: 200px;
+      background: linear-gradient(160deg, #6b4a28, #3d2510);
+      border-radius: 4px 12px 12px 4px;
+      padding: 28px 20px;
+      box-shadow: -6px 0 0 #2a1508, 0 20px 60px rgba(0,0,0,0.35), inset 0 0 30px rgba(0,0,0,0.2);
+      position: relative;
+      margin-bottom: 28px;
+    }
+    #intro .cover-ornament {
+      text-align: center;
+      color: var(--gold);
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      opacity: 0.8;
+    }
+    #intro .cover-title {
+      text-align: center;
+      font-family: var(--font);
+      font-size: 1.1rem;
+      color: rgba(201,169,110,0.9);
+      letter-spacing: 0.12em;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    #intro .cover-recipient {
+      text-align: center;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: rgba(201,169,110,0.55);
+    }
+    #intro .cover-line {
+      width: 100%; height: 1px;
+      background: rgba(201,169,110,0.25);
+      margin: 10px 0;
+    }
+    #intro .cover-bottom {
+      text-align: center;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(201,169,110,0.35);
+    }
+    #intro .open-btn {
+      font-family: var(--font);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      background: none; border: none;
+      cursor: pointer; letter-spacing: 0.06em;
+      transition: color 0.3s;
+      opacity: 0;
+    }
+    #intro .open-btn:hover { color: var(--spine); }
+    #intro .open-hint {
+      font-family: var(--font-ui);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(122,90,58,0.35);
+      margin-top: 8px;
+    }
+
+    /* ══════════════════════════════════
+       BOOK CONTAINER
+    ══════════════════════════════════ */
+    #book-container {
+      position: fixed; inset: 0; z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+    #book-container.open { display: flex; }
+
+    /* ── Spine (tranche) ── */
+    #book {
+      position: relative;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+    }
+
+    /* ── Page ── */
+    .page {
+      width: 100%;
+      background: var(--paper);
+      border-radius: 2px 8px 8px 2px;
+      box-shadow: -4px 0 0 var(--spine), 2px 4px 20px rgba(0,0,0,0.14), inset -1px 0 0 var(--paper-edge);
+      min-height: 460px;
+      max-height: 65vh;
+      overflow: hidden;
+      position: relative;
+      display: none;
+    }
+    .page.active { display: flex; flex-direction: column; }
+
+    /* ── Page header ── */
+    .page-header {
+      padding: 16px 20px 10px;
+      border-bottom: 1px solid var(--paper-edge);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .page-type {
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .page-num {
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      color: var(--paper-edge);
+    }
+    .page-ref {
+      font-family: var(--font-ui);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      font-style: normal;
+      opacity: 0.85;
+    }
+
+    /* ── Page body ── */
+    .page-body {
+      padding: 18px 22px 20px;
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--paper-edge) transparent;
+    }
+    .page-body::-webkit-scrollbar { width: 3px; }
+    .page-body::-webkit-scrollbar-thumb { background: var(--paper-edge); border-radius: 2px; }
+
+    /* ── Verset page ── */
+    .verse-ornament {
+      text-align: center;
+      color: var(--gold); font-size: 0.75rem;
+      letter-spacing: 0.6em; opacity: 0.5;
+      margin-bottom: 14px;
+    }
+    .verse-body {
+      font-size: calc(1.2rem * var(--fs-scale));
+      font-style: italic;
+      line-height: 1.9;
+      color: var(--text-color);
+      text-align: center;
+    }
+    .verse-body em { color: var(--gold); font-style: normal; }
+    .verse-author {
+      text-align: right;
+      font-family: var(--font-ui);
+      font-size: 0.68rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-top: 14px;
+      border-top: 1px solid var(--paper-edge);
+      padding-top: 10px;
+    }
+
+    /* ── Prière page ── */
+    .prayer-title {
+      font-size: calc(0.95rem * var(--fs-scale));
+      font-weight: 600;
+      color: var(--spine);
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .prayer-from {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.6;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .prayer-body {
+      font-size: calc(1.05rem * var(--fs-scale));
+      font-style: italic;
+      line-height: 2;
+      color: var(--text-color);
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    .prayer-amen {
+      text-align: center;
+      font-size: calc(0.85rem * var(--fs-scale));
+      color: var(--gold);
+      letter-spacing: 0.3em;
+      margin-top: 14px;
+      opacity: 0.7;
+    }
+
+    /* ── Navigation ── */
+    #book-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%;
+      padding: 12px 4px 0;
+    }
+    .nav-btn {
+      background: none; border: none;
+      font-family: var(--font-ui);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer; padding: 8px 12px;
+      transition: color 0.2s;
+      opacity: 0.6;
+    }
+    .nav-btn:hover { color: var(--spine); opacity: 1; }
+    .nav-btn:disabled { opacity: 0.15; cursor: default; }
+    #page-indicator {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--paper-edge);
+    }
+
+    /* ── Tabs (mini sommaire) ── */
+    #book-tabs {
+      position: absolute;
+      right: -28px; top: 20px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .book-tab {
+      width: 26px; height: 26px;
+      background: var(--paper);
+      border: 1px solid var(--paper-edge);
+      border-left: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.08);
+      transition: background 0.2s;
+    }
+    .book-tab:hover { background: #fdf3e0; }
+    .book-tab.active { background: #fdf3e0; border-color: var(--gold); }
+
+    /* ── Edit button (admin) ── */
+    #edit-fab {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 500;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--spine);
+      border: none; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+      opacity: 0.6;
+    }
+    #edit-fab:hover { opacity: 1; transform: scale(1.08); }
+
+    /* ══════════════════════════════════
+       MUSIC PILL
+    ══════════════════════════════════ */
+    #music-pill {
+      position: fixed; top: 16px; right: 16px;
+      z-index: 600; display: none;
+    }
+    .pill-btn {
+      background: #fff;
+      border: 1px solid rgba(123,94,58,0.2);
+      border-radius: 50px;
+      color: var(--spine);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px 7px 7px;
+      font-family: var(--font-ui);
+      font-size: 0.72rem; font-weight: 300;
+      letter-spacing: 0.06em;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+    }
+    .pill-btn:hover { box-shadow: 0 5px 18px rgba(0,0,0,0.14); }
+    .pill-cover-wrap {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(123,94,58,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; overflow: hidden; flex-shrink: 0;
+    }
+    .pill-cover-wrap img { width:100%;height:100%;object-fit:cover;border-radius:50%; }
+
+    /* ══════════════════════════════════
+       PIN MODAL
+    ══════════════════════════════════ */
+    #pin-modal {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(44,31,14,0.6);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center; justify-content: center;
+    }
+    #pin-modal.open { display: flex; }
+    #pin-box {
+      background: var(--paper);
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 280px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+    #pin-box h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--spine);
+      margin-bottom: 6px;
+    }
+    #pin-box p {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    #pin-dots {
+      display: flex; justify-content: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .pin-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid var(--paper-edge);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .pin-dot.filled { background: var(--spine); border-color: var(--spine); }
+    .pin-dot.error  { background: #c0392b; border-color: #c0392b; }
+    #pin-keypad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-bottom: 12px;
+    }
+    .pin-key {
+      height: 44px;
+      background: #f5ede0;
+      border: 1px solid var(--paper-edge);
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 1rem; font-weight: 400;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pin-key:hover { background: #ffe8c8; border-color: var(--gold); }
+    .pin-key:active { transform: scale(0.94); }
+    .pin-key.del { font-size: 0.85rem; color: var(--text-muted); }
+    #pin-error {
+      font-family: var(--font-ui);
+      font-size: 0.68rem;
+      color: #c0392b;
+      height: 18px;
+      transition: opacity 0.2s;
+    }
+    #pin-cancel {
+      font-family: var(--font-ui);
+      font-size: 0.68rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      background: none; border: none;
+      cursor: pointer; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ══════════════════════════════════
+       PAGE EDITOR MODAL
+    ══════════════════════════════════ */
+    #page-editor {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(44,31,14,0.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: flex-end; justify-content: center;
+      padding-bottom: 0;
+    }
+    #page-editor.open { display: flex; }
+    #editor-panel {
+      background: var(--paper);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 32px;
+      width: 100%; max-width: 400px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    #editor-panel h3 {
+      font-size: 1.1rem; font-weight: 600;
+      color: var(--spine); margin-bottom: 16px;
+      text-align: center;
+    }
+    .ed-field { margin-bottom: 14px; }
+    .ed-label {
+      font-family: var(--font-ui);
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 5px; display: block;
+    }
+    .ed-input, .ed-textarea, .ed-select {
+      width: 100%;
+      border: 1px solid var(--paper-edge);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--text-color);
+      background: #fffaf5;
+      outline: none;
+    }
+    .ed-input:focus, .ed-textarea:focus, .ed-select:focus { border-color: var(--gold); }
+    .ed-textarea { min-height: 90px; resize: vertical; }
+    .ed-select { font-family: var(--font-ui); font-size: 0.85rem; }
+    .ed-row { display: flex; gap: 10px; }
+    .ed-row > * { flex: 1; }
+    .ed-btn-row { display: flex; gap: 10px; margin-top: 18px; }
+    .ed-btn {
+      flex: 1; padding: 11px;
+      border-radius: 10px;
+      font-family: var(--font-ui);
+      font-size: 0.78rem; font-weight: 400;
+      letter-spacing: 0.06em; cursor: pointer;
+      border: none; transition: all 0.2s;
+    }
+    .ed-btn-save { background: var(--spine); color: #fff; }
+    .ed-btn-save:hover { background: #3d2510; }
+    .ed-btn-delete { background: #fbe8e8; color: #c0392b; border: 1px solid #f0c0b8; }
+    .ed-btn-delete:hover { background: #f5d0c8; }
+    .ed-btn-cancel { background: #f0ebe3; color: var(--text-muted); }
+    .ed-pages-list { margin-bottom: 14px; }
+    .ed-page-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: #f8f2e8;
+      border-radius: 8px; margin-bottom: 6px;
+      cursor: pointer; border: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .ed-page-item:hover { border-color: var(--gold); }
+    .ed-page-item.selected { border-color: var(--spine); background: #fdf5e8; }
+    .ed-page-icon { font-size: 1rem; flex-shrink: 0; }
+    .ed-page-info { flex: 1; min-width: 0; }
+    .ed-page-type { font-family: var(--font-ui); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+    .ed-page-title { font-size: 0.9rem; font-style: italic; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ed-add-btn {
+      width: 100%; padding: 10px;
+      background: none;
+      border: 1.5px dashed var(--paper-edge);
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 0.72rem; letter-spacing: 0.1em;
+      color: var(--text-muted); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ed-add-btn:hover { border-color: var(--gold); color: var(--spine); }
+
+    /* ── PIN setup first time ── */
+    #pin-setup {
+      position: fixed; inset: 0; z-index: 1100;
+      background: rgba(44,31,14,0.6); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+    }
+    #pin-setup.open { display: flex; }
+    #pin-setup-box {
+      background: var(--paper); border-radius: 16px;
+      padding: 28px 24px; width: 280px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.25); text-align: center;
+    }
+    #pin-setup-box h3 { font-size: 1.1rem; color: var(--spine); margin-bottom: 6px; }
+    #pin-setup-box p { font-family: var(--font-ui); font-size: 0.72rem; color: var(--text-muted); margin-bottom: 18px; font-weight: 300; }
+
+    @media (max-width: 380px) {
+      #book { width: calc(100vw - 32px); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Music pill -->
+<div id="music-pill">
+  <button class="pill-btn" onclick="toggleMusic()">
+    <div class="pill-cover-wrap" id="pill-cover">♪</div>
+    <span id="pill-icon">▶</span>
+    <span id="pill-label">louange</span>
+  </button>
+</div>
+
+<!-- ══════════════════
+     INTRO COVER
+══════════════════ -->
+<div id="intro">
+  <div class="cover-book" id="cover-book">
+    <div class="cover-ornament" id="cover-ornament">✦</div>
+    <div class="cover-line"></div>
+    <div class="cover-title" data-node-name="bookTitle">Ma Bible de Poche</div>
+    <div class="cover-line"></div>
+    <div class="cover-recipient" data-node-name="bookSubtitle">pour toi, avec amour</div>
+    <div class="cover-line" style="margin-top:12px"></div>
+    <div class="cover-bottom" data-node-name="bookFrom">de maman</div>
+  </div>
+  <button class="open-btn" id="open-btn">ouvrir le livre</button>
+  <div class="open-hint">appuyer pour continuer</div>
+</div>
+
+<!-- ══════════════════
+     BOOK
+══════════════════ -->
+<div id="book-container">
+  <div id="book">
+    <!-- Tabs latéraux -->
+    <div id="book-tabs"></div>
+
+    <!-- Page active -->
+    <div id="current-page" class="page active">
+      <!-- remplie dynamiquement -->
+    </div>
+    <div id="book-nav">
+      <button class="nav-btn" id="prev-btn" onclick="goPage(-1)" disabled>← précédent</button>
+      <span id="page-indicator">1 / 1</span>
+      <button class="nav-btn" id="next-btn" onclick="goPage(1)">suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit FAB -->
+<button id="edit-fab" onclick="openPinModal()" title="Modifier le livre">✏️</button>
+
+<!-- ══════════════════
+     PIN MODAL
+══════════════════ -->
+<div id="pin-modal">
+  <div id="pin-box">
+    <h3>Accès protégé</h3>
+    <p id="pin-desc">Entrez votre code à 6 chiffres</p>
+    <div id="pin-dots">
+      <div class="pin-dot" id="dot-0"></div>
+      <div class="pin-dot" id="dot-1"></div>
+      <div class="pin-dot" id="dot-2"></div>
+      <div class="pin-dot" id="dot-3"></div>
+      <div class="pin-dot" id="dot-4"></div>
+      <div class="pin-dot" id="dot-5"></div>
+    </div>
+    <div id="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key del" onclick="pinKey('del')">⌫</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinKey('cancel')">✕</button>
+    </div>
+    <div id="pin-error"></div>
+    <button id="pin-cancel" onclick="closePinModal()">annuler</button>
+  </div>
+</div>
+
+<!-- PIN SETUP (first time) -->
+<div id="pin-setup">
+  <div id="pin-setup-box">
+    <h3>Choisir un code</h3>
+    <p id="setup-desc">Définissez votre code secret à 6 chiffres pour protéger l'édition</p>
+    <div id="pin-dots-setup">
+      <div id="pin-keypad-setup" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        <button class="pin-key" onclick="setupKey('1')">1</button>
+        <button class="pin-key" onclick="setupKey('2')">2</button>
+        <button class="pin-key" onclick="setupKey('3')">3</button>
+        <button class="pin-key" onclick="setupKey('4')">4</button>
+        <button class="pin-key" onclick="setupKey('5')">5</button>
+        <button class="pin-key" onclick="setupKey('6')">6</button>
+        <button class="pin-key" onclick="setupKey('7')">7</button>
+        <button class="pin-key" onclick="setupKey('8')">8</button>
+        <button class="pin-key" onclick="setupKey('9')">9</button>
+        <button class="pin-key del" onclick="setupKey('del')">⌫</button>
+        <button class="pin-key" onclick="setupKey('0')">0</button>
+        <button class="pin-key del" style="opacity:0.3">✕</button>
+      </div>
+      <div id="setup-dots" style="display:flex;justify-content:center;gap:10px;margin-bottom:12px">
+        <div class="pin-dot" id="sd-0"></div><div class="pin-dot" id="sd-1"></div>
+        <div class="pin-dot" id="sd-2"></div><div class="pin-dot" id="sd-3"></div>
+        <div class="pin-dot" id="sd-4"></div><div class="pin-dot" id="sd-5"></div>
+      </div>
+    </div>
+    <div id="setup-error" style="font-family:var(--font-ui);font-size:0.68rem;color:#c0392b;height:18px;margin-bottom:8px"></div>
+  </div>
+</div>
+
+<!-- ══════════════════
+     PAGE EDITOR
+══════════════════ -->
+<div id="page-editor">
+  <div id="editor-panel">
+    <h3>✦ Modifier le livre</h3>
+
+    <!-- List of pages -->
+    <div class="ed-pages-list" id="ed-pages-list"></div>
+    <button class="ed-add-btn" onclick="edAddPage()">+ Ajouter une page</button>
+
+    <!-- Form (shown when a page is selected) -->
+    <div id="ed-form" style="display:none;margin-top:18px;border-top:1px solid var(--paper-edge);padding-top:16px">
+      <div class="ed-field">
+        <label class="ed-label">Type de page</label>
+        <select class="ed-select" id="ed-type" onchange="edTypeChange()">
+          <option value="verse">Verset</option>
+          <option value="prayer">Prière</option>
+        </select>
+      </div>
+      <!-- Verse fields -->
+      <div id="ed-verse-fields">
+        <div class="ed-field">
+          <label class="ed-label">Référence (ex: Jean 3:16)</label>
+          <input class="ed-input" id="ed-ref" placeholder="Jean 3:16" />
+        </div>
+        <div class="ed-field">
+          <label class="ed-label">Texte du verset</label>
+          <textarea class="ed-textarea" id="ed-text" placeholder="Car Dieu a tant aimé le monde..."></textarea>
+        </div>
+        <div class="ed-field">
+          <label class="ed-label">Auteur / Source</label>
+          <input class="ed-input" id="ed-author" placeholder="Bible, Coran, source..." />
+        </div>
+      </div>
+      <!-- Prayer fields -->
+      <div id="ed-prayer-fields" style="display:none">
+        <div class="ed-field">
+          <label class="ed-label">Titre de la prière</label>
+          <input class="ed-input" id="ed-ptitle" placeholder="Prière de maman" />
+        </div>
+        <div class="ed-field">
+          <label class="ed-label">De la part de</label>
+          <input class="ed-input" id="ed-pfrom" placeholder="Maman" />
+        </div>
+        <div class="ed-field">
+          <label class="ed-label">Texte de la prière</label>
+          <textarea class="ed-textarea" id="ed-pbody" style="min-height:120px" placeholder="Seigneur, je te confie..."></textarea>
+        </div>
+        <div class="ed-field">
+          <label class="ed-label">Conclusion (Amen, Ameen…)</label>
+          <input class="ed-input" id="ed-pamen" placeholder="Amen" />
+        </div>
+      </div>
+      <div class="ed-btn-row">
+        <button class="ed-btn ed-btn-save" onclick="edSavePage()">Enregistrer</button>
+        <button class="ed-btn ed-btn-delete" onclick="edDeletePage()" id="ed-delete-btn">Supprimer</button>
+      </div>
+      <div class="ed-btn-row" style="margin-top:8px">
+        <button class="ed-btn ed-btn-cancel" onclick="closeEditor()">Fermer</button>
+      </div>
+    </div>
+    <div id="ed-form-empty" style="margin-top:16px;border-top:1px solid var(--paper-edge);padding-top:16px">
+      <button class="ed-btn ed-btn-cancel" style="width:100%" onclick="closeEditor()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let pages = [];        // Array of page objects
+let currentIdx = 0;
+
+const STORAGE_KEY = 'ww_sanctuary_pages';
+const PIN_KEY     = 'ww_sanctuary_pin';
+
+/* ══════════════════════════════════════════════════
+   DEFAULT PAGES
+══════════════════════════════════════════════════ */
+const DEFAULT_PAGES = [
+  {
+    id: 'p1', type: 'verse',
+    ref: 'Philippiens 4:6-7',
+    text: 'Ne vous inquiétez de rien,\nmais en toute chose faites\nconnaître vos besoins à Dieu\npar des prières et des supplications,\navec des actions de grâces.',
+    author: 'Bible — Épître aux Philippiens',
+  },
+  {
+    id: 'p2', type: 'prayer',
+    title: 'Prière de maman',
+    from: 'Maman',
+    body: 'Seigneur, je te confie mon enfant.\nProtège-le sur tous ses chemins.\nDonne-lui la sagesse,\nla paix du cœur,\net que ta lumière\nguide chacun de ses pas.',
+    amen: 'Amen',
+  },
+  {
+    id: 'p3', type: 'verse',
+    ref: 'Psaumes 23:1',
+    text: 'L\'Éternel est mon berger :\nJe ne manquerai de rien.',
+    author: 'Bible — Psaumes de David',
+  },
+];
+
+/* ══════════════════════════════════════════════════
+   AUDIO
+══════════════════════════════════════════════════ */
+const audio = new Audio();
+let isPlaying = false;
+let _musicStartTime = 0;
+
+function setAudioSrc(src) {
+  if (!src || audio.src === src) return;
+  audio.src = src;
+  if (_musicStartTime > 0) {
+    const apply = () => { audio.currentTime = _musicStartTime; audio.removeEventListener('loadedmetadata', apply); };
+    audio.addEventListener('loadedmetadata', apply);
+  }
+}
+function toggleMusic() {
+  if (!audio.src || audio.src === window.location.href) return;
+  if (isPlaying) {
+    audio.pause(); isPlaying = false;
+    document.getElementById('pill-icon').textContent = '▶';
+  } else {
+    audio.play().catch(() => {});
+    isPlaying = true;
+    document.getElementById('pill-icon').textContent = '⏸';
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER PAGE
+══════════════════════════════════════════════════ */
+function renderPage(idx) {
+  const pg = pages[idx];
+  if (!pg) return;
+  const container = document.getElementById('current-page');
+
+  let headerRight = '';
+  let bodyHtml = '';
+
+  if (pg.type === 'verse') {
+    headerRight = `<span class="page-ref">${escHtml(pg.ref || '')}</span>`;
+    bodyHtml = `
+      <div class="verse-ornament">· ✦ ·</div>
+      <div class="verse-body">${formatText(pg.text || '')}</div>
+      ${pg.author ? `<div class="verse-author">— ${escHtml(pg.author)}</div>` : ''}
+    `;
+  } else if (pg.type === 'prayer') {
+    headerRight = `<span class="page-ref">${escHtml(pg.from || '')}</span>`;
+    bodyHtml = `
+      <div class="prayer-title">${escHtml(pg.title || 'Prière')}</div>
+      ${pg.from ? `<div class="prayer-from">de ${escHtml(pg.from)}</div>` : ''}
+      <div class="prayer-body">${escHtml(pg.body || '')}</div>
+      ${pg.amen ? `<div class="prayer-amen">${escHtml(pg.amen)}</div>` : ''}
+    `;
+  }
+
+  const typeLabel = pg.type === 'verse' ? 'Verset' : 'Prière';
+  container.innerHTML = `
+    <div class="page-header">
+      <span class="page-type">${typeLabel}</span>
+      ${headerRight}
+      <span class="page-num">${idx + 1} / ${pages.length}</span>
+    </div>
+    <div class="page-body">${bodyHtml}</div>
+  `;
+
+  // Animate in
+  TweenMax.from(container, 0.35, { opacity: 0, x: 20, ease: Power2.easeOut });
+
+  // Update nav
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === pages.length - 1;
+  document.getElementById('page-indicator').textContent = `${idx + 1} / ${pages.length}`;
+
+  // Update tabs
+  renderTabs(idx);
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function formatText(s) {
+  // bold *text* → em, newlines → br, and color first word if verse-like
+  return escHtml(s).replace(/\n/g, '<br>');
+}
+
+function renderTabs(activeIdx) {
+  const container = document.getElementById('book-tabs');
+  container.innerHTML = '';
+  pages.forEach((pg, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'book-tab' + (i === activeIdx ? ' active' : '');
+    tab.title = pg.type === 'verse' ? (pg.ref || 'Verset') : (pg.title || 'Prière');
+    tab.textContent = pg.type === 'verse' ? '✦' : '🙏';
+    tab.onclick = () => { currentIdx = i; renderPage(i); };
+    container.appendChild(tab);
+  });
+}
+
+function goPage(dir) {
+  const next = currentIdx + dir;
+  if (next < 0 || next >= pages.length) return;
+  currentIdx = next;
+  renderPage(currentIdx);
+}
+
+/* ══════════════════════════════════════════════════
+   PIN SYSTEM
+══════════════════════════════════════════════════ */
+let pinBuffer = '';
+let pinMode = 'check'; // 'check' | 'setup-1' | 'setup-2'
+let pinFirst = '';
+
+function getStoredPin() {
+  try { return localStorage.getItem(PIN_KEY) || null; } catch { return null; }
+}
+function setStoredPin(p) {
+  try { localStorage.setItem(PIN_KEY, p); } catch {}
+}
+
+function openPinModal() {
+  const stored = getStoredPin();
+  if (!stored) {
+    // First time — setup PIN
+    openPinSetup();
+    return;
+  }
+  pinMode = 'check';
+  pinBuffer = '';
+  updatePinDots('pin-dots', 0, false);
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-desc').textContent = 'Entrez votre code à 6 chiffres';
+  document.getElementById('pin-modal').classList.add('open');
+}
+
+function closePinModal() {
+  document.getElementById('pin-modal').classList.remove('open');
+  pinBuffer = '';
+}
+
+function pinKey(k) {
+  if (k === 'cancel') { closePinModal(); return; }
+  if (k === 'del') {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots('pin-dots', pinBuffer.length, false);
+    return;
+  }
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += k;
+  updatePinDots('pin-dots', pinBuffer.length, false);
+
+  if (pinBuffer.length === 6) {
+    setTimeout(() => checkPin(), 120);
+  }
+}
+
+function checkPin() {
+  const stored = getStoredPin();
+  if (pinBuffer === stored) {
+    closePinModal();
+    openEditor();
+  } else {
+    updatePinDots('pin-dots', 6, true);
+    document.getElementById('pin-error').textContent = 'Code incorrect';
+    setTimeout(() => {
+      pinBuffer = '';
+      updatePinDots('pin-dots', 0, false);
+      document.getElementById('pin-error').textContent = '';
+    }, 900);
+  }
+}
+
+function updatePinDots(containerId, count, error) {
+  for (let i = 0; i < 6; i++) {
+    const dot = document.getElementById(containerId === 'pin-dots' ? `dot-${i}` : `sd-${i}`);
+    if (!dot) continue;
+    dot.classList.toggle('filled', i < count && !error);
+    dot.classList.toggle('error', i < count && error);
+  }
+}
+
+/* PIN SETUP */
+let setupBuffer = '';
+function openPinSetup() {
+  pinMode = 'setup-1';
+  setupBuffer = '';
+  document.getElementById('setup-desc').textContent = 'Définissez votre code à 6 chiffres';
+  updatePinDots('setup-dots', 0, false);
+  document.getElementById('pin-setup').classList.add('open');
+}
+function closePinSetup() {
+  document.getElementById('pin-setup').classList.remove('open');
+  setupBuffer = '';
+}
+function setupKey(k) {
+  if (k === 'del') {
+    setupBuffer = setupBuffer.slice(0, -1);
+    updatePinDots('setup-dots', setupBuffer.length, false);
+    return;
+  }
+  if (setupBuffer.length >= 6) return;
+  setupBuffer += k;
+  updatePinDots('setup-dots', setupBuffer.length, false);
+  if (setupBuffer.length === 6) {
+    setTimeout(() => {
+      if (pinMode === 'setup-1') {
+        pinFirst = setupBuffer;
+        setupBuffer = '';
+        pinMode = 'setup-2';
+        document.getElementById('setup-desc').textContent = 'Confirmez votre code';
+        updatePinDots('setup-dots', 0, false);
+      } else {
+        if (setupBuffer === pinFirst) {
+          setStoredPin(setupBuffer);
+          closePinSetup();
+          openEditor();
+        } else {
+          updatePinDots('setup-dots', 6, true);
+          document.getElementById('setup-error').textContent = 'Les codes ne correspondent pas';
+          setTimeout(() => {
+            pinMode = 'setup-1'; setupBuffer = ''; pinFirst = '';
+            updatePinDots('setup-dots', 0, false);
+            document.getElementById('setup-desc').textContent = 'Réessayez : définissez votre code';
+            document.getElementById('setup-error').textContent = '';
+          }, 900);
+        }
+      }
+    }, 120);
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   PAGE EDITOR
+══════════════════════════════════════════════════ */
+let selectedEdIdx = null;
+
+function openEditor() {
+  selectedEdIdx = null;
+  renderEdList();
+  document.getElementById('ed-form').style.display = 'none';
+  document.getElementById('ed-form-empty').style.display = 'block';
+  document.getElementById('page-editor').classList.add('open');
+}
+
+function closeEditor() {
+  document.getElementById('page-editor').classList.remove('open');
+}
+
+function renderEdList() {
+  const list = document.getElementById('ed-pages-list');
+  list.innerHTML = '';
+  pages.forEach((pg, i) => {
+    const item = document.createElement('div');
+    item.className = 'ed-page-item' + (i === selectedEdIdx ? ' selected' : '');
+    const icon = pg.type === 'verse' ? '✦' : '🙏';
+    const title = pg.type === 'verse' ? (pg.ref || 'Verset') : (pg.title || 'Prière');
+    item.innerHTML = `
+      <span class="ed-page-icon">${icon}</span>
+      <div class="ed-page-info">
+        <div class="ed-page-type">${pg.type === 'verse' ? 'Verset' : 'Prière'}</div>
+        <div class="ed-page-title">${escHtml(title)}</div>
+      </div>
+    `;
+    item.onclick = () => selectEdPage(i);
+    list.appendChild(item);
+  });
+}
+
+function selectEdPage(i) {
+  selectedEdIdx = i;
+  const pg = pages[i];
+  renderEdList();
+  document.getElementById('ed-form').style.display = 'block';
+  document.getElementById('ed-form-empty').style.display = 'none';
+  document.getElementById('ed-delete-btn').style.display = '';
+
+  document.getElementById('ed-type').value = pg.type;
+  edTypeChange();
+
+  if (pg.type === 'verse') {
+    document.getElementById('ed-ref').value    = pg.ref    || '';
+    document.getElementById('ed-text').value   = pg.text   || '';
+    document.getElementById('ed-author').value = pg.author || '';
+  } else {
+    document.getElementById('ed-ptitle').value = pg.title || '';
+    document.getElementById('ed-pfrom').value  = pg.from  || '';
+    document.getElementById('ed-pbody').value  = pg.body  || '';
+    document.getElementById('ed-pamen').value  = pg.amen  || '';
+  }
+}
+
+function edAddPage() {
+  const newPg = {
+    id: 'p' + Date.now(),
+    type: 'verse',
+    ref: '', text: '', author: '',
+  };
+  pages.push(newPg);
+  selectedEdIdx = pages.length - 1;
+  renderEdList();
+  selectEdPage(selectedEdIdx);
+  document.getElementById('ed-ref').value = '';
+  document.getElementById('ed-text').value = '';
+  document.getElementById('ed-author').value = '';
+  document.getElementById('ed-delete-btn').style.display = 'none';
+  savePages();
+}
+
+function edTypeChange() {
+  const t = document.getElementById('ed-type').value;
+  document.getElementById('ed-verse-fields').style.display  = t === 'verse'  ? '' : 'none';
+  document.getElementById('ed-prayer-fields').style.display = t === 'prayer' ? '' : 'none';
+}
+
+function edSavePage() {
+  if (selectedEdIdx === null) return;
+  const t = document.getElementById('ed-type').value;
+  const pg = pages[selectedEdIdx];
+  pg.type = t;
+  if (t === 'verse') {
+    pg.ref    = document.getElementById('ed-ref').value;
+    pg.text   = document.getElementById('ed-text').value;
+    pg.author = document.getElementById('ed-author').value;
+  } else {
+    pg.title = document.getElementById('ed-ptitle').value;
+    pg.from  = document.getElementById('ed-pfrom').value;
+    pg.body  = document.getElementById('ed-pbody').value;
+    pg.amen  = document.getElementById('ed-pamen').value;
+  }
+  savePages();
+  renderEdList();
+  // If editing current page, re-render
+  if (selectedEdIdx === currentIdx) renderPage(currentIdx);
+  // Flash confirm
+  const btn = document.querySelector('.ed-btn-save');
+  const orig = btn.textContent;
+  btn.textContent = '✓ Enregistré';
+  setTimeout(() => { btn.textContent = orig; }, 1500);
+}
+
+function edDeletePage() {
+  if (selectedEdIdx === null) return;
+  if (pages.length <= 1) { alert('Le livre doit avoir au moins une page.'); return; }
+  pages.splice(selectedEdIdx, 1);
+  selectedEdIdx = null;
+  currentIdx = Math.min(currentIdx, pages.length - 1);
+  savePages();
+  renderEdList();
+  renderPage(currentIdx);
+  document.getElementById('ed-form').style.display = 'none';
+  document.getElementById('ed-form-empty').style.display = 'block';
+}
+
+/* ══════════════════════════════════════════════════
+   PERSISTENCE (localStorage for pages)
+══════════════════════════════════════════════════ */
+function savePages() {
+  // Local cache always
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pages)); } catch {}
+
+  // Also persist to DB via the WishWell API if we have publication metadata
+  const meta = window.__WW_META__;
+  if (!meta || !meta.id) return;
+
+  const apiBase = window.__WW_API_BASE__ || '';  // injected by serve.js via window.__WW_API_BASE__
+  fetch(`${apiBase}/api/publications/${meta.id}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: { pages: pages } }),
+  }).catch(() => {}); // silent fail — localStorage is the fallback
+}
+
+function loadPages() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return null;
+}
+
+/* ══════════════════════════════════════════════════
+   DATA (from __WW_DATA__)
+══════════════════════════════════════════════════ */
+function applyField(key, val) {
+  if (val == null || val === '') return;
+  if (key === 'musicSrc')       { setAudioSrc(val); return; }
+  if (key === 'musicStartTime') { _musicStartTime = parseFloat(val) || 0; return; }
+  if (key === 'albumArt') {
+    const pc = document.getElementById('pill-cover');
+    if (pc) { pc.innerHTML = ''; const i = document.createElement('img'); i.src = val; pc.appendChild(i); }
+    return;
+  }
+  // Pages from WW_DATA (server-stored pages override localStorage)
+  if (key === 'pages' && Array.isArray(val)) {
+    pages = val;
+    savePages();
+    return;
+  }
+  const el = document.querySelector(`[data-node-name="${key}"]`);
+  if (el) el.innerText = val;
+}
+
+/* ══════════════════════════════════════════════════
+   INTRO → BOOK
+══════════════════════════════════════════════════ */
+function openBook() {
+  const intro = document.getElementById('intro');
+  const bookC = document.getElementById('book-container');
+
+  TweenMax.to(intro, 0.6, {
+    opacity: 0, scale: 0.95, ease: Power2.easeIn,
+    onComplete: () => {
+      intro.style.display = 'none';
+      bookC.classList.add('open');
+      document.getElementById('music-pill').style.display = 'block';
+      TweenMax.from('#book', 0.6, { opacity: 0, y: 20, ease: Power2.easeOut });
+      renderPage(currentIdx);
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+function init() {
+  // Load pages: priority = server __WW_DATA__.pages > localStorage > defaults
+  const serverData = window.__WW_DATA__ || {};
+
+  // pages may be stored as JSON string or array in data.pages
+  let serverPages = serverData.pages;
+  if (typeof serverPages === 'string') {
+    try { serverPages = JSON.parse(serverPages); } catch { serverPages = null; }
+  }
+
+  if (Array.isArray(serverPages) && serverPages.length) {
+    pages = serverPages;
+    // Sync to localStorage as cache
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pages)); } catch {}
+  } else {
+    const stored = loadPages();
+    pages = stored || DEFAULT_PAGES;
+  }
+
+  // Apply all other fields
+  Object.keys(serverData).forEach(k => {
+    if (k !== 'pages') applyField(k, serverData[k]);
+  });
+
+  // Intro animation
+  const tl = new TimelineMax();
+  tl
+    .from('#cover-book', 1.2, { opacity: 0, scale: 0.88, y: 20, ease: Back.easeOut.config(1.5) })
+    .to('.open-btn', 0.8, { opacity: 1, y: 0, ease: Power2.easeOut });
+
+  document.getElementById('open-btn').addEventListener('click', openBook);
+}
+
+/* ══════════════════════════════════════════════════
+   WW_UPDATE
+══════════════════════════════════════════════════ */
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'WW_UPDATE') return;
+  const { data, style } = e.data;
+  if (style) {
+    const r = document.documentElement;
+    if (style.primaryColor) r.style.setProperty('--primary',    style.primaryColor);
+    if (style.accentColor)  r.style.setProperty('--accent',     style.accentColor);
+    if (style.textColor)    r.style.setProperty('--text-color', style.textColor);
+    if (style.textMuted)    r.style.setProperty('--text-muted', style.textMuted);
+    if (style.fontFamily)   { r.style.setProperty('--font', `'${style.fontFamily}', Georgia, serif`); }
+    if (style.fontSize) {
+      const sc = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
+      r.style.setProperty('--fs-scale', sc);
+    }
+  }
+  if (data) {
+    Object.keys(data).forEach(k => applyField(k, data[k]));
+  }
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

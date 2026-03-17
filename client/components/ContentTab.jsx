@@ -87,6 +87,31 @@ function StartTimeField({ value, onChange }) {
   );
 }
 
+/* ── Date Field ──────────────────────────────────────────────── */
+function DateField({ value, onChange, placeholder }) {
+  // Affiche un date picker natif + calcul automatique du nombre de jours
+  const days = value ? Math.floor((new Date() - new Date(value)) / (1000 * 60 * 60 * 24)) : null;
+
+  return (
+    <div className={styles.dateField}>
+      <input
+        type="date"
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        className={styles.dateInput}
+        placeholder={placeholder}
+        max={new Date().toISOString().split('T')[0]}
+      />
+      {days !== null && days >= 0 && (
+        <div className={styles.dateDays}>
+          <span className={styles.dateDaysNum}>{days.toLocaleString('fr-FR')}</span>
+          <span className={styles.dateDaysLabel}>jours aujourd'hui</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ContentTab({ fields, data, onChange, onUpload }) {
   const [openSections, setOpenSections] = useState({ Intro: true, Music: true, Story: true, Message: true, Celebration: true, Wishes: true, Outro: false });
   const baseFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
@@ -233,6 +258,8 @@ function Field({ field, value, onChange, onUpload }) {
         </div>
       ) : field.type === 'starttime' ? (
         <StartTimeField value={value} onChange={onChange} />
+      ) : field.type === 'date' ? (
+        <DateField value={value} onChange={onChange} placeholder={field.placeholder} />
       ) : field.type === 'layout' ? (
         <div className={styles.layoutGrid}>
           {(field.options || []).map(opt => (

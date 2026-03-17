@@ -10,7 +10,7 @@ async function seed() {
 
   const email = process.env.ADMIN_EMAIL || 'admin@ewishwell.com';
   const password = process.env.ADMIN_PASSWORD || 'changeme123';
-  const name = 'Admin eWishWell';
+  const name = 'Admin myKado';
 
   const existing = await AdminUser.findOne({ email });
   if (existing) {

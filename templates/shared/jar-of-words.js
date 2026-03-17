@@ -1,5 +1,5 @@
 /* ============================================================
-   JAR OF WORDS  ·  eWishWell
+   JAR OF WORDS  ·  myKado
    A cosy, animated jar you can shake to get warm messages.
    Usage: JarOfWords.init({ words: [...], recipientName: 'Marie', theme: 'pink' | 'gold' | 'mint' })
    ============================================================ */

@@ -28,7 +28,7 @@ export default function Dashboard() {
       <header className={styles.header}>
         <div className={styles.logo}>
           <span className={styles.logoIcon}>🎂</span>
-          <span className={styles.logoText}>eWishWell</span>
+          <span className={styles.logoText}>myKado</span>
         </div>
         <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>
           <span>+</span> New Wish

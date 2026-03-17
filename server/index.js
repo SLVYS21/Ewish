@@ -154,7 +154,7 @@ mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
     app.listen(PORT, () => {
-      console.log(`\n🚀 eWishWell server on :${PORT}`);
+      console.log(`\n🚀 myKado server on :${PORT}`);
       if (PROD) {
         console.log(`   Landing  →  https://${WWW_HOST}`);
         console.log(`   App      →  https://${APP_HOST}`);

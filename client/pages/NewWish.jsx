@@ -56,7 +56,7 @@ export default function NewWish() {
     <div className={styles.root}>
       <header className={styles.header}>
         <Link to="/ewish-admin/ewish" className={styles.back}>← Back</Link>
-        <div className={styles.logo}>🎂 eWishWell</div>
+        <div className={styles.logo}>🎂 myKado</div>
         <div />
       </header>
 
