@@ -249,6 +249,14 @@ function Field({ field, value, onChange, onUpload }) {
               </button>
             </>
           )}
+          {field.key === 'videoSrc' && (
+            <>
+              <input type="file" ref={fileRef} onChange={handleFileChange} accept="video/*" style={{display:'none'}} />
+              <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload vidéo">
+                {uploading ? '…' : '🎬'}
+              </button>
+            </>
+          )}
           {/* Preview for image URLs */}
           {value && (field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path')) && (
             <div className={styles.imgPreview}>

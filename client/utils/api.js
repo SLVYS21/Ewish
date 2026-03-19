@@ -141,3 +141,4 @@ export const uploadFont  = (formData) => api.post('/fonts', formData, {
   headers: { 'Content-Type': 'multipart/form-data' },
 });
 export const deleteFont  = (id)      => api.delete(`/fonts/${id}`, { withCredentials: true });
+export const duplicatePublication = (id, data) => api.post(`/publications/${id}/duplicate`, data, { withCredentials: true });

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Notre Film d'Amour</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:  #e8637a;
+      --accent:   #f4a0b0;
+      --soft:     #fce8ed;
+      --bg:       #fef5f7;
+      --bg2:      #eef4fb;
+      --text:     #2d1a22;
+      --muted:    #a07080;
+      --font-s:   'Dancing Script', cursive;
+      --font-b:   'Lato', sans-serif;
+      --fs-scale: 1;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: var(--font-b);
+      color: var(--text);
+    }
+
+    /* ══════════════════════════════════
+       SECTIONS — toutes fixed, empilées
+    ══════════════════════════════════ */
+    .scene {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 24px 40px;  /* 80px top = space for pill */
+      text-align: center;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+
+    /* ══════════════════════════════════
+       S1 — ACCUEIL
+       fond: dégradé rose pâle
+    ══════════════════════════════════ */
+    #s1 {
+      background: linear-gradient(160deg, #fff5f7 0%, #fce8ed 55%, #fef5f7 100%);
+    }
+
+    /* Petits cœurs déco */
+    .deco-hearts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .dh {
+      position: absolute; color: var(--accent); opacity: 0;
+      animation: floatHeart 6s ease-in-out infinite;
+    }
+    .dh:nth-child(1){ left:8%;  top:14%; font-size:.9rem; animation-delay:0s;   animation-duration:5.5s; }
+    .dh:nth-child(2){ left:82%; top:18%; font-size:1.1rem; animation-delay:1.3s; animation-duration:7s; }
+    .dh:nth-child(3){ left:12%; top:72%; font-size:.7rem;  animation-delay:2.6s; animation-duration:6s; }
+    .dh:nth-child(4){ left:84%; top:68%; font-size:.85rem; animation-delay:.8s;  animation-duration:8s; }
+    .dh:nth-child(5){ left:50%; top:6%;  font-size:.65rem; animation-delay:3.1s; animation-duration:5s; }
+    @keyframes floatHeart {
+      0%,100%{ opacity:0; transform:translateY(0) scale(1); }
+      20%     { opacity:.55; }
+      50%     { opacity:.35; transform:translateY(-18px) scale(1.1); }
+      80%     { opacity:.45; }
+    }
+
+    .s1-greeting {
+      font-family: var(--font-s);
+      font-size: calc(2.5rem * var(--fs-scale));
+      color: var(--primary);
+      margin-bottom: 28px;
+    }
+
+    .s1-circle-wrap {
+      position: relative;
+      width: 230px; height: 230px;
+      margin-bottom: 26px;
+    }
+    .s1-ring {
+      position: absolute; inset: -10px; border-radius: 50%;
+      border: 1.5px solid rgba(232,99,122,.22);
+      animation: pulse-ring 2.2s ease-in-out infinite;
+    }
+    .s1-ring-2 {
+      position: absolute; inset: -22px; border-radius: 50%;
+      border: 1px solid rgba(232,99,122,.1);
+      animation: pulse-ring 2.2s ease-in-out infinite .35s;
+    }
+    @keyframes pulse-ring {
+      0%,100%{ transform:scale(1); opacity:.5; }
+      50%    { transform:scale(1.06); opacity:1; }
+    }
+    .s1-photo {
+      width: 230px; height: 230px; border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 12px 40px rgba(232,99,122,.28), 0 4px 12px rgba(0,0,0,.08);
+      display: block;
+      animation: heartbeat 2.1s ease-in-out infinite;
+    }
+    .s1-photo-placeholder {
+      width: 230px; height: 230px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--soft), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+      border: 4px solid #fff;
+      box-shadow: 0 12px 40px rgba(232,99,122,.28);
+      animation: heartbeat 2.1s ease-in-out infinite;
+    }
+    @keyframes heartbeat {
+      0%,100%{ transform:scale(1); }
+      14%    { transform:scale(1.045); }
+      28%    { transform:scale(1); }
+      42%    { transform:scale(1.022); }
+      70%    { transform:scale(1); }
+    }
+
+    /* Bouton cœur */
+    #heart-btn {
+      position: absolute; top: -6px; left: -6px;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b8a, #ff8fa3);
+      border: 3px solid #fff;
+      box-shadow: 0 4px 16px rgba(255,107,138,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.45rem;
+      cursor: pointer; z-index: 10;
+      animation: pulse-heart 1.7s ease-in-out infinite;
+      transition: transform .18s;
+    }
+    #heart-btn:hover { transform: scale(1.12); }
+    #heart-btn:active { transform: scale(.9); animation: none; }
+    @keyframes pulse-heart {
+      0%,100%{ transform:scale(1); }
+      50%    { transform:scale(1.14); }
+    }
+
+    .s1-subtext {
+      font-size: calc(.88rem * var(--fs-scale));
+      font-weight: 300; color: var(--muted);
+      line-height: 1.65; max-width: 260px;
+      font-style: italic;
+    }
+
+    /* ══════════════════════════════════
+       S2 — VINYLE
+       fond: bleu ciel doux
+    ══════════════════════════════════ */
+    #s2 {
+      background: linear-gradient(170deg, #eef4fb 0%, #ddeaf8 100%);
+      justify-content: flex-start;
+      padding-top: 60px;
+    }
+
+    /* ── Vinyle ────────────────────────────────────────────── */
+    /* Wrapper : taille fixe, overflow visible pour le disc */
+    .s2-vinyl-wrap {
+      position: relative;
+      width: 220px; height: 220px;
+      margin-bottom: 32px;
+      flex-shrink: 0;
+      /* Le disc noir est en position absolute mais on le contient */
+      z-index: 0;
+    }
+    /* Disc noir qui tourne — same size as wrapper, no overflow */
+    .s2-disc {
+      position: absolute; inset: 0;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50%,
+        #1c1c2e 0%, #0d0d1a 35%, #252538 55%, #1c1c2e 100%);
+      box-shadow: 0 10px 36px rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .s2-disc-grooves {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: repeating-radial-gradient(circle at 50%,
+        transparent 0%, transparent 4%,
+        rgba(255,255,255,.03) 4%, rgba(255,255,255,.03) 4.5%);
+    }
+    #s2-disc.spinning { animation: spin-vinyl 5s linear infinite; }
+    @keyframes spin-vinyl { to{ transform:rotate(360deg); } }
+
+    /* Photo centrée sur le disc, visible par-dessus */
+    .s2-vinyl-photo {
+      width: 160px; height: 160px; border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+      position: relative; z-index: 2;
+      flex-shrink: 0;
+    }
+    .s2-vinyl-placeholder {
+      width: 160px; height: 160px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--soft), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      border: 5px solid #fff;
+      position: relative; z-index: 2;
+      flex-shrink: 0;
+    }
+    .s2-vinyl-hole {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 11px; height: 11px; border-radius: 50%;
+      background: #fff; z-index: 3;
+    }
+
+    .s2-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), #d44d65);
+      color: #fff; border-radius: 50px;
+      padding: 5px 18px;
+      font-size: calc(.65rem * var(--fs-scale));
+      font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .s2-track {
+      font-family: var(--font-s);
+      font-size: calc(1.75rem * var(--fs-scale));
+      color: var(--text);
+      margin-bottom: 14px; line-height: 1.2;
+    }
+    .s2-text {
+      font-size: calc(.92rem * var(--fs-scale));
+      font-weight: 300; color: #4a6080;
+      line-height: 1.8; max-width: 290px;
+      margin-bottom: 20px;
+    }
+
+    /* s2-play-btn removed — pilule handles play/pause */
+
+    .s2-next-btn {
+      font-size: calc(.88rem * var(--fs-scale));
+      color: #4a6080; background: none;
+      border: 1.5px solid rgba(74,96,128,.3);
+      border-radius: 50px; padding: 10px 28px;
+      cursor: pointer; letter-spacing: .04em;
+      font-family: var(--font-b);
+      transition: all .3s;
+    }
+    .s2-next-btn:hover { background: rgba(74,96,128,.08); border-color: rgba(74,96,128,.6); }
+
+    /* ══════════════════════════════════
+       S3 — PHOTOS POLAROID
+       fond: blanc cassé
+    ══════════════════════════════════ */
+    #s3 { background: #f7f5f5; padding-bottom: 100px; }
+
+    #s3-area {
+      position: relative;
+      width: 100%; height: 320px;
+      flex-shrink: 0;
+    }
+
+    .polaroid {
+      position: absolute;
+      background: #fff;
+      padding: 9px 9px 30px 9px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+      left: 50%; top: 50%;
+      transform-origin: center bottom;
+      cursor: default;
+    }
+    .polaroid img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .pol-caption {
+      position: absolute; bottom: 7px; left: 0; right: 0;
+      text-align: center;
+      font-family: var(--font-s);
+      font-size: .72rem; color: #d44d65; opacity: .8;
+    }
+
+    .s3-sub {
+      font-size: calc(.88rem * var(--fs-scale));
+      font-style: italic; color: var(--muted);
+      margin-top: 12px;
+    }
+
+    .s3-letter-btn {
+      margin-top: 16px;
+      background: linear-gradient(135deg, var(--primary), #d44d65);
+      color: #fff; border: none; border-radius: 50px;
+      padding: 14px 36px;
+      font-family: var(--font-b);
+      font-size: calc(.95rem * var(--fs-scale));
+      font-weight: 700; letter-spacing: .04em;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(232,99,122,.4);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .s3-letter-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(232,99,122,.55); }
+    .s3-letter-btn:active { transform: translateY(0); }
+
+    /* ══════════════════════════════════
+       S4 — LETTRE
+       fond: rose très pâle → blanc
+    ══════════════════════════════════ */
+    #s4 {
+      background: linear-gradient(160deg, #fff5f8 0%, #fff 60%, #fff5f8 100%);
+      padding: 0; align-items: stretch; justify-content: flex-start;
+    }
+
+    .s4-inner {
+      display: flex; flex-direction: column;
+      width: 100%; height: 100%;
+      padding: 44px 24px 0;
+      overflow: hidden;
+    }
+
+    .s4-quote {
+      font-family: Georgia, serif;
+      font-size: 4.5rem; line-height: .4;
+      color: var(--accent); opacity: .35;
+      margin-bottom: 8px; flex-shrink: 0;
+    }
+    .s4-title {
+      font-family: var(--font-s);
+      font-size: calc(1.75rem * var(--fs-scale));
+      color: var(--primary);
+      margin-bottom: 14px; flex-shrink: 0;
+    }
+    .s4-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,99,122,.3), transparent);
+      margin-bottom: 18px; flex-shrink: 0;
+    }
+
+    .s4-scroll {
+      flex: 1; overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(232,99,122,.2) transparent;
+    }
+    .s4-scroll::-webkit-scrollbar { width: 3px; }
+    .s4-scroll::-webkit-scrollbar-thumb { background: rgba(232,99,122,.25); border-radius: 2px; }
+
+    .s4-salut {
+      font-size: calc(1.05rem * var(--fs-scale));
+      font-weight: 700; color: var(--text);
+      margin-bottom: 14px;
+    }
+    .s4-body {
+      font-size: calc(1rem * var(--fs-scale));
+      font-weight: 300; color: #3a2530;
+      line-height: 1.9; white-space: pre-wrap;
+    }
+    .typer-cursor {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--primary); margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink .75s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .s4-sig {
+      font-family: var(--font-s);
+      font-size: calc(1.25rem * var(--fs-scale));
+      color: var(--primary); text-align: right;
+      margin: 20px 0 4px; flex-shrink: 0;
+    }
+    .s4-footer {
+      flex-shrink: 0;
+      padding: 14px 0 28px;
+      background: linear-gradient(to top, #fff5f8 70%, transparent);
+    }
+    .s4-surprise-btn {
+      width: 100%; padding: 13px 24px;
+      background: none;
+      border: 1.5px solid rgba(232,99,122,.35);
+      border-radius: 50px;
+      font-family: var(--font-b);
+      font-size: calc(.9rem * var(--fs-scale));
+      color: var(--primary); cursor: pointer;
+      letter-spacing: .04em;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all .3s;
+    }
+    .s4-surprise-btn:hover { background: var(--soft); border-color: var(--primary); }
+
+    /* ══════════════════════════════════
+       S5 — VIDÉO
+    ══════════════════════════════════ */
+    #s5 {
+      background: var(--accent);
+      padding: 20px 16px 90px;  /* space for pill */
+      gap: 16px;
+    }
+
+    .s5-title {
+      position: absolute; top: 20px; left: 0; right: 0;
+      font-family: var(--font-s);
+      font-size: calc(1.3rem * var(--fs-scale));
+      color: rgba(255,255,255,.88); z-index: 5; pointer-events: none;
+      text-align: center;
+    }
+
+    /* Conteneur 9:16 centré */
+    .s5-video-container {
+      position: relative;
+      width: min(100%, calc(100vh * 9 / 16));
+      aspect-ratio: 9 / 16;
+      background: var(--accent);
+      border-radius: 0px;
+      /*overflow: hidden;*/
+      flex-shrink: 0;
+    }
+
+    #surprise-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0; transition: opacity 1.2s ease;
+    }
+    #surprise-video.ready { opacity: 1; }
+
+    .s5-no-video {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px;
+      color: rgba(255,255,255,.4); font-size: .85rem;
+      letter-spacing: .08em;
+    }
+    .s5-no-video span { font-size: 3rem; }
+
+    .s5-overlay {
+      position: absolute; inset: 0; z-index: 4; pointer-events: none;
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,.3) 0%, transparent 20%,
+        transparent 75%, rgba(0,0,0,.4) 100%);
+    }
+
+    .s5-bottom {
+      position: absolute; bottom: 24px; left: 0; right: 0;
+      display: flex; justify-content: center; z-index: 10;
+    }
+    .s5-replay-btn {
+      background: rgba(255,255,255,.15);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 50px; padding: 12px 32px;
+      font-family: var(--font-b);
+      font-size: calc(.88rem * var(--fs-scale));
+      color: #fff; cursor: pointer; letter-spacing: .06em;
+      transition: all .3s;
+    }
+    .s5-replay-btn:hover { background: rgba(255,255,255,.25); }
+
+    /* ══════════════════════════════════
+       PILULE MUSICALE — bottom center
+    ══════════════════════════════════ */
+    #music-pill {
+      position: fixed; top: 16px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 9000;
+      display: none;
+    }
+    .pill-btn {
+      background: linear-gradient(135deg, var(--primary), #d44d65);
+      border: none; border-radius: 50px; color: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 18px 8px 8px;
+      font-family: var(--font-b);
+      font-size: .8rem; font-weight: 400;
+      box-shadow: 0 6px 22px rgba(232,99,122,.5), 0 2px 8px rgba(0,0,0,.12);
+      transition: transform .2s, box-shadow .2s;
+      white-space: nowrap;
+    }
+    .pill-btn:hover { transform: scale(1.04); box-shadow: 0 8px 28px rgba(232,99,122,.65); }
+    .pill-btn:active { transform: scale(.96); }
+
+    .pill-cover {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; overflow: hidden; flex-shrink: 0;
+    }
+    .pill-cover img {
+      width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+      animation: spin 8s linear infinite paused;
+    }
+    .pill-cover img.playing { animation-play-state: running; }
+    @keyframes spin { to{ transform:rotate(360deg); } }
+
+    .pill-meta { display: flex; flex-direction: column; gap: 1px; }
+    .pill-title { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .pill-progress {
+      width: 90px; height: 2px;
+      background: rgba(255,255,255,.25); border-radius: 2px; overflow: hidden;
+    }
+    .pill-fill {
+      height: 100%; background: #fff; border-radius: 2px; width: 0%;
+      transition: width .6s linear;
+    }
+
+    .pill-icon { font-size: .9rem; flex-shrink: 0; }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-height:680px) {
+      .s1-photo, .s1-photo-placeholder { width:185px; height:185px; }
+      .s1-circle-wrap { width:185px; height:185px; }
+      .s2-vinyl-wrap { width:170px; height:170px; }
+      .s2-vinyl-photo, .s2-vinyl-placeholder { width:170px; height:170px; }
+      #s3-area { height:260px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ PILULE MUSIQUE ═══ -->
+<div id="music-pill">
+  <button class="pill-btn" onclick="toggleMusic()">
+    <div class="pill-cover" id="pill-cover">🎵</div>
+    <div class="pill-meta">
+      <span class="pill-title" id="pill-title">Notre Chanson</span>
+      <div class="pill-progress"><div class="pill-fill" id="pill-fill"></div></div>
+    </div>
+    <span class="pill-icon" id="pill-icon">▶</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════
+     S1 — ACCUEIL
+═══════════════════════════ -->
+<div class="scene active" id="s1" data-section="greeting">
+  <div class="deco-hearts">
+    <span class="dh">♥</span><span class="dh">♥</span><span class="dh">♥</span>
+    <span class="dh">♥</span><span class="dh">♥</span>
+  </div>
+
+  <div class="s1-greeting" data-node-name="greeting">Coucou Sarah...</div>
+
+  <div class="s1-circle-wrap">
+    <div class="s1-ring"></div>
+    <div class="s1-ring-2"></div>
+    <img src="" id="s1-photo" class="s1-photo" style="display:none" alt="">
+    <div class="s1-photo-placeholder" id="s1-ph">💕</div>
+    <button id="heart-btn" onclick="nextScene()" aria-label="Découvrir">❤️</button>
+  </div>
+
+  <div class="s1-subtext" data-node-name="greetingText">
+    J'ai quelque chose de spécial pour toi.<br>Clique sur mon cœur.
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     S2 — VINYLE
+═══════════════════════════ -->
+<div class="scene" id="s2" data-section="music">
+  <div class="s2-vinyl-wrap">
+    <div class="s2-disc" id="s2-disc">
+      <div class="s2-disc-grooves"></div>
+      <img src="" id="s2-art" class="s2-vinyl-photo" style="display:none" alt="">
+      <div class="s2-vinyl-placeholder" id="s2-art-ph">🎵</div>
+      <div class="s2-vinyl-hole"></div>
+    </div>
+  </div>
+
+  <div class="s2-tag" data-node-name="nowTag">MAINTENANT...</div>
+  <div class="s2-track">
+    "<span data-node-name="trackTitle">Notre chanson</span>"
+  </div>
+  <div class="s2-text" data-node-name="musicText">
+    Tu sais, quand j'écoute cette chanson,<br>je ne peux pas m'empêcher de sourire.
+  </div>
+
+
+  <button class="s2-next-btn" onclick="nextScene()" data-node-name="photosBtn">
+    Voir nos souvenirs →
+  </button>
+</div>
+
+<!-- ═══════════════════════════
+     S3 — PHOTOS
+═══════════════════════════ -->
+<div class="scene" id="s3" data-section="celebration">
+  <div id="s3-area"></div>
+  <div class="s3-sub" data-node-name="photoCaption">(Oui, tu es toujours le plus beau sur les photos !)</div>
+  <button class="s3-letter-btn" onclick="nextScene()" data-node-name="letterBtn">
+    Lire ma lettre d'amour
+  </button>
+</div>
+
+<!-- ═══════════════════════════
+     S4 — LETTRE
+═══════════════════════════ -->
+<div class="scene" id="s4" data-section="message">
+  <div class="s4-inner">
+    <div class="s4-quote">"</div>
+    <div class="s4-title">À mon <span data-node-name="letterTitle">Sarah d'amour...</span></div>
+    <div class="s4-divider"></div>
+    <div class="s4-scroll" id="s4-scroll">
+      <div class="s4-salut" data-node-name="letterSalut">Mon cœur,</div>
+      <div class="s4-body" id="s4-body"></div>
+    </div>
+    <div class="s4-sig" id="s4-sig" style="opacity:0">
+      <span data-node-name="senderName">Ton amour Marc</span> ❤️
+    </div>
+    <div class="s4-footer">
+      <button class="s4-surprise-btn" id="s4-next" onclick="nextScene()" style="display:none">
+        🎁 <span data-node-name="surpriseBtn">J'ai une dernière surprise...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     S5 — VIDÉO
+═══════════════════════════ -->
+<div class="scene" id="s5">
+  <div class="s5-video-container">
+    <div class="s5-title" data-node-name="videoLabel">Notre film d'amour</div>
+    <div class="s5-overlay"></div>
+    <div class="s5-no-video" id="s5-empty">
+      <span>🎬</span><p>Ajoute une vidéo<br>depuis l'éditeur</p>
+    </div>
+    <video id="surprise-video" playsinline loop muted></video>
+    <div class="s5-bottom">
+      <button class="s5-replay-btn" onclick="replayAll()">
+        ↺ <span data-node-name="replayBtn">Revoir nos souvenirs</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let _current      = 0;
+let _transitioning= false;
+let _photos       = [];
+let _letter       = '';
+let _typeTimer    = null;
+let _typed        = false;
+let _isPlaying    = false;
+let _startTime    = 0;
+const SCENES      = ['s1','s2','s3','s4','s5'];
+
+/* ══════════════════════════════════════════════
+   TRANSITIONS
+══════════════════════════════════════════════ */
+function nextScene() {
+  if (_transitioning) return;
+  goScene(_current + 1);
+}
+
+function goScene(idx) {
+  if (idx < 0 || idx >= SCENES.length || idx === _current) return;
+  if (_transitioning) return;
+  _transitioning = true;
+
+  const fromEl = document.getElementById(SCENES[_current]);
+  const toEl   = document.getElementById(SCENES[idx]);
+  const dir    = idx > _current ? 1 : -1;
+
+  // Make next scene ready but invisible above/below
+  toEl.classList.add('active');
+  TweenMax.set(toEl, { opacity: 0, y: dir * 50, visibility: 'visible' });
+
+  // Exit current
+  TweenMax.to(fromEl, 0.45, {
+    opacity: 0,
+    y: dir * -50,
+    ease: Power2.easeIn,
+    onComplete: () => {
+      fromEl.classList.remove('active');
+      TweenMax.set(fromEl, { y: 0, visibility: 'hidden' });   // reset
+
+      // Enter new
+      TweenMax.to(toEl, 0.55, {
+        opacity: 1,
+        visibility: 'visible',
+        y: 0,
+        ease: Power3.easeOut,
+        onComplete: () => {
+          _current = idx;
+          _transitioning = false;
+          onSceneEnter(idx);
+        }
+      });
+    }
+  });
+}
+
+function onSceneEnter(idx) {
+  if (idx === 1) enterS2();
+  if (idx === 2) enterS3();
+  if (idx === 3) enterS4();
+  if (idx === 4) enterS5();
+}
+
+/* ══════════════════════════════════════════════
+   SCENE ENTER ANIMATIONS
+══════════════════════════════════════════════ */
+function enterS2() {
+  // Pilule apparaît
+  const pill = document.getElementById('music-pill');
+  pill.style.display = 'block';
+  TweenMax.from(pill, 0.6, { opacity:0, y:-40, ease: Back.easeOut.config(2) });
+
+  // Éléments S2 en cascade
+  const els = ['#s2 .s2-tag','#s2 .s2-track','#s2 .s2-text','#s2 .s2-next-btn'];
+  els.forEach((sel, i) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    TweenMax.from(el, 0.55, { opacity:0, y:14, ease: Power2.easeOut, delay: 0.1 + i * 0.1 });
+  });
+  TweenMax.from('.s2-vinyl-wrap', 0.7, { opacity:0, scale:.7, ease: Back.easeOut.config(1.8), delay:0.05 });
+}
+
+function enterS3() {
+  renderPolaroids();
+  TweenMax.from('.s3-sub',        0.6, { opacity:0, y:10, ease:Power2.easeOut, delay:0.3 });
+  TweenMax.from('.s3-letter-btn', 0.6, { opacity:0, y:14, ease:Power2.easeOut, delay:0.45 });
+}
+
+function enterS4() {
+  TweenMax.from('.s4-quote',   0.5, { opacity:0, ease:Power2.easeOut });
+  TweenMax.from('.s4-title',   0.6, { opacity:0, y:10, ease:Power2.easeOut, delay:0.1 });
+  TweenMax.from('.s4-divider', 0.7, { scaleX:0, ease:Power2.easeOut, delay:0.2 });
+  TweenMax.from('.s4-salut',   0.6, { opacity:0, y:8,  ease:Power2.easeOut, delay:0.3 });
+  if (!_typed) { _typed = true; setTimeout(startTyping, 550); }
+}
+
+function enterS5() {
+  const vid = document.getElementById('surprise-video');
+  if (vid.src && vid.src !== window.location.href) {
+    vid.play().catch(() => {});
+    vid.classList.add('ready');
+  }
+  TweenMax.from('.s5-title', 0.8, { opacity:0, y:-12, ease:Power2.easeOut, delay:0.2 });
+  TweenMax.from('.s5-bottom', 0.8, { opacity:0, y:20, ease:Power2.easeOut, delay:0.5 });
+}
+
+/* ══════════════════════════════════════════════
+   REPLAY
+══════════════════════════════════════════════ */
+function replayAll() {
+  // Reset state
+  _typed = false;
+  document.getElementById('s4-body').innerHTML = '';
+  TweenMax.set('#s4-sig', { opacity: 0 });
+  document.getElementById('s4-next').style.display = 'none';
+  if (_typeTimer) { clearTimeout(_typeTimer); _typeTimer = null; }
+  document.getElementById('surprise-video').pause();
+
+  if (_transitioning) return;
+  _transitioning = true;
+
+  const fromEl = document.getElementById(SCENES[_current]);
+  TweenMax.to(fromEl, 0.4, { opacity: 0, ease: Power2.easeIn, onComplete: () => {
+    // Reset ALL scenes
+    SCENES.forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('active');
+      TweenMax.set(el, { opacity: 0, y: 0, visibility: 'hidden' });
+    });
+
+    // Activate S1
+    const s1 = document.getElementById('s1');
+    s1.classList.add('active');
+    _current = 0;
+    _transitioning = false;
+
+    // Animate S1 in
+    TweenMax.to(s1, 0.6, { opacity: 1, visibility: 'visible', ease: Power2.easeOut });
+    TweenMax.from('.s1-greeting',    0.8, { opacity:0, y:-12, ease:Power2.easeOut, delay:0.2 });
+    TweenMax.from('.s1-circle-wrap', 1.0, { opacity:0, scale:.85, ease:Back.easeOut.config(1.5), delay:0.4 });
+    TweenMax.from('.s1-subtext',     0.7, { opacity:0, y:10, ease:Power2.easeOut, delay:0.9 });
+  }});
+}
+
+/* ══════════════════════════════════════════════
+   AUDIO
+══════════════════════════════════════════════ */
+const audio = new Audio();
+
+function setAudioSrc(src) {
+  if (!src || audio.src === src) return;
+  audio.src = src;
+  if (_startTime > 0) {
+    const fn = () => { audio.currentTime = _startTime; audio.removeEventListener('loadedmetadata', fn); };
+    audio.addEventListener('loadedmetadata', fn);
+  }
+}
+
+function toggleMusic() {
+  if (!audio.src || audio.src === window.location.href) return;
+  if (_isPlaying) {
+    audio.pause(); _isPlaying = false;
+    document.getElementById('pill-icon').textContent = '▶';
+    document.getElementById('s2-disc').classList.remove('spinning');
+    const ci = document.querySelector('#pill-cover img');
+    if (ci) ci.classList.remove('playing');
+  } else {
+    audio.play().catch(() => {});
+    _isPlaying = true;
+    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('s2-disc').classList.add('spinning');
+    const ci = document.querySelector('#pill-cover img');
+    if (ci) ci.classList.add('playing');
+  }
+}
+
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  document.getElementById('pill-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+});
+
+/* ══════════════════════════════════════════════
+   TYPEWRITER
+══════════════════════════════════════════════ */
+function startTyping() {
+  const el     = document.getElementById('s4-body');
+  const scroll = document.getElementById('s4-scroll');
+  const text   = _letter || 'Je t\'aime infiniment.';
+  el.innerHTML = '<span class="typer-cursor"></span>';
+  let i = 0;
+
+  function tick() {
+    if (i >= text.length) {
+      const cur = el.querySelector('.typer-cursor');
+      if (cur) setTimeout(() => cur.remove(), 1400);
+      // Signature
+      setTimeout(() => {
+        TweenMax.to('#s4-sig', 0.7, { opacity:1, y:0, ease:Power2.easeOut });
+      }, 600);
+      // Bouton surprise
+      setTimeout(() => {
+        const btn = document.getElementById('s4-next');
+        btn.style.display = 'flex';
+        TweenMax.from(btn, 0.6, { opacity:0, y:12, ease:Back.easeOut.config(1.5) });
+      }, 1400);
+      return;
+    }
+    const cur  = el.querySelector('.typer-cursor');
+    const node = document.createTextNode(text[i]);
+    if (cur) el.insertBefore(node, cur); else el.appendChild(node);
+    i++;
+    scroll.scrollTop = scroll.scrollHeight;
+    const c = text[i - 1];
+    const delay = c === '.' || c === '!' || c === '?' ? 95
+                : c === ','  ? 55
+                : c === '\n' ? 220
+                : 24 + Math.random() * 18;
+    _typeTimer = setTimeout(tick, delay);
+  }
+  tick();
+}
+
+/* ══════════════════════════════════════════════
+   POLAROIDS
+══════════════════════════════════════════════ */
+const DEF_POS = [
+  { x:-85, y:-45, r:-8,  w:150 },
+  { x: 55, y:-55, r: 6,  w:140 },
+  { x:-18, y: 28, r:-2,  w:170 },
+  { x: 75, y: 48, r: 9,  w:138 },
+  { x:-75, y: 65, r:-5,  w:135 },
+  { x:  5, y:-20, r: 3,  w:145 },
+];
+
+function renderPolaroids() {
+  const area = document.getElementById('s3-area');
+  area.innerHTML = '';
+
+  const list = _photos.length ? _photos : [
+    { src:'', label:'Souvenir 1' },
+    { src:'', label:'Souvenir 2' },
+    { src:'', label:'Souvenir 3' },
+  ];
+
+  list.forEach((ph, i) => {
+    const pos = {
+      x: ph.x !== undefined ? ph.x : DEF_POS[i % DEF_POS.length].x,
+      y: ph.y !== undefined ? ph.y : DEF_POS[i % DEF_POS.length].y,
+      r: ph.rotate !== undefined ? ph.rotate : DEF_POS[i % DEF_POS.length].r,
+      w: ph.width  !== undefined ? ph.width  : DEF_POS[i % DEF_POS.length].w,
+      z: ph.zIndex !== undefined ? ph.zIndex : (i + 1),
+    };
+
+    const pol = document.createElement('div');
+    pol.className = 'polaroid';
+    const h = Math.round(pos.w * 1.12);
+    pol.style.cssText = `
+      width:${pos.w}px; height:${h}px;
+      transform:translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.r}deg);
+      z-index:${pos.z};
+    `;
+
+    if (ph.src) {
+      const img = document.createElement('img');
+      img.src = ph.src; img.alt = '';
+      pol.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.style.cssText = `width:100%;height:${h-28}px;background:linear-gradient(135deg,#fce8ed,#f4a0b0);display:flex;align-items:center;justify-content:center;font-size:2rem;`;
+      placeholder.textContent = '📸';
+      pol.appendChild(placeholder);
+    }
+
+    const lbl = document.createElement('div');
+    lbl.className = 'pol-caption';
+    lbl.textContent = ph.label || '';
+    pol.appendChild(lbl);
+
+    // Staggered entrance
+    TweenMax.set(pol, { opacity:0, scale:.7, rotation: pos.r + (Math.random()>.5?14:-14) });
+    area.appendChild(pol);
+    TweenMax.to(pol, 0.65, {
+      opacity:1, scale:1, rotation:pos.r,
+      ease: Back.easeOut.config(1.6),
+      delay: 0.08 + i * 0.1
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+function applyField(key, val) {
+  if (val == null || val === '') return;
+
+  if (key === 'musicSrc')       { setAudioSrc(val); return; }
+  if (key === 'musicStartTime') { _startTime = parseFloat(val) || 0; return; }
+  if (key === 'letterText')     { _letter = val; return; }
+
+  if (key === 'albumArt') {
+    const img = document.getElementById('s2-art');
+    const ph  = document.getElementById('s2-art-ph');
+    if (img) { img.src = val; img.style.display = 'block'; }
+    if (ph)  ph.style.display = 'none';
+    // Pilule cover
+    const pc = document.getElementById('pill-cover');
+    if (pc) { pc.innerHTML = ''; const i = document.createElement('img'); i.src = val; pc.appendChild(i); }
+    return;
+  }
+
+  if (key === 'imagePath') {
+    const img = document.getElementById('s1-photo');
+    const ph  = document.getElementById('s1-ph');
+    if (img) { img.src = val; img.style.display = 'block'; }
+    if (ph)  ph.style.display = 'none';
+    return;
+  }
+
+  if (key === 'trackTitle') {
+    document.getElementById('pill-title').textContent = val.toUpperCase();
+  }
+
+  if (key === 'videoSrc') {
+    const vid = document.getElementById('surprise-video');
+    const emp = document.getElementById('s5-empty');
+    vid.src = val;
+    if (emp) emp.style.display = 'none';
+    return;
+  }
+
+  if (key === 'photos' && Array.isArray(val)) {
+    _photos = val;
+    return;
+  }
+
+  const el = document.querySelector(`[data-node-name="${key}"]`);
+  if (el) el.innerText = val;
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+function init() {
+  const data = window.__WW_DATA__ || {};
+  Object.keys(data).forEach(k => { if (data[k] != null && data[k] !== '') applyField(k, data[k]); });
+
+  // S1 is active by default (class already set in HTML)
+  // Force it visible then animate children
+  TweenMax.set('#s1', { opacity: 1, visibility: 'visible' });
+  TweenMax.from('.s1-greeting',    0.9, { opacity:0, y:-14, ease:Power2.easeOut, delay:0.3 });
+  TweenMax.from('.s1-circle-wrap', 1.1, { opacity:0, scale:.82, ease:Back.easeOut.config(1.5), delay:0.5 });
+  TweenMax.from('.s1-subtext',     0.8, { opacity:0, y:12, ease:Power2.easeOut, delay:1.0 });
+}
+
+/* ══════════════════════════════════════════════
+   WW_UPDATE
+══════════════════════════════════════════════ */
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'WW_UPDATE') return;
+  const { data, style } = e.data;
+  if (style) {
+    const r = document.documentElement;
+    if (style.primaryColor) r.style.setProperty('--primary', style.primaryColor);
+    if (style.accentColor)  r.style.setProperty('--accent',  style.accentColor);
+    if (style.textColor)    r.style.setProperty('--text-color', style.textColor);
+    if (style.textMuted)    r.style.setProperty('--text-muted', style.textMuted);
+    if (style.fontFamily)   r.style.setProperty('--font-b', `'${style.fontFamily}', sans-serif`);
+    if (style.fontSize) {
+      const sc = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
+      r.style.setProperty('--fs-scale', sc);
+    }
+  }
+  if (data) {
+    const { photoTransforms: _pt, ...fields } = data;
+    Object.keys(fields).forEach(k => applyField(k, fields[k]));
+  }
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

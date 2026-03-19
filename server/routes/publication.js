@@ -131,6 +131,37 @@ router.post('/:id/publish', async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+router.post('/:id/duplicate', async (req, res) => {
+  try {
+    const original = await Publication.findById(req.params.id).lean();
+    if (!original) return res.status(404).json({ error: 'Publication introuvable' });
+ 
+    const { customName, title } = req.body;
+    if (!customName || !title) return res.status(400).json({ error: 'customName et title requis' });
+ 
+    const slug = slugify(customName, { lower: true, strict: true });
+ 
+    // Copy all fields except _id, shortCode, publishedAt, published
+    const clone = await Publication.create({
+      templateName:    original.templateName,
+      customName:      slug,
+      title:           title,
+      data:            original.data || {},
+      style:           original.style || {},
+      decorations:     original.decorations || [],
+      jarConfig:       original.jarConfig || null,
+      widgets:         original.widgets || [],
+      photoTransforms: original.photoTransforms || {},
+      published:       false,
+    });
+ 
+    res.status(201).json(clone);
+  } catch (e) {
+    if (e.code === 11000) return res.status(409).json({ error: 'Ce nom est déjà utilisé.' });
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // DELETE
 router.delete('/:id', async (req, res) => {
   try {

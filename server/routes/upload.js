@@ -48,21 +48,30 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const isAudio = file.mimetype.startsWith('audio/');
+    const isAudio      = file.mimetype.startsWith('audio/');
+    const isVideo      = file.mimetype.startsWith('video/');
+    const isBackground = req.body?.hint === 'background';
     return {
-      folder: isAudio ? 'ewishwell/audio' : 'ewishwell/images',
-      resource_type: isAudio ? 'video' : 'image',
-      public_id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      ...(isAudio ? {} : { transformation: [{ quality: 'auto', fetch_format: 'auto' }] }),
+      folder:        isAudio ? 'ewishwell/audio'
+                   : isVideo ? 'ewishwell/videos'
+                   : isBackground ? 'ewishwell/backgrounds'
+                   : 'ewishwell/images',
+      resource_type: (isAudio || isVideo) ? 'video' : 'image',
+      public_id:     `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      ...((isAudio || isVideo) ? {} : {
+        transformation: isBackground
+          ? [{ width: 1400, height: 1400, crop: 'limit', quality: 75, fetch_format: 'webp' }]
+          : [{ quality: 'auto:good', fetch_format: 'auto' }],
+      }),
     };
   },
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB pour les vidéos
   fileFilter: (req, file, cb) => {
-    const ok = /^(image|audio)\//.test(file.mimetype);
+    const ok = /^(image|audio|video)\//.test(file.mimetype);
     cb(ok ? null : new Error('Type non supporté'), ok);
   },
 });
