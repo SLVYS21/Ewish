@@ -228,7 +228,7 @@ function Field({ field, value, onChange, onUpload }) {
             className={styles.input}
           />
           {/* Upload button for image fields */}
-          {(field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path')) && (
+          {(field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
             <>
               <input type="file" ref={fileRef} onChange={handleFileChange} accept="image/*" style={{display:'none'}} />
               <button
@@ -258,7 +258,7 @@ function Field({ field, value, onChange, onUpload }) {
             </>
           )}
           {/* Preview for image URLs */}
-          {value && (field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path')) && (
+          {value && (field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
             <div className={styles.imgPreview}>
               <img src={value} alt="" onError={e => e.target.style.display='none'} />
             </div>

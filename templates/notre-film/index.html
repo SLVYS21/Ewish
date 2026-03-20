@@ -394,27 +394,34 @@
     ══════════════════════════════════ */
     #s5 {
       background: var(--accent);
-      padding: 20px 16px 90px;  /* space for pill */
-      gap: 16px;
+      padding: 0;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
     }
 
     .s5-title {
-      position: absolute; top: 20px; left: 0; right: 0;
       font-family: var(--font-s);
       font-size: calc(1.3rem * var(--fs-scale));
-      color: rgba(255,255,255,.88); z-index: 5; pointer-events: none;
+      color: rgba(255,255,255,.88);
       text-align: center;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+      position: relative; z-index: 5;
     }
 
-    /* Conteneur 9:16 centré */
+    /* Conteneur 9:16 centré avec marges */
     .s5-video-container {
       position: relative;
-      width: min(100%, calc(100vh * 9 / 16));
-      aspect-ratio: 9 / 16;
-      background: var(--accent);
-      border-radius: 0px;
-      /*overflow: hidden;*/
+      /* hauteur max = viewport - titre - bouton replay - espaces */
+      height: calc(100vh - 160px);
+      width: calc((100vh - 160px) * 9 / 16);
+      max-width: calc(100vw - 32px);
+      background: #111;
+      border-radius: 16px;
+      overflow: hidden;
       flex-shrink: 0;
+      margin: 0 auto;
     }
 
     #surprise-video {
@@ -441,10 +448,7 @@
         transparent 75%, rgba(0,0,0,.4) 100%);
     }
 
-    .s5-bottom {
-      position: absolute; bottom: 24px; left: 0; right: 0;
-      display: flex; justify-content: center; z-index: 10;
-    }
+    /* s5-bottom removed — button is now in normal flow */
     .s5-replay-btn {
       background: rgba(255,255,255,.15);
       backdrop-filter: blur(14px);
@@ -549,7 +553,7 @@
     <div class="s1-ring-2"></div>
     <img src="" id="s1-photo" class="s1-photo" style="display:none" alt="">
     <div class="s1-photo-placeholder" id="s1-ph">💕</div>
-    <button id="heart-btn" onclick="nextScene()" aria-label="Découvrir">❤️</button>
+    <button id="heart-btn" onclick="heartClick()" aria-label="Découvrir">❤️</button>
   </div>
 
   <div class="s1-subtext" data-node-name="greetingText">
@@ -601,7 +605,7 @@
 <div class="scene" id="s4" data-section="message">
   <div class="s4-inner">
     <div class="s4-quote">"</div>
-    <div class="s4-title">À <span data-node-name="letterTitle">Sarah d'amour...</span></div>
+    <div class="s4-title">À mon <span data-node-name="letterTitle">Sarah d'amour...</span></div>
     <div class="s4-divider"></div>
     <div class="s4-scroll" id="s4-scroll">
       <div class="s4-salut" data-node-name="letterSalut">Mon cœur,</div>
@@ -612,7 +616,7 @@
     </div>
     <div class="s4-footer">
       <button class="s4-surprise-btn" id="s4-next" onclick="nextScene()" style="display:none">
-        <span data-node-name="surpriseBtn">J'ai une dernière surprise...</span>
+        🎁 <span data-node-name="surpriseBtn">J'ai une dernière surprise...</span>
       </button>
     </div>
   </div>
@@ -622,19 +626,17 @@
      S5 — VIDÉO
 ═══════════════════════════ -->
 <div class="scene" id="s5">
+  <div class="s5-title" data-node-name="videoLabel">Notre film d'amour</div>
   <div class="s5-video-container">
-    <div class="s5-title" data-node-name="videoLabel">Notre film d'amour</div>
     <div class="s5-overlay"></div>
     <div class="s5-no-video" id="s5-empty">
       <span>🎬</span><p>Ajoute une vidéo<br>depuis l'éditeur</p>
     </div>
     <video id="surprise-video" playsinline loop muted></video>
-    <div class="s5-bottom">
-      <button class="s5-replay-btn" onclick="replayAll()">
-        ↺ <span data-node-name="replayBtn">Revoir nos souvenirs</span>
-      </button>
-    </div>
   </div>
+  <button class="s5-replay-btn" onclick="replayAll()" style="margin-top:16px;flex-shrink:0">
+    ↺ <span data-node-name="replayBtn">Revoir nos souvenirs</span>
+  </button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
@@ -655,6 +657,19 @@ const SCENES      = ['s1','s2','s3','s4','s5'];
 /* ══════════════════════════════════════════════
    TRANSITIONS
 ══════════════════════════════════════════════ */
+function heartClick() {
+  // Lance la musique immédiatement
+  if (audio.src && audio.src !== window.location.href && !_isPlaying) {
+    audio.play().catch(() => {});
+    _isPlaying = true;
+    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('s2-disc').classList.add('spinning');
+    const ci = document.querySelector('#pill-cover img');
+    if (ci) ci.classList.add('playing');
+  }
+  nextScene();
+}
+
 function nextScene() {
   if (_transitioning) return;
   goScene(_current + 1);
@@ -974,6 +989,22 @@ function applyField(key, val) {
 
   if (key === 'photos' && Array.isArray(val)) {
     _photos = val;
+    return;
+  }
+
+  // Individual photo fields photo1..photo6
+  const photoMatch = key.match(/^photo(\d+)$/);
+  if (photoMatch && val) {
+    const idx = parseInt(photoMatch[1]) - 1;
+    if (!_photos[idx]) _photos[idx] = {};
+    _photos[idx].src = val;
+    return;
+  }
+  const labelMatch = key.match(/^photo(\d+)Label$/);
+  if (labelMatch && val) {
+    const idx = parseInt(labelMatch[1]) - 1;
+    if (!_photos[idx]) _photos[idx] = {};
+    _photos[idx].label = val;
     return;
   }
 
