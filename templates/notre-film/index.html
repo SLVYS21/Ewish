@@ -533,7 +533,11 @@
       <span class="pill-title" id="pill-title">Notre Chanson</span>
       <div class="pill-progress"><div class="pill-fill" id="pill-fill"></div></div>
     </div>
-    <span class="pill-icon" id="pill-icon">▶</span>
+    <span class="pill-icon" id="pill-icon">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+        </svg>
+    </span>
   </button>
 </div>
 
@@ -662,7 +666,7 @@ function heartClick() {
   if (audio.src && audio.src !== window.location.href && !_isPlaying) {
     audio.play().catch(() => {});
     _isPlaying = true;
-    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('pill-icon').innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
     document.getElementById('s2-disc').classList.add('spinning');
     const ci = document.querySelector('#pill-cover img');
     if (ci) ci.classList.add('playing');
@@ -815,18 +819,20 @@ function setAudioSrc(src) {
   }
 }
 
+const svgPlay = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const svgPause = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
 function toggleMusic() {
   if (!audio.src || audio.src === window.location.href) return;
   if (_isPlaying) {
     audio.pause(); _isPlaying = false;
-    document.getElementById('pill-icon').textContent = '▶';
+    document.getElementById('pill-icon').innerHTML = svgPlay;
     document.getElementById('s2-disc').classList.remove('spinning');
     const ci = document.querySelector('#pill-cover img');
     if (ci) ci.classList.remove('playing');
   } else {
     audio.play().catch(() => {});
     _isPlaying = true;
-    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('pill-icon').innerHTML = svgPause;
     document.getElementById('s2-disc').classList.add('spinning');
     const ci = document.querySelector('#pill-cover img');
     if (ci) ci.classList.add('playing');

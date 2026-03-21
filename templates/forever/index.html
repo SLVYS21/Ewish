@@ -390,10 +390,17 @@
 <div id="progress-line"></div>
 
 <!-- Music pill -->
+ const svgPlay = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const svgPause = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
 <div id="music-pill">
   <button class="pill-btn" onclick="toggleMusic()">
     <div class="pill-cover-wrap" id="pill-cover">♥</div>
-    <span id="pill-icon">▶</span>
+    <span id="pill-icon">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </span>
     <span id="pill-label">notre chanson</span>
   </button>
 </div>
@@ -483,17 +490,20 @@ function setAudioSrc(src) {
     audio.addEventListener('loadedmetadata', apply);
   }
 }
+const svgPlay = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const svgPause = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
 function toggleMusic() {
   if (!audio.src || audio.src === window.location.href) return;
   if (isPlaying) {
     audio.pause(); isPlaying = false;
-    document.getElementById('pill-icon').textContent = '▶';
+    document.getElementById('pill-icon').innerHTML = svgPlay;
     const ci = document.querySelector('#pill-cover img');
     if (ci) ci.classList.remove('playing');
   } else {
     audio.play().catch(() => {});
     isPlaying = true;
-    document.getElementById('pill-icon').textContent = '⏸';
+    document.getElementById('pill-icon').innerHTML = svgPause;
     const ci = document.querySelector('#pill-cover img');
     if (ci) ci.classList.add('playing');
   }
