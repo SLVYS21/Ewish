@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className={s.footer}>
       <div className={s.inner}>
         <div className={s.brand}>
-          <div className={s.logo}>e<em>Wishes</em></div>
+          <div className={s.logo}>my<em>Kado</em></div>
           <p className={s.tagline}>Des vœux qui touchent vraiment.</p>
         </div>
         <nav className={s.nav}>
@@ -16,7 +16,7 @@ export default function Footer() {
           <a href={APP_URL} target="_blank" rel="noreferrer">Mon espace créateur</a>
         </nav>
         <div className={s.legal}>
-          © {new Date().getFullYear()} eWishes · Tous droits réservés
+          © {new Date().getFullYear()} myKado · Tous droits réservés
         </div>
       </div>
     </footer>

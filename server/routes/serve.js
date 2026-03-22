@@ -30,6 +30,38 @@ router.get('/:templateName/:customName', async (req, res) => {
         </body></html>
       `);
     }
+
+    const isPreview = req.query.preview === '1';
+
+    if (!pub.published && !isPreview) {
+      return res.status(410).send(`
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Lien non disponible</title>
+          <style>
+            body { margin:0; font-family:'Segoe UI',system-ui,sans-serif;
+              background:#f8f8f8; display:flex; align-items:center;
+              justify-content:center; min-height:100vh; }
+            .card { background:#fff; border-radius:16px; padding:48px 36px;
+              text-align:center; max-width:360px;
+              box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+            .icon { font-size:3rem; margin-bottom:16px; }
+            h1 { font-size:1.3rem; color:#1a1a1a; margin:0 0 10px; font-weight:700; }
+            p { color:#888; font-size:0.9rem; line-height:1.6; margin:0; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">🔒</div>
+            <h1>Ce lien n'est plus disponible</h1>
+            <p>Cette création a été dépubliée par son auteur.</p>
+          </div>
+        </body>
+        </html>
+      `);
+    }
  
     const TMPL_DIR = process.env.TEMPLATES_DIR ||
       (fs.existsSync(path.join(__dirname, '../templates'))
@@ -121,6 +153,20 @@ ${bgCssLines.join('\n')}
     }
  
     html = html.replace('</head>', injection + '\n</head>');
+
+    // ── Incrémenter le compteur de visites ──────────────────
+    Publication.findByIdAndUpdate(pub._id, {
+      $inc: { views: 1 },
+      lastViewedAt: new Date(),
+    }).catch(() => {});
+
+    if (!isPreview) {
+      Publication.findByIdAndUpdate(pub._id, {
+        $inc: { views: 1 },
+        lastViewedAt: new Date(),
+      }).catch(() => {});
+    }
+
     res.send(html);
   } catch (e) {
     console.error(e);

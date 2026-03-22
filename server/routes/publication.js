@@ -164,6 +164,19 @@ router.post('/:id/duplicate', async (req, res) => {
   }
 });
 
+// POST unpublish
+router.post('/:id/unpublish', async (req, res) => {
+  try {
+    const pub = await Publication.findByIdAndUpdate(
+      req.params.id,
+      { published: false },
+      { new: true }
+    );
+    if (!pub) return res.status(404).json({ error: 'Not found' });
+    res.json({ success: true });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
 // DELETE
 router.delete('/:id', async (req, res) => {
   try {

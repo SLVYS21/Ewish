@@ -21,7 +21,7 @@ export default function Navbar({ onOrder }) {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     >
       <a href="/" className={s.logo}>
-        <span className={s.logoText}>e<em>Wishes</em></span>
+        <span className={s.logoText}>my<em>Kado</em></span>
       </a>
 
       <div className={s.links}>

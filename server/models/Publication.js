@@ -51,8 +51,6 @@ const decorationSchema = new mongoose.Schema({
   zIndex:    { type: Number, default: 10 },
   delay:     { type: Number, default: 0 },      // animation delay in seconds
   rotate:    { type: Number, default: 0 },      // initial rotation degrees
-  showAfter:  {type: Number, default: 0},
-  hideAfter:  {type: Number, default: 0},
 }, { _id: false });
 
 const publicationSchema = new mongoose.Schema({
@@ -73,8 +71,6 @@ const publicationSchema = new mongoose.Schema({
     fontFamily:   { type: String, default: 'Work Sans' },
     fontSize:     { type: String, default: 'medium' },
     theme:        { type: String, default: 'light' },
-    textColor:    { type: String, default: '#333333' },
-    textMuted:    { type: String, default: '#999999' },
 
     // Background per section — key = section slug
     // Special key "global" = fallback for all sections with no specific bg
@@ -93,6 +89,10 @@ const publicationSchema = new mongoose.Schema({
   // Free-form decoration elements
   decorations: [decorationSchema],
 
+  // Analytics — compteur de visites
+  views:       { type: Number, default: 0 },
+  lastViewedAt:{ type: Date },
+
   published:   { type: Boolean, default: false },
   publishedAt: { type: Date },
 
@@ -100,6 +100,8 @@ const publicationSchema = new mongoose.Schema({
   showBranding: { type: Boolean, default: false },  // afficher bouton promo eWishWell
   brandingUrl:  { type: String,  default: '' },      // lien custom (WhatsApp ou landing)
 
+  // Short URL code — generated on first publish
+  // e.g. /s/abc123  or  /s/prenom-occasion
   shortCode:   { type: String, unique: true, sparse: true },
   createdAt:   { type: Date, default: Date.now },
   updatedAt:   { type: Date, default: Date.now },

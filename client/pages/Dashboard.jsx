@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getPublications, deletePublication, duplicatePublication } from '../utils/api'
+import { getPublications, deletePublication, duplicatePublication, unpublishPublication } from '../utils/api'
 import styles from './Dashboard.module.css';
 
 export default function Dashboard() {
@@ -51,6 +51,13 @@ export default function Dashboard() {
     } catch (e) {
       setDupError(e.response?.data?.error || 'Erreur lors de la duplication');
     } finally { setDupLoading(false); }
+  };
+
+  const handleUnpublish = async (id, e) => {
+    e.stopPropagation();
+    if (!confirm('Dépublier cette publication ? Elle ne sera plus accessible en ligne.')) return;
+    await unpublishPublication(id);
+    setPubs(p => p.map(x => x._id === id ? { ...x, published: false } : x));
   };
  
   const TEMPLATE_ICONS = {
@@ -166,6 +173,12 @@ export default function Dashboard() {
                   </p>
                   <p className={styles.cardDate}>
                     {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}
+                    {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}
+                    {pub.views > 0 && (
+                      <span className={styles.viewCount} title="Vues">
+                        · 👁 {pub.views.toLocaleString('fr-FR')}
+                      </span>
+                    )}
                   </p>
                 </div>
                 <div className={styles.cardActions}>
@@ -178,7 +191,15 @@ export default function Dashboard() {
                       className={styles.btnIcon}
                       title="View live"
                     >↗</a>
-                  )}<button
+                  )}
+                  {pub.published && (
+                    <button
+                      className={styles.btnIcon}
+                      title="Dépublier"
+                      onClick={e => handleUnpublish(pub._id, e)}
+                    >🔴</button>
+                  )}
+                  <button
                     className={styles.btnIcon}
                     title="Dupliquer"
                     onClick={e => openDupModal(pub, e)}

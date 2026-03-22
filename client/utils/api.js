@@ -142,3 +142,5 @@ export const uploadFont  = (formData) => api.post('/fonts', formData, {
 });
 export const deleteFont  = (id)      => api.delete(`/fonts/${id}`, { withCredentials: true });
 export const duplicatePublication = (id, data) => api.post(`/publications/${id}/duplicate`, data, { withCredentials: true });
+
+export const unpublishPublication  = (id)       => api.post(`/publications/${id}/unpublish`, {}, { withCredentials: true });

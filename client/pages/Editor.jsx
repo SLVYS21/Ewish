@@ -25,8 +25,8 @@ const TABS = [
 ];
 
 function BrandingTab({ show, url, onToggle, onUrlChange }) {
-  const DEFAULT_URL = 'https://ewishwell.com';
- 
+  const DEFAULT_URL = 'https://app.mykado.store';
+//previewSrc
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
  
@@ -306,7 +306,7 @@ export default function Editor() {
     return true;
   });
 
-  const previewSrc = pub ? `${import.meta.env.VITE_API_URL}/site/${pub.templateName}/${pub.customName}` : '';
+  const previewSrc = pub ? `${import.meta.env.VITE_API_URL}/site/${pub.templateName}/${pub.customName}?preview=1` : '';
 
   if (!pub) return (
     <div className={styles.loading}>
