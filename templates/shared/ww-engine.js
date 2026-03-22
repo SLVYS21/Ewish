@@ -462,6 +462,53 @@
     injectKeyframes();
 
     const style = window.__WW_STYLE__ || {};
+    // ── Branding promo button ────────────────────────────────────
+    const br = window.__WW_BRANDING__;
+    if (br && br.show) {
+      (function() {
+        var btn = document.createElement('a');
+        btn.href = br.url;
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.id = 'ww-branding-btn';
+        btn.textContent = br.label || 'Crée le tien sur eWishWell ✨';
+        btn.style.cssText = [
+          'position:fixed',
+          'bottom:14px',
+          'left:50%',
+          'transform:translateX(-50%)',
+          'z-index:8999',
+          'background:rgba(255,255,255,0.92)',
+          'backdrop-filter:blur(10px)',
+          '-webkit-backdrop-filter:blur(10px)',
+          'border:1px solid rgba(0,0,0,0.08)',
+          'border-radius:50px',
+          'padding:8px 18px',
+          'font-family:system-ui,-apple-system,sans-serif',
+          'font-size:0.72rem',
+          'font-weight:600',
+          'color:#444',
+          'text-decoration:none',
+          'white-space:nowrap',
+          'box-shadow:0 4px 16px rgba(0,0,0,0.12)',
+          'opacity:0',
+          'transition:opacity 0.6s ease 1.5s, transform 0.2s',
+          'cursor:pointer',
+        ].join(';');
+        btn.addEventListener('mouseenter', function() {
+          btn.style.transform = 'translateX(-50%) translateY(-2px)';
+          btn.style.boxShadow = '0 6px 22px rgba(0,0,0,0.18)';
+        });
+        btn.addEventListener('mouseleave', function() {
+          btn.style.transform = 'translateX(-50%)';
+          btn.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+        });
+        document.body.appendChild(btn);
+        // Fade in après un délai pour ne pas distraire
+        setTimeout(function() { btn.style.opacity = '1'; }, 100);
+      })();
+    }
+
     const decos = window.__WW_DECO__  || [];
 
     applyBackgrounds(style);

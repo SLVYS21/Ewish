@@ -22,7 +22,7 @@ router.get('/:templateName/:customName', async (req, res) => {
       templateName: req.params.templateName,
       customName:   req.params.customName,
     }).lean();
-
+ 
     if (!pub) {
       return res.status(404).send(`
         <html><body style="font-family:sans-serif;text-align:center;padding:80px;background:#fafafa">
@@ -30,7 +30,7 @@ router.get('/:templateName/:customName', async (req, res) => {
         </body></html>
       `);
     }
-
+ 
     const TMPL_DIR = process.env.TEMPLATES_DIR ||
       (fs.existsSync(path.join(__dirname, '../templates'))
         ? path.join(__dirname, '../templates')
@@ -39,9 +39,9 @@ router.get('/:templateName/:customName', async (req, res) => {
     if (!fs.existsSync(templatePath)) {
       return res.status(404).send('<h1>Template introuvable</h1>');
     }
-
+ 
     let html = fs.readFileSync(templatePath, 'utf8');
-
+ 
     // Load custom fonts from DB and inject @font-face declarations
     let fontFaceCSS = '';
     try {
@@ -55,7 +55,7 @@ router.get('/:templateName/:customName', async (req, res) => {
     const s     = pub.style || {};
     const scale = s.fontSize === 'small' ? '0.85' : s.fontSize === 'large' ? '1.15' : '1';
     const bgs   = s.backgrounds || {};
-
+ 
     /* ── CSS: section background variables ─────────────────── */
     const bgCssLines = [];
     Object.entries(bgs).forEach(([key, bg]) => {
@@ -70,7 +70,7 @@ router.get('/:templateName/:customName', async (req, res) => {
         if (bg.blur    != null) bgCssLines.push(`  --bg-${key}-blur: ${bg.blur}px;`);
       }
     });
-
+ 
     const injection = `
 <style>
 ${fontFaceCSS ? fontFaceCSS + '\n' : ''}  :root {
@@ -88,7 +88,7 @@ ${bgCssLines.join('\n')}
   /* ── Publication data injected by server ── */
   const _rawData = ${JSON.stringify(pub.data || {})};
   const _jarCfg  = ${JSON.stringify(pub.jarConfig || null)};
-
+ 
   window.__WW_DATA__  = _jarCfg ? { ..._rawData, jarConfig: _jarCfg } : _rawData;
   window.__WW_STYLE__ = ${JSON.stringify(pub.style || {})};
   window.__WW_META__  = ${JSON.stringify({
@@ -97,18 +97,29 @@ ${bgCssLines.join('\n')}
     templateName: pub.templateName,
     customName:   pub.customName,
   })};
-
+ 
   /* ── Decorations (read by ww-engine.js) ── */
+  window.__WW_API_BASE__  = '${process.env.API_BASE_URL || ''}';
+  window.__WW_BRANDING__ = ${JSON.stringify({
+    show: Boolean(pub.showBranding),
+    url: pub.brandingUrl || process.env.BRANDING_URL || 'https://wa.me/your_number',
+    label: 'Crée le tien sur eWishWell ✨'
+  })};
   window.__WW_DECO__     = ${JSON.stringify(pub.decorations || [])};
   window.__WW_WIDGETS__ = ${JSON.stringify(pub.widgets || [])};
   window.__WW_PHOTO_TRANSFORMS__ = ${JSON.stringify(pub.photoTransforms || {})};
 <\/script>`;
-
+  // window.__WW_BRANDING__  = ${JSON.stringify({
+  //   show: ${pub.showBranding ? 'true' : 'false'},
+  //   url:  '${(pub.brandingUrl || process.env.BRANDING_URL || 'https://wa.me/your_number').replace(/'/g, "\\'")}',
+  //   label: 'Crée le tien sur eWishWell ✨',
+  // })};
+  
     /* ── Inject engine script tag if not already present ───── */
     if (!html.includes('ww-engine.js')) {
       html = html.replace('</head>', '<script src="/templates/shared/ww-engine.js"><\/script>\n</head>');
     }
-
+ 
     html = html.replace('</head>', injection + '\n</head>');
     res.send(html);
   } catch (e) {

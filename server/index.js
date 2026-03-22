@@ -12,6 +12,7 @@ const PROD = process.env.NODE_ENV === 'production';
 
 // Domains (override via .env)
 const WWW_HOST = process.env.WWW_HOST || 'www.mykado.store';   // landing
+const LANDING_URL  = process.env.LANDING_URL  || `https://${'www.mykado.store'}`;
 const APP_HOST = process.env.APP_HOST || 'app.mykado.store';   // React app
 
 // ── CORS ─────────────────────────────────────────────────────
@@ -147,6 +148,14 @@ if (PROD && fs.existsSync(REACT_DIST)) {
     }
   });
 }
+
+app.use((req, res) => {
+  // Ne pas rediriger les requêtes API (retourner 404 JSON)
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Route introuvable' });
+  }
+  res.redirect(302, LANDING_URL);
+});
 
 // ── MongoDB + start ───────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/wishwell';

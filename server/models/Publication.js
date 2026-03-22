@@ -96,6 +96,10 @@ const publicationSchema = new mongoose.Schema({
   published:   { type: Boolean, default: false },
   publishedAt: { type: Date },
 
+  // Branding promo button
+  showBranding: { type: Boolean, default: false },  // afficher bouton promo eWishWell
+  brandingUrl:  { type: String,  default: '' },      // lien custom (WhatsApp ou landing)
+
   shortCode:   { type: String, unique: true, sparse: true },
   createdAt:   { type: Date, default: Date.now },
   updatedAt:   { type: Date, default: Date.now },

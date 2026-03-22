@@ -41,11 +41,11 @@ router.post('/', async (req, res) => {
 // - jarConfig : replaced entirely when present (it's a self-contained object)
 router.patch('/:id', async (req, res) => {
   try {
-    const { data, style, jarConfig, decorations, widgets, photoTransforms, ...rest } = req.body;
-
+    const { data, style, jarConfig, decorations, widgets, photoTransforms, showBranding, brandingUrl, ...rest } = req.body;
+ 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
-
+ 
     // style: shallow merge but backgrounds sub-object merges deeply
     let mergedStyle = existing.style || {};
     if (style) {
@@ -57,20 +57,22 @@ router.patch('/:id', async (req, res) => {
         mergedStyle.backgrounds = { ...(mergedStyle.backgrounds || {}), ...newBgs };
       }
     }
-    console.log('mergedStyle', mergedStyle);
-
+ 
     const update = {
       ...rest,
       data:  data  ? { ...existing.data, ...data } : existing.data,
       style: mergedStyle,
       updatedAt: Date.now(),
     };
-
+    // Branding fields (direct update)
+    if (showBranding !== undefined) update.showBranding = showBranding;
+    if (brandingUrl  !== undefined) update.brandingUrl  = brandingUrl;
+ 
     // jarConfig: replace entirely (nested arrays don't merge well)
     if (jarConfig !== undefined) {
       update.jarConfig = jarConfig;
     }
-
+ 
     // decorations: replace entirely (client sends full array)
     if (decorations !== undefined) {
       update.decorations = decorations;
@@ -81,7 +83,7 @@ router.patch('/:id', async (req, res) => {
     if (photoTransforms !== undefined) {
       update.photoTransforms = photoTransforms;
     }
-
+ 
     const pub = await Publication.findByIdAndUpdate(req.params.id, update, { new: true });
     res.json(pub);
   } catch (e) { res.status(400).json({ error: e.message }); }

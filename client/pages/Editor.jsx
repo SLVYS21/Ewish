@@ -21,7 +21,110 @@ const TABS = [
   { key: 'jar',         label: 'Jar',              icon: '🫙',  templates: ['birthday', 'special'] },
   { key: 'widgets',     label: 'Widgets',           icon: '🧩' },
   { key: 'wishes',      label: 'Vœux',             icon: '💌',  templatePrefix: 'collective' },
+  { key: 'branding',    label: 'Promo',            icon: '📣' },
 ];
+
+function BrandingTab({ show, url, onToggle, onUrlChange }) {
+  const DEFAULT_URL = 'https://ewishwell.com';
+ 
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+ 
+      {/* Toggle */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px',
+        background: 'var(--surface, rgba(255,255,255,.05))',
+        border: '1.5px solid var(--border, rgba(255,255,255,.1))',
+        borderRadius: '12px', padding: '14px 16px' }}>
+        <button
+          onClick={() => onToggle(!show)}
+          style={{
+            width: '44px', height: '24px', borderRadius: '50px',
+            border: 'none', cursor: 'pointer', flexShrink: 0, marginTop: '2px',
+            background: show ? 'var(--brand, #c8963e)' : 'rgba(255,255,255,.15)',
+            position: 'relative', transition: 'background .25s',
+          }}
+        >
+          <span style={{
+            position: 'absolute', top: '3px',
+            left: show ? '22px' : '3px',
+            width: '18px', height: '18px', borderRadius: '50%',
+            background: '#fff', transition: 'left .25s',
+          }} />
+        </button>
+        <div>
+          <div style={{ fontSize: '0.85rem', fontWeight: '700',
+            color: 'var(--text, #fff)', marginBottom: '4px' }}>
+            📣 Afficher le bouton eWishWell
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-3, rgba(255,255,255,.4))',
+            lineHeight: '1.5' }}>
+            Un petit bouton discret s'affiche en bas de la page.
+            Tes clients peuvent cliquer pour commander leur propre création.
+            <br />
+            <span style={{ color: 'var(--brand, #c8963e)', fontWeight: '600' }}>
+              Offre une réduction en échange ! 🎁
+            </span>
+          </div>
+        </div>
+      </div>
+ 
+      {/* Preview */}
+      {show && (
+        <div style={{ borderRadius: '10px', overflow: 'hidden',
+          border: '1px solid var(--border, rgba(255,255,255,.1))' }}>
+          <div style={{ padding: '8px 12px', fontSize: '0.62rem',
+            letterSpacing: '0.15em', textTransform: 'uppercase',
+            color: 'var(--text-3, rgba(255,255,255,.4))', background: 'rgba(0,0,0,.2)' }}>
+            Aperçu du bouton
+          </div>
+          <div style={{ padding: '16px', display: 'flex', justifyContent: 'center',
+            background: 'rgba(255,255,255,.03)' }}>
+            <span style={{
+              background: 'rgba(255,255,255,0.92)',
+              borderRadius: '50px', padding: '8px 18px',
+              fontSize: '0.72rem', fontWeight: '600', color: '#444',
+              boxShadow: '0 4px 16px rgba(0,0,0,.12)',
+            }}>
+              Crée le tien sur eWishWell ✨
+            </span>
+          </div>
+        </div>
+      )}
+ 
+      {/* URL */}
+      <div>
+        <label style={{ display: 'block', fontSize: '0.65rem',
+          letterSpacing: '0.15em', textTransform: 'uppercase',
+          color: 'var(--text-3, rgba(255,255,255,.35))', marginBottom: '8px' }}>
+          Lien de destination
+        </label>
+        <input
+          type="url"
+          value={url}
+          onChange={e => onUrlChange(e.target.value)}
+          placeholder={DEFAULT_URL}
+          style={{
+            width: '100%', padding: '10px 12px',
+            background: 'var(--surface, rgba(255,255,255,.05))',
+            border: '1.5px solid var(--border, rgba(255,255,255,.1))',
+            borderRadius: '8px', color: 'var(--text, #fff)',
+            fontSize: '0.85rem', outline: 'none',
+          }}
+          onFocus={e => e.target.style.borderColor = 'var(--brand, #c8963e)'}
+          onBlur={e => e.target.style.borderColor = 'var(--border, rgba(255,255,255,.1))'}
+        />
+        <p style={{ fontSize: '0.7rem', color: 'var(--text-3, rgba(255,255,255,.35))',
+          marginTop: '6px', lineHeight: '1.5' }}>
+          Ton WhatsApp : <code style={{ color: 'var(--brand, #c8963e)' }}>
+            https://wa.me/+2290000000000
+          </code>
+          <br />ou l'URL de ta landing page.
+        </p>
+      </div>
+ 
+    </div>
+  );
+}
 
 export default function Editor() {
   const { id }     = useParams();
@@ -37,10 +140,13 @@ export default function Editor() {
   const [jarConfig,   setJarConfig]   = useState(null);
   const [widgets,     setWidgets]     = useState([]);
   const [photoTransforms, setPhotoTransforms] = useState({});
+
   const [activeTab,   setActiveTab]   = useState('content');
   const [saveStatus,  setSaveStatus]  = useState('saved');
   const [publishing,  setPublishing]  = useState(false);
   const [publishedUrl, setPublishedUrl] = useState('');
+  const [showBranding, setShowBranding] = useState(false);
+  const [brandingUrl,  setBrandingUrl]  = useState('');
   const [shortCode,    setShortCode]    = useState('');
   const [slugEditing,  setSlugEditing]  = useState(false);
   const [slugDraft,    setSlugDraft]    = useState('');
@@ -67,13 +173,15 @@ export default function Editor() {
         setJarConfig(found.jarConfig || null);
         setWidgets(found.widgets || []);
         setPhotoTransforms(found.photoTransforms || {});
+        setShowBranding(found.showBranding || false);
+        setBrandingUrl(found.brandingUrl || '');
         if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
 
         try {
           const tr = await fetch(`${import.meta.env.VITE_API_URL}/api/templates/${found.templateName}`);
           if (tr.ok) setTemplate(await tr.json());
         } catch {}
-      } catch { navigate('/'); }
+      } catch { navigate('/ewish-admin/ewish'); }
     };
     load();
   }, [id]);
@@ -376,6 +484,20 @@ export default function Editor() {
               <WishesManager
                 publicationId={pub._id}
                 templateName={pub.templateName}
+              />
+            )}
+            {activeTab === 'branding' && (
+              <BrandingTab
+                show={showBranding}
+                url={brandingUrl}
+                onToggle={(v) => {
+                  setShowBranding(v);
+                  updatePublication(id, { showBranding: v, brandingUrl }).catch(() => {});
+                }}
+                onUrlChange={(v) => {
+                  setBrandingUrl(v);
+                  updatePublication(id, { showBranding, brandingUrl: v }).catch(() => {});
+                }}
               />
             )}
           </div>
