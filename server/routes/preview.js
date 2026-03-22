@@ -145,8 +145,12 @@ router.get('/:templateName', async (req, res) => {
     const template = await Template.findOne({ name: templateName }).lean();
     if (!template) return res.status(404).send('<h1>Template not found</h1>');
 
-    const templatePath = path.join(__dirname, `../../templates/${templateName}/index.html`);
-    if (!fs.existsSync(templatePath)) return res.status(404).send('<h1>Not found</h1>');
+    let templatePath = path.join(__dirname, `../../templates/${templateName}/index.html`);
+    if (!fs.existsSync(templatePath)) {
+      templatePath = path.join(__dirname, `../templates/${templateName}/index.html`);
+      if (!fs.existsSync(templatePath))
+        return res.status(404).send('<h1>Not found</h1>');
+    }
 
     let html = fs.readFileSync(templatePath, 'utf8');
 
