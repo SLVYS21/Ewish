@@ -40,9 +40,7 @@ const upload = multer({
 /* ── GET /api/fonts — list all custom fonts ─────────────────── */
 router.get('/', async (req, res) => {
   try {
-    console.log('Trying to get fonts');
     const fonts = await Font.find({}).sort('-createdAt').lean();
-    console.log(fonts);
     res.json(fonts);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
