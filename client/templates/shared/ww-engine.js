@@ -85,16 +85,23 @@
     const isBody    = el === document.body;
     const isSection = !isBody && el.hasAttribute('data-section');
 
-    // Sections are position:absolute with auto height — give them full viewport coverage
+    // Sections need full viewport coverage for bg wrap to work
+    // Don't override position if element is already position:fixed (e.g. notre-film scenes)
     if (isSection) {
-      el.style.top      = '0';
-      el.style.left     = '0';
-      el.style.right    = '0';
-      el.style.bottom   = '0';
-      el.style.width    = '100%';
-      el.style.height   = '100vh';
-      el.style.position = 'absolute';
-      el.style.overflow = 'hidden';
+      const computedPos = window.getComputedStyle(el).position;
+      if (computedPos !== 'fixed') {
+        el.style.top      = '0';
+        el.style.left     = '0';
+        el.style.right    = '0';
+        el.style.bottom   = '0';
+        el.style.width    = '100%';
+        el.style.height   = '100vh';
+        el.style.position = 'absolute';
+        el.style.overflow = 'hidden';
+      } else {
+        // Fixed element — just ensure overflow is hidden
+        el.style.overflow = 'hidden';
+      }
     }
 
     // We always use a wrapper div so we can layer image + overlay cleanly
