@@ -14,8 +14,8 @@
       --soft:     #fce8ed;
       --bg:       #fef5f7;
       --bg2:      #eef4fb;
-      --text:     #2d1a22;
-      --muted:    #a07080;
+      --text-color:     #2d1a22;
+      --text-muted:    #888888;
       --font-s:   'Dancing Script', cursive;
       --font-b:   'Lato', sans-serif;
       --fs-scale: 1;
@@ -26,27 +26,45 @@
       overflow: hidden;
       background: var(--bg);
       font-family: var(--font-b);
-      color: var(--text);
+      color: var(--text-color);
     }
 
     /* ══════════════════════════════════
        SECTIONS — toutes fixed, empilées
     ══════════════════════════════════ */
     .scene {
-      position: fixed; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 80px 24px 40px;  /* 80px top = space for pill */
+      position: fixed; 
+      inset: 0;
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      justify-content: center;
+      padding: 80px 24px 40px;
       text-align: center;
       pointer-events: none;
       overflow: hidden;
       opacity: 0;
       visibility: hidden;
+      /* IMPORTANT : On force le contexte d'empilement */
+      z-index: 1;
     }
+
     .scene.active {
       opacity: 1;
       visibility: visible;
       pointer-events: all;
+    }
+
+    .ww-bg-wrap {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: -1 !important; /* Toujours derrière le texte/boutons */
+      pointer-events: none;
+    }
+
+    /* Si un background est injecté, on rend le fond par défaut transparent */
+    .scene[style*="background-image"] {
+      background: transparent !important;
     }
 
     /* ══════════════════════════════════
@@ -149,7 +167,7 @@
 
     .s1-subtext {
       font-size: calc(.88rem * var(--fs-scale));
-      font-weight: 300; color: var(--muted);
+      font-weight: 300; color: var(--text-color);
       line-height: 1.65; max-width: 260px;
       font-style: italic;
     }
@@ -231,12 +249,13 @@
     .s2-track {
       font-family: var(--font-s);
       font-size: calc(1.75rem * var(--fs-scale));
-      color: var(--text);
+      color: var(--text-muted);
       margin-bottom: 14px; line-height: 1.2;
     }
     .s2-text {
       font-size: calc(.92rem * var(--fs-scale));
-      font-weight: 300; color: #4a6080;
+      color: var(--text-color);
+      font-weight: 300;
       line-height: 1.8; max-width: 290px;
       margin-bottom: 20px;
     }
@@ -245,7 +264,7 @@
 
     .s2-next-btn {
       font-size: calc(.88rem * var(--fs-scale));
-      color: #4a6080; background: none;
+      color: var(--text-muted); background: none;
       border: 1.5px solid rgba(74,96,128,.3);
       border-radius: 50px; padding: 10px 28px;
       cursor: pointer; letter-spacing: .04em;
@@ -287,16 +306,16 @@
 
     .s3-sub {
       font-size: calc(.88rem * var(--fs-scale));
-      font-style: italic; color: var(--muted);
+      font-style: italic; color: var(--text-color);
       margin-top: 12px;
     }
 
     .s3-letter-btn {
       margin-top: 16px;
       background: linear-gradient(135deg, var(--primary), #d44d65);
-      color: #fff; border: none; border-radius: 50px;
+      color: var(--text-muted); border: none; border-radius: 50px;
       padding: 14px 36px;
-      font-family: var(--font-b);
+      font-family: var(--font-s);
       font-size: calc(.95rem * var(--fs-scale));
       font-weight: 700; letter-spacing: .04em;
       cursor: pointer;
@@ -350,12 +369,12 @@
 
     .s4-salut {
       font-size: calc(1.05rem * var(--fs-scale));
-      font-weight: 700; color: var(--text);
+      font-weight: 700; color: var(--text-color);
       margin-bottom: 14px;
     }
     .s4-body {
       font-size: calc(1rem * var(--fs-scale));
-      font-weight: 300; color: #3a2530;
+      font-weight: 300; color: var(--text-color);
       line-height: 1.9; white-space: pre-wrap;
     }
     .typer-cursor {
@@ -501,7 +520,7 @@
     @keyframes spin { to{ transform:rotate(360deg); } }
 
     .pill-meta { display: flex; flex-direction: column; gap: 1px; }
-    .pill-title { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .pill-title { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-family: var(--font-b); }
     .pill-progress {
       width: 90px; height: 2px;
       background: rgba(255,255,255,.25); border-radius: 2px; overflow: hidden;
@@ -522,6 +541,32 @@
       .s2-vinyl-wrap { width:170px; height:170px; }
       .s2-vinyl-photo, .s2-vinyl-placeholder { width:170px; height:170px; }
       #s3-area { height:260px; }
+    }
+
+    /* 1. On vide tous les fonds par défaut pour laisser passer l'image injectée */
+    .scene, #s1, #s2, #s3, #s4, #s5 {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+
+    /* 2. On cible l'élément injecté par le logiciel (souvent .ww-bg-wrap ou .ww-background) */
+    [class*="ww-bg"], [class*="ww-background"], .ww-bg-wrap {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: -1 !important; /* Derrière tout */
+      pointer-events: none !important;
+    }
+
+    /* 3. On force le contenu de tes scènes à passer DEVANT */
+    .scene > *:not([class*="ww-bg"]) {
+      position: relative !important;
+      z-index: 10 !important;
+    }
+
+    /* 4. On s'assure que le body est aussi transparent pour voir l'injecté */
+    body {
+      background: transparent !important;
     }
   </style>
 </head>
@@ -611,7 +656,7 @@
 <div class="scene" id="s4" data-section="message">
   <div class="s4-inner">
     <div class="s4-quote">"</div>
-    <div class="s4-title">À<span data-node-name="letterTitle">Sarah d'amour...</span></div>
+    <div class="s4-title"><span data-node-name="letterTitle">Sarah d'amour...</span></div>
     <div class="s4-divider"></div>
     <div class="s4-scroll" id="s4-scroll">
       <div class="s4-salut" data-node-name="letterSalut">Mon cœur,</div>
@@ -690,23 +735,24 @@ function goScene(idx) {
   const toEl   = document.getElementById(SCENES[idx]);
   const dir    = idx > _current ? 1 : -1;
 
-  // Make next scene ready but invisible above/below
+  // Préparation de la scène suivante
   toEl.classList.add('active');
-  TweenMax.set(toEl, { opacity: 0, y: dir * 50, visibility: 'visible' });
+  // On s'assure que le z-index est supérieur pour la nouvelle scène durant l'anim
+  TweenMax.set(toEl, { opacity: 0, y: dir * 50, visibility: 'visible', zIndex: 2 });
+  TweenMax.set(fromEl, { zIndex: 1 });
 
-  // Exit current
+  // Sortie de la scène actuelle
   TweenMax.to(fromEl, 0.45, {
     opacity: 0,
     y: dir * -50,
     ease: Power2.easeIn,
     onComplete: () => {
       fromEl.classList.remove('active');
-      TweenMax.set(fromEl, { y: 0, visibility: 'hidden' });   // reset
+      TweenMax.set(fromEl, { y: 0, visibility: 'hidden', zIndex: 1 });
 
-      // Enter new
+      // Entrée de la nouvelle scène
       TweenMax.to(toEl, 0.55, {
         opacity: 1,
-        visibility: 'visible',
         y: 0,
         ease: Power3.easeOut,
         onComplete: () => {
@@ -1046,8 +1092,8 @@ window.addEventListener('message', (e) => {
     const r = document.documentElement;
     if (style.primaryColor) r.style.setProperty('--primary', style.primaryColor);
     if (style.accentColor)  r.style.setProperty('--accent',  style.accentColor);
-    if (style.textColor)    r.style.setProperty('--text-color', style.textColor);
-    if (style.textMuted)    r.style.setProperty('--text-muted', style.textMuted);
+    if (style.textColor)    r.style.setProperty('--text-color-color', style.textColor);
+    if (style.textMuted)    r.style.setProperty('--text-color-muted', style.textMuted);
     if (style.fontFamily)   r.style.setProperty('--font-b', `'${style.fontFamily}', sans-serif`);
     if (style.fontSize) {
       const sc = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
@@ -1057,34 +1103,60 @@ window.addEventListener('message', (e) => {
     // Les scenes sont position:fixed — ww-engine les remet en absolute,
     // on corrige après chaque application
     if (style.backgrounds && window.wwEngine) {
-      window.wwEngine.applyBackgrounds(style);
-      const bgs = style.backgrounds || {};
+    window.wwEngine.applyBackgrounds(style);
+    
+    // On laisse le moteur faire, puis on corrige immédiatement après
+    setTimeout(() => {
       document.querySelectorAll('.scene').forEach(scene => {
-        // Reforcer position:fixed
-        scene.style.position = 'fixed';
-        scene.style.inset    = '0';
-        scene.style.width    = '100%';
-        scene.style.height   = '100%';
-        // Si bg custom sur cette scene ou global → effacer le bg CSS natif
-        const sectionKey = scene.getAttribute('data-section');
-        const hasBg = (sectionKey && bgs[sectionKey] && bgs[sectionKey].value)
-                   || (bgs['global'] && bgs['global'].value);
-        if (hasBg) {
-          scene.style.setProperty('--scene-bg-' + scene.id, 'transparent');
-        }
-        // ww-bg-wrap bien positionné
-        const bgWrap = scene.querySelector(':scope > .ww-bg-wrap');
+        // 1. On RE-FORCE le fixed car le moteur le passe souvent en absolute
+        scene.style.setProperty('position', 'fixed', 'important');
+        scene.style.setProperty('inset', '0', 'important');
+        scene.style.setProperty('background', 'transparent', 'important');
+
+        // 2. On cherche le wrapper de bg injecté à l'intérieur
+        const bgWrap = scene.querySelector('[class*="ww-bg"], .ww-bg-wrap');
         if (bgWrap) {
-          bgWrap.style.position = 'absolute';
-          bgWrap.style.inset    = '0';
-          bgWrap.style.zIndex   = '0';
-          scene.querySelectorAll(':scope > *:not(.ww-bg-wrap)').forEach(child => {
-            child.style.position = 'relative';
-            child.style.zIndex   = '1';
+          bgWrap.style.setProperty('position', 'absolute', 'important');
+          bgWrap.style.setProperty('z-index', '-1', 'important');
+          
+          // On s'assure que le contenu n'est pas caché
+          scene.querySelectorAll(':scope > *:not([class*="ww-bg"])').forEach(child => {
+            child.style.setProperty('position', 'relative', 'important');
+            child.style.setProperty('z-index', '10', 'important');
           });
         }
       });
-    }
+    }, 10); // Petit délai pour laisser l'injection se terminer
+  }
+    // if (style.backgrounds && window.wwEngine) {
+    //   window.wwEngine.applyBackgrounds(style);
+    //   const bgs = style.backgrounds || {};
+    //   document.querySelectorAll('.scene').forEach(scene => {
+    //     // Reforcer position:fixed
+    //     scene.style.position = 'fixed';
+    //     scene.style.inset    = '0';
+    //     scene.style.width    = '100%';
+    //     scene.style.height   = '100%';
+    //     // Si bg custom sur cette scene ou global → effacer le bg CSS natif
+    //     const sectionKey = scene.getAttribute('data-section');
+    //     const hasBg = (sectionKey && bgs[sectionKey] && bgs[sectionKey].value)
+    //                || (bgs['global'] && bgs['global'].value);
+    //     if (hasBg) {
+    //       scene.style.setProperty('--scene-bg-' + scene.id, 'transparent');
+    //     }
+    //     // ww-bg-wrap bien positionné
+    //     const bgWrap = scene.querySelector(':scope > .ww-bg-wrap');
+    //     if (bgWrap) {
+    //       bgWrap.style.position = 'absolute';
+    //       bgWrap.style.inset    = '0';
+    //       bgWrap.style.zIndex   = '0';
+    //       scene.querySelectorAll(':scope > *:not(.ww-bg-wrap)').forEach(child => {
+    //         child.style.position = 'relative';
+    //         child.style.zIndex   = '1';
+    //       });
+    //     }
+    //   });
+    // }
   }
   if (data) {
     const { photoTransforms: _pt, ...fields } = data;

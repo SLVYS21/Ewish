@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulaire — eWishWell</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold:    #c8963e;
+      --gold-s:  rgba(200,150,62,0.12);
+      --bg:      #0c0b09;
+      --surface: rgba(255,255,255,0.04);
+      --border:  rgba(255,255,255,0.08);
+      --text:    #f0ebe3;
+      --muted:   rgba(240,235,227,0.45);
+      --red:     #e74c3c;
+      --green:   #2ecc71;
+      --fd:      'Cormorant Garamond', Georgia, serif;
+      --fb:      'Jost', system-ui, sans-serif;
+    }
+    body { background:var(--bg); color:var(--text); font-family:var(--fb); min-height:100vh; }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:128px;
+    }
+    .wrap { position:relative; z-index:1; max-width:540px; margin:0 auto; padding:48px 20px 80px; }
+
+    /* Header */
+    .hd { text-align:center; margin-bottom:48px; }
+    .hd-logo { font-family:var(--fd); font-size:1rem; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); opacity:.85; display:block; margin-bottom:4px; }
+    .hd-sub { font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+    /* Order badge */
+    .order-badge {
+      background:var(--gold-s); border:1px solid rgba(200,150,62,.3);
+      border-radius:12px; padding:16px 20px;
+      display:flex; align-items:center; gap:14px;
+      margin-bottom:36px;
+    }
+    .order-badge-icon { font-size:1.8rem; flex-shrink:0; }
+    .order-badge-ref { font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+    .order-badge-info { font-size:.95rem; font-weight:600; color:var(--text); }
+    .order-badge-tpl {
+      margin-left:auto; flex-shrink:0;
+      font-size:.65rem; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--gold); background:var(--gold-s);
+      border:1px solid rgba(200,150,62,.25);
+      border-radius:50px; padding:4px 10px;
+    }
+
+    /* Section */
+    .sec-label {
+      font-size:.62rem; letter-spacing:.3em; text-transform:uppercase;
+      color:var(--gold); opacity:.7;
+      margin-bottom:16px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .sec-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* Field */
+    .field { margin-bottom:14px; }
+    .field label {
+      display:flex; align-items:center; gap:6px;
+      font-size:.65rem; letter-spacing:.15em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:7px;
+    }
+    .req { color:var(--gold); font-size:.7rem; }
+    .field input, .field textarea, .field select {
+      width:100%; background:var(--surface); border:1.5px solid var(--border);
+      border-radius:10px; padding:12px 14px;
+      color:var(--text); font-family:var(--fb); font-size:.9rem; font-weight:300;
+      outline:none; transition:border-color .2s; appearance:none;
+    }
+    .field input::placeholder, .field textarea::placeholder { color:rgba(240,235,227,.2); }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color:var(--gold); }
+    .field textarea { min-height:100px; resize:vertical; }
+    .field-hint { font-size:.7rem; color:var(--muted); margin-top:5px; line-height:1.5; }
+    .field select {
+      cursor:pointer;
+      background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='rgba(240,235,227,0.4)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
+    }
+    .field select option { background:#1a1714; color:var(--text); }
+
+    /* File upload */
+    .upload-zone {
+      border:1.5px dashed var(--border); border-radius:10px;
+      padding:24px 16px; text-align:center; cursor:pointer;
+      transition:border-color .2s, background .2s;
+      position:relative;
+    }
+    .upload-zone:hover { border-color:rgba(200,150,62,.4); background:var(--gold-s); }
+    .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .upload-zone-icon { font-size:1.8rem; margin-bottom:8px; display:block; }
+    .upload-zone-text { font-size:.8rem; color:var(--muted); line-height:1.5; }
+    .upload-zone-text strong { color:var(--gold); }
+    .upload-previews { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .upload-thumb {
+      width:72px; height:72px; border-radius:8px; object-fit:cover;
+      border:1.5px solid var(--border); flex-shrink:0;
+    }
+    .upload-status { font-size:.72rem; margin-top:8px; color:var(--muted); }
+    .upload-status.ok { color:var(--green); }
+    .upload-status.err { color:var(--red); }
+
+    /* Multi photos */
+    .photos-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+    /* Error */
+    .err-msg {
+      background:rgba(231,76,60,.1); border:1px solid rgba(231,76,60,.3);
+      border-radius:8px; padding:12px 16px; font-size:.82rem; color:var(--red);
+      margin-bottom:16px; display:none;
+    }
+    .err-msg.show { display:block; }
+
+    /* Submit */
+    .submit-wrap { margin-top:32px; }
+    .submit-btn {
+      width:100%; padding:16px 24px;
+      background:var(--gold); border:none; border-radius:12px;
+      font-family:var(--fb); font-size:.9rem; font-weight:600;
+      color:#0c0b09; cursor:pointer; letter-spacing:.04em;
+      transition:all .2s; position:relative; overflow:hidden;
+    }
+    .submit-btn::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,.12); opacity:0; transition:opacity .2s; }
+    .submit-btn:hover::after { opacity:1; }
+    .submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .submit-note { text-align:center; font-size:.72rem; color:var(--muted); margin-top:12px; line-height:1.6; }
+
+    /* Success */
+    #success { display:none; text-align:center; padding:60px 24px; animation:fadeUp .6s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .suc-icon { font-size:3rem; display:block; margin-bottom:20px; }
+    .suc-title { font-family:var(--fd); font-size:2rem; font-style:italic; margin-bottom:12px; }
+    .suc-text { font-size:.9rem; font-weight:300; color:var(--muted); line-height:1.75; max-width:340px; margin:0 auto; }
+
+    /* Loader */
+    .uploading-overlay {
+      position:fixed; inset:0; background:rgba(12,11,9,.85);
+      display:none; align-items:center; justify-content:center;
+      z-index:100; flex-direction:column; gap:16px;
+    }
+    .uploading-overlay.show { display:flex; }
+    .spinner { width:40px; height:40px; border:3px solid rgba(200,150,62,.2); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .uploading-label { font-size:.85rem; color:var(--muted); letter-spacing:.06em; }
+
+    /* Animate in */
+    .hd,.order-badge,.sec-label,.field,.submit-wrap { opacity:0; transform:translateY(12px); animation:fadeUp .5s ease forwards; }
+    .order-badge  { animation-delay:.05s }
+    .field:nth-child(1) { animation-delay:.1s }
+    .field:nth-child(2) { animation-delay:.15s }
+    .field:nth-child(3) { animation-delay:.2s }
+    .field:nth-child(4) { animation-delay:.25s }
+    .field:nth-child(5) { animation-delay:.3s }
+    .submit-wrap { animation-delay:.35s }
+  </style>
+</head>
+<body>
+
+<div class="uploading-overlay" id="uploading-overlay">
+  <div class="spinner"></div>
+  <div class="uploading-label" id="uploading-label">Upload en cours…</div>
+</div>
+
+<div class="wrap">
+
+  <div class="hd">
+    <span class="hd-logo">eWishWell</span>
+    <span class="hd-sub">Formulaire de personnalisation</span>
+  </div>
+
+  <!-- Badge commande -->
+  <div class="order-badge" id="order-badge">
+    <div class="order-badge-icon" id="badge-icon">🎁</div>
+    <div>
+      <div class="order-badge-ref">Ta commande</div>
+      <div class="order-badge-info" id="badge-info">Chargement…</div>
+    </div>
+    <div class="order-badge-tpl" id="badge-tpl">—</div>
+  </div>
+
+  <form id="detail-form" novalidate>
+    <div id="form-fields">
+      <!-- Injecté dynamiquement selon le template -->
+    </div>
+
+    <div class="err-msg" id="err-msg"></div>
+
+    <div class="submit-wrap">
+      <button type="submit" class="submit-btn" id="submit-btn">
+        Envoyer mes informations →
+      </button>
+      <p class="submit-note">On s'occupe du reste. Tu recevras ton lien sur WhatsApp.</p>
+    </div>
+  </form>
+
+  <div id="success">
+    <span class="suc-icon">🎉</span>
+    <div class="suc-title">Merci !</div>
+    <p class="suc-text">Tes informations ont bien été reçues. On crée ta création et on t'envoie le lien sur WhatsApp très vite.</p>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIGURATION DES CHAMPS PAR TEMPLATE
+═══════════════════════════════════════════════════════ */
+const TEMPLATE_CONFIGS = {
+
+  birthday: {
+    icon: '🎂', label: 'Anniversaire',
+    sections: [
+      {
+        title: 'La personne fêtée',
+        fields: [
+          { key:'name',         label:'Prénom',                type:'text',     placeholder:'Ex: Sarah', required:true },
+          { key:'greeting',     label:'Message d\'accueil',    type:'text',     placeholder:'Ex: Joyeux anniversaire Sarah !' },
+          { key:'greetingText', label:'Sous-texte accueil',    type:'text',     placeholder:'Ex: Tu mérites tout le bonheur du monde' },
+          { key:'text1',        label:'Texte section fête',    type:'text',     placeholder:'Ex: C\'est ton jour !' },
+        ]
+      },
+      {
+        title: 'La chanson',
+        fields: [
+          { key:'musicSrc',     label:'Lien audio (mp3/m4a)',  type:'url',      placeholder:'https://... .mp3', hint:'Partage un lien Google Drive ou WeTransfer' },
+          { key:'albumArt',     label:'Pochette (photo)',       type:'image',    placeholder:'Photo de l\'artiste' },
+          { key:'trackTitle',   label:'Titre de la chanson',   type:'text',     placeholder:'Ex: Happy Birthday' },
+          { key:'trackArtist',  label:'Artiste',               type:'text',     placeholder:'Ex: Stevie Wonder' },
+        ]
+      },
+      {
+        title: 'Les photos',
+        fields: [
+          { key:'imagePath',    label:'Photo principale (cercle)', type:'image', required:true },
+          { key:'photo1',       label:'Photo 2',                   type:'image' },
+          { key:'photo2',       label:'Photo 3',                   type:'image' },
+        ]
+      },
+      {
+        title: 'Le message',
+        fields: [
+          { key:'messageText',  label:'Message d\'amour / vœux', type:'textarea', placeholder:'Écris ton message personnel ici…', required:true },
+          { key:'senderName',   label:'De la part de',           type:'text',     placeholder:'Ex: Ta famille qui t\'aime' },
+        ]
+      },
+    ]
+  },
+
+  special: {
+    icon: '🔍', label: 'Recherche Google',
+    sections: [
+      {
+        title: 'La personne fêtée',
+        fields: [
+          { key:'name',         label:'Prénom',                type:'text',  placeholder:'Ex: Marc', required:true },
+          { key:'greeting',     label:'Message d\'accueil',    type:'text',  placeholder:'Ex: Coucou mon amour...' },
+          { key:'greetingText', label:'Sous-texte',            type:'text',  placeholder:'Ex: J\'ai quelque chose pour toi' },
+        ]
+      },
+      {
+        title: 'La recherche Google',
+        fields: [
+          { key:'searchQuery',  label:'La recherche (ton nom ?)', type:'text', placeholder:'Ex: la meilleure maman du monde', required:true },
+          { key:'result1',      label:'Résultat 1',              type:'text', placeholder:'Ex: Elle sourit même quand c\'est dur' },
+          { key:'result2',      label:'Résultat 2',              type:'text', placeholder:'Ex: Elle cuisine mieux que Google' },
+          { key:'result3',      label:'Résultat 3',              type:'text', placeholder:'Ex: Impossible de la remplacer' },
+        ]
+      },
+      {
+        title: 'La chanson',
+        fields: [
+          { key:'musicSrc',     label:'Lien audio',    type:'url',   placeholder:'https://... .mp3' },
+          { key:'trackTitle',   label:'Titre',         type:'text',  placeholder:'Notre chanson' },
+          { key:'trackArtist',  label:'Artiste',       type:'text',  placeholder:'Artiste' },
+          { key:'albumArt',     label:'Pochette',      type:'image' },
+        ]
+      },
+      {
+        title: 'Les photos & message',
+        fields: [
+          { key:'imagePath',    label:'Photo principale',     type:'image', required:true },
+          { key:'messageText',  label:'Message personnel',    type:'textarea', placeholder:'Mon message pour toi…', required:true },
+          { key:'senderName',   label:'De la part de',        type:'text',  placeholder:'Ton/ta …' },
+        ]
+      },
+    ]
+  },
+
+  'notre-film': {
+    icon: '🎬', label: 'Notre Film d\'Amour',
+    sections: [
+      {
+        title: 'L\'accueil',
+        fields: [
+          { key:'greeting',       label:'Salutation',           type:'text',     placeholder:'Ex: Coucou mon amour...', required:true },
+          { key:'imagePath',      label:'Photo du cercle',       type:'image',    required:true },
+          { key:'greetingText',   label:'Sous-texte accueil',   type:'textarea', placeholder:'J\'ai quelque chose de spécial pour toi.' },
+        ]
+      },
+      {
+        title: 'La musique',
+        fields: [
+          { key:'musicSrc',       label:'Lien audio',           type:'url',   placeholder:'https://... .mp3', hint:'Google Drive, WeTransfer, ou lien direct' },
+          { key:'albumArt',       label:'Pochette de l\'album', type:'image' },
+          { key:'trackTitle',     label:'Titre de la chanson',  type:'text',  placeholder:'Ex: Perfect - Ed Sheeran' },
+          { key:'musicText',      label:'Texte section musique',type:'textarea', placeholder:'Quand j\'écoute cette chanson…' },
+        ]
+      },
+      {
+        title: 'Les photos (jusqu\'à 6)',
+        fields: [
+          { key:'photo1',  label:'Photo 1', type:'image', required:true },
+          { key:'photo1Label', label:'Légende 1', type:'text', placeholder:'Ex: Notre premier voyage' },
+          { key:'photo2',  label:'Photo 2', type:'image' },
+          { key:'photo2Label', label:'Légende 2', type:'text', placeholder:'' },
+          { key:'photo3',  label:'Photo 3', type:'image' },
+          { key:'photo3Label', label:'Légende 3', type:'text', placeholder:'' },
+          { key:'photo4',  label:'Photo 4 (optionnel)', type:'image' },
+          { key:'photo5',  label:'Photo 5 (optionnel)', type:'image' },
+          { key:'photo6',  label:'Photo 6 (optionnel)', type:'image' },
+          { key:'photoCaption', label:'Légende générale sous les photos', type:'text', placeholder:'(Oui, tu es toujours aussi belle !)' },
+        ]
+      },
+      {
+        title: 'La lettre d\'amour',
+        fields: [
+          { key:'letterTitle',  label:'Destinataire',      type:'text',     placeholder:'Ex: mon amour...', required:true },
+          { key:'letterSalut',  label:'Salutation',        type:'text',     placeholder:'Ex: Mon cœur,' },
+          { key:'letterText',   label:'Corps de la lettre',type:'textarea', placeholder:'Écris ta lettre ici… (elle s\'affichera lettre par lettre)', required:true },
+          { key:'senderName',   label:'Signature',         type:'text',     placeholder:'Ex: Ton amour Marc ❤️' },
+        ]
+      },
+      {
+        title: 'La vidéo surprise (optionnel)',
+        fields: [
+          { key:'videoSrc',    label:'Lien vidéo (mp4)', type:'url',  placeholder:'https://... .mp4', hint:'La vidéo doit être au format 9:16 (vertical)' },
+          { key:'videoLabel',  label:'Titre de la vidéo', type:'text', placeholder:'Notre film d\'amour' },
+        ]
+      },
+    ]
+  },
+
+  forever: {
+    icon: '♥', label: 'Forever',
+    sections: [
+      {
+        title: 'L\'accueil',
+        fields: [
+          { key:'name',           label:'Prénom / Surnom',      type:'text',  placeholder:'Ex: Mon cœur', required:true },
+          { key:'greeting',       label:'Ligne d\'intro',        type:'text',  placeholder:'hey,' },
+          { key:'greetingText',   label:'Phrase d\'accroche',   type:'text',  placeholder:'J\'ai une surprise pour toi.' },
+        ]
+      },
+      {
+        title: 'Le décompte',
+        fields: [
+          { key:'loveStartDate',  label:'Date de votre premier jour (YYYY-MM-DD)', type:'text', placeholder:'Ex: 2022-02-14', hint:'Format : année-mois-jour. Laisse vide pour mettre un chiffre manuellement.' },
+          { key:'countdownLabel', label:'Texte au-dessus du chiffre', type:'text', placeholder:'ensemble depuis' },
+          { key:'countdownUnit',  label:'Unité (jours, mois…)',       type:'text', placeholder:'jours' },
+          { key:'countdownSince', label:'Ligne italique sous',         type:'text', placeholder:'depuis le premier jour' },
+        ]
+      },
+      {
+        title: 'Les photos',
+        fields: [
+          { key:'imagePath',  label:'Photo centrale (principale)', type:'image', required:true },
+          { key:'photo1',     label:'Photo gauche',               type:'image' },
+          { key:'photo2',     label:'Photo droite',               type:'image' },
+          { key:'photoCaption', label:'Légende sous les photos',  type:'text',  placeholder:'Toujours aussi belle.' },
+        ]
+      },
+      {
+        title: 'La musique',
+        fields: [
+          { key:'musicSrc',    label:'Lien audio',          type:'url',   placeholder:'https://... .mp3' },
+          { key:'albumArt',    label:'Pochette',             type:'image' },
+          { key:'trackTitle',  label:'Titre',                type:'text',  placeholder:'Notre chanson' },
+        ]
+      },
+      {
+        title: 'Le message',
+        fields: [
+          { key:'messageText', label:'Message (s\'écrit lettre par lettre)', type:'textarea', placeholder:'Ton message personnel…', required:true },
+          { key:'senderName',  label:'Signature',                           type:'text',     placeholder:'de toi qui t\'aime' },
+        ]
+      },
+    ]
+  },
+
+  'collective-family': {
+    icon: '👨‍👩‍👧', label: 'Collectif Famille',
+    sections: [
+      {
+        title: 'La personne fêtée',
+        fields: [
+          { key:'name',         label:'Prénom',           type:'text', placeholder:'Ex: Papa', required:true },
+          { key:'greeting',     label:'Message d\'accueil', type:'text', placeholder:'Ex: Joyeux anniversaire !' },
+          { key:'greetingText', label:'Sous-texte',        type:'text', placeholder:'On t\'aime tellement !' },
+        ]
+      },
+      {
+        title: 'La chanson',
+        fields: [
+          { key:'musicSrc',    label:'Lien audio',  type:'url',   placeholder:'https://... .mp3' },
+          { key:'albumArt',    label:'Pochette',    type:'image' },
+          { key:'trackTitle',  label:'Titre',       type:'text',  placeholder:'Notre chanson' },
+          { key:'trackArtist', label:'Artiste',     type:'text',  placeholder:'Artiste' },
+        ]
+      },
+      {
+        title: 'Les photos',
+        fields: [
+          { key:'imagePath', label:'Photo principale', type:'image', required:true },
+          { key:'photo1',    label:'Photo 2',          type:'image' },
+          { key:'photo2',    label:'Photo 3',          type:'image' },
+        ]
+      },
+      {
+        title: 'Les vœux',
+        fields: [
+          { key:'messageText', label:'Message collectif', type:'textarea', placeholder:'De toute la famille…', required:true },
+          { key:'senderName',  label:'Signé par',          type:'text',    placeholder:'Ex: Ta famille ❤️' },
+        ]
+      },
+    ]
+  },
+
+  sanctuary: {
+    icon: '✦', label: 'Sanctuary',
+    sections: [
+      {
+        title: 'La couverture',
+        fields: [
+          { key:'bookTitle',    label:'Titre du livre',   type:'text', placeholder:'Ma Bible de Poche', required:true },
+          { key:'bookSubtitle', label:'Sous-titre',       type:'text', placeholder:'pour toi, avec amour' },
+          { key:'bookFrom',     label:'De la part de',    type:'text', placeholder:'de maman' },
+        ]
+      },
+      {
+        title: 'La musique (optionnel)',
+        fields: [
+          { key:'musicSrc',   label:'Lien audio (louange)', type:'url',  placeholder:'https://... .mp3' },
+          { key:'trackTitle', label:'Titre',                 type:'text', placeholder:'Louange' },
+        ]
+      },
+      {
+        title: 'Les pages (versets & prières)',
+        fields: [
+          { key:'pagesNote', label:'', type:'info',
+            content:'Les pages seront configurées directement dans l\'éditeur après création. Indique ici les versets ou prières que tu veux ajouter.' },
+          { key:'pagesText', label:'Liste tes versets / prières', type:'textarea',
+            placeholder:'Ex:\n- Jean 3:16 (Bible)\n- Prière de maman pour moi\n- Sourate Al-Fatiha\n- Psaume 23', required:true },
+        ]
+      },
+    ]
+  },
+
+};
+
+/* ═══════════════════════════════════════════════════════
+   UPLOAD vers Cloudinary via API serveur
+═══════════════════════════════════════════════════════ */
+const API = '';   // même domaine
+
+async function uploadFile(file, onProgress) {
+  const fd = new FormData();
+  fd.append('file', file);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API}/api/upload`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100));
+    };
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) resolve(data.url);
+        else reject(new Error(data.error || 'Upload échoué'));
+      } catch { reject(new Error('Réponse invalide')); }
+    };
+    xhr.onerror = () => reject(new Error('Erreur réseau'));
+    xhr.send(fd);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONSTRUCTION DU FORMULAIRE
+═══════════════════════════════════════════════════════ */
+const formValues = {};      // { fieldKey: value }
+const uploadedUrls = {};    // { fieldKey: cloudinaryUrl }
+
+function buildForm(templateName) {
+  const config = TEMPLATE_CONFIGS[templateName];
+  if (!config) {
+    document.getElementById('form-fields').innerHTML =
+      '<p style="color:var(--muted);text-align:center;padding:40px 0">Template non reconnu.</p>';
+    return;
+  }
+
+  // Update badge
+  document.getElementById('badge-icon').textContent = config.icon;
+  document.getElementById('badge-tpl').textContent = config.label;
+
+  const container = document.getElementById('form-fields');
+  container.innerHTML = '';
+
+  config.sections.forEach(section => {
+    const secLabel = document.createElement('div');
+    secLabel.className = 'sec-label';
+    secLabel.textContent = section.title;
+    container.appendChild(secLabel);
+
+    section.fields.forEach(field => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'field';
+
+      if (field.type === 'info') {
+        wrapper.innerHTML = `
+          <div style="background:var(--gold-s);border:1px solid rgba(200,150,62,.2);
+            border-radius:10px;padding:14px 16px;font-size:.82rem;
+            color:var(--muted);line-height:1.6;">
+            ℹ️ ${field.content}
+          </div>`;
+        container.appendChild(wrapper);
+        return;
+      }
+
+      const reqStar = field.required ? '<span class="req">*</span>' : '';
+      const hint    = field.hint ? `<div class="field-hint">💡 ${field.hint}</div>` : '';
+
+      if (field.type === 'image') {
+        wrapper.innerHTML = `
+          <label>${field.label} ${reqStar}</label>
+          <div class="upload-zone" id="zone-${field.key}">
+            <input type="file" accept="image/*" data-field="${field.key}"
+              onchange="handleImageUpload(this, '${field.key}')">
+            <span class="upload-zone-icon">📷</span>
+            <div class="upload-zone-text">
+              <strong>Clique pour choisir</strong> ou glisse ta photo<br>
+              JPG, PNG — max 10MB
+            </div>
+            <div class="upload-previews" id="preview-${field.key}"></div>
+          </div>
+          <div class="upload-status" id="status-${field.key}"></div>
+          ${hint}`;
+
+      } else if (field.type === 'textarea') {
+        wrapper.innerHTML = `
+          <label>${field.label} ${reqStar}</label>
+          <textarea placeholder="${field.placeholder || ''}"
+            oninput="formValues['${field.key}']=this.value"
+            rows="4"></textarea>${hint}`;
+
+      } else if (field.type === 'url') {
+        wrapper.innerHTML = `
+          <label>${field.label} ${reqStar}</label>
+          <input type="url" placeholder="${field.placeholder || ''}"
+            oninput="formValues['${field.key}']=this.value">
+          ${hint}`;
+
+      } else {
+        wrapper.innerHTML = `
+          <label>${field.label} ${reqStar}</label>
+          <input type="text" placeholder="${field.placeholder || ''}"
+            oninput="formValues['${field.key}']=this.value">
+          ${hint}`;
+      }
+
+      container.appendChild(wrapper);
+    });
+  });
+}
+
+/* ── Image upload ── */
+async function handleImageUpload(input, fieldKey) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const statusEl  = document.getElementById(`status-${fieldKey}`);
+  const previewEl = document.getElementById(`preview-${fieldKey}`);
+
+  statusEl.textContent = '⏳ Upload en cours…';
+  statusEl.className   = 'upload-status';
+
+  try {
+    const url = await uploadFile(file, (pct) => {
+      statusEl.textContent = `⏳ ${pct}%…`;
+    });
+
+    uploadedUrls[fieldKey] = url;
+    formValues[fieldKey]   = url;
+
+    // Preview
+    previewEl.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = url; img.className = 'upload-thumb'; img.alt = '';
+    previewEl.appendChild(img);
+
+    statusEl.textContent = '✓ Photo uploadée';
+    statusEl.className   = 'upload-status ok';
+
+  } catch (err) {
+    statusEl.textContent = '✕ ' + err.message;
+    statusEl.className   = 'upload-status err';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SUBMIT
+═══════════════════════════════════════════════════════ */
+document.getElementById('detail-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const errEl = document.getElementById('err-msg');
+  errEl.classList.remove('show');
+
+  // Check required fields
+  const templateName = new URLSearchParams(location.search).get('t');
+  const config       = TEMPLATE_CONFIGS[templateName];
+  if (!config) return;
+
+  const missing = [];
+  config.sections.forEach(section => {
+    section.fields.forEach(field => {
+      if (field.required && !formValues[field.key]) {
+        missing.push(field.label);
+      }
+    });
+  });
+
+  if (missing.length) {
+    errEl.textContent = `Champs obligatoires manquants : ${missing.join(', ')}`;
+    errEl.classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  const ref = new URLSearchParams(location.search).get('ref') || '';
+
+  try {
+    const res = await fetch(`${API}/api/orders/${ref}/details`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ templateData: formValues }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+
+    document.getElementById('detail-form').style.display = 'none';
+    document.getElementById('success').style.display     = 'block';
+
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+    btn.disabled     = false;
+    btn.textContent  = 'Envoyer mes informations →';
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   INIT — lit ?ref=EW-XXXX&t=template dans l'URL
+═══════════════════════════════════════════════════════ */
+(function init() {
+  const params = new URLSearchParams(location.search);
+  const ref    = params.get('ref')  || '';
+  const tpl    = params.get('t')    || '';
+  const name   = params.get('name') || '';   // prénom destinataire pré-rempli
+
+  document.getElementById('badge-info').textContent =
+    name ? `Pour ${name}` : 'Personnalisation';
+
+  if (!tpl) {
+    document.getElementById('form-fields').innerHTML =
+      '<p style="color:var(--muted);text-align:center;padding:60px 20px">Lien invalide. Contacte-nous sur WhatsApp.</p>';
+    return;
+  }
+
+  buildForm(tpl);
+})();
+</script>
+</body>
+</html>

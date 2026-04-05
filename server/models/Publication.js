@@ -68,6 +68,8 @@ const publicationSchema = new mongoose.Schema({
   style: {
     primaryColor: { type: String, default: '#ff69b4' },
     accentColor:  { type: String, default: '#ffb347' },
+    textColor:    { type: String, default: '#333333' },
+    textMuted:    { type: String, default: '#888888' },
     fontFamily:   { type: String, default: 'Work Sans' },
     fontSize:     { type: String, default: 'medium' },
     theme:        { type: String, default: 'light' },
@@ -108,6 +110,6 @@ const publicationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 publicationSchema.index({ templateName: 1, customName: 1 }, { unique: true });
-publicationSchema.index({ shortCode: 1 }, { unique: true, sparse: true });
+//publicationSchema.index({ shortCode: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Publication', publicationSchema);

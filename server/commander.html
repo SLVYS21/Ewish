@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commander — eWishWell</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:      #c8963e;
+      --gold-soft: rgba(200,150,62,0.12);
+      --bg:        #0c0b09;
+      --bg2:       #141210;
+      --surface:   rgba(255,255,255,0.04);
+      --border:    rgba(255,255,255,0.08);
+      --text:      #f0ebe3;
+      --muted:     rgba(240,235,227,0.45);
+      --font-d:    'Cormorant Garamond', Georgia, serif;
+      --font-b:    'Jost', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 128px;
+    }
+
+    /* ── Layout ── */
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .logo {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .logo-mark {
+      font-family: var(--font-d);
+      font-size: 1.1rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.85;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .logo-tagline {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Hero text ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero h1 {
+      font-family: var(--font-d);
+      font-size: clamp(2.2rem, 6vw, 3rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero h1 em {
+      color: var(--gold);
+      font-style: normal;
+    }
+    .hero p {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    /* ── Templates grid ── */
+    .section-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .tpl-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: all 0.22s;
+      position: relative;
+      overflow: hidden;
+      text-align: left;
+    }
+    .tpl-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--gold-soft);
+      opacity: 0;
+      transition: opacity 0.22s;
+    }
+    .tpl-card:hover::before,
+    .tpl-card.selected::before { opacity: 1; }
+    .tpl-card.selected {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px var(--gold);
+    }
+
+    .tpl-icon { font-size: 1.6rem; margin-bottom: 8px; display: block; }
+    .tpl-name {
+      font-family: var(--font-d);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .tpl-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .tpl-price {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+    .tpl-check {
+      position: absolute; top: 10px; right: 10px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--gold);
+      display: none; align-items: center; justify-content: center;
+      font-size: 0.65rem; color: #000;
+    }
+    .tpl-card.selected .tpl-price { display: none; }
+    .tpl-card.selected .tpl-check { display: flex; }
+
+    /* ── Form ── */
+    .form-section { margin-bottom: 10px; }
+
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 0.9rem;
+      font-weight: 300;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+    .field input::placeholder, .field textarea::placeholder {
+      color: rgba(240,235,227,0.2);
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--gold);
+    }
+    .field textarea {
+      min-height: 90px; resize: vertical;
+    }
+    .field select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='rgba(240,235,227,0.4)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .field select option { background: #1a1714; color: var(--text); }
+
+    /* Champ caché animé */
+    .field-hidden {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+      margin-bottom: 0;
+    }
+    .field-hidden.visible {
+      max-height: 200px;
+      opacity: 1;
+      margin-bottom: 16px;
+    }
+
+    /* ── Délai ── */
+    .delay-pills {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .delay-pill {
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: none;
+    }
+    .delay-pill:hover { border-color: rgba(200,150,62,0.4); color: var(--text); }
+    .delay-pill.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-soft);
+    }
+
+    /* ── Submit ── */
+    .submit-wrap {
+      margin-top: 32px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--gold);
+      border: none; border-radius: 12px;
+      font-family: var(--font-b);
+      font-size: 0.9rem; font-weight: 600;
+      color: #0c0b09;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .submit-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.12);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .submit-btn:hover::after { opacity: 1; }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .submit-note {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Success state ── */
+    #success {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+      animation: fadeUp 0.6s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .success-icon { font-size: 3.5rem; margin-bottom: 24px; display: block; }
+    .success-title {
+      font-family: var(--font-d);
+      font-size: 2rem; font-style: italic;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .success-text {
+      font-size: 0.9rem; font-weight: 300;
+      color: var(--muted); line-height: 1.75;
+      max-width: 340px; margin: 0 auto 32px;
+    }
+    .success-ref {
+      display: inline-block;
+      background: var(--gold-soft);
+      border: 1px solid rgba(200,150,62,0.3);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-family: var(--font-b);
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      background: rgba(231,76,60,0.12);
+      border: 1px solid rgba(231,76,60,0.3);
+      border-radius: 8px; padding: 12px 16px;
+      font-size: 0.82rem; color: #e74c3c;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* ── Animations entrée ── */
+    .logo, .hero, .section-label, .templates-grid,
+    .form-section, .submit-wrap {
+      opacity: 0; transform: translateY(16px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+    .hero          { animation-delay: 0.1s; }
+    .section-label { animation-delay: 0.2s; }
+    .templates-grid{ animation-delay: 0.3s; }
+    .form-section  { animation-delay: 0.4s; }
+    .submit-wrap   { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="logo">
+    <span class="logo-mark">eWishWell</span>
+    <span class="logo-tagline">Cadeaux animés & personnalisés</span>
+  </div>
+
+  <div class="hero">
+    <h1>Crée un cadeau<br><em>inoubliable</em></h1>
+    <p>Remplis ce formulaire. On te recontacte sous 24h pour finaliser ensemble — sans pré-paiement.</p>
+  </div>
+
+  <form id="order-form" novalidate>
+
+    <!-- Templates -->
+    <div class="section-label">Choisis ton template</div>
+    <div class="templates-grid" id="tpl-grid">
+      <div class="tpl-card" data-tpl="birthday" onclick="selectTemplate(this)">
+        <span class="tpl-icon">🎂</span>
+        <span class="tpl-price">À partir de 5 000 FCFA</span>
+        <div class="tpl-check">✓</div>
+        <div class="tpl-name">Anniversaire</div>
+        <div class="tpl-desc">Musique, photos, confettis, vœux animés</div>
+      </div>
+      <div class="tpl-card" data-tpl="special" onclick="selectTemplate(this)">
+        <span class="tpl-icon">🔍</span>
+        <span class="tpl-price">À partir de 5 000 FCFA</span>
+        <div class="tpl-check">✓</div>
+        <div class="tpl-name">Recherche Google</div>
+        <div class="tpl-desc">Tu es le #1 résultat de ma vie</div>
+      </div>
+      <div class="tpl-card" data-tpl="notre-film" onclick="selectTemplate(this)">
+        <span class="tpl-icon">🎬</span>
+        <span class="tpl-price">À partir de 8 500 FCFA</span>
+        <div class="tpl-check">✓</div>
+        <div class="tpl-name">Notre Film d'Amour</div>
+        <div class="tpl-desc">Polaroids, lettre, vidéo surprise</div>
+      </div>
+      <div class="tpl-card" data-tpl="collective-family" onclick="selectTemplate(this)">
+        <span class="tpl-icon">👨‍👩‍👧</span>
+        <span class="tpl-price">À partir de 6 000 FCFA</span>
+        <div class="tpl-check">✓</div>
+        <div class="tpl-name">Collectif Famille</div>
+        <div class="tpl-desc">Tous ensemble pour une personne</div>
+      </div>
+      <div class="tpl-card" data-tpl="forever" onclick="selectTemplate(this)">
+        <span class="tpl-icon">♥</span>
+        <span class="tpl-price">À partir de 7 500 FCFA</span>
+        <div class="tpl-check">✓</div>
+        <div class="tpl-name">Forever</div>
+        <div class="tpl-desc">Pour graver sur un collier QR</div>
+      </div>
+      <div class="tpl-card" data-tpl="sanctuary" onclick="selectTemplate(this)">
+        <span class="tpl-icon">✦</span>
+        <span class="tpl-price">À partir de 7 500 FCFA</span>
+        <div class="tpl-check">✓</div>
+        <div class="tpl-name">Sanctuary</div>
+        <div class="tpl-desc">Bible / Coran de poche animé</div>
+      </div>
+    </div>
+
+    <!-- Formulaire client -->
+    <div class="section-label">Tes informations</div>
+    <div class="form-section">
+
+      <div class="error-msg" id="error-msg"></div>
+
+      <div class="field">
+        <label>Ton prénom *</label>
+        <input type="text" id="sender-name" placeholder="Ex: Marie" required autocomplete="given-name">
+      </div>
+
+      <div class="field">
+        <label>Ton numéro WhatsApp *</label>
+        <input type="tel" id="sender-phone" placeholder="+229 XX XX XX XX" required autocomplete="tel">
+      </div>
+
+      <div class="field">
+        <label>Prénom de la personne à qui tu offres *</label>
+        <input type="text" id="recipient-name" placeholder="Ex: Sarah" required>
+      </div>
+
+      <div class="field">
+        <label>Occasion</label>
+        <select id="occasion">
+          <option value="">Sélectionne une occasion</option>
+          <option value="anniversaire">🎂 Anniversaire</option>
+          <option value="saint-valentin">💝 Saint-Valentin</option>
+          <option value="fete-des-meres">🌹 Fête des mères</option>
+          <option value="fete-des-peres">👔 Fête des pères</option>
+          <option value="mariage">💍 Mariage / Fiançailles</option>
+          <option value="noel">🎄 Noël</option>
+          <option value="retraite">🏅 Retraite / Promotion</option>
+          <option value="autre">✨ Autre</option>
+        </select>
+      </div>
+
+      <!-- Champ "autre occasion" conditionnel -->
+      <div class="field field-hidden" id="occasion-other-wrap">
+        <label>Précise l'occasion</label>
+        <input type="text" id="occasion-other" placeholder="Ex: Remise de diplôme">
+      </div>
+
+      <div class="field">
+        <label>Tu as une date limite ?</label>
+        <div class="delay-pills">
+          <button type="button" class="delay-pill" data-val="urgent" onclick="selectDelay(this)">🔥 Urgent (24h)</button>
+          <button type="button" class="delay-pill" data-val="3j" onclick="selectDelay(this)">3 jours</button>
+          <button type="button" class="delay-pill" data-val="1sem" onclick="selectDelay(this)">1 semaine</button>
+          <button type="button" class="delay-pill" data-val="flexible" onclick="selectDelay(this)">Je suis flexible</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Quelque chose à nous préciser ? (optionnel)</label>
+        <textarea id="notes" placeholder="Ex: je veux une ambiance romantique, couleurs dorées, chanson spécifique..."></textarea>
+      </div>
+
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-wrap">
+      <button type="submit" class="submit-btn" id="submit-btn">
+        Envoyer ma commande →
+      </button>
+      <p class="submit-note">
+        Sans pré-paiement · On te recontacte sur WhatsApp sous 24h<br>
+        pour finaliser les détails et le paiement.
+      </p>
+    </div>
+
+  </form>
+
+  <!-- Success -->
+  <div id="success">
+    <span class="success-icon">✨</span>
+    <div class="success-title">Commande reçue !</div>
+    <p class="success-text">
+      On a bien reçu ta demande. Tu vas recevoir un message WhatsApp
+      dans les prochaines heures pour finaliser ensemble.
+    </p>
+    <div class="success-ref" id="success-ref">REF: EW-XXXXXX</div>
+  </div>
+
+</div>
+
+<script>
+/* ── State ── */
+let selectedTemplate = '';
+let selectedDelay    = '';
+
+/* ── Template selection ── */
+function selectTemplate(card) {
+  document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedTemplate = card.dataset.tpl;
+}
+
+/* ── Delay selection ── */
+function selectDelay(pill) {
+  document.querySelectorAll('.delay-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  selectedDelay = pill.dataset.val;
+}
+
+/* ── Occasion conditionnel ── */
+document.getElementById('occasion').addEventListener('change', function() {
+  const wrap = document.getElementById('occasion-other-wrap');
+  if (this.value === 'autre') {
+    wrap.classList.add('visible');
+  } else {
+    wrap.classList.remove('visible');
+  }
+});
+
+/* ── Form submit ── */
+document.getElementById('order-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const errEl = document.getElementById('error-msg');
+  errEl.classList.remove('show');
+
+  // Validation
+  const senderName    = document.getElementById('sender-name').value.trim();
+  const senderPhone   = document.getElementById('sender-phone').value.trim();
+  const recipientName = document.getElementById('recipient-name').value.trim();
+
+  if (!selectedTemplate) {
+    errEl.textContent = 'Merci de choisir un template.';
+    errEl.classList.add('show');
+    document.getElementById('tpl-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!senderName || !senderPhone || !recipientName) {
+    errEl.textContent = 'Merci de remplir tous les champs obligatoires (*).';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  const occasion = document.getElementById('occasion').value;
+  const payload = {
+    template:        selectedTemplate,
+    senderName,
+    senderPhone,
+    recipientName,
+    occasion:        occasion === 'autre'
+                       ? document.getElementById('occasion-other').value.trim()
+                       : occasion,
+    delay:           selectedDelay,
+    notes:           document.getElementById('notes').value.trim(),
+  };
+
+  try {
+    const res = await fetch('/api/orders/public', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+
+    // Success
+    document.getElementById('order-form').style.display = 'none';
+    const successEl = document.getElementById('success');
+    successEl.style.display = 'block';
+    document.getElementById('success-ref').textContent = `REF: ${data.ref}`;
+
+  } catch (err) {
+    errEl.textContent = err.message || 'Une erreur est survenue. Réessaie.';
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Envoyer ma commande →';
+  }
+});
+</script>
+</body>
+</html>

@@ -56,7 +56,8 @@ app.use('/site/collective-pro',    express.static(path.join(TEMPLATES_DIR, 'coll
 // ── API (shared, accessible from both subdomains) ─────────────
 app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/templates',    require('./routes/templates'));
-app.use('/api/orders',       require('./routes/orders'));
+//app.use('/api/orders',       require('./routes/orders'));
+app.use('/api/orders',       require('./routes/order-public'));
 app.use('/api/promo',        require('./routes/promo'));
 app.use('/api/upload',       require('./routes/upload'));
 app.use('/api/track',        require('./routes/analytics'));
