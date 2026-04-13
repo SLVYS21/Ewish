@@ -268,7 +268,7 @@
       border: 1.5px solid rgba(74,96,128,.3);
       border-radius: 50px; padding: 10px 28px;
       cursor: pointer; letter-spacing: .04em;
-      font-family: var(--font-b);
+      font-family: var(--font-s);
       transition: all .3s;
     }
     .s2-next-btn:hover { background: rgba(74,96,128,.08); border-color: rgba(74,96,128,.6); }
@@ -313,7 +313,7 @@
     .s3-letter-btn {
       margin-top: 16px;
       background: linear-gradient(135deg, var(--primary), #d44d65);
-      color: var(--text-muted); border: none; border-radius: 50px;
+      color: var(--accent); border: none; border-radius: 50px;
       padding: 14px 36px;
       font-family: var(--font-s);
       font-size: calc(.95rem * var(--fs-scale));
@@ -477,17 +477,16 @@
       border-radius: 50px; padding: 12px 32px;
       font-family: var(--font-b);
       font-size: calc(.88rem * var(--fs-scale));
-      color: #fff; cursor: pointer; letter-spacing: .06em;
+      color: #fff; cursor: pointer; letter-spacing: .04em;
       transition: all .3s;
     }
     .s5-replay-btn:hover { background: rgba(255,255,255,.25); }
 
     /* ══════════════════════════════════
-       PILULE MUSICALE — bottom center
+       PILULE MUSICALE — Top Right (Mini)
     ══════════════════════════════════ */
     #music-pill {
-      position: fixed; top: 16px; left: 50%;
-      transform: translateX(-50%);
+      position: fixed; top: 12px; right: 12px;
       z-index: 9000;
       display: none;
     }
@@ -495,22 +494,22 @@
       background: linear-gradient(135deg, var(--primary), #d44d65);
       border: none; border-radius: 50px; color: #fff;
       cursor: pointer;
-      display: flex; align-items: center; gap: 9px;
-      padding: 8px 18px 8px 8px;
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 12px 5px 5px;
       font-family: var(--font-b);
-      font-size: .8rem; font-weight: 400;
-      box-shadow: 0 6px 22px rgba(232,99,122,.5), 0 2px 8px rgba(0,0,0,.12);
-      transition: transform .2s, box-shadow .2s;
+      font-size: .7rem; font-weight: 400;
+      box-shadow: 0 4px 14px rgba(232,99,122,.4);
+      transition: transform .2s;
       white-space: nowrap;
     }
-    .pill-btn:hover { transform: scale(1.04); box-shadow: 0 8px 28px rgba(232,99,122,.65); }
+    .pill-btn:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(232,99,122,.5); }
     .pill-btn:active { transform: scale(.96); }
 
     .pill-cover {
-      width: 30px; height: 30px; border-radius: 50%;
+      width: 24px; height: 24px; border-radius: 50%;
       background: rgba(255,255,255,.25);
       display: flex; align-items: center; justify-content: center;
-      font-size: .9rem; overflow: hidden; flex-shrink: 0;
+      font-size: .7rem; overflow: hidden; flex-shrink: 0;
     }
     .pill-cover img {
       width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
@@ -519,18 +518,17 @@
     .pill-cover img.playing { animation-play-state: running; }
     @keyframes spin { to{ transform:rotate(360deg); } }
 
-    .pill-meta { display: flex; flex-direction: column; gap: 1px; }
-    .pill-title { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-family: var(--font-b); }
+    .pill-meta { display: flex; flex-direction: column; gap: 0px; }
+    .pill-title { font-size: .6rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-b); }
     .pill-progress {
-      width: 90px; height: 2px;
+      width: 60px; height: 1.5px;
       background: rgba(255,255,255,.25); border-radius: 2px; overflow: hidden;
     }
     .pill-fill {
       height: 100%; background: #fff; border-radius: 2px; width: 0%;
       transition: width .6s linear;
     }
-
-    .pill-icon { font-size: .9rem; flex-shrink: 0; }
+    .pill-icon { font-size: .8rem; flex-shrink: 0; }
 
     /* ══════════════════════════════════
        RESPONSIVE
@@ -646,7 +644,7 @@
   <div id="s3-area"></div>
   <div class="s3-sub" data-node-name="photoCaption">(Oui, tu es toujours le plus beau sur les photos !)</div>
   <button class="s3-letter-btn" onclick="nextScene()" data-node-name="letterBtn">
-    Lire ma lettre d'amour
+    Mes mots pour toi..
   </button>
 </div>
 
@@ -1128,35 +1126,6 @@ window.addEventListener('message', (e) => {
       });
     }, 10); // Petit délai pour laisser l'injection se terminer
   }
-    // if (style.backgrounds && window.wwEngine) {
-    //   window.wwEngine.applyBackgrounds(style);
-    //   const bgs = style.backgrounds || {};
-    //   document.querySelectorAll('.scene').forEach(scene => {
-    //     // Reforcer position:fixed
-    //     scene.style.position = 'fixed';
-    //     scene.style.inset    = '0';
-    //     scene.style.width    = '100%';
-    //     scene.style.height   = '100%';
-    //     // Si bg custom sur cette scene ou global → effacer le bg CSS natif
-    //     const sectionKey = scene.getAttribute('data-section');
-    //     const hasBg = (sectionKey && bgs[sectionKey] && bgs[sectionKey].value)
-    //                || (bgs['global'] && bgs['global'].value);
-    //     if (hasBg) {
-    //       scene.style.setProperty('--scene-bg-' + scene.id, 'transparent');
-    //     }
-    //     // ww-bg-wrap bien positionné
-    //     const bgWrap = scene.querySelector(':scope > .ww-bg-wrap');
-    //     if (bgWrap) {
-    //       bgWrap.style.position = 'absolute';
-    //       bgWrap.style.inset    = '0';
-    //       bgWrap.style.zIndex   = '0';
-    //       scene.querySelectorAll(':scope > *:not(.ww-bg-wrap)').forEach(child => {
-    //         child.style.position = 'relative';
-    //         child.style.zIndex   = '1';
-    //       });
-    //     }
-    //   });
-    // }
   }
   if (data) {
     const { photoTransforms: _pt, ...fields } = data;
