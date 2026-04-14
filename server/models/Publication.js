@@ -51,8 +51,8 @@ const decorationSchema = new mongoose.Schema({
   zIndex:    { type: Number, default: 10 },
   delay:     { type: Number, default: 0 },      // animation delay in seconds
   rotate:    { type: Number, default: 0 },      // initial rotation degrees
-  showAfter: {type: number, default: 0},
-  hideAfter: { type: number, default: 0}
+  showAfter: {type: Number, default: 0},
+  hideAfter: { type: Number, default: 0}
 }, { _id: false });
 
 const publicationSchema = new mongoose.Schema({
