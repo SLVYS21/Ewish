@@ -341,7 +341,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
               <label className={s.fieldLabel}>Profondeur (z-index)</label>
               <span className={s.sliderVal}>{selectedDeco.zIndex ?? 10}</span>
             </div>
-            <input type="range" min="-9999" max="9999" step="1"
+            <input type="range" min="-100" max="100" step="1"
               className={s.slider}
               value={selectedDeco.zIndex ?? 10}
               onChange={e => updateDeco(selectedDeco.id, { zIndex: parseInt(e.target.value) })}
