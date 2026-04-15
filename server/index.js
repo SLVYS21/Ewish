@@ -14,7 +14,7 @@ const PROD = process.env.NODE_ENV === 'production';
 const WWW_HOST = process.env.WWW_HOST || 'www.mykado.store';   // landing
 const LANDING_URL  = process.env.LANDING_URL  || `https://${'www.mykado.store'}`;
 const APP_HOST = process.env.APP_HOST || 'app.mykado.store';   // React app
-
+//site
 // ── CORS ─────────────────────────────────────────────────────
 // Allow both subdomains in production, Vite dev server locally
 // Extra origins from env (e.g. DO static site: https://ewish-xxx.ondigitalocean.app)
@@ -52,7 +52,7 @@ app.use('/site/birthday',          express.static(path.join(TEMPLATES_DIR, 'birt
 app.use('/site/special',           express.static(path.join(TEMPLATES_DIR, 'special')));
 app.use('/site/collective-family', express.static(path.join(TEMPLATES_DIR, 'collective-family')));
 app.use('/site/collective-pro',    express.static(path.join(TEMPLATES_DIR, 'collective-pro')));
-
+app.use('/site/notre-film',        express.static(path.join(TEMPLATES_DIR, 'notre-film')));
 // ── API (shared, accessible from both subdomains) ─────────────
 app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/templates',    require('./routes/templates'));

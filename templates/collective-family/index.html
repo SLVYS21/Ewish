@@ -135,9 +135,20 @@
     .six { position: relative; }
     .six .photo-grid {
       display: flex; justify-content: center; align-items: flex-end;
-      gap: 16px; margin-bottom: 14px;
+      gap: 12px; margin-bottom: 14px;
     }
-    .six .hat { position: absolute; width: -8000px; top: -35px;}
+    .six .photo-grid [data-photo="1"] { width: 120px; height: 140px; }
+    .six .photo-grid .lydia-dp { width: 140px; height: 160px; }
+    .six .photo-grid [data-photo="2"] { width: 120px; height: 135px; }
+
+    .photo-placeholder {
+      background: linear-gradient(135deg, #ffb3c6, var(--primary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; border-radius: 15px; flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(255,105,180,0.25);
+    }
+
+    .six .hat { position: absolute; width: 50px; top: -35px; left: 50%; transform: translateX(-50%); z-index: 5; }
     .six .lydia-dp {
       display: inline-block; max-width: 100%; height: auto; object-fit: contain;
     }
@@ -165,6 +176,8 @@
       box-shadow: 0 12px 40px rgba(255,105,180,0.15);
       border: 1.5px solid rgba(255,105,180,0.12);
       display: none; animation: fadeSlide 0.5s ease;
+      max-height: 55vh; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
     }
     .ws-card.active { display: block; }
     @keyframes fadeSlide { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
@@ -179,7 +192,7 @@
     .ws-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .ws-name { font-weight: 700; font-size: 1rem; color: var(--text-color); margin-bottom: 2px; }
     .ws-role { font-size: 0.75rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
-    .ws-message { font-size: 0.95rem; color: var(--text-color); line-height: 1.75; font-weight: 300; font-style: italic; }
+    .ws-message { font-size: 0.95rem; color: var(--text-color); line-height: 1.75; font-weight: 300; font-style: italic; white-space: pre-wrap; word-break: break-word; }
     .ws-message::before { content: '\201C'; font-size: 2rem; color: var(--primary); line-height: 0; vertical-align: -0.5em; margin-right: 2px; }
     .ws-message::after  { content: '\201D'; font-size: 2rem; color: var(--primary); line-height: 0; vertical-align: -0.5em; margin-left: 2px; }
     .ws-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; }
@@ -339,9 +352,9 @@
   <!-- 5. BIRTHDAY CELEBRATION -->
   <div class="six">
     <div class="photo-grid" id="photo-grid">
-      <div data-photo="1" style="margin-bottom:24px; display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">📸</div>
+      <div class="photo-placeholder" data-photo="1">📸</div>
       <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath" >
-      <div data-photo="2" style="margin-bottom:24px; display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">🎂</div>
+      <div class="photo-placeholder" data-photo="2">🎂</div>
     </div>
     <img src="img/hat.svg" alt="" class="hat">
     <div class="wish">
@@ -639,16 +652,14 @@ const animationTimeline = () => {
   function reviwerWishes() {
     const ws = document.getElementById('wishes-section');
     if (!ws) return;
-    // Make visible and scroll/animate to it
-    TweenMax.to(ws, 0.5, { opacity: 1, y: 0, display: 'flex', ease: Power2.easeOut });
+    // Reset any previous animations and make section visible
+    TweenMax.killTweensOf(ws);
+    TweenMax.set(ws, { opacity: 1, y: 0, display: 'flex', visibility: 'visible' });
+    ws.style.pointerEvents = 'auto';
     ws.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    document.getElementById('revoir-btn').style.display = 'none';
-    // After a delay, re-hide it and show btn again
-    setTimeout(() => {
-      TweenMax.to(ws, 0.5, { opacity: 0, y: -40, onComplete: () => {
-        document.getElementById('revoir-btn').style.display = 'flex';
-      }});
-    }, 5000);
+    
+    const rb = document.getElementById('revoir-btn');
+    if (rb) rb.style.display = 'none';
   }
 
 fetchData();
