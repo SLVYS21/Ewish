@@ -264,7 +264,7 @@
     .baloons img:nth-child(even) { left: -10%; }
     .baloons img:nth-child(odd) { right: -10%; }
     .baloons img:nth-child(3n+0) { left: 30%; }
-    .eight svg { width: 25px; position: absolute; visibility: hidden; z-index: -1; }
+    .eight svg { width: 25px; position: absolute; visibility: hidden; z-index: 5; }
     .eight svg:nth-child(1) { top:7vh; left:5vw; fill:#c9a84c; }
     .eight svg:nth-child(2) { top:23vh; left:35vw; fill:#1e3a5f; }
     .eight svg:nth-child(3) { top:33vh; left:23vw; fill:#e8c86a; }
@@ -325,6 +325,46 @@
       transition: all 0.2s;
     }
     #revoir-btn:hover { background: var(--gold); color: var(--navy); transform: translateX(-50%) translateY(-2px); }
+
+    /* ─── Mode Revoir les vœux (Full Screen) ─── */
+    .wishes-section.is-replaying {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 20000 !important;
+      background: var(--navy) !important;
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .ws-close-btn {
+      display: none;
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 20001;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(8px);
+    }
+    .wishes-section.is-replaying .ws-close-btn { display: flex; }
+    .ws-close-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      transform: rotate(90deg) scale(1.1);
+    }
 
   </style>
 </head>
@@ -451,6 +491,7 @@
 
   <!-- 8. WISHES CAROUSEL -->
   <div class="wishes-section" id="wishes-section">
+    <button class="ws-close-btn" onclick="closeWishes()" aria-label="Fermer">×</button>
     <div class="ws-title" data-node-name="carouselTitle">Ce que l'équipe a voulu vous dire</div>
     <div class="ws-subtitle">Messages personnels</div>
     <div class="ws-carousel">
@@ -695,14 +736,37 @@ const animationTimeline=()=>{
   function reviwerWishes() {
     const ws = document.getElementById('wishes-section');
     if (!ws) return;
-    // Reset any previous animations and make section visible
+    
+    // Ajout de la classe pour le mode plein écran surélevé
+    ws.classList.add('is-replaying');
+    
+    // Reset any previous animations/positions
     TweenMax.killTweensOf(ws);
     TweenMax.set(ws, { opacity: 1, y: 0, display: 'flex', visibility: 'visible' });
     ws.style.pointerEvents = 'auto';
-    ws.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
     const rb = document.getElementById('revoir-btn');
     if (rb) rb.style.display = 'none';
+
+    // Disable body scroll if needed
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeWishes() {
+    const ws = document.getElementById('wishes-section');
+    if (!ws) return;
+    
+    ws.classList.remove('is-replaying');
+    ws.style.display = 'none';
+    ws.style.visibility = 'hidden';
+    ws.style.opacity = 0;
+    
+    // Re-show the floating re-view button
+    const rb = document.getElementById('revoir-btn');
+    if (rb) rb.style.display = 'flex';
+    
+    // Scroll back to bottom if we were replaying
+    document.querySelector('.nine')?.scrollIntoView({ behavior: 'smooth' });
   }
 
 fetchData();
