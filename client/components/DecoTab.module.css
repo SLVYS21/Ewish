@@ -3,17 +3,32 @@
 .addArea {
   padding: 16px 16px 0;
 }
-.addBtn {
-  width: 100%; padding: 12px;
+.addAreaRow {
+  display: flex;
+  gap: 8px;
+}
+.linkInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.linkInput:focus { border-color: #5b4fcf; }
+.linkBtn, .uploadBtn {
+  width: 40px; height: 40px;
+  display: flex; justify-content: center; align-items: center;
   background: linear-gradient(135deg, #5b4fcf, #7c6fe0);
-  color: #fff; border: none; border-radius: 10px;
-  font-size: 0.85rem; font-family: inherit; font-weight: 600;
-  cursor: pointer; display: flex; align-items: center;
-  justify-content: center; gap: 8px;
+  color: #fff; border: none; border-radius: 8px;
+  font-size: 1.2rem; font-weight: bold; font-family: inherit;
+  cursor: pointer; flex-shrink: 0;
   transition: opacity 0.2s, transform 0.15s;
 }
-.addBtn:hover { opacity: 0.9; transform: translateY(-1px); }
-.addBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.linkBtn:hover, .uploadBtn:hover { opacity: 0.9; transform: translateY(-1px); }
+.linkBtn:disabled, .uploadBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .spinner {
   width: 14px; height: 14px;
   border: 2px solid rgba(255,255,255,0.3);

@@ -74,7 +74,17 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
   const sections = TEMPLATE_SECTIONS[templateName] || TEMPLATE_SECTIONS.birthday;
   const [uploading, setUploading] = useState(false);
   const [selected, setSelected] = useState(null); // id of selected deco
+  const [linkUrl, setLinkUrl] = useState('');
   const fileRef = useRef(null);
+
+  const handleAddLink = () => {
+    if (!linkUrl) return;
+    const newDeco = { ...DEFAULT_DECO, id: genId(), src: linkUrl };
+    const next = [...decorations, newDeco];
+    onChange(next);
+    setSelected(newDeco.id);
+    setLinkUrl('');
+  };
 
   const selectedDeco = decorations.find(d => d.id === selected);
 
@@ -114,22 +124,37 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
 
       {/* Add button */}
       <div className={s.addArea}>
-        <button
-          className={s.addBtn}
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-        >
-          {uploading
-            ? <><span className={s.spinner} /> Envoi…</>
-            : <><span>＋</span> Ajouter une décoration</>
-          }
-        </button>
+        <div className={s.addAreaRow}>
+          <input
+            type="url"
+            value={linkUrl}
+            onChange={e => setLinkUrl(e.target.value)}
+            placeholder="URL de l'image (https://...)"
+            className={s.linkInput}
+          />
+          <button
+            className={s.linkBtn}
+            onClick={handleAddLink}
+            disabled={!linkUrl}
+            title="Ajouter depuis l'URL"
+          >
+            ＋
+          </button>
+          <button
+            className={s.uploadBtn}
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            title="Uploader un fichier"
+          >
+            {uploading ? <span className={s.spinner} /> : '↑'}
+          </button>
+        </div>
         <input
           ref={fileRef} type="file" accept="image/*,image/gif"
           style={{ display: 'none' }}
           onChange={e => handleUpload(e.target.files[0])}
         />
-        <p className={s.hint}>PNG, GIF, WebP — fonctionne mieux avec fond transparent</p>
+        <p className={s.hint}>PNG, GIF, WebP, lien HTTPS — gère la transparence</p>
       </div>
 
       {/* Decoration list */}
