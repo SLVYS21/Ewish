@@ -18,7 +18,7 @@ export default function WishesManager({ publicationId, templateName }) {
   const loadWishes = async () => {
     setLoading(true);
     try {
-      const r = await fetch(`/api/wishes/${publicationId}`);
+      const r = await fetch(`${BACKEND_LINK}/api/wishes/${publicationId}`);
       setWishes(await r.json());
     } catch { setWishes([]); }
     finally { setLoading(false); }
@@ -26,7 +26,7 @@ export default function WishesManager({ publicationId, templateName }) {
 
   const toggle = async (wish, field) => {
     try {
-      const r = await fetch(`/api/wishes/${wish._id}`, {
+      const r = await fetch(`${BACKEND_LINK}/api/wishes/${wish._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: !wish[field] }),
@@ -38,7 +38,7 @@ export default function WishesManager({ publicationId, templateName }) {
 
   const deleteWish = async (id) => {
     if (!confirm('Supprimer ce message ?')) return;
-    await fetch(`/api/wishes/${id}`, { method: 'DELETE' });
+    await fetch(`${BACKEND_LINK}/api/wishes/${id}`, { method: 'DELETE' });
     setWishes(w => w.filter(x => x._id !== id));
   };
 

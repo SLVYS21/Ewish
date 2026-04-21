@@ -1,31 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getPublications, deletePublication, duplicatePublication, unpublishPublication } from '../utils/api'
 import styles from './Dashboard.module.css';
 
+const LIMIT = 20;
+
 export default function Dashboard() {
   const [pubs, setPubs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
   const navigate = useNavigate();
 
-   const [dupModal,  setDupModal]  = useState(null); // pub object being duplicated
+  const [dupModal,  setDupModal]  = useState(null);
   const [dupTitle,  setDupTitle]  = useState('');
   const [dupSlug,   setDupSlug]   = useState('');
   const [dupError,  setDupError]  = useState('');
   const [dupLoading,setDupLoading]= useState(false);
 
-  useEffect(() => {
-    getPublications()
-      .then(r => setPubs(r.data))
-      .catch(() => setPubs([]))
+  const searchTimer = useRef(null);
+
+  const fetchPubs = useCallback((p, s) => {
+    setLoading(true);
+    getPublications({ page: p, limit: LIMIT, search: s || undefined })
+      .then(r => {
+        setPubs(r.data);
+        setHasNext(r.data.length === LIMIT);
+      })
+      .catch(() => { setPubs([]); setHasNext(false); })
       .finally(() => setLoading(false));
   }, []);
+
+  // Initial load
+  useEffect(() => { fetchPubs(1, ''); }, [fetchPubs]);
+
+  // Debounced search
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearch(val);
+    setPage(1);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => fetchPubs(1, val), 350);
+  };
+
+  const goToPage = (p) => {
+    setPage(p);
+    fetchPubs(p, search);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
     if (!confirm('Delete this wish?')) return;
     await deletePublication(id);
-    setPubs(p => p.filter(x => x._id !== id));
+    fetchPubs(page, search);
   };
 
   const openDupModal = (pub, e) => {
@@ -58,6 +87,7 @@ export default function Dashboard() {
     if (!confirm('Dépublier cette publication ? Elle ne sera plus accessible en ligne.')) return;
     await unpublishPublication(id);
     setPubs(p => p.map(x => x._id === id ? { ...x, published: false } : x));
+    fetchPubs(page, search);
   };
  
   const TEMPLATE_ICONS = {
@@ -132,7 +162,22 @@ export default function Dashboard() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2>My Wishes</h2>
-          <span className={styles.badge}>{pubs.length}</span>
+          <span className={styles.badge}>{pubs.length}{hasNext ? '+' : ''}</span>
+        </div>
+
+        {/* Search bar */}
+        <div className={styles.searchBar}>
+          <span className={styles.searchIcon}>🔍</span>
+          <input
+            className={styles.searchInput}
+            type="text"
+            placeholder="Rechercher par titre, nom, destinataire…"
+            value={search}
+            onChange={handleSearchChange}
+          />
+          {search && (
+            <button className={styles.searchClear} onClick={() => { setSearch(''); setPage(1); fetchPubs(1, ''); }}>✕</button>
+          )}
         </div>
 
         {loading ? (
@@ -209,6 +254,27 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {(page > 1 || hasNext) && (
+          <div className={styles.pagination}>
+            <button
+              className={styles.pageBtn}
+              disabled={page === 1 || loading}
+              onClick={() => goToPage(page - 1)}
+            >
+              ← Précédente
+            </button>
+            <span className={styles.pageInfo}>Page {page}</span>
+            <button
+              className={styles.pageBtn}
+              disabled={!hasNext || loading}
+              onClick={() => goToPage(page + 1)}
+            >
+              Suivante →
+            </button>
           </div>
         )}
       </section>

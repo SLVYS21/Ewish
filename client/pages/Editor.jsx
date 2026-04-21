@@ -1,40 +1,42 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPublications, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug } from '../utils/api';
-import ContentTab     from '../components/ContentTab';
-import StyleTab       from '../components/StyleTab';
-import BackgroundTab  from '../components/BackgroundTab';
-import DecoTab         from '../components/DecoTab';
-import WidgetTab       from '../components/WidgetTab';
-import PhotoLayoutTab  from '../components/PhotoLayoutTab';
-import JarTab         from '../components/JarTab';
-import WishesManager  from '../components/WishesManager';
+import ContentTab from '../components/ContentTab';
+import StyleTab from '../components/StyleTab';
+import BackgroundTab from '../components/BackgroundTab';
+import DecoTab from '../components/DecoTab';
+import WidgetTab from '../components/WidgetTab';
+import PhotoLayoutTab from '../components/PhotoLayoutTab';
+import JarTab from '../components/JarTab';
+import WishesManager from '../components/WishesManager';
 import styles from './Editor.module.css';
 
 /* ─── Tab definitions ────────────────────────────────────────── */
 const TABS = [
-  { key: 'content',     label: 'Contenu',         icon: '✏️' },
-  { key: 'style',       label: 'Style',            icon: '🎨' },
-  { key: 'background',  label: 'Fond',             icon: '🖼' },
-  { key: 'decorations', label: 'Décorations',      icon: '🌸' },
-  { key: 'photos',      label: 'Photos',           icon: '📐' },
-  { key: 'jar',         label: 'Jar',              icon: '🫙',  templates: ['birthday', 'special'] },
-  { key: 'widgets',     label: 'Widgets',           icon: '🧩' },
-  { key: 'wishes',      label: 'Vœux',             icon: '💌',  templatePrefix: 'collective' },
-  { key: 'branding',    label: 'Promo',            icon: '📣' },
+  { key: 'content', label: 'Contenu', icon: '✏️' },
+  { key: 'style', label: 'Style', icon: '🎨' },
+  { key: 'background', label: 'Fond', icon: '🖼' },
+  { key: 'decorations', label: 'Décorations', icon: '🌸' },
+  { key: 'photos', label: 'Photos', icon: '📐' },
+  { key: 'jar', label: 'Jar', icon: '🫙', templates: ['birthday', 'special'] },
+  { key: 'widgets', label: 'Widgets', icon: '🧩' },
+  { key: 'wishes', label: 'Vœux', icon: '💌', templatePrefix: 'collective' },
+  { key: 'branding', label: 'Promo', icon: '📣' },
 ];
 
 function BrandingTab({ show, url, onToggle, onUrlChange }) {
   const DEFAULT_URL = 'https://app.mykado.store';
-//previewSrc
+  //previewSrc
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
- 
+
       {/* Toggle */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px',
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', gap: '14px',
         background: 'var(--surface, rgba(255,255,255,.05))',
         border: '1.5px solid var(--border, rgba(255,255,255,.1))',
-        borderRadius: '12px', padding: '14px 16px' }}>
+        borderRadius: '12px', padding: '14px 16px'
+      }}>
         <button
           onClick={() => onToggle(!show)}
           style={{
@@ -52,12 +54,16 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
           }} />
         </button>
         <div>
-          <div style={{ fontSize: '0.85rem', fontWeight: '700',
-            color: 'var(--text, #fff)', marginBottom: '4px' }}>
+          <div style={{
+            fontSize: '0.85rem', fontWeight: '700',
+            color: 'var(--text, #fff)', marginBottom: '4px'
+          }}>
             📣 Afficher le bouton eWishWell
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-3, rgba(255,255,255,.4))',
-            lineHeight: '1.5' }}>
+          <div style={{
+            fontSize: '0.75rem', color: 'var(--text-3, rgba(255,255,255,.4))',
+            lineHeight: '1.5'
+          }}>
             Un petit bouton discret s'affiche en bas de la page.
             Tes clients peuvent cliquer pour commander leur propre création.
             <br />
@@ -67,18 +73,24 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
           </div>
         </div>
       </div>
- 
+
       {/* Preview */}
       {show && (
-        <div style={{ borderRadius: '10px', overflow: 'hidden',
-          border: '1px solid var(--border, rgba(255,255,255,.1))' }}>
-          <div style={{ padding: '8px 12px', fontSize: '0.62rem',
+        <div style={{
+          borderRadius: '10px', overflow: 'hidden',
+          border: '1px solid var(--border, rgba(255,255,255,.1))'
+        }}>
+          <div style={{
+            padding: '8px 12px', fontSize: '0.62rem',
             letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: 'var(--text-3, rgba(255,255,255,.4))', background: 'rgba(0,0,0,.2)' }}>
+            color: 'var(--text-3, rgba(255,255,255,.4))', background: 'rgba(0,0,0,.2)'
+          }}>
             Aperçu du bouton
           </div>
-          <div style={{ padding: '16px', display: 'flex', justifyContent: 'center',
-            background: 'rgba(255,255,255,.03)' }}>
+          <div style={{
+            padding: '16px', display: 'flex', justifyContent: 'center',
+            background: 'rgba(255,255,255,.03)'
+          }}>
             <span style={{
               background: 'rgba(255,255,255,0.92)',
               borderRadius: '50px', padding: '8px 18px',
@@ -90,12 +102,14 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
           </div>
         </div>
       )}
- 
+
       {/* URL */}
       <div>
-        <label style={{ display: 'block', fontSize: '0.65rem',
+        <label style={{
+          display: 'block', fontSize: '0.65rem',
           letterSpacing: '0.15em', textTransform: 'uppercase',
-          color: 'var(--text-3, rgba(255,255,255,.35))', marginBottom: '8px' }}>
+          color: 'var(--text-3, rgba(255,255,255,.35))', marginBottom: '8px'
+        }}>
           Lien de destination
         </label>
         <input
@@ -113,54 +127,56 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
           onFocus={e => e.target.style.borderColor = 'var(--brand, #c8963e)'}
           onBlur={e => e.target.style.borderColor = 'var(--border, rgba(255,255,255,.1))'}
         />
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-3, rgba(255,255,255,.35))',
-          marginTop: '6px', lineHeight: '1.5' }}>
+        <p style={{
+          fontSize: '0.7rem', color: 'var(--text-3, rgba(255,255,255,.35))',
+          marginTop: '6px', lineHeight: '1.5'
+        }}>
           Ton WhatsApp : <code style={{ color: 'var(--brand, #c8963e)' }}>
             https://wa.me/+2290000000000
           </code>
           <br />ou l'URL de ta landing page.
         </p>
       </div>
- 
+
     </div>
   );
 }
 
 export default function Editor() {
-  const { id }     = useParams();
-  const navigate   = useNavigate();
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   /* ── State ─────────────────────────────────────────────────── */
-  const [pub,         setPub]         = useState(null);
-  const [template,    setTemplate]    = useState(null);
-  const [data,        setData]        = useState({});
-  const [style,       setStyle]       = useState({});
+  const [pub, setPub] = useState(null);
+  const [template, setTemplate] = useState(null);
+  const [data, setData] = useState({});
+  const [style, setStyle] = useState({});
   const [backgrounds, setBackgrounds] = useState({});   // style.backgrounds extracted
   const [decorations, setDecorations] = useState([]);
-  const [jarConfig,   setJarConfig]   = useState(null);
-  const [widgets,     setWidgets]     = useState([]);
+  const [jarConfig, setJarConfig] = useState(null);
+  const [widgets, setWidgets] = useState([]);
   const [photoTransforms, setPhotoTransforms] = useState({});
 
-  const [activeTab,   setActiveTab]   = useState('content');
-  const [saveStatus,  setSaveStatus]  = useState('saved');
-  const [publishing,  setPublishing]  = useState(false);
+  const [activeTab, setActiveTab] = useState('content');
+  const [saveStatus, setSaveStatus] = useState('saved');
+  const [publishing, setPublishing] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState('');
   const [showBranding, setShowBranding] = useState(false);
-  const [brandingUrl,  setBrandingUrl]  = useState('');
-  const [shortCode,    setShortCode]    = useState('');
-  const [slugEditing,  setSlugEditing]  = useState(false);
-  const [slugDraft,    setSlugDraft]    = useState('');
-  const [slugStatus,   setSlugStatus]   = useState('');
+  const [brandingUrl, setBrandingUrl] = useState('');
+  const [shortCode, setShortCode] = useState('');
+  const [slugEditing, setSlugEditing] = useState(false);
+  const [slugDraft, setSlugDraft] = useState('');
+  const [slugStatus, setSlugStatus] = useState('');
 
-  const iframeRef  = useRef(null);
+  const iframeRef = useRef(null);
   const tabsBarRef = useRef(null);
-  const saveTimer  = useRef(null);
+  const saveTimer = useRef(null);
 
   /* ── Load publication ───────────────────────────────────────── */
   useEffect(() => {
     const load = async () => {
       try {
-        const r     = await getPublications();
+        const r = await getPublications({ limit: 1000 });
         const found = r.data.find(p => p._id === id);
         if (!found) { navigate('/'); return; }
 
@@ -180,7 +196,7 @@ export default function Editor() {
         try {
           const tr = await fetch(`${import.meta.env.VITE_API_URL}/api/templates/${found.templateName}`);
           if (tr.ok) setTemplate(await tr.json());
-        } catch {}
+        } catch { }
       } catch { navigate('/ewish-admin/ewish'); }
     };
     load();
@@ -195,11 +211,11 @@ export default function Editor() {
       try {
         const fullStyle = { ...newStyle, backgrounds: newBgs };
         await updatePublication(id, {
-          data:        newData,
-          style:       fullStyle,
+          data: newData,
+          style: fullStyle,
           decorations: newDecos,
-          jarConfig:   newJar,
-          widgets:     newWidgets,
+          jarConfig: newJar,
+          widgets: newWidgets,
           photoTransforms: newPhotoTransforms,
         });
         setSaveStatus('saved');
@@ -214,13 +230,13 @@ export default function Editor() {
     try {
       // Single WW_UPDATE carries everything
       iframe.contentWindow.postMessage({
-        type:        'WW_UPDATE',
-        data:        { ...d, photoTransforms: photoT },
-        style:       { ...st, backgrounds: bgs },
+        type: 'WW_UPDATE',
+        data: { ...d, photoTransforms: photoT },
+        style: { ...st, backgrounds: bgs },
         decorations: decos,
-        widgets:     wids,
+        widgets: wids,
       }, '*');
-    } catch {}
+    } catch { }
   }, []);
 
   /* ── Change handlers ────────────────────────────────────────── */
@@ -267,7 +283,7 @@ export default function Editor() {
     autoSave(data, style, backgrounds, decorations, newJar, widgets);
     const iframe = iframeRef.current;
     if (iframe?.contentWindow) {
-      try { iframe.contentWindow.postMessage({ type: 'WW_UPDATE', data: { ...data, jarConfig: newJar }, style }, '*'); } catch {}
+      try { iframe.contentWindow.postMessage({ type: 'WW_UPDATE', data: { ...data, jarConfig: newJar }, style }, '*'); } catch { }
     }
   };
 
@@ -293,7 +309,7 @@ export default function Editor() {
       try {
         const sl = await getShortLink(id);
         setShortCode(sl.data.shortCode);
-      } catch {}
+      } catch { }
     } catch (e) {
       alert(e.response?.data?.error || 'Publish failed');
     } finally { setPublishing(false); }
@@ -326,80 +342,80 @@ export default function Editor() {
         </div>
         <div className={styles.topbarCenter}>
           <span className={`${styles.saveStatus} ${styles[saveStatus]}`}>
-            {saveStatus === 'saving'  && '↻ Sauvegarde…'}
-            {saveStatus === 'saved'   && '✓ Sauvegardé'}
+            {saveStatus === 'saving' && '↻ Sauvegarde…'}
+            {saveStatus === 'saved' && '✓ Sauvegardé'}
             {saveStatus === 'unsaved' && '● Non sauvegardé'}
           </span>
         </div>
         <div className={styles.topbarRight}>
-            {shortCode && (
-              <div className={styles.shortUrlWrap}>
-                {slugEditing ? (
-                  <>
-                    <span className={styles.shortUrlPrefix}>/s/</span>
-                    <input
-                      className={styles.slugInput}
-                      value={slugDraft}
-                      onChange={e => setSlugDraft(e.target.value)}
-                      onKeyDown={async e => {
-                        if (e.key === 'Enter') {
-                          setSlugStatus('saving');
-                          try {
-                            const r = await setCustomSlug(id, slugDraft);
-                            setShortCode(r.data.shortCode);
-                            setSlugStatus('saved');
-                            setSlugEditing(false);
-                          } catch(err) {
-                            setSlugStatus(err.response?.data?.error || 'error');
-                          }
+          {shortCode && (
+            <div className={styles.shortUrlWrap}>
+              {slugEditing ? (
+                <>
+                  <span className={styles.shortUrlPrefix}>/s/</span>
+                  <input
+                    className={styles.slugInput}
+                    value={slugDraft}
+                    onChange={e => setSlugDraft(e.target.value)}
+                    onKeyDown={async e => {
+                      if (e.key === 'Enter') {
+                        setSlugStatus('saving');
+                        try {
+                          const r = await setCustomSlug(id, slugDraft);
+                          setShortCode(r.data.shortCode);
+                          setSlugStatus('saved');
+                          setSlugEditing(false);
+                        } catch (err) {
+                          setSlugStatus(err.response?.data?.error || 'error');
                         }
-                        if (e.key === 'Escape') setSlugEditing(false);
-                      }}
-                      autoFocus
-                    />
-                    <button className={styles.slugSave} onClick={async () => {
-                      setSlugStatus('saving');
-                      try {
-                        const r = await setCustomSlug(id, slugDraft);
-                        setShortCode(r.data.shortCode);
-                        setSlugStatus('saved');
-                        setSlugEditing(false);
-                      } catch(err) {
-                        setSlugStatus(err.response?.data?.error || 'error');
                       }
-                    }}>✓</button>
-                    <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}>✕</button>
-                    {slugStatus && slugStatus !== 'saving' && (
-                      <span className={styles.slugMsg}>{slugStatus === 'saved' ? '✓' : slugStatus}</span>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className={styles.shortUrl}
-                      title="Copier le lien court"
-                      onClick={() => {
-                        const origin = import.meta.env.VITE_API_URL || window.location.origin;
-                        navigator.clipboard.writeText(`${origin}/s/${shortCode}`);
-                      }}
-                    >
-                      /s/{shortCode} 📋
-                    </button>
-                    <button
-                      className={styles.slugEdit}
-                      title="Modifier le slug"
-                      onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
-                    >✏️</button>
-                    <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>↗</a>
-                  </>
-                )}
-              </div>
-            )}
-            <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
-              {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
-            </button>
-          </div>
-        </header>
+                      if (e.key === 'Escape') setSlugEditing(false);
+                    }}
+                    autoFocus
+                  />
+                  <button className={styles.slugSave} onClick={async () => {
+                    setSlugStatus('saving');
+                    try {
+                      const r = await setCustomSlug(id, slugDraft);
+                      setShortCode(r.data.shortCode);
+                      setSlugStatus('saved');
+                      setSlugEditing(false);
+                    } catch (err) {
+                      setSlugStatus(err.response?.data?.error || 'error');
+                    }
+                  }}>✓</button>
+                  <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}>✕</button>
+                  {slugStatus && slugStatus !== 'saving' && (
+                    <span className={styles.slugMsg}>{slugStatus === 'saved' ? '✓' : slugStatus}</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    className={styles.shortUrl}
+                    title="Copier le lien court"
+                    onClick={() => {
+                      const origin = import.meta.env.VITE_API_URL || window.location.origin;
+                      navigator.clipboard.writeText(`${origin}/s/${shortCode}`);
+                    }}
+                  >
+                    /s/{shortCode} 📋
+                  </button>
+                  <button
+                    className={styles.slugEdit}
+                    title="Modifier le slug"
+                    onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
+                  >✏️</button>
+                  <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>↗</a>
+                </>
+              )}
+            </div>
+          )}
+          <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
+            {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
+          </button>
+        </div>
+      </header>
 
       <div className={styles.workspace}>
         {/* ── Left Panel ── */}
@@ -492,11 +508,11 @@ export default function Editor() {
                 url={brandingUrl}
                 onToggle={(v) => {
                   setShowBranding(v);
-                  updatePublication(id, { showBranding: v, brandingUrl }).catch(() => {});
+                  updatePublication(id, { showBranding: v, brandingUrl }).catch(() => { });
                 }}
                 onUrlChange={(v) => {
                   setBrandingUrl(v);
-                  updatePublication(id, { showBranding, brandingUrl: v }).catch(() => {});
+                  updatePublication(id, { showBranding, brandingUrl: v }).catch(() => { });
                 }}
               />
             )}
@@ -511,7 +527,7 @@ export default function Editor() {
               <button
                 className={styles.previewBtn}
                 onClick={() => { const f = iframeRef.current; if (f) { const s = f.src; f.src = ''; f.src = s; } }}
-                //onClick={() => iframeRef.current?.contentWindow?.location.reload()}
+              //onClick={() => iframeRef.current?.contentWindow?.location.reload()}
               >↺ Restart</button>
             </div>
             <span className={styles.previewUrl}>/site/{pub.templateName}/{pub.customName}</span>
