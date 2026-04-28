@@ -112,6 +112,7 @@ export const getMe = () => api.get('/auth/me', { withCredentials: true });
 // ── Orders ──
 export const getOrders = (params) => api.get('/orders', { params, withCredentials: true });
 export const updateOrder = (id, data) => api.patch(`/orders/${id}`, data, { withCredentials: true });
+export const getOrderByPublication = (pubId) => api.get(`/orders/by-publication/${pubId}`, { withCredentials: true });
 
 // ── Analytics ──
 export const getAnalytics = (period) => api.get('/analytics', { params: { period }, withCredentials: true });

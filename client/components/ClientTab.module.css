@@ -1,0 +1,129 @@
+.root {
+  padding: 24px;
+  color: var(--text, #fff);
+  font-family: 'Jost', sans-serif;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--text-3, rgba(255,255,255,0.4));
+  padding: 40px 20px;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-3, rgba(255,255,255,0.5));
+  line-height: 1.5;
+}
+
+.importBtn {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--brand, #c8963e);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(200, 150, 62, 0.2);
+}
+
+.importBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(200, 150, 62, 0.3);
+  filter: brightness(1.1);
+}
+
+.fieldsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldItem {
+  background: var(--surface, rgba(255,255,255,0.03));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+}
+
+.fieldHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.fieldKey {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand, #c8963e);
+  font-weight: 600;
+}
+
+.copyBtn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  color: var(--text, #fff);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.copyBtn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.fieldValue {
+  font-size: 0.85rem;
+  color: var(--text-2, rgba(255,255,255,0.85));
+  word-break: break-word;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.imgPreview {
+  margin-top: 8px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+}

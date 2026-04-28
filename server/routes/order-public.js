@@ -22,7 +22,6 @@ router.post('/public', async (req, res) => {
     if (!template)       return res.status(400).json({ error: 'Template requis' });
     if (!senderName)     return res.status(400).json({ error: 'Ton prénom est requis' });
     if (!senderPhone)    return res.status(400).json({ error: 'Ton numéro WhatsApp est requis' });
-    if (!recipientName)  return res.status(400).json({ error: 'Le prénom du destinataire est requis' });
 
     // Générer une référence unique (retry si collision)
     let ref, exists;
@@ -39,7 +38,7 @@ router.post('/public', async (req, res) => {
       templateName:  template,
       senderName,
       senderPhone,
-      recipientName,
+      recipientName: recipientName || 'À définir',
       occasion:      occasion || '',
       delay:         delay    || 'flexible',
       notes:         notes    || '',
@@ -54,7 +53,7 @@ router.post('/public', async (req, res) => {
   }
 });
 
-module.exports = router;
+
 
 /* ── POST /api/orders/:ref/details ──────────────────────────── */
 // Reçoit les données du formulaire client et les stocke sur la commande
@@ -75,3 +74,16 @@ router.post('/:ref/details', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+/* ── GET /api/orders/by-publication/:pubId ───────────────────── */
+router.get('/by-publication/:pubId', async (req, res) => {
+  try {
+    const order = await Order.findOne({ publicationId: req.params.pubId }).lean();
+    if (!order) return res.status(404).json({ error: 'No order linked to this publication' });
+    res.json(order);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+module.exports = router;

@@ -13,43 +13,18 @@ const TEMPLATE_PRICES = { birthday: 5000, special: 6000, 'collective-family': 80
 
 function fmtPrice(p) { return new Intl.NumberFormat('fr-FR').format(p) + ' FCFA'; }
 
-const STEPS = ['Infos', 'Détails', 'Paiement'];
-
 export default function OrderModal({ templateName, onClose }) {
-  const [step, setStep]           = useState(0);
   const [form, setForm]           = useState({
-    firstName: '', lastName: '', email: '', phone: '',
-    recipientName: '', occasion: '', notes: '',
-    promoCode: '', paymentMethod: 'wave',
+    firstName: '', phone: '', occasion: ''
   });
-  const [promo, setPromo]         = useState(null);  // { discount, type }
-  const [promoLoading, setPromoLoading] = useState(false);
-  const [promoError, setPromoError]     = useState('');
   const [submitting, setSubmitting]     = useState(false);
   const [done, setDone]           = useState(false);
   const [error, setError]         = useState('');
 
-  const basePrice    = TEMPLATE_PRICES[templateName] || 5000;
-  const discount     = promo ? (promo.type === 'percent' ? Math.round(basePrice * promo.value / 100) : promo.value) : 0;
-  const finalPrice   = Math.max(0, basePrice - discount);
-
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const applyPromo = async () => {
-    if (!form.promoCode) return;
-    setPromoLoading(true); setPromoError('');
-    try {
-      const data = await checkPromo(form.promoCode, templateName);
-      setPromo({ value: data.value, type: data.type });
-    } catch (e) {
-      setPromoError(e.message); setPromo(null);
-    } finally { setPromoLoading(false); }
-  };
-
   const canNext = () => {
-    if (step === 0) return form.firstName && form.email;
-    if (step === 1) return form.recipientName && form.occasion;
-    return true;
+    return form.firstName && form.phone && form.occasion;
   };
 
   const submit = async () => {
@@ -57,16 +32,13 @@ export default function OrderModal({ templateName, onClose }) {
     try {
       await createOrder({
         templateName,
-        client: { firstName: form.firstName, lastName: form.lastName, email: form.email, phone: form.phone },
-        recipientName: form.recipientName,
+        senderName: form.firstName,
+        senderPhone: form.phone,
         occasion: form.occasion,
-        notes: form.notes,
-        promoCode: form.promoCode || undefined,
-        paymentMethod: form.paymentMethod,
       });
-      // Track purchase
-      trackEvent('Purchase', { value: finalPrice, currency: 'XOF', content_name: TEMPLATE_LABELS[templateName] });
-      if (typeof window.fbq === 'function') window.fbq('track', 'Purchase', { value: finalPrice, currency: 'XOF' });
+      // Track purchase (Initiated since no payment yet)
+      trackEvent('Lead', { content_name: TEMPLATE_LABELS[templateName] });
+      if (typeof window.fbq === 'function') window.fbq('track', 'Lead', { content_name: TEMPLATE_LABELS[templateName] });
       setDone(true);
     } catch (e) { setError(e.message); }
     finally { setSubmitting(false); }
@@ -103,86 +75,23 @@ export default function OrderModal({ templateName, onClose }) {
             <>
               {/* Header */}
               <div className={s.head}>
-                <h3 className={s.title}>{TEMPLATE_LABELS[templateName]}</h3>
-                <div className={s.priceTag}>{fmtPrice(finalPrice)}{discount > 0 && <span className={s.strike}>{fmtPrice(basePrice)}</span>}</div>
-              </div>
-
-              {/* Step progress */}
-              <div className={s.steps}>
-                {STEPS.map((label, i) => (
-                  <div key={i} className={`${s.stepDot} ${i <= step ? s.active : ''} ${i < step ? s.done : ''}`}>
-                    <div className={s.dotCircle}>{i < step ? '✓' : i + 1}</div>
-                    <span>{label}</span>
-                  </div>
-                ))}
+                <h3 className={s.title}>Passer commande</h3>
+                <p style={{fontSize: '0.8rem', color: 'var(--muted)', marginTop: '8px'}}>Remplissez ce formulaire et nous vous recontacterons par WhatsApp pour finaliser.</p>
               </div>
 
               {/* Fields */}
               <div className={s.body}>
-                {step === 0 && (
-                  <div className={s.fields}>
-                    <div className={s.row}>
-                      <Field label="Prénom *" value={form.firstName} onChange={v => set('firstName', v)} placeholder="Kofi" />
-                      <Field label="Nom" value={form.lastName} onChange={v => set('lastName', v)} placeholder="Mensah" />
-                    </div>
-                    <Field label="Email *" type="email" value={form.email} onChange={v => set('email', v)} placeholder="vous@email.com" />
-                    <Field label="Téléphone (WhatsApp)" type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder="+229 97..." />
-                  </div>
-                )}
-
-                {step === 1 && (
-                  <div className={s.fields}>
-                    <Field label="Prénom du destinataire *" value={form.recipientName} onChange={v => set('recipientName', v)} placeholder="Marie" />
-                    <Field label="Occasion *" value={form.occasion} onChange={v => set('occasion', v)} placeholder="Anniversaire 30 ans, départ en retraite…" />
-                    <div className={s.fieldGroup}>
-                      <label className={s.label}>Instructions / souhaits</label>
-                      <textarea className={s.textarea} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Photos à inclure, musique souhaitée, ambiance particulière…" rows={3} />
-                    </div>
-                  </div>
-                )}
-
-                {step === 2 && (
-                  <div className={s.fields}>
-                    {/* Promo */}
-                    <div className={s.promoRow}>
-                      <input className={s.promoInput} value={form.promoCode} onChange={e => set('promoCode', e.target.value.toUpperCase())} placeholder="Code promo" onKeyDown={e => e.key === 'Enter' && applyPromo()} />
-                      <button className={s.promoBtn} onClick={applyPromo} disabled={promoLoading}>{promoLoading ? '…' : 'Appliquer'}</button>
-                    </div>
-                    {promoError && <p className={s.promoError}>{promoError}</p>}
-                    {promo && <p className={s.promoOk}>✓ Code appliqué — économie de {fmtPrice(discount)}</p>}
-
-                    {/* Payment */}
-                    <div className={s.fieldGroup}>
-                      <label className={s.label}>Mode de paiement</label>
-                      <div className={s.payMethods}>
-                        {[['wave','Wave'], ['mtn','MTN MoMo'], ['moov','Moov Money']].map(([val, lbl]) => (
-                          <label key={val} className={`${s.payOption} ${form.paymentMethod === val ? s.selected : ''}`}>
-                            <input type="radio" value={val} checked={form.paymentMethod === val} onChange={() => set('paymentMethod', val)} />
-                            {lbl}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Summary */}
-                    <div className={s.summary}>
-                      <div className={s.summaryRow}><span>Template</span><span>{TEMPLATE_LABELS[templateName]}</span></div>
-                      <div className={s.summaryRow}><span>Prix</span><span>{fmtPrice(basePrice)}</span></div>
-                      {discount > 0 && <div className={s.summaryRow}><span>Réduction</span><span className={s.discount}>−{fmtPrice(discount)}</span></div>}
-                      <div className={`${s.summaryRow} ${s.total}`}><span>Total</span><span>{fmtPrice(finalPrice)}</span></div>
-                    </div>
-                    {error && <p className={s.errorMsg}>{error}</p>}
-                  </div>
-                )}
+                <div className={s.fields}>
+                  <Field label="Votre Nom *" value={form.firstName} onChange={v => set('firstName', v)} placeholder="Ex: Kofi" />
+                  <Field label="Numéro WhatsApp *" type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder="Ex: +229 97..." />
+                  <Field label="Évènement *" value={form.occasion} onChange={v => set('occasion', v)} placeholder="Ex: Anniversaire de ma mère, Départ en retraite..." />
+                </div>
+                {error && <p className={s.errorMsg}>{error}</p>}
               </div>
 
               {/* Footer nav */}
               <div className={s.foot}>
-                {step > 0 && <button className={s.btnBack} onClick={() => setStep(s => s - 1)}>← Retour</button>}
-                {step < STEPS.length - 1
-                  ? <button className={s.btnNext} onClick={() => setStep(s => s + 1)} disabled={!canNext()}>Suivant →</button>
-                  : <button className={s.btnSubmit} onClick={submit} disabled={submitting || !canNext()}>{submitting ? 'Envoi…' : `Commander · ${fmtPrice(finalPrice)}`}</button>
-                }
+                <button className={s.btnSubmit} onClick={submit} disabled={submitting || !canNext()}>{submitting ? 'Envoi…' : 'Envoyer la demande'}</button>
               </div>
             </>
           )}

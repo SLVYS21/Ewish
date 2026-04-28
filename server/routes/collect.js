@@ -81,12 +81,50 @@ router.get('/:publicationId', async (req, res) => {
       height: 90px; display: flex; align-items: center; justify-content: center;
       gap: 10px; color: #aaa; font-size: 0.85rem;
       transition: border-color 0.2s, background 0.2s;
-      cursor: pointer;
+      cursor: pointer; position: relative; overflow: hidden;
     }
     .photo-preview:hover { border-color: ${primaryColor}; background: ${primaryColor}08; color: ${primaryColor}; }
     .photo-preview.has-image { border-style: solid; border-color: ${primaryColor}; padding: 4px; }
     .photo-preview.has-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
     .photo-preview .upload-icon { font-size: 1.4rem; }
+
+    /* Upload loading state */
+    .photo-preview.uploading {
+      border-color: ${primaryColor};
+      background: ${primaryColor}08;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .upload-loader {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: ${primaryColor};
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .uploading .upload-loader { display: flex; }
+    .uploading .upload-default { display: none; }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid ${primaryColor}30;
+      border-top-color: ${primaryColor};
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Upload done badge */
+    .upload-done-badge {
+      display: none;
+      position: absolute; top: 6px; right: 8px;
+      background: #22c55e; color: #fff;
+      font-size: 0.65rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 99px;
+      letter-spacing: 0.04em;
+    }
+    .photo-preview.upload-ok .upload-done-badge { display: block; }
 
     .submit-btn {
       width: 100%; padding: 14px;
@@ -139,8 +177,18 @@ router.get('/:publicationId', async (req, res) => {
     <div class="field">
       <label>Ta photo (optionnel)</label>
       <div class="photo-preview" id="photo-preview" onclick="document.getElementById('photo-input').click()">
-        <span class="upload-icon">📷</span>
-        <span>Clique pour ajouter une photo</span>
+        <!-- Default state -->
+        <div class="upload-default" style="display:flex;align-items:center;gap:10px">
+          <span class="upload-icon">📷</span>
+          <span>Clique pour ajouter une photo</span>
+        </div>
+        <!-- Loading state -->
+        <div class="upload-loader">
+          <div class="spinner"></div>
+          <span>Upload en cours…</span>
+        </div>
+        <!-- Done badge -->
+        <span class="upload-done-badge">✓ Uploadée</span>
       </div>
       <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(this)">
     </div>
@@ -161,6 +209,7 @@ router.get('/:publicationId', async (req, res) => {
 <script>
 const PUB_ID = '${req.params.publicationId}';
 let uploadedPhotoUrl = '';
+let isUploading = false;
 
 function updateCount(el) {
   document.getElementById('msg-count').textContent = el.value.length;
@@ -169,9 +218,16 @@ function updateCount(el) {
 async function handlePhoto(input) {
   const file = input.files[0];
   if (!file) return;
+
   const preview = document.getElementById('photo-preview');
-  preview.classList.add('has-image');
-  preview.innerHTML = '<img src="' + URL.createObjectURL(file) + '" alt="preview">';
+  const submitBtn = document.getElementById('submit-btn');
+
+  // --- Show loading state ---
+  isUploading = true;
+  preview.classList.remove('has-image', 'upload-ok');
+  preview.classList.add('uploading');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Photo en cours d\'upload…';
 
   // Upload
   const form = new FormData();
@@ -180,8 +236,33 @@ async function handlePhoto(input) {
     const res = await fetch('/api/upload', { method: 'POST', body: form });
     const data = await res.json();
     uploadedPhotoUrl = data.url || '';
+
+    // --- Upload success: show thumbnail + green badge ---
+    preview.classList.remove('uploading');
+    preview.classList.add('has-image', 'upload-ok');
+    // Replace the loader content with the image thumbnail
+    preview.querySelector('.upload-loader').style.display = 'none';
+    const thumb = document.createElement('img');
+    thumb.src = uploadedPhotoUrl || URL.createObjectURL(file);
+    thumb.alt = 'preview';
+    thumb.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:7px';
+    preview.insertBefore(thumb, preview.firstChild);
+
   } catch (e) {
     console.error('Upload failed', e);
+    // --- Upload failed: reset to default ---
+    preview.classList.remove('uploading', 'has-image', 'upload-ok');
+    preview.querySelector('.upload-loader').style.display = '';
+    preview.querySelector('.upload-default').style.display = 'flex';
+    // Show inline error
+    const errEl = document.getElementById('error-msg');
+    errEl.textContent = 'Échec de l\'upload photo. Réessaie.';
+    errEl.style.display = 'block';
+  } finally {
+    // --- Always re-enable submit ---
+    isUploading = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = '${isPro ? 'Envoyer mon message 📩' : 'Envoyer mes vœux 💌'}';
   }
 }
 
@@ -192,6 +273,14 @@ async function submitWish() {
   const errEl = document.getElementById('error-msg');
 
   errEl.style.display = 'none';
+
+  // Block if upload is still running
+  if (isUploading) {
+    errEl.textContent = 'La photo est encore en cours d\'upload, patiente un instant…';
+    errEl.style.display = 'block';
+    return;
+  }
+
   if (!firstName) { errEl.textContent = 'Ton prénom est requis.'; errEl.style.display='block'; return; }
   if (!message)   { errEl.textContent = 'Le message ne peut pas être vide.'; errEl.style.display='block'; return; }
   ${isPro ? `if (!role) { errEl.textContent = 'Ton rôle est requis.'; errEl.style.display='block'; return; }` : ''}

@@ -9,6 +9,7 @@ import WidgetTab from '../components/WidgetTab';
 import PhotoLayoutTab from '../components/PhotoLayoutTab';
 import JarTab from '../components/JarTab';
 import WishesManager from '../components/WishesManager';
+import ClientTab from '../components/ClientTab';
 import styles from './Editor.module.css';
 
 /* ─── Tab definitions ────────────────────────────────────────── */
@@ -21,6 +22,7 @@ const TABS = [
   { key: 'jar', label: 'Jar', icon: '🫙', templates: ['birthday', 'special'] },
   { key: 'widgets', label: 'Widgets', icon: '🧩' },
   { key: 'wishes', label: 'Vœux', icon: '💌', templatePrefix: 'collective' },
+  { key: 'client', label: 'Client', icon: '📝' },
   { key: 'branding', label: 'Promo', icon: '📣' },
 ];
 
@@ -149,6 +151,7 @@ export default function Editor() {
   /* ── State ─────────────────────────────────────────────────── */
   const [pub, setPub] = useState(null);
   const [template, setTemplate] = useState(null);
+  const [linkedOrder, setLinkedOrder] = useState(null);
   const [data, setData] = useState({});
   const [style, setStyle] = useState({});
   const [backgrounds, setBackgrounds] = useState({});   // style.backgrounds extracted
@@ -197,6 +200,14 @@ export default function Editor() {
           const tr = await fetch(`${import.meta.env.VITE_API_URL}/api/templates/${found.templateName}`);
           if (tr.ok) setTemplate(await tr.json());
         } catch { }
+
+        // Fetch linked order
+        try {
+          const orderRes = await import('../utils/api').then(m => m.getOrderByPublication(id));
+          setLinkedOrder(orderRes.data);
+        } catch {
+          setLinkedOrder(null);
+        }
       } catch { navigate('/ewish-admin/ewish'); }
     };
     load();
@@ -243,8 +254,17 @@ export default function Editor() {
   const handleDataChange = (key, value) => {
     const next = { ...data, [key]: value };
     setData(next);
-    autoSave(next, style, backgrounds, decorations, jarConfig, widgets);
-    refreshPreview(next, style, backgrounds, decorations, widgets);
+    autoSave(next, style, backgrounds, decorations, jarConfig, widgets, photoTransforms);
+    refreshPreview(next, style, backgrounds, decorations, widgets, photoTransforms);
+  };
+
+  const handleImportClientData = (templateData) => {
+    if (!templateData) return;
+    const next = { ...data, ...templateData };
+    setData(next);
+    autoSave(next, style, backgrounds, decorations, jarConfig, widgets, photoTransforms);
+    refreshPreview(next, style, backgrounds, decorations, widgets, photoTransforms);
+    alert('Les données du client ont été importées dans le contenu !');
   };
 
   const handleStyleChange = (key, value) => {
@@ -500,6 +520,14 @@ export default function Editor() {
               <WishesManager
                 publicationId={pub._id}
                 templateName={pub.templateName}
+              />
+            )}
+            {activeTab === 'client' && (
+              <ClientTab
+                order={linkedOrder}
+                pubId={pub._id}
+                templateName={pub.templateName}
+                onImportAll={handleImportClientData}
               />
             )}
             {activeTab === 'branding' && (

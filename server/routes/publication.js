@@ -197,4 +197,39 @@ router.delete('/:id', async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// POST /api/publications/:id/client-details
+// Handle client form submitted directly via publication link
+const Order = require('../models/Order');
+
+router.post('/:id/client-details', async (req, res) => {
+  try {
+    const { templateData, clientName } = req.body;
+    if (!templateData) return res.status(400).json({ error: 'Données manquantes' });
+
+    const pub = await Publication.findById(req.params.id);
+    if (!pub) return res.status(404).json({ error: 'Publication introuvable' });
+
+    // Find or create an Order for this publication
+    let order = await Order.findOne({ publicationId: pub._id });
+    if (!order) {
+      order = new Order({
+        ref: 'PUB-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        publicationId: pub._id,
+        templateName: pub.templateName,
+        status: 'en_cours',
+        senderName: clientName || 'Client',
+      });
+    }
+    
+    order.templateData = templateData;
+    if (clientName) order.senderName = clientName;
+    order.status = 'en_cours';
+    
+    await order.save();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;
