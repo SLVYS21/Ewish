@@ -154,23 +154,71 @@
     }
   }
 
+  /* ─── Section Resolving ────────────────────────────────────────── */
+  const SECTION_FALLBACKS = {
+    greeting: '.one, .greeting-section, #section-greeting',
+    music: '.music-interlude, #section-music',
+    message: '.three, .four, .message-section, .google-section, #section-message',
+    ideas: '.five, #section-ideas',
+    celebration: '.six, .celebration-section, #section-celebration',
+    outro: '.nine, .outro-section, #section-outro'
+  };
+
+  function getSectionElement(key) {
+    if (key === 'global') return document.body;
+    let el = document.querySelector(`[data-section="${key}"]`);
+    if (el) return el;
+    if (SECTION_FALLBACKS[key]) {
+      return document.querySelector(SECTION_FALLBACKS[key]);
+    }
+    return null;
+  }
+
+  /* ─── Visibility Observer ───────────────────────────────────────── */
+  function onVisible(element, onShow, onHide) {
+    if (element === document.body) {
+      onShow();
+      return null;
+    }
+
+    function check() {
+      const style = window.getComputedStyle(element);
+      return parseFloat(style.opacity) > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+    }
+
+    let currentlyVisible = check();
+    if (currentlyVisible) onShow();
+
+    const observer = new MutationObserver(() => {
+      const vis = check();
+      if (vis && !currentlyVisible) {
+        currentlyVisible = true;
+        onShow();
+      } else if (!vis && currentlyVisible) {
+        currentlyVisible = false;
+        if (onHide) onHide();
+      }
+    });
+
+    observer.observe(element, { attributes: true, attributeFilter: ['style', 'class'] });
+    return observer;
+  }
+
   /* ─── Apply all section backgrounds ───────────────────────────── */
   function applyBackgrounds(style) {
     const bgs = (style && style.backgrounds) ? style.backgrounds : {};
     const globalBg = bgs['global'];
 
-    // Apply global bg to body (affects all sections that don't have their own bg)
     if (globalBg && globalBg.value) {
       applyBackground(document.body, globalBg);
     }
 
-    // Apply per-section backgrounds (override global)
-    document.querySelectorAll('[data-section]').forEach(el => {
-      const key = el.getAttribute('data-section');
+    Object.keys(bgs).forEach(key => {
       if (key === 'global') return;
       const bg = bgs[key];
       if (bg && bg.value) {
-        applyBackground(el, bg);
+        const el = getSectionElement(key);
+        if (el) applyBackground(el, bg);
       }
     });
   }
@@ -190,116 +238,94 @@
     if (el._wwHideTimer) { clearTimeout(el._wwHideTimer); el._wwHideTimer = null; }
   }
 
-  /* ─── Build a single decoration element ────────────────────────── */
-  function buildDecoElement(deco) {
-    const img = document.createElement('img');
-    img.src              = deco.src;
-    img.alt              = '';
-    img.draggable        = false;
-    img.className        = 'ww-deco' + (deco.section === 'global' ? ' ww-global' : '');
-
-    const rot    = deco.rotate  != null ? deco.rotate  : 0;
-    const op     = deco.opacity != null ? deco.opacity : 0.85;
-    const sz     = deco.size    != null ? deco.size    : 80;
-    const delay  = deco.delay   != null ? deco.delay   : 0;
-    const zIdx   = deco.zIndex  != null ? deco.zIndex  : 10;
-    const x      = deco.position && deco.position.x != null ? deco.position.x : 50;
-    const y      = deco.position && deco.position.y != null ? deco.position.y : 10;
-
-    img.style.cssText = `
-      left:       ${x}%;
-      top:        ${y}%;
-      width:      ${sz}px;
-      height:     auto;
-      opacity:    ${op};
-      z-index:    ${zIdx};
-      --ww-rot:   ${rot}deg;
-      --ww-opacity: ${op};
-      transform:  rotate(${rot}deg);
-      animation-delay: ${delay}s;
-      animation-fill-mode: both;
-    `;
-
-    // Set animation
-    const anim = deco.animation || 'float';
-    if (anim !== 'none') {
-      const DURATIONS = {
-        float: '3s', spin: '6s', pulse: '2s', drift: '5s',
-        pop: '0.6s', shake: '0.6s', swing: '3s', bounce: '2s',
-      };
-      const ITERATES = {
-        float: 'infinite', spin: 'infinite', pulse: 'infinite', drift: 'infinite',
-        pop: '1', shake: '1', swing: 'infinite', bounce: 'infinite',
-      };
-      const dur  = DURATIONS[anim] || '3s';
-      const iter = ITERATES[anim]  || 'infinite';
-      img.style.animation = `ww-fadein 0.6s ${delay}s both, ww-${anim} ${dur} ${delay + 0.6}s ${iter} ease-in-out`;
-    } else {
-      // fade in only
-      img.style.animation = `ww-fadein 0.6s ${delay}s both`;
-    }
-
-    img.dataset.decoId = deco.id;
-
-    // ── Visibility timing ────────────────────────────────────
-    const showAfter = deco.showAfter != null ? deco.showAfter : 0;
-    const hideAfter = deco.hideAfter != null ? deco.hideAfter : 0; // 0 = never hide
-
-    if (showAfter > 0) {
-      // Start hidden, reveal after showAfter seconds
-      img.style.opacity = '0';
-      img.style.animation = 'none';
-      img._wwShowTimer = setTimeout(() => {
-        img.style.animation = '';  // restore
-        const anim2 = deco.animation || 'float';
-        const DURATIONS2 = { float:'3s', spin:'6s', pulse:'2s', drift:'5s', pop:'0.6s', shake:'0.6s', swing:'3s', bounce:'2s' };
-        const ITERATES2  = { float:'infinite', spin:'infinite', pulse:'infinite', drift:'infinite', pop:'1', shake:'1', swing:'infinite', bounce:'infinite' };
-        if (anim2 !== 'none') {
-          img.style.animation = `ww-fadein 0.6s both, ww-${anim2} ${DURATIONS2[anim2]||'3s'} 0.6s ${ITERATES2[anim2]||'infinite'} ease-in-out`;
-        } else {
-          img.style.animation = 'ww-fadein 0.6s both';
-        }
-        // Schedule hide if needed
-        if (hideAfter > 0) {
-          img._wwHideTimer = setTimeout(() => _scheduleHide(img, deco), 0);
-        }
-      }, showAfter * 1000);
-    } else if (hideAfter > 0) {
-      // Visible from start, hide after hideAfter seconds
-      const totalDelay = (hideAfter - delay) * 1000;
-      img._wwHideTimer = setTimeout(() => _scheduleHide(img, deco), Math.max(0, totalDelay));
-    }
-
-    return img;
-  }
-
   /* ─── Mount all decorations ─────────────────────────────────────── */
   function applyDecorations(decos) {
     if (!decos || !decos.length) return;
 
-    // Remove any previously mounted decos — clear timers first to avoid stale callbacks
-    document.querySelectorAll('.ww-deco').forEach(el => { _clearDecoTimers(el); el.remove(); });
+    // Remove any previously mounted decos
+    document.querySelectorAll('.ww-deco').forEach(el => {
+      _clearDecoTimers(el);
+      if (el._wwObserver) { el._wwObserver.disconnect(); }
+      el.remove();
+    });
 
     decos.forEach(deco => {
-      const el = buildDecoElement(deco);
+      const img = document.createElement('img');
+      img.src              = deco.src;
+      img.alt              = '';
+      img.draggable        = false;
+      img.className        = 'ww-deco' + (deco.section === 'global' ? ' ww-global' : '');
+      img.dataset.decoId   = deco.id;
 
-      if (deco.section === 'global') {
-        // Global: attach to body, fixed position
-        document.body.appendChild(el);
-      } else {
-        // Section-specific: attach inside matching data-section
-        const section = document.querySelector(`[data-section="${deco.section}"]`);
-        if (section) {
-          // Ensure section is relatively positioned
-          const pos = window.getComputedStyle(section).position;
-          if (pos === 'static') section.style.position = 'relative';
-          section.appendChild(el);
+      const rot    = deco.rotate  != null ? deco.rotate  : 0;
+      const op     = deco.opacity != null ? deco.opacity : 0.85;
+      const sz     = deco.size    != null ? deco.size    : 80;
+      const delay  = deco.delay   != null ? deco.delay   : 0;
+      const zIdx   = deco.zIndex  != null ? deco.zIndex  : 10;
+      const x      = deco.position && deco.position.x != null ? deco.position.x : 50;
+      const y      = deco.position && deco.position.y != null ? deco.position.y : 10;
+
+      img.style.cssText = `
+        left:       ${x}%;
+        top:        ${y}%;
+        width:      ${sz}px;
+        height:     auto;
+        opacity:    0; /* Hidden until visible */
+        z-index:    ${zIdx};
+        --ww-rot:   ${rot}deg;
+        --ww-opacity: ${op};
+        transform:  rotate(${rot}deg);
+        pointer-events: none;
+      `;
+
+      const sectionEl = getSectionElement(deco.section) || document.body;
+      if (sectionEl === document.body) img.classList.add('ww-global');
+
+      const pos = window.getComputedStyle(sectionEl).position;
+      if (pos === 'static' && sectionEl !== document.body) sectionEl.style.position = 'relative';
+      sectionEl.appendChild(img);
+
+      const showAfter = deco.showAfter != null ? deco.showAfter : 0;
+      const hideAfter = deco.hideAfter != null ? deco.hideAfter : 0;
+      const anim = deco.animation || 'float';
+      
+      const DURATIONS = { float:'3s', spin:'6s', pulse:'2s', drift:'5s', pop:'0.6s', shake:'0.6s', swing:'3s', bounce:'2s' };
+      const ITERATES  = { float:'infinite', spin:'infinite', pulse:'infinite', drift:'infinite', pop:'1', shake:'1', swing:'infinite', bounce:'infinite' };
+
+      img._wwStart = () => {
+        _clearDecoTimers(img);
+        img.style.opacity = '0';
+        img.style.animation = 'none';
+        img.style.display = 'block';
+        void img.offsetWidth; // force reflow
+
+        const applyAnim = () => {
+          if (anim !== 'none') {
+            img.style.animation = `ww-fadein 0.6s both, ww-${anim} ${DURATIONS[anim]||'3s'} 0.6s ${ITERATES[anim]||'infinite'} ease-in-out`;
+          } else {
+            img.style.animation = 'ww-fadein 0.6s both';
+          }
+        };
+
+        const totalStartDelay = Math.max(showAfter, delay);
+        if (totalStartDelay > 0) {
+          img._wwShowTimer = setTimeout(applyAnim, totalStartDelay * 1000);
         } else {
-          // Fallback: body
-          el.classList.add('ww-global');
-          document.body.appendChild(el);
+          applyAnim();
         }
-      }
+
+        if (hideAfter > 0) {
+          img._wwHideTimer = setTimeout(() => _scheduleHide(img, deco), hideAfter * 1000);
+        }
+      };
+
+      img._wwStop = () => {
+        _clearDecoTimers(img);
+        img.style.animation = 'none';
+        img.style.opacity = '0';
+      };
+
+      img._wwObserver = onVisible(sectionEl, () => img._wwStart(), () => img._wwStop());
     });
   }
 
