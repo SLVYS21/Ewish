@@ -58,6 +58,8 @@ const orderSchema = new mongoose.Schema({
   // Lien vers la publication créée (rempli après livraison)
   publicationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Publication', default: null },
   adminNotes:    { type: String, default: '' },
+  // Multi-tenant
+  merchantId:    { type: String, index: true, default: null },
   // Données du formulaire client (rempli après envoi du formulaire)
   templateData:  { type: mongoose.Schema.Types.Mixed, default: null },
 }, { timestamps: true });

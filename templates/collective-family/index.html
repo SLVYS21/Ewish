@@ -263,7 +263,8 @@
       background: transparent;
       backdrop-filter: blur(50px) !important;
       -webkit-backdrop-filter: blur(50px) !important;
-      /*linear-gradient(160deg, var(--bg-section2), var(--bg-section))*/;
+      /*linear-gradient(160deg, var(--bg-section2), var(--bg-section))*/
+      ;
       padding: 20px;
     }
 
@@ -396,7 +397,13 @@
       text-transform: uppercase;
       font-family: var(--font);
     }*/
-    .wish-hbd { font-size: clamp(2em, 6vw, 3em); margin: 0; text-transform: uppercase; color: var(--text-color); display: inline-block;}
+    .wish-hbd {
+      font-size: clamp(2em, 6vw, 3em);
+      margin: 0;
+      text-transform: uppercase;
+      color: var(--text-color);
+      display: inline-block;
+    }
 
     .wish h5 {
       font-weight: 300;
@@ -1073,7 +1080,7 @@
         return;
       }
 
-      container.innerHTML = wishes.map((w, i) => `
+      container.innerHTML = wishes.map ( (w, i) => `
     <div class="ws-card ${i === 0 ? 'active' : ''}" id="wc-${i}">
       <div class="ws-avatar">
         ${w.photoUrl ? `<img src="${w.photoUrl}" alt="">` : w.firstName.charAt(0).toUpperCase()}
@@ -1081,6 +1088,8 @@
       <div class="ws-name">${escHtml(w.firstName)}</div>
       ${w.role ? `<div class="ws-role">${escHtml(w.role)}</div>` : ''}
       <div class="ws-message">${escHtml(w.message)}</div>
+      ${w.audioUrl ? `<div style="margin-top:12px"><audio controls src="${w.audioUrl}" style="width:100%; height:36px"></audio></div>` : ''}
+      ${w.videoUrl ? `<div style="margin-top:12px">${(w.videoUrl.includes('youtube.com') || w.videoUrl.includes('youtu.be')) ? `<iframe width="100%" height="160" src="https://www.youtube.com/embed/${w.videoUrl.split('v=')[1]?.split('&')[0] || w.videoUrl.split('youtu.be/')[1]?.split('?')[0]}" frameBorder="0" allowFullScreen style="border-radius:8px"></iframe>` : `<video controls src="${w.videoUrl}" style="width:100%; max-height:160px; border-radius:8px; background:#000"></video>`}</div>` : ''}
     </div>
   `).join('');
 

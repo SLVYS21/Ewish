@@ -1,14 +1,15 @@
 import { useState, useRef } from 'react';
+import { Hand, Music, BookOpen, MessageSquare, PartyPopper, Mail, Star, Timer, Upload, Film, ChevronRight } from 'lucide-react';
 import styles from './ContentTab.module.css';
 
 const SECTION_ICONS = {
-  Intro: '👋',
-  Music: '🎵',
-  Story: '📖',
-  Message: '💬',
-  Celebration: '🎉',
-  Wishes: '💌',
-  Outro: '🌟',
+  Intro: <Hand size={16} />,
+  Music: <Music size={16} />,
+  Story: <BookOpen size={16} />,
+  Message: <MessageSquare size={16} />,
+  Celebration: <PartyPopper size={16} />,
+  Wishes: <Mail size={16} />,
+  Outro: <Star size={16} />,
 };
 
 // Default fields when template isn't loaded from DB yet
@@ -56,7 +57,7 @@ function StartTimeField({ value, onChange }) {
   return (
     <div className={styles.startTimeField}>
       <div className={styles.startTimeDisplay}>
-        <span className={styles.startTimeIcon}>⏱</span>
+        <span className={styles.startTimeIcon}><Timer size={14} /></span>
         <span className={styles.startTimeValue}>{fmtTime(seconds)}</span>
         <span className={styles.startTimeHint}>depuis le début</span>
       </div>
@@ -140,7 +141,7 @@ export default function ContentTab({ fields, data, onChange, onUpload }) {
         <Section
           key={sectionName}
           name={sectionName}
-          icon={SECTION_ICONS[sectionName] || '📝'}
+          icon={SECTION_ICONS[sectionName] || <BookOpen size={16} />}
           fields={sectionFields}
           data={data}
           onChange={onChange}
@@ -159,7 +160,7 @@ function Section({ name, icon, fields, data, onChange, onUpload, open, onToggle 
       <button className={styles.sectionHeader} onClick={onToggle}>
         <span className={styles.sectionIcon}>{icon}</span>
         <span className={styles.sectionName}>{name}</span>
-        <span className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}>›</span>
+        <span className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}><ChevronRight size={16} /></span>
       </button>
       {open && (
         <div className={styles.sectionBody}>
@@ -237,7 +238,7 @@ function Field({ field, value, onChange, onUpload }) {
                 disabled={uploading}
                 title="Upload image"
               >
-                {uploading ? '…' : '↑'}
+                {uploading ? '…' : <Upload size={14} />}
               </button>
             </>
           )}
@@ -245,7 +246,7 @@ function Field({ field, value, onChange, onUpload }) {
             <>
               <input type="file" ref={fileRef} onChange={handleFileChange} accept="audio/*" style={{display:'none'}} />
               <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload audio">
-                {uploading ? '…' : '♪'}
+                {uploading ? '…' : <Music size={14} />}
               </button>
             </>
           )}
@@ -253,7 +254,7 @@ function Field({ field, value, onChange, onUpload }) {
             <>
               <input type="file" ref={fileRef} onChange={handleFileChange} accept="video/*" style={{display:'none'}} />
               <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload vidéo">
-                {uploading ? '…' : '🎬'}
+                {uploading ? '…' : <Film size={14} />}
               </button>
             </>
           )}

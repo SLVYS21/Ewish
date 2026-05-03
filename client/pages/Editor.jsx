@@ -10,20 +10,23 @@ import PhotoLayoutTab from '../components/PhotoLayoutTab';
 import JarTab from '../components/JarTab';
 import WishesManager from '../components/WishesManager';
 import ClientTab from '../components/ClientTab';
+import QRCodeModal from '../components/QRCodeModal';
+import { Joyride, STATUS } from 'react-joyride';
+import { QrCode, PenTool, Palette, Image as ImageIcon, Sparkles, LayoutTemplate, Coffee, Blocks, MailOpen, ClipboardList, Megaphone, Info, Copy, Edit2, Check, X, RefreshCw, Gift, ArrowLeft } from 'lucide-react';
 import styles from './Editor.module.css';
 
 /* ─── Tab definitions ────────────────────────────────────────── */
 const TABS = [
-  { key: 'content', label: 'Contenu', icon: '✏️' },
-  { key: 'style', label: 'Style', icon: '🎨' },
-  { key: 'background', label: 'Fond', icon: '🖼' },
-  { key: 'decorations', label: 'Décorations', icon: '🌸' },
-  { key: 'photos', label: 'Photos', icon: '📐' },
-  { key: 'jar', label: 'Jar', icon: '🫙', templates: ['birthday', 'special'] },
-  { key: 'widgets', label: 'Widgets', icon: '🧩' },
-  { key: 'wishes', label: 'Vœux', icon: '💌', templatePrefix: 'collective' },
-  { key: 'client', label: 'Client', icon: '📝' },
-  { key: 'branding', label: 'Promo', icon: '📣' },
+  { key: 'content', label: 'Contenu', icon: <PenTool size={18} strokeWidth={1.5} /> },
+  { key: 'style', label: 'Style', icon: <Palette size={18} strokeWidth={1.5} /> },
+  { key: 'background', label: 'Fond', icon: <ImageIcon size={18} strokeWidth={1.5} /> },
+  { key: 'decorations', label: 'Décorations', icon: <Sparkles size={18} strokeWidth={1.5} /> },
+  { key: 'photos', label: 'Photos', icon: <LayoutTemplate size={18} strokeWidth={1.5} /> },
+  { key: 'jar', label: 'Jar', icon: <Coffee size={18} strokeWidth={1.5} />, templates: ['birthday', 'special'] },
+  { key: 'widgets', label: 'Widgets', icon: <Blocks size={18} strokeWidth={1.5} /> },
+  { key: 'wishes', label: 'Vœux', icon: <MailOpen size={18} strokeWidth={1.5} />, templatePrefix: 'collective' },
+  { key: 'client', label: 'Client', icon: <ClipboardList size={18} strokeWidth={1.5} /> },
+  { key: 'branding', label: 'Promo', icon: <Megaphone size={18} strokeWidth={1.5} /> },
 ];
 
 function BrandingTab({ show, url, onToggle, onUrlChange }) {
@@ -58,9 +61,10 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
         <div>
           <div style={{
             fontSize: '0.85rem', fontWeight: '700',
-            color: 'var(--text, #fff)', marginBottom: '4px'
+            color: 'var(--text, #fff)', marginBottom: '4px',
+            display: 'flex', alignItems: 'center', gap: '6px'
           }}>
-            📣 Afficher le bouton eWishWell
+            <Megaphone size={16} /> Afficher le bouton eWishWell
           </div>
           <div style={{
             fontSize: '0.75rem', color: 'var(--text-3, rgba(255,255,255,.4))',
@@ -69,8 +73,8 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
             Un petit bouton discret s'affiche en bas de la page.
             Tes clients peuvent cliquer pour commander leur propre création.
             <br />
-            <span style={{ color: 'var(--brand, #c8963e)', fontWeight: '600' }}>
-              Offre une réduction en échange ! 🎁
+            <span style={{ color: 'var(--brand)', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              Offre une réduction en échange ! <Gift size={14} />
             </span>
           </div>
         </div>
@@ -98,8 +102,9 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
               borderRadius: '50px', padding: '8px 18px',
               fontSize: '0.72rem', fontWeight: '600', color: '#444',
               boxShadow: '0 4px 16px rgba(0,0,0,.12)',
+              display: 'flex', alignItems: 'center', gap: '6px'
             }}>
-              Crée le tien sur eWishWell ✨
+              Crée le tien sur eWishWell <Sparkles size={14} />
             </span>
           </div>
         </div>
@@ -108,11 +113,11 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
       {/* URL */}
       <div>
         <label style={{
-          display: 'block', fontSize: '0.65rem',
+          display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.65rem',
           letterSpacing: '0.15em', textTransform: 'uppercase',
           color: 'var(--text-3, rgba(255,255,255,.35))', marginBottom: '8px'
         }}>
-          Lien de destination
+          Lien de destination <span title="URL vers laquelle le bouton eWishWell redirigera"><Info size={14} /></span>
         </label>
         <input
           type="url"
@@ -133,7 +138,7 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
           fontSize: '0.7rem', color: 'var(--text-3, rgba(255,255,255,.35))',
           marginTop: '6px', lineHeight: '1.5'
         }}>
-          Ton WhatsApp : <code style={{ color: 'var(--brand, #c8963e)' }}>
+          Ton WhatsApp : <code style={{ color: 'var(--brand)' }}>
             https://wa.me/+2290000000000
           </code>
           <br />ou l'URL de ta landing page.
@@ -170,6 +175,25 @@ export default function Editor() {
   const [slugEditing, setSlugEditing] = useState(false);
   const [slugDraft, setSlugDraft] = useState('');
   const [slugStatus, setSlugStatus] = useState('');
+
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+  const tourSteps = [
+    { target: '.tour-step-tabs', content: 'Voici les onglets pour modifier votre création. Commencez par le Contenu !', disableBeacon: true, placement: 'top' },
+    { target: '.tour-step-preview', content: 'Prévisualisez vos changements en temps réel ici.', placement: 'left' },
+    { target: '.tour-step-publish', content: 'Une fois satisfait, cliquez ici pour publier votre création !', placement: 'bottom' }
+  ];
+
+  const handleJoyrideCallback = (data) => {
+    const { status } = data;
+    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      setRunTour(false);
+      localStorage.setItem('ewish_onboarding_done', 'true');
+    }
+  };
 
   const iframeRef = useRef(null);
   const tabsBarRef = useRef(null);
@@ -211,7 +235,11 @@ export default function Editor() {
       } catch { navigate('/ewish-admin/ewish'); }
     };
     load();
-  }, [id]);
+
+    if (!localStorage.getItem('ewish_onboarding_done')) {
+      setRunTour(true);
+    }
+  }, [id, navigate]);
 
   /* ── Auto-save (debounced 1s) ───────────────────────────────── */
   const autoSave = useCallback(async (newData, newStyle, newBgs, newDecos, newJar, newWidgets, newPhotoTransforms) => {
@@ -353,32 +381,82 @@ export default function Editor() {
 
   return (
     <div className={styles.root}>
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        callback={handleJoyrideCallback}
+        continuous
+        showProgress
+        showSkipButton
+        styles={{
+          options: {
+            primaryColor: 'var(--brand)',
+            zIndex: 10000,
+          }
+        }}
+      />
       {/* ── Top Bar ── */}
       <header className={styles.topbar}>
         <div className={styles.topbarLeft}>
-          <Link to="/ewish-admin/ewish" className={styles.back}>← Dashboard</Link>
-          <span className={styles.divider} />
-          <span className={styles.pubTitle}>{pub.title || 'Sans titre'}</span>
+          <span className={styles.pubTitle}>Customize Wish</span>
         </div>
         <div className={styles.topbarCenter}>
           <span className={`${styles.saveStatus} ${styles[saveStatus]}`}>
-            {saveStatus === 'saving' && '↻ Sauvegarde…'}
-            {saveStatus === 'saved' && '✓ Sauvegardé'}
-            {saveStatus === 'unsaved' && '● Non sauvegardé'}
+            {saveStatus === 'saving' && <><RefreshCw size={14} className={styles.spinIcon} /> Sauvegarde…</>}
+            {saveStatus === 'saved' && <><Check size={14} /> Sauvegardé</>}
+            {saveStatus === 'unsaved' && 'Non sauvegardé'}
           </span>
         </div>
         <div className={styles.topbarRight}>
-          {shortCode && (
-            <div className={styles.shortUrlWrap}>
-              {slugEditing ? (
-                <>
-                  <span className={styles.shortUrlPrefix}>/s/</span>
-                  <input
-                    className={styles.slugInput}
-                    value={slugDraft}
-                    onChange={e => setSlugDraft(e.target.value)}
-                    onKeyDown={async e => {
-                      if (e.key === 'Enter') {
+          {pub.published && shortCode && (
+            <button className={styles.btnGhost} onClick={() => setShowQrModal(true)}>
+              <QrCode size={16} /> Code QR
+            </button>
+          )}
+          <button className={styles.btnGhost} onClick={() => navigate('/ewish-admin/ewish')}>
+            <ArrowLeft size={16} /> Dashboard
+          </button>
+          <button className={`${styles.btnPublish} tour-step-publish`} onClick={() => setIsPublishModalOpen(true)}>
+            Publish Changes
+          </button>
+        </div>
+      </header>
+
+      {/* ── Publish Modal ── */}
+      {isPublishModalOpen && (
+        <div className={styles.publishModalOverlay} onClick={() => setIsPublishModalOpen(false)}>
+          <div className={styles.publishModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.dragPill} />
+            <h2>Publish Changes</h2>
+            
+            {pub.published && (
+              <div className={styles.publishModalSection}>
+                <label>Current public URL:</label>
+                {shortCode ? (
+                  slugEditing ? (
+                    <div className={styles.publishUrlBoxEdit}>
+                      <span className={styles.shortUrlPrefix}>/s/</span>
+                      <input
+                        className={styles.slugInput}
+                        value={slugDraft}
+                        onChange={e => setSlugDraft(e.target.value)}
+                        onKeyDown={async e => {
+                          if (e.key === 'Enter') {
+                            setSlugStatus('saving');
+                            try {
+                              const r = await setCustomSlug(id, slugDraft);
+                              setShortCode(r.data.shortCode);
+                              setSlugStatus('saved');
+                              setSlugEditing(false);
+                            } catch (err) {
+                              setSlugStatus(err.response?.data?.error || 'error');
+                            }
+                          }
+                          if (e.key === 'Escape') setSlugEditing(false);
+                        }}
+                        autoFocus
+                      />
+                      <button className={styles.slugSave} onClick={async () => {
                         setSlugStatus('saving');
                         try {
                           const r = await setCustomSlug(id, slugDraft);
@@ -388,88 +466,97 @@ export default function Editor() {
                         } catch (err) {
                           setSlugStatus(err.response?.data?.error || 'error');
                         }
-                      }
-                      if (e.key === 'Escape') setSlugEditing(false);
-                    }}
-                    autoFocus
-                  />
-                  <button className={styles.slugSave} onClick={async () => {
-                    setSlugStatus('saving');
-                    try {
-                      const r = await setCustomSlug(id, slugDraft);
-                      setShortCode(r.data.shortCode);
-                      setSlugStatus('saved');
-                      setSlugEditing(false);
-                    } catch (err) {
-                      setSlugStatus(err.response?.data?.error || 'error');
-                    }
-                  }}>✓</button>
-                  <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}>✕</button>
-                  {slugStatus && slugStatus !== 'saving' && (
-                    <span className={styles.slugMsg}>{slugStatus === 'saved' ? '✓' : slugStatus}</span>
-                  )}
-                </>
-              ) : (
-                <>
-                  <button
-                    className={styles.shortUrl}
-                    title="Copier le lien court"
-                    onClick={() => {
-                      const origin = import.meta.env.VITE_API_URL || window.location.origin;
-                      navigator.clipboard.writeText(`${origin}/s/${shortCode}`);
-                    }}
-                  >
-                    /s/{shortCode} 📋
-                  </button>
-                  <button
-                    className={styles.slugEdit}
-                    title="Modifier le slug"
-                    onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
-                  >✏️</button>
-                  <a href={publishedUrl} target="_blank" rel="noreferrer" className={styles.btnGhost}>↗</a>
-                </>
-              )}
+                      }}><Check size={16} /></button>
+                      <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}><X size={16} /></button>
+                      {slugStatus && slugStatus !== 'saving' && (
+                        <span className={styles.slugMsg}>{slugStatus === 'saved' ? <Check size={16} /> : slugStatus}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className={styles.publishUrlBox}>
+                      <span className={styles.publishUrlText}>
+                        {window.location.origin}/s/{shortCode}
+                      </span>
+                      <div style={{display: 'flex', gap: '8px'}}>
+                        <button className={styles.slugEditModal} title="Modifier le slug" onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}><Edit2 size={16} /></button>
+                        <button className={styles.copyBtn} title="Copier" onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/s/${shortCode}`);
+                          alert("Copié dans le presse-papier !");
+                        }}><Copy size={16} /></button>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <div className={styles.publishUrlBox}>
+                    <span className={styles.publishUrlText}>
+                      {window.location.origin}/site/{pub.templateName}/{pub.customName}
+                    </span>
+                    <button className={styles.copyBtn} onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/site/${pub.templateName}/${pub.customName}`);
+                      alert("Copié dans le presse-papier !");
+                    }}><Copy size={16} /></button>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className={styles.publishWarning}>
+              Publishing these changes will update the public version of your wish.
             </div>
-          )}
-          <button className={styles.btnPublish} onClick={handlePublish} disabled={publishing}>
-            {publishing ? 'Publication…' : pub.published ? 'Mettre à jour' : 'Publier'}
-          </button>
+            
+            <div className={styles.publishModalActions}>
+              <button className={styles.modalCancel} onClick={() => setIsPublishModalOpen(false)}>Cancel</button>
+              <button className={styles.modalConfirm} onClick={() => { handlePublish(); setIsPublishModalOpen(false); }} disabled={publishing}>
+                {publishing ? 'Publishing...' : 'Publish Changes'}
+              </button>
+            </div>
+          </div>
         </div>
-      </header>
+      )}
 
       <div className={styles.workspace}>
-        {/* ── Left Panel ── */}
-        <aside className={styles.panel}>
-          {/* Tabs */}
-          <div className={styles.tabs} ref={tabsBarRef}>
-            {visibleTabs.map(tab => (
-              <button
-                key={tab.key}
-                data-tabkey={tab.key}
-                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
-                onClick={() => {
-                  setActiveTab(tab.key);
-                  const bar = tabsBarRef.current;
-                  const btn = bar?.querySelector(`[data-tabkey="${tab.key}"]`);
-                  if (bar && btn) {
-                    const btnLeft = btn.offsetLeft;
-                    const btnRight = btnLeft + btn.offsetWidth;
-                    const barWidth = bar.clientWidth;
-                    const scroll = bar.scrollLeft;
-                    if (btnLeft < scroll + 12) bar.scrollTo({ left: btnLeft - 12, behavior: 'smooth' });
-                    else if (btnRight > scroll + barWidth - 12) bar.scrollTo({ left: btnRight - barWidth + 12, behavior: 'smooth' });
-                  }
-                }}
-                title={tab.label}
-              >
-                <span className={styles.tabIcon}>{tab.icon}</span>
-                <span className={styles.tabLabel}>{tab.label}</span>
-              </button>
-            ))}
+        {/* ── Left/Bottom Panel ── */}
+        <aside className={`${styles.panel} ${isPanelOpen ? styles.panelOpen : styles.panelClosed}`}>
+          {/* Mobile Handle / Header */}
+          <div className={styles.mobilePanelHeader} onClick={() => setIsPanelOpen(!isPanelOpen)}>
+            <div className={styles.dragPill} />
+            <div className={styles.mobilePanelTitleBar}>
+              <span className={styles.mobilePanelTitle}>Edit Wish</span>
+              <div className={styles.mobilePanelActions}>
+              <span className={styles.mobilePanelToggleIcon}>
+                {isPanelOpen ? (
+                  /* Icône Chevron Down */
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                ) : (
+                  /* Icône Chevron Up */
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 15l-6-6-6 6" />
+                  </svg>
+                )}
+              </span>
+            </div>
+            </div>
           </div>
 
-          {/* Tab content */}
-          <div className={styles.panelBody}>
+          <div className={styles.panelContentWrapper}>
+            {/* Sidebar tabs */}
+            <div className={`${styles.tabsSidebar} tour-step-tabs`}>
+              {visibleTabs.map(tab => (
+                <button
+                  key={tab.key}
+                  className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`}
+                  onClick={() => setActiveTab(tab.key)}
+                  title={tab.label}
+                >
+                  <span className={styles.tabIcon}>{tab.icon}</span>
+                  <span className={styles.tabLabel}>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.panelBody}>
             {activeTab === 'content' && (
               <ContentTab
                 fields={template?.fields || []}
@@ -545,6 +632,7 @@ export default function Editor() {
               />
             )}
           </div>
+          </div>
         </aside>
 
         {/* ── Preview ── */}
@@ -554,13 +642,13 @@ export default function Editor() {
             <div className={styles.previewNav}>
               <button
                 className={styles.previewBtn}
+                title="Restart Preview"
                 onClick={() => { const f = iframeRef.current; if (f) { const s = f.src; f.src = ''; f.src = s; } }}
-              //onClick={() => iframeRef.current?.contentWindow?.location.reload()}
-              >↺ Restart</button>
+              ><RefreshCw size={16} /></button>
             </div>
             <span className={styles.previewUrl}>/site/{pub.templateName}/{pub.customName}</span>
           </div>
-          <div className={styles.previewFrame}>
+          <div className={`${styles.previewFrame} tour-step-preview`}>
             <iframe
               ref={iframeRef}
               src={previewSrc}
@@ -572,13 +660,20 @@ export default function Editor() {
         </div>
       </div>
 
-      {publishedUrl && pub.published && (
+      {/* {publishedUrl && pub.published && (
         <div className={styles.toast}>
           🎉 En ligne sur{' '}
           <a href={publishedUrl} target="_blank" rel="noreferrer">
             {window.location.origin}{publishedUrl}
           </a>
         </div>
+      )} */}
+
+      {showQrModal && pub.published && shortCode && (
+        <QRCodeModal
+          url={`${import.meta.env.VITE_API_URL}/s/${shortCode}`}
+          onClose={() => setShowQrModal(false)}
+        />
       )}
     </div>
   );

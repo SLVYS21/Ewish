@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAnalytics } from '../../utils/api';
+import { getAnalytics, buyCredits } from '../../utils/api';
+import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
 import s from './AdminDashboard.module.css';
 
@@ -19,7 +20,20 @@ export default function AdminDashboard() {
   const [data, setData]     = useState(null);
   const [period, setPeriod] = useState('7d');
   const [loading, setLoading] = useState(true);
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
+
+  const handleBuyCredits = async () => {
+    try {
+      const amount = prompt("Combien de crédits souhaitez-vous acheter ? (Simulation)", "10");
+      if (!amount) return;
+      const res = await buyCredits(parseInt(amount, 10));
+      setUser({ ...user, credits: res.data.credits });
+      alert(`${amount} crédits ajoutés avec succès ! (Simulation)`);
+    } catch (e) {
+      alert('Erreur: ' + (e.response?.data?.error || e.message));
+    }
+  };
 
   useEffect(() => { load(period); }, [period]);
 
@@ -48,8 +62,8 @@ export default function AdminDashboard() {
       {!loading && data && <>
         {/* ── Stats row ── */}
         <div className={s.statsRow}>
+          <StatCard label="Solde Crédits"      value={user?.credits || 0}    icon="💎" meta={<button onClick={handleBuyCredits} className={s.buyBtn}>Acheter</button>} colorClass={s.gold} isText />
           <StatCard label="Commandes totales" value={data.orders.total}     icon="📦" meta={`${data.orders.pending} en attente`} />
-          <StatCard label="En attente"         value={data.orders.pending}   icon="⏳" meta="À traiter"     colorClass={s.red}   />
           <StatCard label="Livrées"            value={data.orders.delivered} icon="✅" meta={`${data.orders.confirmed} confirmées`} colorClass={s.green} />
           <StatCard label="Revenus"            value={fmtPrice(data.revenue.total)} icon="💰" meta="Confirmées + livrées" colorClass={s.gold} isText />
           <StatCard label="Conversion"         value={`${data.funnel.conversionRate}%`} icon="📈" meta={`${data.funnel.pageViews} visites → ${data.funnel.purchases} achats`} isText />

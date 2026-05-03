@@ -94,6 +94,9 @@ router.get('/', requireAdmin, async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
     const filter = status ? { status } : {};
+    if (req.admin.role === 'merchant') {
+      filter.merchantId = req.admin.merchantId;
+    }
     const [orders, total] = await Promise.all([
       Order.find(filter).sort('-createdAt').skip((page-1)*limit).limit(+limit).lean(),
       Order.countDocuments(filter),
@@ -109,6 +112,9 @@ router.get('/:id', requireAdmin, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).lean();
     if (!order) return res.status(404).json({ error: 'Not found' });
+    if (req.admin.role === 'merchant' && order.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
     res.json(order);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -118,8 +124,13 @@ router.get('/:id', requireAdmin, async (req, res) => {
 // PATCH /api/orders/:id — update status or link publication
 router.patch('/:id', requireAdmin, async (req, res) => {
   try {
+    const existing = await Order.findById(req.params.id).lean();
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    if (req.admin.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+    
     const order = await Order.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
-    if (!order) return res.status(404).json({ error: 'Not found' });
     res.json(order);
   } catch (e) {
     res.status(500).json({ error: e.message });

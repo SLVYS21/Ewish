@@ -19,7 +19,7 @@
 
 /* ── Hero ── */
 .hero {
-  background: linear-gradient(135deg, #fff5fb 0%, #fffbf0 100%);
+  background: linear-gradient(135deg, var(--bg) 0%, var(--surface2) 100%);
   border-bottom: 1px solid var(--border);
   padding: 64px 32px;
   text-align: center;
@@ -33,9 +33,7 @@
   margin-bottom: 16px;
 }
 .hero h1 span {
-  background: linear-gradient(135deg, var(--brand), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--brand);
 }
 .hero p {
   font-size: 1.1rem;
@@ -45,7 +43,7 @@
 }
 .heroCta {
   display: inline-block;
-  background: linear-gradient(135deg, var(--brand), var(--accent));
+  background: var(--brand);
   color: #fff;
   text-decoration: none;
   padding: 14px 32px;
@@ -55,7 +53,7 @@
   box-shadow: var(--shadow-brand);
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.heroCta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,105,180,0.4); }
+.heroCta:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(225, 29, 72, 0.4); }
 
 /* ── Section ── */
 .section { padding: 40px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
@@ -146,13 +144,13 @@
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   display: flex; flex-direction: column;
 }
-.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--brand-light); }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--brand); }
 
 .cardThumb {
   height: 130px;
-  background: linear-gradient(135deg, #fff0f7, #fff8ec);
+  background: linear-gradient(135deg, var(--surface2) 0%, var(--brand-light) 100%);
   display: flex; align-items: center; justify-content: center;
-  font-size: 3rem;
+  color: var(--brand);
   position: relative;
 }
 .publishedBadge {
@@ -186,7 +184,7 @@
 /* ── Buttons ── */
 .btnPrimary {
   display: inline-flex; align-items: center; gap: 6px;
-  background: linear-gradient(135deg, var(--brand), var(--accent));
+  background: var(--brand);
   color: #fff; border: none; border-radius: 50px;
   padding: 8px 20px; font-size: 0.875rem; font-weight: 600;
   cursor: pointer; text-decoration: none;
@@ -194,7 +192,22 @@
   transition: transform var(--transition), box-shadow var(--transition);
   font-family: var(--font);
 }
-.btnPrimary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(255,105,180,0.4); }
+.btnPrimary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4); }
+
+.btnGhost {
+  color: var(--brand); text-decoration: none;
+  font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+  padding: 7px 18px; border-radius: 50px;
+  border: 1px solid var(--brand);
+  background: var(--surface);
+  transition: all var(--transition);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btnGhost:hover { background: var(--brand-light); }
 
 /* ── Empty ── */
 .empty {

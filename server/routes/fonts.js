@@ -20,7 +20,7 @@ const MIME_TO_FORMAT = {
   'application/font-woff':   'woff',
   'application/x-font-ttf':  'truetype',
   'application/x-font-otf':  'opentype',
-  'application/octet-stream':'truetype', // .ttf often comes as this
+  'application/octet-stream':'truetype',
 };
 
 // Multer — memory storage (we'll upload to Cloudinary manually for raw files)

@@ -16,4 +16,19 @@ const requireAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { requireAdmin };
+const requireOptionalAdmin = (req, res, next) => {
+  const token = req.cookies?.ww_admin_token
+    || req.headers.authorization?.replace('Bearer ', '');
+
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = decoded;
+  } catch {
+    // Ignore invalid tokens for optional auth
+  }
+  next();
+};
+
+module.exports = { requireAdmin, requireOptionalAdmin };

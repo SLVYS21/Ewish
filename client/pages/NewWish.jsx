@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getTemplates, createPublication } from '../utils/api';
+import { useAuth } from '../admin/context/AuthContext';
 import styles from './NewWish.module.css';
 
 export default function NewWish() {
@@ -9,6 +10,7 @@ export default function NewWish() {
   const [form, setForm] = useState({ title: '', customName: '', recipientName: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,6 +47,10 @@ export default function NewWish() {
         },
         style: selected.defaultStyle || {},
       });
+      // Update local user credits if they are a merchant
+      if (user?.role === 'merchant') {
+        setUser({ ...user, credits: Math.max(0, user.credits - (selected.creditsRequired || 1)) });
+      }
       navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
     } catch (e) {
       setError(e.response?.data?.error || 'Something went wrong');
@@ -77,6 +83,7 @@ export default function NewWish() {
                 <div className={styles.templateInfo}>
                   <strong>{t.label}</strong>
                   <span>{t.description}</span>
+                  <div className={styles.templateCredits}>💎 {t.creditsRequired || 1} Crédit(s)</div>
                 </div>
                 {selected?.name === t.name && <span className={styles.check}>✓</span>}
               </div>
@@ -118,9 +125,12 @@ export default function NewWish() {
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
+            {user?.role === 'merchant' && selected && user.credits < (selected.creditsRequired || 1) && (
+              <p className={styles.error}>Vous n'avez pas assez de crédits (Solde: {user.credits}).</p>
+            )}
 
-            <button type="submit" className={styles.submit} disabled={loading || !selected}>
-              {loading ? 'Creating...' : 'Create & customize →'}
+            <button type="submit" className={styles.submit} disabled={loading || !selected || (user?.role === 'merchant' && user.credits < (selected?.creditsRequired || 1))}>
+              {loading ? 'Création...' : 'Créer & personnaliser →'}
             </button>
           </form>
         </div>

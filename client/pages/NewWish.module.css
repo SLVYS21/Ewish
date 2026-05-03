@@ -43,13 +43,9 @@
 .templateThumb { font-size: 2rem; flex-shrink: 0; }
 .templateInfo { flex: 1; }
 .templateInfo strong { display: block; font-size: 0.9rem; margin-bottom: 2px; }
-.templateInfo span { font-size: 0.78rem; color: var(--text-2); }
-.check {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--brand); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
-}
+.templateInfo span { font-size: .8rem; color: #a1a1aa; line-height: 1.4; display: block; margin-top: 4px; }
+.templateCredits { font-size: 0.75rem; color: #c8963e; margin-top: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.check { margin-left: auto; color: #3b82f6; font-weight: 600; font-size: 1.2rem; }
 
 /* ── Form ── */
 .form { display: flex; flex-direction: column; gap: 18px; }

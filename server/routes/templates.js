@@ -40,6 +40,9 @@ router.post('/', async (req, res) => {
 const { requireAdmin } = require('../middleware/auth');
 router.patch('/:name', requireAdmin, async (req, res) => {
   try {
+    if (req.admin.role === 'merchant') {
+      return res.status(403).json({ error: 'Seuls les administrateurs peuvent modifier les templates' });
+    }
     const allowed = ['label','price','priceLabel','description','highlights','active','featured','tags','sortOrder'];
     const update = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });

@@ -3,23 +3,38 @@
 .shell {
   display: flex; height: 100vh; overflow: hidden;
   font-family: 'Syne', 'Plus Jakarta Sans', system-ui, sans-serif;
-  background: #0e0f11; color: #e8e4dc;
-  --a-bg:       #0e0f11;
-  --a-surface:  #15171b;
-  --a-surface2: #1c1f25;
-  --a-border:   rgba(255,255,255,0.07);
-  --a-border-h: rgba(255,255,255,0.14);
+  background: var(--a-bg); color: var(--a-text);
+  --a-bg:       #f4f5f7;
+  --a-surface:  #ffffff;
+  --a-surface2: #f9fafc;
+  --a-border:   rgba(0,0,0,0.08);
+  --a-border-h: rgba(0,0,0,0.15);
   --a-gold:     #c8963e;
   --a-green:    #3ecf8e;
   --a-red:      #e05757;
   --a-blue:     #4e9eff;
   --a-amber:    #f0a030;
-  --a-text:     #e8e4dc;
-  --a-text2:    #9a9488;
-  --a-text3:    #5a554e;
+  --a-text:     #1a1d21;
+  --a-text2:    #5a606b;
+  --a-text3:    #9a9da3;
   --a-font:     'Syne', system-ui, sans-serif;
   --a-font-d:   'DM Serif Display', Georgia, serif;
   --a-r:        10px;
+}
+
+.mobileHeader {
+  display: none;
+  align-items: center; justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--a-surface);
+  border-bottom: 1px solid var(--a-border);
+  flex-shrink: 0;
+}
+.menuBtn {
+  background: none; border: none;
+  color: var(--a-text); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px;
 }
 
 /* ── Sidebar ── */
@@ -99,4 +114,24 @@
   flex: 1; overflow-y: auto; overflow-x: hidden;
   display: flex; flex-direction: column;
   background: var(--a-bg);
+}
+
+.sidebarOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 1000;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.sidebarOverlay.open { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 900px) {
+  .shell { flex-direction: column; }
+  .mobileHeader { display: flex; }
+  .sidebar {
+    position: fixed; top: 0; bottom: 0; left: 0;
+    z-index: 1001; transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebarOverlay { display: block; }
 }

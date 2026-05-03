@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Wish = require('../models/Wish');
 const Publication = require('../models/Publication');
+const { requireAdmin } = require('../middleware/auth');
 
 // POST /api/wishes/:publicationId — submit a wish (public, no auth)
 router.post('/:publicationId', async (req, res) => {
@@ -8,7 +9,7 @@ router.post('/:publicationId', async (req, res) => {
     const pub = await Publication.findById(req.params.publicationId).lean();
     if (!pub) return res.status(404).json({ error: 'Publication not found' });
 
-    const { firstName, role, message, photoUrl } = req.body;
+    const { firstName, role, message, photoUrl, audioUrl, videoUrl } = req.body;
     if (!firstName?.trim() || !message?.trim()) {
       return res.status(400).json({ error: 'firstName and message are required' });
     }
@@ -19,6 +20,8 @@ router.post('/:publicationId', async (req, res) => {
       role: role?.trim() || '',
       message: message.trim(),
       photoUrl: photoUrl || '',
+      audioUrl: audioUrl || '',
+      videoUrl: videoUrl || '',
       approved: false,
     });
 
@@ -29,8 +32,14 @@ router.post('/:publicationId', async (req, res) => {
 });
 
 // GET /api/wishes/:publicationId — list all wishes (admin)
-router.get('/:publicationId', async (req, res) => {
+router.get('/:publicationId', requireAdmin, async (req, res) => {
   try {
+    if (req.admin.role === 'merchant') {
+      const pub = await Publication.findById(req.params.publicationId).lean();
+      if (!pub || pub.merchantId !== req.admin.merchantId) {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
+    }
     const wishes = await Wish.find({ publicationId: req.params.publicationId })
       .sort('-createdAt').lean();
     res.json(wishes);
@@ -54,8 +63,18 @@ router.get('/:publicationId/approved', async (req, res) => {
 });
 
 // PATCH /api/wishes/:id — approve or hide
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireAdmin, async (req, res) => {
   try {
+    const existing = await Wish.findById(req.params.id).lean();
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    
+    if (req.admin.role === 'merchant') {
+      const pub = await Publication.findById(existing.publicationId).lean();
+      if (!pub || pub.merchantId !== req.admin.merchantId) {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
+    }
+
     const wish = await Wish.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
@@ -69,8 +88,18 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE /api/wishes/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
+    const existing = await Wish.findById(req.params.id).lean();
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    
+    if (req.admin.role === 'merchant') {
+      const pub = await Publication.findById(existing.publicationId).lean();
+      if (!pub || pub.merchantId !== req.admin.merchantId) {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
+    }
+
     await Wish.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {

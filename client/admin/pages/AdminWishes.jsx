@@ -4,16 +4,16 @@ import api from '../../utils/api';
 import PageShell from '../components/PageShell';
 import s from './AdminWishes.module.css';
 
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '—'; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'; }
 
 export default function AdminWishes() {
-  const [pubs, setPubs]         = useState([]);
-  const [pubId, setPubId]       = useState('');
-  const [wishes, setWishes]     = useState([]);
-  const [filter, setFilter]     = useState('all');   // all | pending | approved
+  const [pubs, setPubs] = useState([]);
+  const [pubId, setPubId] = useState('');
+  const [wishes, setWishes] = useState([]);
+  const [filter, setFilter] = useState('all');   // all | pending | approved
   const [loadingP, setLoadingP] = useState(true);
   const [loadingW, setLoadingW] = useState(false);
-  const [toast, setToast]       = useState('');
+  const [toast, setToast] = useState('');
 
   // Load collective publications
   useEffect(() => {
@@ -57,19 +57,19 @@ export default function AdminWishes() {
   };
 
   const displayed = wishes.filter(w => {
-    if (filter === 'pending')  return !w.approved && !w.hidden;
-    if (filter === 'approved') return  w.approved && !w.hidden;
+    if (filter === 'pending') return !w.approved && !w.hidden;
+    if (filter === 'approved') return w.approved && !w.hidden;
     return true;
   });
 
-  const pendingCount  = wishes.filter(w => !w.approved && !w.hidden).length;
-  const approvedCount = wishes.filter(w =>  w.approved && !w.hidden).length;
+  const pendingCount = wishes.filter(w => !w.approved && !w.hidden).length;
+  const approvedCount = wishes.filter(w => w.approved && !w.hidden).length;
 
   return (
     <PageShell title="Vœux collectifs" subtitle="Modérer les messages reçus">
       {/* ── Publication selector ── */}
       <div className={s.toolbar}>
-        {loadingP ? <div className={s.spinner} style={{ width:20, height:20 }} /> : (
+        {loadingP ? <div className={s.spinner} style={{ width: 20, height: 20 }} /> : (
           <select className={s.pubSelect} value={pubId} onChange={e => setPubId(e.target.value)}>
             <option value="">Sélectionner une publication…</option>
             {pubs.map(p => <option key={p._id} value={p._id}>{p.title || p.customName} — {p.templateName}</option>)}
@@ -77,9 +77,9 @@ export default function AdminWishes() {
         )}
         {pubId && (
           <div className={s.filterTabs}>
-            <button className={`${s.filterBtn} ${filter==='all'?s.active:''}`}      onClick={()=>setFilter('all')}>Tous ({wishes.length})</button>
-            <button className={`${s.filterBtn} ${filter==='pending'?s.active:''}`}  onClick={()=>setFilter('pending')}>En attente ({pendingCount})</button>
-            <button className={`${s.filterBtn} ${filter==='approved'?s.active:''}`} onClick={()=>setFilter('approved')}>Approuvés ({approvedCount})</button>
+            <button className={`${s.filterBtn} ${filter === 'all' ? s.active : ''}`} onClick={() => setFilter('all')}>Tous ({wishes.length})</button>
+            <button className={`${s.filterBtn} ${filter === 'pending' ? s.active : ''}`} onClick={() => setFilter('pending')}>En attente ({pendingCount})</button>
+            <button className={`${s.filterBtn} ${filter === 'approved' ? s.active : ''}`} onClick={() => setFilter('approved')}>Approuvés ({approvedCount})</button>
           </div>
         )}
         {pubId && (
@@ -108,7 +108,7 @@ export default function AdminWishes() {
                 <div className={s.avatar}>
                   {w.photoUrl
                     ? <img src={w.photoUrl} alt="" className={s.avatarImg} />
-                    : <span>{(w.firstName||'?')[0].toUpperCase()}</span>
+                    : <span>{(w.firstName || '?')[0].toUpperCase()}</span>
                   }
                 </div>
                 <div className={s.authorInfo}>
@@ -120,8 +120,8 @@ export default function AdminWishes() {
                   {w.hidden
                     ? <span className={`${s.badge} ${s.badgeHidden}`}>Masqué</span>
                     : w.approved
-                    ? <span className={`${s.badge} ${s.badgeApproved}`}>Visible</span>
-                    : <span className={`${s.badge} ${s.badgePending}`}>En attente</span>
+                      ? <span className={`${s.badge} ${s.badgeApproved}`}>Visible</span>
+                      : <span className={`${s.badge} ${s.badgePending}`}>En attente</span>
                   }
                 </div>
               </div>
@@ -131,6 +131,31 @@ export default function AdminWishes() {
 
               {/* Photo if any */}
               {w.photoUrl && <img src={w.photoUrl} alt="" className={s.photoPreview} />}
+
+              {/* Audio if any */}
+              {w.audioUrl && (
+                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--a-surface2)', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--a-text2)', marginBottom: '6px' }}>🎤 Message vocal</div>
+                  <audio controls src={w.audioUrl} style={{ width: '100%', height: '36px', borderRadius: '18px' }}></audio>
+                </div>
+              )}
+
+              {/* Video if any */}
+              {w.videoUrl && (
+                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--a-surface2)', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--a-text2)', marginBottom: '6px' }}>🎥 Vidéo</div>
+                  {w.videoUrl.includes('youtube.com') || w.videoUrl.includes('youtu.be') ? (
+                    <iframe
+                      width="100%" height="180"
+                      src={`https://www.youtube.com/embed/${w.videoUrl.split(/v=|youtu\.be\//)[1]?.split(/[?&]/)[0]}`}
+                      frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
+                      style={{ borderRadius: '8px' }}>
+                    </iframe>
+                  ) : (
+                    <video controls src={w.videoUrl} style={{ width: '100%', maxHeight: '200px', borderRadius: '8px', backgroundColor: '#000' }}></video>
+                  )}
+                </div>
+              )}
 
               {/* Actions */}
               <div className={s.actions}>

@@ -9,6 +9,7 @@ import NewWish from "./pages/NewWish";
 import { AuthProvider, useAuth } from "./admin/context/AuthContext";
 import AdminLayout from "./admin/components/AdminLayout";
 import AdminLogin from "./admin/pages/AdminLogin";
+import AdminRegister from "./admin/pages/AdminRegister";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import AdminOrders from "./admin/pages/AdminOrders";
 import AdminPublications from "./admin/pages/AdminPublications";
@@ -39,6 +40,18 @@ function AdminLoginGate() {
   return <AdminLogin />;
 }
 
+function AdminRegisterGate() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <Spinner />;
+
+  if (user) {
+    return <Navigate to="/ewish-admin" replace />;
+  }
+
+  return <AdminRegister />;
+}
+
 function Spinner() {
   return (
     <div
@@ -47,7 +60,7 @@ function Spinner() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0e0f11",
+        background: "#f4f5f7",
       }}
     >
       <div
@@ -55,7 +68,7 @@ function Spinner() {
           width: 30,
           height: 30,
           borderRadius: "50%",
-          border: "2px solid rgba(255,255,255,.07)",
+          border: "2px solid rgba(0,0,0,.08)",
           borderTopColor: "#c8963e",
           animation: "spin .75s linear infinite",
         }}
@@ -91,8 +104,9 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Login */}
+          {/* Login / Register */}
           <Route path="/ewish-admin/login" element={<AdminLoginGate />} />
+          <Route path="/ewish-admin/register" element={<AdminRegisterGate />} />
 
           {/* Protected Admin */}
           <Route

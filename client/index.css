@@ -1,35 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --brand: #ff69b4;
-  --brand-light: #ffd6ec;
-  --brand-dark: #d6409f;
-  --accent: #ffb347;
-  --accent-light: #fff0d6;
-  --green: #22c55e;
+  /* Professional Pink Theme */
+  --brand: #e11d48;
+  --brand-light: #ffe4e6;
+  --brand-dark: #be185d;
+  --accent: #f59e0b;
+  --accent-light: #fef3c7;
+  --green: #10b981;
   --red: #ef4444;
 
-  --bg: #f8f7f5;
+  --bg: #fafafa;
   --surface: #ffffff;
-  --surface2: #f3f2ef;
-  --border: #e8e5e0;
-  --border-focus: #ff69b4;
+  --surface2: #f4f4f5;
+  --border: #e4e4e7;
+  --border-focus: #e11d48;
 
-  --text: #1a1714;
-  --text-2: #6b6560;
-  --text-3: #a8a39e;
+  --text: #18181b;
+  --text-2: #52525b;
+  --text-3: #a1a1aa;
 
   --radius-sm: 6px;
-  --radius: 12px;
-  --radius-lg: 20px;
+  --radius: 10px;
+  --radius-lg: 16px;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
-  --shadow-brand: 0 6px 24px rgba(255,105,180,0.3);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  --shadow-brand: 0 4px 14px rgba(225, 29, 72, 0.25);
 
-  --font: 'Plus Jakarta Sans', sans-serif;
-  --transition: 0.18s ease;
+  --font: 'Inter', sans-serif;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html, body, #root {

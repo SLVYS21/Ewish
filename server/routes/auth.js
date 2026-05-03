@@ -3,6 +3,45 @@ const jwt = require('jsonwebtoken');
 const AdminUser = require('../models/AdminUser');
 const { requireAdmin } = require('../middleware/auth');
 
+// POST /api/auth/register (Create a merchant account)
+router.post('/register', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email et mot de passe requis' });
+
+    const existing = await AdminUser.findOne({ email: email.toLowerCase() });
+    if (existing) return res.status(409).json({ error: 'Un compte avec cet email existe déjà' });
+
+    const user = new AdminUser({
+      email,
+      password,
+      name: name || 'Marchand',
+      role: 'merchant',
+    });
+    // Use the user's ID as their merchantId
+    user.merchantId = user._id.toString();
+    
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role, merchantId: user.merchantId },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
+    res.cookie('ww_admin_token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({ user: user.toSafeObject() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
@@ -19,7 +58,7 @@ router.post('/login', async (req, res) => {
     await user.save();
 
     const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { id: user._id, email: user.email, role: user.role, merchantId: user.merchantId },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );

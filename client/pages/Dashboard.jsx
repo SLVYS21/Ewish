@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Gift, Search, Users, Building, Heart, Sparkles, Film, Copy, X, Trash2, Edit2, MonitorPlay, ExternalLink, CircleOff, Eye, QrCode } from 'lucide-react';
 import { getPublications, deletePublication, duplicatePublication, unpublishPublication } from '../utils/api'
+import QRCodeModal from '../components/QRCodeModal';
 import styles from './Dashboard.module.css';
 
 const LIMIT = 20;
@@ -18,6 +20,9 @@ export default function Dashboard() {
   const [dupSlug,   setDupSlug]   = useState('');
   const [dupError,  setDupError]  = useState('');
   const [dupLoading,setDupLoading]= useState(false);
+
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [qrModalPub, setQrModalPub] = useState(null);
 
   const searchTimer = useRef(null);
 
@@ -91,19 +96,51 @@ export default function Dashboard() {
   };
  
   const TEMPLATE_ICONS = {
-    birthday: '🎂', special: '🔍', 'collective-family': '👨‍👩‍👧', 'collective-pro': '🏢',
-    forever: '♥', sanctuary: '✦', 'notre-film': '🎬',
+    birthday: <Gift size={24} strokeWidth={1.5} />,
+    special: <Search size={24} strokeWidth={1.5} />,
+    'collective-family': <Users size={24} strokeWidth={1.5} />,
+    'collective-pro': <Building size={24} strokeWidth={1.5} />,
+    forever: <Heart size={24} strokeWidth={1.5} />,
+    sanctuary: <Sparkles size={24} strokeWidth={1.5} />,
+    'notre-film': <Film size={24} strokeWidth={1.5} />,
   };
 
   return (
     <div className={styles.root}>
+
+      {/* Video Modal */}
+      {videoModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setVideoModalOpen(false)}>
+          <div className={styles.modal} style={{ maxWidth: '640px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <span className={styles.modalIcon}><MonitorPlay size={32} color="var(--brand)" /></span>
+              <h2>Comment ça marche ?</h2>
+              <p>Regardez cette courte vidéo pour apprendre à utiliser l'éditeur.</p>
+            </div>
+            <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '8px', overflow: 'hidden', marginTop: '16px' }}>
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="Tutoriel eWish"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className={styles.modalActions} style={{ marginTop: '20px' }}>
+              <button className={styles.modalCancel} onClick={() => setVideoModalOpen(false)}>Fermer</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* -Duplication modal */}
       {dupModal && (
         <div className={styles.modalOverlay} onClick={closeDupModal}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <span className={styles.modalIcon}>⎘</span>
+              <span className={styles.modalIcon}><Copy size={32} color="var(--brand)" /></span>
               <h2>Dupliquer la publication</h2>
               <p>Le template <strong>{dupModal.templateName}</strong> sera conservé avec toutes ses données.</p>
             </div>
@@ -132,23 +169,36 @@ export default function Dashboard() {
             {dupError && <p className={styles.modalError}>{dupError}</p>}
             <div className={styles.modalActions}>
               <button className={styles.modalCancel} onClick={closeDupModal}>Annuler</button>
-              <button className={styles.modalConfirm} onClick={handleDuplicate} disabled={dupLoading}>
-                {dupLoading ? '⏳ Duplication…' : '⎘ Dupliquer'}
+              <button className={styles.modalConfirm} onClick={handleDuplicate} disabled={dupLoading} style={{display:'flex', gap:'8px', alignItems:'center', justifyContent:'center'}}>
+                {dupLoading ? '⏳ Duplication…' : <><Copy size={16} /> Dupliquer</>}
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* QR Code Modal */}
+      {qrModalPub && qrModalPub.shortCode && (
+        <QRCodeModal
+          url={`${import.meta.env.VITE_API_URL || window.location.origin}/s/${qrModalPub.shortCode}`}
+          onClose={() => setQrModalPub(null)}
+        />
+      )}
+
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>🎂</span>
+          <span className={styles.logoIcon}><Gift size={28} color="var(--brand)" /></span>
           <span className={styles.logoText}>myKado</span>
         </div>
-        <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>
-          <span>+</span> New Wish
-        </Link>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button className={styles.btnGhost} onClick={() => setVideoModalOpen(true)}>
+            <MonitorPlay size={18} /> Tutoriel
+          </button>
+          <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>
+            <span>+</span> New
+          </Link>
+        </div>
       </header>
 
       {/* Hero */}
@@ -167,7 +217,7 @@ export default function Dashboard() {
 
         {/* Search bar */}
         <div className={styles.searchBar}>
-          <span className={styles.searchIcon}>🔍</span>
+          <span className={styles.searchIcon}><Search size={18} color="var(--text-3)" /></span>
           <input
             className={styles.searchInput}
             type="text"
@@ -176,7 +226,7 @@ export default function Dashboard() {
             onChange={handleSearchChange}
           />
           {search && (
-            <button className={styles.searchClear} onClick={() => { setSearch(''); setPage(1); fetchPubs(1, ''); }}>✕</button>
+            <button className={styles.searchClear} onClick={() => { setSearch(''); setPage(1); fetchPubs(1, ''); }}><X size={16} /></button>
           )}
         </div>
 
@@ -186,7 +236,7 @@ export default function Dashboard() {
           </div>
         ) : pubs.length === 0 ? (
           <div className={styles.empty}>
-            <span className={styles.emptyIcon}>✨</span>
+            <span className={styles.emptyIcon}><Sparkles size={48} color="var(--brand)" strokeWidth={1} /></span>
             <p>No wishes yet — create your first one!</p>
             <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>Create a wish</Link>
           </div>
@@ -195,7 +245,7 @@ export default function Dashboard() {
             {pubs.map(pub => (
               <div key={pub._id} className={styles.card} onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>
                 <div className={styles.cardThumb}>
-                  <span>{TEMPLATE_ICONS[pub.templateName] || '✨'}</span>
+                  <span>{TEMPLATE_ICONS[pub.templateName] || <Sparkles size={24} />}</span>
                   {pub.published && <span className={styles.publishedBadge}>Live</span>}
                 </div>
                 <div className={styles.cardBody}>
@@ -209,10 +259,11 @@ export default function Dashboard() {
                             e.stopPropagation();
                             const origin = import.meta.env.VITE_API_URL || window.location.origin;
                             navigator.clipboard.writeText(`${origin}/s/${pub.shortCode}`);
-                            e.currentTarget.textContent = '✓ Copié!';
-                            setTimeout(() => e.currentTarget.textContent = `/s/${pub.shortCode} 📋`, 1500);
+                            e.currentTarget.innerHTML = '✓ Copié!';
+                            setTimeout(() => e.currentTarget.innerHTML = `/s/${pub.shortCode} <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`, 1500);
                           }}
-                        >/s/{pub.shortCode} 📋</span>
+                          style={{display:'inline-flex', alignItems:'center', gap:'4px'}}
+                        >/s/{pub.shortCode} <Copy size={14} /></span>
                       : `/${pub.templateName}/${pub.customName}`
                     }
                   </p>
@@ -220,8 +271,8 @@ export default function Dashboard() {
                     {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}
                     {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}
                     {pub.views > 0 && (
-                      <span className={styles.viewCount} title="Vues">
-                        · 👁 {pub.views.toLocaleString('fr-FR')}
+                      <span className={styles.viewCount} title="Vues" style={{display:'inline-flex', alignItems:'center', gap:'4px'}}>
+                        · <Eye size={14} /> {pub.views.toLocaleString('fr-FR')}
                       </span>
                     )}
                   </p>
@@ -235,22 +286,29 @@ export default function Dashboard() {
                       onClick={e => e.stopPropagation()}
                       className={styles.btnIcon}
                       title="View live"
-                    >↗</a>
+                    ><ExternalLink size={16} /></a>
+                  )}
+                  {pub.published && pub.shortCode && (
+                    <button
+                      className={styles.btnIcon}
+                      title="Code QR"
+                      onClick={e => { e.stopPropagation(); setQrModalPub(pub); }}
+                    ><QrCode size={16} /></button>
                   )}
                   {pub.published && (
                     <button
                       className={styles.btnIcon}
                       title="Dépublier"
                       onClick={e => handleUnpublish(pub._id, e)}
-                    >🔴</button>
+                    ><CircleOff size={16} color="var(--red)" /></button>
                   )}
                   <button
                     className={styles.btnIcon}
                     title="Dupliquer"
                     onClick={e => openDupModal(pub, e)}
-                  >⎘</button>
-                  <button className={styles.btnIcon} onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>✏️</button>
-                  <button className={`${styles.btnIcon} ${styles.btnDanger}`} onClick={e => handleDelete(pub._id, e)}>🗑</button>
+                  ><Copy size={16} /></button>
+                  <button className={styles.btnIcon} title="Éditer" onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}><Edit2 size={16} /></button>
+                  <button className={`${styles.btnIcon} ${styles.btnDanger}`} title="Supprimer" onClick={e => handleDelete(pub._id, e)}><Trash2 size={16} /></button>
                 </div>
               </div>
             ))}

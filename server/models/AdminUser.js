@@ -5,7 +5,9 @@ const adminUserSchema = new mongoose.Schema({
   email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   name:     { type: String, default: 'Admin' },
-  role:     { type: String, enum: ['super_admin', 'admin'], default: 'admin' },
+  role:     { type: String, enum: ['super_admin', 'admin', 'merchant'], default: 'admin' },
+  merchantId:{ type: String, index: true },
+  credits:  { type: Number, default: 0 },
   lastLogin:{ type: Date },
 }, { timestamps: true });
 
@@ -20,8 +22,8 @@ adminUserSchema.methods.comparePassword = function(plain) {
 };
 
 adminUserSchema.methods.toSafeObject = function() {
-  const { _id, email, name, role, lastLogin, createdAt } = this;
-  return { _id, email, name, role, lastLogin, createdAt };
+  const { _id, email, name, role, merchantId, credits, lastLogin, createdAt } = this;
+  return { _id, email, name, role, merchantId, credits, lastLogin, createdAt };
 };
 
 module.exports = mongoose.model('AdminUser', adminUserSchema);

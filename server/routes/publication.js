@@ -1,12 +1,18 @@
 const router = require('express').Router();
 const Publication = require('../models/Publication');
+const AdminUser = require('../models/AdminUser');
+const Template = require('../models/Template');
 const slugify = require('slugify');
+const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 
 // GET all
-router.get('/', async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
   try {
     const { limit = 20, page = 1, search } = req.query;
     const query = {};
+    if (req.admin.role === 'merchant') {
+      query.merchantId = req.admin.merchantId;
+    }
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -35,11 +41,26 @@ router.get('/:templateName/:customName', async (req, res) => {
 });
 
 // POST create
-router.post('/', async (req, res) => {
+router.post('/', requireOptionalAdmin, async (req, res) => {
   try {
     const { templateName, customName, title, data, style, jarConfig } = req.body;
+    
+    if (req.admin?.role === 'merchant') {
+      const template = await Template.findOne({ name: templateName }).lean();
+      if (!template) return res.status(404).json({ error: 'Template introuvable' });
+      
+      const user = await AdminUser.findById(req.admin.id);
+      const creditsReq = template.creditsRequired || 1;
+      if (user.credits < creditsReq) {
+        return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits pour utiliser ce template.` });
+      }
+      user.credits -= creditsReq;
+      await user.save();
+    }
+
     const slug = slugify(customName || title || 'wish', { lower: true, strict: true });
-    const pub = await Publication.create({ templateName, customName: slug, title, data, style, jarConfig });
+    const merchantId = req.admin?.role === 'merchant' ? req.admin.merchantId : undefined;
+    const pub = await Publication.create({ templateName, customName: slug, title, data, style, jarConfig, merchantId });
     res.status(201).json(pub);
   } catch (e) {
     if (e.code === 11000) return res.status(409).json({ error: 'This custom name is already taken.' });
@@ -51,12 +72,15 @@ router.post('/', async (req, res) => {
 // - data   : shallow-merged (preserves keys not sent)
 // - style  : shallow-merged
 // - jarConfig : replaced entirely when present (it's a self-contained object)
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireOptionalAdmin, async (req, res) => {
   try {
     const { data, style, jarConfig, decorations, widgets, photoTransforms, showBranding, brandingUrl, ...rest } = req.body;
 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
+    if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
 
     // style: shallow merge but backgrounds sub-object merges deeply
     let mergedStyle = existing.style || {};
@@ -102,8 +126,14 @@ router.patch('/:id', async (req, res) => {
 });
 
 // POST publish
-router.post('/:id/publish', async (req, res) => {
+router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
   try {
+    const existing = await Publication.findById(req.params.id).lean();
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
     const pub = await Publication.findByIdAndUpdate(
       req.params.id,
       { published: true, publishedAt: Date.now() },
@@ -145,10 +175,23 @@ router.post('/:id/publish', async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-router.post('/:id/duplicate', async (req, res) => {
+router.post('/:id/duplicate', requireOptionalAdmin, async (req, res) => {
   try {
     const original = await Publication.findById(req.params.id).lean();
     if (!original) return res.status(404).json({ error: 'Publication introuvable' });
+
+    if (req.admin?.role === 'merchant') {
+      const template = await Template.findOne({ name: original.templateName }).lean();
+      if (!template) return res.status(404).json({ error: 'Template introuvable' });
+      
+      const user = await AdminUser.findById(req.admin.id);
+      const creditsReq = template.creditsRequired || 1;
+      if (user.credits < creditsReq) {
+        return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits pour dupliquer.` });
+      }
+      user.credits -= creditsReq;
+      await user.save();
+    }
 
     const { customName, title } = req.body;
     if (!customName || !title) return res.status(400).json({ error: 'customName et title requis' });
@@ -156,6 +199,7 @@ router.post('/:id/duplicate', async (req, res) => {
     const slug = slugify(customName, { lower: true, strict: true });
 
     // Copy all fields except _id, shortCode, publishedAt, published
+    const merchantId = req.admin?.role === 'merchant' ? req.admin.merchantId : original.merchantId;
     const clone = await Publication.create({
       templateName: original.templateName,
       customName: slug,
@@ -167,6 +211,7 @@ router.post('/:id/duplicate', async (req, res) => {
       widgets: original.widgets || [],
       photoTransforms: original.photoTransforms || {},
       published: false,
+      merchantId,
     });
 
     res.status(201).json(clone);
@@ -177,8 +222,14 @@ router.post('/:id/duplicate', async (req, res) => {
 });
 
 // POST unpublish
-router.post('/:id/unpublish', async (req, res) => {
+router.post('/:id/unpublish', requireOptionalAdmin, async (req, res) => {
   try {
+    const existing = await Publication.findById(req.params.id).lean();
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
     const pub = await Publication.findByIdAndUpdate(
       req.params.id,
       { published: false },
@@ -190,8 +241,14 @@ router.post('/:id/unpublish', async (req, res) => {
 });
 
 // DELETE
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireOptionalAdmin, async (req, res) => {
   try {
+    const existing = await Publication.findById(req.params.id).lean();
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
     await Publication.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
@@ -218,6 +275,7 @@ router.post('/:id/client-details', async (req, res) => {
         templateName: pub.templateName,
         status: 'en_cours',
         senderName: clientName || 'Client',
+        merchantId: pub.merchantId,
       });
     }
     

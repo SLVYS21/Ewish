@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getMe, login as apiLogin, logout as apiLogout } from '../../utils/api';
+import { getMe, login as apiLogin, register as apiRegister, logout as apiLogout } from '../../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -25,8 +25,14 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const register = async (email, password, name) => {
+    const r = await apiRegister(email, password, name);
+    setUser(r.data.user);
+    return r.data.user;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

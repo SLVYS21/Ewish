@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Menu, X } from 'lucide-react';
 import s from './AdminLayout.module.css';
 
 const NAV = [
@@ -8,11 +10,13 @@ const NAV = [
   { to: '/ewish-admin/publications', icon: '🎬', label: 'Publications'               },
   { to: '/ewish-admin/templates',    icon: '🎨', label: 'Templates & Prix'           },
   { to: '/ewish-admin/wishes',       icon: '💌', label: 'Vœux collectifs'            },
+  { to: '/ewish-admin/ewish',        icon: '🔗', label: 'Espace Client'              },
 ];
 
 export default function AdminLayout({ pendingCount = 0 }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -21,8 +25,17 @@ export default function AdminLayout({ pendingCount = 0 }) {
 
   return (
     <div className={s.shell}>
+      {/* ── Mobile Header ── */}
+      <div className={s.mobileHeader}>
+        <div className={s.logo}>eWish<span>Well</span></div>
+        <button className={s.menuBtn} onClick={() => setMobileOpen(!mobileOpen)}>
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
       {/* ── Sidebar ── */}
-      <aside className={s.sidebar}>
+      <div className={`${s.sidebarOverlay} ${mobileOpen ? s.open : ''}`} onClick={() => setMobileOpen(false)} />
+      <aside className={`${s.sidebar} ${mobileOpen ? s.open : ''}`}>
         <div className={s.sidebarHead}>
           <div className={s.logo}>eWish<span>Well</span></div>
           <div className={s.adminBadge}>Admin</div>
@@ -32,6 +45,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
           {NAV.map(({ to, icon, label, end }) => (
             <NavLink
               key={to} to={to} end={end}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) => `${s.navItem} ${isActive ? s.active : ''}`}
             >
               <span className={s.navIcon}>{icon}</span>

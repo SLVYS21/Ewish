@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getFonts, uploadFont, deleteFont } from '../utils/api';
+import { Palette, Brush, Baseline, Type, AArrowUp, Moon, Sun, Plus, X, UploadCloud, Eye, Gift, Mail } from 'lucide-react';
 import styles from './StyleTab.module.css';
 
 const SYSTEM_FONTS = [
@@ -22,8 +23,8 @@ const FONT_SIZES = [
 ];
 
 const THEMES = [
-  { value: 'light', label: 'Light', icon: '☀️' },
-  { value: 'dark',  label: 'Dark',  icon: '🌙' },
+  { value: 'light', label: 'Light', icon: <Sun size={14} /> },
+  { value: 'dark',  label: 'Dark',  icon: <Moon size={14} /> },
 ];
 
 const PRESETS = [
@@ -112,7 +113,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Color Presets */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>🎨 Color Presets</h3>
+        <h3 className={styles.groupTitle}><Palette size={16} /> Color Presets</h3>
         <div className={styles.presets}>
           {PRESETS.map(p => (
             <button
@@ -132,7 +133,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Custom colors */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>🖌 Custom Colors</h3>
+        <h3 className={styles.groupTitle}><Brush size={16} /> Custom Colors</h3>
         <div className={styles.colorRow}>
           <label className={styles.colorLabel}>Primary</label>
           <div className={styles.colorPair}>
@@ -159,7 +160,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Text Colors */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>🔤 Couleur du texte</h3>
+        <h3 className={styles.groupTitle}><Baseline size={16} /> Couleur du texte</h3>
         <div className={styles.colorRow}>
           <label className={styles.colorLabel}>Principal</label>
           <div className={styles.colorPair}>
@@ -200,7 +201,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Font Family */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>✏️ Police</h3>
+        <h3 className={styles.groupTitle}><Type size={16} /> Police</h3>
 
         {/* Custom fonts section */}
         {customFonts.length > 0 && (
@@ -219,7 +220,7 @@ export default function StyleTab({ style, onChange }) {
                     className={styles.fontDeleteBtn}
                     onClick={(e) => handleDeleteFont(font, e)}
                     title="Supprimer"
-                  >✕</span>
+                  ><X size={14} /></span>
                 </button>
               ))}
             </div>
@@ -237,7 +238,7 @@ export default function StyleTab({ style, onChange }) {
               onKeyDown={e => e.key === 'Enter' && fileInputRef.current?.click()}
             />
             <label className={`${styles.fontUploadBtn} ${uploading ? styles.fontUploadBtnLoading : ''}`}>
-              {uploading ? '⏳ Upload…' : '📁 Choisir le fichier (.ttf .otf .woff2)'}
+              {uploading ? <span style={{display:'flex', alignItems:'center', gap:'4px'}}><UploadCloud size={14} /> Upload…</span> : <span style={{display:'flex', alignItems:'center', gap:'4px'}}><UploadCloud size={14} /> Choisir le fichier (.ttf .otf .woff2)</span>}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -253,8 +254,8 @@ export default function StyleTab({ style, onChange }) {
             </button>
           </div>
         ) : (
-          <button className={styles.addFontBtn} onClick={() => setShowUploader(true)}>
-            ➕ Ajouter une font
+          <button className={styles.addFontBtn} onClick={() => setShowUploader(true)} style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}>
+            <Plus size={14} /> Ajouter une font
           </button>
         )}
 
@@ -276,7 +277,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Font Size */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>🔠 Font Size</h3>
+        <h3 className={styles.groupTitle}><AArrowUp size={16} /> Font Size</h3>
         <div className={styles.sizeRow}>
           {FONT_SIZES.map(sz => (
             <button
@@ -293,7 +294,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Theme */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>🌗 Theme</h3>
+        <h3 className={styles.groupTitle}><Sun size={16} /> Theme</h3>
         <div className={styles.themeRow}>
           {THEMES.map(t => (
             <button
@@ -310,7 +311,7 @@ export default function StyleTab({ style, onChange }) {
 
       {/* Live preview */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>👁 Preview</h3>
+        <h3 className={styles.groupTitle}><Eye size={16} /> Preview</h3>
         <div className={styles.sampleCard} style={{
           fontFamily: `'${s.fontFamily}', sans-serif`,
           fontSize: s.fontSize === 'small' ? '0.85rem' : s.fontSize === 'large' ? '1.05rem' : '0.9rem',
@@ -318,10 +319,11 @@ export default function StyleTab({ style, onChange }) {
           <div className={styles.sampleBadge} style={{
             background: `linear-gradient(135deg, ${s.primaryColor}, ${s.accentColor})`
           }}>Happy Birthday!</div>
-          <p style={{ color: s.textColor }}>A warm message just for you 🎂</p>
+          <p style={{ color: s.textColor, display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>A warm message just for you <Gift size={14} /></p>
           <button className={styles.sampleBtn} style={{
-            background: `linear-gradient(135deg, ${s.primaryColor}, ${s.accentColor})`
-          }}>Voir mes vœux 💌</button>
+            background: `linear-gradient(135deg, ${s.primaryColor}, ${s.accentColor})`,
+            display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', margin: '0 auto'
+          }}>Voir mes vœux <Mail size={14} /></button>
         </div>
       </div>
     </div>

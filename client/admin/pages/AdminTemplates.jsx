@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getTemplates, getPromos, createPromo, updatePromo, deletePromo } from '../../utils/api';
+import { useAuth } from '../context/AuthContext';
 import api from '../../utils/api';
 import PageShell from '../components/PageShell';
 import Modal from '../components/Modal';
@@ -23,6 +24,8 @@ export default function AdminTemplates() {
   const [promoForm, setPromoForm]   = useState(PROMO_DEFAULTS);
   const [saving, setSaving]         = useState(false);
   const [toast, setToast]           = useState('');
+  const { user }                    = useAuth();
+  const isAdmin                     = user?.role === 'admin' || user?.role === 'super_admin';
 
   useEffect(() => { loadTemplates(); loadPromos(); }, []);
 
@@ -47,6 +50,7 @@ export default function AdminTemplates() {
       await api.patch(`/templates/${tmplModal.name}`, {
         label:       tmplModal.label,
         price:       Number(tmplModal.price) || 0,
+        creditsRequired: Number(tmplModal.creditsRequired) || 1,
         description: tmplModal.description,
         priceLabel:  tmplModal.priceLabel,
         active:      tmplModal.active,
@@ -111,8 +115,11 @@ export default function AdminTemplates() {
                     <span> · {t.collectEnabled ? 'Collectif' : 'Individuel'}</span>
                   </div>
                 </div>
-                <div className={s.tmplPrice}>{fmtPrice(t.price)}</div>
-                <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openTmpl(t)}>✏ Modifier</button>
+                <div className={s.tmplPriceWrap}>
+                  <div className={s.tmplPrice}>{fmtPrice(t.price)}</div>
+                  <div className={s.tmplCredits}>{t.creditsRequired || 1} Crédit(s)</div>
+                </div>
+                {isAdmin && <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openTmpl(t)}>✏ Modifier</button>}
               </div>
             );
           })}
@@ -168,7 +175,10 @@ export default function AdminTemplates() {
                 <input className={s.formInput} value={tmplModal.label||''} onChange={e=>setTmplModal(m=>({...m,label:e.target.value}))} />
               </div>
               <div className={s.formGroup}><label className={s.formLabel}>Prix (FCFA)</label>
-                <input type="number" className={s.formInput} value={tmplModal.price||''} onChange={e=>setTmplModal(m=>({...m,price:e.target.value}))} />
+                <input type="number" className={s.formInput} value={tmplModal.price||''} onChange={e=>setTmplModal(m=>({...m,price:e.target.value}))} disabled={!isAdmin} />
+              </div>
+              <div className={s.formGroup}><label className={s.formLabel}>Crédits requis</label>
+                <input type="number" className={s.formInput} value={tmplModal.creditsRequired||1} onChange={e=>setTmplModal(m=>({...m,creditsRequired:e.target.value}))} disabled={!isAdmin} />
               </div>
             </div>
             <div className={s.formGroup}><label className={s.formLabel}>Description</label>

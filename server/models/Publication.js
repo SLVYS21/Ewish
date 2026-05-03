@@ -93,6 +93,9 @@ const publicationSchema = new mongoose.Schema({
   // Free-form decoration elements
   decorations: [decorationSchema],
 
+  // Multi-tenant
+  merchantId:  { type: String, index: true },
+
   // Analytics — compteur de visites
   views:       { type: Number, default: 0 },
   lastViewedAt:{ type: Date },

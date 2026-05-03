@@ -14,7 +14,7 @@ router.get('/:publicationId', async (req, res) => {
       `);
     }
 
-    const recipientName = pub.data?.name || pub.title || 'quelqu\'un de spécial';
+    const recipientName = pub.data?.name || pub.title || "quelqu'un de spécial";
     const groupName = pub.data?.groupName || 'Le groupe';
     const isPro = pub.templateName === 'collective-pro';
 
@@ -126,27 +126,48 @@ router.get('/:publicationId', async (req, res) => {
     }
     .photo-preview.upload-ok .upload-done-badge { display: block; }
 
+    /* Media Tabs */
+    .media-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .media-tab {
+      flex: 1; padding: 8px; background: #fafafa; border: 1.5px solid #e5e5e5;
+      border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600;
+      color: #555; cursor: pointer; transition: all 0.2s;
+    }
+    .media-tab.active { background: \${primaryColor}15; border-color: \${primaryColor}; color: \${primaryColor}; }
+    .media-pane { display: none; }
+    .media-pane.active { display: block; }
+    
+    .audio-recorder { text-align: center; padding: 15px; border: 2px dashed #e0e0e0; border-radius: 10px; }
+    .record-btn {
+      background: #ef4444; color: #fff; border: none; border-radius: 50px;
+      padding: 10px 20px; font-weight: 600; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;
+    }
+    .record-btn:hover { background: #dc2626; }
+    .record-btn.recording { animation: pulseRecord 1.5s infinite; }
+    @keyframes pulseRecord { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
     .submit-btn {
       width: 100%; padding: 14px;
-      background: linear-gradient(135deg, ${primaryColor}, ${accentColor});
+      background: linear-gradient(135deg, \${primaryColor}, \${accentColor});
       color: #fff; border: none; border-radius: 50px;
       font-family: inherit; font-size: 1rem; font-weight: 600;
       cursor: pointer; margin-top: 8px;
-      box-shadow: 0 6px 20px ${primaryColor}40;
+      box-shadow: 0 6px 20px \${primaryColor}40;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px ${primaryColor}50; }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px \${primaryColor}50; }
     .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     .success {
       display: none; text-align: center; padding: 20px 0;
     }
     .success .s-emoji { font-size: 3.5rem; display: block; margin-bottom: 16px; }
-    .success h2 { font-size: 1.4rem; color: ${primaryColor}; margin-bottom: 8px; }
+    .success h2 { font-size: 1.4rem; color: \${primaryColor}; margin-bottom: 8px; }
     .success p { color: #888; font-weight: 300; font-size: 0.9rem; }
 
     .char-count { font-size: 0.7rem; color: #bbb; text-align: right; margin-top: 4px; }
-    .required { color: ${primaryColor}; }
+    .required { color: \${primaryColor}; }
   </style>
 </head>
 <body>
@@ -175,22 +196,59 @@ router.get('/:publicationId', async (req, res) => {
     </div>
 
     <div class="field">
-      <label>Ta photo (optionnel)</label>
-      <div class="photo-preview" id="photo-preview" onclick="document.getElementById('photo-input').click()">
-        <!-- Default state -->
-        <div class="upload-default" style="display:flex;align-items:center;gap:10px">
-          <span class="upload-icon">📷</span>
-          <span>Clique pour ajouter une photo</span>
-        </div>
-        <!-- Loading state -->
-        <div class="upload-loader">
-          <div class="spinner"></div>
-          <span>Upload en cours…</span>
-        </div>
-        <!-- Done badge -->
-        <span class="upload-done-badge">✓ Uploadée</span>
+      <label>Ajouter un Média (optionnel)</label>
+      <div class="media-tabs">
+        <button type="button" class="media-tab active" onclick="switchMediaTab('photo')">📷 Photo</button>
+        <button type="button" class="media-tab" onclick="switchMediaTab('audio')">🎤 Vocal</button>
+        <button type="button" class="media-tab" onclick="switchMediaTab('video')">🎥 Vidéo</button>
       </div>
-      <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(this)">
+
+      <!-- PHOTO PANE -->
+      <div id="tab-photo" class="media-pane active">
+        <div class="photo-preview" id="photo-preview" onclick="document.getElementById('photo-input').click()">
+          <div class="upload-default" style="display:flex;align-items:center;gap:10px">
+            <span class="upload-icon">📷</span>
+            <span>Clique pour ajouter une photo</span>
+          </div>
+          <div class="upload-loader">
+            <div class="spinner"></div><span>Upload en cours…</span>
+          </div>
+          <span class="upload-done-badge">✓ Uploadée</span>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+      </div>
+
+      <!-- AUDIO PANE -->
+      <div id="tab-audio" class="media-pane">
+        <div class="audio-recorder">
+          <button type="button" class="record-btn" id="record-btn" onclick="toggleRecording()">🎤 Enregistrer un message vocal</button>
+          <div id="record-time" style="display:none; color:#ef4444; font-weight:bold; margin-top:10px;">00:00</div>
+          <audio id="audio-playback" controls style="display:none; width:100%; margin-top:15px; border-radius:30px;"></audio>
+          
+          <div class="upload-loader" id="audio-loader" style="display:none; margin-top:10px; color:${primaryColor}">
+            <div class="spinner" style="border-top-color:${primaryColor}"></div><span>Upload de l'audio…</span>
+          </div>
+          <div class="upload-done-badge" id="audio-done" style="position:static; display:none; margin-top:10px; max-width:100px; margin-left:auto; margin-right:auto;">✓ Uploadé</div>
+        </div>
+      </div>
+
+      <!-- VIDEO PANE -->
+      <div id="tab-video" class="media-pane">
+        <div class="photo-preview" id="video-preview" onclick="document.getElementById('video-input').click()">
+          <div class="upload-default" id="video-default" style="display:flex;align-items:center;gap:10px">
+            <span class="upload-icon">🎥</span>
+            <span>Clique pour uploader (Max 15 Mo)</span>
+          </div>
+          <div class="upload-loader" id="video-loader">
+            <div class="spinner"></div><span>Upload en cours…</span>
+          </div>
+          <span class="upload-done-badge" id="video-done">✓ Vidéo Uploadée</span>
+        </div>
+        <input type="file" id="video-input" accept="video/*" style="display:none" onchange="handleVideo(this)">
+        
+        <div style="text-align:center;margin:10px 0;font-size:0.8rem;color:#888;">OU</div>
+        <input type="text" id="video-link" placeholder="Lien externe (YouTube, Vimeo...)" style="width:100%;padding:11px 14px;border:1.5px solid #e5e5e5;border-radius:10px;font-family:inherit;font-size:0.92rem;">
+      </div>
     </div>
 
     <div id="error-msg" style="color:#e74c3c;font-size:0.82rem;margin-bottom:10px;display:none"></div>
@@ -209,7 +267,22 @@ router.get('/:publicationId', async (req, res) => {
 <script>
 const PUB_ID = '${req.params.publicationId}';
 let uploadedPhotoUrl = '';
+let uploadedAudioUrl = '';
+let uploadedVideoUrl = '';
 let isUploading = false;
+
+let mediaRecorder;
+let audioChunks = [];
+let recordingInterval;
+let recordSeconds = 0;
+let isRecording = false;
+
+function switchMediaTab(tab) {
+  document.querySelectorAll('.media-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.media-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector('.media-tab[onclick*="'+tab+'"]').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
 
 function updateCount(el) {
   document.getElementById('msg-count').textContent = el.value.length;
@@ -222,14 +295,12 @@ async function handlePhoto(input) {
   const preview = document.getElementById('photo-preview');
   const submitBtn = document.getElementById('submit-btn');
 
-  // --- Show loading state ---
   isUploading = true;
   preview.classList.remove('has-image', 'upload-ok');
   preview.classList.add('uploading');
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Photo en cours d\'upload…';
+  submitBtn.textContent = 'Photo en cours d\\'upload…';
 
-  // Upload
   const form = new FormData();
   form.append('file', file);
   try {
@@ -237,10 +308,8 @@ async function handlePhoto(input) {
     const data = await res.json();
     uploadedPhotoUrl = data.url || '';
 
-    // --- Upload success: show thumbnail + green badge ---
     preview.classList.remove('uploading');
     preview.classList.add('has-image', 'upload-ok');
-    // Replace the loader content with the image thumbnail
     preview.querySelector('.upload-loader').style.display = 'none';
     const thumb = document.createElement('img');
     thumb.src = uploadedPhotoUrl || URL.createObjectURL(file);
@@ -250,16 +319,154 @@ async function handlePhoto(input) {
 
   } catch (e) {
     console.error('Upload failed', e);
-    // --- Upload failed: reset to default ---
     preview.classList.remove('uploading', 'has-image', 'upload-ok');
     preview.querySelector('.upload-loader').style.display = '';
     preview.querySelector('.upload-default').style.display = 'flex';
-    // Show inline error
     const errEl = document.getElementById('error-msg');
-    errEl.textContent = 'Échec de l\'upload photo. Réessaie.';
+    errEl.textContent = 'Échec de l\\'upload photo. Réessaie.';
     errEl.style.display = 'block';
   } finally {
-    // --- Always re-enable submit ---
+    isUploading = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = '${isPro ? 'Envoyer mon message 📩' : 'Envoyer mes vœux 💌'}';
+  }
+}
+
+async function handleVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 15 * 1024 * 1024) {
+    alert('La vidéo est trop volumineuse (max 15 Mo).');
+    input.value = '';
+    return;
+  }
+
+  const preview = document.getElementById('video-preview');
+  const submitBtn = document.getElementById('submit-btn');
+
+  isUploading = true;
+  preview.classList.remove('upload-ok');
+  preview.classList.add('uploading');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Vidéo en cours d\\'upload…';
+
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    uploadedVideoUrl = data.url || '';
+
+    preview.classList.remove('uploading');
+    preview.classList.add('upload-ok');
+    preview.querySelector('.upload-loader').style.display = 'none';
+    preview.querySelector('.upload-default').style.display = 'none';
+    document.getElementById('video-done').style.display = 'block';
+
+  } catch (e) {
+    console.error('Video upload failed', e);
+    preview.classList.remove('uploading', 'upload-ok');
+    preview.querySelector('.upload-loader').style.display = '';
+    preview.querySelector('.upload-default').style.display = 'flex';
+    const errEl = document.getElementById('error-msg');
+    errEl.textContent = 'Échec de l\\'upload vidéo.';
+    errEl.style.display = 'block';
+  } finally {
+    isUploading = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = '${isPro ? 'Envoyer mon message 📩' : 'Envoyer mes vœux 💌'}';
+  }
+}
+
+async function toggleRecording() {
+  const btn = document.getElementById('record-btn');
+  const timeDisplay = document.getElementById('record-time');
+  const audioPlayback = document.getElementById('audio-playback');
+
+  if (!isRecording) {
+    // Start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.addEventListener('dataavailable', event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener('stop', async () => {
+        clearInterval(recordingInterval);
+        timeDisplay.style.display = 'none';
+        btn.classList.remove('recording');
+        btn.textContent = '🎤 Nouvel enregistrement';
+        
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioPlayback.src = audioUrl;
+        audioPlayback.style.display = 'block';
+
+        // Auto upload
+        await uploadAudio(audioBlob);
+      });
+
+      mediaRecorder.start();
+      isRecording = true;
+      btn.classList.add('recording');
+      btn.textContent = '⏹️ Arrêter l\\'enregistrement';
+      timeDisplay.style.display = 'block';
+      audioPlayback.style.display = 'none';
+      document.getElementById('audio-done').style.display = 'none';
+      uploadedAudioUrl = '';
+      
+      recordSeconds = 0;
+      timeDisplay.textContent = '00:00';
+      recordingInterval = setInterval(() => {
+        recordSeconds++;
+        const m = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+        const s = String(recordSeconds % 60).padStart(2, '0');
+        timeDisplay.textContent = m + ':' + s;
+      }, 1000);
+
+    } catch (err) {
+      alert('Impossible d\\'accéder au microphone.');
+    }
+  } else {
+    // Stop recording
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    isRecording = false;
+  }
+}
+
+async function uploadAudio(blob) {
+  const submitBtn = document.getElementById('submit-btn');
+  const loader = document.getElementById('audio-loader');
+  const doneBadge = document.getElementById('audio-done');
+  
+  isUploading = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Audio en cours d\\'upload…';
+  loader.style.display = 'flex';
+  doneBadge.style.display = 'none';
+
+  const form = new FormData();
+  form.append('file', blob, 'audio.webm');
+  
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    uploadedAudioUrl = data.url || '';
+    loader.style.display = 'none';
+    doneBadge.style.display = 'block';
+  } catch (e) {
+    console.error('Audio upload failed', e);
+    loader.style.display = 'none';
+    const errEl = document.getElementById('error-msg');
+    errEl.textContent = 'Échec de l\\'upload audio.';
+    errEl.style.display = 'block';
+  } finally {
     isUploading = false;
     submitBtn.disabled = false;
     submitBtn.textContent = '${isPro ? 'Envoyer mon message 📩' : 'Envoyer mes vœux 💌'}';
@@ -276,7 +483,7 @@ async function submitWish() {
 
   // Block if upload is still running
   if (isUploading) {
-    errEl.textContent = 'La photo est encore en cours d\'upload, patiente un instant…';
+    errEl.textContent = 'La photo est encore en cours d\\'upload, patiente un instant…';
     errEl.style.display = 'block';
     return;
   }
@@ -289,11 +496,20 @@ async function submitWish() {
   btn.disabled = true;
   btn.textContent = 'Envoi en cours…';
 
+  let finalVideoUrl = uploadedVideoUrl || document.getElementById('video-link').value.trim();
+
   try {
     const res = await fetch('/api/wishes/' + PUB_ID, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firstName, role, message, photoUrl: uploadedPhotoUrl }),
+      body: JSON.stringify({ 
+        firstName, 
+        role, 
+        message, 
+        photoUrl: uploadedPhotoUrl,
+        audioUrl: uploadedAudioUrl,
+        videoUrl: finalVideoUrl
+      }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur serveur');

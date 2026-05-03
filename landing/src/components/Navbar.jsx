@@ -27,11 +27,11 @@ export default function Navbar({ onOrder }) {
       <div className={s.links}>
         <a href="#templates"   className={s.link}>Templates</a>
         <a href="#how-it-works" className={s.link}>Comment ça marche</a>
-        <a href={APP_URL}      className={s.link} target="_blank" rel="noreferrer">Mon espace</a>
+        <a href={`${APP_URL}/ewish-admin/login`} className={s.link}>Se connecter</a>
       </div>
 
       <button className={s.cta} onClick={onOrder}>
-        Commander →
+        Créer un compte →
       </button>
     </motion.nav>
   );

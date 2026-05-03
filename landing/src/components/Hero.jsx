@@ -92,7 +92,7 @@ export default function Hero({ onOrder }) {
           transition={{ duration: 0.6, delay: 1.9, ease: [0.22, 1, 0.36, 1] }}
         >
           <button className={s.btnPrimary} onClick={onOrder}>
-            Créer mon vœu
+            Commencer à créer
           </button>
           <a href="#templates" className={s.btnSecondary}>
             Voir les templates

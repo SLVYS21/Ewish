@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Hourglass, Cake, Quote, Calendar, Plus, X, Trash2, ChevronUp, ChevronDown, RefreshCw, CalendarDays, Clock } from 'lucide-react';
 import s from './WidgetTab.module.css';
 
 const WIDGET_TYPES = [
-  { id: 'countdown',  icon: '⏳', label: 'Décompte',     desc: 'Temps écoulé depuis une date' },
-  { id: 'age',        icon: '🎂', label: 'Âge exact',    desc: 'Années, mois, jours précis' },
-  { id: 'quote',      icon: '💬', label: 'Citation',      desc: 'Texte mis en valeur' },
-  { id: 'memories',   icon: '📅', label: 'Souvenir',     desc: 'Depuis combien de temps vous vous connaissez' },
+  { id: 'countdown',  icon: <Hourglass size={16} />, label: 'Décompte',     desc: 'Temps écoulé depuis une date' },
+  { id: 'age',        icon: <Cake size={16} />, label: 'Âge exact',    desc: 'Années, mois, jours précis' },
+  { id: 'quote',      icon: <Quote size={16} />, label: 'Citation',      desc: 'Texte mis en valeur' },
+  { id: 'memories',   icon: <Calendar size={16} />, label: 'Souvenir',     desc: 'Depuis combien de temps vous vous connaissez' },
 ];
 
 const DEFAULT_WIDGETS = {
@@ -51,7 +52,7 @@ export default function WidgetTab({ widgets = [], onChange }) {
         />
       ) : (
         <div className={s.section}>
-          <div className={s.sectionTitle}>➕ Ajouter un widget</div>
+          <div className={s.sectionTitle} style={{display:'flex', alignItems:'center', gap:'6px'}}><Plus size={16} /> Ajouter un widget</div>
           <div className={s.typeGrid}>
             {WIDGET_TYPES.map(t => (
               <button key={t.id} className={s.typeCard} onClick={() => setAdding(t.id)}>
@@ -74,8 +75,8 @@ function WidgetConfigurator({ type, defaults, onConfirm, onCancel }) {
   return (
     <div className={s.configurator}>
       <div className={s.cfgHeader}>
-        <span>{t.icon} {t.label}</span>
-        <button className={s.btnCancel} onClick={onCancel}>✕</button>
+        <span style={{display:'flex', alignItems:'center', gap:'6px'}}>{t.icon} {t.label}</span>
+        <button className={s.btnCancel} onClick={onCancel} style={{display:'flex', alignItems:'center', justifyContent:'center'}}><X size={14} /></button>
       </div>
 
       {(type === 'countdown' || type === 'age' || type === 'memories') && (
@@ -89,8 +90,8 @@ function WidgetConfigurator({ type, defaults, onConfirm, onCancel }) {
               <label className={s.label}>Unité affichée</label>
               <div className={s.unitRow}>
                 {['auto','years','months','days','hours'].map(u => (
-                  <button key={u} className={`${s.unitBtn} ${cfg.unit===u ? s.unitActive : ''}`} onClick={() => setCfg({...cfg, unit: u})}>
-                    {u === 'auto' ? '🔄 Auto' : u === 'years' ? '📆 Années' : u === 'months' ? '🗓 Mois' : u === 'days' ? '📅 Jours' : '⏰ Heures'}
+                  <button key={u} className={`${s.unitBtn} ${cfg.unit===u ? s.unitActive : ''}`} onClick={() => setCfg({...cfg, unit: u})} style={{display:'flex', alignItems:'center', gap:'4px'}}>
+                    {u === 'auto' ? <><RefreshCw size={14} /> Auto</> : u === 'years' ? <><CalendarDays size={14} /> Années</> : u === 'months' ? <><CalendarDays size={14} /> Mois</> : u === 'days' ? <><Calendar size={14} /> Jours</> : <><Clock size={14} /> Heures</>}
                   </button>
                 ))}
               </div>
@@ -122,13 +123,13 @@ function WidgetEditor({ widget, onUpdate, onRemove }) {
   return (
     <div className={s.widgetCard}>
       <div className={s.widgetHeader} onClick={() => setOpen(!open)}>
-        <span>{t?.icon} {t?.label}</span>
+        <span style={{display:'flex', alignItems:'center', gap:'6px'}}>{t?.icon} {t?.label}</span>
         <span className={s.widgetMeta}>
           {widget.date ? new Date(widget.date).toLocaleDateString('fr-FR') : widget.text?.slice(0,20)}
         </span>
         <div className={s.widgetActions}>
-          <button className={s.chevron}>{open ? '▲' : '▼'}</button>
-          <button className={s.btnRemove} onClick={e => { e.stopPropagation(); onRemove(); }}>🗑</button>
+          <button className={s.chevron} style={{display:'flex', alignItems:'center', justifyContent:'center'}}>{open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button>
+          <button className={s.btnRemove} onClick={e => { e.stopPropagation(); onRemove(); }} style={{display:'flex', alignItems:'center', justifyContent:'center'}}><Trash2 size={14} /></button>
         </div>
       </div>
       {open && (
@@ -150,8 +151,8 @@ function WidgetEditor({ widget, onUpdate, onRemove }) {
               <label className={s.label}>Unité</label>
               <div className={s.unitRow}>
                 {['auto','years','months','days','hours'].map(u => (
-                  <button key={u} className={`${s.unitBtn} ${widget.unit===u ? s.unitActive : ''}`} onClick={() => onUpdate({unit: u})}>
-                    {u==='auto'?'🔄':u==='years'?'📆':u==='months'?'🗓':u==='days'?'📅':'⏰'}
+                  <button key={u} className={`${s.unitBtn} ${widget.unit===u ? s.unitActive : ''}`} onClick={() => onUpdate({unit: u})} style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+                    {u==='auto'?<RefreshCw size={14} />:u==='years'?<CalendarDays size={14} />:u==='months'?<CalendarDays size={14} />:u==='days'?<Calendar size={14} />:<Clock size={14} />}
                   </button>
                 ))}
               </div>

@@ -1,44 +1,45 @@
 import { useState, useRef } from 'react';
 import { uploadFile } from '../utils/api';
+import { Globe, Hand, Music, MessageSquare, Lightbulb, Gift, Sparkles, Users, Building, Mail, Palette, Wand2, Image as ImageIcon, RefreshCw, Trash2, UploadCloud } from 'lucide-react';
 import s from './BackgroundTab.module.css';
 
 /* ── Section definitions per template ─────────────────────── */
 const TEMPLATE_SECTIONS = {
   birthday: [
-    { key: 'global',      label: 'Global (fallback)', icon: '🌐' },
-    { key: 'greeting',    label: 'Intro / Bonjour',   icon: '👋' },
-    { key: 'music',       label: 'Musique',            icon: '🎵' },
-    { key: 'message',     label: 'Message',            icon: '💬' },
-    { key: 'ideas',       label: 'Idées',              icon: '💡' },
-    { key: 'celebration', label: 'Celebration',        icon: '🎂' },
-    { key: 'outro',       label: 'Outro',              icon: '✨' },
+    { key: 'global',      label: 'Global (fallback)', icon: <Globe size={16} /> },
+    { key: 'greeting',    label: 'Intro / Bonjour',   icon: <Hand size={16} /> },
+    { key: 'music',       label: 'Musique',            icon: <Music size={16} /> },
+    { key: 'message',     label: 'Message',            icon: <MessageSquare size={16} /> },
+    { key: 'ideas',       label: 'Idées',              icon: <Lightbulb size={16} /> },
+    { key: 'celebration', label: 'Celebration',        icon: <Gift size={16} /> },
+    { key: 'outro',       label: 'Outro',              icon: <Sparkles size={16} /> },
   ],
   special: [
-    { key: 'global',      label: 'Global (fallback)', icon: '🌐' },
-    { key: 'greeting',    label: 'Intro',              icon: '👋' },
-    { key: 'music',       label: 'Musique',            icon: '🎵' },
-    { key: 'message',     label: 'Message',            icon: '💬' },
-    { key: 'ideas',       label: 'Idées',              icon: '💡' },
-    { key: 'celebration', label: 'Celebration',        icon: '💫' },
-    { key: 'outro',       label: 'Outro',              icon: '✨' },
+    { key: 'global',      label: 'Global (fallback)', icon: <Globe size={16} /> },
+    { key: 'greeting',    label: 'Intro',              icon: <Hand size={16} /> },
+    { key: 'music',       label: 'Musique',            icon: <Music size={16} /> },
+    { key: 'message',     label: 'Message',            icon: <MessageSquare size={16} /> },
+    { key: 'ideas',       label: 'Idées',              icon: <Lightbulb size={16} /> },
+    { key: 'celebration', label: 'Celebration',        icon: <Sparkles size={16} /> },
+    { key: 'outro',       label: 'Outro',              icon: <Sparkles size={16} /> },
   ],
   'collective-family': [
-    { key: 'global',    label: 'Global (fallback)', icon: '🌐' },
-    { key: 'greeting',  label: 'Intro',              icon: '👋' },
-    { key: 'music',     label: 'Musique',            icon: '🎵' },
-    { key: 'fromgroup', label: 'Du groupe',          icon: '👨‍👩‍👧' },
-    { key: 'ideas',     label: 'Idées',              icon: '💡' },
-    { key: 'wishes',    label: 'Vœux',               icon: '💌' },
-    { key: 'outro',     label: 'Outro',              icon: '✨' },
+    { key: 'global',    label: 'Global (fallback)', icon: <Globe size={16} /> },
+    { key: 'greeting',  label: 'Intro',              icon: <Hand size={16} /> },
+    { key: 'music',     label: 'Musique',            icon: <Music size={16} /> },
+    { key: 'fromgroup', label: 'Du groupe',          icon: <Users size={16} /> },
+    { key: 'ideas',     label: 'Idées',              icon: <Lightbulb size={16} /> },
+    { key: 'wishes',    label: 'Vœux',               icon: <Mail size={16} /> },
+    { key: 'outro',     label: 'Outro',              icon: <Sparkles size={16} /> },
   ],
   'collective-pro': [
-    { key: 'global',    label: 'Global (fallback)', icon: '🌐' },
-    { key: 'greeting',  label: 'Intro',              icon: '👋' },
-    { key: 'music',     label: 'Musique',            icon: '🎵' },
-    { key: 'fromgroup', label: 'Du groupe',          icon: '🏢' },
-    { key: 'ideas',     label: 'Idées',              icon: '💡' },
-    { key: 'wishes',    label: 'Vœux',               icon: '💌' },
-    { key: 'outro',     label: 'Outro',              icon: '✨' },
+    { key: 'global',    label: 'Global (fallback)', icon: <Globe size={16} /> },
+    { key: 'greeting',  label: 'Intro',              icon: <Hand size={16} /> },
+    { key: 'music',     label: 'Musique',            icon: <Music size={16} /> },
+    { key: 'fromgroup', label: 'Du groupe',          icon: <Building size={16} /> },
+    { key: 'ideas',     label: 'Idées',              icon: <Lightbulb size={16} /> },
+    { key: 'wishes',    label: 'Vœux',               icon: <Mail size={16} /> },
+    { key: 'outro',     label: 'Outro',              icon: <Sparkles size={16} /> },
   ],
 };
 
@@ -113,9 +114,9 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
         <h3 className={s.groupTitle}>Type de fond</h3>
         <div className={s.typeRow}>
           {[
-            { value: 'color',    label: '🎨 Couleur' },
-            { value: 'gradient', label: '🌈 Dégradé' },
-            { value: 'image',    label: '🖼 Image' },
+            { value: 'color',    label: <><Palette size={14} /> Couleur</> },
+            { value: 'gradient', label: <><Wand2 size={14} /> Dégradé</> },
+            { value: 'image',    label: <><ImageIcon size={14} /> Image</> },
           ].map(t => (
             <button
               key={t.value}
@@ -191,11 +192,12 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
                   className={s.btnSecondary}
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading}
+                  style={{display: 'flex', gap: '6px', alignItems: 'center'}}
                 >
-                  {uploading ? '↻ Upload…' : '🔄 Changer'}
+                  {uploading ? <><RefreshCw size={14} className="spinIcon" /> Upload…</> : <><RefreshCw size={14} /> Changer</>}
                 </button>
-                <button className={s.btnDanger} onClick={() => update({ value: '' })}>
-                  🗑 Supprimer
+                <button className={s.btnDanger} onClick={() => update({ value: '' })} style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
+                  <Trash2 size={14} /> Supprimer
                 </button>
               </div>
             </div>
@@ -213,7 +215,7 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
             >
               {uploading
                 ? <><span className={s.uploadSpinner} /> Upload en cours…</>
-                : <><span className={s.dropIcon}>🖼</span> Cliquez ou déposez une image</>
+                : <><span className={s.dropIcon}><ImageIcon size={24} /></span> Cliquez ou déposez une image</>
               }
             </div>
           )}
@@ -285,8 +287,8 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
                 </div>
             }
           </div>
-          <button className={s.btnDanger} onClick={clearBg} style={{ marginTop: 8 }}>
-            🗑 Effacer ce fond
+          <button className={s.btnDanger} onClick={clearBg} style={{ marginTop: 8, display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}>
+            <Trash2 size={14} /> Effacer ce fond
           </button>
         </div>
       )}

@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { Image as ImageIcon, Star, LayoutGrid, ScanLine, AlignVerticalJustifyCenter, AlignVerticalJustifyStart, AlignHorizontalJustifyStart, MousePointer2, RefreshCw } from 'lucide-react';
 import s from './PhotoLayoutTab.module.css';
 
 const PHOTO_META = {
-  photo1: { label: 'Gauche',  emoji: '🖼', color: '#e8d5f5', defaultX: -80 },
-  photo2: { label: 'Centre',  emoji: '⭐', color: '#ffd6e0', defaultX:   0 },
-  photo3: { label: 'Droite',  emoji: '🖼', color: '#d5eaf5', defaultX:  80 },
+  photo1: { label: 'Gauche',  icon: <ImageIcon size={16} />, color: '#e8d5f5', defaultX: -80 },
+  photo2: { label: 'Centre',  icon: <Star size={16} />, color: '#ffd6e0', defaultX:   0 },
+  photo3: { label: 'Droite',  icon: <ImageIcon size={16} />, color: '#d5eaf5', defaultX:  80 },
 };
 
 const DEFAULTS = {
@@ -14,11 +15,11 @@ const DEFAULTS = {
 };
 
 const PRESETS = [
-  { id: 'default',  label: 'Défaut',   icon: '▦', transforms: { photo1:{x:0,y:4,rotation:-6,scale:1,zIndex:1}, photo2:{x:0,y:0,rotation:0,scale:1.1,zIndex:2}, photo3:{x:0,y:2,rotation:5,scale:1,zIndex:1} } },
-  { id: 'fan',      label: 'Éventail', icon: '🀱', transforms: { photo1:{x:-20,y:10,rotation:-18,scale:0.9,zIndex:1}, photo2:{x:0,y:0,rotation:0,scale:1.05,zIndex:3}, photo3:{x:20,y:10,rotation:18,scale:0.9,zIndex:2} } },
-  { id: 'stack',    label: 'Pile',     icon: '⧉', transforms: { photo1:{x:-30,y:8,rotation:-12,scale:1,zIndex:1}, photo2:{x:0,y:0,rotation:3,scale:1,zIndex:3}, photo3:{x:28,y:6,rotation:10,scale:0.95,zIndex:2} } },
-  { id: 'cascade',  label: 'Cascade',  icon: '↘', transforms: { photo1:{x:-10,y:-20,rotation:-4,scale:0.88,zIndex:1}, photo2:{x:5,y:0,rotation:0,scale:1,zIndex:2}, photo3:{x:10,y:20,rotation:4,scale:0.88,zIndex:1} } },
-  { id: 'row',      label: 'Rangée',   icon: '▬', transforms: { photo1:{x:0,y:0,rotation:-3,scale:0.95,zIndex:1}, photo2:{x:0,y:-8,rotation:0,scale:1,zIndex:2}, photo3:{x:0,y:0,rotation:3,scale:0.95,zIndex:1} } },
+  { id: 'default',  label: 'Défaut',   icon: <LayoutGrid size={14} />, transforms: { photo1:{x:0,y:4,rotation:-6,scale:1,zIndex:1}, photo2:{x:0,y:0,rotation:0,scale:1.1,zIndex:2}, photo3:{x:0,y:2,rotation:5,scale:1,zIndex:1} } },
+  { id: 'fan',      label: 'Éventail', icon: <ScanLine size={14} />, transforms: { photo1:{x:-20,y:10,rotation:-18,scale:0.9,zIndex:1}, photo2:{x:0,y:0,rotation:0,scale:1.05,zIndex:3}, photo3:{x:20,y:10,rotation:18,scale:0.9,zIndex:2} } },
+  { id: 'stack',    label: 'Pile',     icon: <AlignVerticalJustifyCenter size={14} />, transforms: { photo1:{x:-30,y:8,rotation:-12,scale:1,zIndex:1}, photo2:{x:0,y:0,rotation:3,scale:1,zIndex:3}, photo3:{x:28,y:6,rotation:10,scale:0.95,zIndex:2} } },
+  { id: 'cascade',  label: 'Cascade',  icon: <AlignVerticalJustifyStart size={14} />, transforms: { photo1:{x:-10,y:-20,rotation:-4,scale:0.88,zIndex:1}, photo2:{x:5,y:0,rotation:0,scale:1,zIndex:2}, photo3:{x:10,y:20,rotation:4,scale:0.88,zIndex:1} } },
+  { id: 'row',      label: 'Rangée',   icon: <AlignHorizontalJustifyStart size={14} />, transforms: { photo1:{x:0,y:0,rotation:-3,scale:0.95,zIndex:1}, photo2:{x:0,y:-8,rotation:0,scale:1,zIndex:2}, photo3:{x:0,y:0,rotation:3,scale:0.95,zIndex:1} } },
 ];
 
 // PREVIEW_SCALE: 1 template-px = how many preview-px
@@ -123,13 +124,13 @@ export default function PhotoLayoutTab({ transforms = {}, onChange }) {
                 onPointerDown={(e) => onPointerDown(e, key)}
                 onClick={() => setActivePhoto(key)}
               >
-                <span className={s.previewEmoji}>{meta.emoji}</span>
+                <span className={s.previewEmoji}>{meta.icon}</span>
                 <span className={s.previewLabel}>{meta.label}</span>
               </div>
             );
           })}
         </div>
-        <p className={s.hint}>✦ Fais glisser les photos • Clique pour sélectionner</p>
+        <p className={s.hint} style={{display:'flex', alignItems:'center', gap:'4px', justifyContent:'center'}}><MousePointer2 size={12} /> Fais glisser les photos • Clique pour sélectionner</p>
       </div>
 
       {/* Fine controls */}
@@ -141,12 +142,13 @@ export default function PhotoLayoutTab({ transforms = {}, onChange }) {
                 key={key}
                 className={`${s.photoTab} ${activePhoto === key ? s.photoTabActive : ''}`}
                 onClick={() => setActivePhoto(key)}
+                style={{display:'flex', alignItems:'center', gap:'6px'}}
               >
-                {PHOTO_META[key].emoji} {PHOTO_META[key].label}
+                {PHOTO_META[key].icon} {PHOTO_META[key].label}
               </button>
             ))}
           </div>
-          <button className={s.resetBtn} onClick={() => resetPhoto(activePhoto)} title="Réinitialiser">↺</button>
+          <button className={s.resetBtn} onClick={() => resetPhoto(activePhoto)} title="Réinitialiser" style={{display:'flex', alignItems:'center', justifyContent:'center'}}><RefreshCw size={14} /></button>
         </div>
 
         <SliderRow label="Position X" value={t.x}        min={-200} max={200} step={1}    unit="px" onChange={v => update(activePhoto,'x',v)} />

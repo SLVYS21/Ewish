@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './WishesManager.module.css';
-const BACKEND_LINK = 'http://localhost:3000';
+const BACKEND_LINK = 'http://localhost:5000';
 
 export default function WishesManager({ publicationId, templateName }) {
   const [wishes, setWishes] = useState([]);
@@ -33,7 +33,7 @@ export default function WishesManager({ publicationId, templateName }) {
       });
       const updated = await r.json();
       setWishes(w => w.map(x => x._id === updated._id ? updated : x));
-    } catch {}
+    } catch { }
   };
 
   const deleteWish = async (id) => {
@@ -49,7 +49,7 @@ export default function WishesManager({ publicationId, templateName }) {
   if (!isCollective) return null;
 
   const approved = wishes.filter(w => w.approved && !w.hidden).length;
-  const pending  = wishes.filter(w => !w.approved).length;
+  const pending = wishes.filter(w => !w.approved).length;
 
   return (
     <div className={styles.root}>
@@ -75,11 +75,11 @@ export default function WishesManager({ publicationId, templateName }) {
           <span className={styles.statLabel}>Reçus</span>
         </div>
         <div className={styles.stat}>
-          <span className={styles.statNum} style={{color:'var(--green)'}}>{approved}</span>
+          <span className={styles.statNum} style={{ color: 'var(--green)' }}>{approved}</span>
           <span className={styles.statLabel}>Approuvés</span>
         </div>
         <div className={styles.stat}>
-          <span className={styles.statNum} style={{color:'var(--accent)'}}>{pending}</span>
+          <span className={styles.statNum} style={{ color: 'var(--accent)' }}>{pending}</span>
           <span className={styles.statLabel}>En attente</span>
         </div>
       </div>
@@ -89,11 +89,11 @@ export default function WishesManager({ publicationId, templateName }) {
 
       {/* Wishes list */}
       {loading ? (
-        <div className={styles.loading}><div className={styles.spinner}/></div>
+        <div className={styles.loading}><div className={styles.spinner} /></div>
       ) : wishes.length === 0 ? (
         <div className={styles.empty}>
           <span>💌</span>
-          <p>Aucun message encore.<br/>Partagez le lien de collecte !</p>
+          <p>Aucun message encore.<br />Partagez le lien de collecte !</p>
         </div>
       ) : (
         <div className={styles.list}>
@@ -110,19 +110,43 @@ export default function WishesManager({ publicationId, templateName }) {
                   <div className={styles.wishName}>{w.firstName}</div>
                   {w.role && <div className={styles.wishRole}>{w.role}</div>}
                   <div className={styles.wishDate}>
-                    {new Date(w.createdAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}
+                    {new Date(w.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
                 <div className={styles.wishStatus}>
                   {w.approved && !w.hidden
                     ? <span className={styles.badgeApproved}>✓ Visible</span>
                     : w.hidden
-                    ? <span className={styles.badgeHidden}>Masqué</span>
-                    : <span className={styles.badgePending}>En attente</span>
+                      ? <span className={styles.badgeHidden}>Masqué</span>
+                      : <span className={styles.badgePending}>En attente</span>
                   }
                 </div>
               </div>
               <p className={styles.wishMessage}>"{w.message}"</p>
+
+              {w.audioUrl && (
+                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--surface2)', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text2)', marginBottom: '6px' }}>🎤 Message vocal</div>
+                  <audio controls src={w.audioUrl} style={{ width: '100%', height: '36px', borderRadius: '18px' }}></audio>
+                </div>
+              )}
+
+              {w.videoUrl && (
+                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--surface2)', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text2)', marginBottom: '6px' }}>🎥 Vidéo</div>
+                  {w.videoUrl.includes('youtube.com') || w.videoUrl.includes('youtu.be') ? (
+                    <iframe
+                      width="100%" height="180"
+                      src={`https://www.youtube.com/embed/${w.videoUrl.split(/v=|youtu\.be\//)[1]?.split(/[?&]/)[0]}`}
+                      frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
+                      style={{ borderRadius: '8px' }}>
+                    </iframe>
+                  ) : (
+                    <video controls src={w.videoUrl} style={{ width: '100%', maxHeight: '200px', borderRadius: '8px', backgroundColor: '#000' }}></video>
+                  )}
+                </div>
+              )}
+
               <div className={styles.wishActions}>
                 <button
                   className={`${styles.actionBtn} ${w.approved ? styles.actionBtnActive : ''}`}

@@ -1,17 +1,18 @@
 import { useState, useRef } from 'react';
 import { uploadFile } from '../utils/api';
+import { Square, Waves, Activity, RotateCw, Wind, Target, Zap, CircleDashed, Vibrate, UploadCloud, X, Plus, Trash2, Palette, Timer } from 'lucide-react';
 import s from './DecoTab.module.css';
 
 const ANIMATIONS = [
-  { value: 'none',   label: 'Fixe',      icon: '⬛' },
-  { value: 'float',  label: 'Flottant',  icon: '🌊' },
-  { value: 'pulse',  label: 'Pulsation', icon: '💓' },
-  { value: 'spin',   label: 'Rotation',  icon: '🔄' },
-  { value: 'drift',  label: 'Dérive',    icon: '🍃' },
-  { value: 'pop',    label: 'Pop',       icon: '🎯' },
-  { value: 'bounce', label: 'Rebond',    icon: '⚡' },
-  { value: 'swing',  label: 'Balancier', icon: '🎪' },
-  { value: 'shake',  label: 'Vibration', icon: '📳' },
+  { value: 'none',   label: 'Fixe',      icon: <Square size={14} /> },
+  { value: 'float',  label: 'Flottant',  icon: <Waves size={14} /> },
+  { value: 'pulse',  label: 'Pulsation', icon: <Activity size={14} /> },
+  { value: 'spin',   label: 'Rotation',  icon: <RotateCw size={14} /> },
+  { value: 'drift',  label: 'Dérive',    icon: <Wind size={14} /> },
+  { value: 'pop',    label: 'Pop',       icon: <Target size={14} /> },
+  { value: 'bounce', label: 'Rebond',    icon: <Zap size={14} /> },
+  { value: 'swing',  label: 'Balancier', icon: <CircleDashed size={14} /> },
+  { value: 'shake',  label: 'Vibration', icon: <Vibrate size={14} /> },
 ];
 
 const TEMPLATE_SECTIONS = {
@@ -137,16 +138,18 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
             onClick={handleAddLink}
             disabled={!linkUrl}
             title="Ajouter depuis l'URL"
+            style={{display:'flex', alignItems:'center', justifyContent:'center'}}
           >
-            ＋
+            <Plus size={16} />
           </button>
           <button
             className={s.uploadBtn}
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
             title="Uploader un fichier"
+            style={{display:'flex', alignItems:'center', justifyContent:'center'}}
           >
-            {uploading ? <span className={s.spinner} /> : '↑'}
+            {uploading ? <span className={s.spinner} /> : <UploadCloud size={16} />}
           </button>
         </div>
         <input
@@ -160,7 +163,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
       {/* Decoration list */}
       {decorations.length === 0 ? (
         <div className={s.empty}>
-          <span className={s.emptyIcon}>🎨</span>
+          <span className={s.emptyIcon}><Palette size={24} /></span>
           <p>Aucune décoration pour l'instant</p>
           <p className={s.emptyHint}>Uploadez une image pour commencer</p>
         </div>
@@ -188,7 +191,8 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
                 className={s.decoRemove}
                 onClick={e => { e.stopPropagation(); removeDeco(deco.id); }}
                 title="Supprimer"
-              >✕</button>
+                style={{display:'flex', alignItems:'center', justifyContent:'center'}}
+              ><X size={14} /></button>
             </button>
           ))}
         </div>
@@ -331,7 +335,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
           {/* Show After */}
           <div className={s.field}>
             <div className={s.sliderHeader}>
-              <label className={s.fieldLabel}>⏱ Apparaît après</label>
+              <label className={s.fieldLabel} style={{display:'flex', alignItems:'center', gap:'4px'}}><Timer size={14} /> Apparaît après</label>
               <span className={s.sliderVal}>
                 {(selectedDeco.showAfter || 0) === 0 ? 'Dès le début' : `${selectedDeco.showAfter}s`}
               </span>
@@ -347,7 +351,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
           {/* Hide After */}
           <div className={s.field}>
             <div className={s.sliderHeader}>
-              <label className={s.fieldLabel}>⏱ Disparaît après</label>
+              <label className={s.fieldLabel} style={{display:'flex', alignItems:'center', gap:'4px'}}><Timer size={14} /> Disparaît après</label>
               <span className={s.sliderVal}>
                 {(selectedDeco.hideAfter || 0) === 0 ? 'Jamais' : `${selectedDeco.hideAfter}s`}
               </span>
@@ -376,7 +380,8 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
           <button
             className={s.btnDanger}
             onClick={() => removeDeco(selectedDeco.id)}
-          >🗑 Supprimer cette décoration</button>
+            style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'6px'}}
+          ><Trash2 size={14} /> Supprimer cette décoration</button>
         </div>
       )}
     </div>

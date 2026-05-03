@@ -106,6 +106,7 @@ export default api;
 
 // ── Auth ──
 export const login = (email, password) => api.post('/auth/login', { email, password }, { withCredentials: true });
+export const register = (email, password, name) => api.post('/auth/register', { email, password, name }, { withCredentials: true });
 export const logout = () => api.post('/auth/logout', {}, { withCredentials: true });
 export const getMe = () => api.get('/auth/me', { withCredentials: true });
 
@@ -132,7 +133,6 @@ export const getApprovedWishes = (pubId) => api.get(`/wishes/${pubId}/approved`,
 // ── Templates (admin update) ──
 export const updateTemplate = (name, data) => api.patch(`/templates/${name}`, data, { withCredentials: true });
 
-// ── Short links ──
 export const getShortLink = (id) => api.post(`/shortlinks/${id}`, {}, { withCredentials: true });
 export const setCustomSlug = (id, slug) => api.patch(`/shortlinks/${id}`, { slug }, { withCredentials: true });
 
@@ -145,3 +145,6 @@ export const deleteFont = (id) => api.delete(`/fonts/${id}`, { withCredentials: 
 export const duplicatePublication = (id, data) => api.post(`/publications/${id}/duplicate`, data, { withCredentials: true });
 
 export const unpublishPublication = (id) => api.post(`/publications/${id}/unpublish`, {}, { withCredentials: true });
+
+// ── Billing ──
+export const buyCredits = (amount) => api.post('/billing/buy-credits', { amount }, { withCredentials: true });

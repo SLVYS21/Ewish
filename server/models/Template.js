@@ -16,8 +16,8 @@ const templateSchema = new mongoose.Schema({
   label: { type: String, required: true },               // e.g. "Birthday Wish"
   description: String,
   thumbnail: String,
-  price: { type: Number, default: 0, required: true
-   },
+  price: { type: Number, default: 0, required: true },
+  creditsRequired: { type: Number, default: 1 },
   fields: [fieldSchema],
   defaultData: { type: mongoose.Schema.Types.Mixed, default: {} },
   defaultStyle: {
