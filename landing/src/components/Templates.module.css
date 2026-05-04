@@ -2,10 +2,16 @@
 .container { max-width: 1100px; margin: 0 auto; }
 
 .header { text-align: center; margin-bottom: 64px; }
-.eyebrow { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
-.title { font-family: var(--font-serif); font-size: clamp(2.2rem, 4vw, 3.4rem); font-weight: 300; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 16px; }
-.title em { font-style: italic; color: var(--gold); }
-.sub { font-size: 1rem; color: var(--ink-3); max-width: 440px; margin: 0 auto; line-height: 1.6; }
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold);
+  background: var(--gold-pale); padding: 6px 14px; border-radius: 99px;
+  margin-bottom: 20px;
+}
+.title { font-family: var(--font-serif); font-size: clamp(2.2rem, 4vw, 3.4rem); font-weight: 400; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 16px; }
+.title em { font-style: italic; color: var(--rose); }
+.sub { font-size: 1rem; color: var(--ink-3); max-width: 440px; margin: 0 auto; line-height: 1.6; font-weight: 400; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
 
@@ -36,28 +42,28 @@
 .filmHole { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); flex-shrink: 0; }
 
 /* Body */
-.body { padding: 20px; }
-.cardTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-.name { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); line-height: 1.2; }
-.price { font-size: 0.78rem; font-weight: 500; color: var(--gold); white-space: nowrap; padding-top: 3px; }
-.desc { font-size: 0.8rem; color: var(--ink-3); line-height: 1.55; margin-bottom: 14px; }
+.body { padding: 22px; }
+.cardTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.name { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400; color: var(--ink); line-height: 1.2; }
+.price { font-size: 0.8rem; font-weight: 700; color: var(--gold); white-space: nowrap; padding-top: 3px; }
+.desc { font-size: 0.82rem; color: var(--ink-3); line-height: 1.6; margin-bottom: 16px; }
 
-.highlights { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-bottom: 18px; }
-.highlight { font-size: 0.76rem; color: var(--ink-2); display: flex; align-items: center; gap: 7px; }
+.highlights { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.highlight { font-size: 0.78rem; color: var(--ink-2); display: flex; align-items: center; gap: 7px; font-weight: 500; }
 .dot { color: var(--gold); font-size: 0.45rem; flex-shrink: 0; }
 
 .actions { display: flex; gap: 8px; align-items: center; }
 .btnOrder {
   flex: 1; background: var(--ink); color: var(--ivory);
-  border: none; border-radius: 99px; padding: 10px 16px;
-  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.02em;
-  transition: background 0.2s;
+  border: none; border-radius: 99px; padding: 12px 16px;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.02em;
+  transition: background 0.2s, transform 0.15s;
 }
-.btnOrder:hover { background: var(--gold); }
+.btnOrder:hover { background: var(--rose); transform: translateY(-1px); }
 .btnPreview {
-  font-size: 0.78rem; color: var(--ink-3);
-  border-bottom: 1px solid var(--ivory-3); padding-bottom: 1px;
-  transition: color 0.2s; white-space: nowrap;
+  font-size: 0.8rem; color: var(--ink-3);
+  border-bottom: 1px solid var(--gold); padding-bottom: 1px;
+  transition: color 0.2s; white-space: nowrap; font-weight: 500;
 }
 .btnPreview:hover { color: var(--gold); }
 

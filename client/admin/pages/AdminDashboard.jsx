@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAnalytics, buyCredits } from '../../utils/api';
 import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
+import { Diamond, Package, CheckCircle, CircleDollarSign, TrendingUp, Inbox } from 'lucide-react';
 import s from './AdminDashboard.module.css';
 
 const BADGE = {
@@ -62,11 +63,11 @@ export default function AdminDashboard() {
       {!loading && data && <>
         {/* ── Stats row ── */}
         <div className={s.statsRow}>
-          <StatCard label="Solde Crédits"      value={user?.credits || 0}    icon="💎" meta={<button onClick={handleBuyCredits} className={s.buyBtn}>Acheter</button>} colorClass={s.gold} isText />
-          <StatCard label="Commandes totales" value={data.orders.total}     icon="📦" meta={`${data.orders.pending} en attente`} />
-          <StatCard label="Livrées"            value={data.orders.delivered} icon="✅" meta={`${data.orders.confirmed} confirmées`} colorClass={s.green} />
-          <StatCard label="Revenus"            value={fmtPrice(data.revenue.total)} icon="💰" meta="Confirmées + livrées" colorClass={s.gold} isText />
-          <StatCard label="Conversion"         value={`${data.funnel.conversionRate}%`} icon="📈" meta={`${data.funnel.pageViews} visites → ${data.funnel.purchases} achats`} isText />
+          <StatCard label="Solde Crédits"      value={user?.credits || 0}    icon={<Diamond size={24} />} meta={<button onClick={handleBuyCredits} className={s.buyBtn}>Acheter</button>} colorClass={s.gold} isText />
+          <StatCard label="Commandes totales" value={data.orders.total}     icon={<Package size={24} />} meta={`${data.orders.pending} en attente`} />
+          <StatCard label="Livrées"            value={data.orders.delivered} icon={<CheckCircle size={24} />} meta={`${data.orders.confirmed} confirmées`} colorClass={s.green} />
+          <StatCard label="Revenus"            value={fmtPrice(data.revenue.total)} icon={<CircleDollarSign size={24} />} meta="Confirmées + livrées" colorClass={s.gold} isText />
+          <StatCard label="Conversion"         value={`${data.funnel.conversionRate}%`} icon={<TrendingUp size={24} />} meta={`${data.funnel.pageViews} visites → ${data.funnel.purchases} achats`} isText />
         </div>
 
         {/* ── Mid row ── */}
@@ -132,7 +133,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           ) : (
-            <div className={s.emptyWrap}><span className={s.emptyIcon}>📭</span>Aucune commande</div>
+            <div className={s.emptyWrap}><span className={s.emptyIcon}><Inbox size={32} /></span>Aucune commande</div>
           )}
         </div>
       </>}

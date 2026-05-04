@@ -44,3 +44,14 @@
   border-top: 1px solid rgba(255,255,255,0.07);
   display: flex; justify-content: flex-end; gap: 8px;
 }
+
+@media (max-width: 640px) {
+  .overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    max-width: 100%;
+  }
+  .foot { flex-direction: column-reverse; }
+  .foot > * { width: 100%; justify-content: center; }
+}

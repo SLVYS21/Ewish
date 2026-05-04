@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import s from './AdminLogin.module.css';
 
@@ -29,7 +29,7 @@ export default function AdminLogin() {
     <div className={s.root}>
       <div className={s.glow} />
       <div className={s.card}>
-        <div className={s.logo}>eWish<span>Well</span></div>
+        <div className={s.logo}>my<span>Kado</span></div>
         <div className={s.sub}>Interface Admin</div>
 
         <div className={s.field}>
@@ -56,6 +56,10 @@ export default function AdminLogin() {
         <button className={s.btn} onClick={submit} disabled={loading}>
           {loading ? 'Connexion…' : 'Se connecter'}
         </button>
+
+        <div style={{ marginTop: 15, textAlign: 'center', fontSize: 13, color: 'var(--text-3, #888)' }}>
+          Pas encore de compte ? <Link to="/ewish-admin/register" style={{ color: 'var(--brand, #c9a84c)', textDecoration: 'none', fontWeight: 600 }}>S'inscrire</Link>
+        </div>
       </div>
     </div>
   );

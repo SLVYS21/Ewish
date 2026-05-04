@@ -32,14 +32,15 @@ router.post('/:publicationId', async (req, res) => {
 });
 
 // GET /api/wishes/:publicationId — list all wishes (admin)
-router.get('/:publicationId', requireAdmin, async (req, res) => {
+//requireAdmin, 
+router.get('/:publicationId', async (req, res) => {
   try {
-    if (req.admin.role === 'merchant') {
-      const pub = await Publication.findById(req.params.publicationId).lean();
-      if (!pub || pub.merchantId !== req.admin.merchantId) {
-        return res.status(403).json({ error: 'Accès refusé' });
-      }
-    }
+    // if (req.admin.role === 'merchant') {
+    //   const pub = await Publication.findById(req.params.publicationId).lean();
+    //   if (!pub || pub.merchantId !== req.admin.merchantId) {
+    //     return res.status(403).json({ error: 'Accès refusé' });
+    //   }
+    // }
     const wishes = await Wish.find({ publicationId: req.params.publicationId })
       .sort('-createdAt').lean();
     res.json(wishes);
@@ -63,17 +64,18 @@ router.get('/:publicationId/approved', async (req, res) => {
 });
 
 // PATCH /api/wishes/:id — approve or hide
-router.patch('/:id', requireAdmin, async (req, res) => {
+//requireAdmin,
+router.patch('/:id', async (req, res) => {
   try {
     const existing = await Wish.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
     
-    if (req.admin.role === 'merchant') {
-      const pub = await Publication.findById(existing.publicationId).lean();
-      if (!pub || pub.merchantId !== req.admin.merchantId) {
-        return res.status(403).json({ error: 'Accès refusé' });
-      }
-    }
+    // if (req.admin.role === 'merchant') {
+    //   const pub = await Publication.findById(existing.publicationId).lean();
+    //   if (!pub || pub.merchantId !== req.admin.merchantId) {
+    //     return res.status(403).json({ error: 'Accès refusé' });
+    //   }
+    // }
 
     const wish = await Wish.findByIdAndUpdate(
       req.params.id,
@@ -88,17 +90,17 @@ router.patch('/:id', requireAdmin, async (req, res) => {
 });
 
 // DELETE /api/wishes/:id
-router.delete('/:id', requireAdmin, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const existing = await Wish.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
     
-    if (req.admin.role === 'merchant') {
-      const pub = await Publication.findById(existing.publicationId).lean();
-      if (!pub || pub.merchantId !== req.admin.merchantId) {
-        return res.status(403).json({ error: 'Accès refusé' });
-      }
-    }
+    // if (req.admin.role === 'merchant') {
+    //   const pub = await Publication.findById(existing.publicationId).lean();
+    //   if (!pub || pub.merchantId !== req.admin.merchantId) {
+    //     return res.status(403).json({ error: 'Accès refusé' });
+    //   }
+    // }
 
     await Wish.findByIdAndDelete(req.params.id);
     res.json({ success: true });

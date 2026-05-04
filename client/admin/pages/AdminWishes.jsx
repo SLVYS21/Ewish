@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPublications } from '../../utils/api';
 import api from '../../utils/api';
 import PageShell from '../components/PageShell';
+import { Inbox, Mic, Video, Eye, EyeOff, Check, Trash2, RefreshCw } from 'lucide-react';
 import s from './AdminWishes.module.css';
 
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'; }
@@ -83,19 +84,19 @@ export default function AdminWishes() {
           </div>
         )}
         {pubId && (
-          <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={loadWishes}>↻ Rafraîchir</button>
+          <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={loadWishes}><RefreshCw size={14} /> Rafraîchir</button>
         )}
       </div>
 
       {/* ── Empty / loading states ── */}
       {!pubId && (
-        <div className={s.emptyWrap}><span className={s.emptyIcon}>💌</span><p>Sélectionnez une publication collective pour modérer les vœux</p></div>
+        <div className={s.emptyWrap}><span className={s.emptyIcon}><Inbox size={32} /></span><p>Sélectionnez une publication collective pour modérer les vœux</p></div>
       )}
       {pubId && loadingW && (
         <div className={s.loadingWrap}><div className={s.spinner} /></div>
       )}
       {pubId && !loadingW && !displayed.length && (
-        <div className={s.emptyWrap}><span className={s.emptyIcon}>💌</span><p>Aucun message dans cette catégorie</p></div>
+        <div className={s.emptyWrap}><span className={s.emptyIcon}><Inbox size={32} /></span><p>Aucun message dans cette catégorie</p></div>
       )}
 
       {/* ── Wish grid ── */}
@@ -134,16 +135,16 @@ export default function AdminWishes() {
 
               {/* Audio if any */}
               {w.audioUrl && (
-                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--a-surface2)', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--a-text2)', marginBottom: '6px' }}>🎤 Message vocal</div>
+                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--surface2)', borderRadius: '10px' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'6px', fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-2)', marginBottom: '6px' }}><Mic size={14} /> Message vocal</div>
                   <audio controls src={w.audioUrl} style={{ width: '100%', height: '36px', borderRadius: '18px' }}></audio>
                 </div>
               )}
 
               {/* Video if any */}
               {w.videoUrl && (
-                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--a-surface2)', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--a-text2)', marginBottom: '6px' }}>🎥 Vidéo</div>
+                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--surface2)', borderRadius: '10px' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'6px', fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-2)', marginBottom: '6px' }}><Video size={14} /> Vidéo</div>
                   {w.videoUrl.includes('youtube.com') || w.videoUrl.includes('youtu.be') ? (
                     <iframe
                       width="100%" height="180"
@@ -163,15 +164,15 @@ export default function AdminWishes() {
                   className={`${s.btn} ${w.approved ? s.btnGhost : s.btnGold} ${s.btnSm}`}
                   onClick={() => toggle(w._id, 'approved', !w.approved)}
                 >
-                  {w.approved ? '✓ Approuvé' : '+ Approuver'}
+                  {w.approved ? <><Check size={14} /> Approuvé</> : '+ Approuver'}
                 </button>
                 <button
                   className={`${s.btn} ${s.btnGhost} ${s.btnSm}`}
                   onClick={() => toggle(w._id, 'hidden', !w.hidden)}
                 >
-                  {w.hidden ? '👁 Afficher' : '🙈 Masquer'}
+                  {w.hidden ? <><Eye size={14} /> Afficher</> : <><EyeOff size={14} /> Masquer</>}
                 </button>
-                <button className={`${s.btn} ${s.btnDanger} ${s.btnSm} ${s.btnIcon}`} onClick={() => remove(w._id)}>🗑</button>
+                <button className={`${s.btn} ${s.btnDanger} ${s.btnSm} ${s.btnIcon}`} onClick={() => remove(w._id)}><Trash2 size={14} /></button>
               </div>
             </div>
           ))}

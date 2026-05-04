@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { getOrders, updateOrder } from '../../utils/api';
 import PageShell from '../components/PageShell';
 import Modal from '../components/Modal';
+import { Search, Inbox } from 'lucide-react';
 import s from './AdminOrders.module.css';
 
 function fmtPrice(p) { return new Intl.NumberFormat('fr-FR').format(p || 0) + ' FCFA'; }
@@ -81,7 +82,7 @@ export default function AdminOrders() {
       {/* ── Toolbar ── */}
       <div className={s.toolbar}>
         <div className={s.searchWrap}>
-          <span className={s.searchIcon}>🔍</span>
+          <span className={s.searchIcon}><Search size={16} /></span>
           <input className={s.searchInput} placeholder="Nom, email, template…" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
         </div>
         <select className={s.filter} value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}>
@@ -95,7 +96,7 @@ export default function AdminOrders() {
         {loading ? (
           <div className={s.loadingWrap}><div className={s.spinner}/></div>
         ) : !paged.length ? (
-          <div className={s.emptyWrap}><span className={s.emptyIcon}>📭</span>Aucune commande trouvée</div>
+          <div className={s.emptyWrap}><span className={s.emptyIcon}><Inbox size={32} /></span>Aucune commande trouvée</div>
         ) : (
           <table className={s.table}>
             <thead>

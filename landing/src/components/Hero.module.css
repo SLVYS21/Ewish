@@ -30,21 +30,23 @@
 }
 
 .eyebrow {
-  font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--gold);
   margin-bottom: 24px;
+  background: var(--gold-pale); padding: 6px 14px; border-radius: 99px;
 }
 
 .headline {
   font-family: var(--font-serif);
   font-size: clamp(3rem, 6vw, 5.5rem);
-  font-weight: 300; line-height: 1.05;
+  font-weight: 400; line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--ink);
   margin-bottom: 28px;
 }
 .line { display: block; }
-.italic { font-style: italic; color: var(--gold); }
+.italic { font-style: italic; color: var(--rose); }
 .animWord { display: inline-flex; overflow: hidden; }
 .char { display: inline-block; }
 
@@ -58,27 +60,28 @@
 .btnPrimary {
   background: var(--ink); color: var(--ivory);
   border: none; border-radius: 99px;
-  padding: 14px 32px; font-size: 0.9rem; font-weight: 500;
+  padding: 14px 32px; font-size: 0.9rem; font-weight: 700;
   letter-spacing: 0.02em;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   box-shadow: 0 6px 24px rgba(26,20,16,0.18);
 }
-.btnPrimary:hover { background: var(--gold); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(184,134,11,0.25); }
+.btnPrimary:hover { background: var(--rose); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(224,85,116,0.25); }
 .btnSecondary {
-  color: var(--ink-2); font-size: 0.88rem; font-weight: 400;
-  border-bottom: 1px solid var(--ivory-3);
+  color: var(--ink-2); font-size: 0.88rem; font-weight: 500;
+  border-bottom: 1px solid var(--gold);
   padding-bottom: 2px; transition: color 0.2s, border-color 0.2s;
 }
 .btnSecondary:hover { color: var(--gold); border-color: var(--gold); }
 
-.proof { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--ink-3); font-weight: 400; }
+.proof { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--ink-3); font-weight: 500; }
 .proofAvatars { display: flex; }
 .proofAvatar {
   width: 28px; height: 28px; border-radius: 50%;
   border: 2px solid var(--ivory);
-  background: var(--ivory-2);
+  background: linear-gradient(135deg, var(--gold), var(--rose));
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; margin-left: -6px;
+  font-size: 0.6rem; font-weight: 700; color: #fff;
+  margin-left: -6px;
 }
 .proofAvatar:first-child { margin-left: 0; }
 

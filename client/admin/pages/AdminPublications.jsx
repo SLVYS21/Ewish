@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getPublications, deletePublication } from '../../utils/api';
 import PageShell from '../components/PageShell';
+import { Search, ExternalLink, Edit2, Trash2, FileText, Gift, Briefcase, Heart, FolderOpen } from 'lucide-react';
 import s from './AdminPublications.module.css';
 
 const THUMB_BG = {
@@ -10,7 +11,7 @@ const THUMB_BG = {
   'collective-family':'linear-gradient(135deg,#ff69b4,#a78bfa)',
   'collective-pro':'linear-gradient(135deg,#1e3a5f,#c9a84c)',
 };
-const THUMB_EMOJI = { birthday:'🎂', special:'🔍', 'collective-family':'🎉', 'collective-pro':'🏆' };
+const THUMB_EMOJI = { birthday:<Gift size={24}/>, special:<Heart size={24}/>, 'collective-family':<Heart size={24}/>, 'collective-pro':<Briefcase size={24}/> };
 
 export function AdminPublications() {
   const [pubs, setPubs]     = useState([]);
@@ -44,12 +45,12 @@ export function AdminPublications() {
     <PageShell title="Publications" subtitle={`${filtered.length} site${filtered.length > 1 ? 's' : ''} créé${filtered.length > 1 ? 's' : ''}`}>
       <div className={s.toolbar}>
         <div className={s.searchWrap}>
-          <span className={s.searchIcon}>🔍</span>
+          <span className={s.searchIcon}><Search size={16} /></span>
           <input className={s.searchInput} placeholder="Titre, template…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
       </div>
       {loading ? <div className={s.loadingWrap}><div className={s.spinner}/></div>
-       : !filtered.length ? <div className={s.emptyWrap}><span>🎬</span><p>Aucune publication</p></div>
+       : !filtered.length ? <div className={s.emptyWrap}><span><FolderOpen size={32} /></span><p>Aucune publication</p></div>
        : (
         <div className={s.list}>
           {filtered.map(p => {
@@ -71,9 +72,9 @@ export function AdminPublications() {
                   {p.published && <div className={s.url}>{url}</div>}
                 </div>
                 <div className={s.actions}>
-                  {p.published && <a href={url} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}>↗ Voir</a>}
-                  <a href={`/ewish-admin/ewish/edit/${p._id}`} className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}>✏ Éditer</a>
-                  <button className={`${s.btn} ${s.btnDanger}`} onClick={e=>handleDelete(p._id,e)}>🗑</button>
+                  {p.published && <a href={url} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}><ExternalLink size={14}/> Voir</a>}
+                  <a href={`/ewish-admin/ewish/edit/${p._id}`} className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}><Edit2 size={14}/> Éditer</a>
+                  <button className={`${s.btn} ${s.btnDanger}`} onClick={e=>handleDelete(p._id,e)}><Trash2 size={14}/></button>
                 </div>
               </div>
             );

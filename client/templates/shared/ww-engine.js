@@ -504,7 +504,7 @@
         btn.target = '_blank';
         btn.rel = 'noopener noreferrer';
         btn.id = 'ww-branding-btn';
-        btn.textContent = br.label || 'Crée le tien sur eWishWell ✨';
+        btn.textContent = br.label || 'Crée le tien sur myKado ✨';
         btn.style.cssText = [
           'position:fixed',
           'bottom:14px',

@@ -30,7 +30,7 @@ export default function AdminRegister() {
     <div className={s.root}>
       <div className={s.glow} />
       <div className={s.card}>
-        <div className={s.logo}>eWish<span>Well</span></div>
+        <div className={s.logo}>my<span>Kado</span></div>
         <div className={s.sub}>Inscription Marchand</div>
 
         <div className={s.field}>
@@ -69,8 +69,8 @@ export default function AdminRegister() {
           {loading ? 'Création...' : 'Créer mon compte'}
         </button>
         
-        <div style={{ marginTop: 15, textAlign: 'center', fontSize: 13, color: '#888' }}>
-          Déjà un compte ? <Link to="/ewish-admin/login" style={{ color: '#c8963e', textDecoration: 'none' }}>Se connecter</Link>
+        <div style={{ marginTop: 15, textAlign: 'center', fontSize: 13, color: 'var(--text-3, #888)' }}>
+          Déjà un compte ? <Link to="/ewish-admin/login" style={{ color: 'var(--brand, #c9a84c)', textDecoration: 'none', fontWeight: 600 }}>Se connecter</Link>
         </div>
       </div>
     </div>

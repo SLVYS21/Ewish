@@ -1,21 +1,25 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* Palette — aligned with myKado dashboard */
   --ivory:      #faf8f4;
   --ivory-2:    #f3efe8;
   --ivory-3:    #e8e2d8;
   --ink:        #1a1410;
   --ink-2:      #4a4035;
   --ink-3:      #8a7e72;
-  --gold:       #b8860b;
-  --gold-l:     #d4a843;
-  --gold-pale:  #f5e9c8;
-  --rose:       #c9847a;
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:  'Cabinet Grotesk', system-ui, sans-serif;
+  /* Brand colors — exact match with admin dashboard */
+  --gold:       #c9a84c;   /* was #b8860b — now matches --brand in dashboard */
+  --gold-l:     #dbb96a;
+  --gold-pale:  #f7efd4;
+  --rose:       #e05574;   /* myKado signature accent */
 
-  --r:  12px;
+  /* Typography — exact match with dashboard */
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-sans:  'Syne', system-ui, sans-serif;
+
+  --r:    12px;
   --r-lg: 20px;
 }
 
@@ -36,4 +40,4 @@ button { font-family: var(--font-sans); cursor: pointer; }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--ivory-2); }
-::-webkit-scrollbar-thumb { background: var(--ivory-3); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 99px; opacity: .4; }

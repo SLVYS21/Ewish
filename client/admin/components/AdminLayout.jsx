@@ -4,13 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { Menu, X } from 'lucide-react';
 import s from './AdminLayout.module.css';
 
+import { LayoutDashboard, Package, PlaySquare, Palette, Mail, ExternalLink } from 'lucide-react';
+
 const NAV = [
-  { to: '/ewish-admin',              icon: '📊', label: 'Dashboard',       end: true },
-  { to: '/ewish-admin/orders',       icon: '📦', label: 'Commandes'                  },
-  { to: '/ewish-admin/publications', icon: '🎬', label: 'Publications'               },
-  { to: '/ewish-admin/templates',    icon: '🎨', label: 'Templates & Prix'           },
-  { to: '/ewish-admin/wishes',       icon: '💌', label: 'Vœux collectifs'            },
-  { to: '/ewish-admin/ewish',        icon: '🔗', label: 'Espace Client'              },
+  { to: '/ewish-admin',              icon: <LayoutDashboard size={18} />, label: 'Dashboard',       end: true },
+  { to: '/ewish-admin/orders',       icon: <Package size={18} />, label: 'Commandes'                  },
+  { to: '/ewish-admin/publications', icon: <PlaySquare size={18} />, label: 'Publications'               },
+  { to: '/ewish-admin/templates',    icon: <Palette size={18} />, label: 'Templates & Prix'           },
+  { to: '/ewish-admin/wishes',       icon: <Mail size={18} />, label: 'Vœux collectifs'            },
+  { to: '/ewish-admin/ewish',        icon: <ExternalLink size={18} />, label: 'Ouvrir l\'éditeur'          },
 ];
 
 export default function AdminLayout({ pendingCount = 0 }) {
@@ -27,7 +29,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
     <div className={s.shell}>
       {/* ── Mobile Header ── */}
       <div className={s.mobileHeader}>
-        <div className={s.logo}>eWish<span>Well</span></div>
+        <div className={s.logo}>my<span>Kado</span></div>
         <button className={s.menuBtn} onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -37,7 +39,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
       <div className={`${s.sidebarOverlay} ${mobileOpen ? s.open : ''}`} onClick={() => setMobileOpen(false)} />
       <aside className={`${s.sidebar} ${mobileOpen ? s.open : ''}`}>
         <div className={s.sidebarHead}>
-          <div className={s.logo}>eWish<span>Well</span></div>
+          <div className={s.logo}>my<span>Kado</span></div>
           <div className={s.adminBadge}>Admin</div>
         </div>
 

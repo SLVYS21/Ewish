@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Gift, Search, Users, Building, Heart, Sparkles, Film, Copy, X, Trash2, Edit2, MonitorPlay, ExternalLink, CircleOff, Eye, QrCode } from 'lucide-react';
+import { Gift, Search, Users, Building, Heart, Sparkles, Film, Copy, X, Trash2, Edit2, MonitorPlay, ExternalLink, CircleOff, Eye, QrCode, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { getPublications, deletePublication, duplicatePublication, unpublishPublication } from '../utils/api'
 import QRCodeModal from '../components/QRCodeModal';
 import styles from './Dashboard.module.css';
@@ -122,7 +122,7 @@ export default function Dashboard() {
                 width="100%"
                 height="100%"
                 src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="Tutoriel eWish"
+                title="Tutoriel myKado"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -187,9 +187,19 @@ export default function Dashboard() {
 
       {/* Header */}
       <header className={styles.header}>
-        <div className={styles.logo}>
-          <span className={styles.logoIcon}><Gift size={28} color="var(--brand)" /></span>
-          <span className={styles.logoText}>myKado</span>
+        <div className={styles.headerLeft}>
+          <button
+            className={styles.btnAdmin}
+            onClick={() => navigate('/ewish-admin')}
+            title="Tableau de bord admin"
+          >
+            <LayoutDashboard size={16} />
+            <span>Admin</span>
+          </button>
+          <div className={styles.logo}>
+            <span className={styles.logoIcon}><Gift size={22} color="var(--brand)" /></span>
+            <span className={styles.logoText}>myKado</span>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button className={styles.btnGhost} onClick={() => setVideoModalOpen(true)}>

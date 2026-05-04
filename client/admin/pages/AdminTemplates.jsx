@@ -5,9 +5,10 @@ import api from '../../utils/api';
 import PageShell from '../components/PageShell';
 import Modal from '../components/Modal';
 import s from './AdminTemplates.module.css';
+import { Gift, Heart, Briefcase, Edit2, Trash2, Tag, Check, X } from 'lucide-react';
 
 const THUMB_BG    = { birthday:'linear-gradient(135deg,#ff69b4,#ffb347)', special:'linear-gradient(135deg,#4285F4,#34A853)', 'collective-family':'linear-gradient(135deg,#ff69b4,#a78bfa)', 'collective-pro':'linear-gradient(135deg,#1e3a5f,#c9a84c)' };
-const THUMB_EMOJI = { birthday:'🎂', special:'🔍', 'collective-family':'🎉', 'collective-pro':'🏆' };
+const THUMB_EMOJI = { birthday:<Gift size={24}/>, special:<Heart size={24}/>, 'collective-family':<Heart size={24}/>, 'collective-pro':<Briefcase size={24}/> };
 function fmtPrice(p) { return new Intl.NumberFormat('fr-FR').format(p || 0) + ' FCFA'; }
 
 // ── Default promo form state ──
@@ -119,7 +120,7 @@ export default function AdminTemplates() {
                   <div className={s.tmplPrice}>{fmtPrice(t.price)}</div>
                   <div className={s.tmplCredits}>{t.creditsRequired || 1} Crédit(s)</div>
                 </div>
-                {isAdmin && <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openTmpl(t)}>✏ Modifier</button>}
+                {isAdmin && <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openTmpl(t)}><Edit2 size={14}/> Modifier</button>}
               </div>
             );
           })}
@@ -135,7 +136,7 @@ export default function AdminTemplates() {
           </div>
           <div className={s.tableWrap}>
             {loadingP ? <div className={s.loadingWrap}><div className={s.spinner}/></div>
-             : !promos.length ? <div className={s.emptyWrap}><span>🏷️</span><p>Aucun code promo</p></div>
+             : !promos.length ? <div className={s.emptyWrap}><span><Tag size={32}/></span><p>Aucun code promo</p></div>
              : promos.map(p => {
               const expired   = p.expiresAt && new Date(p.expiresAt) < new Date();
               const exhausted = p.maxUses !== null && p.usedCount >= p.maxUses;
@@ -151,8 +152,8 @@ export default function AdminTemplates() {
                   <div className={s.promoUses}>{p.usedCount} utilisation{p.usedCount>1?'s':''}{p.maxUses?` / ${p.maxUses}`:''}</div>
                   <span className={`${s.badge} ${ok?s.badgeApproved:expired?s.badgeCancelled:s.badgeHidden}`}>{ok?'Actif':expired?'Expiré':'Inactif'}</span>
                   <div className={s.promoActions}>
-                    <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openEditPromo(p)}>✏</button>
-                    <button className={`${s.btn} ${s.btnDanger} ${s.btnSm} ${s.btnIcon}`} onClick={()=>removePromo(p._id)}>🗑</button>
+                    <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openEditPromo(p)}><Edit2 size={14}/></button>
+                    <button className={`${s.btn} ${s.btnDanger} ${s.btnSm} ${s.btnIcon}`} onClick={()=>removePromo(p._id)}><Trash2 size={14}/></button>
                   </div>
                 </div>
               );

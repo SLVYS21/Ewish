@@ -107,8 +107,8 @@ export default function Hero({ onOrder }) {
           transition={{ delay: 2.3, duration: 0.6 }}
         >
           <div className={s.proofAvatars}>
-            {['🎂','🎉','🏆','💌'].map((e, i) => (
-              <div key={i} className={s.proofAvatar} style={{ zIndex: 4 - i }}>{e}</div>
+            {['A','C','F','J'].map((c, i) => (
+              <div key={i} className={s.proofAvatar} style={{ zIndex: 4 - i }}>{c}</div>
             ))}
           </div>
           <span>+340 vœux créés ce mois</span>

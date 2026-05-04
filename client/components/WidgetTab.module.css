@@ -5,78 +5,81 @@
   letter-spacing: 0.06em; color: #999; margin-bottom: 10px; }
 
 /* Type picker */
-.typeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.typeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .typeCard {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
-  padding: 10px 12px; background: #f5f5f7; border: 2px solid transparent;
-  border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  padding: 12px 14px; background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s;
 }
-.typeCard:hover { background: #eeeef2; border-color: #ddd; }
-.typeIcon  { font-size: 1.5rem; }
-.typeLabel { font-size: 0.8rem; font-weight: 700; color: #222; }
-.typeDesc  { font-size: 0.65rem; color: #888; line-height: 1.3; }
+.typeCard:hover { background: var(--surface); border-color: var(--brand); }
+.typeIcon  { font-size: 1.5rem; color: var(--text); }
+.typeLabel { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+.typeDesc  { font-size: 0.7rem; color: var(--text-3); line-height: 1.3; }
 
 /* Configurator */
 .configurator {
-  background: #f9f9fc; border: 1.5px solid #e5e5ea;
-  border-radius: 14px; padding: 14px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px;
 }
 .cfgHeader {
   display: flex; justify-content: space-between; align-items: center;
   font-weight: 700; font-size: 0.85rem; margin-bottom: 12px;
 }
 .btnCancel {
-  background: none; border: none; cursor: pointer; font-size: 1rem; color: #999;
-  padding: 2px 6px;
+  background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--text-3);
+  padding: 2px 6px; transition: color 0.2s;
 }
-.btnCancel:hover { color: #333; }
+.btnCancel:hover { color: var(--text); }
 
 /* Form */
-.label { display: block; font-size: 0.72rem; font-weight: 600; color: #666; margin: 10px 0 4px; }
+.label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-2); margin: 12px 0 6px; }
 .input {
-  width: 100%; padding: 7px 10px; font-size: 0.82rem;
-  border: 1.5px solid #e0e0e5; border-radius: 8px;
-  background: #fff; box-sizing: border-box; outline: none;
+  width: 100%; padding: 10px 12px; font-size: 0.85rem;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); box-sizing: border-box; outline: none; color: var(--text);
+  transition: border-color 0.2s;
 }
-.input:focus { border-color: #a855f7; }
+.input:focus { border-color: var(--brand); }
 .textarea {
-  width: 100%; padding: 8px 10px; font-size: 0.82rem;
-  border: 1.5px solid #e0e0e5; border-radius: 8px;
-  background: #fff; box-sizing: border-box; outline: none;
-  resize: vertical; font-family: inherit;
+  width: 100%; padding: 10px 12px; font-size: 0.85rem;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); box-sizing: border-box; outline: none; color: var(--text);
+  resize: vertical; font-family: inherit; transition: border-color 0.2s;
 }
-.textarea:focus { border-color: #a855f7; }
+.textarea:focus { border-color: var(--brand); }
 
-.unitRow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.unitRow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 .unitBtn {
-  padding: 4px 10px; border-radius: 20px; border: 1.5px solid #e0e0e5;
-  background: #f5f5f7; font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+  padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--surface); font-size: 0.8rem; cursor: pointer; transition: all 0.2s; color: var(--text-2);
 }
-.unitBtn:hover { border-color: #ccc; background: #eee; }
-.unitActive { background: #f0e6ff !important; border-color: #a855f7 !important; color: #7c3aed; font-weight: 700; }
+.unitBtn:hover { border-color: var(--brand); color: var(--text); }
+.unitActive { background: rgba(201, 168, 76, 0.1) !important; border-color: var(--brand) !important; color: var(--brand); font-weight: 700; }
 
 .btnAdd {
-  margin-top: 14px; width: 100%; padding: 10px;
-  background: #a855f7; color: #fff; border: none; border-radius: 10px;
-  font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.15s;
+  margin-top: 16px; width: 100%; padding: 12px;
+  background: var(--brand); color: #fff; border: none; border-radius: 12px;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
 }
-.btnAdd:hover:not(:disabled) { background: #9333ea; }
-.btnAdd:disabled { opacity: 0.4; cursor: not-allowed; }
+.btnAdd:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3); }
+.btnAdd:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Active widget cards */
+/* Active widget cards */
 .widgetCard {
-  border: 1.5px solid #e5e5ea; border-radius: 12px;
-  overflow: hidden; margin-bottom: 8px;
+  border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 10px;
 }
 .widgetHeader {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 12px; background: #f9f9fc;
-  cursor: pointer; font-size: 0.82rem; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; background: var(--surface2);
+  cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--text);
+  transition: background 0.2s;
 }
-.widgetHeader:hover { background: #f0f0f5; }
-.widgetMeta { flex: 1; font-size: 0.72rem; color: #999; font-weight: 400; }
-.widgetActions { display: flex; gap: 4px; align-items: center; }
-.chevron { background: none; border: none; cursor: pointer; font-size: 0.7rem; color: #aaa; }
-.btnRemove { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 2px; }
-.btnRemove:hover { opacity: 0.7; }
-.widgetBody { padding: 12px; border-top: 1px solid #eee; background: #fff; }
+.widgetHeader:hover { background: var(--surface); }
+.widgetMeta { flex: 1; font-size: 0.75rem; color: var(--text-3); font-weight: 500; }
+.widgetActions { display: flex; gap: 6px; align-items: center; }
+.chevron { background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--text-3); }
+.btnRemove { background: none; border: none; cursor: pointer; font-size: 0.95rem; padding: 4px; color: var(--text-2); transition: color 0.2s; }
+.btnRemove:hover { color: var(--red); }
+.widgetBody { padding: 14px; border-top: 1px solid var(--border); background: var(--surface); }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './WishesManager.module.css';
-const BACKEND_LINK = 'https://go.mykado.store';
+const BACKEND_LINK = import.meta.env.VITE_API_URL;
 
 export default function WishesManager({ publicationId, templateName }) {
   const [wishes, setWishes] = useState([]);

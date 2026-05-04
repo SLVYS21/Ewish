@@ -8,14 +8,25 @@
 .header {
   position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 24px;
   height: 60px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
+.headerLeft { display: flex; align-items: center; gap: 10px; }
 .logo { display: flex; align-items: center; gap: 8px; }
 .logoIcon { font-size: 1.4rem; }
 .logoText { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+/* Admin shortcut pill */
+.btnAdmin {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-2); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btnAdmin:hover { background: rgba(201,168,76,0.1); border-color: var(--brand); color: var(--brand); }
+
 
 /* ── Hero ── */
 .hero {

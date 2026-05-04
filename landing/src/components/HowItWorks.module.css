@@ -1,29 +1,37 @@
 .section { padding: 100px 40px; background: var(--ivory-2); }
 .inner { max-width: 900px; margin: 0 auto; }
 .header { text-align: center; margin-bottom: 64px; }
-.eyebrow { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
-.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 300; color: var(--ink); letter-spacing: -0.01em; }
-.title em { font-style: italic; color: var(--gold); }
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold);
+  background: var(--gold-pale); padding: 6px 14px; border-radius: 99px;
+  margin-bottom: 20px;
+}
+.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 400; color: var(--ink); letter-spacing: -0.01em; }
+.title em { font-style: italic; color: var(--rose); }
 
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; position: relative; }
 .step {
-  padding: 32px 28px; text-align: center; position: relative;
+  padding: 36px 28px; text-align: center; position: relative;
 }
 .step:not(:last-child) { border-right: 1px solid var(--ivory-3); }
 
-.stepNum { font-family: var(--font-serif); font-size: 3rem; font-weight: 300; color: var(--ivory-3); line-height: 1; margin-bottom: 12px; }
+.stepNum { font-family: var(--font-serif); font-size: 3rem; font-weight: 400; color: rgba(201,168,76,0.2); line-height: 1; margin-bottom: 12px; }
 .stepIcon { font-size: 2rem; margin-bottom: 16px; }
-.stepTitle { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.stepTitle { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
 .stepDesc { font-size: 0.85rem; color: var(--ink-3); line-height: 1.65; }
 
 .bottomCta {
-  text-align: center; margin-top: 56px;
-  padding: 20px 32px;
-  background: var(--gold-pale); border-radius: 99px;
-  font-size: 0.88rem; color: var(--ink-2); display: inline-block;
-  width: 100%;
+  text-align: center; margin-top: 60px;
+  padding: 22px 36px;
+  background: linear-gradient(135deg, var(--gold-pale), var(--ivory-3));
+  border-radius: 99px;
+  font-size: 0.9rem; color: var(--ink-2); display: inline-block;
+  width: 100%; font-weight: 500;
+  border: 1px solid var(--gold-l);
 }
-.bottomCta strong { color: var(--gold); }
+.bottomCta strong { color: var(--rose); font-weight: 800; }
 
 @media (max-width: 680px) {
   .section { padding: 80px 20px; }
