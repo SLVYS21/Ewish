@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getTemplates, createPublication } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
+import PaymentModal from '../admin/components/PaymentModal';
 import styles from './NewWish.module.css';
 
 export default function NewWish() {
@@ -10,6 +11,7 @@ export default function NewWish() {
   const [form, setForm] = useState({ title: '', customName: '', recipientName: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -126,7 +128,16 @@ export default function NewWish() {
 
             {error && <p className={styles.error}>{error}</p>}
             {user?.role === 'merchant' && selected && user.credits < (selected.creditsRequired || 1) && (
-              <p className={styles.error}>Vous n'avez pas assez de crédits (Solde: {user.credits}).</p>
+              <div className={styles.creditWarning}>
+                <p className={styles.error}>Vous n'avez pas assez de crédits (Solde: {user.credits}).</p>
+                <button 
+                  type="button" 
+                  className={styles.buyBtn} 
+                  onClick={() => setPaymentModalOpen(true)}
+                >
+                  💎 Acheter des crédits
+                </button>
+              </div>
             )}
 
             <button type="submit" className={styles.submit} disabled={loading || !selected || (user?.role === 'merchant' && user.credits < (selected?.creditsRequired || 1))}>
@@ -134,6 +145,13 @@ export default function NewWish() {
             </button>
           </form>
         </div>
+
+        {paymentModalOpen && (
+          <PaymentModal 
+            onClose={() => setPaymentModalOpen(false)} 
+            onSuccess={(newCredits) => { /* user context updated in Modal */ }} 
+          />
+        )}
 
         <div className={styles.right}>
           <div className={styles.previewCard}>

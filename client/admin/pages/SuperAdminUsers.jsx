@@ -94,6 +94,11 @@ function UserDrawer({ userId, onClose, onUpdated }) {
                   {saving ? '…' : <><Check size={15} /> Sauvegarder</>}
                 </button>
               </div>
+              <div className={s.quickAdd}>
+                <button onClick={() => setCredits(prev => (parseInt(prev) || 0) + 10)}>+10</button>
+                <button onClick={() => setCredits(prev => (parseInt(prev) || 0) + 50)}>+50</button>
+                <button onClick={() => setCredits(prev => (parseInt(prev) || 0) + 100)}>+100</button>
+              </div>
               {msg && <div className={s.msg}>{msg}</div>}
             </div>
 

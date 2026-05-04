@@ -145,9 +145,19 @@ export default function PaymentModal({ onClose, onSuccess }) {
               </div>
 
               {error && (
-                <div className={s.errorBox}>
-                  <AlertCircle size={16} />
-                  <span>{error}</span>
+                <div className={s.errorContainer}>
+                  <div className={s.errorBox}>
+                    <AlertCircle size={16} />
+                    <span>{error}</span>
+                  </div>
+                  <a 
+                    href={`https://wa.me/22990000000?text=${encodeURIComponent("Bonjour, j'ai un problème avec mon paiement sur myKado. ID Transaction: " + (error.details?.transactionId || "N/A"))}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={s.supportBtn}
+                  >
+                    Besoin d'aide ? Contactez le support WhatsApp
+                  </a>
                 </div>
               )}
 

@@ -178,6 +178,10 @@
   cursor: not-allowed;
 }
 
+.errorContainer {
+  margin-bottom: 20px;
+}
+
 .errorBox {
   display: flex;
   align-items: center;
@@ -187,7 +191,16 @@
   color: #dc2626;
   border-radius: 8px;
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
+}
+
+.supportBtn {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--brand, #000);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .successBox {

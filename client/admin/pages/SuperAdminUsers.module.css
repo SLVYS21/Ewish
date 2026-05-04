@@ -157,6 +157,32 @@
 .saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 .msg { font-size: 0.78rem; color: var(--brand); }
 
+.quickAdd {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.quickAdd button {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quickAdd button:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: rgba(201,168,76,0.05);
+}
+
 /* Pub list */
 .pubList { width: 100%; display: flex; flex-direction: column; gap: 6px; }
 .pubItem { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }

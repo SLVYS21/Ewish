@@ -71,6 +71,39 @@
 .hint code { background: var(--surface2); padding: 1px 5px; border-radius: 4px; font-size: 0.72rem; color: var(--brand-dark); }
 
 .error { color: var(--red); font-size: 0.82rem; }
+
+.creditWarning {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(224, 87, 87, 0.05);
+  border: 1px dashed var(--red);
+  padding: 16px;
+  border-radius: 12px;
+  margin: 10px 0;
+}
+
+.creditWarning .error {
+  margin-bottom: 0;
+}
+
+.buyBtn {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: transform 0.2s;
+}
+
+.buyBtn:hover {
+  transform: scale(1.02);
+}
+
 .submit {
   background: linear-gradient(135deg, var(--brand), var(--accent));
   color: #fff; border: none; border-radius: 50px;
