@@ -203,7 +203,7 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button className={styles.btnGhost} onClick={() => setVideoModalOpen(true)}>
-            <MonitorPlay size={18} /> Tutoriel
+            <MonitorPlay size={18} /> Tuto
           </button>
           <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>
             <span>+</span> New
