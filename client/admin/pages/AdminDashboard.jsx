@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAnalytics, buyCredits } from '../../utils/api';
 import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
+import PaymentModal from '../components/PaymentModal';
 import { Diamond, Package, CheckCircle, CircleDollarSign, TrendingUp, Inbox } from 'lucide-react';
 import s from './AdminDashboard.module.css';
 
@@ -21,19 +22,12 @@ export default function AdminDashboard() {
   const [data, setData]     = useState(null);
   const [period, setPeriod] = useState('7d');
   const [loading, setLoading] = useState(true);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleBuyCredits = async () => {
-    try {
-      const amount = prompt("Combien de crédits souhaitez-vous acheter ? (Simulation)", "10");
-      if (!amount) return;
-      const res = await buyCredits(parseInt(amount, 10));
-      setUser({ ...user, credits: res.data.credits });
-      alert(`${amount} crédits ajoutés avec succès ! (Simulation)`);
-    } catch (e) {
-      alert('Erreur: ' + (e.response?.data?.error || e.message));
-    }
+  const handleBuyCredits = () => {
+    setPaymentModalOpen(true);
   };
 
   useEffect(() => { load(period); }, [period]);
@@ -59,6 +53,12 @@ export default function AdminDashboard() {
         </div>
       }
     >
+      {paymentModalOpen && (
+        <PaymentModal 
+          onClose={() => setPaymentModalOpen(false)} 
+          onSuccess={() => { load(period); }} 
+        />
+      )}
       {loading && <div className={s.loadingWrap}><div className={s.spinner} /></div>}
       {!loading && data && <>
         {/* ── Stats row ── */}

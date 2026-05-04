@@ -213,15 +213,15 @@ export default function Dashboard() {
 
       {/* Hero */}
       <section className={styles.hero}>
-        <h1>Create magical<br /><span>birthday wishes</span></h1>
-        <p>Animated, personalized, unforgettable.</p>
-        <Link to="/ewish-admin/ewish/new" className={styles.heroCta}>Get started →</Link>
+        <h1>Créez des messages<br /><span>animés et magiques</span></h1>
+        <p>Animés, personnalisés, inoubliables.</p>
+        <Link to="/ewish-admin/ewish/new" className={styles.heroCta}>Commencer →</Link>
       </section>
 
       {/* My Wishes */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2>My Wishes</h2>
+          <h2>Mes créations</h2>
           <span className={styles.badge}>{pubs.length}{hasNext ? '+' : ''}</span>
         </div>
 

@@ -17,6 +17,11 @@ import AdminPublications from "./admin/pages/AdminPublications";
 import AdminTemplates from "./admin/pages/AdminTemplates";
 import AdminWishes from "./admin/pages/AdminWishes";
 
+// ── Super Admin ──
+import SuperAdminStats  from "./admin/pages/SuperAdminStats";
+import SuperAdminUsers  from "./admin/pages/SuperAdminUsers";
+import SuperAdminAssets from "./admin/pages/SuperAdminAssets";
+
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
 
@@ -28,6 +33,19 @@ function RequireAuth({ children }) {
 
   return children;
 }
+
+function RequireSuperAdmin({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return <Spinner />;
+
+  if (!user || user.role !== 'super_admin') {
+    return <Navigate to="/ewish-admin" replace />;
+  }
+
+  return children;
+}
+
 
 function AdminLoginGate() {
   const { user, loading } = useAuth();
@@ -122,9 +140,17 @@ export default function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="publications" element={<AdminPublications />} />
-            <Route path="templates" element={<AdminTemplates />} />
             <Route path="wishes" element={<AdminWishes />} />
+
+            {/* Super Admin only routes */}
+            <Route path="templates"    element={<RequireSuperAdmin><AdminTemplates /></RequireSuperAdmin>} />
+            <Route path="super/stats"  element={<RequireSuperAdmin><SuperAdminStats /></RequireSuperAdmin>} />
+            <Route path="super/users"  element={<RequireSuperAdmin><SuperAdminUsers /></RequireSuperAdmin>} />
+            <Route path="super/assets" element={<RequireSuperAdmin><SuperAdminAssets /></RequireSuperAdmin>} />
           </Route>
+
+
+
 
           <Route path="/ewish-admin/ewish" element={<RequireAuth><Dashboard /></RequireAuth>} />
           <Route path="/ewish-admin/ewish/new" element={<RequireAuth><NewWish /></RequireAuth>} />

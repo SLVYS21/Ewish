@@ -1,0 +1,117 @@
+/* Tabs */
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 18px; border-radius: 99px;
+  background: var(--surface2); border: 1px solid var(--border);
+  font-size: 0.85rem; font-weight: 600; color: var(--text-2);
+  cursor: pointer; transition: all 0.2s;
+}
+.tab:hover { border-color: var(--brand); color: var(--brand); }
+.tabActive  { background: rgba(201,168,76,0.1); border-color: var(--brand); color: var(--brand); }
+
+/* Drop Zone */
+.dropZone {
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 32px;
+  background: var(--surface2);
+}
+.dropZone:hover, .dragOver { border-color: var(--brand); background: rgba(201,168,76,0.04); }
+.fileInput { display: none; }
+
+.dropPrompt {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  color: var(--text-3);
+}
+.dropPrompt svg { opacity: 0.5; }
+.dropPrompt div { font-size: 0.9rem; }
+.dropPrompt span { color: var(--brand); text-decoration: underline; cursor: pointer; }
+.dropHint { font-size: 0.75rem; color: var(--text-3); }
+
+/* Preview area */
+.previewArea {
+  display: flex; gap: 20px; align-items: flex-start; text-align: left;
+}
+.previewImg {
+  width: 120px; height: 90px; object-fit: cover;
+  border-radius: 10px; flex-shrink: 0; border: 1px solid var(--border);
+}
+.previewMeta { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.metaInput {
+  width: 100%; padding: 8px 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 0.85rem; outline: none;
+  transition: border-color 0.2s;
+}
+.metaInput:focus { border-color: var(--brand); }
+.tagRow { display: flex; align-items: center; gap: 6px; color: var(--text-3); }
+
+.uploadActions { display: flex; gap: 8px; }
+.cancelBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600;
+  color: var(--text-2); cursor: pointer; transition: all 0.2s;
+}
+.cancelBtn:hover { border-color: var(--red, #e05757); color: var(--red, #e05757); }
+.uploadBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--brand); color: #fff; border: none;
+  border-radius: 8px; padding: 7px 18px; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.uploadBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Grid */
+.loading, .empty { padding: 40px; text-align: center; color: var(--text-3); font-size: 0.9rem; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.assetCard {
+  border-radius: 12px; border: 1px solid var(--border);
+  overflow: hidden; background: var(--surface2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.assetCard:hover { transform: translateY(-2px); box-shadow: var(--shadow, 0 4px 20px rgba(0,0,0,0.12)); }
+
+.assetThumb {
+  position: relative; aspect-ratio: 16/9; overflow: hidden;
+}
+.assetThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.deleteBtn {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(0,0,0,0.6); border: none; border-radius: 6px;
+  padding: 5px; cursor: pointer; color: #fff;
+  opacity: 0; transition: opacity 0.2s;
+  display: flex; align-items: center;
+}
+.assetThumb:hover .deleteBtn { opacity: 1; }
+.deleteBtn:hover { background: rgba(224,87,87,0.85); }
+.deleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.assetName {
+  padding: 8px 10px 4px;
+  font-size: 0.78rem; font-weight: 600; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tagList { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 10px 10px; }
+.tagPill {
+  font-size: 0.65rem; font-weight: 600; padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(201,168,76,0.1); color: var(--brand);
+}
+
+@media (max-width: 640px) {
+  .previewArea { flex-direction: column; }
+  .previewImg { width: 100%; height: 160px; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}

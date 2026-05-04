@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
-import { uploadFile } from '../utils/api';
-import { Globe, Hand, Music, MessageSquare, Lightbulb, Gift, Sparkles, Users, Building, Mail, Palette, Wand2, Image as ImageIcon, RefreshCw, Trash2, UploadCloud } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { uploadFile, getAssets } from '../utils/api';
+import { Globe, Hand, Music, MessageSquare, Lightbulb, Gift, Sparkles, Users, Building, Mail, Palette, Wand2, Image as ImageIcon, RefreshCw, Trash2, UploadCloud, Library } from 'lucide-react';
 import s from './BackgroundTab.module.css';
 
 /* ── Section definitions per template ─────────────────────── */
@@ -60,7 +60,14 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
   const sections = TEMPLATE_SECTIONS[templateName] || TEMPLATE_SECTIONS.birthday;
   const [activeSection, setActiveSection] = useState(sections[0].key);
   const [uploading, setUploading] = useState(false);
+  const [bankAssets, setBankAssets] = useState([]);
   const fileRef = useRef(null);
+
+  useEffect(() => {
+    getAssets('background')
+      .then(r => setBankAssets(r.data))
+      .catch(() => {});
+  }, []);
 
   const current = backgrounds[activeSection] || DEFAULT_SECTION;
 
@@ -256,8 +263,31 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
             </>
           )}
 
+          {/* Shared Bank */}
+          {bankAssets.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div className={s.sliderHeader}>
+                <label className={s.fieldLabel} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Library size={14} /> Banque d'images
+                </label>
+              </div>
+              <div className={s.bankGrid}>
+                {bankAssets.map(asset => (
+                  <div 
+                    key={asset._id} 
+                    className={`${s.bankItem} ${current.value === asset.url ? s.bankItemActive : ''}`}
+                    onClick={() => update({ type: 'image', value: asset.url })}
+                    title={asset.name}
+                  >
+                    <img src={asset.url} alt={asset.name} className={s.bankImg} loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* URL direct */}
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 20 }}>
             <label className={s.fieldLabel}>Ou coller une URL</label>
             <input
               type="text"

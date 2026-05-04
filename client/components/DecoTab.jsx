@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
-import { uploadFile } from '../utils/api';
-import { Square, Waves, Activity, RotateCw, Wind, Target, Zap, CircleDashed, Vibrate, UploadCloud, X, Plus, Trash2, Palette, Timer } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { uploadFile, getAssets } from '../utils/api';
+import { Square, Waves, Activity, RotateCw, Wind, Target, Zap, CircleDashed, Vibrate, UploadCloud, X, Plus, Trash2, Palette, Timer, Library } from 'lucide-react';
 import s from './DecoTab.module.css';
 
 const ANIMATIONS = [
@@ -76,7 +76,14 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
   const [uploading, setUploading] = useState(false);
   const [selected, setSelected] = useState(null); // id of selected deco
   const [linkUrl, setLinkUrl] = useState('');
+  const [bankAssets, setBankAssets] = useState([]);
   const fileRef = useRef(null);
+
+  useEffect(() => {
+    getAssets('decoration')
+      .then(r => setBankAssets(r.data))
+      .catch(() => {});
+  }, []);
 
   const handleAddLink = () => {
     if (!linkUrl) return;
@@ -120,6 +127,13 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
     } finally { setUploading(false); }
   };
 
+  const addFromBank = (asset) => {
+    const newDeco = { ...DEFAULT_DECO, id: genId(), src: asset.url };
+    const next = [...decorations, newDeco];
+    onChange(next);
+    setSelected(newDeco.id);
+  };
+
   return (
     <div className={s.root}>
 
@@ -159,6 +173,27 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
         />
         <p className={s.hint}>PNG, GIF, WebP, lien HTTPS — gère la transparence</p>
       </div>
+
+      {/* Shared Bank */}
+      {bankAssets.length > 0 && (
+        <div className={s.bankSection}>
+          <div className={s.bankTitle}>
+            <Library size={12} /> Banque de décorations
+          </div>
+          <div className={s.bankGrid}>
+            {bankAssets.map(asset => (
+              <div 
+                key={asset._id} 
+                className={s.bankItem}
+                onClick={() => addFromBank(asset)}
+                title={asset.name}
+              >
+                <img src={asset.url} alt={asset.name} className={s.bankImg} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Decoration list */}
       {decorations.length === 0 ? (

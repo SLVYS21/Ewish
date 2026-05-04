@@ -148,3 +148,20 @@ export const unpublishPublication = (id) => api.post(`/publications/${id}/unpubl
 
 // ── Billing ──
 export const buyCredits = (amount) => api.post('/billing/buy-credits', { amount }, { withCredentials: true });
+export const verifyKkiapayTransaction = (transactionId) => api.post('/billing/kkiapay-verify', { transactionId }, { withCredentials: true });
+
+// ── Super Admin ──
+export const getSuperAdminStats  = ()         => api.get('/superadmin/stats');
+export const getSuperAdminTransactions = (params) => api.get('/superadmin/transactions', { params });
+export const getSuperAdminUsers  = (params)   => api.get('/superadmin/users', { params });
+export const getSuperAdminUser   = (id)       => api.get(`/superadmin/users/${id}`);
+export const updateSuperAdminUser= (id, data) => api.put(`/superadmin/users/${id}`, data);
+export const deleteSuperAdminUser= (id)       => api.delete(`/superadmin/users/${id}`);
+
+// ── Asset Bank ──
+export const getAssets     = (type)  => api.get('/assets', { params: { type } });
+export const uploadAsset   = (formData) => api.post('/assets', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' },
+});
+export const updateAsset   = (id, data) => api.put(`/assets/${id}`, data);
+export const deleteAsset   = (id)    => api.delete(`/assets/${id}`);

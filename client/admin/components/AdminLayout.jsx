@@ -1,29 +1,48 @@
 import { useState } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Package, PlaySquare, Palette, Mail, ExternalLink, Users, BarChart2, Images, ShieldAlert } from 'lucide-react';
 import s from './AdminLayout.module.css';
-
-import { LayoutDashboard, Package, PlaySquare, Palette, Mail, ExternalLink } from 'lucide-react';
 
 const NAV = [
   { to: '/ewish-admin',              icon: <LayoutDashboard size={18} />, label: 'Dashboard',       end: true },
-  { to: '/ewish-admin/orders',       icon: <Package size={18} />, label: 'Commandes'                  },
-  { to: '/ewish-admin/publications', icon: <PlaySquare size={18} />, label: 'Publications'               },
-  { to: '/ewish-admin/templates',    icon: <Palette size={18} />, label: 'Templates & Prix'           },
-  { to: '/ewish-admin/wishes',       icon: <Mail size={18} />, label: 'Vœux collectifs'            },
-  { to: '/ewish-admin/ewish',        icon: <ExternalLink size={18} />, label: 'Ouvrir l\'éditeur'          },
+  { to: '/ewish-admin/orders',       icon: <Package size={18} />,        label: 'Commandes'               },
+  { to: '/ewish-admin/publications', icon: <PlaySquare size={18} />,     label: 'Publications'            },
+  { to: '/ewish-admin/wishes',       icon: <Mail size={18} />,           label: 'Vœux collectifs'         },
+  { to: '/ewish-admin/ewish',        icon: <ExternalLink size={18} />,   label: "Ouvrir l'éditeur"        },
+];
+
+const SUPER_NAV = [
+  { to: '/ewish-admin/super/stats',  icon: <BarChart2 size={18} />, label: 'Statistiques plateforme' },
+  { to: '/ewish-admin/super/users',  icon: <Users size={18} />,     label: 'Marchands'               },
+  { to: '/ewish-admin/super/assets', icon: <Images size={18} />,    label: "Banque d'images"         },
+  { to: '/ewish-admin/templates',    icon: <Palette size={18} />,   label: 'Templates & Prix'        },
 ];
 
 export default function AdminLayout({ pendingCount = 0 }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isSuperAdmin = user?.role === 'super_admin';
 
   const handleLogout = async () => {
     await logout();
     navigate('/ewish-admin/login');
   };
+
+  const renderNav = (items) => items.map(({ to, icon, label, end }) => (
+    <NavLink
+      key={to} to={to} end={end}
+      onClick={() => setMobileOpen(false)}
+      className={({ isActive }) => `${s.navItem} ${isActive ? s.active : ''}`}
+    >
+      <span className={s.navIcon}>{icon}</span>
+      <span className={s.navLabel}>{label}</span>
+      {label === 'Commandes' && pendingCount > 0 && (
+        <span className={s.navBadge}>{pendingCount}</span>
+      )}
+    </NavLink>
+  ));
 
   return (
     <div className={s.shell}>
@@ -40,23 +59,21 @@ export default function AdminLayout({ pendingCount = 0 }) {
       <aside className={`${s.sidebar} ${mobileOpen ? s.open : ''}`}>
         <div className={s.sidebarHead}>
           <div className={s.logo}>my<span>Kado</span></div>
-          <div className={s.adminBadge}>Admin</div>
+          <div className={s.adminBadge}>{isSuperAdmin ? 'Super Admin' : 'Admin'}</div>
         </div>
 
         <nav className={s.nav}>
-          {NAV.map(({ to, icon, label, end }) => (
-            <NavLink
-              key={to} to={to} end={end}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) => `${s.navItem} ${isActive ? s.active : ''}`}
-            >
-              <span className={s.navIcon}>{icon}</span>
-              <span className={s.navLabel}>{label}</span>
-              {label === 'Commandes' && pendingCount > 0 && (
-                <span className={s.navBadge}>{pendingCount}</span>
-              )}
-            </NavLink>
-          ))}
+          {renderNav(NAV)}
+
+          {/* Super admin section */}
+          {isSuperAdmin && (
+            <>
+              <div className={s.navSeparator}>
+                <ShieldAlert size={12} /> Plateforme
+              </div>
+              {renderNav(SUPER_NAV)}
+            </>
+          )}
         </nav>
 
         <div className={s.sidebarFoot}>
@@ -66,7 +83,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
             </div>
             <div className={s.userInfo}>
               <div className={s.userName}>{user?.name || user?.email}</div>
-              <div className={s.userRole}>Administrateur</div>
+              <div className={s.userRole}>{isSuperAdmin ? 'Super Administrateur' : 'Administrateur'}</div>
             </div>
             <button className={s.logoutBtn} onClick={handleLogout} title="Déconnexion">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -67,6 +67,9 @@ app.use('/api/analytics',    require('./routes/analytics'));
 app.use('/api/shortlinks',   require('./routes/shortlinks'));
 app.use('/api/fonts',        require('./routes/fonts.js'));
 app.use('/api/billing',      require('./routes/billing.js'));
+app.use('/api/superadmin',   require('./routes/superadmin'));
+app.use('/api/assets',       require('./routes/assetbank'));
+
 
 app.use('/collect', require('./routes/collect'));
 app.use('/s',       require('./routes/shortlinks'));

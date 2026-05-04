@@ -16,6 +16,15 @@ const requireAdmin = (req, res, next) => {
   }
 };
 
+const requireSuperAdmin = (req, res, next) => {
+  requireAdmin(req, res, () => {
+    if (req.admin.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Accès réservé au super admin' });
+    }
+    next();
+  });
+};
+
 const requireOptionalAdmin = (req, res, next) => {
   const token = req.cookies?.ww_admin_token
     || req.headers.authorization?.replace('Bearer ', '');
@@ -31,4 +40,4 @@ const requireOptionalAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { requireAdmin, requireOptionalAdmin };
+module.exports = { requireAdmin, requireSuperAdmin, requireOptionalAdmin };

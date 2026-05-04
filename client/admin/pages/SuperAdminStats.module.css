@@ -1,0 +1,130 @@
+.loading, .error { color: var(--text-3); padding: 40px; text-align: center; font-size: 0.9rem; }
+
+/* KPI grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.accent {
+  background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(224,85,116,0.06));
+  border-color: rgba(201,168,76,0.25);
+}
+
+.cardIcon { color: var(--brand); opacity: 0.8; }
+.cardValue { font-size: 2rem; font-weight: 800; color: var(--text); line-height: 1; }
+.cardLabel { font-size: 0.78rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.cardSub   { font-size: 0.75rem; color: var(--text-2); }
+
+/* Sections */
+.section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.sectionTitle {
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-3);
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 16px;
+}
+
+/* Top templates */
+.templateList { display: flex; flex-direction: column; gap: 10px; }
+.templateRow {
+  display: grid; grid-template-columns: 28px 1fr auto 120px;
+  align-items: center; gap: 12px;
+}
+.rank  { font-size: 0.78rem; color: var(--text-3); font-weight: 700; }
+.tplName { font-size: 0.88rem; color: var(--text); font-weight: 600; }
+.tplCount { font-size: 0.78rem; color: var(--text-2); white-space: nowrap; }
+.bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.barFill { height: 100%; background: var(--brand); border-radius: 99px; transition: width 0.5s; }
+
+/* Growth */
+.growthRow { display: flex; gap: 32px; }
+.growthItem {}
+.growthVal   { font-size: 2rem; font-weight: 800; color: var(--brand); }
+.growthLabel { font-size: 0.78rem; color: var(--text-3); margin-top: 4px; }
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .templateRow { grid-template-columns: 24px 1fr auto; }
+  .bar { display: none; }
+  .growthRow { gap: 20px; }
+}
+
+/* Transactions Table */
+.tableWrap {
+  overflow-x: auto;
+  margin: 0 -20px;
+  padding: 0 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.table td {
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.adminName { font-weight: 600; color: var(--text); }
+.adminEmail { font-size: 0.75rem; color: var(--text-3); }
+
+.bold { font-weight: 700; color: var(--text); }
+.date { color: var(--text-3); font-size: 0.8rem; }
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.failed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
