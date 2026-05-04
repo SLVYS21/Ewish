@@ -296,14 +296,14 @@
   }
   
   /* The collapsed height needs to expose the header, approx 60px */
-  .panelClosed { transform: translateY(calc(100% - 64px)); }
+  .panelClosed { transform: translateY(calc(100% - 46px)); }
   .panelOpen { transform: translateY(0); }
   
   .mobilePanelHeader { display: block; }
   
   .panelContentWrapper { flex-direction: column; }
   .tabsSidebar { 
-    width: 100%; height: 60px; flex-direction: row; align-items: center; justify-content: flex-start;
+    width: 100%; height: 50px; flex-direction: row; align-items: center; justify-content: flex-start;
     padding: 0 16px; overflow-x: auto; overflow-y: hidden;
     border-right: none; border-bottom: 1px solid var(--border); gap: 4px;
   }
@@ -451,4 +451,4 @@
 }
 .publishModalActions button:hover { opacity: 0.85; transform: translateY(-1px); }
 .modalCancel { background: var(--surface2); border: 1px solid var(--border) !important; color: var(--text-2); }
-.modalConfirm { background: var(--brand, #c9a84c); color: #fff; box-shadow: 0 4px 14px rgba(201,168,76,0.3); }
+.modalConfirm { background: var(--brand, #c9a84c); color: #fff; box-shadow: 0 4px 14px rgba(201,168,76,0.3); }

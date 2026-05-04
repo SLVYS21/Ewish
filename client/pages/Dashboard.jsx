@@ -193,8 +193,8 @@ export default function Dashboard() {
             onClick={() => navigate('/ewish-admin')}
             title="Tableau de bord admin"
           >
-            <LayoutDashboard size={16} />
-            <span>Admin</span>
+            {/* <LayoutDashboard size={16} /> */}
+            <span>⬅</span>
           </button>
           <div className={styles.logo}>
             <span className={styles.logoIcon}><Gift size={22} color="var(--brand)" /></span>

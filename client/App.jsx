@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import InstallPWA from "./components/InstallPWA";
 
 // ── Public editor routes ──
 import Dashboard from "./pages/Dashboard";
@@ -103,6 +104,7 @@ export default function App() {
     // </AuthProvider>
     <AuthProvider>
       <BrowserRouter>
+        <InstallPWA />
         <Routes>
           {/* Login / Register */}
           <Route path="/ewish-admin/login" element={<AdminLoginGate />} />
