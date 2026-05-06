@@ -106,6 +106,7 @@ const publicationSchema = new mongoose.Schema({
   // Branding promo button
   showBranding: { type: Boolean, default: false },  // afficher bouton promo eWishWell
   brandingUrl:  { type: String,  default: '' },      // lien custom (WhatsApp ou landing)
+  brandingText: { type: String,  default: '' },      // texte custom (WhatsApp ou landing)
 
   // Short URL code — generated on first publish
   // e.g. /s/abc123  or  /s/prenom-occasion

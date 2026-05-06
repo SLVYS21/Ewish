@@ -29,9 +29,11 @@ const TABS = [
   { key: 'branding', label: 'Promo', icon: <Megaphone size={18} strokeWidth={1.5} /> },
 ];
 
-function BrandingTab({ show, url, onToggle, onUrlChange }) {
+function BrandingTab({ show, url, text, onToggle, onUrlChange, onTextChange }) {
   const DEFAULT_URL = 'https://app.mykado.store';
-  //previewSrc
+  const DEFAULT_TEXT = 'Crée le tien sur myKado';
+  const displayText = text || DEFAULT_TEXT;
+
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
@@ -47,7 +49,7 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
           style={{
             width: '44px', height: '24px', borderRadius: '50px',
             border: 'none', cursor: 'pointer', flexShrink: 0, marginTop: '2px',
-            background: show ? 'var(--brand, #c8963e)' : 'rgba(255,255,255,.15)',
+            background: show ? 'var(--brand, #c8963e)' : 'rgba(120, 120, 128, 0.2)',
             position: 'relative', transition: 'background .25s',
           }}
         >
@@ -80,6 +82,39 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
         </div>
       </div>
 
+      {/* Texte du bouton */}
+      <div>
+        <label style={{
+          display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.65rem',
+          letterSpacing: '0.15em', textTransform: 'uppercase',
+          color: 'var(--text-3, rgba(255,255,255,.35))', marginBottom: '8px'
+        }}>
+          Texte du bouton
+        </label>
+        <input
+          type="text"
+          value={text}
+          onChange={e => onTextChange(e.target.value)}
+          placeholder={DEFAULT_TEXT}
+          maxLength={60}
+          style={{
+            width: '100%', padding: '10px 12px',
+            background: 'var(--surface, rgba(255,255,255,.05))',
+            border: '1.5px solid var(--border, rgba(255,255,255,.1))',
+            borderRadius: '8px', color: 'var(--text, #fff)',
+            fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box',
+          }}
+          onFocus={e => e.target.style.borderColor = 'var(--brand, #c8963e)'}
+          onBlur={e => e.target.style.borderColor = 'var(--border, rgba(255,255,255,.1))'}
+        />
+        <p style={{
+          fontSize: '0.7rem', color: 'var(--text-3, rgba(255,255,255,.35))',
+          marginTop: '4px'
+        }}>
+          Laisse vide pour utiliser le texte par défaut.
+        </p>
+      </div>
+
       {/* Preview */}
       {show && (
         <div style={{
@@ -104,7 +139,7 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
               boxShadow: '0 4px 16px rgba(0,0,0,.12)',
               display: 'flex', alignItems: 'center', gap: '6px'
             }}>
-              Crée le tien sur myKado <Sparkles size={14} />
+              {displayText} <Sparkles size={14} />
             </span>
           </div>
         </div>
@@ -129,7 +164,7 @@ function BrandingTab({ show, url, onToggle, onUrlChange }) {
             background: 'var(--surface, rgba(255,255,255,.05))',
             border: '1.5px solid var(--border, rgba(255,255,255,.1))',
             borderRadius: '8px', color: 'var(--text, #fff)',
-            fontSize: '0.85rem', outline: 'none',
+            fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box',
           }}
           onFocus={e => e.target.style.borderColor = 'var(--brand, #c8963e)'}
           onBlur={e => e.target.style.borderColor = 'var(--border, rgba(255,255,255,.1))'}
@@ -171,6 +206,7 @@ export default function Editor() {
   const [publishedUrl, setPublishedUrl] = useState('');
   const [showBranding, setShowBranding] = useState(false);
   const [brandingUrl, setBrandingUrl] = useState('');
+  const [brandingText, setBrandingText] = useState('');
   const [shortCode, setShortCode] = useState('');
   const [slugEditing, setSlugEditing] = useState(false);
   const [slugDraft, setSlugDraft] = useState('');
@@ -219,6 +255,7 @@ export default function Editor() {
         setPhotoTransforms(found.photoTransforms || {});
         setShowBranding(found.showBranding || false);
         setBrandingUrl(found.brandingUrl || '');
+        setBrandingText(found.brandingText || '');
         if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
 
         try {
@@ -653,13 +690,18 @@ export default function Editor() {
               <BrandingTab
                 show={showBranding}
                 url={brandingUrl}
+                text={brandingText}
                 onToggle={(v) => {
                   setShowBranding(v);
-                  updatePublication(id, { showBranding: v, brandingUrl }).catch(() => { });
+                  updatePublication(id, { showBranding: v, brandingUrl, brandingText }).catch(() => { });
                 }}
                 onUrlChange={(v) => {
                   setBrandingUrl(v);
-                  updatePublication(id, { showBranding, brandingUrl: v }).catch(() => { });
+                  updatePublication(id, { showBranding, brandingUrl: v, brandingText }).catch(() => { });
+                }}
+                onTextChange={(v) => {
+                  setBrandingText(v);
+                  updatePublication(id, { showBranding, brandingUrl, brandingText: v }).catch(() => { });
                 }}
               />
             )}

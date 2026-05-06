@@ -574,7 +574,10 @@
           const root = document.documentElement;
           if (style.primaryColor) root.style.setProperty('--primary',    style.primaryColor);
           if (style.accentColor)  root.style.setProperty('--accent',     style.accentColor);
-          if (style.fontFamily)   root.style.setProperty('--font',       `'${style.fontFamily}', sans-serif`);
+          if (style.fontFamily) {
+            root.style.setProperty('--font',   `'${style.fontFamily}', sans-serif`);
+            root.style.setProperty('--font-b', `'${style.fontFamily}', sans-serif`);
+          }
           if (style.textColor)    root.style.setProperty('--text-color', style.textColor);
           if (style.textMuted)    root.style.setProperty('--text-muted', style.textMuted);
           if (style.fontSize) {

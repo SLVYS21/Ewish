@@ -109,6 +109,7 @@ ${fontFaceCSS ? fontFaceCSS + '\n' : ''}  :root {
     --primary:    ${s.primaryColor  || '#ff69b4'};
     --accent:     ${s.accentColor   || '#ffb347'};
     --font:       '${s.fontFamily   || 'Work Sans'}', sans-serif;
+    --font-b:     '${s.fontFamily   || 'Work Sans'}', sans-serif;
     --fs-scale:   ${scale};
     --text-color: ${s.textColor     || '#333333'};
     --text-muted: ${s.textMuted     || '#888888'};
@@ -134,8 +135,8 @@ ${bgCssLines.join('\n')}
   window.__WW_API_BASE__  = '${process.env.API_BASE_URL || ''}';
   window.__WW_BRANDING__ = ${JSON.stringify({
     show: Boolean(pub.showBranding),
-    url: pub.brandingUrl || process.env.BRANDING_URL || 'https://wa.me/your_number',
-    label: 'Crée le tien sur myKado ✨'
+    url: pub.brandingUrl || process.env.BRANDING_URL || 'https://wa.me/+2290159571057',
+    label: pub.brandingText || 'Crée le tien sur myKado ✨'
   })};
   window.__WW_DECO__     = ${JSON.stringify(pub.decorations || [])};
   window.__WW_WIDGETS__ = ${JSON.stringify(pub.widgets || [])};
