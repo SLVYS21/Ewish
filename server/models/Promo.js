@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const promoSchema = new mongoose.Schema({
   code:        { type: String, required: true, unique: true, uppercase: true, trim: true },
   type:        { type: String, enum: ['percent', 'fixed'], default: 'percent' },
-  value:       { type: Number, required: function () { return this.isCreditGift; } },   // % ou montant FCFA
+  value:       { type: Number, required: function () { return !this.isCreditGift; } },   // % ou montant FCFA
   minOrder:    { type: Number, default: 0 },        // montant minimum pour activer
   maxUses:     { type: Number, default: null },     // null = illimité
   usedCount:   { type: Number, default: 0 },
