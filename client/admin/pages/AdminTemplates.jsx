@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getTemplates, getPromos, createPromo, updatePromo, deletePromo } from '../../utils/api';
+import { getTemplates, getPromos, createPromo, updatePromo, deletePromo, uploadFile } from '../../utils/api';
 import { useAuth } from '../context/AuthContext';
 import api from '../../utils/api';
 import PageShell from '../components/PageShell';
 import Modal from '../components/Modal';
 import s from './AdminTemplates.module.css';
-import { Gift, Heart, Briefcase, Edit2, Trash2, Tag, Check, X } from 'lucide-react';
+import { Gift, Heart, Briefcase, Edit2, Trash2, Tag, Check, X, Upload } from 'lucide-react';
 
 const THUMB_BG    = { birthday:'linear-gradient(135deg,#ff69b4,#ffb347)', special:'linear-gradient(135deg,#4285F4,#34A853)', 'collective-family':'linear-gradient(135deg,#ff69b4,#a78bfa)', 'collective-pro':'linear-gradient(135deg,#1e3a5f,#c9a84c)' };
 const THUMB_EMOJI = { birthday:<Gift size={24}/>, special:<Heart size={24}/>, 'collective-family':<Heart size={24}/>, 'collective-pro':<Briefcase size={24}/> };
@@ -24,6 +24,7 @@ export default function AdminTemplates() {
   const [promoModal, setPromoModal] = useState(null);   // null | 'new' | promoObj
   const [promoForm, setPromoForm]   = useState(PROMO_DEFAULTS);
   const [saving, setSaving]         = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [toast, setToast]           = useState('');
   const { user }                    = useAuth();
   const isAdmin                     = user?.role === 'admin' || user?.role === 'super_admin';
@@ -45,6 +46,22 @@ export default function AdminTemplates() {
 
   // ── TEMPLATE EDIT ──
   const openTmpl = (t) => setTmplModal({ ...t, highlightsText: (t.highlights||[]).join('\n') });
+  
+  const handleUploadThumbnail = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const res = await uploadFile(file);
+      setTmplModal(m => ({ ...m, thumbnail: res.data.url }));
+      showToast('Image uploadée avec succès');
+    } catch (err) {
+      showToast('Erreur lors du téléchargement de l\'image', 'error');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const saveTmpl = async () => {
     setSaving(true);
     try {
@@ -56,6 +73,7 @@ export default function AdminTemplates() {
         priceLabel:  tmplModal.priceLabel,
         active:      tmplModal.active,
         featured:    tmplModal.featured,
+        thumbnail:   tmplModal.thumbnail,
         highlights:  tmplModal.highlightsText.split('\n').map(s=>s.trim()).filter(Boolean),
       }, { withCredentials: true });
       showToast('Template mis à jour');
@@ -107,7 +125,11 @@ export default function AdminTemplates() {
             const emoji = THUMB_EMOJI[t.name] || '🎁';
             return (
               <div key={t.name} className={s.tmplRow}>
-                <div className={s.tmplThumb} style={{ background: bg }}>{emoji}</div>
+                {t.thumbnail ? (
+                  <div className={s.tmplThumb} style={{ backgroundImage: `url(${t.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                ) : (
+                  <div className={s.tmplThumb} style={{ background: bg }}>{emoji}</div>
+                )}
                 <div className={s.tmplInfo}>
                   <div className={s.tmplName}>{t.label}</div>
                   <div className={s.tmplMeta}>
@@ -166,11 +188,31 @@ export default function AdminTemplates() {
       <Modal open={!!tmplModal} onClose={()=>setTmplModal(null)} title="Modifier le template"
         footer={<>
           <button className={`${s.btn} ${s.btnGhost}`} onClick={()=>setTmplModal(null)}>Annuler</button>
-          <button className={`${s.btn} ${s.btnGold}`} onClick={saveTmpl} disabled={saving}>{saving?'Enregistrement…':'Enregistrer'}</button>
+          <button className={`${s.btn} ${s.btnGold}`} onClick={saveTmpl} disabled={saving || uploadingImage}>{saving?'Enregistrement…':'Enregistrer'}</button>
         </>}
       >
         {tmplModal && (
           <div className={s.formStack}>
+            
+            {/* Thumbnail Upload */}
+            <div className={s.formGroup}>
+              <label className={s.formLabel}>Image du Template</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div 
+                  style={{ 
+                    width: '80px', height: '80px', borderRadius: '12px', background: '#f4f5f7', 
+                    backgroundImage: tmplModal.thumbnail ? `url(${tmplModal.thumbnail})` : 'none',
+                    backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0,
+                    border: '1px solid #e1e3e8'
+                  }} 
+                />
+                <label className={`${s.btn} ${s.btnGhost}`} style={{ cursor: 'pointer' }}>
+                  {uploadingImage ? 'Chargement...' : <><Upload size={16} /> Changer l'image</>}
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleUploadThumbnail} disabled={uploadingImage} />
+                </label>
+              </div>
+            </div>
+
             <div className={s.formGrid2}>
               <div className={s.formGroup}><label className={s.formLabel}>Nom affiché</label>
                 <input className={s.formInput} value={tmplModal.label||''} onChange={e=>setTmplModal(m=>({...m,label:e.target.value}))} />

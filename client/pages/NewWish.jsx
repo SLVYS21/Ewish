@@ -63,17 +63,17 @@ export default function NewWish() {
   return (
     <div className={styles.root}>
       <header className={styles.header}>
-        <Link to="/ewish-admin/ewish" className={styles.back}>← Back</Link>
+        <Link to="/ewish-admin/ewish" className={styles.back}>← Retour</Link>
         <div className={styles.logo}>🎂 myKado</div>
         <div />
       </header>
 
       <div className={styles.body}>
         <div className={styles.left}>
-          <h1>Create a new wish</h1>
-          <p className={styles.sub}>Choose a template and personalize it.</p>
+          <h1>Créer une publication</h1>
+          <p className={styles.sub}>Choisissez un template et personnalisez-le.</p>
 
-          <h2 className={styles.stepLabel}>1. Choose a template</h2>
+          <h2 className={styles.stepLabel}>1. Choisissez un template</h2>
           <div className={styles.templateGrid}>
             {templates.map(t => (
               <div
@@ -81,7 +81,11 @@ export default function NewWish() {
                 className={`${styles.templateCard} ${selected?.name === t.name ? styles.active : ''}`}
                 onClick={() => setSelected(t)}
               >
-                <div className={styles.templateThumb}>🎂</div>
+                {t.thumbnail ? (
+                  <div className={styles.templateThumb} style={{ backgroundImage: `url(${t.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' }} />
+                ) : (
+                  <div className={styles.templateThumb}>🎂</div>
+                )}
                 <div className={styles.templateInfo}>
                   <strong>{t.label}</strong>
                   <span>{t.description}</span>
@@ -92,10 +96,10 @@ export default function NewWish() {
             ))}
           </div>
 
-          <h2 className={styles.stepLabel}>2. Set it up</h2>
+          <h2 className={styles.stepLabel}>2. Configurer</h2>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
-              <label>Recipient's name *</label>
+              <label>Nom du destinataire *</label>
               <input
                 type="text" required placeholder="Lydia"
                 value={form.recipientName}
@@ -103,17 +107,17 @@ export default function NewWish() {
               />
             </div>
             <div className={styles.field}>
-              <label>Wish title</label>
+              <label>Titre de la publication</label>
               <input
-                type="text" placeholder="Lydia's 25th Birthday"
+                type="text" placeholder="Anniversaire de Lydia"
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               />
             </div>
             <div className={styles.field}>
-              <label>Custom URL name</label>
+              <label>Lien personnalisé</label>
               <div className={styles.inputGroup}>
-                <span className={styles.inputPrefix}>/birthday/</span>
+                <span className={styles.inputPrefix}>/{selected?.name || 'template'}/</span>
                 <input
                   type="text" placeholder="lydia-25"
                   value={form.customName}
@@ -121,8 +125,8 @@ export default function NewWish() {
                 />
               </div>
               <span className={styles.hint}>
-                Leave empty to auto-generate from the title.
-                Final URL: <code>/site/birthday/{toSlug(form.customName || form.title || form.recipientName || 'wish')}</code>
+                Laissez vide pour générer depuis le titre.
+                Lien final: <code>/site/{selected?.name || 'template'}/{toSlug(form.customName || form.title || form.recipientName || 'wish')}</code>
               </span>
             </div>
 
@@ -155,15 +159,24 @@ export default function NewWish() {
 
         <div className={styles.right}>
           <div className={styles.previewCard}>
-            <div className={styles.previewThumb}>🎂</div>
+            {selected?.thumbnail ? (
+              <div className={styles.previewThumb} style={{ backgroundImage: `url(${selected.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' }} />
+            ) : (
+              <div className={styles.previewThumb}>🎂</div>
+            )}
             <h3>{selected?.label || 'Birthday Wish'}</h3>
             <p>{selected?.description}</p>
             <div className={styles.features}>
-              <span>🎵 Music player</span>
-              <span>💬 WhatsApp style message</span>
-              <span>🎉 Confetti & fireworks</span>
-              <span>💌 Personal wishes</span>
-              <span>🎈 Balloons</span>
+              {selected?.highlights && selected.highlights.length > 0 ? (
+                selected.highlights.map((h, i) => <span key={i}>✨ {h}</span>)
+              ) : (
+                <>
+                  <span>🎵 Musique de fond</span>
+                  <span>💬 Message interactif</span>
+                  <span>🎉 Animations & confettis</span>
+                  <span>💌 Vœux personnalisés</span>
+                </>
+              )}
             </div>
           </div>
         </div>

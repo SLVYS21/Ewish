@@ -43,7 +43,7 @@ router.patch('/:name', requireAdmin, async (req, res) => {
     if (req.admin.role === 'merchant') {
       return res.status(403).json({ error: 'Seuls les administrateurs peuvent modifier les templates' });
     }
-    const allowed = ['label','price','priceLabel','description','highlights','active','featured','tags','sortOrder'];
+    const allowed = ['label','price','priceLabel','description','highlights','active','featured','tags','sortOrder', 'thumbnail', 'creditsRequired'];
     const update = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
     const template = await Template.findOneAndUpdate(
