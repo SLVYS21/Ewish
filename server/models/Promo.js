@@ -12,12 +12,18 @@ const promoSchema = new mongoose.Schema({
   description: { type: String },
   // Restreindre à certains templates
   templates:   [{ type: String }],  // vide = tous les templates
+
+  // Credit specific promos
+  isCreditGift: { type: Boolean, default: false },
+  creditAmount: { type: Number, default: 0 },
+  usedBy:      [{ type: mongoose.Schema.Types.ObjectId, ref: 'AdminUser' }], // Track users who used this code
 }, { timestamps: true });
 
-promoSchema.methods.isValid = function(orderAmount) {
+promoSchema.methods.isValid = function(orderAmount, userId = null) {
   if (!this.active) return { ok: false, reason: 'Code inactif' };
   if (this.expiresAt && new Date() > this.expiresAt) return { ok: false, reason: 'Code expiré' };
   if (this.maxUses !== null && this.usedCount >= this.maxUses) return { ok: false, reason: 'Code épuisé' };
+  if (userId && this.usedBy && this.usedBy.includes(userId)) return { ok: false, reason: 'Vous avez déjà utilisé ce code' };
   if (orderAmount < this.minOrder) return { ok: false, reason: `Minimum ${this.minOrder} FCFA requis` };
   return { ok: true };
 };

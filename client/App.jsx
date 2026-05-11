@@ -20,6 +20,7 @@ import AdminWishes from "./admin/pages/AdminWishes";
 // ── Super Admin ──
 import SuperAdminStats  from "./admin/pages/SuperAdminStats";
 import SuperAdminUsers  from "./admin/pages/SuperAdminUsers";
+import SuperAdminPromos from "./admin/pages/SuperAdminPromos";
 import SuperAdminAssets from "./admin/pages/SuperAdminAssets";
 
 function RequireAuth({ children }) {
@@ -138,7 +139,6 @@ export default function App() {
             }
           >
             <Route index element={<AdminDashboard />} />
-            <Route path="orders" element={<AdminOrders />} />
             <Route path="publications" element={<AdminPublications />} />
             <Route path="wishes" element={<AdminWishes />} />
 
@@ -146,6 +146,7 @@ export default function App() {
             <Route path="templates"    element={<RequireSuperAdmin><AdminTemplates /></RequireSuperAdmin>} />
             <Route path="super/stats"  element={<RequireSuperAdmin><SuperAdminStats /></RequireSuperAdmin>} />
             <Route path="super/users"  element={<RequireSuperAdmin><SuperAdminUsers /></RequireSuperAdmin>} />
+            <Route path="super/promos" element={<RequireSuperAdmin><SuperAdminPromos /></RequireSuperAdmin>} />
             <Route path="super/assets" element={<RequireSuperAdmin><SuperAdminAssets /></RequireSuperAdmin>} />
           </Route>
 

@@ -1,19 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Gift, Search, Users, Building, Heart, Sparkles, Film, Copy, X, Trash2, Edit2, MonitorPlay, ExternalLink, CircleOff, Eye, QrCode, ArrowLeft, LayoutDashboard } from 'lucide-react';
-import { getPublications, deletePublication, duplicatePublication, unpublishPublication } from '../utils/api'
+import { Gift, Search, Users, Building, Heart, Sparkles, Film, Copy, X, Trash2, Edit2, MonitorPlay, ExternalLink, CircleOff, Eye, QrCode, ArrowLeft, LayoutDashboard, Plus } from 'lucide-react';
+import { getPublications, deletePublication, duplicatePublication, unpublishPublication, getTemplates, createPublication } from '../utils/api'
+import { useAuth } from '../admin/context/AuthContext';
 import QRCodeModal from '../components/QRCodeModal';
 import styles from './Dashboard.module.css';
 
 const LIMIT = 20;
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [pubs, setPubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
+  const [activeTab, setActiveTab] = useState('mine');
+  const [templates, setTemplates] = useState([]);
   const navigate = useNavigate();
+
+  const isSuperAdmin = user?.role === 'super_admin';
 
   const [dupModal,  setDupModal]  = useState(null);
   const [dupTitle,  setDupTitle]  = useState('');
@@ -26,16 +32,25 @@ export default function Dashboard() {
 
   const searchTimer = useRef(null);
 
-  const fetchPubs = useCallback((p, s) => {
+  const fetchPubs = useCallback((p, s, tab = activeTab) => {
     setLoading(true);
-    getPublications({ page: p, limit: LIMIT, search: s || undefined })
+    if (tab === 'templates') {
+      getTemplates().then(r => setTemplates(r.data)).finally(() => setLoading(false));
+      return;
+    }
+
+    const params = { page: p, limit: LIMIT, search: s || undefined };
+    if (tab === 'mine') params.mine = 'true';
+    if (tab === 'premade') params.premade = 'true';
+
+    getPublications(params)
       .then(r => {
         setPubs(r.data);
         setHasNext(r.data.length === LIMIT);
       })
       .catch(() => { setPubs([]); setHasNext(false); })
       .finally(() => setLoading(false));
-  }, []);
+  }, [activeTab]);
 
   // Initial load
   useEffect(() => { fetchPubs(1, ''); }, [fetchPubs]);
@@ -46,13 +61,29 @@ export default function Dashboard() {
     setSearch(val);
     setPage(1);
     clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => fetchPubs(1, val), 350);
+    searchTimer.current = setTimeout(() => fetchPubs(1, val, activeTab), 350);
   };
 
   const goToPage = (p) => {
     setPage(p);
-    fetchPubs(p, search);
+    fetchPubs(p, search, activeTab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setPage(1);
+    setSearch('');
+    fetchPubs(1, '', tab);
+  };
+
+  const handleCreateFromTemplate = async (templateName) => {
+    try {
+      const res = await createPublication({ templateName, customName: `draft-${Date.now()}`, title: 'Nouvelle création' });
+      navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
+    } catch (e) {
+      alert(e.response?.data?.error || 'Erreur lors de la création');
+    }
   };
 
   const handleDelete = async (id, e) => {
@@ -218,37 +249,91 @@ export default function Dashboard() {
         <Link to="/ewish-admin/ewish/new" className={styles.heroCta}>Commencer →</Link>
       </section>
 
-      {/* My Wishes */}
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px', padding: '0 20px' }}>
+        <button 
+          onClick={() => handleTabChange('mine')} 
+          style={{ padding: '10px 20px', borderRadius: '20px', border: 'none', background: activeTab === 'mine' ? 'var(--brand)' : 'var(--bg-2)', color: activeTab === 'mine' ? '#fff' : 'var(--text-2)', cursor: 'pointer', fontWeight: 'bold' }}>
+          Mes créations
+        </button>
+        <button 
+          onClick={() => handleTabChange('templates')} 
+          style={{ padding: '10px 20px', borderRadius: '20px', border: 'none', background: activeTab === 'templates' ? 'var(--brand)' : 'var(--bg-2)', color: activeTab === 'templates' ? '#fff' : 'var(--text-2)', cursor: 'pointer', fontWeight: 'bold' }}>
+          Templates disponibles
+        </button>
+        <button 
+          onClick={() => handleTabChange('premade')} 
+          style={{ padding: '10px 20px', borderRadius: '20px', border: 'none', background: activeTab === 'premade' ? 'var(--brand)' : 'var(--bg-2)', color: activeTab === 'premade' ? '#fff' : 'var(--text-2)', cursor: 'pointer', fontWeight: 'bold' }}>
+          Modèles (Préfaits)
+        </button>
+      </div>
+
+      {/* Main Section */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2>Mes créations</h2>
-          <span className={styles.badge}>{pubs.length}{hasNext ? '+' : ''}</span>
+          <h2>
+            {activeTab === 'mine' && 'Mes créations'}
+            {activeTab === 'templates' && 'Templates'}
+            {activeTab === 'premade' && 'Modèles préfaits'}
+          </h2>
+          {activeTab !== 'templates' && <span className={styles.badge}>{pubs.length}{hasNext ? '+' : ''}</span>}
+          {activeTab === 'templates' && <span className={styles.badge}>{templates.length}</span>}
         </div>
 
         {/* Search bar */}
-        <div className={styles.searchBar}>
-          <span className={styles.searchIcon}><Search size={18} color="var(--text-3)" /></span>
-          <input
-            className={styles.searchInput}
-            type="text"
-            placeholder="Rechercher par titre, nom, destinataire…"
-            value={search}
-            onChange={handleSearchChange}
-          />
-          {search && (
-            <button className={styles.searchClear} onClick={() => { setSearch(''); setPage(1); fetchPubs(1, ''); }}><X size={16} /></button>
-          )}
-        </div>
+        {activeTab !== 'templates' && (
+          <div className={styles.searchBar}>
+            <span className={styles.searchIcon}><Search size={18} color="var(--text-3)" /></span>
+            <input
+              className={styles.searchInput}
+              type="text"
+              placeholder="Rechercher par titre, nom, destinataire…"
+              value={search}
+              onChange={handleSearchChange}
+            />
+            {search && (
+              <button className={styles.searchClear} onClick={() => { setSearch(''); setPage(1); fetchPubs(1, '', activeTab); }}><X size={16} /></button>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <div className={styles.empty}>
             <div className={styles.spinner} />
           </div>
+        ) : activeTab === 'templates' ? (
+          templates.length === 0 ? (
+            <div className={styles.empty}>
+              <p>Aucun template disponible pour le moment.</p>
+            </div>
+          ) : (
+            <div className={styles.grid}>
+              {templates.map(tpl => (
+                <div key={tpl._id} className={styles.card}>
+                  <div className={styles.cardThumb} style={{ background: tpl.defaultStyle?.primaryColor || 'var(--bg-2)' }}>
+                    <span>{TEMPLATE_ICONS[tpl.name] || <Sparkles size={24} />}</span>
+                    <span className={styles.premadeBadge} style={{backgroundColor: 'var(--gold)', color: '#000', fontSize: '10px', fontWeight: 'bold', padding: '2px 6px', borderRadius: '4px', marginLeft: '6px'}}>{tpl.creditsRequired} Crédit{tpl.creditsRequired > 1 ? 's' : ''}</span>
+                  </div>
+                  <div className={styles.cardBody}>
+                    <h3>{tpl.label}</h3>
+                    <p className={styles.cardMeta} style={{ fontSize: '12px', marginTop: '4px' }}>{tpl.description}</p>
+                  </div>
+                  <div className={styles.cardActions} style={{ justifyContent: 'center', padding: '12px' }}>
+                    <button 
+                      onClick={() => handleCreateFromTemplate(tpl.name)} 
+                      style={{ width: '100%', padding: '8px', background: 'var(--brand)', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold' }}>
+                      <Plus size={16} /> Créer ({tpl.creditsRequired} crédits)
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : pubs.length === 0 ? (
           <div className={styles.empty}>
             <span className={styles.emptyIcon}><Sparkles size={48} color="var(--brand)" strokeWidth={1} /></span>
-            <p>No wishes yet — create your first one!</p>
-            <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>Create a wish</Link>
+            <p>{activeTab === 'mine' ? 'Aucune création pour le moment — commencez !' : 'Aucun modèle trouvé.'}</p>
+            {activeTab === 'mine' && <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>Créer un vœu</Link>}
           </div>
         ) : (
           <div className={styles.grid}>
@@ -257,6 +342,7 @@ export default function Dashboard() {
                 <div className={styles.cardThumb}>
                   <span>{TEMPLATE_ICONS[pub.templateName] || <Sparkles size={24} />}</span>
                   {pub.published && <span className={styles.publishedBadge}>Live</span>}
+                  {pub.isPremade && <span className={styles.premadeBadge} style={{backgroundColor: 'var(--gold)', color: '#000', fontSize: '10px', fontWeight: 'bold', padding: '2px 6px', borderRadius: '4px', marginLeft: '6px'}}>MODÈLE</span>}
                 </div>
                 <div className={styles.cardBody}>
                   <h3>{pub.title || pub.data?.name || 'Untitled'}</h3>
@@ -280,7 +366,7 @@ export default function Dashboard() {
                   <p className={styles.cardDate}>
                     {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}
                     {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}
-                    {pub.views > 0 && (
+                    {isSuperAdmin && pub.views > 0 && (
                       <span className={styles.viewCount} title="Vues" style={{display:'inline-flex', alignItems:'center', gap:'4px'}}>
                         · <Eye size={14} /> {pub.views.toLocaleString('fr-FR')}
                       </span>
@@ -305,7 +391,7 @@ export default function Dashboard() {
                       onClick={e => { e.stopPropagation(); setQrModalPub(pub); }}
                     ><QrCode size={16} /></button>
                   )}
-                  {pub.published && (
+                  {pub.published && (pub.merchantId === user?.merchantId || isSuperAdmin) && (
                     <button
                       className={styles.btnIcon}
                       title="Dépublier"
@@ -316,9 +402,14 @@ export default function Dashboard() {
                     className={styles.btnIcon}
                     title="Dupliquer"
                     onClick={e => openDupModal(pub, e)}
+                    style={pub.isPremade ? {backgroundColor: 'var(--gold-light)', color: 'var(--gold-dark)'} : {}}
                   ><Copy size={16} /></button>
-                  <button className={styles.btnIcon} title="Éditer" onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}><Edit2 size={16} /></button>
-                  <button className={`${styles.btnIcon} ${styles.btnDanger}`} title="Supprimer" onClick={e => handleDelete(pub._id, e)}><Trash2 size={16} /></button>
+                  {(pub.merchantId === user?.merchantId || isSuperAdmin) && !pub.isPremade && (
+                    <button className={styles.btnIcon} title="Éditer" onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}><Edit2 size={16} /></button>
+                  )}
+                  {(pub.merchantId === user?.merchantId || isSuperAdmin) && (
+                    <button className={`${styles.btnIcon} ${styles.btnDanger}`} title="Supprimer" onClick={e => handleDelete(pub._id, e)}><Trash2 size={16} /></button>
+                  )}
                 </div>
               </div>
             ))}
@@ -326,7 +417,7 @@ export default function Dashboard() {
         )}
 
         {/* Pagination */}
-        {(page > 1 || hasNext) && (
+        {activeTab !== 'templates' && (page > 1 || hasNext) && (
           <div className={styles.pagination}>
             <button
               className={styles.pageBtn}

@@ -66,6 +66,12 @@ export function AdminPublications() {
                     <span>{p.templateName}</span>
                     <span className={s.dot}>·</span>
                     <span className={p.published ? s.published : s.draft}>{p.published ? 'Publié' : 'Brouillon'}</span>
+                    {p.isPremade && (
+                      <>
+                        <span className={s.dot}>·</span>
+                        <span className={s.premadeBadge} style={{color: 'var(--gold)', fontWeight: 'bold'}}>MODÈLE</span>
+                      </>
+                    )}
                     <span className={s.dot}>·</span>
                     <span>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : ''}</span>
                   </div>

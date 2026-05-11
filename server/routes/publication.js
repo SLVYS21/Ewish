@@ -8,27 +8,47 @@ const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 // GET all
 router.get('/', requireAdmin, async (req, res) => {
   try {
-    const { limit = 20, page = 1, search } = req.query;
+    const { limit = 20, page = 1, search, premade, mine } = req.query;
     const query = {};
-    if (req.admin.role === 'merchant') {
+    
+    if (premade === 'true') {
+      query.isPremade = true;
+    } else if (mine === 'true') {
       query.merchantId = req.admin.merchantId;
-    }
-    if (search) {
+      query.isPremade = { $ne: true };
+    } else if (req.admin.role === 'merchant') {
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { customName: { $regex: search, $options: 'i' } },
-        { 'data.name': { $regex: search, $options: 'i' } },
-        { 'data.recipientName': { $regex: search, $options: 'i' } },
-        { 'data.recipient': { $regex: search, $options: 'i' } },
-        { 'data.occasion': { $regex: search, $options: 'i' } },
+        { merchantId: req.admin.merchantId },
+        { isPremade: true }
       ];
+    } else if (req.query.premade === 'true') { // legacy fallback
+      query.isPremade = true;
+    }
+
+    if (search) {
+      const searchFilter = {
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { customName: { $regex: search, $options: 'i' } },
+          { 'data.name': { $regex: search, $options: 'i' } },
+          { 'data.recipientName': { $regex: search, $options: 'i' } },
+          { 'data.recipient': { $regex: search, $options: 'i' } },
+          { 'data.occasion': { $regex: search, $options: 'i' } },
+        ]
+      };
+      if (query.$or) {
+        query.$and = [{ $or: query.$or }, searchFilter];
+        delete query.$or;
+      } else {
+        Object.assign(query, searchFilter);
+      }
     }
     const pubs = await Publication.find(query).sort('-updatedAt').skip((page - 1) * limit).limit(limit).lean();
     res.json(pubs);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET by templateName + customName
+// GET by templateName + customName 
 router.get('/:templateName/:customName', async (req, res) => {
   try {
     const pub = await Publication.findOne({
@@ -60,7 +80,14 @@ router.post('/', requireOptionalAdmin, async (req, res) => {
 
     const slug = slugify(customName || title || 'wish', { lower: true, strict: true });
     const merchantId = req.admin?.role === 'merchant' ? req.admin.merchantId : undefined;
-    const pub = await Publication.create({ templateName, customName: slug, title, data, style, jarConfig, merchantId });
+    
+    const createData = { templateName, customName: slug, title, data, style, jarConfig, merchantId };
+    if (req.admin?.role === 'super_admin') {
+      if (req.body.isPremade !== undefined) createData.isPremade = req.body.isPremade;
+      if (req.body.premadeLabel !== undefined) createData.premadeLabel = req.body.premadeLabel;
+    }
+
+    const pub = await Publication.create(createData);
     res.status(201).json(pub);
   } catch (e) {
     if (e.code === 11000) return res.status(409).json({ error: 'This custom name is already taken.' });

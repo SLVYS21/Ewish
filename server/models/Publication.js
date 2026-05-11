@@ -96,6 +96,10 @@ const publicationSchema = new mongoose.Schema({
   // Multi-tenant
   merchantId:  { type: String, index: true },
 
+  // Pre-made system
+  isPremade:   { type: Boolean, default: false, index: true },
+  premadeLabel:{ type: String },
+
   // Analytics — compteur de visites
   views:       { type: Number, default: 0 },
   lastViewedAt:{ type: Date },

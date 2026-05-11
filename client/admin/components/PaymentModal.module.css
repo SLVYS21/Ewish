@@ -219,3 +219,145 @@
   color: var(--text-1, #111);
   margin: 0;
 }
+
+/* Promo styles */
+.promoInputWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-2, #f9f9f9);
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 8px;
+  padding: 4px 12px;
+  transition: border-color 0.2s;
+}
+
+.promoInputWrap:focus-within {
+  border-color: var(--brand, #000);
+}
+
+.promoIcon {
+  color: var(--text-3, #888);
+}
+
+.promoInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  outline: none;
+  color: var(--text-1, #111);
+}
+
+.promoBtn {
+  background: var(--text-1, #111);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.promoBtn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.promoBtn:disabled {
+  background: var(--text-3, #ccc);
+  cursor: not-allowed;
+}
+
+.discountTag {
+  color: var(--green, #10b981);
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.priceSub {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+/* Packs Grid */
+.packsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.packCard {
+  background: var(--surface2, #f5f5f5);
+  border: 2px solid var(--border-color, #eee);
+  border-radius: 12px;
+  padding: 16px 8px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.packCard:hover {
+  border-color: var(--text-3, #ccc);
+}
+
+.packActive {
+  border-color: var(--brand, #c8963e);
+  background: rgba(200, 150, 62, 0.05);
+}
+
+.packQty {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-1, #111);
+  line-height: 1;
+}
+
+.packLabel {
+  font-size: 12px;
+  color: var(--text-2, #666);
+  text-transform: uppercase;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.packPrice {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand, #c8963e);
+}
+
+.packBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--brand, #c8963e);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btnGhost {
+  background: none;
+  border: none;
+  color: var(--text-3, #888);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btnGhost:hover {
+  color: var(--brand, #c8963e);
+}

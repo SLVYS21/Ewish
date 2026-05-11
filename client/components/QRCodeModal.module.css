@@ -112,6 +112,19 @@
 .captureArea {
   display: inline-flex; align-items: center; justify-content: center;
   background: transparent;
+  position: relative;
+}
+
+.logoWrapper {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
 }
 
 /* Shapes implementation */

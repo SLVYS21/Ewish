@@ -1,39 +1,92 @@
 import React, { useState, useEffect, useRef } from 'react';
-import QRCode from 'qrcode';
+import QRCodeStyling from 'qr-code-styling';
 import html2canvas from 'html2canvas';
-import { X, Heart, Square, Circle } from 'lucide-react';
+import { X, Heart, Square, Circle, LayoutGrid } from 'lucide-react';
 import styles from './QRCodeModal.module.css';
 
 export default function QRCodeModal({ url, onClose }) {
-  const [shape, setShape] = useState('heart');
+  const [shape, setShape] = useState('heart'); // Global outline shape
+  const [styleType, setStyleType] = useState('rounded'); // 'square', 'rounded', 'dots', 'classy'
   const [qrColor, setQrColor] = useState('#e60000');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [isTransparent, setIsTransparent] = useState(true);
   const [qrSrc, setQrSrc] = useState('');
   
+  const qrCode = useRef(null);
   const captureRef = useRef(null);
 
   useEffect(() => {
-    generateQR();
-  }, [url, qrColor, bgColor, isTransparent]);
+    qrCode.current = new QRCodeStyling({
+      width: 240,
+      height: 240,
+      data: url,
+      margin: 0,
+      qrOptions: {
+        typeNumber: 0,
+        mode: "Byte",
+        errorCorrectionLevel: "H" // High error correction needed for shapes like Heart
+      },
+      imageOptions: {
+        hideBackgroundDots: true,
+        imageSize: 0.4,
+        margin: 0
+      }
+    });
+    
+    updateQR();
+  }, []);
 
-  const generateQR = async () => {
+  useEffect(() => {
+    updateQR();
+  }, [url, qrColor, bgColor, isTransparent, styleType]);
+
+  const updateQR = async () => {
+    if (!qrCode.current) return;
+    
+    let dotsType = 'square';
+    let cornersSquareType = 'square';
+    let cornersDotType = 'square';
+
+    if (styleType === 'rounded') {
+      dotsType = 'rounded';
+      cornersSquareType = 'extra-rounded';
+      cornersDotType = 'dot';
+    } else if (styleType === 'dots') {
+      dotsType = 'dots';
+      cornersSquareType = 'dot';
+      cornersDotType = 'dot';
+    } else if (styleType === 'classy') {
+      dotsType = 'classy-rounded';
+      cornersSquareType = 'extra-rounded';
+      cornersDotType = 'dot';
+    }
+
+    qrCode.current.update({
+      data: url,
+      dotsOptions: {
+        color: qrColor,
+        type: dotsType
+      },
+      backgroundOptions: {
+        color: isTransparent ? 'transparent' : bgColor,
+      },
+      cornersSquareOptions: {
+        color: qrColor,
+        type: cornersSquareType
+      },
+      cornersDotOptions: {
+        color: qrColor,
+        type: cornersDotType
+      }
+    });
+
     try {
-      // Use the alpha channel for transparency if enabled (#00000000 for fully transparent)
-      const lightColor = isTransparent ? '#00000000' : bgColor;
-      
-      const src = await QRCode.toDataURL(url, {
-        width: 200,
-        margin: 0, // margin 0 is REQUIRED to prevent gaps inside the shapes
-        color: {
-          dark: qrColor,
-          light: lightColor
-        },
-        errorCorrectionLevel: 'H'
-      });
-      setQrSrc(src);
-    } catch (err) {
-      console.error(err);
+      const blob = await qrCode.current.getRawData("png");
+      if (blob) {
+        setQrSrc(URL.createObjectURL(blob));
+      }
+    } catch (e) {
+      console.error("Erreur lors de la génération du QR", e);
     }
   };
 
@@ -51,7 +104,7 @@ export default function QRCodeModal({ url, onClose }) {
       });
       
       const link = document.createElement('a');
-      link.download = `qrcode-${shape}.png`;
+      link.download = `qrcode-${shape}-${styleType}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (err) {
@@ -61,7 +114,7 @@ export default function QRCodeModal({ url, onClose }) {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.modal}>
+      <div className={styles.modal} style={{maxHeight: '90vh', overflowY: 'auto'}}>
         <button className={styles.closeBtn} onClick={onClose}>
           <X size={20} />
         </button>
@@ -70,7 +123,7 @@ export default function QRCodeModal({ url, onClose }) {
         <p className={styles.subtitle}>Générez un code QR stylisé pour partager votre lien : <br/> <a href={url} target="_blank" rel="noreferrer">{url}</a></p>
 
         <div className={styles.controls}>
-          {/* Shape Selector */}
+          {/* Global Shape Selector */}
           <div className={styles.shapeSelector}>
             <div className={`${styles.shapeBtn} ${shape === 'heart' ? styles.active : ''}`} onClick={() => setShape('heart')}>
               <Heart size={20} />
@@ -81,12 +134,34 @@ export default function QRCodeModal({ url, onClose }) {
               <span>Carré</span>
             </div>
             <div className={`${styles.shapeBtn} ${shape === 'rounded' ? styles.active : ''}`} onClick={() => setShape('rounded')}>
-              <Square size={20} rx={4} />
+              <Square size={20} rx={6} />
               <span>Arrondi</span>
             </div>
             <div className={`${styles.shapeBtn} ${shape === 'circle' ? styles.active : ''}`} onClick={() => setShape('circle')}>
               <Circle size={20} />
               <span>Cercle</span>
+            </div>
+          </div>
+
+          <div className={styles.divider} />
+
+          {/* Pixels Style Selector */}
+          <div className={styles.shapeSelector}>
+            <div className={`${styles.shapeBtn} ${styleType === 'square' ? styles.active : ''}`} onClick={() => setStyleType('square')}>
+              <Square size={20} />
+              <span>Pixels carrés</span>
+            </div>
+            <div className={`${styles.shapeBtn} ${styleType === 'rounded' ? styles.active : ''}`} onClick={() => setStyleType('rounded')}>
+              <Square size={20} rx={6} />
+              <span>Pixels arrondis</span>
+            </div>
+            <div className={`${styles.shapeBtn} ${styleType === 'dots' ? styles.active : ''}`} onClick={() => setStyleType('dots')}>
+              <Circle size={20} />
+              <span>En points</span>
+            </div>
+            <div className={`${styles.shapeBtn} ${styleType === 'classy' ? styles.active : ''}`} onClick={() => setStyleType('classy')}>
+              <LayoutGrid size={20} />
+              <span>Style Classe</span>
             </div>
           </div>
 
@@ -125,16 +200,18 @@ export default function QRCodeModal({ url, onClose }) {
         <div className={styles.previewBg}>
           <div className={styles.scaleWrapper}>
             <div className={styles.captureArea} ref={captureRef} style={{ padding: shape === 'heart' ? '80px' : '40px' }}>
-              {shape === 'heart' ? (
-                <div className={styles.heartWrapper}>
-                  <div className={styles.qrPartMain}><img src={qrSrc} alt="QR" /></div>
-                  <div className={styles.qrPartLeft}><img src={qrSrc} alt="QR" /></div>
-                  <div className={styles.qrPartRight}><img src={qrSrc} alt="QR" /></div>
-                </div>
-              ) : (
-                <div className={`${styles.simpleWrapper} ${styles[shape]}`}>
-                  <img src={qrSrc} alt="QR" />
-                </div>
+              {qrSrc && (
+                shape === 'heart' ? (
+                  <div className={styles.heartWrapper}>
+                    <div className={styles.qrPartMain}><img src={qrSrc} alt="QR" /></div>
+                    <div className={styles.qrPartLeft}><img src={qrSrc} alt="QR" /></div>
+                    <div className={styles.qrPartRight}><img src={qrSrc} alt="QR" /></div>
+                  </div>
+                ) : (
+                  <div className={`${styles.simpleWrapper} ${styles[shape]}`}>
+                    <img src={qrSrc} alt="QR" />
+                  </div>
+                )
               )}
             </div>
           </div>

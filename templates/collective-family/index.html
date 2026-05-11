@@ -116,12 +116,14 @@
     /* ===== GREETING ===== */
     .one {
       font-size: 4.5rem;
-      font-family: 'Pacifico', cursive;
+      /* font-family: 'Pacifico', cursive; */
+      font-family: var(--font);
     }
 
     .two {
       font-size: 1.2rem;
       font-weight: 300;
+      font-family: var(--font);
     }
 
     .three {
@@ -261,8 +263,8 @@
       align-items: center;
       justify-content: center;
       background: transparent;
-      backdrop-filter: blur(50px) !important;
-      -webkit-backdrop-filter: blur(50px) !important;
+      backdrop-filter: blur(0px) !important;
+      -webkit-backdrop-filter: blur(0px) !important;
       /*linear-gradient(160deg, var(--bg-section2), var(--bg-section))*/
       ;
       padding: 20px;
@@ -327,7 +329,7 @@
 
     .idea-6 span {
       font-size: 14rem;
-      font-family: 'Pacifico', cursive;
+      font-family: var(--font)
     }
 
     /* ===== CELEBRATION ===== */
@@ -420,8 +422,8 @@
       align-items: center;
       justify-content: center;
       background: transparent;
-      backdrop-filter: blur(50px) !important;
-      -webkit-backdrop-filter: blur(50px) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
       /*linear-gradient(160deg, var(--bg-section), var(--bg-section2));*/
       padding: 20px;
       overflow: hidden;

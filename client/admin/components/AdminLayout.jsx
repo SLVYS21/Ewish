@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X, LayoutDashboard, Package, PlaySquare, Palette, Mail, ExternalLink, Users, BarChart2, Images, ShieldAlert } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Package, PlaySquare, Palette, Mail, ExternalLink, Users, BarChart2, Images, ShieldAlert, Ticket } from 'lucide-react';
 import s from './AdminLayout.module.css';
 
 const NAV = [
   { to: '/ewish-admin',              icon: <LayoutDashboard size={18} />, label: 'Dashboard',       end: true },
-  { to: '/ewish-admin/orders',       icon: <Package size={18} />,        label: 'Commandes'               },
   { to: '/ewish-admin/publications', icon: <PlaySquare size={18} />,     label: 'Publications'            },
   { to: '/ewish-admin/wishes',       icon: <Mail size={18} />,           label: 'Vœux collectifs'         },
   { to: '/ewish-admin/ewish',        icon: <ExternalLink size={18} />,   label: "Ouvrir l'éditeur"        },
@@ -15,6 +14,7 @@ const NAV = [
 const SUPER_NAV = [
   { to: '/ewish-admin/super/stats',  icon: <BarChart2 size={18} />, label: 'Statistiques plateforme' },
   { to: '/ewish-admin/super/users',  icon: <Users size={18} />,     label: 'Marchands'               },
+  { to: '/ewish-admin/super/promos', icon: <Ticket size={18} />,    label: 'Codes Promo'             },
   { to: '/ewish-admin/super/assets', icon: <Images size={18} />,    label: "Banque d'images"         },
   { to: '/ewish-admin/templates',    icon: <Palette size={18} />,   label: 'Templates & Prix'        },
 ];

@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const PageEvent = require('../models/PageEvent');
 const Order = require('../models/Order');
+const Publication = require('../models/Publication');
+const Transaction = require('../models/Transaction');
 const { requireAdmin } = require('../middleware/auth');
 const { trackEvent } = require('../services/analytics');
 
@@ -21,6 +23,34 @@ router.post('/', async (req, res) => {
 // GET /api/analytics — admin dashboard stats
 router.get('/', requireAdmin, async (req, res) => {
   try {
+    if (req.admin.role === 'merchant') {
+      const [
+        totalPublications,
+        publishedPublications,
+        transactions,
+        publicationsByTemplate
+      ] = await Promise.all([
+        Publication.countDocuments({ merchantId: req.admin.merchantId, isPremade: { $ne: true } }),
+        Publication.countDocuments({ merchantId: req.admin.merchantId, published: true, isPremade: { $ne: true } }),
+        Transaction.find({ adminId: req.admin.id }).sort('-createdAt').limit(20).lean(),
+        Publication.aggregate([
+          { $match: { merchantId: req.admin.merchantId, isPremade: { $ne: true } } },
+          { $group: { _id: '$templateName', count: { $sum: 1 } } },
+          { $sort: { count: -1 } }
+        ])
+      ]);
+
+      return res.json({
+        role: 'merchant',
+        publications: {
+          total: totalPublications,
+          published: publishedPublications
+        },
+        transactions,
+        publicationsByTemplate
+      });
+    }
+
     const { period = '30d' } = req.query;
     const days = period === '7d' ? 7 : period === '90d' ? 90 : 30;
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
