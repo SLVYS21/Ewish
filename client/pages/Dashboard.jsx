@@ -427,9 +427,8 @@ export default function Dashboard() {
             </div>
           )}
         </section>
-      )}
 
-      <WhatsAppFAB />
+      {!false && <WhatsAppFAB />}
     </div>
   );
 }

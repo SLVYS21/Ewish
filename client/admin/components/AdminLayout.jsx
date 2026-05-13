@@ -10,7 +10,7 @@ const NAV = [
   { to: '/ewish-admin/ewish',      icon: <PlaySquare size={18} />,      label: 'Publications'          },
   { to: '/ewish-admin/wishes',     icon: <Mail size={18} />,            label: 'Mes Vœux'              },
   { to: '/ewish-admin/suggestions',icon: <Lightbulb size={18} />,       label: 'Suggestions'           },
-  { to: '/ewish-admin/ewish/new',  icon: <Plus size={18} />,            label: "Ouvrir l'éditeur", highlight: true },
+  { to: '/ewish-admin/ewish',  icon: <Plus size={18} />,            label: "Ouvrir l'éditeur", highlight: true },
 ];
 
 const SUPER_NAV = [
@@ -105,7 +105,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
         <Outlet />
       </div>
 
-      {!hideWa && <WhatsAppFAB />}
+      {<WhatsAppFAB />}
     </div>
   );
 }
