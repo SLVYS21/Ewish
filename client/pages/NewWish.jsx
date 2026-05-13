@@ -1,19 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getTemplates, createPublication } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import PaymentModal from '../admin/components/PaymentModal';
+import WhatsAppFAB from '../components/WhatsAppFAB';
 import styles from './NewWish.module.css';
+
+const TEMPLATE_ICONS = {
+  birthday: '🎂', special: '✨', 'collective-family': '👨‍👩‍👧',
+  'collective-pro': '🏢', forever: '❤️', sanctuary: '🌸', 'notre-film': '🎬',
+};
+const TEMPLATE_COLORS = {
+  birthday: 'linear-gradient(135deg,#ff6b9d,#ff8e53)',
+  special:  'linear-gradient(135deg,#a78bfa,#60a5fa)',
+  'collective-family': 'linear-gradient(135deg,#34d399,#06b6d4)',
+  'collective-pro':    'linear-gradient(135deg,#c9a84c,#e8c86a)',
+  forever:  'linear-gradient(135deg,#f472b6,#ec4899)',
+  sanctuary:'linear-gradient(135deg,#818cf8,#c084fc)',
+  'notre-film': 'linear-gradient(135deg,#475569,#0ea5e9)',
+};
 
 export default function NewWish() {
   const [templates, setTemplates] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [form, setForm] = useState({ title: '', customName: '', recipientName: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [selected,  setSelected]  = useState(null);
+  const [dropOpen,  setDropOpen]  = useState(false);
+  const [tplSearch, setTplSearch] = useState('');
+  const [form, setForm]           = useState({ title: '', customName: '', recipientName: '' });
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const dropRef  = useRef(null);
 
   useEffect(() => {
     getTemplates()
@@ -22,34 +40,32 @@ export default function NewWish() {
         if (r.data.length > 0) setSelected(r.data[0]);
       })
       .catch(() => {
-        // Fallback if no DB
-        const fallback = [{ name: 'birthday', label: 'Birthday Wish', description: 'Animated birthday card with music, confetti & more.' }];
-        setTemplates(fallback);
-        setSelected(fallback[0]);
+        const fb = [{ name: 'birthday', label: 'Birthday Wish', description: 'Animated birthday card with music, confetti & more.' }];
+        setTemplates(fb); setSelected(fb[0]);
       });
   }, []);
 
-  const toSlug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = e => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const toSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  const handleSubmit = async e => {
     e.preventDefault();
     if (!selected) return;
     setLoading(true); setError('');
     try {
       const slug = toSlug(form.customName || form.title || form.recipientName || 'wish');
       const res = await createPublication({
-        templateName: selected.name,
-        customName: slug,
+        templateName: selected.name, customName: slug,
         title: form.title || `${form.recipientName}'s Birthday`,
-        data: {
-          ...(selected.defaultData || {}),
-          name: form.recipientName,
-          waName: form.recipientName,
-          waAvatar: form.recipientName?.charAt(0)?.toUpperCase() || 'A',
-        },
+        data: { ...(selected.defaultData || {}), name: form.recipientName, waName: form.recipientName, waAvatar: form.recipientName?.charAt(0)?.toUpperCase() || 'A' },
         style: selected.defaultStyle || {},
       });
-      // Update local user credits if they are a merchant
       if (user?.role === 'merchant') {
         setUser({ ...user, credits: Math.max(0, user.credits - (selected.creditsRequired || 1)) });
       }
@@ -59,6 +75,13 @@ export default function NewWish() {
       setLoading(false);
     }
   };
+
+  const filtered = templates.filter(t =>
+    !tplSearch || t.label?.toLowerCase().includes(tplSearch.toLowerCase()) || t.name?.toLowerCase().includes(tplSearch.toLowerCase())
+  );
+
+  const insufficientCredits = user?.role === 'merchant' && selected && user.credits < (selected.creditsRequired || 1);
+  const VITE_API = import.meta.env.VITE_API_URL || '';
 
   return (
     <div className={styles.root}>
@@ -71,105 +94,136 @@ export default function NewWish() {
       <div className={styles.body}>
         <div className={styles.left}>
           <h1>Créer une publication</h1>
-          <p className={styles.sub}>Choisissez un template et personnalisez-le.</p>
+          <p className={styles.sub}>Choisissez un template et personnalisez-le en quelques clics.</p>
 
+          {/* ── Template Dropdown ── */}
           <h2 className={styles.stepLabel}>1. Choisissez un template</h2>
-          <div className={styles.templateGrid}>
-            {templates.map(t => (
-              <div
-                key={t.name}
-                className={`${styles.templateCard} ${selected?.name === t.name ? styles.active : ''}`}
-                onClick={() => setSelected(t)}
-              >
-                {t.thumbnail ? (
-                  <div className={styles.templateThumb} style={{ backgroundImage: `url(${t.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' }} />
-                ) : (
-                  <div className={styles.templateThumb}>🎂</div>
-                )}
-                <div className={styles.templateInfo}>
-                  <strong>{t.label}</strong>
-                  <span>{t.description}</span>
-                  <div className={styles.templateCredits}>💎 {t.creditsRequired || 1} Crédit(s)</div>
+          <div className={styles.dropWrapper} ref={dropRef}>
+            <button
+              type="button"
+              className={styles.dropTrigger}
+              onClick={() => setDropOpen(o => !o)}
+            >
+              {selected ? (
+                <span className={styles.dropSelected}>
+                  <span className={styles.dropThumb} style={{background: TEMPLATE_COLORS[selected.name] || '#667eea'}}>
+                    {TEMPLATE_ICONS[selected.name] || '✨'}
+                  </span>
+                  <span className={styles.dropInfo}>
+                    <strong>{selected.label}</strong>
+                    <span>💎 {selected.creditsRequired || 1} crédit{(selected.creditsRequired||1) > 1 ? 's' : ''}</span>
+                  </span>
+                </span>
+              ) : (
+                <span className={styles.dropPlaceholder}>Sélectionner un template…</span>
+              )}
+              <span className={`${styles.dropChevron} ${dropOpen ? styles.dropChevronOpen : ''}`}>▼</span>
+            </button>
+
+            {dropOpen && (
+              <div className={styles.dropMenu}>
+                <div className={styles.dropSearch}>
+                  <span className={styles.dropSearchIcon}>🔍</span>
+                  <input
+                    autoFocus
+                    className={styles.dropSearchInput}
+                    placeholder="Rechercher un template…"
+                    value={tplSearch}
+                    onChange={e => setTplSearch(e.target.value)}
+                    onClick={e => e.stopPropagation()}
+                  />
                 </div>
-                {selected?.name === t.name && <span className={styles.check}>✓</span>}
+                <div className={styles.dropList}>
+                  {filtered.length === 0 && <div className={styles.dropEmpty}>Aucun template trouvé</div>}
+                  {filtered.map(t => (
+                    <button
+                      key={t.name}
+                      type="button"
+                      className={`${styles.dropItem} ${selected?.name === t.name ? styles.dropItemActive : ''}`}
+                      onClick={() => { setSelected(t); setDropOpen(false); setTplSearch(''); }}
+                    >
+                      <span className={styles.dropItemThumb} style={{background: TEMPLATE_COLORS[t.name] || '#667eea'}}>
+                        {TEMPLATE_ICONS[t.name] || '✨'}
+                      </span>
+                      <span className={styles.dropItemInfo}>
+                        <strong>{t.label}</strong>
+                        <span>{t.description}</span>
+                      </span>
+                      <span className={styles.dropItemCredit}>💎 {t.creditsRequired || 1}</span>
+                      {selected?.name === t.name && <span className={styles.dropItemCheck}>✓</span>}
+                    </button>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
           </div>
 
+          {/* ── Form ── */}
           <h2 className={styles.stepLabel}>2. Configurer</h2>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
               <label>Nom du destinataire *</label>
-              <input
-                type="text" required placeholder="Lydia"
-                value={form.recipientName}
-                onChange={e => setForm(f => ({ ...f, recipientName: e.target.value }))}
-              />
+              <input type="text" required placeholder="Lydia" value={form.recipientName}
+                onChange={e => setForm(f => ({ ...f, recipientName: e.target.value }))} />
             </div>
             <div className={styles.field}>
               <label>Titre de la publication</label>
-              <input
-                type="text" placeholder="Anniversaire de Lydia"
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              />
+              <input type="text" placeholder="Anniversaire de Lydia" value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
             </div>
             <div className={styles.field}>
               <label>Lien personnalisé</label>
               <div className={styles.inputGroup}>
                 <span className={styles.inputPrefix}>/{selected?.name || 'template'}/</span>
-                <input
-                  type="text" placeholder="lydia-25"
-                  value={form.customName}
-                  onChange={e => setForm(f => ({ ...f, customName: toSlug(e.target.value) }))}
-                />
+                <input type="text" placeholder="lydia-25" value={form.customName}
+                  onChange={e => setForm(f => ({ ...f, customName: toSlug(e.target.value) }))} />
               </div>
               <span className={styles.hint}>
-                Laissez vide pour générer depuis le titre.
                 Lien final: <code>/site/{selected?.name || 'template'}/{toSlug(form.customName || form.title || form.recipientName || 'wish')}</code>
               </span>
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
-            {user?.role === 'merchant' && selected && user.credits < (selected.creditsRequired || 1) && (
+            {insufficientCredits && (
               <div className={styles.creditWarning}>
-                <p className={styles.error}>Vous n'avez pas assez de crédits (Solde: {user.credits}).</p>
-                <button 
-                  type="button" 
-                  className={styles.buyBtn} 
-                  onClick={() => setPaymentModalOpen(true)}
-                >
+                <p className={styles.error}>⚠️ Crédits insuffisants (Solde: {user.credits}).</p>
+                <button type="button" className={styles.buyBtn} onClick={() => setPaymentModalOpen(true)}>
                   💎 Acheter des crédits
                 </button>
               </div>
             )}
 
-            <button type="submit" className={styles.submit} disabled={loading || !selected || (user?.role === 'merchant' && user.credits < (selected?.creditsRequired || 1))}>
+            <button type="submit" className={styles.submit} disabled={loading || !selected || insufficientCredits}>
               {loading ? 'Création...' : 'Créer & personnaliser →'}
             </button>
           </form>
         </div>
 
         {paymentModalOpen && (
-          <PaymentModal 
-            onClose={() => setPaymentModalOpen(false)} 
-            onSuccess={(newCredits) => { /* user context updated in Modal */ }} 
-          />
+          <PaymentModal onClose={() => setPaymentModalOpen(false)} onSuccess={() => {}} />
         )}
 
+        {/* ── Preview panel ── */}
         <div className={styles.right}>
           <div className={styles.previewCard}>
-            {selected?.thumbnail ? (
-              <div className={styles.previewThumb} style={{ backgroundImage: `url(${selected.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' }} />
-            ) : (
-              <div className={styles.previewThumb}>🎂</div>
-            )}
+            <div className={styles.previewThumb} style={{background: selected ? (TEMPLATE_COLORS[selected.name]||'linear-gradient(135deg,#667eea,#764ba2)') : '#1e293b'}}>
+              <span className={styles.previewEmoji}>{TEMPLATE_ICONS[selected?.name] || '🎂'}</span>
+            </div>
             <h3>{selected?.label || 'Birthday Wish'}</h3>
             <p>{selected?.description}</p>
+            <div className={styles.creditInfo}>💎 {selected?.creditsRequired || 1} crédit{(selected?.creditsRequired||1)>1?'s':''}</div>
+            {selected && (
+              <a
+                href={`${VITE_API}/preview/${selected.name}`}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.previewBtn}
+              >
+                👁 Voir l'aperçu
+              </a>
+            )}
             <div className={styles.features}>
-              {selected?.highlights && selected.highlights.length > 0 ? (
-                selected.highlights.map((h, i) => <span key={i}>✨ {h}</span>)
-              ) : (
+              {selected?.highlights?.length ? selected.highlights.map((h,i) => <span key={i}>✨ {h}</span>) : (
                 <>
                   <span>🎵 Musique de fond</span>
                   <span>💬 Message interactif</span>
@@ -181,6 +235,8 @@ export default function NewWish() {
           </div>
         </div>
       </div>
+
+      <WhatsAppFAB />
     </div>
   );
 }

@@ -1,22 +1,26 @@
 import { useState } from 'react';
-import { NavLink, useNavigate, Outlet } from 'react-router-dom';
+import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X, LayoutDashboard, Package, PlaySquare, Palette, Mail, ExternalLink, Users, BarChart2, Images, ShieldAlert, Ticket } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Plus, PlaySquare, Palette, Mail, ExternalLink, Users, BarChart2, Images, ShieldAlert, Ticket, Target, Lightbulb, Settings } from 'lucide-react';
+import WhatsAppFAB from '../../components/WhatsAppFAB';
 import s from './AdminLayout.module.css';
 
 const NAV = [
-  { to: '/ewish-admin',              icon: <LayoutDashboard size={18} />, label: 'Dashboard',       end: true },
-  { to: '/ewish-admin/publications', icon: <PlaySquare size={18} />,     label: 'Publications'            },
-  { to: '/ewish-admin/wishes',       icon: <Mail size={18} />,           label: 'Vœux collectifs'         },
-  { to: '/ewish-admin/ewish',        icon: <ExternalLink size={18} />,   label: "Ouvrir l'éditeur"        },
+  { to: '/ewish-admin',            icon: <LayoutDashboard size={18} />, label: 'Dashboard'             },
+  { to: '/ewish-admin/ewish',      icon: <PlaySquare size={18} />,      label: 'Publications'          },
+  { to: '/ewish-admin/wishes',     icon: <Mail size={18} />,            label: 'Mes Vœux'              },
+  { to: '/ewish-admin/suggestions',icon: <Lightbulb size={18} />,       label: 'Suggestions'           },
+  { to: '/ewish-admin/ewish/new',  icon: <Plus size={18} />,            label: "Ouvrir l'éditeur", highlight: true },
 ];
 
 const SUPER_NAV = [
-  { to: '/ewish-admin/super/stats',  icon: <BarChart2 size={18} />, label: 'Statistiques plateforme' },
-  { to: '/ewish-admin/super/users',  icon: <Users size={18} />,     label: 'Marchands'               },
-  { to: '/ewish-admin/super/promos', icon: <Ticket size={18} />,    label: 'Codes Promo'             },
-  { to: '/ewish-admin/super/assets', icon: <Images size={18} />,    label: "Banque d'images"         },
-  { to: '/ewish-admin/templates',    icon: <Palette size={18} />,   label: 'Templates & Prix'        },
+  { to: '/ewish-admin/super/stats',        icon: <BarChart2 size={18} />, label: 'Statistiques'            },
+  { to: '/ewish-admin/super/users',        icon: <Users size={18} />,     label: 'Utilisateurs'            },
+  { to: '/ewish-admin/super/promos',       icon: <Ticket size={18} />,    label: 'Codes Promo'             },
+  { to: '/ewish-admin/super/assets',       icon: <Images size={18} />,    label: "Banque d'images"         },
+  { to: '/ewish-admin/super/prospection',  icon: <Target size={18} />,    label: 'Prospection'             },
+  { to: '/ewish-admin/super/settings',     icon: <Settings size={18} />,  label: 'Configuration'           },
+  { to: '/ewish-admin/templates',          icon: <Palette size={18} />,   label: 'Templates & Prix'        },
 ];
 
 export default function AdminLayout({ pendingCount = 0 }) {
@@ -30,11 +34,11 @@ export default function AdminLayout({ pendingCount = 0 }) {
     navigate('/ewish-admin/login');
   };
 
-  const renderNav = (items) => items.map(({ to, icon, label, end }) => (
+  const renderNav = (items) => items.map(({ to, icon, label, end, highlight }) => (
     <NavLink
       key={to} to={to} end={end}
       onClick={() => setMobileOpen(false)}
-      className={({ isActive }) => `${s.navItem} ${isActive ? s.active : ''}`}
+      className={({ isActive }) => `${s.navItem} ${isActive ? s.active : ''} ${highlight ? s.navHighlight : ''}`}
     >
       <span className={s.navIcon}>{icon}</span>
       <span className={s.navLabel}>{label}</span>
@@ -100,6 +104,8 @@ export default function AdminLayout({ pendingCount = 0 }) {
       <div className={s.main}>
         <Outlet />
       </div>
+
+      {!hideWa && <WhatsAppFAB />}
     </div>
   );
 }

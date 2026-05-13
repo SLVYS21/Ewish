@@ -69,6 +69,9 @@ app.use('/api/fonts',        require('./routes/fonts.js'));
 app.use('/api/billing',      require('./routes/billing.js'));
 app.use('/api/superadmin',   require('./routes/superadmin'));
 app.use('/api/assets',       require('./routes/assetbank'));
+app.use('/api/suggestions',  require('./routes/suggestions'));
+app.use('/api/prospects',    require('./routes/prospects'));
+app.use('/api/settings',     require('./routes/settings'));
 
 
 app.use('/collect', require('./routes/collect'));

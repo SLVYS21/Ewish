@@ -1,8 +1,9 @@
 // ── AdminPublications.jsx ──────────────────────────────────────────────────
 import { useState, useEffect, useMemo } from 'react';
-import { getPublications, deletePublication } from '../../utils/api';
+import { getPublications, deletePublication, updatePublication } from '../../utils/api';
+import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
-import { Search, ExternalLink, Edit2, Trash2, FileText, Gift, Briefcase, Heart, FolderOpen } from 'lucide-react';
+import { Search, ExternalLink, Edit2, Trash2, FileText, Gift, Briefcase, Heart, FolderOpen, Star } from 'lucide-react';
 import s from './AdminPublications.module.css';
 
 const THUMB_BG = {
@@ -18,6 +19,7 @@ export function AdminPublications() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [toast, setToast]   = useState('');
+  const { user }            = useAuth();
 
   useEffect(() => { load(); }, []);
   const load = async () => {
@@ -34,6 +36,18 @@ export function AdminPublications() {
     if (!confirm('Supprimer cette publication définitivement ?')) return;
     try { await deletePublication(id); setPubs(p => p.filter(x => x._id !== id)); showToast('Publication supprimée'); }
     catch { showToast('Erreur'); }
+  };
+
+  const handleTogglePremade = async (p, e) => {
+    e.stopPropagation();
+    try {
+      const newValue = !p.isPremade;
+      await updatePublication(p._id, { isPremade: newValue });
+      setPubs(pubs => pubs.map(x => x._id === p._id ? { ...x, isPremade: newValue } : x));
+      showToast(newValue ? 'Défini comme modèle' : 'Modèle retiré');
+    } catch {
+      showToast('Erreur lors de la modification');
+    }
   };
 
   const filtered = useMemo(() => {
@@ -78,6 +92,16 @@ export function AdminPublications() {
                   {p.published && <div className={s.url}>{url}</div>}
                 </div>
                 <div className={s.actions}>
+                  {user?.role === 'super_admin' && (
+                    <button 
+                      className={`${s.btn} ${s.btnGhost}`} 
+                      onClick={(e) => handleTogglePremade(p, e)}
+                      style={{ color: p.isPremade ? 'var(--text)' : 'var(--gold)' }}
+                    >
+                      <Star size={14} fill={p.isPremade ? 'currentColor' : 'none'} /> 
+                      {p.isPremade ? 'Retirer' : 'Modèle'}
+                    </button>
+                  )}
                   {p.published && <a href={url} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}><ExternalLink size={14}/> Voir</a>}
                   <a href={`/ewish-admin/ewish/edit/${p._id}`} className={`${s.btn} ${s.btnGhost}`} onClick={e=>e.stopPropagation()}><Edit2 size={14}/> Éditer</a>
                   <button className={`${s.btn} ${s.btnDanger}`} onClick={e=>handleDelete(p._id,e)}><Trash2 size={14}/></button>

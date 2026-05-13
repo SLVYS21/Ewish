@@ -164,4 +164,21 @@ export const uploadAsset   = (formData) => api.post('/assets', formData, {
   headers: { 'Content-Type': 'multipart/form-data' },
 });
 export const updateAsset   = (id, data) => api.put(`/assets/${id}`, data);
-export const deleteAsset   = (id)    => api.delete(`/assets/${id}`);
+export const deleteAsset   = (id)    => api.delete(`/assets/${id}`);
+
+// ── Suggestions ──
+export const createSuggestion  = (data)       => api.post('/suggestions', data, { withCredentials: true });
+export const getMySuggestions  = ()           => api.get('/suggestions/mine', { withCredentials: true });
+export const getAllSuggestions  = (params)    => api.get('/suggestions', { params, withCredentials: true });
+export const updateSuggestion  = (id, data)  => api.patch(`/suggestions/${id}`, data, { withCredentials: true });
+export const deleteSuggestion  = (id)        => api.delete(`/suggestions/${id}`, { withCredentials: true });
+
+// ── Prospects (super admin) ──
+export const getProspects    = (params)    => api.get('/prospects', { params, withCredentials: true });
+export const createProspect  = (data)      => api.post('/prospects', data, { withCredentials: true });
+export const updateProspect  = (id, data)  => api.patch(`/prospects/${id}`, data, { withCredentials: true });
+export const deleteProspect  = (id)        => api.delete(`/prospects/${id}`, { withCredentials: true });
+
+// ── Settings ──
+export const getSettings     = ()           => api.get('/settings');
+export const updateSettings  = (data)       => api.put('/settings', data, { withCredentials: true });

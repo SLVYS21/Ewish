@@ -75,6 +75,7 @@ const publicationSchema = new mongoose.Schema({
     fontFamily:   { type: String, default: 'Work Sans' },
     fontSize:     { type: String, default: 'medium' },
     theme:        { type: String, default: 'light' },
+    confettiType: { type: String, default: 'fireworks' },
 
     // Background per section — key = section slug
     // Special key "global" = fallback for all sections with no specific bg

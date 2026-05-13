@@ -61,6 +61,16 @@
 .navItem.active { background: rgba(201,168,76,0.1); color: var(--brand, #c9a84c); }
 .navIcon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: inherit; }
 .navLabel { flex: 1; }
+.navHighlight {
+  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(232,168,74,0.12)) !important;
+  color: var(--brand, #c9a84c) !important;
+  border: 1.5px solid rgba(201,168,76,0.35);
+  box-shadow: 0 2px 10px rgba(201,168,76,0.12);
+}
+.navHighlight:hover {
+  background: linear-gradient(135deg, rgba(201,168,76,0.28), rgba(232,168,74,0.2)) !important;
+  border-color: rgba(201,168,76,0.6);
+}
 .navBadge {
   background: var(--red, #e05757); color: #fff;
   font-size: 0.65rem; font-weight: 700;

@@ -1,0 +1,95 @@
+.overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.formModal {
+  background: var(--bg, #0e0f11); border: 1px solid var(--border, rgba(255,255,255,.08));
+  border-radius: 16px; padding: 28px; width: 100%; max-width: 620px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0,0,0,.5);
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.formModal h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+@media (max-width: 560px) { .formGrid { grid-template-columns: 1fr; } }
+.formField { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.formField label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3, rgba(255,255,255,.4)); }
+.formField input, .formField textarea, .formField select {
+  background: var(--surface, rgba(255,255,255,.05)); border: 1.5px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 8px; padding: 9px 12px; color: var(--text, #fff);
+  font-size: .88rem; font-family: var(--font, sans-serif); outline: none;
+  transition: border-color .2s;
+}
+.formField input:focus, .formField textarea:focus { border-color: var(--brand, #c9a84c); }
+.formField textarea { resize: vertical; min-height: 80px; }
+.formActions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+.btnCancel { padding: 9px 18px; background: var(--surface, rgba(255,255,255,.05)); border: 1px solid var(--border); border-radius: 8px; color: var(--text-2); font-size: .82rem; cursor: pointer; }
+.btnSave { padding: 9px 20px; background: var(--brand, #c9a84c); border: none; border-radius: 8px; color: #fff; font-size: .82rem; font-weight: 700; cursor: pointer; }
+.btnSave:disabled { opacity: .5; cursor: not-allowed; }
+.msgModal {
+  background: var(--bg, #0e0f11); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px; width: 100%; max-width: 520px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.5);
+  animation: slideUp .25s ease;
+}
+.msgModal h3 { font-size: .95rem; font-weight: 700; margin-bottom: 14px; }
+.msgTextarea {
+  width: 100%; resize: vertical; min-height: 180px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 12px; color: var(--text);
+  font-size: .85rem; font-family: var(--font); outline: none;
+  transition: border-color .2s; margin-bottom: 14px;
+}
+.msgTextarea:focus { border-color: var(--brand); }
+
+/* ── Toolbar ── */
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.searchBar {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 180px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 50px; padding: 8px 14px;
+}
+.searchBar input { background: none; border: none; outline: none; color: var(--text); font-size: .85rem; font-family: var(--font); flex: 1; }
+.statusSelect { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: .82rem; font-family: var(--font); outline: none; cursor: pointer; }
+.btnAdd { background: var(--brand, #c9a84c); border: none; border-radius: 50px; padding: 9px 18px; color: #fff; font-size: .82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: filter .2s; }
+.btnAdd:hover { filter: brightness(1.1); }
+
+/* ── Status bar ── */
+.statusBar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.statusPill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid var(--pill-color, #94a3b8);
+  background: none; color: var(--text-2);
+  font-size: .75rem; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.statusPill:hover { background: rgba(255,255,255,.06); }
+.statusPillActive { background: var(--pill-color, #94a3b8); color: #fff; }
+.pillCount { background: rgba(0,0,0,.25); border-radius: 10px; padding: 1px 6px; font-size: .68rem; }
+
+/* ── Table ── */
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3); padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.row { border-bottom: 1px solid var(--border); transition: background .15s; }
+.row:hover { background: var(--surface); }
+.row td { padding: 12px 12px; vertical-align: top; }
+.emptyRow { text-align: center; color: var(--text-3); padding: 48px; font-style: italic; font-size: .88rem; }
+.companyName { font-size: .88rem; font-weight: 700; color: var(--text); }
+.contactName { font-size: .75rem; color: var(--text-3); margin-top: 2px; }
+.activityTag { background: var(--surface2); padding: 3px 8px; border-radius: 6px; font-size: .75rem; color: var(--text-2); }
+.muted { font-size: .78rem; color: var(--text-3); }
+.statusDropdown { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px 8px; font-size: .75rem; font-weight: 700; cursor: pointer; font-family: var(--font); }
+.rowActions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.btnWa { display: flex; align-items: center; gap: 5px; background: #25D366; border: none; border-radius: 8px; padding: 5px 10px; color: #fff; font-size: .75rem; font-weight: 700; cursor: pointer; transition: filter .2s; }
+.btnWa:hover { filter: brightness(.9); }
+.btnMsg, .btnEdit, .btnDel { background: var(--surface2); border: none; border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: .82rem; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+.btnMsg:hover { background: rgba(201,168,76,.2); }
+.btnEdit:hover { background: var(--border); }
+.btnDel:hover { background: rgba(239,68,68,.2); }
+.notes { font-size: .72rem; color: var(--text-3); font-style: italic; margin-top: 6px; max-width: 240px; }
+.loading { display: flex; align-items: center; justify-content: center; padding: 80px; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

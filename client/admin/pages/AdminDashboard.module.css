@@ -24,6 +24,19 @@
 .gold  { color:var(--brand); }
 .buyBtn { background: var(--brand); color: #fff; border: none; padding: 4px 12px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-left: 8px; transition: opacity .2s; }
 .buyBtn:hover { opacity: 0.8; }
+.lowCreditsWarn {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, rgba(251,191,36,.12), rgba(239,68,68,.08));
+  border: 1.5px solid rgba(251,191,36,.4);
+  border-radius: 14px; padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: .88rem; color: var(--text);
+  animation: pulseWarn 2.5s ease-in-out infinite;
+}
+@keyframes pulseWarn {
+  0%, 100% { border-color: rgba(251,191,36,.4); }
+  50%       { border-color: rgba(251,191,36,.8); }
+}
 
 /* ── Mid ── */
 .midRow { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px; }

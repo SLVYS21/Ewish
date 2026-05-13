@@ -1,0 +1,110 @@
+/* ── Submit form (merchant) ── */
+.submitForm {
+  background: var(--surface, #fff); border: 1px solid var(--border, #e5e5ea);
+  border-radius: 16px; padding: 24px;
+  display: flex; flex-direction: column; gap: 14px;
+  max-width: 600px; margin-bottom: 28px;
+}
+.submitForm h3 { font-size: 1rem; font-weight: 700; margin: 0; }
+.catRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.catBtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border: 1.5px solid var(--border, #e5e5ea);
+  border-radius: 8px; background: var(--surface2, #f5f5f7);
+  color: var(--text-2, #666); font-size: .75rem; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.catActive { border-color: var(--brand, #c9a84c); color: var(--brand, #c9a84c); background: rgba(201,168,76,.08); }
+.textarea {
+  width: 100%; resize: vertical; min-height: 90px;
+  background: var(--surface2, #f5f5f7); border: 1.5px solid var(--border, #e5e5ea);
+  border-radius: 10px; padding: 10px 12px; color: var(--text, #222);
+  font-size: .88rem; font-family: var(--font, inherit); outline: none; transition: border-color .2s;
+}
+.textarea:focus { border-color: var(--brand, #c9a84c); }
+.submitBtn {
+  align-self: flex-start; display: flex; align-items: center; gap: 6px;
+  background: var(--brand, #c9a84c); color: #fff; border: none;
+  border-radius: 50px; padding: 9px 22px; font-size: .88rem; font-weight: 700;
+  cursor: pointer; transition: filter .2s;
+}
+.submitBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Filter pills ── */
+.filterRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border, #e5e5ea);
+  background: none; color: var(--text-2, #666);
+  font-size: .75rem; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.pill:hover { background: var(--surface2, #f5f5f7); }
+.pillActive {
+  border-color: var(--pc, var(--brand, #c9a84c));
+  color: var(--pc, var(--brand, #c9a84c));
+  background: color-mix(in srgb, var(--pc, #c9a84c) 10%, transparent);
+}
+.pillCount { background: rgba(0,0,0,.08); border-radius: 10px; padding: 1px 5px; font-size: .68rem; }
+
+/* ── List ── */
+.list { display: flex; flex-direction: column; gap: 10px; }
+.card {
+  background: var(--surface, #fff); border: 1px solid var(--border, #e5e5ea);
+  border-radius: 14px; overflow: hidden; transition: border-color .2s;
+}
+.cardOpen { border-color: var(--brand, #c9a84c); }
+.cardHead {
+  padding: 14px 18px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.cardHead:hover { background: var(--surface2, #f5f5f7); }
+.catTag { font-size: .72rem; font-weight: 700; color: var(--text-3, #999); }
+.msg { font-size: .88rem; color: var(--text, #222); line-height: 1.5; margin: 0; }
+.cardMeta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.author { font-size: .72rem; font-weight: 600; color: var(--text-3, #999); }
+.date { font-size: .72rem; color: var(--text-3, #999); margin-left: auto; }
+.statusSelect {
+  background: none; border: 1.5px solid var(--border, #e5e5ea);
+  border-radius: 8px; padding: 3px 8px; font-size: .72rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font, inherit); outline: none;
+}
+.statusBadge { font-size: .72rem; font-weight: 700; }
+.chevron { font-size: .65rem; color: var(--text-3, #999); flex-shrink: 0; }
+
+/* ── Card body ── */
+.cardBody { padding: 0 18px 18px; border-top: 1px solid var(--border, #e5e5ea); padding-top: 14px; }
+.fullMsg { font-size: .88rem; color: var(--text, #222); line-height: 1.6; white-space: pre-wrap; margin-bottom: 14px; }
+.adminNoteBox {
+  background: rgba(201,168,76,.08); border-left: 3px solid var(--brand, #c9a84c);
+  border-radius: 0 8px 8px 0; padding: 10px 14px;
+}
+.adminNoteLabel { font-size: .7rem; font-weight: 700; color: var(--brand, #c9a84c); display: block; margin-bottom: 4px; }
+.adminNoteBox p { font-size: .85rem; color: var(--text, #222); margin: 0; line-height: 1.5; }
+.noteEdit { display: flex; flex-direction: column; gap: 8px; }
+.noteEdit label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3, #999); }
+.noteTextarea {
+  width: 100%; resize: vertical; min-height: 70px;
+  background: var(--surface2, #f5f5f7); border: 1.5px solid var(--border, #e5e5ea);
+  border-radius: 8px; padding: 9px 12px; color: var(--text, #222);
+  font-size: .85rem; font-family: var(--font, inherit); outline: none; transition: border-color .2s;
+}
+.noteTextarea:focus { border-color: var(--brand, #c9a84c); }
+.noteActions { display: flex; gap: 8px; }
+.noteSave {
+  background: var(--brand, #c9a84c); border: none; border-radius: 8px;
+  padding: 7px 16px; color: #fff; font-size: .78rem; font-weight: 700; cursor: pointer;
+}
+.noteSave:disabled { opacity: .5; cursor: not-allowed; }
+.noteDelete {
+  background: rgba(239,68,68,.08); border: 1.5px solid rgba(239,68,68,.3);
+  border-radius: 8px; padding: 7px 12px; color: #ef4444; font-size: .78rem; font-weight: 600; cursor: pointer;
+  transition: background .2s;
+}
+.noteDelete:hover { background: rgba(239,68,68,.15); }
+
+/* ── Empty / spinner ── */
+.empty { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--text-2, #666); }
+.empty span { font-size: 2.5rem; }
+.empty p { font-size: .9rem; font-weight: 300; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border, #e5e5ea); border-top-color: var(--brand, #c9a84c); border-radius: 50%; animation: spin .7s linear infinite; margin: 60px auto; display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }

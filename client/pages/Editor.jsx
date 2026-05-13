@@ -8,6 +8,7 @@ import DecoTab from '../components/DecoTab';
 import WidgetTab from '../components/WidgetTab';
 import PhotoLayoutTab from '../components/PhotoLayoutTab';
 import JarTab from '../components/JarTab';
+import ConfettiTab from '../components/ConfettiTab';
 import WishesManager from '../components/WishesManager';
 import ClientTab from '../components/ClientTab';
 import QRCodeModal from '../components/QRCodeModal';
@@ -23,6 +24,7 @@ const TABS = [
   { key: 'decorations', label: 'Décorations', icon: <Sparkles size={18} strokeWidth={1.5} /> },
   { key: 'photos', label: 'Photos', icon: <LayoutTemplate size={18} strokeWidth={1.5} /> },
   { key: 'jar', label: 'Jar', icon: <Coffee size={18} strokeWidth={1.5} />, templates: ['birthday', 'special'] },
+  { key: 'confetti', label: 'Confettis', icon: <span style={{fontSize:'16px'}}>🎊</span>, templatePrefixes: ['birthday', 'special', 'collective'] },
   { key: 'widgets', label: 'Widgets', icon: <Blocks size={18} strokeWidth={1.5} /> },
   { key: 'wishes', label: 'Vœux', icon: <MailOpen size={18} strokeWidth={1.5} />, templatePrefix: 'collective' },
   { key: 'client', label: 'Client', icon: <ClipboardList size={18} strokeWidth={1.5} /> },
@@ -199,6 +201,7 @@ export default function Editor() {
   const [jarConfig, setJarConfig] = useState(null);
   const [widgets, setWidgets] = useState([]);
   const [photoTransforms, setPhotoTransforms] = useState({});
+  const [confettiType, setConfettiType] = useState('default');
 
   const [activeTab, setActiveTab] = useState('content');
   const [saveStatus, setSaveStatus] = useState('saved');
@@ -256,6 +259,7 @@ export default function Editor() {
         setShowBranding(found.showBranding || false);
         setBrandingUrl(found.brandingUrl || '');
         setBrandingText(found.brandingText || '');
+        setConfettiType(st.confettiType || 'default');
         if (found.published) setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
 
         try {
@@ -340,6 +344,21 @@ export default function Editor() {
     refreshPreview(data, next, backgrounds, decorations, widgets);
   };
 
+  const handleConfettiChange = (type) => {
+    setConfettiType(type);
+    const next = { ...style, confettiType: type };
+    setStyle(next);
+    autoSave(data, next, backgrounds, decorations, jarConfig, widgets);
+    // Send live preview message
+    const iframe = iframeRef.current;
+    if (iframe?.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage({ type: 'WW_CONFETTI', effectType: type }, '*');
+        iframe.contentWindow.postMessage({ type: 'WW_UPDATE', style: { ...next, backgrounds } }, '*');
+      } catch {}
+    }
+  };
+
   const handleBackgroundsChange = (newBgs) => {
     setBackgrounds(newBgs);
     autoSave(data, style, newBgs, decorations, jarConfig, widgets);
@@ -405,6 +424,11 @@ export default function Editor() {
   const visibleTabs = TABS.filter(tab => {
     if (tab.templates && !tab.templates.includes(pub?.templateName)) return false;
     if (tab.templatePrefix && !pub?.templateName?.startsWith(tab.templatePrefix)) return false;
+    if (tab.templatePrefixes) {
+      const name = pub?.templateName || '';
+      const matches = tab.templatePrefixes.some(p => name === p || name.startsWith(p));
+      if (!matches) return false;
+    }
     return true;
   });
 
@@ -670,6 +694,13 @@ export default function Editor() {
                 jarConfig={jarConfig}
                 onChange={handleJarChange}
                 templateName={pub.templateName}
+              />
+            )}
+            {activeTab === 'confetti' && (
+              <ConfettiTab
+                confettiType={confettiType}
+                onChange={handleConfettiChange}
+                iframeRef={iframeRef}
               />
             )}
             {activeTab === 'wishes' && (

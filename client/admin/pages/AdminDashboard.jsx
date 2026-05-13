@@ -4,7 +4,8 @@ import { getAnalytics, buyCredits } from '../../utils/api';
 import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
 import PaymentModal from '../components/PaymentModal';
-import { Diamond, Package, CheckCircle, CircleDollarSign, TrendingUp, Inbox, PlaySquare } from 'lucide-react';
+import WhatsAppFAB from '../../components/WhatsAppFAB';
+import { Diamond, Package, CheckCircle, CircleDollarSign, TrendingUp, Inbox, PlaySquare, AlertTriangle } from 'lucide-react';
 import s from './AdminDashboard.module.css';
 
 const BADGE = {
@@ -40,6 +41,7 @@ export default function AdminDashboard() {
   };
 
   return (
+    <>
     <PageShell
       title="Dashboard"
       subtitle="Vue d'ensemble de l'activité"
@@ -63,11 +65,21 @@ export default function AdminDashboard() {
       {!loading && data && <>
         {user?.role === 'merchant' ? (
           <>
+            {(user?.credits ?? 99) <= 2 && (
+              <div className={s.lowCreditsWarn}>
+                <AlertTriangle size={18} style={{flexShrink:0}} />
+                <div>
+                  <strong>Crédits faibles !</strong> Il vous reste seulement <strong>{user.credits}</strong> crédit{user.credits !== 1 ? 's' : ''}.
+                  Rechargez maintenant pour continuer à créer.
+                </div>
+                <button onClick={handleBuyCredits} className={s.buyBtn} style={{flexShrink:0}}>Recharger</button>
+              </div>
+            )}
             {/* ── Merchant Stats ── */}
             <div className={s.statsRow}>
-              <StatCard label="Solde Crédits"      value={user?.credits || 0}    icon={<Diamond size={24} />} meta={<button onClick={handleBuyCredits} className={s.buyBtn}>Acheter</button>} colorClass={s.gold} isText />
+              <StatCard label="Crédits" value={user?.credits || 0} icon={<Diamond size={24} />} meta={<button onClick={handleBuyCredits} className={s.buyBtn}>Acheter</button>} colorClass={s.gold} isText />
               <StatCard label="Total Publications" value={data.publications?.total || 0} icon={<PlaySquare size={24} />} meta="Publications créées" />
-              <StatCard label="Publiées"           value={data.publications?.published || 0} icon={<CheckCircle size={24} />} meta="En ligne" colorClass={s.green} />
+              <StatCard label="Publiées" value={data.publications?.published || 0} icon={<CheckCircle size={24} />} meta="En ligne" colorClass={s.green} />
             </div>
 
             <div className={s.midRow}>
@@ -178,6 +190,8 @@ export default function AdminDashboard() {
         )}
       </>}
     </PageShell>
+    <WhatsAppFAB />
+    </>
   );
 }
 

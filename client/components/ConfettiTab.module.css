@@ -1,0 +1,142 @@
+.root {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface, rgba(255,255,255,.05));
+  border: 1.5px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 12px;
+}
+.headerIcon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.headerTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text, #fff);
+  margin-bottom: 2px;
+}
+.headerSub {
+  font-size: 0.72rem;
+  color: var(--text-3, rgba(255,255,255,.4));
+  line-height: 1.4;
+}
+
+/* ── Effects grid ────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  background: var(--surface, rgba(255,255,255,.04));
+  border: 1.5px solid var(--border, rgba(255,255,255,.08));
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text, #fff);
+}
+.card:hover {
+  border-color: var(--brand, #c8963e);
+  background: rgba(200, 150, 62, 0.08);
+  transform: translateY(-2px);
+}
+.cardActive {
+  border-color: var(--brand, #c8963e) !important;
+  background: rgba(200, 150, 62, 0.14) !important;
+  box-shadow: 0 0 0 1px var(--brand, #c8963e), 0 4px 16px rgba(200, 150, 62, 0.2);
+}
+.cardPreviewing {
+  animation: pulse 0.4s ease;
+}
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.cardEmoji {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.cardLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-2, rgba(255,255,255,.75));
+}
+
+.activeBadge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--brand, #c8963e);
+  background: rgba(200, 150, 62, 0.15);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+.previewingBadge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.55rem;
+  color: #fff;
+  background: rgba(255,255,255,.15);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+/* ── Current selection info ─────────────────────────────── */
+.currentInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(200, 150, 62, 0.08);
+  border: 1.5px solid rgba(200, 150, 62, 0.3);
+  border-radius: 12px;
+}
+.currentEmoji {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.currentLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand, #c8963e);
+  margin-bottom: 2px;
+}
+.currentDesc {
+  font-size: 0.68rem;
+  color: var(--text-3, rgba(255,255,255,.4));
+  line-height: 1.4;
+}
+
+/* ── Hint ───────────────────────────────────────────────── */
+.hint {
+  font-size: 0.7rem;
+  color: var(--text-3, rgba(255,255,255,.35));
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+}

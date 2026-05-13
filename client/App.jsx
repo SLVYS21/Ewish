@@ -18,10 +18,13 @@ import AdminTemplates from "./admin/pages/AdminTemplates";
 import AdminWishes from "./admin/pages/AdminWishes";
 
 // ── Super Admin ──
-import SuperAdminStats  from "./admin/pages/SuperAdminStats";
-import SuperAdminUsers  from "./admin/pages/SuperAdminUsers";
-import SuperAdminPromos from "./admin/pages/SuperAdminPromos";
-import SuperAdminAssets from "./admin/pages/SuperAdminAssets";
+import SuperAdminStats        from "./admin/pages/SuperAdminStats";
+import SuperAdminUsers        from "./admin/pages/SuperAdminUsers";
+import SuperAdminPromos       from "./admin/pages/SuperAdminPromos";
+import SuperAdminAssets       from "./admin/pages/SuperAdminAssets";
+import SuperAdminProspection  from "./admin/pages/SuperAdminProspection";
+import SuperAdminSuggestions  from "./admin/pages/SuperAdminSuggestions";
+import SuperAdminSettings     from "./admin/pages/SuperAdminSettings";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -144,10 +147,13 @@ export default function App() {
 
             {/* Super Admin only routes */}
             <Route path="templates"    element={<RequireSuperAdmin><AdminTemplates /></RequireSuperAdmin>} />
-            <Route path="super/stats"  element={<RequireSuperAdmin><SuperAdminStats /></RequireSuperAdmin>} />
-            <Route path="super/users"  element={<RequireSuperAdmin><SuperAdminUsers /></RequireSuperAdmin>} />
-            <Route path="super/promos" element={<RequireSuperAdmin><SuperAdminPromos /></RequireSuperAdmin>} />
-            <Route path="super/assets" element={<RequireSuperAdmin><SuperAdminAssets /></RequireSuperAdmin>} />
+            <Route path="super/stats"        element={<RequireSuperAdmin><SuperAdminStats /></RequireSuperAdmin>} />
+            <Route path="super/users"        element={<RequireSuperAdmin><SuperAdminUsers /></RequireSuperAdmin>} />
+            <Route path="super/promos"       element={<RequireSuperAdmin><SuperAdminPromos /></RequireSuperAdmin>} />
+            <Route path="super/assets"       element={<RequireSuperAdmin><SuperAdminAssets /></RequireSuperAdmin>} />
+            <Route path="super/prospection"  element={<RequireSuperAdmin><SuperAdminProspection /></RequireSuperAdmin>} />
+            <Route path="super/settings"     element={<RequireSuperAdmin><SuperAdminSettings /></RequireSuperAdmin>} />
+            <Route path="suggestions"        element={<RequireAuth><SuperAdminSuggestions /></RequireAuth>} />
           </Route>
 
 

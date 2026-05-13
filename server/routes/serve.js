@@ -141,6 +141,7 @@ ${bgCssLines.join('\n')}
   window.__WW_DECO__     = ${JSON.stringify(pub.decorations || [])};
   window.__WW_WIDGETS__ = ${JSON.stringify(pub.widgets || [])};
   window.__WW_PHOTO_TRANSFORMS__ = ${JSON.stringify(pub.photoTransforms || {})};
+  window.__WW_CONFETTI_TYPE__ = '${(pub.style && pub.style.confettiType) || 'default'}';
 <\/script>`;
   // window.__WW_BRANDING__  = ${JSON.stringify({
   //   show: ${pub.showBranding ? 'true' : 'false'},

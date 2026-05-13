@@ -1,0 +1,116 @@
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e5e5ea);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.section {
+  padding: 24px;
+}
+
+.section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.desc {
+  font-size: 0.88rem;
+  color: var(--text-2, #666);
+  margin-bottom: 24px;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.inputWrap input, .inputWrap textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border, #e5e5ea);
+  border-radius: 10px;
+  background: var(--surface2, #f5f5f7);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.inputWrap input:focus, .inputWrap textarea:focus {
+  border-color: var(--brand, #c9a84c);
+}
+
+.hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-3, #999);
+  margin-top: 6px;
+}
+
+.footer {
+  padding: 16px 24px;
+  background: var(--surface2, #f5f5f7);
+  border-top: 1px solid var(--border, #e5e5ea);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.successMsg {
+  font-size: 0.82rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.saveBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--brand, #c9a84c);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.saveBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading {
+  padding: 60px;
+  text-align: center;
+  color: var(--text-2);
+}
