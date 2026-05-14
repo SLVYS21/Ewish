@@ -106,8 +106,13 @@ export default function NewWish() {
             >
               {selected ? (
                 <span className={styles.dropSelected}>
-                  <span className={styles.dropThumb} style={{background: TEMPLATE_COLORS[selected.name] || '#667eea'}}>
-                    {TEMPLATE_ICONS[selected.name] || '✨'}
+                  <span 
+                    className={styles.dropThumb} 
+                    style={{
+                      background: selected.thumbnail ? `url(${selected.thumbnail}) center/cover no-repeat` : (TEMPLATE_COLORS[selected.name] || '#667eea')
+                    }}
+                  >
+                    {!selected.thumbnail && (TEMPLATE_ICONS[selected.name] || '✨')}
                   </span>
                   <span className={styles.dropInfo}>
                     <strong>{selected.label}</strong>
@@ -142,8 +147,13 @@ export default function NewWish() {
                       className={`${styles.dropItem} ${selected?.name === t.name ? styles.dropItemActive : ''}`}
                       onClick={() => { setSelected(t); setDropOpen(false); setTplSearch(''); }}
                     >
-                      <span className={styles.dropItemThumb} style={{background: TEMPLATE_COLORS[t.name] || '#667eea'}}>
-                        {TEMPLATE_ICONS[t.name] || '✨'}
+                      <span 
+                        className={styles.dropItemThumb} 
+                        style={{
+                          background: t.thumbnail ? `url(${t.thumbnail}) center/cover no-repeat` : (TEMPLATE_COLORS[t.name] || '#667eea')
+                        }}
+                      >
+                        {!t.thumbnail && (TEMPLATE_ICONS[t.name] || '✨')}
                       </span>
                       <span className={styles.dropItemInfo}>
                         <strong>{t.label}</strong>
@@ -199,8 +209,15 @@ export default function NewWish() {
         {/* ── Preview panel ── */}
         <div className={styles.right}>
           <div className={styles.previewCard}>
-            <div className={styles.previewThumb} style={{background: selected ? (TEMPLATE_COLORS[selected.name]||'linear-gradient(135deg,#667eea,#764ba2)') : '#1e293b'}}>
-              <span className={styles.previewEmoji}>{TEMPLATE_ICONS[selected?.name] || '🎂'}</span>
+            <div 
+              className={styles.previewThumb} 
+              style={{
+                background: selected?.thumbnail ? `url(${selected.thumbnail}) center/cover no-repeat` : (selected ? (TEMPLATE_COLORS[selected.name]||'linear-gradient(135deg,#667eea,#764ba2)') : '#1e293b')
+              }}
+            >
+              {!selected?.thumbnail && (
+                <span className={styles.previewEmoji}>{TEMPLATE_ICONS[selected?.name] || '🎂'}</span>
+              )}
             </div>
             <h3>{selected?.label || 'Birthday Wish'}</h3>
             <p>{selected?.description}</p>

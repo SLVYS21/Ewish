@@ -452,3 +452,17 @@
 .publishModalActions button:hover { opacity: 0.85; transform: translateY(-1px); }
 .modalCancel { background: var(--surface2); border: 1px solid var(--border) !important; color: var(--text-2); }
 .modalConfirm { background: var(--brand, #c9a84c); color: #fff; box-shadow: 0 4px 14px rgba(201,168,76,0.3); }
+
+.slugSection { margin-top: 14px; }
+.slugLabel { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px; }
+
+.publishingStatus {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 0; gap: 12px; color: var(--text-2); font-size: 0.9rem;
+}
+.spinnerSmall {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border); border-top-color: var(--brand);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+

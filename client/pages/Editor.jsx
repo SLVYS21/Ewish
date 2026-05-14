@@ -490,8 +490,14 @@ export default function Editor() {
               <QrCode size={16} /> Code QR
             </button>
           )}
-          <button className={`${styles.btnPublish} tour-step-publish`} onClick={() => setIsPublishModalOpen(true)}>
-            Publier
+          <button 
+            className={`${styles.btnPublish} tour-step-publish`} 
+            onClick={() => {
+              handlePublish();
+              setIsPublishModalOpen(true);
+            }}
+          >
+            {pub?.published ? 'Partager' : 'Publier'}
           </button>
         </div>
       </header>
@@ -504,7 +510,7 @@ export default function Editor() {
 
             {/* Header */}
             <div className={styles.publishModalHeader}>
-              <h2>Publier la création</h2>
+              <h2>{pub?.published ? 'Partager ma création' : 'Publier la création'}</h2>
               <button className={styles.publishModalClose} onClick={() => setIsPublishModalOpen(false)}>
                 <X size={18} />
               </button>
@@ -520,98 +526,86 @@ export default function Editor() {
 
             {/* ── Link section — always visible ── */}
             <div className={styles.publishModalSection}>
-              <div className={styles.publishLinkLabel}>Lien de publication</div>
-
-              {/* URL display row */}
-              <div className={styles.publishLinkRow}>
-                <span className={styles.publishUrlText}>
-                  {shortCode
-                    ? `${import.meta.env.VITE_API_URL}/s/${shortCode}`
-                    : <span className={styles.publishUrlPlaceholder}>Sera généré à la publication</span>
-                  }
-                </span>
-                {shortCode && (
-                  <button
-                    className={`${styles.copyBtn} ${linkCopied ? styles.copyBtnDone : ''}`}
-                    title="Copier le lien"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL}/s/${shortCode}`);
-                      setLinkCopied(true);
-                      setTimeout(() => setLinkCopied(false), 2000);
-                    }}
-                  >
-                    {linkCopied ? <Check size={16} /> : <Copy size={16} />}
-                    {linkCopied ? 'Copié !' : 'Copier'}
-                  </button>
-                )}
-              </div>
-
-              {/* Slug editor — always accessible if shortCode exists */}
-              {shortCode && !slugEditing && (
-                <button
-                  className={styles.slugEditTrigger}
-                  onClick={() => { setSlugDraft(shortCode); setSlugEditing(true); setSlugStatus(''); }}
-                >
-                  <Edit2 size={13} /> Modifier le lien court
-                </button>
-              )}
-
-              {slugEditing && (
-                <div className={styles.publishUrlBoxEdit}>
-                  <span className={styles.shortUrlPrefix}>/s/</span>
-                  <input
-                    className={styles.slugInput}
-                    value={slugDraft}
-                    onChange={e => setSlugDraft(e.target.value)}
-                    onKeyDown={async e => {
-                      if (e.key === 'Enter') {
-                        setSlugStatus('saving');
-                        try {
-                          const r = await setCustomSlug(id, slugDraft);
-                          setShortCode(r.data.shortCode);
-                          setSlugStatus('saved');
-                          setSlugEditing(false);
-                        } catch (err) {
-                          setSlugStatus(err.response?.data?.error || 'Erreur');
-                        }
-                      }
-                      if (e.key === 'Escape') setSlugEditing(false);
-                    }}
-                    placeholder="mon-lien-custom"
-                    autoFocus
-                  />
-                  <button className={styles.slugSave} onClick={async () => {
-                    setSlugStatus('saving');
-                    try {
-                      const r = await setCustomSlug(id, slugDraft);
-                      setShortCode(r.data.shortCode);
-                      setSlugStatus('saved');
-                      setSlugEditing(false);
-                    } catch (err) {
-                      setSlugStatus(err.response?.data?.error || 'Erreur');
-                    }
-                  }}><Check size={16} /></button>
-                  <button className={styles.slugCancel} onClick={() => setSlugEditing(false)}><X size={16} /></button>
-                  {slugStatus && slugStatus !== 'saving' && (
-                    <span className={`${styles.slugMsg} ${slugStatus === 'saved' ? styles.slugOk : styles.slugErr}`}>
-                      {slugStatus === 'saved' ? <><Check size={13} /> OK</> : slugStatus}
-                    </span>
-                  )}
+              {publishing ? (
+                <div className={styles.publishingStatus}>
+                  <div className={styles.spinnerSmall} />
+                  <span>{pub?.published ? 'Mise à jour en cours...' : 'Publication en cours...'}</span>
                 </div>
-              )}
-            </div>
+              ) : (
+                <>
+                  <div className={styles.publishLinkLabel}>Lien de publication</div>
 
-            <div className={styles.publishWarning}>
-              {pub?.published
-                ? 'Publier mettra à jour la version publique de votre création.'
-                : 'Votre création sera accessible via le lien ci-dessus après publication.'
-              }
+                  {/* URL display row */}
+                  <div className={styles.publishLinkRow}>
+                    <span className={styles.publishUrlText}>
+                      {shortCode
+                        ? `${import.meta.env.VITE_API_URL}/s/${shortCode}`
+                        : <span className={styles.publishUrlPlaceholder}>Sera généré à la publication</span>
+                      }
+                    </span>
+                    {shortCode && (
+                      <button
+                        className={`${styles.copyBtn} ${linkCopied ? styles.copyBtnDone : ''}`}
+                        title="Copier le lien"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL}/s/${shortCode}`);
+                          setLinkCopied(true);
+                          setTimeout(() => setLinkCopied(false), 2000);
+                        }}
+                      >
+                        {linkCopied ? <Check size={16} /> : <Copy size={16} />}
+                        {linkCopied ? 'Copié !' : 'Copier le lien'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Slug editor — always accessible if shortCode exists */}
+                  {shortCode && (
+                    <div className={styles.slugSection}>
+                      <div className={styles.slugLabel}>Personnaliser l'adresse (URL)</div>
+                      <div className={styles.publishUrlBoxEdit}>
+                        <span className={styles.shortUrlPrefix}>/s/</span>
+                        <input
+                          className={styles.slugInput}
+                          value={slugDraft}
+                          onChange={e => setSlugDraft(e.target.value)}
+                          onBlur={async () => {
+                            if (slugDraft === shortCode) return;
+                            setSlugStatus('saving');
+                            try {
+                              const r = await setCustomSlug(id, slugDraft);
+                              setShortCode(r.data.shortCode);
+                              setSlugStatus('saved');
+                            } catch (err) {
+                              setSlugStatus(err.response?.data?.error || 'Erreur');
+                            }
+                          }}
+                          onKeyDown={async e => {
+                            if (e.key === 'Enter') {
+                              e.target.blur();
+                            }
+                            if (e.key === 'Escape') {
+                              setSlugDraft(shortCode);
+                            }
+                          }}
+                          placeholder="mon-lien-custom"
+                        />
+                        {slugStatus === 'saving' && <RefreshCw size={14} className={styles.spinIcon} />}
+                        {slugStatus && slugStatus !== 'saving' && (
+                          <span className={`${styles.slugMsg} ${slugStatus === 'saved' ? styles.slugOk : styles.slugErr}`}>
+                            {slugStatus === 'saved' ? <><Check size={13} /> Sauvegardé</> : slugStatus}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             <div className={styles.publishModalActions}>
-              <button className={styles.modalCancel} onClick={() => setIsPublishModalOpen(false)}>Fermer</button>
-              <button className={styles.modalConfirm} onClick={() => { handlePublish(); setIsPublishModalOpen(false); }} disabled={publishing}>
-                {publishing ? 'Publication...' : pub?.published ? 'Republier' : 'Publier'}
+              <button className={styles.modalConfirm} onClick={() => setIsPublishModalOpen(false)}>
+                Terminer
               </button>
             </div>
           </div>

@@ -328,8 +328,15 @@ export default function Dashboard() {
               <div className={styles.cardGrid}>
                 {filteredTemplates.map(tpl => (
                   <div key={tpl._id} className={styles.tplCard}>
-                    <div className={styles.tplThumb} style={{background: TEMPLATE_COLORS[tpl.name] || 'linear-gradient(135deg,#667eea,#764ba2)'}}>
-                      <span className={styles.tplIcon}>{TEMPLATE_ICONS[tpl.name] || <Sparkles size={32} />}</span>
+                    <div 
+                      className={styles.tplThumb} 
+                      style={{
+                        background: tpl.thumbnail ? `url(${tpl.thumbnail}) center/cover no-repeat` : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(135deg,#667eea,#764ba2)')
+                      }}
+                    >
+                      {!tpl.thumbnail && (
+                        <span className={styles.tplIcon}>{TEMPLATE_ICONS[tpl.name] || <Sparkles size={32} />}</span>
+                      )}
                       <span className={styles.tplCreditBadge}>{tpl.creditsRequired} crédits</span>
                     </div>
                     <div className={styles.tplBody}>
@@ -357,16 +364,28 @@ export default function Dashboard() {
           ) : (
             <div className={styles.cardGrid}>
               {pubs.map(pub => (
-                <div
-                  key={pub._id}
-                  className={`${styles.pubCard} ${pub.isPremade ? styles.pubCardPremade : ''}`}
-                  onClick={() => !pub.isPremade && navigate(`/ewish-admin/ewish/edit/${pub._id}`)}
-                >
-                  <div className={styles.pubThumb} style={{background: TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#667eea,#764ba2)'}}>
-                    <span className={styles.tplIcon}>{TEMPLATE_ICONS[pub.templateName] || <Sparkles size={32} />}</span>
-                    {pub.published && <span className={styles.liveBadge}>Live</span>}
-                    {pub.isPremade && <span className={styles.premadeBadge}>MODÈLE</span>}
-                  </div>
+                  <div
+                    key={pub._id}
+                    className={`${styles.pubCard} ${pub.isPremade ? styles.pubCardPremade : ''}`}
+                    onClick={() => !pub.isPremade && navigate(`/ewish-admin/ewish/edit/${pub._id}`)}
+                  >
+                    {(() => {
+                      const tpl = templates.find(t => t.name === pub.templateName);
+                      return (
+                        <div 
+                          className={styles.pubThumb} 
+                          style={{
+                            background: tpl?.thumbnail ? `url(${tpl.thumbnail}) center/cover no-repeat` : (TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#667eea,#764ba2)')
+                          }}
+                        >
+                          {!tpl?.thumbnail && (
+                            <span className={styles.tplIcon}>{TEMPLATE_ICONS[pub.templateName] || <Sparkles size={32} />}</span>
+                          )}
+                          {pub.published && <span className={styles.liveBadge}>Live</span>}
+                          {pub.isPremade && <span className={styles.premadeBadge}>MODÈLE</span>}
+                        </div>
+                      );
+                    })()}
                   <div className={styles.pubBody}>
                     <h3>{pub.title || pub.data?.name || 'Sans titre'}</h3>
                     <p className={styles.pubMeta}>{pub.shortCode ? `/s/${pub.shortCode}` : `/${pub.templateName}/${pub.customName}`}</p>
