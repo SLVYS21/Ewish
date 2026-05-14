@@ -113,8 +113,7 @@ const publicationSchema = new mongoose.Schema({
   brandingUrl:  { type: String,  default: '' },      // lien custom (WhatsApp ou landing)
   brandingText: { type: String,  default: '' },      // texte custom (WhatsApp ou landing)
 
-  // Short URL code — generated on first publish
-  // e.g. /s/abc123  or  /s/prenom-occasion
+  isPaid:      { type: Boolean, default: false },
   shortCode:   { type: String, unique: true, sparse: true },
   createdAt:   { type: Date, default: Date.now },
   updatedAt:   { type: Date, default: Date.now },

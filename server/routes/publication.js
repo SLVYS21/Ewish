@@ -68,14 +68,6 @@ router.post('/', requireOptionalAdmin, async (req, res) => {
     if (req.admin?.role === 'merchant') {
       const template = await Template.findOne({ name: templateName }).lean();
       if (!template) return res.status(404).json({ error: 'Template introuvable' });
-      
-      const user = await AdminUser.findById(req.admin.id);
-      const creditsReq = template.creditsRequired || 1;
-      if (user.credits < creditsReq) {
-        return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits pour utiliser ce template.` });
-      }
-      user.credits -= creditsReq;
-      await user.save();
     }
 
     const slug = slugify(customName || title || 'wish', { lower: true, strict: true });
@@ -162,6 +154,22 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       return res.status(403).json({ error: 'Accès refusé' });
     }
 
+    // Credit deduction for merchants
+    if (req.admin?.role === 'merchant' && !existing.isPaid) {
+      const template = await Template.findOne({ name: existing.templateName }).lean();
+      const creditsReq = template?.creditsRequired || 1;
+      const user = await AdminUser.findById(req.admin.id);
+      
+      if (user.credits < creditsReq) {
+        return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits pour publier cette création.`, creditsRequired: creditsReq });
+      }
+      
+      user.credits -= creditsReq;
+      await user.save();
+      // Mark as paid so we don't deduct again
+      await Publication.findByIdAndUpdate(req.params.id, { isPaid: true });
+    }
+
     const pub = await Publication.findByIdAndUpdate(
       req.params.id,
       { published: true, publishedAt: Date.now() },
@@ -211,14 +219,6 @@ router.post('/:id/duplicate', requireOptionalAdmin, async (req, res) => {
     if (req.admin?.role === 'merchant') {
       const template = await Template.findOne({ name: original.templateName }).lean();
       if (!template) return res.status(404).json({ error: 'Template introuvable' });
-      
-      const user = await AdminUser.findById(req.admin.id);
-      const creditsReq = template.creditsRequired || 1;
-      if (user.credits < creditsReq) {
-        return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits pour dupliquer.` });
-      }
-      user.credits -= creditsReq;
-      await user.save();
     }
 
     const { customName, title } = req.body;
