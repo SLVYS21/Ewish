@@ -101,6 +101,15 @@ function Spinner() {
   );
 }
 
+function RoleBasedIndex() {
+  const { user, loading } = useAuth();
+  if (loading) return <Spinner />;
+  if (user?.role/* !== 'merchant'*/) {
+    return <AdminDashboard />;
+  }
+  return <Navigate to="/ewish-admin/ewish" replace />;
+}
+
 export default function App() {
   return (
     // <AuthProvider>
@@ -141,7 +150,7 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<RoleBasedIndex />} />
             <Route path="publications" element={<AdminPublications />} />
             <Route path="wishes" element={<AdminWishes />} />
 

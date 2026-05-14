@@ -6,6 +6,20 @@
 .periodBtn { padding:6px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s; }
 .periodBtn:hover { background:var(--surface); border-color:var(--brand); color:var(--text); }
 .periodBtn.active { background:rgba(201,168,76,0.1);color:var(--brand);border-color:var(--brand); }
+.createBtn {
+  display: flex; align-items: center; gap: 2px;
+  background: linear-gradient(135deg, var(--brand), #e8a84a);
+  color: #fff; border: none; border-radius: 8px;
+  padding: 6px 12px; font-family: inherit; font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(201,168,76,0.25);
+}
+.createBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+  opacity: 0.95;
+}
+.createBtn:active { transform: translateY(0); }
 
 /* ── Stats ── */
 .statsRow { display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px; }
@@ -36,6 +50,43 @@
 @keyframes pulseWarn {
   0%, 100% { border-color: rgba(251,191,36,.4); }
   50%       { border-color: rgba(251,191,36,.8); }
+}
+
+.mainCta {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 30px 40px;
+  margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
+  position: relative; overflow: hidden;
+}
+.mainCta:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  border-color: rgba(201,168,76,0.3);
+}
+.mainCta::after {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ctaText h3 { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #fff; margin-bottom: 6px; }
+.ctaText p { font-size: 0.9rem; color: rgba(255,255,255,0.6); }
+.ctaBtn {
+  background: var(--brand); color: #fff; border: none; border-radius: 12px;
+  padding: 12px 24px; font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+  transition: transform 0.2s;
+}
+.mainCta:hover .ctaBtn { transform: scale(1.05); }
+
+@media (max-width: 640px) {
+  .mainCta { flex-direction: column; text-align: center; padding: 24px; }
+  .ctaBtn { width: 100%; justify-content: center; }
 }
 
 /* ── Mid ── */

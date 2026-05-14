@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
 import PaymentModal from '../components/PaymentModal';
 import WhatsAppFAB from '../../components/WhatsAppFAB';
-import { Diamond, Package, CheckCircle, CircleDollarSign, TrendingUp, Inbox, PlaySquare, AlertTriangle } from 'lucide-react';
+import { Diamond, Package, CheckCircle, CircleDollarSign, TrendingUp, Inbox, PlaySquare, AlertTriangle, Plus, ArrowRight } from 'lucide-react';
 import s from './AdminDashboard.module.css';
 
 const BADGE = {
@@ -46,12 +46,17 @@ export default function AdminDashboard() {
       title="Dashboard"
       subtitle="Vue d'ensemble de l'activité"
       actions={
-        <div className={s.periods}>
-          {['7d','30d','90d'].map(p => (
-            <button key={p} className={`${s.periodBtn} ${period === p ? s.active : ''}`} onClick={() => setPeriod(p)}>
-              {p === '7d' ? '7 jours' : p === '30d' ? '30 jours' : '90 jours'}
-            </button>
-          ))}
+        <div style={{display:'flex', gap:'5px'}}>
+          <button className={s.createBtn} onClick={() => navigate('/ewish-admin/ewish')}>
+            Créer mon site <ArrowRight size={18} />
+          </button>
+          <div className={s.periods}>
+            {['7d','30d','90d'].map(p => (
+              <button key={p} className={`${s.periodBtn} ${period === p ? s.active : ''}`} onClick={() => setPeriod(p)}>
+                {p === '7d' ? '7 jours' : p === '30d' ? '30 jours' : '90 jours'}
+              </button>
+            ))}
+          </div>
         </div>
       }
     >
@@ -65,7 +70,7 @@ export default function AdminDashboard() {
       {!loading && data && <>
         {user?.role === 'merchant' ? (
           <>
-            {(user?.credits ?? 99) <= 2 && (
+            {/* {(user?.credits ?? 99) <= 2 && (
               <div className={s.lowCreditsWarn}>
                 <AlertTriangle size={18} style={{flexShrink:0}} />
                 <div>
@@ -74,7 +79,19 @@ export default function AdminDashboard() {
                 </div>
                 <button onClick={handleBuyCredits} className={s.buyBtn} style={{flexShrink:0}}>Recharger</button>
               </div>
-            )}
+            )} */}
+
+            {/* ── Main CTA ── */}
+            <div className={s.mainCta} onClick={() => navigate('/ewish-admin/ewish')}>
+              <div className={s.ctaText}>
+                <h3>Prêt à créer votre prochaine merveille ?</h3>
+                <p>Choisissez un template et commencez la personnalisation en quelques clics.</p>
+              </div>
+              <button className={s.ctaBtn}>
+                <Plus size={20} /> Commencer à créer
+              </button>
+            </div>
+
             {/* ── Merchant Stats ── */}
             <div className={s.statsRow}>
               <StatCard label="Crédits" value={user?.credits || 0} icon={<Diamond size={24} />} meta={<button onClick={handleBuyCredits} className={s.buyBtn}>Acheter</button>} colorClass={s.gold} isText />

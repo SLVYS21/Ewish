@@ -12,23 +12,24 @@ import ConfettiTab from '../components/ConfettiTab';
 import WishesManager from '../components/WishesManager';
 import ClientTab from '../components/ClientTab';
 import QRCodeModal from '../components/QRCodeModal';
+import PaymentModal from '../admin/components/PaymentModal';
 import { Joyride, STATUS } from 'react-joyride';
 import { QrCode, PenTool, Palette, Image as ImageIcon, Sparkles, LayoutTemplate, Coffee, Blocks, MailOpen, ClipboardList, Megaphone, Info, Copy, Edit2, Check, X, RefreshCw, Gift, ArrowLeft } from 'lucide-react';
 import styles from './Editor.module.css';
 
 /* ─── Tab definitions ────────────────────────────────────────── */
 const TABS = [
-  { key: 'content', label: 'Contenu', icon: <PenTool size={18} strokeWidth={1.5} /> },
-  { key: 'style', label: 'Style', icon: <Palette size={18} strokeWidth={1.5} /> },
-  { key: 'background', label: 'Fond', icon: <ImageIcon size={18} strokeWidth={1.5} /> },
-  { key: 'decorations', label: 'Décorations', icon: <Sparkles size={18} strokeWidth={1.5} /> },
-  { key: 'photos', label: 'Photos', icon: <LayoutTemplate size={18} strokeWidth={1.5} /> },
-  { key: 'jar', label: 'Jar', icon: <Coffee size={18} strokeWidth={1.5} />, templates: ['birthday', 'special'] },
+  { key: 'content', label: 'Texte & Médias', icon: <PenTool size={18} strokeWidth={1.5} /> },
+  { key: 'style', label: 'Design', icon: <Palette size={18} strokeWidth={1.5} /> },
+  { key: 'background', label: 'Arrière-plan', icon: <ImageIcon size={18} strokeWidth={1.5} /> },
+  { key: 'decorations', label: 'Animations', icon: <Sparkles size={18} strokeWidth={1.5} /> },
+  { key: 'photos', label: 'Mise en page', icon: <LayoutTemplate size={18} strokeWidth={1.5} /> },
+  { key: 'jar', label: 'Cagnotte', icon: <Coffee size={18} strokeWidth={1.5} />, templates: ['birthday', 'special'] },
   { key: 'confetti', label: 'Confettis', icon: <span style={{fontSize:'16px'}}>🎊</span>, templatePrefixes: ['birthday', 'special', 'collective'] },
-  { key: 'widgets', label: 'Widgets', icon: <Blocks size={18} strokeWidth={1.5} /> },
+  { key: 'widgets', label: 'Extras', icon: <Blocks size={18} strokeWidth={1.5} /> },
   { key: 'wishes', label: 'Vœux', icon: <MailOpen size={18} strokeWidth={1.5} />, templatePrefix: 'collective' },
-  { key: 'client', label: 'Client', icon: <ClipboardList size={18} strokeWidth={1.5} /> },
-  { key: 'branding', label: 'Promo', icon: <Megaphone size={18} strokeWidth={1.5} /> },
+  { key: 'client', label: 'Infos Client', icon: <ClipboardList size={18} strokeWidth={1.5} /> },
+  { key: 'branding', label: 'Lien myKado', icon: <Megaphone size={18} strokeWidth={1.5} /> },
 ];
 
 function BrandingTab({ show, url, text, onToggle, onUrlChange, onTextChange }) {
@@ -218,6 +219,7 @@ export default function Editor() {
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [runTour, setRunTour] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const tourSteps = [
@@ -409,14 +411,24 @@ export default function Editor() {
       await updatePublication(id, { data, style: fullStyle, decorations, jarConfig, widgets });
       const r = await publishPublication(id);
       setPublishedUrl(r.data.url);
-      setPub(p => ({ ...p, published: true }));
+      setPub(p => ({ ...p, published: true, isPaid: true }));
       // Get or generate short code
       try {
         const sl = await getShortLink(id);
         setShortCode(sl.data.shortCode);
       } catch { }
+
+      // Refresh user credits since they might have been deducted
+      import('../utils/api').then(m => m.getMe()).then(res => {
+        if (res.data.user) setUser(res.data.user);
+      });
+
     } catch (e) {
-      alert(e.response?.data?.error || 'Publish failed');
+      if (e.response?.status === 402) {
+        setPaymentModalOpen(true);
+      } else {
+        alert(e.response?.data?.error || 'Publish failed');
+      }
     } finally { setPublishing(false); }
   };
 
@@ -778,6 +790,13 @@ export default function Editor() {
         <QRCodeModal
           url={`${import.meta.env.VITE_API_URL}/s/${shortCode}`}
           onClose={() => setShowQrModal(false)}
+        />
+      )}
+
+      {paymentModalOpen && (
+        <PaymentModal 
+          onClose={() => setPaymentModalOpen(false)} 
+          onSuccess={() => { handlePublish(); }} 
         />
       )}
     </div>

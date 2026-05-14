@@ -95,7 +95,7 @@ export default function Templates({ onSelectTemplate }) {
                 {/* Actions */}
                 <div className={s.actions}>
                   <button className={s.btnOrder} onClick={() => onSelectTemplate(t.name)}>
-                    Créer mon compte
+                    Créer mon site
                   </button>
                   <a href={`${import.meta.env.VITE_API_URL}/preview/${t.name}`} target="_blank" rel="noreferrer" className={s.btnPreview}>
                     Aperçu →

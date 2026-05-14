@@ -14,10 +14,10 @@ export default function AdminRegister() {
 
   const submit = async () => {
     setError('');
-    if (!email || !pass || !name) { setError('Tous les champs sont requis.'); return; }
+    if (!email || !pass) { setError('Tous les champs sont requis.'); return; }
     setLoading(true);
     try {
-      await register(email, pass, name);
+      await register(email, pass, '');
       navigate('/ewish-admin');
     } catch (e) {
       setError(e.response?.data?.error || 'Erreur lors de la création du compte');
@@ -33,15 +33,7 @@ export default function AdminRegister() {
         <div className={s.logo}>my<span>Kado</span></div>
         <div className={s.sub}>Inscription Marchand</div>
 
-        <div className={s.field}>
-          <label>Nom ou Société</label>
-          <input
-            type="text" value={name}
-            placeholder="Mon Entreprise"
-            onChange={e => setName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-email').focus()}
-          />
-        </div>
+
 
         <div className={s.field}>
           <label>Email</label>

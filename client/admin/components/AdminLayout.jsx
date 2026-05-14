@@ -28,6 +28,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isSuperAdmin = user?.role === 'super_admin';
+  const isMerchant   = user?.role === 'merchant';
 
   const handleLogout = async () => {
     await logout();
@@ -51,57 +52,63 @@ export default function AdminLayout({ pendingCount = 0 }) {
   return (
     <div className={s.shell}>
       {/* ── Mobile Header ── */}
-      <div className={s.mobileHeader}>
-        <div className={s.logo}>my<span>Kado</span></div>
-        <button className={s.menuBtn} onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
+      {/*{!isMerchant &&*/(
+        <div className={s.mobileHeader}>
+          <div className={s.logo}>my<span>Kado</span></div>
+          <button className={s.menuBtn} onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      )}
 
       {/* ── Sidebar ── */}
-      <div className={`${s.sidebarOverlay} ${mobileOpen ? s.open : ''}`} onClick={() => setMobileOpen(false)} />
-      <aside className={`${s.sidebar} ${mobileOpen ? s.open : ''}`}>
-        <div className={s.sidebarHead}>
-          <div className={s.logo}>my<span>Kado</span></div>
-          <div className={s.adminBadge}>{isSuperAdmin ? 'Super Admin' : 'Admin'}</div>
-        </div>
+      {/*{!isMerchant &&*/ (
+        <>
+          <div className={`${s.sidebarOverlay} ${mobileOpen ? s.open : ''}`} onClick={() => setMobileOpen(false)} />
+          <aside className={`${s.sidebar} ${mobileOpen ? s.open : ''}`}>
+            <div className={s.sidebarHead}>
+              <div className={s.logo}>my<span>Kado</span></div>
+              <div className={s.adminBadge}>{isSuperAdmin ? 'Super Admin' : 'Admin'}</div>
+            </div>
 
-        <nav className={s.nav}>
-          {renderNav(NAV)}
+            <nav className={s.nav}>
+              {renderNav(NAV)}
 
-          {/* Super admin section */}
-          {isSuperAdmin && (
-            <>
-              <div className={s.navSeparator}>
-                <ShieldAlert size={12} /> Plateforme
+              {/* Super admin section */}
+              {isSuperAdmin && (
+                <>
+                  <div className={s.navSeparator}>
+                    <ShieldAlert size={12} /> Plateforme
+                  </div>
+                  {renderNav(SUPER_NAV)}
+                </>
+              )}
+            </nav>
+
+            <div className={s.sidebarFoot}>
+              <div className={s.adminUser}>
+                <div className={s.avatar}>
+                  {(user?.name || user?.email || 'A')[0].toUpperCase()}
+                </div>
+                <div className={s.userInfo}>
+                  <div className={s.userName}>{user?.name || user?.email}</div>
+                  <div className={s.userRole}>{isSuperAdmin ? 'Super Administrateur' : 'Administrateur'}</div>
+                </div>
+                <button className={s.logoutBtn} onClick={handleLogout} title="Déconnexion">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                </button>
               </div>
-              {renderNav(SUPER_NAV)}
-            </>
-          )}
-        </nav>
-
-        <div className={s.sidebarFoot}>
-          <div className={s.adminUser}>
-            <div className={s.avatar}>
-              {(user?.name || user?.email || 'A')[0].toUpperCase()}
             </div>
-            <div className={s.userInfo}>
-              <div className={s.userName}>{user?.name || user?.email}</div>
-              <div className={s.userRole}>{isSuperAdmin ? 'Super Administrateur' : 'Administrateur'}</div>
-            </div>
-            <button className={s.logoutBtn} onClick={handleLogout} title="Déconnexion">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </aside>
+          </aside>
+        </>
+      )}
 
       {/* ── Main ── */}
-      <div className={s.main}>
+      <div className={`${s.main} ${isMerchant ? s.mainFull : ''}`}>
         <Outlet />
       </div>
 

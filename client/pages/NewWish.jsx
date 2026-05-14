@@ -80,7 +80,7 @@ export default function NewWish() {
     !tplSearch || t.label?.toLowerCase().includes(tplSearch.toLowerCase()) || t.name?.toLowerCase().includes(tplSearch.toLowerCase())
   );
 
-  const insufficientCredits = user?.role === 'merchant' && selected && user.credits < (selected.creditsRequired || 1);
+
   const VITE_API = import.meta.env.VITE_API_URL || '';
 
   return (
@@ -184,16 +184,9 @@ export default function NewWish() {
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
-            {insufficientCredits && (
-              <div className={styles.creditWarning}>
-                <p className={styles.error}>⚠️ Crédits insuffisants (Solde: {user.credits}).</p>
-                <button type="button" className={styles.buyBtn} onClick={() => setPaymentModalOpen(true)}>
-                  💎 Acheter des crédits
-                </button>
-              </div>
-            )}
 
-            <button type="submit" className={styles.submit} disabled={loading || !selected || insufficientCredits}>
+
+            <button type="submit" className={styles.submit} disabled={loading || !selected}>
               {loading ? 'Création...' : 'Créer & personnaliser →'}
             </button>
           </form>

@@ -40,14 +40,14 @@ const CATEGORY_ICONS = { feature: <Lightbulb size={16}/>, bug: <Bug size={16}/>,
 const STATUS_COLORS = { new:'#3b82f6', read:'#94a3b8', planned:'#f59e0b', done:'#10b981', rejected:'#ef4444' };
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [pubs, setPubs]           = useState([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
   const [templateSearch, setTemplateSearch] = useState('');
   const [page, setPage]           = useState(1);
   const [hasNext, setHasNext]     = useState(false);
-  const [activeTab, setActiveTab] = useState('mine');
+  const [activeTab, setActiveTab] = useState('templates');
   const [templates, setTemplates] = useState([]);
   const navigate = useNavigate();
 
@@ -237,6 +237,8 @@ export default function Dashboard() {
         </div>
         <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
           <button className={styles.btnGhost} onClick={() => setShowTuto(true)} title="Tuto"><MonitorPlay size={16}/> Tuto</button>
+          {/* <button className={styles.btnGhost} onClick={logout} title="Déconnexion" style={{color:'var(--red)'}}>
+          Quitter</button> */}
           <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}><Plus size={16}/></Link>
         </div>
       </header>
@@ -264,19 +266,14 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Hero ── */}
-      <section className={styles.hero}>
-        <h1>Créez des messages<br/><span>animés et magiques</span></h1>
-        <p>Animés, personnalisés, inoubliables.</p>
-        <Link to="/ewish-admin/ewish/new" className={styles.heroCta}>Commencer maintenant</Link>
-      </section>
+
 
       {/* ── Tabs ── */}
       <div className={styles.tabs}>
         {[
-          { key:'mine',      label:'Publications', icon:<Folder size={18} /> },
           { key:'templates', label:'Templates',      icon:<Layout size={18} /> },
-          { key:'premade',   label:'Préfaits',        icon:<StarIcon size={18} /> },
+          { key:'mine',      label:'Créations', icon:<Folder size={18} /> },
+          { key:'premade',   label:'Modèles',        icon:<StarIcon size={18} /> },
         ].map(t => (
           <button
             key={t.key}
@@ -291,9 +288,9 @@ export default function Dashboard() {
       <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2>
-              {activeTab==='mine'&&'Publications'}
-              {activeTab==='templates'&&'Templates'}
-              {activeTab==='premade'&&'Préfaits'}
+              {activeTab==='mine'&&'Mes Créations'}
+              {activeTab==='templates'&&'Choisissez un template'}
+              {activeTab==='premade'&&'Modèles'}
             </h2>
             <span className={styles.badge}>
               {activeTab==='templates' ? filteredTemplates.length : pubs.length}{hasNext?'+':''}

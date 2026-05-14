@@ -17,7 +17,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await login(email, pass);
-      navigate('/ewish-admin');
+      navigate('/ewish-admin/ewish');
     } catch (e) {
       setError(e.response?.data?.error || 'Identifiants invalides');
     } finally { setLoading(false); }
@@ -36,7 +36,7 @@ export default function AdminLogin() {
           <label>Email</label>
           <input
             type="email" value={email} autoComplete="username"
-            placeholder="admin@ewishwell.com"
+            placeholder="user@mykado.com"
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && document.getElementById('admin-pass').focus()}
           />

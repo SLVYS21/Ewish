@@ -14,27 +14,27 @@ const SECTION_ICONS = {
 
 // Default fields when template isn't loaded from DB yet
 const DEFAULT_FIELDS = [
-  { key:'greeting', label:'Greeting', type:'text', section:'Intro', placeholder:'Hiya' },
-  { key:'name', label:"Recipient's Name", type:'text', section:'Intro', placeholder:'Lydia', required:true },
-  { key:'greetingText', label:'Personal Note', type:'text', section:'Intro', placeholder:'I really like your name btw!' },
-  { key:'musicSrc', label:'Music File URL', type:'url', section:'Music', placeholder:'https://... .mp3' },
-  { key:'musicStartTime', label:'Démarrer à', type:'starttime', section:'Music' },
-  { key:'albumArt', label:'Album Cover URL', type:'url', section:'Music', placeholder:'https://... .jpg' },
-  { key:'trackTitle', label:'Track Title', type:'text', section:'Music', placeholder:'Notre chanson' },
-  { key:'trackArtist', label:'Artist', type:'text', section:'Music', placeholder:'Artiste' },
-  { key:'text1', label:'Birthday Announcement', type:'text', section:'Story', required:true },
-  { key:'textInChatBox', label:'WhatsApp Message', type:'textarea', section:'Message', required:true },
-  { key:'waName', label:'Contact Name', type:'text', section:'Message' },
-  { key:'imagePath', label:'Main Photo URL', type:'url', section:'Celebration' },
-  { key:'photo1', label:'Side Photo Left', type:'url', section:'Celebration' },
-  { key:'photo2', label:'Side Photo Right', type:'url', section:'Celebration' },
-  { key:'wishHeading', label:'Wish Heading', type:'text', section:'Celebration', required:true },
-  { key:'wishText', label:'Wish Subtitle', type:'text', section:'Celebration' },
-  { key:'wish1', label:'Wish Paragraph 1', type:'textarea', section:'Wishes' },
-  { key:'wish2', label:'Wish Paragraph 2', type:'textarea', section:'Wishes' },
-  { key:'wish3', label:'Wish Paragraph 3', type:'textarea', section:'Wishes' },
-  { key:'outroText', label:'Outro Text', type:'text', section:'Outro' },
-  { key:'replayText', label:'Replay Text', type:'text', section:'Outro' },
+  { key: 'greeting', label: 'Greeting', type: 'text', section: 'Intro', placeholder: 'Hiya' },
+  { key: 'name', label: "Recipient's Name", type: 'text', section: 'Intro', placeholder: 'Lydia', required: true },
+  { key: 'greetingText', label: 'Personal Note', type: 'text', section: 'Intro', placeholder: 'I really like your name btw!' },
+  { key: 'musicSrc', label: 'Music File URL', type: 'url', section: 'Music', placeholder: 'https://... .mp3' },
+  { key: 'musicStartTime', label: 'Démarrer à', type: 'starttime', section: 'Music' },
+  { key: 'albumArt', label: 'Album Cover URL', type: 'url', section: 'Music', placeholder: 'https://... .jpg' },
+  { key: 'trackTitle', label: 'Track Title', type: 'text', section: 'Music', placeholder: 'Notre chanson' },
+  { key: 'trackArtist', label: 'Artist', type: 'text', section: 'Music', placeholder: 'Artiste' },
+  { key: 'text1', label: 'Birthday Announcement', type: 'text', section: 'Story', required: true },
+  { key: 'textInChatBox', label: 'WhatsApp Message', type: 'textarea', section: 'Message', required: true },
+  { key: 'waName', label: 'Contact Name', type: 'text', section: 'Message' },
+  { key: 'imagePath', label: 'Main Photo URL', type: 'url', section: 'Celebration' },
+  { key: 'photo1', label: 'Side Photo Left', type: 'url', section: 'Celebration' },
+  { key: 'photo2', label: 'Side Photo Right', type: 'url', section: 'Celebration' },
+  { key: 'wishHeading', label: 'Wish Heading', type: 'text', section: 'Celebration', required: true },
+  { key: 'wishText', label: 'Wish Subtitle', type: 'text', section: 'Celebration' },
+  { key: 'wish1', label: 'Wish Paragraph 1', type: 'textarea', section: 'Wishes' },
+  { key: 'wish2', label: 'Wish Paragraph 2', type: 'textarea', section: 'Wishes' },
+  { key: 'wish3', label: 'Wish Paragraph 3', type: 'textarea', section: 'Wishes' },
+  { key: 'outroText', label: 'Outro Text', type: 'text', section: 'Outro' },
+  { key: 'replayText', label: 'Replay Text', type: 'text', section: 'Outro' },
 ];
 
 
@@ -51,8 +51,8 @@ function StartTimeField({ value, onChange }) {
   };
 
   const handleSlider = (e) => onChange(parseInt(e.target.value));
-  const handleMins  = (e) => onChange(Math.max(0, parseInt(e.target.value) || 0) * 60 + secs);
-  const handleSecs  = (e) => onChange(mins * 60 + Math.max(0, Math.min(59, parseInt(e.target.value) || 0)));
+  const handleMins = (e) => onChange(Math.max(0, parseInt(e.target.value) || 0) * 60 + secs);
+  const handleSecs = (e) => onChange(mins * 60 + Math.max(0, Math.min(59, parseInt(e.target.value) || 0)));
 
   return (
     <div className={styles.startTimeField}>
@@ -222,46 +222,48 @@ function Field({ field, value, onChange, onUpload }) {
         </div>
       ) : field.type === 'url' ? (
         <div className={styles.urlRow}>
-          <input
-            type="url" value={value}
-            onChange={e => onChange(e.target.value)}
-            placeholder={field.placeholder || 'https://...'}
-            className={styles.input}
-          />
-          {/* Upload button for image fields */}
-          {(field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
-            <>
-              <input type="file" ref={fileRef} onChange={handleFileChange} accept="image/*" style={{display:'none'}} />
-              <button
-                className={styles.uploadBtn}
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                title="Upload image"
-              >
-                {uploading ? '…' : <Upload size={14} />}
-              </button>
-            </>
-          )}
-          {field.key === 'musicSrc' && (
-            <>
-              <input type="file" ref={fileRef} onChange={handleFileChange} accept="audio/*" style={{display:'none'}} />
-              <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload audio">
-                {uploading ? '…' : <Music size={14} />}
-              </button>
-            </>
-          )}
-          {field.key === 'videoSrc' && (
-            <>
-              <input type="file" ref={fileRef} onChange={handleFileChange} accept="video/*" style={{display:'none'}} />
-              <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload vidéo">
-                {uploading ? '…' : <Film size={14} />}
-              </button>
-            </>
-          )}
+          <div className={styles.urlRowInputs}>
+            <input
+              type="url" value={value}
+              onChange={e => onChange(e.target.value)}
+              placeholder={field.placeholder || 'https://...'}
+              className={styles.input}
+            />
+            {/* Upload button for image fields */}
+            {(field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
+              <>
+                <input type="file" ref={fileRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
+                <button
+                  className={styles.uploadBtn}
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  title="Upload image"
+                >
+                  {uploading ? '…' : <><Upload size={14} /> Charger</>}
+                </button>
+              </>
+            )}
+            {field.key === 'musicSrc' && (
+              <>
+                <input type="file" ref={fileRef} onChange={handleFileChange} accept="audio/*" style={{ display: 'none' }} />
+                <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload audio">
+                  {uploading ? '…' : <><Music size={14} /> Charger</>}
+                </button>
+              </>
+            )}
+            {field.key === 'videoSrc' && (
+              <>
+                <input type="file" ref={fileRef} onChange={handleFileChange} accept="video/*" style={{ display: 'none' }} />
+                <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload vidéo">
+                  {uploading ? '…' : <><Film size={14} /> Charger</>}
+                </button>
+              </>
+            )}
+          </div>
           {/* Preview for image URLs */}
           {value && (field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
             <div className={styles.imgPreview}>
-              <img src={value} alt="" onError={e => e.target.style.display='none'} />
+              <img src={value} alt="" onError={e => e.target.style.display = 'none'} />
             </div>
           )}
         </div>

@@ -41,16 +41,17 @@
 }
 .colorText { flex: 1; }
 
-.urlRow { display: flex; flex-direction: column; gap: 6px; }
-.urlRow > div:first-of-type { display: flex; gap: 6px; align-items: stretch; }
-.urlRow .input { flex: 1; }
+.urlRow { display: flex; flex-direction: column; gap: 8px; }
+.urlRowInputs { display: flex; gap: 8px; align-items: stretch; }
+.urlRowInputs .input { flex: 1; }
 
 .uploadBtn {
-  width: 34px; flex-shrink: 0; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); background: var(--surface2);
-  cursor: pointer; font-size: 0.9rem; color: var(--text-2);
-  transition: background var(--transition), border-color var(--transition);
-  display: flex; align-items: center; justify-content: center;
+  padding: 0 12px; height: 38px; flex-shrink: 0; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--brand);
+  cursor: pointer; font-size: 0.9rem; color: #fff;
+  transition: all var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-weight: 600;
 }
 .uploadBtn:hover:not(:disabled) { background: var(--brand-light); border-color: var(--brand); color: var(--brand-dark); }
 .uploadBtn:disabled { opacity: 0.5; cursor: not-allowed; }
