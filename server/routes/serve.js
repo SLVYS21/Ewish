@@ -3,6 +3,22 @@ const path   = require('path');
 const fs     = require('fs');
 const Publication = require('../models/Publication');
 const Font        = require('../models/Font');
+const { minify }  = require('html-minifier-terser');
+
+async function minifyHtml(html) {
+  try {
+    return await minify(html, {
+      collapseWhitespace: true,
+      removeComments: true,
+      minifyJS: true,
+      minifyCSS: true,
+      ignoreCustomComments: [/FB_PIXEL_ID/]
+    });
+  } catch (err) {
+    console.error('Minification error:', err);
+    return html; // Fallback to original HTML on error
+  }
+}
 
 
 /* ── Cloudinary URL optimizer ─────────────────────────────────
@@ -17,6 +33,10 @@ function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_li
 }
 
 router.get('/:templateName/:customName', async (req, res) => {
+  // Security headers — allow embedding from app origins
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store");
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
   try {
     const pub = await Publication.findOne({
       templateName: req.params.templateName,
@@ -169,6 +189,9 @@ ${bgCssLines.join('\n')}
       }).catch(() => {});
     }
 
+    html = await minifyHtml(html);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (e) {
     console.error(e);

@@ -2,6 +2,18 @@ const router = require('express').Router();
 const path = require('path');
 const fs = require('fs');
 const Template = require('../models/Template');
+const { minify } = require('html-minifier-terser');
+
+// Utilisation asynchrone dans ta route
+async function minifyHtml(html) {
+  return await minify(html, {
+    collapseWhitespace: true,
+    removeComments: true,
+    minifyJS: true,
+    minifyCSS: true,
+    ignoreCustomComments: [/FB_PIXEL_ID/]
+  });
+}
 
 // Demo data per template — realistic but fake
 const DEMO_DATA = {
@@ -61,14 +73,15 @@ const DEMO_DATA = {
 };
 
 // Minify HTML — strip comments, collapse whitespace
-function minifyHtml(html) {
-  return html
-    .replace(/<!--(?!FB_PIXEL_ID)[\s\S]*?-->/g, '')        // strip HTML comments
-    // .replace(/\s{2,}/g, ' ')                                // collapse whitespace
-    // .replace(/>\s+</g, '><')                                // trim between tags
-    // .replace(/\/\*[\s\S]*?\*\//g, '');                      // strip CSS comments
-}
-
+// function minifyHtml(html) {
+//   return html
+//     .replace(/<!--(?!FB_PIXEL_ID)[\s\S]*?-->/g, '') // Supprime les commentaires HTML
+//     .replace(/\/\*[\s\S]*?\*\//g, '')               // Supprime les commentaires CSS (/* ... */)
+//     .replace(/^[ \t]+/gm, '')                       // Supprime les espaces/tabulations au début de chaque ligne
+//     .replace(/[ \t]+$/gm, '')                       // Supprime les espaces/tabulations à la fin de chaque ligne
+//     .replace(/>\s+</g, '><')                        // Supprime l'espace entre les balises HTML
+//     .replace(/[\r\n]+/g, '\n');                     // Fusionne les sauts de ligne multiples en un seul
+// }
 // Inject protection layer into the HTML
 function injectProtection(html, templateName) {
   const watermarkCss = `
@@ -82,10 +95,10 @@ function injectProtection(html, templateName) {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none; 
     /* z-index maximal autorisé par les navigateurs pour être au-dessus de TOUT (même des modales) */
-    z-index: 2147483647; 
+    z-index: 2147483647;
     background: 
       /* Le texte SVG répété */
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' fill='rgba(0,0,0,0.07)' font-family='sans-serif' font-weight='bold' font-size='22' letter-spacing='2' text-anchor='middle' transform='rotate(-45 150 150)'%3ED%C3%89MO EWISHWELL%3C/text%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' fill='rgba(0,0,0,0.07)' font-family='sans-serif' font-weight='bold' font-size='22' letter-spacing='2' text-anchor='middle' transform='rotate(-45 150 150)'%3ED%C3%89MO MYKADO%3C/text%3E%3C/svg%3E"),
       /* Tes rayures roses */
       repeating-linear-gradient(
         -45deg,
@@ -100,10 +113,10 @@ function injectProtection(html, templateName) {
   const protectionScript = `
 <script id="ww-demo-guard">
 (function(){
-  // Block right-click
+  // 1. Block right-click (Fonctionne partout)
   document.addEventListener('contextmenu', e => e.preventDefault());
   
-  // Block shortcuts (F12, Ctrl+U, Ctrl+S, Ctrl+Shift+I/J, Cmd+U/S)
+  // 2. Block shortcuts (Fonctionne partout)
   document.addEventListener('keydown', function(e) {
     var blocked = e.key === 'F12'
       || (e.ctrlKey && ['u','s','i','j','p'].includes(e.key.toLowerCase()))
@@ -112,18 +125,27 @@ function injectProtection(html, templateName) {
     if (blocked) e.preventDefault();
   });
 
-  // Detect DevTools open (basic heuristic)
-  var threshold = 160;
-  setInterval(function() {
-    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#aaa;font-size:1rem;">🔒 Démo indisponible</div>';
-    }
-  }, 1000);
-
-  // Disable drag
+  // 3. Disable drag (Fonctionne partout)
   document.addEventListener('dragstart', e => e.preventDefault());
+
+  // 4. Detect DevTools open (Désactivé si dans une iframe)
+  // window.self !== window.top permet de savoir si on est dans une iframe
+  try {
+    var inIframe = window.self !== window.top;
+  } catch (e) {
+    var inIframe = true; // Si erreur (cross-origin), on assume que c'est une iframe
+  }
+
+  if (!inIframe) {
+    var threshold = 160;
+    setInterval(function() {
+      if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#aaa;font-size:1rem;">🔒 Démo indisponible</div>';
+      }
+    }, 1000);
+  }
 })();
-</scr` + `ipt>`;
+</script>`;
 
   // Inject right before </head>
   html = html.replace('</head>', watermarkCss + '\n</head>');
@@ -135,9 +157,8 @@ function injectProtection(html, templateName) {
 router.get('/:templateName', async (req, res) => {
   const { templateName } = req.params;
 
-  // Security headers — only embeddable from same origin
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
+  // Security headers — allow embedding from app origins
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store");
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Cache-Control', 'no-store');
 
@@ -176,7 +197,7 @@ router.get('/:templateName', async (req, res) => {
 
     html = html.replace('</head>', injection + '\n</head>');
     html = injectProtection(html, templateName);
-    html = minifyHtml(html);
+    html = await minifyHtml(html);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);

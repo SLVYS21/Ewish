@@ -360,9 +360,22 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 640px) {
-  .section { padding: 20px 16px; }
-  .cardGrid { grid-template-columns: 1fr; }
+  .section { padding: 16px 14px; }
+  .cardGrid { grid-template-columns: 1fr; gap: 12px; }
   .tabs { gap: 6px; padding: 16px 12px 0; }
-  .tab { padding: 7px 14px; font-size: .75rem; }
-  .hero { padding: 40px 20px; }
+  .tab { padding: 7px 14px; font-size: .75rem; border-radius: 16px; }
+  .hero { padding: 32px 20px; }
+  .hero h1 { font-size: 2.2rem; }
+  .hero p { font-size: 0.9rem; margin-bottom: 20px; }
+  
+  /* Compact cards for mobile */
+  .pubThumb, .tplThumb { height: 100px; }
+  .pubBody, .tplBody { padding: 10px 12px; }
+  .pubBody h3 { font-size: 0.85rem; }
+  .tplName { font-size: 0.85rem; }
+  .pubActions { padding: 8px 10px 10px; gap: 6px; }
+  .btnIcon { width: 34px; height: 34px; border-radius: 10px; } /* Slightly larger touch target */
+  
+  .tplActions { padding: 10px 12px; gap: 6px; }
+  .tplBtnGhost, .tplBtnPrimary { padding: 10px 6px; font-size: 0.72rem; }
 }

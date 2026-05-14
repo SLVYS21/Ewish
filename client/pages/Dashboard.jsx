@@ -163,13 +163,13 @@ export default function Dashboard() {
     <div className={styles.root}>
 
       {/* ── Low Credits Banner ── */}
-      {LOW_CREDITS && (
+      {/* {LOW_CREDITS && (
         <div className={styles.lowCreditsBanner}>
           <AlertTriangle size={16} />
-          <span>Crédits faibles : <strong>{user.credits}</strong> crédit{user.credits !== 1 ? 's' : ''} restant{user.credits !== 1 ? 's' : ''}.</span>
+          <span><strong>{user.credits}</strong> crédit{user.credits !== 1 ? 's' : ''} restant{user.credits !== 1 ? 's' : ''}.</span>
           <Link to="/ewish-admin" className={styles.lowCreditsLink}>Recharger →</Link>
         </div>
-      )}
+      )} */}
 
       {/* ── Preview Modal ── */}
       {previewUrl && (
@@ -228,11 +228,12 @@ export default function Dashboard() {
             <span className={styles.logoIcon}><Gift size={22} color="var(--brand)"/></span>
             <span className={styles.logoText}>myKado</span>
           </div>
-          {LOW_CREDITS && (
+          {/* {LOW_CREDITS && (
             <span className={styles.lowCreditsChip} title={`${user.credits} crédit(s) restant(s)`}>
-              <AlertTriangle size={12}/> {user.credits} crédit{user.credits !== 1 ? 's' : ''}
+              <AlertTriangle size={12}/> {user.credits}
             </span>
-          )}
+          )} */}
+          {/* <strong>{user.credits}</strong> crédit{user.credits !== 1 ? 's' : ''} restant{user.credits !== 1 ? 's' : ''}. */}
         </div>
         <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
           <button className={styles.btnGhost} onClick={() => setShowTuto(true)} title="Tuto"><MonitorPlay size={16}/> Tuto</button>

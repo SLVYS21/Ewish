@@ -8,9 +8,9 @@ router.post('/', requireAdmin, async (req, res) => {
     const { category, message, authorName } = req.body;
     if (!message?.trim()) return res.status(400).json({ error: 'Message requis' });
     const sug = await Suggestion.create({
-      merchantId:  req.user.merchantId || req.user._id,
-      authorName:  authorName || req.user.name || 'Anonyme',
-      authorEmail: req.user.email,
+      merchantId:  req.admin.merchantId || req.admin._id,
+      authorName:  authorName || req.admin.name || 'Anonyme',
+      authorEmail: req.admin.email,
       category:    category || 'feature',
       message:     message.trim().slice(0, 1000),
     });
@@ -23,7 +23,7 @@ router.post('/', requireAdmin, async (req, res) => {
 /* ── GET /api/suggestions/mine — own suggestions */
 router.get('/mine', requireAdmin, async (req, res) => {
   try {
-    const id = req.user.merchantId || req.user._id;
+    const id = req.admin.merchantId || req.admin._id;
     const sugs = await Suggestion.find({ merchantId: id }).sort({ createdAt: -1 }).limit(50).lean();
     res.json(sugs);
   } catch (e) {
@@ -32,9 +32,9 @@ router.get('/mine', requireAdmin, async (req, res) => {
 });
 
 /* ── GET /api/suggestions  — All suggestions (super_admin only) */
-router.get('/', requireSuperAdmin, async (req, res) => {
+router.get('/', requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
+    if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
     const { status, page = 1, limit = 50 } = req.query;
     const filter = status ? { status } : {};
     const [items, total] = await Promise.all([
@@ -48,9 +48,9 @@ router.get('/', requireSuperAdmin, async (req, res) => {
 });
 
 /* ── PATCH /api/suggestions/:id — Update status/note (super_admin) */
-router.patch('/:id', requireSuperAdmin, async (req, res) => {
+router.patch('/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
+    if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
     const { status, adminNote } = req.body;
     const update = {};
     if (status)    update.status    = status;
@@ -64,9 +64,9 @@ router.patch('/:id', requireSuperAdmin, async (req, res) => {
 });
 
 /* ── DELETE /api/suggestions/:id — super_admin */
-router.delete('/:id', requireSuperAdmin, async (req, res) => {
+router.delete('/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
+    if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
     await Suggestion.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {

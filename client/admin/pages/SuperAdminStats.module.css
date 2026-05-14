@@ -61,10 +61,43 @@
 .growthLabel { font-size: 0.78rem; color: var(--text-3); margin-top: 4px; }
 
 @media (max-width: 640px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-  .templateRow { grid-template-columns: 24px 1fr auto; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .templateRow { grid-template-columns: 24px 1fr auto; font-size: 0.8rem; }
   .bar { display: none; }
-  .growthRow { gap: 20px; }
+  .growthRow { gap: 20px; flex-direction: column; }
+  .growthVal { font-size: 1.6rem; }
+  
+  .tableWrap { margin: 0; padding: 0; border: none; overflow: visible; }
+  .table { display: block; }
+  .table thead { display: none; }
+  .table tbody { display: block; }
+  .table tbody tr {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+  .table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.8rem;
+    text-align: right;
+  }
+  .table tbody td:last-child { border-bottom: none; }
+  .table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    text-align: left;
+  }
 }
 
 /* Transactions Table */

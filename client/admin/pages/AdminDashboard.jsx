@@ -97,10 +97,10 @@ export default function AdminDashboard() {
                       <tbody>
                         {data.transactions.map(tx => (
                           <tr key={tx._id}>
-                            <td className={s.muted}>{fmtDate(tx.createdAt)}</td>
-                            <td className={s.bold}>{fmtPrice(tx.amount)}</td>
-                            <td style={{color: 'var(--gold)'}}>+{tx.credits}</td>
-                            <td>{BADGE[tx.status?.toLowerCase()] || tx.status}</td>
+                            <td data-label="Date" className={s.muted}>{fmtDate(tx.createdAt)}</td>
+                            <td data-label="Montant" className={s.bold}>{fmtPrice(tx.amount)}</td>
+                            <td data-label="Crédits" style={{color: 'var(--gold)'}}>+{tx.credits}</td>
+                            <td data-label="Statut">{BADGE[tx.status?.toLowerCase()] || tx.status}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -125,8 +125,8 @@ export default function AdminDashboard() {
                       <tbody>
                         {data.publicationsByTemplate.map(pt => (
                           <tr key={pt._id}>
-                            <td className={s.bold}>{pt._id}</td>
-                            <td>{pt.count}</td>
+                            <td data-label="Template" className={s.bold}>{pt._id}</td>
+                            <td data-label="Quantité">{pt.count}</td>
                           </tr>
                         ))}
                       </tbody>

@@ -140,18 +140,18 @@ export default function SuperAdminStats() {
                   <tbody>
                     {transactions.map(tx => (
                       <tr key={tx._id}>
-                        <td>
+                        <td data-label="Marchand">
                           <div className={s.adminName}>{tx.adminId?.name || '—'}</div>
                           <div className={s.adminEmail}>{tx.adminId?.email || '—'}</div>
                         </td>
-                        <td className={s.bold}>{fmtPrice(tx.amount)}</td>
-                        <td>{tx.credits}</td>
-                        <td>
+                        <td data-label="Montant" className={s.bold}>{fmtPrice(tx.amount)}</td>
+                        <td data-label="Crédits">{tx.credits}</td>
+                        <td data-label="Statut">
                           <span className={`${s.badge} ${tx.status === 'SUCCESS' ? s.success : s.failed}`}>
                             {tx.status}
                           </span>
                         </td>
-                        <td className={s.date}>
+                        <td data-label="Date" className={s.date}>
                           {new Date(tx.createdAt).toLocaleDateString('fr-FR', {
                             day: 'numeric',
                             month: 'short',

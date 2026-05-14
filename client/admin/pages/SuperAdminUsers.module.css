@@ -192,8 +192,47 @@
 .pubDate  { color: var(--text-3); font-size: 0.72rem; white-space: nowrap; }
 
 @media (max-width: 640px) {
-  .tableWrap { font-size: 0.8rem; }
-  .table thead th:nth-child(4),
-  .table td:nth-child(4) { display: none; }
-  .drawer { width: 100%; border-left: none; border-top: 1px solid var(--border); align-self: flex-end; max-height: 85vh; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+  .toolbar { flex-direction: column; }
+  .searchWrap { max-width: none; }
+  
+  .tableWrap { border: none; overflow: visible; }
+  .table { display: block; }
+  .table thead { display: none; }
+  .table tbody { display: block; }
+  .table tbody tr {
+    display: block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+  .table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.8rem;
+    text-align: right;
+  }
+  .table tbody td:last-child { border-bottom: none; }
+  .table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    text-align: left;
+  }
+  
+  .userCell { justify-content: flex-end; }
+  .actions { justify-content: flex-end; }
+  
+  .drawer { 
+    width: 100%; border-left: none; border-top: 1px solid var(--border); 
+    align-self: flex-end; max-height: 85vh; 
+    border-top-left-radius: 20px; border-top-right-radius: 20px; 
+  }
 }

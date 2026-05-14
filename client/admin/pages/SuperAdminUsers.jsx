@@ -195,7 +195,7 @@ export default function SuperAdminUsers() {
               <tr><td colSpan={6} className={s.empty}>Aucun marchand trouvé</td></tr>
             ) : users.map(u => (
               <tr key={u._id} className={s.row} onClick={() => setSelected(u._id)}>
-                <td>
+                <td data-label="Marchand">
                   <div className={s.userCell}>
                     <div className={s.avatar}>{(u.name || u.email || 'U')[0].toUpperCase()}</div>
                     <div>
@@ -204,18 +204,18 @@ export default function SuperAdminUsers() {
                     </div>
                   </div>
                 </td>
-                <td><span className={s.roleBadge}>{u.role}</span></td>
-                <td>
+                <td data-label="Rôle"><span className={s.roleBadge}>{u.role}</span></td>
+                <td data-label="Publications">
                   <span className={s.pubStats}>
                     {u.pubStats.total} <span>({u.pubStats.published} pub.)</span>
                   </span>
                 </td>
-                <td>
+                <td data-label="Crédits">
                   <span className={s.creditBadge}>
                     <Coins size={13} /> {u.credits}
                   </span>
                 </td>
-                <td className={s.dateCell}>{fmt(u.createdAt)}</td>
+                <td data-label="Inscrit le" className={s.dateCell}>{fmt(u.createdAt)}</td>
                 <td onClick={e => e.stopPropagation()}>
                   <div className={s.actions}>
                     <button className={s.btnDetail} onClick={() => setSelected(u._id)}>
