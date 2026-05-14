@@ -81,7 +81,8 @@
 /* ── Section ── */
 .section { padding: 28px 32px; max-width: 1140px; margin: 0 auto; width: 100%; }
 .sectionHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-.sectionHeader h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+.sectionHeader h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
+.tabDescription { font-size: 0.8rem; color: var(--text-3); margin: 0; line-height: 1.4; }
 .badge {
   background: var(--brand-light); color: var(--brand-dark);
   font-size: 0.72rem; font-weight: 700;

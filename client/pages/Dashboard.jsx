@@ -272,7 +272,7 @@ export default function Dashboard() {
       <div className={styles.tabs}>
         {[
           { key:'templates', label:'Templates',      icon:<Layout size={18} /> },
-          { key:'mine',      label:'Créations', icon:<Folder size={18} /> },
+          { key:'mine',      label:'Mes Sites', icon:<Folder size={18} /> },
           { key:'premade',   label:'Modèles',        icon:<StarIcon size={18} /> },
         ].map(t => (
           <button
@@ -287,11 +287,18 @@ export default function Dashboard() {
 
       <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2>
-              {activeTab==='mine'&&'Mes Créations'}
-              {activeTab==='templates'&&'Choisissez un template'}
-              {activeTab==='premade'&&'Modèles'}
-            </h2>
+            <div>
+              <h2>
+                {activeTab==='mine'&&'Mes Sites'}
+                {activeTab==='templates'&&'Choisissez un template'}
+                {activeTab==='premade'&&'Modèles'}
+              </h2>
+              <p className={styles.tabDescription}>
+                {activeTab==='templates' && "Sélectionnez un design de base pour commencer votre création personnalisée."}
+                {activeTab==='mine'      && "Gérez vos sites créés, modifiez-les ou suivez leurs performances."}
+                {activeTab==='premade'   && "Gagnez du temps avec des créations déjà prêtes à l'emploi. Dupliquez et personnalisez en un clic !"}
+              </p>
+            </div>
             <span className={styles.badge}>
               {activeTab==='templates' ? filteredTemplates.length : pubs.length}{hasNext?'+':''}
             </span>
