@@ -53,6 +53,9 @@ app.use('/site/special',           express.static(path.join(TEMPLATES_DIR, 'spec
 app.use('/site/collective-family', express.static(path.join(TEMPLATES_DIR, 'collective-family')));
 app.use('/site/collective-pro',    express.static(path.join(TEMPLATES_DIR, 'collective-pro')));
 app.use('/site/notre-film',        express.static(path.join(TEMPLATES_DIR, 'notre-film')));
+app.use('/site/wall-of-wishes',    express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes')));
+app.use('/site/forever',           express.static(path.join(TEMPLATES_DIR, 'forever')));
+app.use('/site/sanctuary',         express.static(path.join(TEMPLATES_DIR, 'sanctuary')));
 // ── API (shared, accessible from both subdomains) ─────────────
 app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/templates',    require('./routes/templates'));

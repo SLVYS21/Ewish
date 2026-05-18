@@ -10,6 +10,7 @@ const SECTION_ICONS = {
   Celebration: <PartyPopper size={16} />,
   Wishes: <Mail size={16} />,
   Outro: <Star size={16} />,
+  Mur: <Mail size={16} />,
 };
 
 // Default fields when template isn't loaded from DB yet
@@ -114,7 +115,7 @@ function DateField({ value, onChange, placeholder }) {
 }
 
 export default function ContentTab({ fields, data, onChange, onUpload }) {
-  const [openSections, setOpenSections] = useState({ Intro: true, Music: true, Story: true, Message: true, Celebration: true, Wishes: true, Outro: false });
+  const [openSections, setOpenSections] = useState({ Intro: true, Music: true, Story: true, Message: true, Celebration: true, Wishes: true, Outro: false, Mur: true });
   const baseFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
 
   // Always inject musicStartTime after musicSrc, regardless of DB fields

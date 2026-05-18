@@ -783,10 +783,132 @@
       color: var(--accent);
       transform: rotate(90deg) scale(1.1);
     }
+    /* ===== INTRO PRO DIAMOND ===== */
+    #intro-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse 90% 80% at 50% 42%, #f8f6f0 0%, #faf8f3 52%, #f5f0e8 100%);
+      opacity: 1; transition: opacity 0.95s ease; overflow: hidden; pointer-events: none;
+    }
+    #intro-overlay.ib-dissolve { opacity: 0; }
+    #intro-overlay::before {
+      content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.16) 0%, transparent 68%);
+      animation: ibGlow 2.5s ease-in-out infinite alternate; pointer-events: none;
+    }
+    @keyframes ibGlow { from { transform:scale(0.9); opacity:0.5; } to { transform:scale(1.1); opacity:1; } }
+    #bloom-svg { position:relative; z-index:1; width:min(285px,77vw); height:min(285px,77vw); overflow:visible; }
+    .ib-spike { fill:rgba(30,58,95,0.06); stroke:rgba(30,58,95,0.52); stroke-width:1.2; stroke-linecap:round; stroke-linejoin:round; }
+    .ib-spike-in { fill:rgba(201,168,76,0.06); stroke:rgba(180,148,56,0.4); stroke-width:0.9; stroke-linecap:round; }
+    .ib-ring-outer { fill:none; stroke:rgba(201,168,76,0.38); stroke-width:0.9; stroke-dasharray:5 5; transform-box:fill-box; transform-origin:50% 50%; animation:ibRingSpin 30s linear infinite; }
+    @keyframes ibRingSpin { to { transform:rotate(360deg); } }
+    .ib-ring-mid    { fill:rgba(201,168,76,0.06); stroke:rgba(180,148,56,0.55); stroke-width:1.1; }
+    .ib-ring-center { fill:rgba(30,58,95,0.55); stroke:rgba(30,58,95,0.88); stroke-width:1.5; }
+    .ib-dot { fill:rgba(201,168,76,0.38); }
+    .ib-draw { stroke-dasharray:2000; stroke-dashoffset:2000; }
+    #ib-text { position:relative; z-index:1; margin-top:18px; text-align:center; opacity:0; transform:translateY(13px); transition:opacity 0.72s ease, transform 0.72s ease; }
+    #ib-text.show { opacity:1; transform:translateY(0); }
+    #ib-label { margin:0; font-family:'Lora',serif; font-size:clamp(0.88rem,3.8vw,1.42rem); font-weight:400; letter-spacing:0.18em; text-transform:uppercase; color:#1e3a5f; }
+    #ib-line-svg { display:block; margin:9px auto 0; width:min(210px,58vw); height:18px; overflow:visible; }
+    .ib-wavy-line { fill:none; stroke:rgba(201,168,76,0.9); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:240; stroke-dashoffset:240; transition:stroke-dashoffset 0.82s cubic-bezier(0.4,0,0.2,1); }
+    .ib-wavy-line.drawn { stroke-dashoffset:0; }
+    #ib-burst { position:absolute; inset:0; pointer-events:none; z-index:2; }
+    .ib-fp { position:absolute; top:50%; left:50%; font-size:clamp(1rem,2.6vw,1.3rem); line-height:1; opacity:0; margin:-14px; animation:ibFall 1.75s ease-out forwards; }
+    @keyframes ibFall { 0%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0.3);} 18%{opacity:1;} 70%{opacity:0.75;} 100%{opacity:0;transform:translate(var(--ib-tx),var(--ib-ty)) rotate(var(--ib-tr)) scale(1.1);} }
+
+    /* ── Grain texture ── */
+    body::after {
+      content: ''; position: fixed; inset: 0; z-index: 999;
+      pointer-events: none; opacity: 0.022;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+    /* ── Ambient floating sparkles ── */
+    #ambient-layer { position: fixed; inset: 0; z-index: 3; pointer-events: none; display: none; }
+    .amb-spark { position: absolute; overflow: visible; opacity: 0; }
+    @keyframes ambFloat {
+      0%, 100% { opacity: 0; transform: translateY(0) rotate(0deg); }
+      20%, 80%  { opacity: 0.45; }
+      50%       { opacity: 0.45; transform: translateY(-10px) rotate(22deg); }
+    }
+    @keyframes ambFloat2 {
+      0%, 100% { opacity: 0; transform: translateY(0) rotate(-18deg); }
+      20%, 80%  { opacity: 0.28; }
+      50%       { opacity: 0.28; transform: translateY(-8px) rotate(6deg); }
+    }
+    .as1 { top:10%; left:5%;  width:14px; height:14px; animation: ambFloat  5.0s ease-in-out infinite 0.0s; }
+    .as2 { top:16%; right:7%; width:10px; height:10px; animation: ambFloat  7.0s ease-in-out infinite 1.2s; }
+    .as3 { bottom:20%; left:4%;  width:12px; height:12px; animation: ambFloat  4.8s ease-in-out infinite 2.5s; }
+    .as4 { bottom:14%; right:5%; width: 9px; height: 9px; animation: ambFloat  6.2s ease-in-out infinite 0.8s; }
+    .as5 { top:48%; left:3%;  width: 8px; height: 8px; animation: ambFloat  8.0s ease-in-out infinite 3.5s; }
+    .as6 { top:58%; right:4%; width:11px; height:11px; animation: ambFloat2 5.5s ease-in-out infinite 1.8s; }
+    /* ── Scene transition sparkle flash ── */
+    #scene-flash {
+      position: fixed; inset: 0; z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none; opacity: 0;
+    }
+    #scene-flash.active { animation: scFlash 0.6s ease-out forwards; }
+    @keyframes scFlash { 0% { opacity:0; } 30% { opacity:1; } 100% { opacity:0; } }
+    #scene-flash svg { width: 44px; height: 44px; }
   </style>
 </head>
 
 <body>
+<!-- Ambient floating sparkles -->
+<div id="ambient-layer" aria-hidden="true">
+  <svg class="amb-spark as1" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as2" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as3" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as4" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as5" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as6" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#e05574"/></svg>
+</div>
+<!-- Scene transition sparkle flash -->
+<div id="scene-flash" aria-hidden="true">
+  <svg viewBox="-10 -10 20 20" overflow="visible">
+    <path d="M0,-7 L1.8,-1.8 L7,0 L1.8,1.8 L0,7 L-1.8,1.8 L-7,0 L-1.8,-1.8 Z" fill="#c9a84c" opacity="0.8"/>
+    <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="white" opacity="0.9"/>
+  </svg>
+</div>
+<div id="intro-overlay" aria-hidden="true">
+  <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <circle class="ib-ring-outer" cx="200" cy="200" r="118"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(0,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(45,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(90,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(135,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(180,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(225,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(270,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(315,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(0,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(45,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(90,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(135,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(180,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(225,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(270,200,200)"/>
+    <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(315,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(22.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(67.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(112.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(157.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(202.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(247.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(292.5,200,200)"/>
+    <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200" transform="rotate(337.5,200,200)"/>
+    <circle class="ib-draw ib-ring-mid"    cx="200" cy="200" r="40"/>
+    <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="13"/>
+  </svg>
+  <div id="ib-text">
+    <p id="ib-label">Collectif Pro</p>
+    <svg id="ib-line-svg" viewBox="0 0 240 18">
+      <path class="ib-wavy-line" d="M6 9 L60 9 L120 13 L180 9 L234 9"/>
+    </svg>
+  </div>
+  <div id="ib-burst"></div>
+</div>
   <div id="tsparticles-confetti" style="position:fixed;inset:0;pointer-events:none;z-index:100"></div>
 
   <div id="music-pill">
@@ -956,6 +1078,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.0.0-beta.16/tsparticles.confetti.bundle.min.js"></script>
   <script>
+    /* ── Scene transition sparkle ── */
+    function flashScene() {
+      const el = document.getElementById('scene-flash');
+      if (!el) return;
+      el.classList.remove('active');
+      void el.offsetWidth;
+      el.classList.add('active');
+    }
+    function showAmbientLayer() {
+      const a = document.getElementById('ambient-layer');
+      if (a) a.style.display = 'block';
+    }
+
     /* ===== MUSIC ===== */
     const audio = new Audio();
     let _musicStartTime = 0;
@@ -1144,17 +1279,21 @@
 
       tl
         .to('.container', 0.1, { visibility: 'visible' })
+        .add(() => showAmbientLayer())
         .from('.one', 0.8, { autoAlpha: 0, y: 15 })
         .from('.two', 0.5, { autoAlpha: 0, y: 10 })
         .to('.one', 0.8, { autoAlpha: 0, y: 15 }, '+=3')
         .to('.two', 0.5, { autoAlpha: 0, y: 10 }, '-=0.5')
+        .add(() => flashScene())
 
         .from('.music-interlude', 0.7, { autoAlpha: 0, scale: 0.97 })
         .add(() => { document.getElementById('music-pill').style.display = 'block'; TweenMax.from('#music-pill', 0.5, { autoAlpha: 0, x: 60 }); })
         .to('.music-interlude', 0.7, { autoAlpha: 0, scale: 0.97 }, '+=4')
+        .add(() => flashScene())
 
         .from('.three', 0.7, { autoAlpha: 0, y: 20 })
         .to('.three', 0.7, { autoAlpha: 0, y: 20 }, '+=3.5')
+        .add(() => flashScene())
 
         .from('.idea-1', 0.7, { autoAlpha: 0, y: -20, rotationX: 5, skewX: '15deg' })
         .to('.idea-1', 0.7, { autoAlpha: 0, y: 20, rotationY: 5, skewX: '-15deg' }, '+=1.5')
@@ -1170,6 +1309,7 @@
         .to('.idea-5', 0.7, { scale: 0.2, autoAlpha: 0 }, '+=1.5')
         .staggerFrom('.idea-6 span', 0.8, { scale: 3, autoAlpha: 0, rotation: 10, ease: Expo.easeOut }, 0.25)
         .staggerTo('.idea-6 span', 0.8, { scale: 3, autoAlpha: 0, rotation: -10, ease: Expo.easeOut }, 0.25, '+=1')
+        .add(() => flashScene())
 
         .staggerFromTo('.baloons img', 2.5, { autoAlpha: 0.9, y: 1400 }, { autoAlpha: 1, y: -1000 }, 0.2)
         .from('.photo-grid', 0.7, { scale: 0.5, autoAlpha: 0, y: 20 }, '-=2')
@@ -1180,9 +1320,11 @@
 
 
         .to('.six', 0.5, { autoAlpha: 0, y: 30, zIndex: '-1' })
+        .add(() => flashScene())
 
         .from('.wishes-section', 0.8, { autoAlpha: 0, y: 40 })
         .to('.wishes-section', 0.8, { autoAlpha: 0, y: -40 }, '+=5')
+        .add(() => flashScene())
         .staggerFrom('.nine p', 1, { autoAlpha: 0, y: -20, rotationX: 5, skewX: '15deg' }, 1.2)
         .add(() => { document.getElementById('revoir-outro-btn').style.display = 'inline-block'; })
         .to('.last-smile', 0.5, { rotation: 90 }, '+=1');
@@ -1240,7 +1382,31 @@
       window.scrollTo(0, 0);
     }
 
-    fetchData();
+    function runIntro() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { fetchData(); return; }
+      const overlay=document.getElementById('intro-overlay'), drawEls=Array.from(overlay.querySelectorAll('.ib-draw'));
+      const introTxt=document.getElementById('ib-text'), linePath=overlay.querySelector('.ib-wavy-line'), burst=document.getElementById('ib-burst');
+      const STEP=50, DUR={'ib-spike':400,'ib-spike-in':300,'ib-ring-mid':500,'ib-ring-center':360};
+      drawEls.forEach((el,i)=>{
+        const len=Math.ceil(el.getTotalLength?el.getTotalLength():400);
+        el.style.strokeDasharray=len; el.style.strokeDashoffset=len;
+        const dur=Object.entries(DUR).reduce((d,[c,v])=>el.classList.contains(c)?v:d,400);
+        setTimeout(()=>{ el.style.transition=`stroke-dashoffset ${dur}ms cubic-bezier(0.25,1,0.5,1)`; el.style.strokeDashoffset='0'; },80+i*STEP);
+      });
+      const drawDone=80+drawEls.length*STEP+520;
+      setTimeout(()=>{ introTxt.classList.add('show'); setTimeout(()=>linePath.classList.add('drawn'),130); },drawDone-380);
+      const PETALS=['✦','◆','✦','⭐','✦','◆','✦','⭐','✦','◆','✦','⭐'];
+      setTimeout(()=>{
+        PETALS.forEach((p,i)=>{ const angle=(i/PETALS.length)*360,rad=angle*Math.PI/180,dist=88+Math.random()*92;
+          const fp=document.createElement('div'); fp.className='ib-fp'; fp.textContent=p;
+          fp.style.cssText=`--ib-tx:${(Math.cos(rad)*dist).toFixed(1)}px;--ib-ty:${(Math.sin(rad)*dist).toFixed(1)}px;--ib-tr:${(Math.random()*360-180).toFixed(0)}deg;animation-delay:${i*32}ms`;
+          burst.appendChild(fp);
+        });
+      },drawDone+120);
+      setTimeout(()=>{ overlay.classList.add('ib-dissolve'); setTimeout(()=>{ overlay.style.display='none'; fetchData(); },960); },drawDone+1080);
+    }
+
+    runIntro();
 
     /* ===== LIVE PREVIEW ===== */
 

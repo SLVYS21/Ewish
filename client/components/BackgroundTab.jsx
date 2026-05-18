@@ -41,6 +41,9 @@ const TEMPLATE_SECTIONS = {
     { key: 'wishes',    label: 'Vœux',               icon: <Mail size={16} /> },
     { key: 'outro',     label: 'Outro',              icon: <Sparkles size={16} /> },
   ],
+  'wall-of-wishes': [
+    { key: 'global', label: 'Fond du mur', icon: <Globe size={16} /> },
+  ],
 };
 
 const DEFAULT_SECTION = { type: 'color', value: '', overlay: 0, blur: 0 };

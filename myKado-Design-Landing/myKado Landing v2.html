@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>myKado — Vœux animés pour particuliers, équipes et entreprises</title>
+  <meta name="description" content="myKado est la plateforme SaaS pour créer, personnaliser et partager des animations de vœux mémorables. Tarification simple en crédits — 1 crédit = 500 XOF." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="myKado Landing v2.css" />
+</head>
+<body>
+
+  <!-- ── Announce bar ── -->
+  <div class="announce" role="region" aria-label="Annonce">
+    <span><strong>Nouveau ·</strong> Tarification en crédits — 1 crédit = 500 XOF, bonus jusqu'à +25%</span>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="#pricing">Voir les formules →</a>
+  </div>
+
+  <!-- ── Navbar ── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="logo">my<em>Kado</em></a>
+      <div class="nav-links">
+        <a href="#product">Produit</a>
+        <a href="#templates">Templates</a>
+        <a href="#usecases">Cas d'usage</a>
+        <a href="#pricing">Tarifs</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <a href="#" class="nav-login">Se connecter</a>
+        <a href="#" class="btn btn-primary nav-cta">Créer un compte <span class="arr">→</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <header class="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-grid"></div>
+      <div class="hero-orb o1"></div>
+      <div class="hero-orb o2"></div>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow" data-reveal><span class="dot" aria-hidden="true"></span> Plateforme de vœux animés</span>
+        <h1 class="hero-headline" data-reveal style="--rd:.08s">
+          Des <em>vœux</em> qui&nbsp;<span class="underline">marquent durablement.</span>
+        </h1>
+        <p class="hero-sub" data-reveal style="--rd:.16s">
+          myKado est la plateforme tout-en-un pour concevoir, personnaliser et partager
+          des animations de vœux d'exception — <strong>anniversaires, hommages,
+          célébrations d'équipe</strong>. Décors sur-mesure, QR codes stylisés, lien
+          promotionnel intégré. Livré en 24h.
+        </p>
+        <div class="hero-actions" data-reveal style="--rd:.24s">
+          <a href="#pricing" class="btn btn-primary">
+            Commencer à créer <span class="arr">→</span>
+          </a>
+          <a href="#product" class="btn btn-ghost">Voir le produit</a>
+        </div>
+        <div class="hero-kpis" data-reveal style="--rd:.32s">
+          <div class="k"><span class="v"><em>340+</em></span><span class="l">vœux créés / mois</span></div>
+          <div class="k"><span class="v">4,9<em>/5</em></span><span class="l">satisfaction client</span></div>
+          <div class="k"><span class="v">&lt;24h</span><span class="l">livraison garantie</span></div>
+        </div>
+      </div>
+
+      <div class="hero-stage" data-reveal style="--rd:.4s">
+        <!-- Floating cards -->
+        <div class="float-card fc1" aria-hidden="true">
+          <div class="fc-icon">★</div>
+          <div class="fc-meta">
+            <div class="fc-t">+24 photos</div>
+            <div class="fc-s">galerie animée</div>
+          </div>
+        </div>
+        <div class="float-card fc2" aria-hidden="true">
+          <div class="fc-icon">✓</div>
+          <div class="fc-meta">
+            <div class="fc-t">QR partagé</div>
+            <div class="fc-s">scan & regarde</div>
+          </div>
+        </div>
+
+        <!-- Phone mockup -->
+        <div class="phone" aria-hidden="true">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-confetti">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="phone-cake">
+              <div class="cake-flame"></div>
+              <div class="cake-candle"></div>
+              <div class="cake-top"></div>
+              <div class="cake-base"></div>
+            </div>
+            <div class="phone-title">Joyeux <em>Anniversaire</em></div>
+            <div class="phone-sub">Aminata · 32 ans</div>
+            <div class="phone-photos">
+              <div class="phone-photo"></div>
+              <div class="phone-photo"></div>
+              <div class="phone-photo"></div>
+              <div class="phone-photo"></div>
+              <div class="phone-photo"></div>
+              <div class="phone-photo"></div>
+            </div>
+            <div class="phone-action">REGARDER L'ANIMATION</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Trust strip ── -->
+  <section class="trust">
+    <div class="trust-inner">
+      <div class="trust-label" data-reveal>
+        Adopté par des équipes RH, agences évènementielles &amp; familles à travers l'Afrique de l'Ouest
+      </div>
+      <div class="trust-logos">
+        <span class="trust-logo" data-reveal style="--rd:.05s"><span class="sigil">A</span> Atlantis</span>
+        <span class="trust-logo" data-reveal style="--rd:.10s"><span class="sigil">S</span> Sahel&amp;Co</span>
+        <span class="trust-logo" data-reveal style="--rd:.15s"><span class="sigil">B</span> Baobab RH</span>
+        <span class="trust-logo" data-reveal style="--rd:.20s"><span class="sigil">M</span> Maison Diallo</span>
+        <span class="trust-logo" data-reveal style="--rd:.25s"><span class="sigil">K</span> Kora Events</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Product explainer ── -->
+  <section class="product" id="product">
+    <div class="product-grid">
+      <div class="product-copy">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Qu'est-ce que myKado ?</span>
+        <h2 class="title" data-reveal style="--rd:.08s">
+          Bien plus qu'une carte —<br/>
+          <em>une expérience</em> à offrir.
+        </h2>
+        <p data-reveal style="--rd:.16s">
+          myKado est un <strong>studio de création en ligne</strong> qui transforme un message
+          de vœux en mini-site animé : photos, musique, décors thématiques, QR code stylisé
+          et lien promotionnel personnalisable. En quelques minutes, vous publiez une page
+          mémorable que vos destinataires reçoivent et conservent.
+        </p>
+        <p data-reveal style="--rd:.22s">
+          Particuliers, équipes RH ou agences évènementielles — myKado s'adapte au moment,
+          à votre budget et à votre charte graphique.
+        </p>
+        <ul class="product-list">
+          <li data-reveal style="--rd:.28s"><span class="tick">✓</span> <span><strong>Éditeur intuitif</strong> — pas besoin de compétences techniques, glissez-déposez vos photos.</span></li>
+          <li data-reveal style="--rd:.34s"><span class="tick">✓</span> <span><strong>Partage instantané</strong> — un lien privé, un QR code, ou diffusion par WhatsApp et email.</span></li>
+          <li data-reveal style="--rd:.40s"><span class="tick">✓</span> <span><strong>Contributions collectives</strong> — invitez famille ou collègues à ajouter leurs messages.</span></li>
+          <li data-reveal style="--rd:.46s"><span class="tick">✓</span> <span><strong>Branding entreprise</strong> — logos, couleurs et liens promo intégrés à l'animation.</span></li>
+        </ul>
+      </div>
+
+      <div class="product-visual" data-reveal style="--rd:.2s">
+        <div class="browser">
+          <div class="browser-bar">
+            <span class="browser-dot r"></span>
+            <span class="browser-dot y"></span>
+            <span class="browser-dot g"></span>
+            <span class="browser-url"><span class="lock">●</span> studio.mykado.app/edit/aminata-32</span>
+          </div>
+          <div class="browser-body">
+            <aside class="editor-side">
+              <span class="es-label">Édition</span>
+              <div class="es-item active"><span class="ic">★</span> Template</div>
+              <div class="es-item"><span class="ic">▣</span> Photos</div>
+              <div class="es-item"><span class="ic">♪</span> Musique</div>
+              <div class="es-item"><span class="ic">◉</span> Décors</div>
+              <div class="es-item"><span class="ic">▦</span> QR code</div>
+              <div class="es-item"><span class="ic">↗</span> Lien promo</div>
+            </aside>
+            <div class="editor-main">
+              <div class="editor-tool t1">
+                <span class="swatch" style="background:linear-gradient(135deg,var(--gold),var(--rose))"></span>
+                Thème · Rose &amp; or
+              </div>
+              <div class="editor-canvas">
+                <div class="ec-h">Joyeux <em>Anniversaire</em></div>
+                <div class="ec-s">Aminata K.</div>
+                <div class="ec-photo"></div>
+                <div class="ec-qr"></div>
+              </div>
+              <div class="editor-tool t2">
+                <span class="swatch" style="background:#25d366"></span>
+                Partager via WhatsApp
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ── -->
+  <section class="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Pourquoi myKado</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Une plateforme <em>complète</em>,<br/>pas un simple générateur de cartes.</h2>
+        <p class="sub" data-reveal style="--rd:.16s">Chaque détail compte. myKado réunit les outils d'un studio créatif, sans la complexité.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="f-card" data-reveal>
+          <div class="f-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <h3>Templates animés</h3>
+          <p>15+ designs pour anniversaires, hommages, départs en retraite, fêtes religieuses et célébrations d'équipe.</p>
+        </div>
+
+        <div class="f-card" data-reveal style="--rd:.08s">
+          <div class="f-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          </div>
+          <h3>Décors & arrière-plans</h3>
+          <p>Confettis, ballons, motifs floraux, dégradés sur-mesure — adaptez chaque détail à l'occasion.</p>
+        </div>
+
+        <div class="f-card" data-reveal style="--rd:.16s">
+          <div class="f-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h2v2h-2zM18 14h3M14 18h2M18 18v3M21 18h-1M21 21h-3v-2"/></svg>
+          </div>
+          <h3>QR codes stylisés</h3>
+          <p>Formes, couleurs et logos personnalisés. Un QR code aussi élégant que votre marque.</p>
+        </div>
+
+        <div class="f-card" data-reveal>
+          <div class="f-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h3>Lien promo intégré</h3>
+          <p>Ajoutez l'URL de votre boutique, votre site ou une offre. La visibilité de votre marque, garantie.</p>
+        </div>
+
+        <div class="f-card" data-reveal style="--rd:.08s">
+          <div class="f-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Vœux collectifs</h3>
+          <p>Invitez 5, 50 ou 500 contributeurs. Chacun ajoute son message et sa photo dans un souvenir partagé.</p>
+        </div>
+
+        <div class="f-card" data-reveal style="--rd:.16s">
+          <div class="f-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L3 14 L12 14 L11 22 L21 10 L12 10 Z"/></svg>
+          </div>
+          <h3>Livraison garantie 24h</h3>
+          <p>Votre animation prête en moins de 24 heures, prête à partager. Sinon, vos crédits sont remboursés.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Templates gallery ── -->
+  <section class="templates" id="templates">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Templates &amp; bibliothèque</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Débloquez, <em>personnalisez</em>, publiez.</h2>
+        <p class="sub" data-reveal style="--rd:.16s">Chaque template a un coût en crédits. Une fois débloqué, il est à vous — personnalisez, dupliquez, republiez sans limite.</p>
+      </div>
+
+      <!-- SaaS flow recap -->
+      <div class="tpl-flow" data-reveal style="--rd:.2s">
+        <div class="step s1">
+          <div class="ic">①</div>
+          <div class="lab">Achetez des crédits</div>
+          <div class="desc">Pack ou à la carte</div>
+        </div>
+        <div class="step s2">
+          <div class="ic">②</div>
+          <div class="lab">Choisissez un template</div>
+          <div class="desc">Débloqué d'un clic</div>
+        </div>
+        <div class="step s3">
+          <div class="ic">③</div>
+          <div class="lab">Personnalisez</div>
+          <div class="desc">Photos, musique, QR…</div>
+        </div>
+        <div class="step s4">
+          <div class="ic">④</div>
+          <div class="lab">Publiez &amp; partagez</div>
+          <div class="desc">Lien privé, WhatsApp</div>
+        </div>
+      </div>
+
+      <!-- Templates grid -->
+      <div class="templates-grid">
+        <!-- T1 — Birthday -->
+        <article class="tpl-card" data-reveal>
+          <div class="tpl-cat">Anniversaire</div>
+          <div class="tpl-cost"><span class="coin" aria-hidden="true"></span>8 crédits</div>
+          <div class="tpl-thumb v-birthday">
+            <div class="scene">
+              <div class="c"></div>
+              <div class="t"></div>
+              <div class="b"></div>
+            </div>
+            <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span>
+          </div>
+          <div class="tpl-body">
+            <h3 class="tpl-name">Joyeux Anniversaire</h3>
+            <p class="tpl-desc">Animation complète avec photos, musique et vœux personnalisés. L'incontournable.</p>
+            <div class="tpl-actions">
+              <button class="btn-preview" data-preview="birthday">Aperçu</button>
+              <button class="btn-unlock">Débloquer</button>
+            </div>
+            <div class="tpl-equiv">≈ <strong>4 000 XOF</strong> — inclus dans le pack Essentiel</div>
+          </div>
+        </article>
+
+        <!-- T2 — Mur de vœux -->
+        <article class="tpl-card" data-reveal style="--rd:.08s">
+          <div class="tpl-cat">Collectif</div>
+          <div class="tpl-cost"><span class="coin" aria-hidden="true"></span>10 crédits</div>
+          <div class="tpl-thumb v-wall">
+            <div class="grid">
+              <div class="note">♥</div>
+              <div class="note">✦</div>
+              <div class="note">★</div>
+              <div class="note">✿</div>
+              <div class="note">♪</div>
+              <div class="note">●</div>
+            </div>
+          </div>
+          <div class="tpl-body">
+            <h3 class="tpl-name">Mur de vœux</h3>
+            <p class="tpl-desc">Un mur interactif où chacun colle son message — comme des post-its numériques.</p>
+            <div class="tpl-actions">
+              <button class="btn-preview" data-preview="wall">Aperçu</button>
+              <button class="btn-unlock">Débloquer</button>
+            </div>
+            <div class="tpl-equiv">≈ <strong>5 000 XOF</strong></div>
+          </div>
+        </article>
+
+        <!-- T3 — Vœu Spécial -->
+        <article class="tpl-card" data-reveal style="--rd:.16s">
+          <div class="tpl-cat">Premium</div>
+          <div class="tpl-cost"><span class="coin" aria-hidden="true"></span>12 crédits</div>
+          <div class="tpl-thumb v-special">
+            <span class="star big">✦</span>
+            <span class="star s1">✦</span>
+            <span class="star s2">✦</span>
+            <span class="star s3">✦</span>
+            <span class="star s4">✦</span>
+          </div>
+          <div class="tpl-body">
+            <h3 class="tpl-name">Vœu Spécial</h3>
+            <p class="tpl-desc">Pour les occasions uniques. Effets premium, thème sur-mesure, vidéo HD.</p>
+            <div class="tpl-actions">
+              <button class="btn-preview" data-preview="special">Aperçu</button>
+              <button class="btn-unlock">Débloquer</button>
+            </div>
+            <div class="tpl-equiv">≈ <strong>6 000 XOF</strong></div>
+          </div>
+        </article>
+
+        <!-- T4 — Hommage -->
+        <article class="tpl-card" data-reveal>
+          <div class="tpl-cat">Hommage</div>
+          <div class="tpl-cost"><span class="coin" aria-hidden="true"></span>10 crédits</div>
+          <div class="tpl-thumb v-hommage">
+            <div class="frame"></div>
+            <div class="ribbon">In Memoriam</div>
+          </div>
+          <div class="tpl-body">
+            <h3 class="tpl-name">Hommage</h3>
+            <p class="tpl-desc">Sobre, digne, intemporel. Cadres dorés et typographie élégante pour rendre hommage.</p>
+            <div class="tpl-actions">
+              <button class="btn-preview" data-preview="hommage">Aperçu</button>
+              <button class="btn-unlock">Débloquer</button>
+            </div>
+            <div class="tpl-equiv">≈ <strong>5 000 XOF</strong></div>
+          </div>
+        </article>
+
+        <!-- T5 — Collectif Famille -->
+        <article class="tpl-card" data-reveal style="--rd:.08s">
+          <div class="tpl-cat">Collectif famille</div>
+          <div class="tpl-cost"><span class="coin" aria-hidden="true"></span>20 crédits</div>
+          <div class="tpl-thumb v-family">
+            <div class="photos">
+              <div class="ph">👤</div>
+              <div class="ph">👤</div>
+              <div class="ph">👤</div>
+              <div class="ph">👤</div>
+              <div class="ph">♥</div>
+              <div class="ph">👤</div>
+            </div>
+          </div>
+          <div class="tpl-body">
+            <h3 class="tpl-name">Collectif Famille</h3>
+            <p class="tpl-desc">Chaque proche ajoute son message et sa photo — un souvenir partagé jusqu'à 50 contributeurs.</p>
+            <div class="tpl-actions">
+              <button class="btn-preview" data-preview="family">Aperçu</button>
+              <button class="btn-unlock">Débloquer</button>
+            </div>
+            <div class="tpl-equiv">≈ <strong>10 000 XOF</strong></div>
+          </div>
+        </article>
+
+        <!-- T6 — Collectif Pro -->
+        <article class="tpl-card" data-reveal style="--rd:.16s">
+          <div class="tpl-cat">Collectif Pro</div>
+          <div class="tpl-cost"><span class="coin" aria-hidden="true"></span>30 crédits</div>
+          <div class="tpl-thumb v-pro">
+            <div class="card">
+              <div class="logo">M</div>
+              <div class="h">Notre équipe</div>
+              <div class="s">Hommage collectif</div>
+              <div class="row"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></div>
+            </div>
+          </div>
+          <div class="tpl-body">
+            <h3 class="tpl-name">Collectif Pro</h3>
+            <p class="tpl-desc">Pour célébrer vos équipes avec classe : branding entreprise, signatures et export HD.</p>
+            <div class="tpl-actions">
+              <button class="btn-preview" data-preview="pro">Aperçu</button>
+              <button class="btn-unlock">Débloquer</button>
+            </div>
+            <div class="tpl-equiv">≈ <strong>15 000 XOF</strong> — inclus dans le pack Pro</div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Préfaits row -->
+      <div class="prefaits" data-reveal>
+        <div class="prefaits-head">
+          <div class="copy">
+            <span class="tag"><span aria-hidden="true">⚡</span> Préfaits prêts à dupliquer</span>
+            <h3>Pressé ? Partez d'un <em>préfait</em>, déjà personnalisé.</h3>
+            <p>Une bibliothèque de vœux pré-configurés — il ne vous reste qu'à changer les noms, les photos et publier. Idéal quand le temps presse.</p>
+          </div>
+          <a href="#" class="btn-link" style="color: var(--gold-l); border-color: var(--gold-l);">Voir toute la bibliothèque →</a>
+        </div>
+        <div class="prefaits-scroll">
+          <button class="prefait">
+            <div class="thumb t1"><span class="label">30 ans · Rétro</span></div>
+            <div class="name">Anniversaire — 30 ans rétro</div>
+            <div class="meta">8 crédits · 12 photos · style vintage</div>
+            <div class="dup">Dupliquer en 1 clic <span class="arr">→</span></div>
+          </button>
+          <button class="prefait">
+            <div class="thumb t2"><span class="label">Mariage · floral</span></div>
+            <div class="name">Vœux de mariage — floral pastel</div>
+            <div class="meta">12 crédits · 20 photos · musique douce</div>
+            <div class="dup">Dupliquer en 1 clic <span class="arr">→</span></div>
+          </button>
+          <button class="prefait">
+            <div class="thumb t3"><span class="label">Naissance · pastel</span></div>
+            <div class="name">Bienvenue bébé — pastel</div>
+            <div class="meta">8 crédits · 10 photos · galerie ronde</div>
+            <div class="dup">Dupliquer en 1 clic <span class="arr">→</span></div>
+          </button>
+          <button class="prefait">
+            <div class="thumb t4"><span class="label">Retraite · 25 ans</span></div>
+            <div class="name">Départ en retraite — service 25 ans</div>
+            <div class="meta">30 crédits · jusqu'à 100 signatures</div>
+            <div class="dup">Dupliquer en 1 clic <span class="arr">→</span></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Use cases ── -->
+  <section class="usecases" id="usecases">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Pour qui</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Un outil, <em>trois publics</em>.</h2>
+        <p class="sub" data-reveal style="--rd:.16s">Que vous célébriez en famille ou que vous engagiez 500 collaborateurs, myKado adapte ses fonctionnalités à votre échelle.</p>
+      </div>
+
+      <div class="uc-grid">
+        <article class="uc-card u1" data-reveal>
+          <span class="uc-tag">Particuliers</span>
+          <h3>Pour offrir un <em>vrai souvenir</em></h3>
+          <p>Anniversaires, fiançailles, naissances — créez une carte animée qui se conserve, se rejoue et se partage en famille.</p>
+          <div class="uc-stats">
+            <div class="uc-stat"><div class="v">5 min</div><div class="l">temps moyen<br/>de création</div></div>
+            <div class="uc-stat"><div class="v">∞</div><div class="l">vues<br/>illimitées</div></div>
+          </div>
+        </article>
+
+        <article class="uc-card u2" data-reveal style="--rd:.1s">
+          <span class="uc-tag">Équipes RH</span>
+          <h3>Pour <em>fédérer</em> et marquer les esprits</h3>
+          <p>Anniversaires de service, départs en retraite, fêtes de fin d'année — un format qui dépasse l'email collectif et touche vraiment.</p>
+          <div class="uc-stats">
+            <div class="uc-stat"><div class="v">500</div><div class="l">contributeurs<br/>par animation</div></div>
+            <div class="uc-stat"><div class="v">100%</div><div class="l">RGPD<br/>conforme</div></div>
+          </div>
+        </article>
+
+        <article class="uc-card u3" data-reveal style="--rd:.2s">
+          <span class="uc-tag">Marques & agences</span>
+          <h3>Pour <em>activer</em> votre audience</h3>
+          <p>Campagnes saisonnières, fidélisation client, opérations white-label — intégrez votre branding et un lien promo dans chaque vœu envoyé.</p>
+          <div class="uc-stats">
+            <div class="uc-stat"><div class="v">+38%</div><div class="l">taux de clic<br/>moyen</div></div>
+            <div class="uc-stat"><div class="v">API</div><div class="l">disponible<br/>sur demande</div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ── -->
+  <section class="how" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Comment ça marche</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Du brief au partage, <em>en quatre étapes.</em></h2>
+      </div>
+
+      <div class="how-grid">
+        <div class="how-line" aria-hidden="true"></div>
+        <div class="how-step" data-reveal>
+          <div class="how-num">01</div>
+          <h3>Créez votre compte</h3>
+          <p>Inscription gratuite. Recevez 1 crédit offert pour tester un brouillon.</p>
+        </div>
+        <div class="how-step" data-reveal style="--rd:.08s">
+          <div class="how-num">02</div>
+          <h3>Achetez vos crédits</h3>
+          <p>1 crédit = 500 XOF. Achetez à la carte ou en pack avec bonus.</p>
+        </div>
+        <div class="how-step" data-reveal style="--rd:.16s">
+          <div class="how-num">03</div>
+          <h3>Personnalisez</h3>
+          <p>Photos, musique, décors, QR code, lien promo — depuis l'éditeur visuel.</p>
+        </div>
+        <div class="how-step" data-reveal style="--rd:.24s">
+          <div class="how-num">04</div>
+          <h3>Publiez & partagez</h3>
+          <p>Lien privé, QR code, WhatsApp ou email. Vu, rejoué, conservé.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Pricing ── -->
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Tarification simple</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Payez en <em>crédits</em>,<br/>économisez avec les packs.</h2>
+        <p class="sub" data-reveal style="--rd:.16s">Une seule unité, des paliers de bonus, aucun abonnement. Vos crédits ne s'expirent jamais.</p>
+      </div>
+
+      <!-- Credit explainer card -->
+      <div class="pricing-explainer" data-reveal style="--rd:.2s">
+        <div class="pe-coin">1<small style="font-size:.8rem;margin-left:2px;">cr</small></div>
+        <div class="pe-content">
+          <div class="pe-eq">1 crédit = <em>500 XOF</em></div>
+          <div class="pe-desc">Le crédit est l'unité universelle de myKado. Une animation simple coûte de 5 à 10 crédits, un projet collectif d'équipe entre 20 et 40 crédits. <strong style="color: var(--ivory);">Achetez à la carte, sans surprise.</strong></div>
+        </div>
+      </div>
+
+      <!-- Plans grid -->
+      <div class="plans">
+        <!-- Découverte -->
+        <article class="plan" data-reveal>
+          <div class="plan-name">Découverte</div>
+          <div class="plan-pitch">Pour tester avec un premier vœu personnel.</div>
+          <div class="plan-credits"><span class="num">5</span><span class="lab">crédits</span></div>
+          <span class="plan-bonus none">+0 bonus</span>
+          <div class="plan-price"><strong>2 500</strong> XOF <small>· 500/crédit</small></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-perks">
+            <li><span class="check">✓</span> Templates standards</li>
+            <li><span class="check">✓</span> Jusqu'à 12 photos / vœu</li>
+            <li><span class="check">✓</span> Musique de bibliothèque</li>
+            <li><span class="check">✓</span> Partage par lien &amp; QR</li>
+            <li><span class="check">✓</span> Support par email</li>
+          </ul>
+          <button class="plan-cta">Acheter 5 crédits</button>
+        </article>
+
+        <!-- Essentiel -->
+        <article class="plan" data-reveal style="--rd:.08s">
+          <div class="plan-name">Essentiel</div>
+          <div class="plan-pitch">L'équilibre idéal pour un projet familial.</div>
+          <div class="plan-credits"><span class="num">12</span><span class="lab">crédits</span></div>
+          <span class="plan-bonus">+2 crédits offerts</span>
+          <div class="plan-price"><strong>6 000</strong> XOF <small>· soit 429/crédit</small></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-perks">
+            <li><span class="check">✓</span> Tous les templates standards</li>
+            <li><span class="check">✓</span> Jusqu'à 24 photos / vœu</li>
+            <li><span class="check">✓</span> Musique personnalisée (MP3)</li>
+            <li><span class="check">✓</span> 1 vœu collectif (jusqu'à 20 pers.)</li>
+            <li><span class="check">✓</span> Livraison 24h garantie</li>
+          </ul>
+          <button class="plan-cta">Acheter 12+2 crédits</button>
+        </article>
+
+        <!-- Pro -->
+        <article class="plan featured" data-reveal style="--rd:.16s">
+          <span class="plan-badge">★ Plus populaire</span>
+          <div class="plan-name">Pro</div>
+          <div class="plan-pitch">Pour équipes RH, agences et créateurs réguliers.</div>
+          <div class="plan-credits"><span class="num">30</span><span class="lab">crédits</span></div>
+          <span class="plan-bonus">+6 crédits offerts</span>
+          <div class="plan-price"><strong>15 000</strong> XOF <small>· soit 417/crédit</small></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-perks">
+            <li><span class="check">✓</span> Templates premium &amp; nouveautés</li>
+            <li><span class="check">✓</span> Photos &amp; vidéos illimitées</li>
+            <li><span class="check">✓</span> Vœux collectifs (jusqu'à 100 pers.)</li>
+            <li><span class="check">✓</span> QR code aux couleurs de marque</li>
+            <li><span class="check">✓</span> Lien promo &amp; tracking de clics</li>
+            <li><span class="check">✓</span> Support prioritaire WhatsApp</li>
+          </ul>
+          <button class="plan-cta">Acheter 30+6 crédits</button>
+        </article>
+
+        <!-- Entreprise -->
+        <article class="plan" data-reveal style="--rd:.24s">
+          <div class="plan-name">Entreprise</div>
+          <div class="plan-pitch">Pour campagnes saisonnières &amp; usages récurrents.</div>
+          <div class="plan-credits"><span class="num">80</span><span class="lab">crédits</span></div>
+          <span class="plan-bonus">+20 crédits offerts (+25%)</span>
+          <div class="plan-price"><strong>40 000</strong> XOF <small>· soit 400/crédit</small></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-perks">
+            <li><span class="check">✓</span> Tout du plan Pro</li>
+            <li><span class="check">✓</span> Vœux collectifs illimités</li>
+            <li><span class="check">✓</span> Branding complet &amp; sous-domaine</li>
+            <li><span class="check">✓</span> Espace multi-utilisateurs</li>
+            <li><span class="check">✓</span> Facturation entreprise</li>
+            <li><span class="check">✓</span> Accompagnement dédié</li>
+          </ul>
+          <button class="plan-cta">Acheter 80+20 crédits</button>
+        </article>
+      </div>
+
+      <p class="pricing-footnote" data-reveal>
+        Besoin de plus de 100 crédits par mois ou d'un accès API ? <a href="#">Parlons-en.</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Testimonials ── -->
+  <section class="testimonials">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Ils nous font confiance</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Des vœux qui <em>restent</em>.</h2>
+        <p class="sub" data-reveal style="--rd:.16s">★★★★★ 4,9 / 5 — basé sur plus de 340 avis vérifiés.</p>
+      </div>
+
+      <div class="test-grid">
+        <div class="t-card" data-reveal>
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">"J'ai commandé pour l'anniversaire de mon mari. Il a fondu en larmes. Les photos, la musique, tout était parfait."</p>
+          <div class="t-author">
+            <div class="t-avatar">A</div>
+            <div><div class="t-name">Aminata K.</div><div class="t-role">Pour son mari</div></div>
+          </div>
+        </div>
+        <div class="t-card" data-reveal style="--rd:.08s">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">"Le collectif pro pour notre directeur — 40 collègues ont participé. Une expérience inoubliable, à recommander."</p>
+          <div class="t-author">
+            <div class="t-avatar">C</div>
+            <div><div class="t-name">Christian M.</div><div class="t-role">DRH · 80 personnes</div></div>
+          </div>
+        </div>
+        <div class="t-card" data-reveal style="--rd:.16s">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">"Simple à commander, livré en 24h, vraiment beau. Ma mère l'a regardé trois fois de suite et l'a envoyé à toute la famille."</p>
+          <div class="t-author">
+            <div class="t-avatar">F</div>
+            <div><div class="t-name">Fatou D.</div><div class="t-role">Pour sa mère</div></div>
+          </div>
+        </div>
+        <div class="t-card" data-reveal style="--rd:.24s">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">"Notre campagne de fin d'année avec myKado a généré 38% de clics en plus sur notre site. Le QR code a fait la différence."</p>
+          <div class="t-author">
+            <div class="t-avatar">J</div>
+            <div><div class="t-name">Jean-Pierre T.</div><div class="t-role">Directeur marketing</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ── -->
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span> Questions fréquentes</span>
+        <h2 class="title" data-reveal style="--rd:.08s">Tout ce que vous voulez savoir.</h2>
+      </div>
+
+      <div class="faq-grid">
+        <details class="faq-item" data-reveal open>
+          <summary>Comment fonctionnent les crédits ?<span class="faq-icon">+</span></summary>
+          <div class="faq-body">
+            Le crédit est l'unité de paiement de myKado. <strong>1 crédit = 500 XOF.</strong>
+            Chaque création consomme un nombre de crédits selon sa complexité : un vœu standard
+            coûte 5 à 10 crédits, un vœu collectif jusqu'à 40 crédits. En achetant un pack,
+            vous bénéficiez de crédits bonus offerts (jusqu'à +25%). Les crédits n'expirent jamais.
+          </div>
+        </details>
+
+        <details class="faq-item" data-reveal style="--rd:.05s">
+          <summary>Combien de temps pour recevoir mon animation ?<span class="faq-icon">+</span></summary>
+          <div class="faq-body">
+            La livraison standard est garantie en moins de <strong>24 heures</strong>. Pour les
+            projets collectifs avec contributions externes, le délai démarre à la clôture des
+            participations. Si nous dépassons 24h, vos crédits vous sont intégralement remboursés.
+          </div>
+        </details>
+
+        <details class="faq-item" data-reveal style="--rd:.10s">
+          <summary>Puis-je payer par Mobile Money ou virement bancaire ?<span class="faq-icon">+</span></summary>
+          <div class="faq-body">
+            Oui — myKado accepte Orange Money, MTN MoMo, Moov Money, Wave, virement bancaire
+            et carte bancaire. Les paiements sont sécurisés et conformes aux standards PCI-DSS.
+          </div>
+        </details>
+
+        <details class="faq-item" data-reveal style="--rd:.15s">
+          <summary>Mes contenus et photos sont-ils protégés ?<span class="faq-icon">+</span></summary>
+          <div class="faq-body">
+            Chaque animation est hébergée sur un lien privé non indexé. Vous restez propriétaire
+            de vos contenus à 100%, et nous ne les utilisons jamais à des fins commerciales.
+            myKado est conforme RGPD et au cadre légal de l'UEMOA.
+          </div>
+        </details>
+
+        <details class="faq-item" data-reveal style="--rd:.20s">
+          <summary>Existe-t-il une formule pour les entreprises avec gros volume ?<span class="faq-icon">+</span></summary>
+          <div class="faq-body">
+            Oui. Au-delà de 100 crédits par mois, nous proposons des tarifs négociés, un
+            accompagnement dédié, et une API pour intégrer myKado à vos workflows RH ou
+            marketing. <a href="#">Contactez l'équipe commerciale</a>.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Final CTA ── -->
+  <section class="finalCta">
+    <div class="finalCta-inner">
+      <div>
+        <h2 data-reveal>Et si votre prochain vœu <em>laissait une trace ?</em></h2>
+        <p data-reveal style="--rd:.08s">
+          Créez votre compte gratuit et recevez <strong>1 crédit offert</strong> pour
+          construire votre premier brouillon. Sans engagement.
+        </p>
+        <div class="cta-actions" data-reveal style="--rd:.16s">
+          <a href="#" class="btn btn-gold">Commencer gratuitement <span class="arr">→</span></a>
+          <a href="#pricing" class="btn btn-ghost">Voir les tarifs</a>
+        </div>
+      </div>
+      <div class="finalCta-card" data-reveal style="--rd:.24s">
+        <h4>Inclus, dans tous les plans</h4>
+        <div class="item"><span class="ic">✓</span> Stockage illimité de vos créations</div>
+        <div class="item"><span class="ic">✓</span> Lien privé partageable à vie</div>
+        <div class="item"><span class="ic">✓</span> Mobile Money &amp; virement acceptés</div>
+        <div class="item"><span class="ic">✓</span> Livraison 24h ou remboursé</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">my<em>Kado</em></a>
+        <p class="tag">La plateforme de vœux animés pour particuliers, équipes RH et marques en Afrique de l'Ouest.</p>
+        <a href="https://wa.me/22900000000" class="whatsapp" target="_blank" rel="noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+      </div>
+      <div class="footer-col">
+        <h5>Produit</h5>
+        <ul>
+          <li><a href="#product">Comment ça marche</a></li>
+          <li><a href="#usecases">Cas d'usage</a></li>
+          <li><a href="#pricing">Tarifs</a></li>
+          <li><a href="#">Galerie de templates</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Entreprise</h5>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Solutions RH</a></li>
+          <li><a href="#">Programme partenaire</a></li>
+          <li><a href="#">Nous contacter</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Légal</h5>
+        <ul>
+          <li><a href="#">Conditions d'utilisation</a></li>
+          <li><a href="#">Politique de confidentialité</a></li>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">Conformité RGPD</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-meta">
+      <div>© <span id="year"></span> myKado · Tous droits réservés</div>
+      <div class="made">Conçu avec attention <strong>en Afrique de l'Ouest</strong></div>
+    </div>
+  </footer>
+
+  <!-- ── Preview modal ── -->
+  <div class="modal" id="tplModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Fermer l'aperçu">×</button>
+      <div class="modal-preview" id="modalPreview"></div>
+      <div class="modal-body">
+        <span class="modal-cat" id="modalCat">Anniversaire</span>
+        <h3 class="modal-title" id="modalTitle">Joyeux Anniversaire</h3>
+        <p class="modal-desc" id="modalDesc">Animation complète avec photos, musique et vœux personnalisés.</p>
+        <ul class="modal-includes" id="modalIncludes"></ul>
+        <div class="modal-cost">
+          <div>
+            <div class="label">Coût pour débloquer</div>
+            <div class="v"><span class="coin"></span><span id="modalCost">8</span> crédits</div>
+            <div class="eq" id="modalEq">≈ 4 000 XOF</div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <a href="#pricing" class="btn btn-ghost">Voir les packs</a>
+          <a href="#" class="btn btn-primary">Débloquer maintenant <span class="arr">→</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Scroll-aware nav border
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 40) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+    // ── Template preview modal ──
+    const TEMPLATES = {
+      birthday: {
+        cat: 'Anniversaire',
+        name: 'Joyeux Anniversaire',
+        desc: "Une animation complète qui démarre par une bougie qui s'allume, dévoile vos photos en cascade et joue la musique de votre choix. Le destinataire ouvre, regarde, rejoue — et garde.",
+        cost: 8, eq: '≈ 4 000 XOF',
+        thumb: '<div class="tpl-thumb v-birthday"><div class="scene"><div class="c"></div><div class="t"></div><div class="b"></div></div><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span></div>',
+        includes: ['Jusqu\u2019à 24 photos animées','Musique de bibliothèque ou MP3 perso','3 styles de typographie au choix','Lien privé + QR code stylisé']
+      },
+      wall: {
+        cat: 'Collectif',
+        name: 'Mur de vœux',
+        desc: "Invitez vos proches ou collègues à coller un message sur un mur interactif. Chaque contribution s'affiche en post-it animé, daté et signé. Idéal pour un anniversaire surprise ou un départ.",
+        cost: 10, eq: '≈ 5 000 XOF',
+        thumb: '<div class="tpl-thumb v-wall"><div class="grid"><div class="note">\u2665</div><div class="note">\u2726</div><div class="note">\u2605</div><div class="note">\u273f</div><div class="note">\u266a</div><div class="note">\u25cf</div></div></div>',
+        includes: ['Jusqu\u2019à 30 contributeurs','Modération avant publication','6 couleurs de post-it','Partage par lien d\u2019invitation']
+      },
+      special: {
+        cat: 'Premium',
+        name: 'Vœu Spécial',
+        desc: "Pour les occasions qui méritent un traitement d'exception. Effets de particules avancés, transitions cinématographiques, fond personnalisable et export vidéo HD téléchargeable.",
+        cost: 12, eq: '≈ 6 000 XOF',
+        thumb: '<div class="tpl-thumb v-special"><span class="star big">\u2726</span><span class="star s1">\u2726</span><span class="star s2">\u2726</span><span class="star s3">\u2726</span><span class="star s4">\u2726</span></div>',
+        includes: ['Thème sur-mesure (couleurs, logo)','Particules &amp; transitions premium','Export vidéo MP4 HD','Photos &amp; vidéos illimitées']
+      },
+      hommage: {
+        cat: 'Hommage',
+        name: 'Hommage',
+        desc: "Une mise en page sobre et intemporelle pour rendre hommage à un être cher. Cadres dorés, typographie sérieuse, musique d'ambiance discrète. Chaque détail pensé pour la dignité du moment.",
+        cost: 10, eq: '≈ 5 000 XOF',
+        thumb: '<div class="tpl-thumb v-hommage"><div class="frame"></div><div class="ribbon">In Memoriam</div></div>',
+        includes: ['Cadres &amp; typographie classiques','Citation ou poème central','Galerie chronologique','Lien privé non-indexé']
+      },
+      family: {
+        cat: 'Collectif famille',
+        name: 'Collectif Famille',
+        desc: "Rassemblez jusqu'à 50 proches autour d'un même souvenir. Chacun ajoute son message vidéo, vocal ou texte avec sa photo. Le résultat : une chronologie animée qui se lit comme un livre.",
+        cost: 20, eq: '≈ 10 000 XOF',
+        thumb: '<div class="tpl-thumb v-family"><div class="photos"><div class="ph">\ud83d\udc64</div><div class="ph">\ud83d\udc64</div><div class="ph">\ud83d\udc64</div><div class="ph">\ud83d\udc64</div><div class="ph">\u2665</div><div class="ph">\ud83d\udc64</div></div></div>',
+        includes: ['Jusqu\u2019à 50 contributeurs','Messages texte, audio ou vidéo','Galerie photos partagée','Album téléchargeable PDF']
+      },
+      pro: {
+        cat: 'Collectif Pro',
+        name: 'Collectif Pro',
+        desc: "Pour les départs en retraite, anniversaires de service ou fêtes d'entreprise. Branding complet, sous-domaine personnalisé, statistiques d'engagement et export pour intranet.",
+        cost: 30, eq: '≈ 15 000 XOF',
+        thumb: '<div class="tpl-thumb v-pro"><div class="card"><div class="logo">M</div><div class="h">Notre équipe</div><div class="s">Hommage collectif</div><div class="row"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></div></div></div>',
+        includes: ['Logo &amp; couleurs entreprise','Sous-domaine personnalisé','Contributions illimitées','Statistiques d\u2019engagement','Export pour intranet']
+      }
+    };
+
+    const modal       = document.getElementById('tplModal');
+    const modalClose  = document.getElementById('modalClose');
+    const modalPrev   = document.getElementById('modalPreview');
+    const modalCat    = document.getElementById('modalCat');
+    const modalTitle  = document.getElementById('modalTitle');
+    const modalDesc   = document.getElementById('modalDesc');
+    const modalCost   = document.getElementById('modalCost');
+    const modalEq     = document.getElementById('modalEq');
+    const modalIncl   = document.getElementById('modalIncludes');
+
+    function openModal(key) {
+      const t = TEMPLATES[key]; if (!t) return;
+      modalPrev.innerHTML = t.thumb;
+      modalCat.textContent = t.cat;
+      modalTitle.textContent = t.name;
+      modalDesc.textContent = t.desc;
+      modalCost.textContent = t.cost;
+      modalEq.textContent = t.eq;
+      modalIncl.innerHTML = t.includes.map(i => `<li><span class="ck">\u2713</span><span>${i}</span></li>`).join('');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('[data-preview]').forEach(b => {
+      b.addEventListener('click', () => openModal(b.dataset.preview));
+    });
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>

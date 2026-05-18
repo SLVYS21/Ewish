@@ -57,6 +57,11 @@ const DEMO_DATA = {
     carouselTitle: 'Ce qu\'ils ont voulu te dire 💌',
     outroText: 'Reviens nous dire si tu as aimé.', replayText: 'Clique pour revoir ↺', outroSmiley: '🥰',
   },
+  'wall-of-wishes': {
+    titleName: 'Sarah',
+    subtitle:  'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+    // publicationId intentionally omitted → template falls back to SAMPLE_WISHES
+  },
   'collective-pro': {
     greeting: 'Cher', name: 'Alexandre', greetingText: 'Nous tenions à marquer ce moment.',
     musicHint: 'Prenez un moment pour écouter 🎵',

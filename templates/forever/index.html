@@ -382,9 +382,122 @@
       .photo-slot-3 { width: 80px; height: 100px; }
       .s3-caption { font-size: calc(1.3rem * var(--fs-scale)); }
     }
+
+    /* ===== INTRO FOREVER RINGS ===== */
+    #intro-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse 90% 80% at 50% 42%, #fff9f9 0%, #fffbf5 52%, #fff5f0 100%);
+      opacity: 1; transition: opacity 0.95s ease; overflow: hidden; pointer-events: none;
+    }
+    #intro-overlay.ib-dissolve { opacity: 0; }
+    #intro-overlay::before {
+      content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(192,57,43,0.14) 0%, transparent 68%);
+      animation: ibGlow 2.4s ease-in-out infinite alternate; pointer-events: none;
+    }
+    @keyframes ibGlow { from { transform:scale(0.88); opacity:0.5; } to { transform:scale(1.12); opacity:1; } }
+    #bloom-svg { position:relative; z-index:1; width:min(300px,80vw); height:min(300px,80vw); overflow:visible; }
+    .ib-ring-left  { fill:rgba(192,57,43,0.06); stroke:rgba(192,57,43,0.55); stroke-width:1.4; stroke-linecap:round; }
+    .ib-ring-right { fill:rgba(192,57,43,0.06); stroke:rgba(192,57,43,0.55); stroke-width:1.4; stroke-linecap:round; }
+    .ib-petal-out  { fill:rgba(192,57,43,0.05); stroke:rgba(192,57,43,0.35); stroke-width:1.0; stroke-linecap:round; stroke-linejoin:round; }
+    .ib-infinity   { fill:none; stroke:rgba(180,40,30,0.45); stroke-width:1.1; stroke-linecap:round; }
+    .ib-ring-outer { fill:none; stroke:rgba(192,57,43,0.28); stroke-width:0.85; stroke-dasharray:5 6; transform-box:fill-box; transform-origin:50% 50%; animation:ibRingSpin 30s linear infinite; }
+    @keyframes ibRingSpin { to { transform:rotate(360deg); } }
+    .ib-ring-mid    { fill:rgba(192,57,43,0.05); stroke:rgba(192,57,43,0.52); stroke-width:1.1; }
+    .ib-ring-center { fill:rgba(192,57,43,0.55); stroke:rgba(192,57,43,0.9); stroke-width:1.5; }
+    .ib-dot { fill:rgba(192,57,43,0.28); }
+    .ib-draw { stroke-dasharray:2000; stroke-dashoffset:2000; }
+    #ib-text { position:relative; z-index:1; margin-top:16px; text-align:center; opacity:0; transform:translateY(13px); transition:opacity 0.72s ease, transform 0.72s ease; }
+    #ib-text.show { opacity:1; transform:translateY(0); }
+    #ib-label { margin:0; font-family:'Playfair Display',serif; font-size:clamp(0.9rem,3.8vw,1.5rem); font-weight:400; font-style:italic; letter-spacing:0.1em; color:#8b2020; }
+    #ib-line-svg { display:block; margin:9px auto 0; width:min(210px,58vw); height:18px; overflow:visible; }
+    .ib-wavy-line { fill:none; stroke:rgba(192,57,43,0.75); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:240; stroke-dashoffset:240; transition:stroke-dashoffset 0.82s cubic-bezier(0.4,0,0.2,1); }
+    .ib-wavy-line.drawn { stroke-dashoffset:0; }
+    #ib-burst { position:absolute; inset:0; pointer-events:none; z-index:2; }
+    .ib-fp { position:absolute; top:50%; left:50%; font-size:clamp(1rem,2.8vw,1.35rem); line-height:1; opacity:0; margin:-14px; animation:ibFall 1.75s ease-out forwards; }
+    @keyframes ibFall { 0%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0.3);} 18%{opacity:1;} 70%{opacity:0.75;} 100%{opacity:0;transform:translate(var(--ib-tx),var(--ib-ty)) rotate(var(--ib-tr)) scale(1.1);} }
+
+    /* ── Ambient floating sparkles ── */
+    #ambient-layer { position: fixed; inset: 0; z-index: 3; pointer-events: none; display: none; }
+    .amb-spark { position: absolute; overflow: visible; opacity: 0; }
+    @keyframes ambFloat {
+      0%, 100% { opacity: 0; transform: translateY(0) rotate(0deg); }
+      20%, 80%  { opacity: 0.45; }
+      50%       { opacity: 0.45; transform: translateY(-10px) rotate(22deg); }
+    }
+    @keyframes ambFloat2 {
+      0%, 100% { opacity: 0; transform: translateY(0) rotate(-18deg); }
+      20%, 80%  { opacity: 0.28; }
+      50%       { opacity: 0.28; transform: translateY(-8px) rotate(6deg); }
+    }
+    .as1 { top:10%; left:5%;  width:14px; height:14px; animation: ambFloat  5.0s ease-in-out infinite 0.0s; }
+    .as2 { top:16%; right:7%; width:10px; height:10px; animation: ambFloat  7.0s ease-in-out infinite 1.2s; }
+    .as3 { bottom:20%; left:4%;  width:12px; height:12px; animation: ambFloat  4.8s ease-in-out infinite 2.5s; }
+    .as4 { bottom:14%; right:5%; width: 9px; height: 9px; animation: ambFloat  6.2s ease-in-out infinite 0.8s; }
+    .as5 { top:48%; left:3%;  width: 8px; height: 8px; animation: ambFloat  8.0s ease-in-out infinite 3.5s; }
+    .as6 { top:58%; right:4%; width:11px; height:11px; animation: ambFloat2 5.5s ease-in-out infinite 1.8s; }
+    /* ── Scene transition sparkle flash ── */
+    #scene-flash {
+      position: fixed; inset: 0; z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none; opacity: 0;
+    }
+    #scene-flash.active { animation: scFlash 0.6s ease-out forwards; }
+    @keyframes scFlash { 0% { opacity:0; } 30% { opacity:1; } 100% { opacity:0; } }
+    #scene-flash svg { width: 44px; height: 44px; }
   </style>
 </head>
 <body>
+<!-- Ambient floating sparkles -->
+<div id="ambient-layer" aria-hidden="true">
+  <svg class="amb-spark as1" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as2" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as3" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as4" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as5" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
+  <svg class="amb-spark as6" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#e05574"/></svg>
+</div>
+<!-- Scene transition sparkle flash -->
+<div id="scene-flash" aria-hidden="true">
+  <svg viewBox="-10 -10 20 20" overflow="visible">
+    <path d="M0,-7 L1.8,-1.8 L7,0 L1.8,1.8 L0,7 L-1.8,1.8 L-7,0 L-1.8,-1.8 Z" fill="#c9a84c" opacity="0.8"/>
+    <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="white" opacity="0.9"/>
+  </svg>
+</div>
+
+<div id="intro-overlay" aria-hidden="true">
+  <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <circle class="ib-ring-outer" cx="200" cy="200" r="118"/>
+    <!-- Two overlapping rings (wedding rings / infinity) -->
+    <circle class="ib-draw ib-ring-left"  cx="172" cy="200" r="62"/>
+    <circle class="ib-draw ib-ring-right" cx="228" cy="200" r="62"/>
+    <!-- 6 decorative petals radiating outward -->
+    <path class="ib-draw ib-petal-out" d="M200 200 C183 168 181 122 200 96 C219 122 217 168 200 200" transform="rotate(0,200,200)"/>
+    <path class="ib-draw ib-petal-out" d="M200 200 C183 168 181 122 200 96 C219 122 217 168 200 200" transform="rotate(60,200,200)"/>
+    <path class="ib-draw ib-petal-out" d="M200 200 C183 168 181 122 200 96 C219 122 217 168 200 200" transform="rotate(120,200,200)"/>
+    <path class="ib-draw ib-petal-out" d="M200 200 C183 168 181 122 200 96 C219 122 217 168 200 200" transform="rotate(180,200,200)"/>
+    <path class="ib-draw ib-petal-out" d="M200 200 C183 168 181 122 200 96 C219 122 217 168 200 200" transform="rotate(240,200,200)"/>
+    <path class="ib-draw ib-petal-out" d="M200 200 C183 168 181 122 200 96 C219 122 217 168 200 200" transform="rotate(300,200,200)"/>
+    <!-- Infinity path through the center -->
+    <path class="ib-draw ib-infinity" d="M148 200 C148 172 168 158 200 158 C232 158 252 172 252 200 C252 228 232 242 200 242 C168 242 148 228 148 200"/>
+    <circle class="ib-draw ib-ring-mid"    cx="200" cy="200" r="36"/>
+    <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="12"/>
+    <circle class="ib-dot" cx="200" cy="138" r="3" transform="rotate(0,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="138" r="3" transform="rotate(60,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="138" r="3" transform="rotate(120,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="138" r="3" transform="rotate(180,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="138" r="3" transform="rotate(240,200,200)"/>
+    <circle class="ib-dot" cx="200" cy="138" r="3" transform="rotate(300,200,200)"/>
+  </svg>
+  <div id="ib-text">
+    <p id="ib-label">Pour toujours</p>
+    <svg id="ib-line-svg" viewBox="0 0 240 18">
+      <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11"/>
+    </svg>
+  </div>
+  <div id="ib-burst"></div>
+</div>
 
 <canvas id="hearts-canvas"></canvas>
 <div id="progress-line"></div>
@@ -475,6 +588,19 @@ const svgPause = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentC
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
 <script>
+/* ── Scene transition sparkle ── */
+function flashScene() {
+  const el = document.getElementById('scene-flash');
+  if (!el) return;
+  el.classList.remove('active');
+  void el.offsetWidth;
+  el.classList.add('active');
+}
+function showAmbientLayer() {
+  const a = document.getElementById('ambient-layer');
+  if (a) a.style.display = 'block';
+}
+
 /* ══════════════════════════════════════
    AUDIO
 ══════════════════════════════════════ */
@@ -657,6 +783,7 @@ function animationTimeline() {
   tl
     // ─ Visible ─
     .to('.container', 0.01, { visibility: 'visible' })
+    .add(() => showAmbientLayer())
 
     // ─ S1: Accueil ────────────────────────
     .from('.s1-hey',      0.8,  { opacity: 0, y: 8, ease: Power2.easeOut })
@@ -669,6 +796,7 @@ function animationTimeline() {
 
     // fade out s1
     .to('#s1', 0.8, { opacity: 0, y: -12, ease: Power2.easeIn })
+    .add(() => flashScene())
 
     // ─ S2: Décompte ────────────────────────
     .from('#s2', 0.01, { opacity: 0 })
@@ -687,6 +815,7 @@ function animationTimeline() {
 
     .to({}, 3.2, {})
     .to('#s2', 0.8, { opacity: 0, y: -12, ease: Power2.easeIn })
+    .add(() => flashScene())
 
     // ─ S3: Photos ──────────────────────────
     .from('#s3', 0.01, { opacity: 0 })
@@ -699,6 +828,7 @@ function animationTimeline() {
 
     .to({}, 3.5, {})
     .to('#s3', 0.8, { opacity: 0, y: -12, ease: Power2.easeIn })
+    .add(() => flashScene())
 
     // ─ S4: Message ─────────────────────────
     .from('#s4', 0.01, { opacity: 0 })
@@ -728,6 +858,7 @@ function animationTimeline() {
 
     .to({}, 0.5, {})
     .to('#s4', 1.0, { opacity: 0, y: -12, ease: Power2.easeIn })
+    .add(() => flashScene())
 
     // ─ S5: Outro ───────────────────────────
     .from('#s5', 0.01, { opacity: 0 })
@@ -791,7 +922,31 @@ window.addEventListener('message', (e) => {
   }
 });
 
-document.addEventListener('DOMContentLoaded', fetchData);
+function runIntro() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { fetchData(); return; }
+  const overlay=document.getElementById('intro-overlay'), drawEls=Array.from(overlay.querySelectorAll('.ib-draw'));
+  const introTxt=document.getElementById('ib-text'), linePath=overlay.querySelector('.ib-wavy-line'), burst=document.getElementById('ib-burst');
+  const STEP=55, DUR={'ib-ring-left':600,'ib-ring-right':600,'ib-petal-out':420,'ib-infinity':700,'ib-ring-mid':480,'ib-ring-center':360};
+  drawEls.forEach((el,i)=>{
+    const len=Math.ceil(el.getTotalLength?el.getTotalLength():400);
+    el.style.strokeDasharray=len; el.style.strokeDashoffset=len;
+    const dur=Object.entries(DUR).reduce((d,[c,v])=>el.classList.contains(c)?v:d,400);
+    setTimeout(()=>{ el.style.transition=`stroke-dashoffset ${dur}ms cubic-bezier(0.25,1,0.5,1)`; el.style.strokeDashoffset='0'; },80+i*STEP);
+  });
+  const drawDone=80+drawEls.length*STEP+700;
+  setTimeout(()=>{ introTxt.classList.add('show'); setTimeout(()=>linePath.classList.add('drawn'),130); },drawDone-380);
+  const PETALS=['❤️','💑','❤️','🌹','❤️','💑','❤️','🌹','❤️','💑','❤️','🌹'];
+  setTimeout(()=>{
+    PETALS.forEach((p,i)=>{ const angle=(i/PETALS.length)*360,rad=angle*Math.PI/180,dist=88+Math.random()*92;
+      const fp=document.createElement('div'); fp.className='ib-fp'; fp.textContent=p;
+      fp.style.cssText=`--ib-tx:${(Math.cos(rad)*dist).toFixed(1)}px;--ib-ty:${(Math.sin(rad)*dist).toFixed(1)}px;--ib-tr:${(Math.random()*360-180).toFixed(0)}deg;animation-delay:${i*32}ms`;
+      burst.appendChild(fp);
+    });
+  },drawDone+120);
+  setTimeout(()=>{ overlay.classList.add('ib-dissolve'); setTimeout(()=>{ overlay.style.display='none'; fetchData(); },960); },drawDone+1080);
+}
+
+document.addEventListener('DOMContentLoaded', runIntro);
 </script>
 </body>
 </html>

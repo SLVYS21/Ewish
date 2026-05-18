@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import s from './AdminLogin.module.css';
 
 export default function AdminLogin() {
-  const [email, setEmail]   = useState('');
-  const [pass, setPass]     = useState('');
-  const [error, setError]   = useState('');
+  const [email, setEmail]     = useState('');
+  const [pass, setPass]       = useState('');
+  const [remember, setRemember] = useState(true);
+  const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate  = useNavigate();
+  const { login }   = useAuth();
+  const navigate    = useNavigate();
 
   const submit = async () => {
     setError('');
@@ -23,42 +24,91 @@ export default function AdminLogin() {
     } finally { setLoading(false); }
   };
 
-  const onKey = (e) => { if (e.key === 'Enter') submit(); };
-
   return (
     <div className={s.root}>
-      <div className={s.glow} />
-      <div className={s.card}>
-        <div className={s.logo}>my<span>Kado</span></div>
-        <div className={s.sub}>Interface Admin</div>
+
+      {/* ── Left: brand panel ── */}
+      <div className={s.valueSide}>
+        <div className={s.valueLogo}>
+          <span className={s.logoBox}>🎁</span>
+          my<span>Kado</span>
+        </div>
+
+        <div>
+          <div className={s.valueTagline}>CRÉER · PUBLIER · PARTAGER</div>
+          <h1 className={s.valueHeadline}>
+            Les plus belles cartes pour vos plus beaux moments.
+          </h1>
+          <p className={s.valueDesc}>
+            Anniversaires, mariages, événements pro — créez une page personnalisée
+            en quelques minutes. Partagez par un simple lien.
+          </p>
+        </div>
+
+        {/* Floating preview card */}
+        <div className={s.floatingCard}>
+          <div className={s.floatingAvatar}>L</div>
+          <div className={s.floatingCardTitle}>Joyeux Anniversaire</div>
+          <div className={s.floatingCardName}>Lydia</div>
+          <div className={s.floatingCardMsg}>On t'aime très fort ! Une belle année commence pour toi.</div>
+        </div>
+
+        <div className={s.valueFooter}>
+          <span>✨ 5 templates</span>
+          <span>💳 KKiapay & MoMo</span>
+          <span>📱 PWA</span>
+        </div>
+      </div>
+
+      {/* ── Right: form ── */}
+      <div className={s.formSide}>
+        <h2 className={s.formTitle}>Bon retour 👋</h2>
+        <p className={s.formSub}>Connectez-vous pour gérer vos créations.</p>
 
         <div className={s.field}>
           <label>Email</label>
           <input
             type="email" value={email} autoComplete="username"
-            placeholder="user@mykado.com"
+            placeholder="vous@mykado.com"
             onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('admin-pass').focus()}
+            onKeyDown={e => e.key === 'Enter' && document.getElementById('login-pass')?.focus()}
           />
         </div>
+
         <div className={s.field}>
           <label>Mot de passe</label>
           <input
-            id="admin-pass" type="password" value={pass} autoComplete="current-password"
+            id="login-pass" type="password" value={pass} autoComplete="current-password"
             placeholder="••••••••"
             onChange={e => setPass(e.target.value)}
-            onKeyDown={onKey}
+            onKeyDown={e => e.key === 'Enter' && submit()}
           />
+        </div>
+
+        <div className={s.fieldRow}>
+          <label>
+            <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
+            Se souvenir de moi
+          </label>
+          <a>Oublié ?</a>
         </div>
 
         {error && <div className={s.error}>{error}</div>}
 
         <button className={s.btn} onClick={submit} disabled={loading}>
-          {loading ? 'Connexion…' : 'Se connecter'}
+          {loading ? 'Connexion…' : 'Se connecter →'}
         </button>
 
-        <div style={{ marginTop: 15, textAlign: 'center', fontSize: 13, color: 'var(--text-3, #888)' }}>
-          Pas encore de compte ? <Link to="/ewish-admin/register" style={{ color: 'var(--brand, #c9a84c)', textDecoration: 'none', fontWeight: 600 }}>S'inscrire</Link>
+        <div className={s.orDivider}><span>OU</span></div>
+
+        <button className={s.btnOutline}>
+          <span className={s.googleDot} />
+          Continuer avec Google
+        </button>
+
+        <div className={s.formFooter}>
+          Pas encore de compte ?{' '}
+          <Link to="/ewish-admin/register">Créer un compte gratuit →</Link>
         </div>
       </div>
     </div>

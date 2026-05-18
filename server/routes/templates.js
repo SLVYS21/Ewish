@@ -1,10 +1,12 @@
 const router = require('express').Router();
 const Template = require('../models/Template');
 
-// GET all templates
+// GET all templates — public: only active ones, sorted by sortOrder
 router.get('/', async (req, res) => {
   try {
-    const templates = await Template.find({}, '-__v').lean();
+    const templates = await Template.find({ active: { $ne: false } }, '-__v')
+      .sort({ sortOrder: 1, createdAt: 1 })
+      .lean();
     res.json(templates);
   } catch (e) {
     res.status(500).json({ error: e.message });

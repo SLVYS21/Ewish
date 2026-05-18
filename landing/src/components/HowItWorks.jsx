@@ -1,55 +1,42 @@
-import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
 import s from './HowItWorks.module.css';
 
 const STEPS = [
-  { n: '01', icon: '🎨', title: 'Choisissez votre format', desc: 'Sélectionnez le template qui correspond à votre occasion et renseignez les infos du destinataire.' },
-  { n: '02', icon: '📸', title: 'Envoyez vos souvenirs', desc: 'Photos, message personnalisé, musique — tout ce qui rendra ce vœu unique et mémorable.' },
-  { n: '03', icon: '✨', title: 'Recevez et partagez', desc: 'Votre animation est prête en 24h. Un lien privé à partager par WhatsApp, email ou réseaux.' },
+  { n: '01', title: 'Créez votre compte',    desc: 'Inscription gratuite. Recevez 1 crédit offert pour tester un brouillon.' },
+  { n: '02', title: 'Achetez vos crédits',   desc: '1 crédit = 500 XOF. Achetez à la carte ou en pack avec bonus.' },
+  { n: '03', title: 'Personnalisez',          desc: "Photos, musique, décors, QR code, lien promo — depuis l'éditeur visuel." },
+  { n: '04', title: 'Publiez & partagez',     desc: 'Lien privé, QR code, WhatsApp ou email. Vu, rejoué, conservé.' },
 ];
 
 export default function HowItWorks() {
   const [ref, inView] = useInView();
 
   return (
-    <section id="how-it-works" className={s.section} ref={ref}>
-      <div className={s.inner}>
-        <motion.div
-          className={s.header}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-        >
-          <p className={s.eyebrow}>✦ Simple & rapide</p>
-          <h2 className={s.title}>En 3 étapes, <em>c'est prêt</em></h2>
-        </motion.div>
-
-        <div className={s.steps}>
-          {STEPS.map((step, i) => (
-            <motion.div
-              key={step.n}
-              className={s.step}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.65, delay: 0.15 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className={s.stepNum}>{step.n}</div>
-              <div className={s.stepIcon}>{step.icon}</div>
-              <h3 className={s.stepTitle}>{step.title}</h3>
-              <p className={s.stepDesc}>{step.desc}</p>
-              {i < STEPS.length - 1 && <div className={s.connector} />}
-            </motion.div>
-          ))}
+    <section className={s.how} id="how" ref={ref}>
+      <div className={s.wrap}>
+        <div className={s.secHead}>
+          <span className={`${s.eyebrow} ${inView ? s.revealed : s.reveal}`}>
+            <span className={s.dot}></span> Comment ça marche
+          </span>
+          <h2 className={`${s.title} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.08s' }}>
+            Du brief au partage, <em>en quatre étapes.</em>
+          </h2>
         </div>
 
-        <motion.div
-          className={s.bottomCta}
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.65 }}
-        >
-          <p>Livraison garantie en <strong>24 heures</strong> — ou remboursé.</p>
-        </motion.div>
+        <div className={s.howGrid}>
+          <div className={s.howLine} aria-hidden="true"></div>
+          {STEPS.map((step, i) => (
+            <div
+              key={step.n}
+              className={`${s.howStep} ${inView ? s.revealed : s.reveal}`}
+              style={{ transitionDelay: `${i * 0.08}s` }}
+            >
+              <div className={`${s.howNum} ${s[`step${i + 1}`]}`}>{step.n}</div>
+              <h3>{step.title}</h3>
+              <p>{step.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

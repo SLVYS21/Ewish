@@ -8,7 +8,7 @@
   cursor: pointer; transition: all 0.2s;
 }
 .tab:hover { border-color: var(--brand); color: var(--brand); }
-.tabActive  { background: rgba(201,168,76,0.1); border-color: var(--brand); color: var(--brand); }
+.tabActive  { background: rgba(225,29,72,0.1); border-color: var(--brand); color: var(--brand); }
 
 /* Drop Zone */
 .dropZone {
@@ -21,7 +21,7 @@
   margin-bottom: 32px;
   background: var(--surface2);
 }
-.dropZone:hover, .dragOver { border-color: var(--brand); background: rgba(201,168,76,0.04); }
+.dropZone:hover, .dragOver { border-color: var(--brand); background: rgba(225,29,72,0.04); }
 .fileInput { display: none; }
 
 .dropPrompt {
@@ -107,7 +107,7 @@
 .tagPill {
   font-size: 0.65rem; font-weight: 600; padding: 2px 7px;
   border-radius: 99px;
-  background: rgba(201,168,76,0.1); color: var(--brand);
+  background: rgba(225,29,72,0.1); color: var(--brand);
 }
 
 @media (max-width: 640px) {

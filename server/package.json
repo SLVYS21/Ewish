@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "cp -rf ../templates/* ./templates/"
+    "build": "cp -rf ../templates/* ./templates/",
+    "seed:ww": "node seeds/wallOfWishes.js"
   },
   "dependencies": {
     "@kkiapay-org/nodejs-sdk": "^1.0.7",

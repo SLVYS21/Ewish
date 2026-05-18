@@ -46,7 +46,7 @@
 /* ── Buttons ── */
 .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:none;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap; }
 .btn:hover { opacity:.9;transform:translateY(-1px); }
-.btnGold   { background:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(201,168,76,.25); }
+.btnGold   { background:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(225,29,72,.25); }
 .btnGhost  { background:var(--surface2);color:var(--text-2);border:1px solid var(--border); }
 .btnGhost:hover { color:var(--text);border-color:var(--brand);opacity:1; }
 .btnDanger { background:rgba(224,87,87,.1);color:var(--red);border:1px solid rgba(224,87,87,.18); }

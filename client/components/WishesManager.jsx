@@ -2,16 +2,23 @@ import { useState, useEffect } from 'react';
 import styles from './WishesManager.module.css';
 const BACKEND_LINK = import.meta.env.VITE_API_URL;
 
-export default function WishesManager({ publicationId, templateName }) {
+export default function WishesManager({ publicationId, templateName, customName }) {
   const [wishes, setWishes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [collectLink, setCollectLink] = useState('');
+  const [copied, setCopied] = useState(false);
 
-  const isCollective = templateName?.startsWith('collective');
+  const isWallOfWishes = templateName === 'wall-of-wishes';
+  const isCollective   = templateName?.startsWith('collective');
+  const isActive       = isCollective || isWallOfWishes;
+
+  // Wall-of-wishes: the site itself is the collect page
+  // Collective: dedicated /collect/ form
+  const collectLink = isWallOfWishes
+    ? `${BACKEND_LINK}/site/wall-of-wishes/${customName}`
+    : `${BACKEND_LINK}/collect/${publicationId}`;
 
   useEffect(() => {
-    if (!publicationId || !isCollective) return;
-    setCollectLink(`${BACKEND_LINK}/collect/${publicationId}`);
+    if (!publicationId || !isActive) return;
     loadWishes();
   }, [publicationId]);
 
@@ -44,27 +51,52 @@ export default function WishesManager({ publicationId, templateName }) {
 
   const copyLink = () => {
     navigator.clipboard.writeText(collectLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!isCollective) return null;
+  if (!isActive) return null;
 
-  const approved = wishes.filter(w => w.approved && !w.hidden).length;
-  const pending = wishes.filter(w => !w.approved).length;
+  const visible  = wishes.filter(w => w.approved && !w.hidden).length;
+  const hidden   = wishes.filter(w => w.hidden).length;
+  const pending  = wishes.filter(w => !w.approved).length;
 
   return (
     <div className={styles.root}>
-      {/* Collect link */}
+
+      {/* Wall-of-wishes info banner */}
+      {isWallOfWishes && (
+        <div style={{
+          background: 'rgba(225,29,72,0.06)', border: '1px solid rgba(225,29,72,0.15)',
+          borderRadius: '10px', padding: '10px 14px', marginBottom: '4px',
+          fontSize: '0.75rem', color: '#52525b', lineHeight: '1.5',
+          display: 'flex', gap: '8px', alignItems: 'flex-start',
+        }}>
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}>💡</span>
+          <span>Les vœux sont publiés <strong style={{ color: '#e11d48' }}>automatiquement</strong> dès qu'ils sont soumis. Tu peux les masquer ou les supprimer ci-dessous.</span>
+        </div>
+      )}
+
+      {/* Share link */}
       <div className={styles.linkCard}>
         <div className={styles.linkHeader}>
-          <span className={styles.linkIcon}>🔗</span>
+          <span className={styles.linkIcon}>{isWallOfWishes ? '🖼️' : '🔗'}</span>
           <div>
-            <div className={styles.linkTitle}>Lien de collecte</div>
-            <div className={styles.linkSub}>Partage ce lien pour récolter les vœux</div>
+            <div className={styles.linkTitle}>
+              {isWallOfWishes ? 'Lien du mur à partager' : 'Lien de collecte'}
+            </div>
+            <div className={styles.linkSub}>
+              {isWallOfWishes
+                ? 'Chacun visite cette page pour laisser son message'
+                : 'Partage ce lien pour récolter les vœux'}
+            </div>
           </div>
         </div>
         <div className={styles.linkRow}>
           <div className={styles.linkUrl}>{collectLink}</div>
-          <button className={styles.copyBtn} onClick={copyLink}>Copier</button>
+          <button className={styles.copyBtn} onClick={copyLink}>
+            {copied ? '✓ Copié' : 'Copier'}
+          </button>
         </div>
       </div>
 
@@ -75,13 +107,20 @@ export default function WishesManager({ publicationId, templateName }) {
           <span className={styles.statLabel}>Reçus</span>
         </div>
         <div className={styles.stat}>
-          <span className={styles.statNum} style={{ color: 'var(--green)' }}>{approved}</span>
-          <span className={styles.statLabel}>Approuvés</span>
+          <span className={styles.statNum} style={{ color: 'var(--green)' }}>{visible}</span>
+          <span className={styles.statLabel}>Visibles</span>
         </div>
-        <div className={styles.stat}>
-          <span className={styles.statNum} style={{ color: 'var(--accent)' }}>{pending}</span>
-          <span className={styles.statLabel}>En attente</span>
-        </div>
+        {isWallOfWishes ? (
+          <div className={styles.stat}>
+            <span className={styles.statNum} style={{ color: 'rgba(255,255,255,0.35)' }}>{hidden}</span>
+            <span className={styles.statLabel}>Masqués</span>
+          </div>
+        ) : (
+          <div className={styles.stat}>
+            <span className={styles.statNum} style={{ color: 'var(--accent)' }}>{pending}</span>
+            <span className={styles.statLabel}>En attente</span>
+          </div>
+        )}
       </div>
 
       {/* Refresh */}
@@ -93,7 +132,7 @@ export default function WishesManager({ publicationId, templateName }) {
       ) : wishes.length === 0 ? (
         <div className={styles.empty}>
           <span>💌</span>
-          <p>Aucun message encore.<br />Partagez le lien de collecte !</p>
+          <p>Aucun message encore.<br />Partagez le lien !</p>
         </div>
       ) : (
         <div className={styles.list}>
@@ -114,10 +153,10 @@ export default function WishesManager({ publicationId, templateName }) {
                   </div>
                 </div>
                 <div className={styles.wishStatus}>
-                  {w.approved && !w.hidden
-                    ? <span className={styles.badgeApproved}>✓ Visible</span>
-                    : w.hidden
-                      ? <span className={styles.badgeHidden}>Masqué</span>
+                  {w.hidden
+                    ? <span className={styles.badgeHidden}>Masqué</span>
+                    : w.approved
+                      ? <span className={styles.badgeApproved}>✓ Visible</span>
                       : <span className={styles.badgePending}>En attente</span>
                   }
                 </div>
@@ -131,30 +170,23 @@ export default function WishesManager({ publicationId, templateName }) {
                 </div>
               )}
 
-              {w.videoUrl && (
-                <div style={{ marginTop: '12px', padding: '10px', background: 'var(--surface2)', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text2)', marginBottom: '6px' }}>🎥 Vidéo</div>
-                  {w.videoUrl.includes('youtube.com') || w.videoUrl.includes('youtu.be') ? (
-                    <iframe
-                      width="100%" height="180"
-                      src={`https://www.youtube.com/embed/${w.videoUrl.split(/v=|youtu\.be\//)[1]?.split(/[?&]/)[0]}`}
-                      frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
-                      style={{ borderRadius: '8px' }}>
-                    </iframe>
-                  ) : (
-                    <video controls src={w.videoUrl} style={{ width: '100%', maxHeight: '200px', borderRadius: '8px', backgroundColor: '#000' }}></video>
-                  )}
+              {w.photoUrl && (w.mediaType === 'photo' || w.mediaType === 'gif') && (
+                <div style={{ marginTop: '10px' }}>
+                  <img src={w.photoUrl} alt="" style={{ width: '100%', maxHeight: '120px', objectFit: 'cover', borderRadius: '8px' }} />
                 </div>
               )}
 
               <div className={styles.wishActions}>
-                <button
-                  className={`${styles.actionBtn} ${w.approved ? styles.actionBtnActive : ''}`}
-                  onClick={() => toggle(w, 'approved')}
-                  title={w.approved ? 'Retirer l\'approbation' : 'Approuver'}
-                >
-                  {w.approved ? '✓ Approuvé' : '+ Approuver'}
-                </button>
+                {/* Approve button only for non-wall-of-wishes (collective flow) */}
+                {!isWallOfWishes && (
+                  <button
+                    className={`${styles.actionBtn} ${w.approved ? styles.actionBtnActive : ''}`}
+                    onClick={() => toggle(w, 'approved')}
+                    title={w.approved ? 'Retirer l\'approbation' : 'Approuver'}
+                  >
+                    {w.approved ? '✓ Approuvé' : '+ Approuver'}
+                  </button>
+                )}
                 <button
                   className={`${styles.actionBtn} ${w.hidden ? styles.actionBtnWarn : ''}`}
                   onClick={() => toggle(w, 'hidden')}

@@ -142,7 +142,9 @@ ${bgCssLines.join('\n')}
   const _rawData = ${JSON.stringify(pub.data || {})};
   const _jarCfg  = ${JSON.stringify(pub.jarConfig || null)};
  
-  window.__WW_DATA__  = _jarCfg ? { ..._rawData, jarConfig: _jarCfg } : _rawData;
+  window.__WW_DATA__  = _jarCfg
+    ? { ..._rawData, jarConfig: _jarCfg, publicationId: '${String(pub._id)}', apiBase: '${process.env.API_BASE_URL || ''}' }
+    : { ..._rawData, publicationId: '${String(pub._id)}', apiBase: '${process.env.API_BASE_URL || ''}' };
   window.__WW_STYLE__ = ${JSON.stringify(pub.style || {})};
   window.__WW_META__  = ${JSON.stringify({
     id:           String(pub._id),

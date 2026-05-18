@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\landing\" -Recurse -Force | Select-Object FullName, @{N='Type';E={if\\($_.PSIsContainer\\){'Directory'}else{[System.IO.Path]::GetExtension\\($_\\)}}} | Format-List)",
+      "Read(//c/Users/Dell/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python scripts/search.py \"celebration greeting service premium warm elegant\" --design-system -p \"myKado\" -f markdown)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\server\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object)",
+      "Bash(npm run *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Force | Select-Object Name, @{Name='Type'; Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\server\" -Recurse -Force | Select-Object FullName, @{Name='Type'; Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Format-Table -AutoSize)",
+      "Bash(dir \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\landing\\\\src\\\\components\" /b)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(mkdir -p extracted)",
+      "Bash(tar -xzf bundle.tar.gz -C extracted)",
+      "Bash(npx vite *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\client\\\\pages\" -File)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Recurse -Force)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(Select-Object -Skip 1)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Recurse -File 2>$null | Where-Object { $_.Directory.Name -notlike 'node_modules' -and \\($_.Extension -in '.html', '.css', '.svg'\\) } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "PowerShell(Get-Item \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\candidature.index.html\" | Select-Object -Property @{Name=\"Name\";Expression={$_.Name}}, @{Name=\"Size\";Expression={$_.Length}}, @{Name=\"Modified\";Expression={$_.LastWriteTime}})",
+      "PowerShell(ls *)"
+    ]
+  }
+}

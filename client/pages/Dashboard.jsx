@@ -47,7 +47,7 @@ export default function Dashboard() {
   const [templateSearch, setTemplateSearch] = useState('');
   const [page, setPage]           = useState(1);
   const [hasNext, setHasNext]     = useState(false);
-  const [activeTab, setActiveTab] = useState('templates');
+  const [activeTab, setActiveTab] = useState('mine');
   const [templates, setTemplates] = useState([]);
   const navigate = useNavigate();
 
@@ -268,19 +268,48 @@ export default function Dashboard() {
 
 
 
+      {/* ── Welcome Hero ── */}
+      <div className={styles.welcomeHero}>
+        <div className={styles.welcomeInner}>
+          <div className={styles.welcomeLeft}>
+            <div className={styles.welcomeTag}>
+              BONJOUR{user?.name ? ` ${user.name.toUpperCase()}` : ''} · {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }).toUpperCase()}
+            </div>
+            <h1 className={styles.welcomeGreeting}>
+              Prêt{user?.name?.endsWith('e') ? 'e' : ''} à créer votre prochaine merveille&nbsp;?
+            </h1>
+            <p className={styles.welcomeSub}>
+              <strong>{pubs.length}</strong> site{pubs.length !== 1 ? 's' : ''} créé{pubs.length !== 1 ? 's' : ''}
+              {user?.role === 'merchant' && <> · <strong>{user?.credits ?? 0} crédit{(user?.credits ?? 0) !== 1 ? 's' : ''}</strong> disponibles</>}
+            </p>
+          </div>
+          <div className={styles.welcomeRight}>
+            {user?.role === 'merchant' && (
+              <div className={styles.creditsChip}>
+                💎 <strong>{user?.credits ?? 0}</strong>
+              </div>
+            )}
+            <Link to="/ewish-admin/ewish/new" className={styles.btnPrimary}>
+              <Plus size={16} /> Créer un site
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* ── Tabs ── */}
       <div className={styles.tabs}>
         {[
-          { key:'templates', label:'Templates',      icon:<Layout size={18} /> },
-          { key:'mine',      label:'Mes Sites', icon:<Folder size={18} /> },
-          { key:'premade',   label:'Modèles',        icon:<StarIcon size={18} /> },
+          { key:'mine',      label:'Mes Sites',  count: pubs.length || null },
+          { key:'templates', label:'Templates',  count: templates.length || null },
+          { key:'premade',   label:'Modèles prêts', count: null },
         ].map(t => (
           <button
             key={t.key}
             className={`${styles.tab} ${activeTab === t.key ? styles.tabActive : ''}`}
-            onClick={() => { handleTabChange(t.key); }}
+            onClick={() => handleTabChange(t.key)}
           >
-            {t.icon} {t.label}
+            {t.label}
+            {t.count != null && <span className={styles.tabCount}>{t.count}</span>}
           </button>
         ))}
       </div>

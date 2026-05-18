@@ -1,0 +1,204 @@
+.product {
+  padding: 120px var(--pad-x) 100px;
+  background: var(--ivory);
+  position: relative;
+}
+.productGrid {
+  max-width: var(--maxw); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  align-items: center;
+}
+
+/* Reveal */
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1);
+}
+.revealed { opacity: 1; transform: none; }
+
+/* Copy */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold-d); background: var(--gold-pale);
+  padding: 6px 14px; border-radius: 99px;
+  border: 1px solid rgba(201,168,76,0.25);
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(201,168,76,.18); }
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 18px 0 22px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.title em { font-style: italic; color: var(--rose); }
+
+.productCopy p {
+  font-size: 1.02rem;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+  max-width: 520px;
+}
+
+.productList {
+  list-style: none;
+  display: flex; flex-direction: column; gap: 14px;
+  margin-top: 28px;
+}
+.productList li {
+  display: flex; align-items: flex-start; gap: 12px;
+  font-size: 0.95rem; color: var(--ink-2); line-height: 1.55;
+}
+.tick {
+  flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gold-pale); color: var(--gold-d);
+  display: grid; place-items: center;
+  font-size: 0.65rem; margin-top: 2px;
+}
+
+/* Browser mockup */
+.browser {
+  background: var(--paper);
+  border: 1px solid var(--ivory-3);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.browserBar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: var(--ivory-2);
+  border-bottom: 1px solid var(--ivory-3);
+}
+.browserDot { width: 11px; height: 11px; border-radius: 50%; }
+.r { background: #ed6a5e; }
+.y { background: #f4be4f; }
+.g { background: #61c554; }
+.browserUrl {
+  flex: 1; margin-left: 14px;
+  background: var(--paper);
+  border: 1px solid var(--ivory-3);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem; color: var(--ink-3);
+  display: flex; align-items: center; gap: 6px;
+}
+.lock { color: var(--emerald); font-size: 0.6rem; }
+.browserBody {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  min-height: 340px;
+}
+.editorSide {
+  background: var(--ivory-2);
+  border-right: 1px solid var(--ivory-3);
+  padding: 16px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.esLabel {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3);
+  padding: 0 8px 4px;
+}
+.esItem {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 8px;
+  font-size: 0.76rem; color: var(--ink-2); font-weight: 500;
+  transition: background .2s ease;
+  cursor: pointer;
+}
+.esItem:hover { background: var(--paper); }
+.esItem.active { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-sm); }
+.ic {
+  width: 16px; height: 16px; border-radius: 4px;
+  background: var(--gold-pale); color: var(--gold-d);
+  display: grid; place-items: center; font-size: 0.6rem;
+}
+.active .ic { background: var(--ink); color: var(--gold-l); }
+
+.editorMain {
+  background:
+    radial-gradient(circle at 70% 30%, rgba(201,168,76,0.10), transparent 50%),
+    radial-gradient(circle at 30% 80%, rgba(224,85,116,0.10), transparent 50%),
+    var(--ivory);
+  position: relative;
+  padding: 24px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+}
+.editorCanvas {
+  width: 100%; max-width: 240px;
+  aspect-ratio: 9/14;
+  background: linear-gradient(180deg, #fff 0%, #fbe6ec 100%);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  padding: 24px 16px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.ecH {
+  font-family: var(--font-serif);
+  font-size: 1.1rem; color: var(--ink);
+  text-align: center; margin-bottom: 4px;
+}
+.ecH em { font-style: italic; color: var(--rose); }
+.ecS {
+  font-size: 0.58rem; color: var(--ink-3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.ecPhoto {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--ivory-2), var(--gold-pale));
+  border: 3px solid #fff;
+  box-shadow: 0 6px 18px rgba(26,20,16,.12);
+  margin-bottom: 12px;
+  position: relative; overflow: hidden;
+}
+.ecPhoto::after {
+  content: '◆'; position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: 1.4rem; color: var(--gold);
+}
+.ecQr {
+  margin-top: auto;
+  width: 48px; height: 48px;
+  background:
+    linear-gradient(90deg, var(--ink) 50%, transparent 50%) 0 0 / 8px 8px,
+    linear-gradient(0deg, var(--ink) 50%, transparent 50%) 0 0 / 8px 8px,
+    var(--paper);
+  border-radius: 5px;
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 1px var(--ink);
+  position: relative;
+}
+.ecQr::after {
+  content: ''; position: absolute; inset: 36%;
+  background: var(--rose); border-radius: 2px;
+}
+.editorTool {
+  position: absolute;
+  background: var(--paper);
+  border: 1px solid var(--ivory-3);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 0.68rem; color: var(--ink-2); font-weight: 600;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 8px;
+}
+.swatch { width: 12px; height: 12px; border-radius: 3px; }
+.t1 { top: 12px; right: 12px; }
+.t2 { bottom: 12px; left: 12px; }
+
+@media (max-width: 880px) {
+  .product { padding: 80px var(--pad-x); }
+  .productGrid { grid-template-columns: 1fr; gap: 48px; }
+  .browserBody { grid-template-columns: 1fr; min-height: auto; }
+  .editorSide { display: none; }
+}

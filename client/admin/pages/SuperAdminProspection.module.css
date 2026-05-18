@@ -86,7 +86,7 @@
 .btnWa { display: flex; align-items: center; gap: 5px; background: #25D366; border: none; border-radius: 8px; padding: 5px 10px; color: #fff; font-size: .75rem; font-weight: 700; cursor: pointer; transition: filter .2s; }
 .btnWa:hover { filter: brightness(.9); }
 .btnMsg, .btnEdit, .btnDel { background: var(--surface2); border: none; border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: .82rem; display: flex; align-items: center; justify-content: center; transition: background .2s; }
-.btnMsg:hover { background: rgba(201,168,76,.2); }
+.btnMsg:hover { background: rgba(225,29,72,.2); }
 .btnEdit:hover { background: var(--border); }
 .btnDel:hover { background: rgba(239,68,68,.2); }
 .notes { font-size: .72rem; color: var(--text-3); font-style: italic; margin-top: 6px; max-width: 240px; }

@@ -58,9 +58,9 @@
   transform: translateY(-2px);
 }
 .cardActive {
-  border-color: var(--brand, #c8963e) !important;
-  background: rgba(200, 150, 62, 0.14) !important;
-  box-shadow: 0 0 0 1px var(--brand, #c8963e), 0 4px 16px rgba(200, 150, 62, 0.2);
+  border-color: var(--brand) !important;
+  background: rgba(225, 29, 72, 0.08) !important;
+  box-shadow: 0 0 0 1px var(--brand), 0 4px 16px rgba(225, 29, 72, 0.18);
 }
 .cardPreviewing {
   animation: pulse 0.4s ease;

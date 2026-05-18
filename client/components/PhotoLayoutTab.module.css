@@ -59,7 +59,7 @@
   background: var(--surface2); cursor: pointer; transition: all 0.2s; color: var(--text-2);
 }
 .photoTab:hover  { border-color: var(--brand); color: var(--text); }
-.photoTabActive  { background: rgba(201,168,76,0.1); border-color: var(--brand); color: var(--brand); }
+.photoTabActive  { background: rgba(225,29,72,0.1); border-color: var(--brand); color: var(--brand); }
 .resetBtn {
   padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border);
   border-radius: 10px; font-size: 0.9rem; color: var(--text-2); cursor: pointer;

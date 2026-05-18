@@ -8,7 +8,7 @@
 .table tbody tr { border-bottom: 1px solid var(--border); }
 .table td { padding: 14px 16px; font-size: 0.85rem; color: var(--text); }
 .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-.badgeGift { background: rgba(201,168,76,0.1); color: var(--brand); }
+.badgeGift { background: rgba(225,29,72,0.1); color: var(--brand); }
 .badgeDiscount { background: rgba(62,207,142,0.1); color: var(--green, #3ecf8e); }
 .btnDanger { background: none; border: none; color: var(--red, #e05757); cursor: pointer; padding: 6px; border-radius: 4px; }
 .btnDanger:hover { background: rgba(224,87,87,0.1); }

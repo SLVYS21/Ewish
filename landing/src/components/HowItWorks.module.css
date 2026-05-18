@@ -1,40 +1,57 @@
-.section { padding: 100px 40px; background: var(--ivory-2); }
-.inner { max-width: 900px; margin: 0 auto; }
-.header { text-align: center; margin-bottom: 64px; }
+.how { padding: 120px var(--pad-x); background: var(--ivory-2); position: relative; }
+.wrap { max-width: var(--maxw); margin: 0 auto; }
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.revealed { opacity: 1; transform: none; }
+
+.secHead { text-align: center; max-width: 720px; margin: 0 auto 64px; }
 .eyebrow {
-  display: inline-block;
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--gold);
-  background: var(--gold-pale); padding: 6px 14px; border-radius: 99px;
-  margin-bottom: 20px;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold-d); background: var(--gold-pale);
+  padding: 6px 14px; border-radius: 99px;
+  border: 1px solid rgba(201,168,76,0.25);
 }
-.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 400; color: var(--ink); letter-spacing: -0.01em; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(201,168,76,.18); }
+.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); margin: 18px 0 16px; color: var(--ink); line-height: 1.1; }
 .title em { font-style: italic; color: var(--rose); }
 
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; position: relative; }
-.step {
-  padding: 36px 28px; text-align: center; position: relative;
+.howGrid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  position: relative;
 }
-.step:not(:last-child) { border-right: 1px solid var(--ivory-3); }
-
-.stepNum { font-family: var(--font-serif); font-size: 3rem; font-weight: 400; color: rgba(201,168,76,0.2); line-height: 1; margin-bottom: 12px; }
-.stepIcon { font-size: 2rem; margin-bottom: 16px; }
-.stepTitle { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
-.stepDesc { font-size: 0.85rem; color: var(--ink-3); line-height: 1.65; }
-
-.bottomCta {
-  text-align: center; margin-top: 60px;
-  padding: 22px 36px;
-  background: linear-gradient(135deg, var(--gold-pale), var(--ivory-3));
-  border-radius: 99px;
-  font-size: 0.9rem; color: var(--ink-2); display: inline-block;
-  width: 100%; font-weight: 500;
-  border: 1px solid var(--gold-l);
+.howLine {
+  position: absolute;
+  top: 28px; left: 6%; right: 6%;
+  height: 1px;
+  background: repeating-linear-gradient(to right, var(--ink-4) 0 6px, transparent 6px 12px);
+  z-index: 0;
 }
-.bottomCta strong { color: var(--rose); font-weight: 800; }
+.howStep { position: relative; z-index: 1; text-align: left; }
 
-@media (max-width: 680px) {
-  .section { padding: 80px 20px; }
-  .steps { grid-template-columns: 1fr; }
-  .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--ivory-3); }
+.howNum {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--ivory);
+  border: 1.5px solid var(--ink);
+  display: grid; place-items: center;
+  font-family: var(--font-serif); font-size: 1.5rem; color: var(--ink);
+  margin-bottom: 20px; position: relative;
+}
+/* Step color variants */
+.step1 { /* default — ivory */ }
+.step2 { background: var(--gold-pale) !important; border-color: var(--gold) !important; color: var(--gold-d) !important; }
+.step3 { background: var(--rose-pale) !important; border-color: var(--rose) !important; color: var(--rose) !important; }
+.step4 { background: var(--ink) !important; border-color: var(--ink) !important; color: var(--gold-l) !important; }
+
+.howStep h3 { font-family: var(--font-serif); font-size: 1.2rem; margin-bottom: 8px; color: var(--ink); }
+.howStep p { font-size: 0.9rem; color: var(--ink-3); line-height: 1.65; }
+
+@media (max-width: 980px) {
+  .howGrid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .howLine { display: none; }
+  .how { padding: 80px var(--pad-x); }
+}
+@media (max-width: 540px) {
+  .howGrid { grid-template-columns: 1fr; }
 }

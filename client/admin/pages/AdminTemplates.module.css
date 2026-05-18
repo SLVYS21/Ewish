@@ -21,7 +21,7 @@
 .visNo   { color:var(--text-3); }
 .featured { color:var(--brand);font-weight:600; }
 .tmplPriceWrap { text-align: right; margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; }
-.tmplPrice { font-family:'DM Serif Display',Georgia,serif;font-size:1.2rem;color:var(--brand);white-space:nowrap; }
+.tmplPrice { font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;color:var(--brand);white-space:nowrap; }
 .tmplCredits { font-size: 0.7rem; color: var(--text-2); text-transform: uppercase; font-weight: 600; margin-top: 4px; }
 
 /* ── Promo rows ── */
@@ -30,7 +30,7 @@
 .promoRow { display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);transition:background .2s; }
 .promoRow:last-child { border-bottom:none; }
 .promoRow:hover { background:var(--surface2); }
-.promoCode { font-family:'Courier New',monospace;font-size:.85rem;font-weight:700;color:var(--brand);background:rgba(201,168,76,.1);padding:4px 10px;border-radius:6px;flex-shrink:0; }
+.promoCode { font-family:'Courier New',monospace;font-size:.85rem;font-weight:700;color:var(--brand);background:rgba(225,29,72,.1);padding:4px 10px;border-radius:6px;flex-shrink:0; }
 .promoDesc { flex:1;font-size:.8rem;color:var(--text-2); }
 .promoUses { font-size:.75rem;color:var(--text-3);white-space:nowrap; }
 .promoActions { display:flex;gap:8px; }
@@ -46,7 +46,7 @@
 .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap; }
 .btn:hover { opacity:.9;transform:translateY(-1px); }
 .btn:disabled { opacity:.4;cursor:not-allowed;transform:none; }
-.btnGold   { background:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(201,168,76,.25); }
+.btnGold   { background:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(225,29,72,.25); }
 .btnGhost  { background:var(--surface2);color:var(--text-2);border:1px solid var(--border); }
 .btnGhost:hover { color:var(--text);border-color:var(--brand);opacity:1; }
 .btnDanger { background:rgba(224,87,87,.1);color:var(--red);border:1px solid rgba(224,87,87,.18); }

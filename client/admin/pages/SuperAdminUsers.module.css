@@ -44,7 +44,7 @@
 .roleBadge {
   display: inline-block; font-size: 0.68rem; font-weight: 700;
   padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.04em;
-  background: rgba(201,168,76,0.1); color: var(--brand);
+  background: rgba(225,29,72,0.1); color: var(--brand);
 }
 .pubStats { font-size: 0.85rem; }
 .pubStats span { color: var(--text-3); font-size: 0.75rem; }
@@ -180,7 +180,7 @@
 .quickAdd button:hover {
   border-color: var(--brand);
   color: var(--brand);
-  background: rgba(201,168,76,0.05);
+  background: rgba(225,29,72,0.05);
 }
 
 /* Pub list */

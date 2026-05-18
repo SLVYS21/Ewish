@@ -1,0 +1,69 @@
+.usecases { padding: 120px var(--pad-x); background: var(--ivory); }
+.wrap { max-width: var(--maxw); margin: 0 auto; }
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.revealed { opacity: 1; transform: none; }
+
+.secHead { text-align: center; max-width: 720px; margin: 0 auto 64px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold-d); background: var(--gold-pale);
+  padding: 6px 14px; border-radius: 99px;
+  border: 1px solid rgba(201,168,76,0.25);
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(201,168,76,.18); }
+.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); margin: 18px 0 16px; color: var(--ink); line-height: 1.1; }
+.title em { font-style: italic; color: var(--rose); }
+.sub { font-size: 1.05rem; color: var(--ink-3); line-height: 1.65; max-width: 560px; margin: 0 auto; }
+
+.ucGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+}
+
+.ucCard {
+  position: relative;
+  border-radius: var(--r-xl);
+  padding: 36px 30px 30px;
+  overflow: hidden;
+  border: 1px solid var(--ivory-3);
+  transition: transform .3s ease, box-shadow .3s ease, opacity .9s cubic-bezier(.22,1,.36,1);
+}
+.ucCard:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+
+.u1 { background: linear-gradient(160deg, #fff 0%, var(--rose-pale) 100%); }
+.u2 { background: linear-gradient(160deg, #fff 0%, var(--gold-pale) 100%); }
+.u3 { background: linear-gradient(160deg, var(--ink) 0%, #2c2218 100%); color: var(--ivory); border-color: var(--ink); }
+
+.ucTag {
+  display: inline-flex;
+  font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+  padding: 4px 10px; border-radius: 99px;
+  margin-bottom: 24px;
+}
+.u1 .ucTag { color: var(--rose); background: #fff; }
+.u2 .ucTag { color: var(--gold-d); background: #fff; }
+.u3 .ucTag { color: var(--gold-l); background: rgba(255,255,255,.08); }
+
+.ucCard h3 { font-family: var(--font-serif); font-size: 1.6rem; line-height: 1.15; margin-bottom: 14px; color: var(--ink); }
+.u3 h3 { color: var(--ivory); }
+.ucCard h3 em { font-style: italic; }
+.u1 h3 em { color: var(--rose); }
+.u2 h3 em { color: var(--gold-d); }
+.u3 h3 em { color: var(--gold-l); }
+
+.ucCard p { font-size: 0.92rem; line-height: 1.6; color: var(--ink-2); margin-bottom: 24px; min-height: 4em; }
+.u3 p { color: var(--ink-4); }
+
+.ucStats { display: flex; gap: 18px; border-top: 1px solid var(--ivory-3); padding-top: 20px; }
+.u3 .ucStats { border-top-color: rgba(255,255,255,.1); }
+.v { font-family: var(--font-serif); font-size: 1.5rem; color: var(--ink); line-height: 1; }
+.u3 .v { color: var(--gold-l); }
+.l { font-size: 0.7rem; color: var(--ink-3); letter-spacing: 0.06em; margin-top: 4px; }
+.u3 .l { color: var(--ink-4); }
+
+@media (max-width: 880px) {
+  .ucGrid { grid-template-columns: 1fr; }
+  .usecases { padding: 80px var(--pad-x); }
+}

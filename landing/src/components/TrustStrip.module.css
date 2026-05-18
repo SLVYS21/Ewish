@@ -1,0 +1,55 @@
+.trust {
+  background: var(--paper);
+  border-top: 1px solid var(--ivory-3);
+  border-bottom: 1px solid var(--ivory-3);
+  padding: 36px var(--pad-x);
+}
+.trustInner {
+  max-width: var(--maxw); margin: 0 auto;
+  display: grid; grid-template-columns: auto 1fr; gap: 40px;
+  align-items: center;
+}
+.trustLabel {
+  font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 700;
+  border-right: 1px solid var(--ivory-3);
+  padding-right: 40px;
+  max-width: 200px;
+  line-height: 1.5;
+}
+.trustLogos {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+}
+.trustLogo {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--ink-4);
+  letter-spacing: 0.02em;
+  transition: color .25s ease;
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: default;
+}
+.trustLogo:hover { color: var(--ink-2); }
+.sigil {
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 5px;
+  font-size: 0.65rem; font-weight: 700;
+  font-family: var(--font-sans);
+}
+
+/* Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1);
+}
+.revealed { opacity: 1; transform: none; }
+
+@media (max-width: 780px) {
+  .trustInner { grid-template-columns: 1fr; gap: 20px; text-align: center; }
+  .trustLabel { border-right: none; padding-right: 0; max-width: 100%; }
+  .trustLogos { justify-content: center; }
+}

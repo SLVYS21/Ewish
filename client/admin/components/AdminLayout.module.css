@@ -1,123 +1,128 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;500;600;700;800&display=swap');
 
 .shell {
   display: flex; height: 100vh; overflow: hidden;
-  font-family: 'Syne', system-ui, sans-serif;
-  background: var(--bg, #f7f5fb); color: var(--text, #222);
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #fafafa; color: #1f1717;
 }
 
 .mobileHeader {
   display: none;
   align-items: center; justify-content: space-between;
   padding: 12px 20px;
-  background: var(--surface, #ffffff);
-  border-bottom: 1px solid var(--border, #e5e5ea);
+  background: #fff;
+  border-bottom: 1px solid #e4e4e7;
   flex-shrink: 0;
 }
 .menuBtn {
   background: none; border: none;
-  color: var(--text, #222); cursor: pointer;
+  color: #52525b; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   padding: 4px;
 }
 
 /* ── Sidebar ── */
 .sidebar {
-  width: 240px; flex-shrink: 0;
-  background: var(--surface, #ffffff);
-  border-right: 1px solid var(--border, #e5e5ea);
+  width: 232px; flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e4e4e7;
   display: flex; flex-direction: column;
 }
 .sidebarHead {
-  padding: 24px 20px 20px;
-  border-bottom: 1px solid var(--border, #e5e5ea);
+  padding: 18px 16px 16px;
+  border-bottom: 1px solid #e4e4e7;
 }
 .logo {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: 1.3rem; color: var(--text, #222);
-  margin-bottom: 4px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.2rem; font-weight: 800;
+  color: #1f1717; margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
-.logo span { color: var(--brand, #c9a84c); }
+.logo span { color: #e11d48; }
 .adminBadge {
-  font-size: 0.65rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  color: var(--text-3, #999);
+  display: inline-block;
+  font-size: 0.62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: #fff; background: #1f1717;
+  padding: 2px 8px; border-radius: 4px;
 }
 
 .nav {
   flex: 1; padding: 12px 10px;
   overflow-y: auto;
-  display: flex; flex-direction: column; gap: 4px;
+  display: flex; flex-direction: column; gap: 2px;
 }
 .navItem {
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: 12px;
-  font-size: 0.85rem; font-weight: 600;
-  color: var(--text-2, #666); text-decoration: none;
-  transition: all 0.2s;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 0.82rem; font-weight: 500;
+  color: #52525b; text-decoration: none;
+  transition: all 0.15s;
   position: relative;
 }
-.navItem:hover { background: var(--surface2, #f5f5f7); color: var(--text, #222); }
-.navItem.active { background: rgba(201,168,76,0.1); color: var(--brand, #c9a84c); }
+.navItem:hover { background: #f4f4f5; color: #1f1717; }
+.navItem.active {
+  background: #fff1f4;
+  color: #e11d48;
+  font-weight: 700;
+}
 .navIcon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: inherit; }
 .navLabel { flex: 1; }
 .navHighlight {
-  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(232,168,74,0.12)) !important;
-  color: var(--brand, #c9a84c) !important;
-  border: 1.5px solid rgba(201,168,76,0.35);
-  box-shadow: 0 2px 10px rgba(201,168,76,0.12);
+  background: #fff1f4 !important;
+  color: #e11d48 !important;
+  border: 1px solid #fbcfe8;
 }
 .navHighlight:hover {
-  background: linear-gradient(135deg, rgba(201,168,76,0.28), rgba(232,168,74,0.2)) !important;
-  border-color: rgba(201,168,76,0.6);
+  background: #ffe4e6 !important;
 }
 .navBadge {
-  background: var(--red, #e05757); color: #fff;
-  font-size: 0.65rem; font-weight: 700;
-  padding: 2px 6px; border-radius: 99px;
+  background: #e11d48; color: #fff;
+  font-size: 0.62rem; font-weight: 800;
+  padding: 1px 6px; border-radius: 99px;
   min-width: 18px; text-align: center;
 }
 .navSeparator {
   display: flex; align-items: center; gap: 6px;
-  padding: 14px 16px 6px;
-  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--text-3, #999);
+  padding: 14px 14px 6px;
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #a1a1aa;
 }
 
 .sidebarFoot {
-  padding: 16px 12px;
-  border-top: 1px solid var(--border, #e5e5ea);
+  padding: 12px 10px;
+  border-top: 1px solid #e4e4e7;
 }
 .adminUser {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: 12px;
+  background: #fafafa;
 }
 .avatar {
-  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--brand, #c9a84c), #e8a84a);
+  width: 32px; height: 32px; border-radius: '50%'; flex-shrink: 0;
+  background: linear-gradient(135deg, #e11d48, #f59e0b);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem; font-weight: 700; color: #fff;
+  font-size: 0.82rem; font-weight: 800; color: #fff;
+  border-radius: 50%;
 }
 .userInfo { flex: 1; min-width: 0; }
-.userName { font-size: 0.8rem; font-weight: 700; color: var(--text, #222); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.userRole { font-size: 0.7rem; color: var(--text-3, #999); }
+.userName { font-size: 0.78rem; font-weight: 700; color: #1f1717; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.userRole { font-size: 0.68rem; color: #a1a1aa; }
 .logoutBtn {
-  background: none; border: none; color: var(--text-3, #999);
+  background: none; border: none; color: #a1a1aa;
   cursor: pointer; padding: 6px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
-.logoutBtn:hover { color: var(--red, #e05757); background: rgba(224,87,87,0.1); }
+.logoutBtn:hover { color: #e11d48; background: #fff1f4; }
 
 /* ── Main ── */
 .main {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   display: flex; flex-direction: column;
-  background: var(--bg, #f7f5fb);
+  background: #fafafa;
 }
-.mainFull {
-  padding-left: 0 !important;
-}
+.mainFull { padding-left: 0 !important; }
 
 .sidebarOverlay {
   display: none; position: fixed; inset: 0;
