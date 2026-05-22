@@ -2,64 +2,84 @@ import { useState, useEffect } from 'react';
 import { useInView } from '../hooks/useInView';
 import s from './Templates.module.css';
 
-const TEMPLATES = {
-  birthday: {
-    key: 'birthday', cat: 'Anniversaire', credits: 8, equiv: '4 000 XOF',
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Descriptions et inclusions pour chaque template (fallback si le serveur ne les retourne pas)
+const TEMPLATE_INFO = {
+  'birthday': {
+    cat: 'Anniversaire', credits: 8,
     name: 'Joyeux Anniversaire',
     desc: "Animation complète avec photos, musique et vœux personnalisés. L'incontournable.",
-    modalDesc: "Une animation complète qui démarre par une bougie qui s'allume, dévoile vos photos en cascade et joue la musique de votre choix.",
-    includes: ["Jusqu'à 24 photos animées", "Musique de bibliothèque ou MP3 perso", "3 styles de typographie au choix", "Lien privé + QR code stylisé"],
-    equivNote: '≈ 4 000 XOF — inclus dans le pack Essentiel',
+    includes: ["Jusqu'à 24 photos animées", "Musique de bibliothèque ou MP3 perso", "3 styles de typographie", "Lien privé + QR code stylisé"],
   },
-  wall: {
-    key: 'wall', cat: 'Collectif', credits: 10, equiv: '5 000 XOF',
+  'wall-of-wishes': {
+    cat: 'Collectif', credits: 10,
     name: 'Mur de vœux',
     desc: 'Un mur interactif où chacun colle son message — comme des post-its numériques.',
-    modalDesc: "Invitez vos proches ou collègues à coller un message sur un mur interactif. Chaque contribution s'affiche en post-it animé, daté et signé.",
     includes: ["Jusqu'à 30 contributeurs", "Modération avant publication", "6 couleurs de post-it", "Partage par lien d'invitation"],
-    equivNote: '≈ 5 000 XOF',
   },
-  special: {
-    key: 'special', cat: 'Premium', credits: 12, equiv: '6 000 XOF',
+  'special': {
+    cat: 'Premium', credits: 12,
     name: 'Vœu Spécial',
     desc: 'Pour les occasions uniques. Effets premium, thème sur-mesure, vidéo HD.',
-    modalDesc: "Pour les occasions qui méritent un traitement d'exception. Effets de particules avancés, transitions cinématographiques, fond personnalisable.",
     includes: ["Thème sur-mesure (couleurs, logo)", "Particules & transitions premium", "Export vidéo MP4 HD", "Photos & vidéos illimitées"],
-    equivNote: '≈ 6 000 XOF',
   },
-  hommage: {
-    key: 'hommage', cat: 'Hommage', credits: 10, equiv: '5 000 XOF',
+  'forever': {
+    cat: 'Hommage', credits: 10,
     name: 'Hommage',
     desc: 'Sobre, digne, intemporel. Cadres dorés et typographie élégante pour rendre hommage.',
-    modalDesc: "Une mise en page sobre et intemporelle pour rendre hommage à un être cher. Cadres dorés, typographie sérieuse, musique d'ambiance discrète.",
     includes: ["Cadres & typographie classiques", "Citation ou poème central", "Galerie chronologique", "Lien privé non-indexé"],
-    equivNote: '≈ 5 000 XOF',
   },
-  family: {
-    key: 'family', cat: 'Collectif famille', credits: 20, equiv: '10 000 XOF',
+  'collective-family': {
+    cat: 'Collectif famille', credits: 20,
     name: 'Collectif Famille',
     desc: "Chaque proche ajoute son message et sa photo — un souvenir partagé jusqu'à 50 contributeurs.",
-    modalDesc: "Rassemblez jusqu'à 50 proches autour d'un même souvenir. Chacun ajoute son message vidéo, vocal ou texte avec sa photo.",
     includes: ["Jusqu'à 50 contributeurs", "Messages texte, audio ou vidéo", "Galerie photos partagée", "Album téléchargeable PDF"],
-    equivNote: '≈ 10 000 XOF',
   },
-  pro: {
-    key: 'pro', cat: 'Collectif Pro', credits: 30, equiv: '15 000 XOF',
+  'collective-pro': {
+    cat: 'Collectif Pro', credits: 30,
     name: 'Collectif Pro',
     desc: 'Pour célébrer vos équipes avec classe : branding entreprise, signatures et export HD.',
-    modalDesc: "Pour les départs en retraite, anniversaires de service ou fêtes d'entreprise. Branding complet, sous-domaine personnalisé.",
-    includes: ["Logo & couleurs entreprise", "Sous-domaine personnalisé", "Contributions illimitées", "Statistiques d'engagement", "Export pour intranet"],
-    equivNote: '≈ 15 000 XOF — inclus dans le pack Pro',
+    includes: ["Logo & couleurs entreprise", "Sous-domaine personnalisé", "Contributions illimitées", "Statistiques d'engagement"],
+  },
+  'sanctuary': {
+    cat: 'Élégant', credits: 12,
+    name: 'Sanctuary',
+    desc: 'Un cadre serein et minimaliste pour les moments qui comptent vraiment.',
+    includes: ["Mise en page apaisante", "Photos & texte animés", "Musique d'ambiance", "Lien privé"],
+  },
+  'notre-film': {
+    cat: 'Cinématique', credits: 15,
+    name: 'Notre Film',
+    desc: 'Un slideshow cinématique pour raconter votre histoire en images.',
+    includes: ["Transitions cinématiques", "Photos & vidéos mixées", "Bande-son personnalisée", "Format 16:9 HD"],
   },
 };
 
-const TEMPLATE_LIST = Object.values(TEMPLATES);
+// Thumbnail CSS variant par nom de template
+const THUMB_KEY = {
+  'birthday': 'birthday',
+  'wall-of-wishes': 'wall',
+  'special': 'special',
+  'forever': 'hommage',
+  'notre-film': 'hommage',
+  'sanctuary': 'special',
+  'collective-family': 'family',
+  'collective-pro': 'pro',
+};
+
+const DEFAULT_LIST = Object.entries(TEMPLATE_INFO).map(([apiName, info]) => ({
+  apiName,
+  thumbKey: THUMB_KEY[apiName] || 'birthday',
+  equiv: `${info.credits * 500} XOF`,
+  ...info,
+}));
 
 const PREFAITS = [
-  { thumb: s.t1, label: '30 ans · Rétro',     name: 'Anniversaire — 30 ans rétro',     meta: '8 crédits · 12 photos · style vintage' },
-  { thumb: s.t2, label: 'Mariage · floral',    name: 'Vœux de mariage — floral pastel', meta: '12 crédits · 20 photos · musique douce' },
-  { thumb: s.t3, label: 'Naissance · pastel',  name: 'Bienvenue bébé — pastel',         meta: '8 crédits · 10 photos · galerie ronde' },
-  { thumb: s.t4, label: 'Retraite · 25 ans',   name: 'Départ en retraite — service 25 ans', meta: '30 crédits · jusqu\'à 100 signatures' },
+  { thumbCls: s.t1, label: '30 ans · Rétro',    apiName: 'birthday',          name: 'Anniversaire — 30 ans rétro',     meta: '8 crédits · style vintage' },
+  { thumbCls: s.t2, label: 'Mariage · floral',   apiName: 'collective-family', name: 'Vœux de mariage — floral pastel', meta: '20 crédits · musique douce' },
+  { thumbCls: s.t3, label: 'Naissance · pastel', apiName: 'birthday',          name: 'Bienvenue bébé — pastel',         meta: '8 crédits · galerie ronde' },
+  { thumbCls: s.t4, label: 'Retraite · 25 ans',  apiName: 'collective-pro',    name: 'Départ en retraite — 25 ans',     meta: '30 crédits · signatures illimitées' },
 ];
 
 function TemplateThumbnail({ tplKey }) {
@@ -131,23 +151,58 @@ function TemplateThumbnail({ tplKey }) {
       </div>
     </div>
   );
-  return null;
+  // Generic fallback
+  return <div className={`${s.tplThumb} ${s.vBirthday}`}></div>;
 }
 
 export default function Templates({ onOrder }) {
   const [ref, inView] = useInView();
-  const [modal, setModal] = useState(null); // tplKey or null
+  const [templates, setTemplates] = useState(DEFAULT_LIST);
+  const [preview, setPreview] = useState(null); // { apiName, info } or null
+  const [iframeReady, setIframeReady] = useState(false);
 
-  const openModal = (key) => { setModal(key); document.body.style.overflow = 'hidden'; };
-  const closeModal = () => { setModal(null); document.body.style.overflow = ''; };
+  // Fetch real template list from server
+  useEffect(() => {
+    fetch(`${API_BASE}/api/templates`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!Array.isArray(data) || data.length === 0) return;
+        const mapped = data
+          .filter(t => t.active !== false)
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+          .map(t => {
+            const info = TEMPLATE_INFO[t.name] || {};
+            return {
+              apiName: t.name,
+              thumbKey: THUMB_KEY[t.name] || 'birthday',
+              cat:     info.cat     || t.category || t.name,
+              credits: t.creditsRequired || info.credits || 5,
+              equiv:   `${(t.creditsRequired || info.credits || 5) * 500} XOF`,
+              name:    t.label      || info.name  || t.name,
+              desc:    info.desc    || t.shortDescription || '',
+              includes: info.includes || t.highlights || [],
+            };
+          });
+        setTemplates(mapped);
+      })
+      .catch(() => {}); // keep default list on failure
+  }, []);
+
+  const openPreview = (tpl) => {
+    setPreview(tpl);
+    setIframeReady(false);
+    document.body.style.overflow = 'hidden';
+  };
+  const closePreview = () => {
+    setPreview(null);
+    document.body.style.overflow = '';
+  };
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') closeModal(); };
+    const onKey = (e) => { if (e.key === 'Escape') closePreview(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-
-  const tpl = modal ? TEMPLATES[modal] : null;
 
   return (
     <section className={s.templates} id="templates" ref={ref}>
@@ -158,29 +213,29 @@ export default function Templates({ onOrder }) {
             <span className={s.dot}></span> Templates &amp; bibliothèque
           </span>
           <h2 className={`${s.title} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.08s' }}>
-            Débloquez, <em>personnalisez</em>, publiez.
+            Personnalisez <em>gratuitement</em>, publiez avec vos crédits.
           </h2>
           <p className={`${s.sub} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.16s' }}>
-            Chaque template a un coût en crédits. Une fois débloqué, il est à vous — personnalisez, dupliquez, republiez sans limite.
+            L'éditeur est accessible sans payer. Vous achetez vos crédits uniquement au moment de publier — pas avant.
           </p>
         </div>
 
-        {/* SaaS flow */}
+        {/* Flow correct */}
         <div className={`${s.tplFlow} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.2s' }}>
           <div className={`${s.step} ${s.s1}`}>
             <div className={s.ic}>①</div>
-            <div className={s.lab}>Achetez des crédits</div>
-            <div className={s.desc}>Pack ou à la carte</div>
+            <div className={s.lab}>Choisissez un template</div>
+            <div className={s.desc}>Aperçu live gratuit</div>
           </div>
           <div className={`${s.step} ${s.s2}`}>
             <div className={s.ic}>②</div>
-            <div className={s.lab}>Choisissez un template</div>
-            <div className={s.desc}>Débloqué d'un clic</div>
+            <div className={s.lab}>Personnalisez</div>
+            <div className={s.desc}>Photos, musique, QR… sans payer</div>
           </div>
           <div className={`${s.step} ${s.s3}`}>
             <div className={s.ic}>③</div>
-            <div className={s.lab}>Personnalisez</div>
-            <div className={s.desc}>Photos, musique, QR…</div>
+            <div className={s.lab}>Achetez vos crédits</div>
+            <div className={s.desc}>Seulement pour publier</div>
           </div>
           <div className={`${s.step} ${s.s4}`}>
             <div className={s.ic}>④</div>
@@ -191,26 +246,26 @@ export default function Templates({ onOrder }) {
 
         {/* Templates grid */}
         <div className={s.templatesGrid}>
-          {TEMPLATE_LIST.map((tplItem, i) => (
+          {templates.map((tpl, i) => (
             <article
-              key={tplItem.key}
+              key={tpl.apiName}
               className={`${s.tplCard} ${inView ? s.revealed : s.reveal}`}
               style={{ transitionDelay: `${(i % 3) * 0.08}s` }}
             >
-              <div className={s.tplCat}>{tplItem.cat}</div>
+              <div className={s.tplCat}>{tpl.cat}</div>
               <div className={s.tplCost}>
                 <span className={s.coin} aria-hidden="true"></span>
-                {tplItem.credits} crédits
+                {tpl.credits} crédits
               </div>
-              <TemplateThumbnail tplKey={tplItem.key} />
+              <TemplateThumbnail tplKey={tpl.thumbKey} />
               <div className={s.tplBody}>
-                <h3 className={s.tplName}>{tplItem.name}</h3>
-                <p className={s.tplDesc}>{tplItem.desc}</p>
+                <h3 className={s.tplName}>{tpl.name}</h3>
+                <p className={s.tplDesc}>{tpl.desc}</p>
                 <div className={s.tplActions}>
-                  <button className={s.btnPreview} onClick={() => openModal(tplItem.key)}>Aperçu</button>
-                  <button className={s.btnUnlock} onClick={onOrder}>Débloquer</button>
+                  <button className={s.btnPreview} onClick={() => openPreview(tpl)}>Aperçu live</button>
+                  <button className={s.btnUnlock} onClick={onOrder}>Commencer</button>
                 </div>
-                <div className={s.tplEquiv}>≈ <strong>{tplItem.equiv}</strong></div>
+                <div className={s.tplEquiv}>≈ <strong>{tpl.equiv}</strong></div>
               </div>
             </article>
           ))}
@@ -221,57 +276,94 @@ export default function Templates({ onOrder }) {
           <div className={s.prefaitsHead}>
             <div className={s.copy}>
               <span className={s.tag}><span aria-hidden="true">⚡</span> Préfaits prêts à dupliquer</span>
-              <h3>Pressé ? Partez d'un <em>préfait</em>, déjà personnalisé.</h3>
-              <p>Une bibliothèque de vœux pré-configurés — il ne vous reste qu'à changer les noms, les photos et publier. Idéal quand le temps presse.</p>
+              <h3>Pressé ? Partez d'un <em>préfait</em>, déjà configuré.</h3>
+              <p>Une bibliothèque de vœux pré-configurés — changez les noms, les photos et publiez. Idéal quand le temps presse.</p>
             </div>
             <button className={s.btnLink} onClick={onOrder}>Voir toute la bibliothèque →</button>
           </div>
           <div className={s.prefaitsScroll}>
             {PREFAITS.map((p, i) => (
-              <button key={i} className={s.prefait} onClick={onOrder}>
-                <div className={`${s.prefaitThumb} ${p.thumb}`}>
+              <div key={i} className={s.prefait}>
+                <div className={`${s.prefaitThumb} ${p.thumbCls}`}>
                   <span className={s.prefaitLabel}>{p.label}</span>
                 </div>
                 <div className={s.prefaitName}>{p.name}</div>
                 <div className={s.prefaitMeta}>{p.meta}</div>
-                <div className={s.dup}>Dupliquer en 1 clic <span className={s.arr}>→</span></div>
-              </button>
+                <div className={s.prefaitActions}>
+                  <button className={s.prefaitPreview} onClick={() => openPreview({ apiName: p.apiName, name: p.name, cat: '', credits: 0, includes: [] })}>
+                    👁 Aperçu
+                  </button>
+                  <button className={s.dup} onClick={onOrder}>
+                    Dupliquer <span className={s.arr}>→</span>
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Modal */}
-      {modal && tpl && (
-        <div className={s.modal} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }} role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      {/* Preview modal with iframe */}
+      {preview && (
+        <div
+          className={s.modal}
+          onClick={(e) => { if (e.target === e.currentTarget) closePreview(); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Aperçu — ${preview.name}`}
+        >
           <div className={s.modalCard}>
-            <button className={s.modalClose} onClick={closeModal} aria-label="Fermer l'aperçu">×</button>
+            <button className={s.modalClose} onClick={closePreview} aria-label="Fermer l'aperçu">×</button>
+
+            {/* Iframe preview */}
             <div className={s.modalPreview}>
-              <TemplateThumbnail tplKey={tpl.key} />
-            </div>
-            <div className={s.modalBody}>
-              <span className={s.modalCat}>{tpl.cat}</span>
-              <h3 className={s.modalTitle} id="modalTitle">{tpl.name}</h3>
-              <p className={s.modalDesc}>{tpl.modalDesc}</p>
-              <ul className={s.modalIncludes}>
-                {tpl.includes.map((inc, i) => (
-                  <li key={i}>
-                    <span className={s.ck}>✓</span>
-                    <span>{inc}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className={s.modalCost}>
-                <div>
-                  <div className={s.costLabel}>Coût pour débloquer</div>
-                  <div className={s.costV}><span className={s.coinLg}></span>{tpl.credits} crédits</div>
-                  <div className={s.costEq}>≈ {tpl.equiv}</div>
+              {!iframeReady && (
+                <div className={s.iframeLoader}>
+                  <div className={s.iframeSpinner}></div>
+                  <span className={s.iframeLoaderText}>Chargement de l'aperçu…</span>
                 </div>
+              )}
+              <iframe
+                key={preview.apiName}
+                src={`${API_BASE}/preview/${preview.apiName}`}
+                className={s.previewFrame}
+                title={`Aperçu — ${preview.name}`}
+                sandbox="allow-scripts allow-same-origin"
+                onLoad={() => setIframeReady(true)}
+              />
+            </div>
+
+            {/* Info panel */}
+            <div className={s.modalBody}>
+              <span className={s.modalCat}>{preview.cat}</span>
+              <h3 className={s.modalTitle} id="modalTitle">{preview.name}</h3>
+              {preview.desc && <p className={s.modalDesc}>{preview.desc}</p>}
+              {preview.includes?.length > 0 && (
+                <ul className={s.modalIncludes}>
+                  {preview.includes.map((inc, i) => (
+                    <li key={i}>
+                      <span className={s.ck}>✓</span>
+                      <span>{inc}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {preview.credits > 0 && (
+                <div className={s.modalCost}>
+                  <div>
+                    <div className={s.costLabel}>Coût à la publication</div>
+                    <div className={s.costV}><span className={s.coinLg}></span>{preview.credits} crédits</div>
+                    <div className={s.costEq}>≈ {preview.equiv || `${preview.credits * 500} XOF`}</div>
+                  </div>
+                </div>
+              )}
+              <div className={s.modalNote}>
+                💡 La personnalisation est <strong>100% gratuite</strong>. Vous payez uniquement pour publier.
               </div>
               <div className={s.modalActions}>
-                <a href="#pricing" className={s.btnGhost} onClick={closeModal}>Voir les packs</a>
-                <button className={s.btnPrimary} onClick={() => { closeModal(); onOrder(); }}>
-                  Débloquer maintenant <span className={s.arr}>→</span>
+                <a href="#pricing" className={s.btnGhost} onClick={closePreview}>Voir les packs</a>
+                <button className={s.btnPrimary} onClick={() => { closePreview(); onOrder(); }}>
+                  Commencer gratuitement <span className={s.arr}>→</span>
                 </button>
               </div>
             </div>

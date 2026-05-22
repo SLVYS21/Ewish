@@ -48,7 +48,13 @@
 @media (max-width: 1080px) {
   .testGrid { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 560px) {
-  .testGrid { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
   .testimonials { padding: 80px var(--pad-x); }
+  .secHead { margin-bottom: 36px; }
+  .sub { font-size: 0.95rem; }
+}
+@media (max-width: 560px) {
+  .testGrid { grid-template-columns: 1fr; gap: 14px; }
+  .tCard { padding: 20px 18px; }
+  .tQuote { font-size: 0.88rem; }
 }

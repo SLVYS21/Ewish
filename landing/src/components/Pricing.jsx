@@ -106,8 +106,8 @@ export default function Pricing({ onOrder }) {
         </div>
 
         <p className={`${s.pricingFootnote} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.4s' }}>
-          Besoin de plus de 100 crédits par mois ou d'un accès API ?{' '}
-          <a href="mailto:contact@mykado.app">Parlons-en.</a>
+          Achat groupé pour un événement ou une campagne ? Des <strong>réductions sur mesure</strong> sont disponibles.{' '}
+          <a href="mailto:contact@mykado.app">Demandez un devis.</a>
         </p>
       </div>
     </section>

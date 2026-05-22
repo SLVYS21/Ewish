@@ -26,7 +26,13 @@
       "Bash(Select-Object -Skip 1)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Recurse -File 2>$null | Where-Object { $_.Directory.Name -notlike 'node_modules' -and \\($_.Extension -in '.html', '.css', '.svg'\\) } | Select-Object -ExpandProperty FullName | Sort-Object)",
       "PowerShell(Get-Item \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\candidature.index.html\" | Select-Object -Property @{Name=\"Name\";Expression={$_.Name}}, @{Name=\"Size\";Expression={$_.Length}}, @{Name=\"Modified\";Expression={$_.LastWriteTime}})",
-      "PowerShell(ls *)"
+      "PowerShell(ls *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\templates\" -Recurse)",
+      "Bash(Select-Object -First 30)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Depth 0 | Where-Object { -not $_.PSIsContainer -or @\\('templates', 'shared'\\).Contains\\($_.Name\\) })",
+      "Bash(node *)",
+      "PowerShell($size = \\(Get-Item \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\templates\\\\BubbleFont.ttf\"\\).Length; Write-Host \"Font size: $\\([math]::Round\\($size/1MB, 2\\)\\) MB \\($size bytes\\)\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Recurse -Depth 2)"
     ]
   }
 }

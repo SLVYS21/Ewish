@@ -2,10 +2,10 @@ import { useInView } from '../hooks/useInView';
 import s from './HowItWorks.module.css';
 
 const STEPS = [
-  { n: '01', title: 'Créez votre compte',    desc: 'Inscription gratuite. Recevez 1 crédit offert pour tester un brouillon.' },
-  { n: '02', title: 'Achetez vos crédits',   desc: '1 crédit = 500 XOF. Achetez à la carte ou en pack avec bonus.' },
-  { n: '03', title: 'Personnalisez',          desc: "Photos, musique, décors, QR code, lien promo — depuis l'éditeur visuel." },
-  { n: '04', title: 'Publiez & partagez',     desc: 'Lien privé, QR code, WhatsApp ou email. Vu, rejoué, conservé.' },
+  { n: '01', title: 'Créez votre compte',       desc: 'Inscription gratuite, en 2 minutes. Accès immédiat à l\'éditeur.' },
+  { n: '02', title: 'Personnalisez librement',   desc: "Photos, musique, décors, QR code — depuis l'éditeur visuel. Sans payer." },
+  { n: '03', title: 'Achetez vos crédits',       desc: 'Seulement avant de publier. À la carte ou en pack avec crédits bonus.' },
+  { n: '04', title: 'Publiez & partagez',        desc: 'Lien privé, QR code, WhatsApp ou email. Vu, rejoué, conservé.' },
 ];
 
 export default function HowItWorks() {

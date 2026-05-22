@@ -28,6 +28,46 @@ const STEPS = [
   { id: 'share',   n: 4, title: 'Le partage', sub: 'Lien & diffusion',  color: '#b45309', soft: '#fffbeb', accent: '#fde68a' },
 ];
 
+/* ─── Section jump map — templates with animated GSAP timeline ── */
+const TEMPLATE_SECTIONS = {
+  birthday:           [
+    { id: 'section-greeting', label: 'Intro',     emoji: '👋' },
+    { id: 'section-music',    label: 'Musique',   emoji: '🎵' },
+    { id: 'section-message',  label: 'Message',   emoji: '💬' },
+    { id: 'section-special',  label: 'WhatsApp',  emoji: '📱' },
+    { id: 'section-ideas',    label: 'Idées',     emoji: '✨' },
+    { id: 'section-balloons', label: 'Ballons',   emoji: '🎈' },
+    { id: 'section-outro',    label: 'Outro',     emoji: '🥂' },
+  ],
+  'collective-family': [
+    { id: 'section-greeting', label: 'Intro',     emoji: '👋' },
+    { id: 'section-music',    label: 'Musique',   emoji: '🎵' },
+    { id: 'section-message',  label: 'Message',   emoji: '💬' },
+    { id: 'section-ideas',    label: 'Idées',     emoji: '✨' },
+    { id: 'section-balloons', label: 'Ballons',   emoji: '🎈' },
+    { id: 'section-wishes',   label: 'Vœux',     emoji: '💌' },
+    { id: 'section-outro',    label: 'Outro',     emoji: '🥂' },
+  ],
+  'collective-pro': [
+    { id: 'section-greeting', label: 'Intro',     emoji: '👋' },
+    { id: 'section-music',    label: 'Musique',   emoji: '🎵' },
+    { id: 'section-message',  label: 'Message',   emoji: '💬' },
+    { id: 'section-ideas',    label: 'Idées',     emoji: '✨' },
+    { id: 'section-balloons', label: 'Ballons',   emoji: '🎈' },
+    { id: 'section-wishes',   label: 'Vœux',     emoji: '💌' },
+    { id: 'section-outro',    label: 'Outro',     emoji: '🥂' },
+  ],
+  special: [
+    { id: 'section-greeting', label: 'Intro',     emoji: '👋' },
+    { id: 'section-music',    label: 'Musique',   emoji: '🎵' },
+    { id: 'section-message',  label: 'Message',   emoji: '💬' },
+    { id: 'section-special',  label: 'Google',    emoji: '🔍' },
+    { id: 'section-ideas',    label: 'Idées',     emoji: '✨' },
+    { id: 'section-balloons', label: 'Ballons',   emoji: '🎈' },
+    { id: 'section-outro',    label: 'Outro',     emoji: '🥂' },
+  ],
+};
+
 /* ─── Tab visibility rules ────────────────────────────────────── */
 const TABS = [
   { key: 'content' },
@@ -203,6 +243,7 @@ export default function Editor() {
 
   const iframeRef  = useRef(null);
   const saveTimer  = useRef(null);
+  const [activeSection, setActiveSection] = useState(null);
 
   /* sync slugDraft when shortCode changes */
   useEffect(() => { if (shortCode) setSlugDraft(shortCode); }, [shortCode]);
@@ -266,6 +307,14 @@ export default function Editor() {
       } catch { setSaveStatus('unsaved'); }
     }, 1000);
   }, [id]);
+
+  /* section jump */
+  const jumpToSection = useCallback((sectionId) => {
+    setActiveSection(sectionId);
+    try {
+      iframeRef.current?.contentWindow?.postMessage({ type: 'WW_JUMP_SECTION', section: sectionId }, '*');
+    } catch {}
+  }, []);
 
   /* live preview */
   const refreshPreview = useCallback((d, st, bgs, decos, wids, photoT) => {
@@ -382,6 +431,8 @@ export default function Editor() {
   const showDeco     = visibleTabs.some(t => t.key === 'decorations');
   const showPhotos   = visibleTabs.some(t => t.key === 'photos');
 
+  const previewSections = pub ? (TEMPLATE_SECTIONS[pub.templateName] || null) : null;
+
   /* step helpers */
   const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
   const currentStep      = STEPS[currentStepIndex];
@@ -442,7 +493,7 @@ export default function Editor() {
         return (
           <div className={styles.extrasList}>
             {showJar && (
-              <AccordionCard icon={Coffee} title="Cagnotte" sub="Collecte des participations" color="#047857">
+              <AccordionCard icon={Coffee} title="Jarre de Voeux" sub="Jarre de Voeux" color="#047857">
                 <JarTab jarConfig={jarConfig} onChange={handleJarChange} templateName={pub.templateName} />
               </AccordionCard>
             )}
@@ -451,15 +502,15 @@ export default function Editor() {
                 <WishesManager publicationId={pub._id} templateName={pub.templateName} customName={pub.customName} />
               </AccordionCard>
             )}
-            {showWidgets && (
+            {/* {showWidgets && (
               <AccordionCard icon={Blocks} title="Widgets" sub="Éléments interactifs" color="#047857">
                 <WidgetTab widgets={widgets} onChange={handleWidgetsChange} />
               </AccordionCard>
-            )}
+            )} */}
             <AccordionCard icon={ClipboardList} title="Infos Client" sub="Données de commande" color="#047857">
               <ClientTab order={linkedOrder} pubId={pub._id} templateName={pub.templateName} onImportAll={handleImportClientData} />
             </AccordionCard>
-            <AccordionCard icon={Megaphone} title="Lien myKado" sub="Promouvoir myKado" color="#047857">
+            <AccordionCard icon={Megaphone} title="Lien de promotion" sub="Ajoutez votre lien de promotion" color="#047857">
               <BrandingTab
                 show={showBranding} url={brandingUrl} text={brandingText}
                 onToggle={v  => { setShowBranding(v);  updatePublication(id, { showBranding: v, brandingUrl, brandingText }).catch(() => {}); }}
@@ -792,9 +843,34 @@ export default function Editor() {
             <div className={styles.previewNav}>
               <button
                 className={styles.previewBtn}
-                onClick={() => { const f = iframeRef.current; if (f) { const s = f.src; f.src = ''; f.src = s; } }}
+                onClick={() => { const f = iframeRef.current; if (f) { const s = f.src; f.src = ''; f.src = s; setActiveSection(null); } }}
               ><RefreshCw size={16} /></button>
             </div>
+            {previewSections && (<>
+              <select
+                className={styles.sectionSelect}
+                value={activeSection || ''}
+                onChange={e => e.target.value && jumpToSection(e.target.value)}
+              >
+                <option value="">Aller à…</option>
+                {previewSections.map(sec => (
+                  <option key={sec.id} value={sec.id}>{sec.emoji} {sec.label}</option>
+                ))}
+              </select>
+              <div className={styles.sectionPicker}>
+                {previewSections.map(sec => (
+                  <button
+                    key={sec.id}
+                    className={`${styles.sectionBtn} ${activeSection === sec.id ? styles.sectionBtnActive : ''}`}
+                    onClick={() => jumpToSection(sec.id)}
+                    title={sec.label}
+                  >
+                    <span className={styles.sectionEmoji}>{sec.emoji}</span>
+                    <span className={styles.sectionLabel}>{sec.label}</span>
+                  </button>
+                ))}
+              </div>
+            </>)}
             <span className={styles.previewUrl}>/site/{pub.templateName}/{pub.customName}</span>
           </div>
           <div className={`${styles.previewFrame} tour-step-preview`}>

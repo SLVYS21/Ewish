@@ -19,8 +19,8 @@ const FAQS = [
     a: "Chaque animation est hébergée sur un lien privé non indexé. Vous restez propriétaire de vos contenus à 100%, et nous ne les utilisons jamais à des fins commerciales. myKado est conforme RGPD et au cadre légal de l’UEMOA.",
   },
   {
-    q: 'Existe-t-il une formule pour les entreprises avec gros volume ?',
-    a: "Oui. Au-delà de 100 crédits par mois, nous proposons des tarifs négociés, un accompagnement dédié, et une API pour intégrer myKado à vos workflows RH ou marketing. <a href=\"mailto:contact@mykado.app\">Contactez l’équipe commerciale</a>.",
+    q: 'Existe-t-il des réductions pour les gros volumes ?',
+    a: "Oui. Pour les achats groupés de crédits (événements d’entreprise, campagnes saisonnières, agences), nous proposons des <strong>tarifs dégressifs négociés</strong> et un accompagnement dédié. Plus vous achetez de crédits d’un coup, moins cher le crédit vous revient. <a href=\"mailto:contact@mykado.app\">Contactez l’équipe commerciale</a> pour un devis personnalisé.",
   },
 ];
 

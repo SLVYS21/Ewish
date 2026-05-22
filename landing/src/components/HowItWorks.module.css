@@ -54,4 +54,7 @@
 }
 @media (max-width: 540px) {
   .howGrid { grid-template-columns: 1fr; }
+  .how { padding: 60px var(--pad-x); }
+  .secHead { margin-bottom: 40px; }
+  .howNum { width: 46px; height: 46px; font-size: 1.2rem; }
 }

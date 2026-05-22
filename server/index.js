@@ -56,6 +56,9 @@ app.use('/site/notre-film',        express.static(path.join(TEMPLATES_DIR, 'notr
 app.use('/site/wall-of-wishes',    express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes')));
 app.use('/site/forever',           express.static(path.join(TEMPLATES_DIR, 'forever')));
 app.use('/site/sanctuary',         express.static(path.join(TEMPLATES_DIR, 'sanctuary')));
+// Serve shared template root assets (e.g. BubbleFont.ttf) at /site/<filename>
+// Resolves relative paths like url('../BubbleFont.ttf') from within template subdirs.
+app.use('/site', express.static(TEMPLATES_DIR, { index: false }));
 // ── API (shared, accessible from both subdomains) ─────────────
 app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/templates',    require('./routes/templates'));

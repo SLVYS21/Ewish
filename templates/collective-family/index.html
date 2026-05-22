@@ -5,7 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>On t'aime fort 🎉</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Pacifico&display=swap"
+  <link rel="preload" href="../BubbleFont-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Pacifico&family=Fredoka+One&display=swap"
     rel="stylesheet">
   <style>
     *,
@@ -362,7 +364,7 @@
     }
 
     .photo-placeholder {
-      background: linear-gradient(135deg, #ffb3c6, var(--primary));
+      background: linear-gradient(135deg, var(--accent), var(--primary));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -613,23 +615,53 @@
       top: 0;
       left: 0;
       pointer-events: none;
+      overflow: hidden;
     }
 
-    .baloons img {
+    @font-face {
+      font-family: 'BubbleFont';
+      src: url('../BubbleFont-subset.woff2') format('woff2'),
+           url('../BubbleFont.ttf') format('truetype');
+      font-display: block;
+    }
+
+    .baloons {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .baloons span {
       display: inline-block;
       position: absolute;
+      font-family: 'BubbleFont', cursive;
+      font-size: clamp(16rem, 13vw, 32rem);
+      line-height: 1;
+      user-select: none;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.22));
     }
 
-    .baloons img:nth-child(even) {
-      left: -10%;
+    .baloons span::after {
+      content: '';
+      display: block;
+      width: 2px;
+      height: clamp(28px, 4.5vh, 48px);
+      background: currentColor;
+      opacity: 0.4;
+      margin: 2px auto 0;
+      border-radius: 2px;
     }
 
-    .baloons img:nth-child(odd) {
-      right: -10%;
-    }
+    @keyframes balloon-sway {
 
-    .baloons img:nth-child(3n+0) {
-      left: 30%;
+      0%,
+      100% {
+        margin-left: -9px;
+      }
+
+      50% {
+        margin-left: 9px;
+      }
     }
 
 
@@ -750,132 +782,428 @@
       color: #fff;
       transform: rotate(90deg) scale(1.1);
     }
+
     /* ===== INTRO FAMILY BLOOM ===== */
     #intro-overlay {
-      position: fixed; inset: 0; z-index: 10000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       background: radial-gradient(ellipse 90% 80% at 50% 42%, #fff5fb 0%, #fffbf0 52%, #fff0f8 100%);
-      opacity: 1; transition: opacity 0.95s ease; overflow: hidden; pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.95s ease;
+      overflow: hidden;
+      pointer-events: none;
     }
-    #intro-overlay.ib-dissolve { opacity: 0; }
+
+    #intro-overlay.ib-dissolve {
+      opacity: 0;
+    }
+
     #intro-overlay::before {
-      content: ''; position: absolute; width: 330px; height: 330px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,100,180,0.17) 0%, transparent 68%);
-      animation: ibGlow 2.3s ease-in-out infinite alternate; pointer-events: none;
+      content: '';
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 100, 180, 0.17) 0%, transparent 68%);
+      animation: ibGlow 2.3s ease-in-out infinite alternate;
+      pointer-events: none;
     }
-    @keyframes ibGlow { from { transform:scale(0.88); opacity:0.5; } to { transform:scale(1.12); opacity:1; } }
-    #bloom-svg { position:relative; z-index:1; width:min(290px,78vw); height:min(290px,78vw); overflow:visible; }
-    .ib-petal-out { fill:rgba(255,100,160,0.09); stroke:rgba(220,60,140,0.52); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-    .ib-petal-in  { fill:rgba(255,100,160,0.05); stroke:rgba(220,60,140,0.32); stroke-width:1.0; stroke-linecap:round; }
-    .ib-ring-outer { fill:none; stroke:rgba(255,160,60,0.35); stroke-width:0.9; stroke-dasharray:5 6; transform-box:fill-box; transform-origin:50% 50%; animation:ibRingSpin 28s linear infinite; }
-    @keyframes ibRingSpin { to { transform:rotate(360deg); } }
-    .ib-ring-mid    { fill:rgba(255,100,160,0.05); stroke:rgba(220,60,140,0.52); stroke-width:1.15; }
-    .ib-ring-center { fill:rgba(220,60,140,0.52); stroke:rgba(220,60,140,0.9); stroke-width:1.5; }
-    .ib-dot { fill:rgba(220,60,140,0.26); }
-    .ib-draw { stroke-dasharray:2000; stroke-dashoffset:2000; }
-    #ib-text { position:relative; z-index:1; margin-top:18px; text-align:center; opacity:0; transform:translateY(13px); transition:opacity 0.72s ease, transform 0.72s ease; }
-    #ib-text.show { opacity:1; transform:translateY(0); }
-    #ib-label { margin:0; font-family:'Nunito',sans-serif; font-size:clamp(0.88rem,3.8vw,1.42rem); font-weight:300; letter-spacing:0.16em; text-transform:uppercase; color:#b03878; }
-    #ib-line-svg { display:block; margin:9px auto 0; width:min(210px,58vw); height:18px; overflow:visible; }
-    .ib-wavy-line { fill:none; stroke:rgba(255,160,60,0.88); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:240; stroke-dashoffset:240; transition:stroke-dashoffset 0.82s cubic-bezier(0.4,0,0.2,1); }
-    .ib-wavy-line.drawn { stroke-dashoffset:0; }
-    #ib-burst { position:absolute; inset:0; pointer-events:none; z-index:2; }
-    .ib-fp { position:absolute; top:50%; left:50%; font-size:clamp(1rem,2.8vw,1.35rem); line-height:1; opacity:0; margin:-14px; animation:ibFall 1.75s ease-out forwards; }
-    @keyframes ibFall { 0%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0.3);} 18%{opacity:1;} 70%{opacity:0.75;} 100%{opacity:0;transform:translate(var(--ib-tx),var(--ib-ty)) rotate(var(--ib-tr)) scale(1.1);} }
+
+    @keyframes ibGlow {
+      from {
+        transform: scale(0.88);
+        opacity: 0.5;
+      }
+
+      to {
+        transform: scale(1.12);
+        opacity: 1;
+      }
+    }
+
+    #bloom-svg {
+      position: relative;
+      z-index: 1;
+      width: min(290px, 78vw);
+      height: min(290px, 78vw);
+      overflow: visible;
+    }
+
+    .ib-petal-out {
+      fill: rgba(255, 100, 160, 0.09);
+      stroke: rgba(220, 60, 140, 0.52);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .ib-petal-in {
+      fill: rgba(255, 100, 160, 0.05);
+      stroke: rgba(220, 60, 140, 0.32);
+      stroke-width: 1.0;
+      stroke-linecap: round;
+    }
+
+    .ib-ring-outer {
+      fill: none;
+      stroke: rgba(255, 160, 60, 0.35);
+      stroke-width: 0.9;
+      stroke-dasharray: 5 6;
+      transform-box: fill-box;
+      transform-origin: 50% 50%;
+      animation: ibRingSpin 28s linear infinite;
+    }
+
+    @keyframes ibRingSpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .ib-ring-mid {
+      fill: rgba(255, 100, 160, 0.05);
+      stroke: rgba(220, 60, 140, 0.52);
+      stroke-width: 1.15;
+    }
+
+    .ib-ring-center {
+      fill: rgba(220, 60, 140, 0.52);
+      stroke: rgba(220, 60, 140, 0.9);
+      stroke-width: 1.5;
+    }
+
+    .ib-dot {
+      fill: rgba(220, 60, 140, 0.26);
+    }
+
+    .ib-draw {
+      stroke-dasharray: 2000;
+      stroke-dashoffset: 2000;
+    }
+
+    #ib-text {
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(13px);
+      transition: opacity 0.72s ease, transform 0.72s ease;
+    }
+
+    #ib-text.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #ib-label {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(0.88rem, 3.8vw, 1.42rem);
+      font-weight: 300;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #b03878;
+    }
+
+    #ib-line-svg {
+      display: block;
+      margin: 9px auto 0;
+      width: min(210px, 58vw);
+      height: 18px;
+      overflow: visible;
+    }
+
+    .ib-wavy-line {
+      fill: none;
+      stroke: rgba(255, 160, 60, 0.88);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      transition: stroke-dashoffset 0.82s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ib-wavy-line.drawn {
+      stroke-dashoffset: 0;
+    }
+
+    #ib-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .ib-fp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: clamp(1rem, 2.8vw, 1.35rem);
+      line-height: 1;
+      opacity: 0;
+      margin: -14px;
+      animation: ibFall 1.75s ease-out forwards;
+    }
+
+    @keyframes ibFall {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) rotate(0deg) scale(0.3);
+      }
+
+      18% {
+        opacity: 1;
+      }
+
+      70% {
+        opacity: 0.75;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(var(--ib-tx), var(--ib-ty)) rotate(var(--ib-tr)) scale(1.1);
+      }
+    }
 
     /* ── Grain texture ── */
     body::after {
-      content: ''; position: fixed; inset: 0; z-index: 999;
-      pointer-events: none; opacity: 0.022;
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0.022;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
       background-size: 200px;
     }
+
     /* ── Ambient floating sparkles ── */
-    #ambient-layer { position: fixed; inset: 0; z-index: 3; pointer-events: none; display: none; }
-    .amb-spark { position: absolute; overflow: visible; opacity: 0; }
+    #ambient-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      display: none;
+    }
+
+    .amb-spark {
+      position: absolute;
+      overflow: visible;
+      opacity: 0;
+    }
+
     @keyframes ambFloat {
-      0%, 100% { opacity: 0; transform: translateY(0) rotate(0deg); }
-      20%, 80%  { opacity: 0.45; }
-      50%       { opacity: 0.45; transform: translateY(-10px) rotate(22deg); }
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: translateY(0) rotate(0deg);
+      }
+
+      20%,
+      80% {
+        opacity: 0.45;
+      }
+
+      50% {
+        opacity: 0.45;
+        transform: translateY(-10px) rotate(22deg);
+      }
     }
+
     @keyframes ambFloat2 {
-      0%, 100% { opacity: 0; transform: translateY(0) rotate(-18deg); }
-      20%, 80%  { opacity: 0.28; }
-      50%       { opacity: 0.28; transform: translateY(-8px) rotate(6deg); }
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: translateY(0) rotate(-18deg);
+      }
+
+      20%,
+      80% {
+        opacity: 0.28;
+      }
+
+      50% {
+        opacity: 0.28;
+        transform: translateY(-8px) rotate(6deg);
+      }
     }
-    .as1 { top:10%; left:5%;  width:14px; height:14px; animation: ambFloat  5.0s ease-in-out infinite 0.0s; }
-    .as2 { top:16%; right:7%; width:10px; height:10px; animation: ambFloat  7.0s ease-in-out infinite 1.2s; }
-    .as3 { bottom:20%; left:4%;  width:12px; height:12px; animation: ambFloat  4.8s ease-in-out infinite 2.5s; }
-    .as4 { bottom:14%; right:5%; width: 9px; height: 9px; animation: ambFloat  6.2s ease-in-out infinite 0.8s; }
-    .as5 { top:48%; left:3%;  width: 8px; height: 8px; animation: ambFloat  8.0s ease-in-out infinite 3.5s; }
-    .as6 { top:58%; right:4%; width:11px; height:11px; animation: ambFloat2 5.5s ease-in-out infinite 1.8s; }
+
+    .as1 {
+      top: 10%;
+      left: 5%;
+      width: 14px;
+      height: 14px;
+      animation: ambFloat 5.0s ease-in-out infinite 0.0s;
+    }
+
+    .as2 {
+      top: 16%;
+      right: 7%;
+      width: 10px;
+      height: 10px;
+      animation: ambFloat 7.0s ease-in-out infinite 1.2s;
+    }
+
+    .as3 {
+      bottom: 20%;
+      left: 4%;
+      width: 12px;
+      height: 12px;
+      animation: ambFloat 4.8s ease-in-out infinite 2.5s;
+    }
+
+    .as4 {
+      bottom: 14%;
+      right: 5%;
+      width: 9px;
+      height: 9px;
+      animation: ambFloat 6.2s ease-in-out infinite 0.8s;
+    }
+
+    .as5 {
+      top: 48%;
+      left: 3%;
+      width: 8px;
+      height: 8px;
+      animation: ambFloat 8.0s ease-in-out infinite 3.5s;
+    }
+
+    .as6 {
+      top: 58%;
+      right: 4%;
+      width: 11px;
+      height: 11px;
+      animation: ambFloat2 5.5s ease-in-out infinite 1.8s;
+    }
+
     /* ── Scene transition sparkle flash ── */
     #scene-flash {
-      position: fixed; inset: 0; z-index: 2000;
-      display: flex; align-items: center; justify-content: center;
-      pointer-events: none; opacity: 0;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
     }
-    #scene-flash.active { animation: scFlash 0.6s ease-out forwards; }
-    @keyframes scFlash { 0% { opacity:0; } 30% { opacity:1; } 100% { opacity:0; } }
-    #scene-flash svg { width: 44px; height: 44px; }
+
+    #scene-flash.active {
+      animation: scFlash 0.6s ease-out forwards;
+    }
+
+    @keyframes scFlash {
+      0% {
+        opacity: 0;
+      }
+
+      30% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    #scene-flash svg {
+      width: 44px;
+      height: 44px;
+    }
   </style>
 </head>
 
 <body>
-<!-- Ambient floating sparkles -->
-<div id="ambient-layer" aria-hidden="true">
-  <svg class="amb-spark as1" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
-  <svg class="amb-spark as2" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#c9a84c"/></svg>
-  <svg class="amb-spark as3" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
-  <svg class="amb-spark as4" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
-  <svg class="amb-spark as5" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
-  <svg class="amb-spark as6" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#e05574"/></svg>
-</div>
-<!-- Scene transition sparkle flash -->
-<div id="scene-flash" aria-hidden="true">
-  <svg viewBox="-10 -10 20 20" overflow="visible">
-    <path d="M0,-7 L1.8,-1.8 L7,0 L1.8,1.8 L0,7 L-1.8,1.8 L-7,0 L-1.8,-1.8 Z" fill="#c9a84c" opacity="0.8"/>
-    <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="white" opacity="0.9"/>
-  </svg>
-</div>
-<div id="intro-overlay" aria-hidden="true">
-  <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-    <circle class="ib-ring-outer" cx="200" cy="200" r="118"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(0,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(45,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(90,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(135,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(180,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(225,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(270,200,200)"/>
-    <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(315,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(0,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(45,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(90,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(135,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(180,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(225,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(270,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200" transform="rotate(315,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(22.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(67.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(112.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(157.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(202.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(247.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(292.5,200,200)"/>
-    <path class="ib-draw ib-petal-in"  d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200" transform="rotate(337.5,200,200)"/>
-    <circle class="ib-draw ib-ring-mid"    cx="200" cy="200" r="40"/>
-    <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="13"/>
-  </svg>
-  <div id="ib-text">
-    <p id="ib-label">Collectif Famille</p>
-    <svg id="ib-line-svg" viewBox="0 0 240 18">
-      <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11"/>
+  <!-- Ambient floating sparkles -->
+  <div id="ambient-layer" aria-hidden="true">
+    <svg class="amb-spark as1" viewBox="-5 -5 10 10">
+      <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c" />
+    </svg>
+    <svg class="amb-spark as2" viewBox="-5 -5 10 10">
+      <path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#c9a84c" />
+    </svg>
+    <svg class="amb-spark as3" viewBox="-5 -5 10 10">
+      <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c" />
+    </svg>
+    <svg class="amb-spark as4" viewBox="-5 -5 10 10">
+      <path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c" />
+    </svg>
+    <svg class="amb-spark as5" viewBox="-5 -5 10 10">
+      <path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c" />
+    </svg>
+    <svg class="amb-spark as6" viewBox="-5 -5 10 10">
+      <path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#e05574" />
     </svg>
   </div>
-  <div id="ib-burst"></div>
-</div>
+  <!-- Scene transition sparkle flash -->
+  <div id="scene-flash" aria-hidden="true">
+    <svg viewBox="-10 -10 20 20" overflow="visible">
+      <path d="M0,-7 L1.8,-1.8 L7,0 L1.8,1.8 L0,7 L-1.8,1.8 L-7,0 L-1.8,-1.8 Z" fill="#c9a84c" opacity="0.8" />
+      <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="white" opacity="0.9" />
+    </svg>
+  </div>
+  <div id="intro-overlay" aria-hidden="true">
+    <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <circle class="ib-ring-outer" cx="200" cy="200" r="118" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(0,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(45,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(90,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(135,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(180,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(225,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(270,200,200)" />
+      <circle class="ib-dot" cx="200" cy="95" r="3.5" transform="rotate(315,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(0,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(45,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(90,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(135,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(180,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(225,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(270,200,200)" />
+      <path class="ib-draw ib-petal-out" d="M200 200 C174 164 170 116 200 90 C230 116 226 164 200 200"
+        transform="rotate(315,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(22.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(67.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(112.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(157.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(202.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(247.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(292.5,200,200)" />
+      <path class="ib-draw ib-petal-in" d="M200 200 C190 176 188 148 200 128 C212 148 210 176 200 200"
+        transform="rotate(337.5,200,200)" />
+      <circle class="ib-draw ib-ring-mid" cx="200" cy="200" r="40" />
+      <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="13" />
+    </svg>
+    <div id="ib-text">
+      <p id="ib-label">Collectif Famille</p>
+      <svg id="ib-line-svg" viewBox="0 0 240 18">
+        <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11" />
+      </svg>
+    </div>
+    <div id="ib-burst"></div>
+  </div>
   <div id="tsparticles-confetti" style="position:fixed;inset:0;pointer-events:none;z-index:100"></div>
 
   <div id="music-pill">
@@ -893,16 +1221,16 @@
   <div class="container">
 
     <!-- 1. GREETING -->
-    <div class="one">
+    <div class="one" data-section="greeting">
       <h1 class="one" style="font-size:clamp(2.5rem,8vw,4.5rem)">
-        <span data-node-name="greeting">Hiya</span>
-        <span data-node-name="name">Lydia</span> 🎉
+        <span data-node-name="greeting">Coucou</span>
+        <span data-node-name="name">Prénom</span> 🎉
       </h1>
       <p class="two" data-node-name="greetingText">On t'aime tellement !</p>
     </div>
 
     <!-- 2. MUSIC -->
-    <div class="music-interlude">
+    <div class="music-interlude" data-section="music">
       <div class="iphone-player">
         <div class="album-art-placeholder" id="main-album-art">🎵</div>
         <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
@@ -933,7 +1261,7 @@
     </div>
 
     <!-- 3. FROM THE GROUP -->
-    <div class="three from-group">
+    <div class="three from-group" data-section="message">
       <div class="group-label">Un message de</div>
       <div class="group-name" data-node-name="groupName">La famille</div>
       <div class="group-message" data-node-name="groupMessage">
@@ -943,7 +1271,7 @@
     </div>
 
     <!-- 4. IDEAS -->
-    <div class="five">
+    <div class="five" data-section="ideas">
       <p class="idea-1" data-node-name="text2">On a cherché les mots.</p>
       <p class="idea-2" data-node-name="text3">On en a trouvé beaucoup.</p>
       <p class="idea-3">
@@ -953,7 +1281,7 @@
       <p class="idea-4" data-node-name="text5Entry">Parce que,</p>
       <p class="idea-5">
         <span data-node-name="text5Content">Tu es irremplaçable</span>
-        <span class="smiley" data-node-name="smiley">:)</span>
+        <span class="smiley" data-node-name="smiley">🥰</span>
       </p>
       <p class="idea-6">
         <span data-node-name="bigTextPart1">S</span>
@@ -962,7 +1290,7 @@
     </div>
 
     <!-- 5. BIRTHDAY CELEBRATION -->
-    <div class="six">
+    <div class="six" data-section="celebration">
       <div class="photo-grid" id="photo-grid">
         <div class="photo-placeholder" data-photo="1">📸</div>
         <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath">
@@ -978,12 +1306,6 @@
     <!-- 6. BALLOONS -->
     <div class="seven">
       <div class="baloons">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt="">
-        <img src="img/ballon2.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon2.svg" alt="">
-        <img src="img/ballon1.svg" alt=""><img src="img/ballon3.svg" alt=""><img src="img/ballon2.svg" alt="">
-        <img src="img/ballon3.svg" alt=""><img src="img/ballon1.svg" alt=""><img src="img/ballon2.svg" alt="">
       </div>
     </div>
 
@@ -1034,7 +1356,7 @@
     </div>
 
     <!-- 9. OUTRO -->
-    <div class="nine">
+    <div class="nine" data-section="outro">
       <p data-node-name="outroText">Reviens nous dire si tu as aimé.</p>
       <p id="replay" data-node-name="replayText">Clique pour revoir ↺</p>
       <button id="revoir-outro-btn" onclick="reviwerWishes()">Revoir les vœux</button>
@@ -1044,7 +1366,8 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.0.0-beta.16/tsparticles.confetti.bundle.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.0.0-beta.16/tsparticles.confetti.bundle.min.js"></script>
   <script>
     /* ── Scene transition sparkle ── */
     function flashScene() {
@@ -1121,16 +1444,20 @@
           setTimeout(() => { confetti({ spread: 360, startVelocity: 45, particleCount: 35, origin: { x: Math.random(), y: Math.random() * 0.6 } }); }, 1200);
           break;
         case 'snow':
-          confetti({ particleCount: 200, spread: 180, startVelocity: 5, gravity: 0.2, scalar: 0.9, shapes: ['circle'], colors: ['#fff','#d0eaff','#b0d4ff'], ticks: 400, origin: { x: 0.5, y: -0.1 } });
+          window._snowEnd = Date.now() + 5000;
+          (function snowFrame() {
+            confetti({ particleCount: 4, angle: 270, spread: 180, startVelocity: 18, gravity: 0.45, decay: 0.97, scalar: 0.9, shapes: ['circle'], colors: ['#fff', '#d0eaff', '#b0d4ff'], ticks: 700, origin: { x: Math.random(), y: -0.05 } });
+            if (Date.now() < window._snowEnd) requestAnimationFrame(snowFrame);
+          })();
           break;
         case 'stars':
-          confetti({ particleCount: 100, spread: 360, startVelocity: 30, decay: 0.95, gravity: 0.5, shapes: ['star'], colors: ['#FFE400','#FFBD00','#E89400','#FFCA6C','#FDFFB8'], origin });
+          confetti({ particleCount: 100, spread: 360, startVelocity: 30, decay: 0.95, gravity: 0.5, shapes: ['star'], colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8'], origin });
           break;
         case 'hearts':
-          confetti({ particleCount: 80, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4','#ff1493','#ff6eb4','#ffb6c1','#ff0066'], origin });
+          confetti({ particleCount: 80, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4', '#ff1493', '#ff6eb4', '#ffb6c1', '#ff0066'], origin });
           break;
         case 'emoji_party':
-          confetti({ particleCount: 50, spread: 120, startVelocity: 35, shapes: ['emoji'], shapeOptions: { emoji: { value: ['🎉','🎊','✨','🎈','🥳'] } }, origin });
+          confetti({ particleCount: 50, spread: 120, startVelocity: 35, shapes: ['emoji'], shapeOptions: { emoji: { value: ['🎉', '🎊', '✨', '🎈', '🥳'] } }, origin });
           break;
         case 'side_cannons':
           confetti({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0, y: 0.65 } });
@@ -1139,7 +1466,7 @@
           break;
         case 'school_pride':
           window._prideEnd = Date.now() + 3500;
-          (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#bb0000','#ffffff'] }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#0000bb','#ffffff'] }); if (Date.now() < window._prideEnd) requestAnimationFrame(frame); })();
+          (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#bb0000', '#ffffff'] }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#0000bb', '#ffffff'] }); if (Date.now() < window._prideEnd) requestAnimationFrame(frame); })();
           break;
         case 'realistic':
           confetti({ particleCount: 100, spread: 70, origin, ticks: 300, gravity: 1.2 });
@@ -1147,7 +1474,11 @@
           setTimeout(() => confetti({ particleCount: 50, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 800);
           break;
         case 'gold_rain':
-          confetti({ particleCount: 150, spread: 120, origin: { x: 0.5, y: 0 }, startVelocity: 15, gravity: 0.6, scalar: 1.1, colors: ['#c9a84c','#e8c86a','#f5e07a','#d4af37','#fff8dc'], shapes: ['square','circle'], ticks: 350 });
+          window._goldEnd = Date.now() + 4000;
+          (function goldFrame() {
+            confetti({ particleCount: 6, angle: 270, spread: 120, startVelocity: 22, gravity: 0.9, decay: 0.96, scalar: 1.1, shapes: ['square', 'circle'], colors: ['#c9a84c', '#e8c86a', '#f5e07a', '#d4af37', '#fff8dc'], ticks: 600, origin: { x: Math.random(), y: -0.02 } });
+            if (Date.now() < window._goldEnd) requestAnimationFrame(goldFrame);
+          })();
           break;
         default:
           confetti({ particleCount: 160, spread: 100, origin, startVelocity: 45, gravity: 0.9 });
@@ -1179,7 +1510,7 @@
         return;
       }
 
-      container.innerHTML = wishes.map ( (w, i) => `
+      container.innerHTML = wishes.map((w, i) => `
     <div class="ws-card ${i === 0 ? 'active' : ''}" id="wc-${i}">
       <div class="ws-avatar">
         ${w.photoUrl ? `<img src="${w.photoUrl}" alt="">` : w.firstName.charAt(0).toUpperCase()}
@@ -1251,24 +1582,64 @@
       else fetch('customize.json').then(r => r.json()).then(run).catch(() => { loadWishes(''); animationTimeline(); });
     };
 
+    /* ===== BUBBLE LETTERS ===== */
+    function buildBubbleLetters() {
+      const nameEl = document.querySelector('[data-node-name="name"]');
+      const rawName = (nameEl ? nameEl.textContent.trim() : 'Prénom').replace(/\s+/g, '');
+      const letters = rawName.toUpperCase().split('');
+      const palette = [
+        '#FF3DAA', '#FF5533', '#FFD600', '#44E644',
+        '#00CFFF', '#FF3355', '#BB44FF', '#FF9922',
+        '#00DDAA', '#FF6699', '#55BBFF', '#FFB833'
+      ];
+      const colors = palette.slice().sort(() => Math.random() - 0.5);
+      const result = letters.concat(['H', 'B', 'D']);
+      const container = document.querySelector('.baloons');
+      if (!container) return;
+      const _vw = window.innerWidth || 375;
+      const _letPct = Math.min(20, (5.5 * 16 * 1.1 / _vw) * 100);
+      const _rightBound = Math.max(70, 96 - _letPct);
+      container.innerHTML = '';
+      result.forEach(function (letter, idx) {
+        const span = document.createElement('span');
+        span.textContent = letter;
+        span.style.color = colors[idx % colors.length];
+        const baseX = (idx / Math.max(result.length - 1, 1)) * (_rightBound - 4) + 2;
+        const jitter = (Math.random() - 0.5) * 8;
+        span.style.left = Math.max(1, Math.min(_rightBound, baseX + jitter)) + '%';
+        span.style.opacity = '0';
+        span.style.animationName = 'balloon-sway';
+        span.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+        span.style.animationTimingFunction = 'ease-in-out';
+        span.style.animationIterationCount = 'infinite';
+        span.style.animationDelay = -(Math.random() * 3) + 's';
+        container.appendChild(span);
+      });
+    }
+
     /* ===== ANIMATION ===== */
     const animationTimeline = () => {
+      buildBubbleLetters();
       const hbd = document.querySelector('.wish-hbd');
       hbd.innerHTML = `<span>${hbd.innerHTML.split('').join('</span><span>')}</span>`;
 
       const ideaIn = { opacity: 0, y: -20, rotationX: 5, skewX: '15deg' };
       const ideaOut = { opacity: 0, y: 20, rotationY: 5, skewX: '-15deg' };
       const tl = new TimelineMax();
+      window._ww_tl = tl;
 
       tl
         .to('.container', 0.1, { visibility: 'visible' })
         .add(() => showAmbientLayer())
+
+        .add('section-greeting')
         .from('.one', 0.7, { autoAlpha: 0, y: 10 })
         .from('.two', 0.4, { autoAlpha: 0, y: 10 })
         .to('.one', 0.7, { autoAlpha: 0, y: 10 }, '+=2.5')
         .to('.two', 0.7, { autoAlpha: 0, y: 10 }, '-=1')
         .add(() => flashScene())
 
+        .add('section-music')
         .from('.music-interlude', 0.7, { autoAlpha: 0, scale: 0.95 })
         .add(() => {
           document.getElementById('music-pill').style.display = 'block';
@@ -1277,10 +1648,12 @@
         .to('.music-interlude', 0.7, { autoAlpha: 0, scale: 0.95 }, '+=4')
         .add(() => flashScene())
 
+        .add('section-message')
         .from('.three', 0.7, { autoAlpha: 0, scale: 0.9 })
         .to('.three', 0.7, { autoAlpha: 0, scale: 0.9 }, '+=3.5')
         .add(() => flashScene())
 
+        .add('section-ideas')
         .from('.idea-1', 0.7, { autoAlpha: 0, y: -20, rotationX: 5, skewX: '15deg' })
         .to('.idea-1', 0.7, { autoAlpha: 0, y: 20, rotationY: 5, skewX: '-15deg' }, '+=1.5')
         .from('.idea-2', 0.7, { autoAlpha: 0, y: -20, rotationX: 5, skewX: '15deg' })
@@ -1297,7 +1670,21 @@
         .staggerTo('.idea-6 span', 0.8, { scale: 3, autoAlpha: 0, rotation: -15, ease: Expo.easeOut }, 0.2, '+=1')
         .add(() => flashScene())
 
-        .staggerFromTo('.baloons img', 2.5, { autoAlpha: 0.9, y: 1400 }, { autoAlpha: 1, y: -1000 }, 0.2)
+        .add('section-balloons')
+        .add(function () {
+          var spans = document.querySelectorAll('.baloons span');
+          [].forEach.call(spans, function (span, i) {
+            TweenMax.fromTo(span,
+              4.5 + Math.random() * 4,
+              { autoAlpha: 0, y: 900 + Math.random() * 700 },
+              {
+                autoAlpha: 1, y: -(700 + Math.random() * 400), ease: Power1.easeOut,
+                delay: i * 0.18 + Math.random() * 0.5
+              }
+            );
+          });
+        })
+        .to({ _: 0 }, 12, { _: 1 })
         .from('.photo-grid', 0.6, { scale: 0.4, autoAlpha: 0, y: 30 }, '-=2')
         //.from('.hat', 0.5, { x:-100, y:350, rotation:-180, autoAlpha:0 })
         .staggerFrom('.wish-hbd span', 0.7, { autoAlpha: 0, y: -50, rotation: 150, skewX: '30deg', ease: Elastic.easeOut.config(1, 0.5) }, 0.1)
@@ -1313,12 +1700,19 @@
         .add(() => flashScene())
 
         // Wishes carousel
+        .add('section-wishes')
         .from('.wishes-section', 0.8, { autoAlpha: 0, y: 40 })
         .to('.wishes-section', 0.8, { autoAlpha: 0, y: -40 }, '+=' + (wishes.length > 1 ? '5' : '3'))
         .add(() => flashScene())
+        .add('section-outro')
         .staggerFrom('.nine p', 1, { autoAlpha: 0, y: -20, rotationX: 5, skewX: '15deg' }, 1.2)
         .add(() => { document.getElementById('revoir-outro-btn').style.display = 'inline-block'; })
         .to('.last-smile', 0.5, { rotation: 90 }, '+=1');
+
+      if (window._ww_pending_jump) {
+        const _lbl = window._ww_pending_jump; window._ww_pending_jump = null;
+        tl.seek(_lbl).play();
+      }
 
       document.getElementById('replay').addEventListener('click', () => {
         // Cacher les boutons "revoir" avant de relancer
@@ -1371,26 +1765,27 @@
 
     function runIntro() {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { fetchData(); return; }
-      const overlay=document.getElementById('intro-overlay'), drawEls=Array.from(overlay.querySelectorAll('.ib-draw'));
-      const introTxt=document.getElementById('ib-text'), linePath=overlay.querySelector('.ib-wavy-line'), burst=document.getElementById('ib-burst');
-      const STEP=52, DUR={'ib-petal-out':430,'ib-petal-in':330,'ib-ring-mid':500,'ib-ring-center':370};
-      drawEls.forEach((el,i)=>{
-        const len=Math.ceil(el.getTotalLength?el.getTotalLength():400);
-        el.style.strokeDasharray=len; el.style.strokeDashoffset=len;
-        const dur=Object.entries(DUR).reduce((d,[c,v])=>el.classList.contains(c)?v:d,400);
-        setTimeout(()=>{ el.style.transition=`stroke-dashoffset ${dur}ms cubic-bezier(0.25,1,0.5,1)`; el.style.strokeDashoffset='0'; },80+i*STEP);
+      const overlay = document.getElementById('intro-overlay'), drawEls = Array.from(overlay.querySelectorAll('.ib-draw'));
+      const introTxt = document.getElementById('ib-text'), linePath = overlay.querySelector('.ib-wavy-line'), burst = document.getElementById('ib-burst');
+      const STEP = 52, DUR = { 'ib-petal-out': 430, 'ib-petal-in': 330, 'ib-ring-mid': 500, 'ib-ring-center': 370 };
+      drawEls.forEach((el, i) => {
+        const len = Math.ceil(el.getTotalLength ? el.getTotalLength() : 400);
+        el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+        const dur = Object.entries(DUR).reduce((d, [c, v]) => el.classList.contains(c) ? v : d, 400);
+        setTimeout(() => { el.style.transition = `stroke-dashoffset ${dur}ms cubic-bezier(0.25,1,0.5,1)`; el.style.strokeDashoffset = '0'; }, 80 + i * STEP);
       });
-      const drawDone=80+drawEls.length*STEP+520;
-      setTimeout(()=>{ introTxt.classList.add('show'); setTimeout(()=>linePath.classList.add('drawn'),130); },drawDone-380);
-      const PETALS=['💕','❤️','💕','💖','💕','❤️','💕','💖','💕','❤️','💕','💖'];
-      setTimeout(()=>{
-        PETALS.forEach((p,i)=>{ const angle=(i/PETALS.length)*360,rad=angle*Math.PI/180,dist=88+Math.random()*92;
-          const fp=document.createElement('div'); fp.className='ib-fp'; fp.textContent=p;
-          fp.style.cssText=`--ib-tx:${(Math.cos(rad)*dist).toFixed(1)}px;--ib-ty:${(Math.sin(rad)*dist).toFixed(1)}px;--ib-tr:${(Math.random()*360-180).toFixed(0)}deg;animation-delay:${i*32}ms`;
+      const drawDone = 80 + drawEls.length * STEP + 520;
+      setTimeout(() => { introTxt.classList.add('show'); setTimeout(() => linePath.classList.add('drawn'), 130); }, drawDone - 380);
+      const PETALS = ['💕', '❤️', '💕', '💖', '💕', '❤️', '💕', '💖', '💕', '❤️', '💕', '💖'];
+      setTimeout(() => {
+        PETALS.forEach((p, i) => {
+          const angle = (i / PETALS.length) * 360, rad = angle * Math.PI / 180, dist = 88 + Math.random() * 92;
+          const fp = document.createElement('div'); fp.className = 'ib-fp'; fp.textContent = p;
+          fp.style.cssText = `--ib-tx:${(Math.cos(rad) * dist).toFixed(1)}px;--ib-ty:${(Math.sin(rad) * dist).toFixed(1)}px;--ib-tr:${(Math.random() * 360 - 180).toFixed(0)}deg;animation-delay:${i * 32}ms`;
           burst.appendChild(fp);
         });
-      },drawDone+120);
-      setTimeout(()=>{ overlay.classList.add('ib-dissolve'); setTimeout(()=>{ overlay.style.display='none'; fetchData(); },960); },drawDone+1080);
+      }, drawDone + 120);
+      setTimeout(() => { overlay.classList.add('ib-dissolve'); setTimeout(() => { overlay.style.display = 'none'; fetchData(); }, 960); }, drawDone + 1080);
     }
 
     runIntro();
@@ -1422,13 +1817,21 @@
         _runConfettiEffect(window.__WW_CONFETTI_TYPE__);
         return;
       }
+      if (e.data.type === 'WW_JUMP_SECTION') {
+        const lbl = e.data.section; if (!lbl) return;
+        const ov = document.getElementById('intro-overlay');
+        if (ov) ov.style.display = 'none';
+        if (window._ww_tl) window._ww_tl.seek(lbl).play();
+        else window._ww_pending_jump = lbl;
+        return;
+      }
       if (e.data.type !== 'WW_UPDATE') return;
       const { data, style } = e.data;
       if (style) {
         const r = document.documentElement;
         if (style.primaryColor) r.style.setProperty('--primary', style.primaryColor);
         if (style.accentColor) r.style.setProperty('--accent', style.accentColor);
-        if (style.fontFamily) { r.style.setProperty('--font', `'${style.fontFamily}', sans-serif`); document.body.style.fontFamily = `'${style.fontFamily}', sans-serif`; }
+        if (style.fontFamily) { r.style.setProperty('--font', `'${style.fontFamily}', sans-serif`); document.body.style.fontFamily = `'${style.fontFamily}', sans-serif`; var _gfm={'Work Sans':'Work+Sans:wght@300;400;500;600;700','Inter':'Inter:wght@300;400;500;600;700','Playfair Display':'Playfair+Display:wght@400;500;600;700','Pacifico':'Pacifico','Dancing Script':'Dancing+Script:wght@400;500;600;700','Montserrat':'Montserrat:wght@300;400;500;600;700','Poppins':'Poppins:wght@300;400;500;600;700','Lato':'Lato:wght@300;400;700','Raleway':'Raleway:wght@300;400;500;600;700','Nunito':'Nunito:wght@300;400;500;600;700'}; var _gfq=_gfm[style.fontFamily]; if(_gfq&&!document.querySelector('link[href*="'+style.fontFamily.replace(/ /g,'+')+'"]')){var _gfl=document.createElement('link');_gfl.rel='stylesheet';_gfl.href='https://fonts.googleapis.com/css2?family='+_gfq+'&display=swap';document.head.appendChild(_gfl);} }
         if (style.textColor) r.style.setProperty('--text-color', style.textColor);
         if (style.textMuted) r.style.setProperty('--text-muted', style.textMuted);
         if (style.bgColor) r.style.setProperty('--bg-color', style.bgColor);

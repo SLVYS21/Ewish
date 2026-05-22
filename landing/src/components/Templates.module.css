@@ -369,10 +369,27 @@
 }
 .prefaitName { font-family: var(--font-serif); font-size: 0.98rem; color: var(--ivory); line-height: 1.2; }
 .prefaitMeta { font-size: 0.72rem; color: var(--ink-4); }
-.dup {
+.prefaitActions {
   margin-top: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.prefaitPreview {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.7rem; font-weight: 600;
+  color: var(--ivory);
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.prefaitPreview:hover { background: rgba(255,255,255,.15); }
+.dup {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.74rem; font-weight: 600; color: var(--gold-l);
+  background: none; border: none; cursor: pointer;
+  padding: 0;
 }
 .arr { transition: transform .2s ease; }
 .prefait:hover .arr { transform: translateX(3px); }
@@ -412,9 +429,48 @@
 }
 .modalClose:hover { background: var(--ink); color: var(--ivory); transform: rotate(90deg); }
 
-.modalPreview { position: relative; min-height: 460px; overflow: hidden; }
+.modalPreview {
+  position: relative;
+  min-height: 460px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--ivory-2);
+}
 .modalPreview .tplThumb { width: 100%; height: 100%; aspect-ratio: auto; }
 .modalPreview .tplThumb::before { display: none; }
+
+.previewFrame {
+  width: 100%; flex: 1;
+  border: none;
+  display: block;
+  min-height: 460px;
+}
+.iframeLoader {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  background: var(--ivory-2);
+}
+.iframeSpinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid var(--ivory-3);
+  border-top-color: var(--gold);
+  animation: iframeSpin .75s linear infinite;
+}
+@keyframes iframeSpin { to { transform: rotate(360deg); } }
+.iframeLoaderText { font-size: 0.78rem; color: var(--ink-3); }
+
+.modalNote {
+  background: var(--gold-pale);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
 
 .modalBody {
   padding: 36px 32px 28px;
@@ -487,20 +543,44 @@
   .prefaits { padding: 32px 24px; }
   .prefaitsScroll { grid-template-columns: 1fr 1fr; }
 }
+@media (max-width: 780px) {
+  .modalCard { grid-template-columns: 1fr; max-height: 95vh; }
+  .modalPreview { min-height: 260px; }
+  .modalBody { padding: 22px 20px 20px; }
+  .modalTitle { font-size: 1.6rem; }
+}
 @media (max-width: 720px) {
   .tplFlow { grid-template-columns: 1fr 1fr; gap: 24px 0; }
   .step:not(:last-child)::after { display: none; }
+  .sub { font-size: 0.95rem; }
 }
 @media (max-width: 560px) {
   .templatesGrid { grid-template-columns: 1fr; }
-}
-@media (max-width: 780px) {
-  .modalCard { grid-template-columns: 1fr; max-height: 95vh; }
-  .modalPreview { min-height: 280px; }
-  .modalBody { padding: 24px 22px; }
+  .templates { padding: 60px var(--pad-x); }
+  .secHead { margin-bottom: 36px; }
+  .tplBody { padding: 18px; }
+  .tplActions { flex-direction: column; }
+  .btnPreview, .btnUnlock { width: 100%; justify-content: center; text-align: center; padding: 12px; }
 }
 @media (max-width: 480px) {
+  .tplFlow { grid-template-columns: 1fr; gap: 20px; }
   .prefaitsScroll { grid-template-columns: 1fr; }
+  .prefaits { padding: 24px 16px; border-radius: 20px; }
+  .prefaitsHead { margin-bottom: 20px; }
+  .modal { padding: 0; align-items: flex-end; }
+  .modalCard {
+    border-radius: 24px 24px 0 0;
+    max-height: 96vh;
+    animation: modalUp .35s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes modalUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+  .modalBody { padding: 18px 16px 24px; }
+  .modalActions { flex-direction: column; }
+  .modalActions .btnGhost,
+  .modalActions .btnPrimary { width: 100%; }
 }
 
 /* Prefait thumb named classes (referenced via variable in JSX) */

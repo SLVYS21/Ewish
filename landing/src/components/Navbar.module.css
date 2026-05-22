@@ -199,3 +199,17 @@
   .navLogin { display: none; }
   .burger { display: flex; }
 }
+@media (max-width: 640px) {
+  .announce {
+    font-size: 0.7rem;
+    padding: 8px var(--pad-x);
+    gap: 6px;
+    flex-wrap: wrap;
+    line-height: 1.5;
+    text-align: center;
+    justify-content: center;
+  }
+  .sep { display: none; }
+  .navInner { padding: 12px var(--pad-x); }
+  .logo { font-size: 1.3rem; }
+}
