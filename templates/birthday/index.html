@@ -1837,7 +1837,7 @@
           var spans = document.querySelectorAll('.baloons span');
           [].forEach.call(spans, function (span, i) {
             TweenMax.fromTo(span,
-              4.5 + Math.random() * 4,
+              7.5 + Math.random() * 4, // Balloons fly slower (increased duration)
               { autoAlpha: 0, y: 900 + Math.random() * 700 },
               {
                 autoAlpha: 1, y: -(700 + Math.random() * 400), ease: Power1.easeOut,
@@ -1846,7 +1846,7 @@
             );
           });
         })
-        .to({ _: 0 }, 12, { _: 1 })
+        .to({ _: 0 }, 9, { _: 1 }) // Reduced from 12 to 9 to eliminate dead time
         .from(".photo-grid", 0.6, { scale: 0.4, autoAlpha: 0, y: 30 }, "-=2")
         .staggerFrom(".wish-hbd span", 0.7, { autoAlpha: 0, y: -50, rotation: 150, skewX: "30deg", ease: Elastic.easeOut.config(1, 0.5) }, 0.1)
         .staggerFromTo(".wish-hbd span", 0.7, { scale: 1.4, rotationY: 150 }, { scale: 1, rotationY: 0, ease: Expo.easeOut }, 0.1, "party")
