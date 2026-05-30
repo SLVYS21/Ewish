@@ -27,7 +27,7 @@ const TEMPLATES = [
     creditsRequired: 2,
     emoji: '🎂',
     gradient: 'linear-gradient(135deg,#ffb4d1,#f7d59e)',
-    highlights: ["Jusqu'à 24 photos animées", 'Musique personnalisée (MP3)', '3 styles de typographie', 'Lien privé + QR code'],
+    highlights: ['Musique personnalisée (MP3)', '3 styles de typographie', 'Lien privé + QR code'],
     tags: ['anniversaire', 'classique'],
     sortOrder: 1,
     active: true,

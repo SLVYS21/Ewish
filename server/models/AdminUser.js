@@ -7,8 +7,19 @@ const adminUserSchema = new mongoose.Schema({
   name:     { type: String, default: 'Admin' },
   role:     { type: String, enum: ['super_admin', 'admin', 'merchant'], default: 'admin' },
   merchantId:{ type: String, index: true },
-  credits:  { type: Number, default: 0 },
-  lastLogin:{ type: Date },
+  credits:   { type: Number, default: 0 },
+  lastLogin: { type: Date },
+  kycStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
+  kycName:   { type: String, default: '' },
+  kycMethod: { type: String, default: '' },
+  kycPhone:  { type: String, default: '' },
+  kycDocumentUrl:       { type: String, default: '' },
+  kycSelfieUrl:         { type: String, default: '' },
+  kycSubmittedAt:       { type: Date },
+  kycRejectionReason:   { type: String, default: '' },
+  kycMobileToken:       { type: String },
+  kycMobileTokenExpiry: { type: Date },
+  googleId:             { type: String, default: '' },
 }, { timestamps: true });
 
 adminUserSchema.pre('save', async function(next) {
@@ -22,8 +33,16 @@ adminUserSchema.methods.comparePassword = function(plain) {
 };
 
 adminUserSchema.methods.toSafeObject = function() {
-  const { _id, email, name, role, merchantId, credits, lastLogin, createdAt } = this;
-  return { _id, email, name, role, merchantId, credits, lastLogin, createdAt };
+  const {
+    _id, email, name, role, merchantId, credits, lastLogin, createdAt,
+    kycStatus, kycName, kycMethod, kycPhone,
+    kycDocumentUrl, kycSelfieUrl, kycSubmittedAt, kycRejectionReason,
+  } = this;
+  return {
+    _id, email, name, role, merchantId, credits, lastLogin, createdAt,
+    kycStatus, kycName, kycMethod, kycPhone,
+    kycDocumentUrl, kycSelfieUrl, kycSubmittedAt, kycRejectionReason,
+  };
 };
 
 module.exports = mongoose.model('AdminUser', adminUserSchema);

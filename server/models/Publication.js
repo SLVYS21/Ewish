@@ -75,7 +75,9 @@ const publicationSchema = new mongoose.Schema({
     fontFamily:   { type: String, default: 'Work Sans' },
     fontSize:     { type: String, default: 'medium' },
     theme:        { type: String, default: 'light' },
-    confettiType: { type: String, default: 'fireworks' },
+    confettiType:  { type: String, default: 'fireworks' },
+    paletteId:     { type: String, default: '' },
+    typographyId:  { type: String, default: '' },
 
     // Background per section — key = section slug
     // Special key "global" = fallback for all sections with no specific bg
@@ -115,6 +117,13 @@ const publicationSchema = new mongoose.Schema({
 
   isPaid:      { type: Boolean, default: false },
   shortCode:   { type: String, unique: true, sparse: true },
+  cagnotteConfig: {
+    enabled:     { type: Boolean, default: false },
+    description: { type: String,  default: '' },
+    goal:        { type: Number,  default: 0 },
+    image:       { type: String,  default: '' },
+    deadline:    { type: Date },
+  },
   createdAt:   { type: Date, default: Date.now },
   updatedAt:   { type: Date, default: Date.now },
 }, { timestamps: true });

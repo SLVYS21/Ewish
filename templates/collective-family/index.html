@@ -374,6 +374,22 @@
       box-shadow: 0 8px 20px rgba(255, 105, 180, 0.25);
     }
 
+    /* ── Photo frames ── */
+    .six .photo-grid [data-photo="main"] { width: 140px; height: 160px; }
+    [data-photo="main"] { overflow: hidden; padding: 0; }
+    [data-photo="main"] img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+    .ww-frame-polaroid { background: #fff !important; padding: 5px 5px 22px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.22) !important; border-radius: 3px !important; }
+    .ww-frame-instant  { background: #fff !important; padding: 5px 5px 30px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important; border-radius: 2px !important; }
+    .ww-frame-film     { background: #111 !important; padding: 6px 4px !important; border-top: 10px solid #111 !important; border-bottom: 10px solid #111 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; border-radius: 2px !important; }
+    .ww-frame-vintage  { background: #f5efe0 !important; border: 3px solid #c8a96e !important; padding: 4px !important; box-shadow: inset 0 0 8px rgba(0,0,0,0.1), 0 3px 8px rgba(0,0,0,0.15) !important; border-radius: 2px !important; }
+    .ww-caption { text-align: center; font-size: 0.6rem; color: #555; padding: 2px 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Courier New', monospace; line-height: 1.3; }
+    .ww-frame-polaroid .ww-caption, .ww-frame-instant .ww-caption { color: #333; }
+    .ww-frame-film .ww-caption { color: #bbb; }
+    .ww-frame-vintage .ww-caption { color: #6b5a3a; font-family: Georgia, serif; }
+    .six .photo-grid [data-photo="3"],
+    .six .photo-grid [data-photo="4"],
+    .six .photo-grid [data-photo="5"] { width: 90px; height: 110px; border-radius: 12px; }
+
     .six .hat {
       position: absolute;
       width: 50px;
@@ -1226,7 +1242,7 @@
         <span data-node-name="greeting">Coucou</span>
         <span data-node-name="name">Prénom</span> 🎉
       </h1>
-      <p class="two" data-node-name="greetingText">On t'aime tellement !</p>
+      <p class="two" data-node-name="greetingText">Notre meuf adorée !</p>
     </div>
 
     <!-- 2. MUSIC -->
@@ -1234,7 +1250,7 @@
       <div class="iphone-player">
         <div class="album-art-placeholder" id="main-album-art">🎵</div>
         <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
-        <p class="track-artist" data-node-name="trackArtist">Artiste</p>
+        <p class="track-artist" data-node-name="trackArtist">Artiste préféré</p>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
@@ -1263,9 +1279,9 @@
     <!-- 3. FROM THE GROUP -->
     <div class="three from-group" data-section="message">
       <div class="group-label">Un message de</div>
-      <div class="group-name" data-node-name="groupName">La famille</div>
+      <div class="group-name" data-node-name="groupName">Tes meilleurs potes</div>
       <div class="group-message" data-node-name="groupMessage">
-        On s'est tous réunis pour te dire quelque chose d'important…
+        Today is your day !
       </div>
       <div class="group-emojis" data-node-name="groupEmojis">🥰 🎂 🎊</div>
     </div>
@@ -1275,13 +1291,13 @@
       <p class="idea-1" data-node-name="text2">On a cherché les mots.</p>
       <p class="idea-2" data-node-name="text3">On en a trouvé beaucoup.</p>
       <p class="idea-3">
-        <span data-node-name="text4">Mais surtout, on voulait dire</span>
+        <span data-node-name="text4">Mais surtout, on voulait te dire</span>
         <strong data-node-name="text4Adjective">merci</strong>.
       </p>
       <p class="idea-4" data-node-name="text5Entry">Parce que,</p>
       <p class="idea-5">
-        <span data-node-name="text5Content">Tu es irremplaçable</span>
-        <span class="smiley" data-node-name="smiley">🥰</span>
+        <span data-node-name="text5Content">Tu es unique !</span>
+        <span class="smiley" data-node-name="smiley">:)</span>
       </p>
       <p class="idea-6">
         <span data-node-name="bigTextPart1">S</span>
@@ -1293,13 +1309,16 @@
     <div class="six" data-section="celebration">
       <div class="photo-grid" id="photo-grid">
         <div class="photo-placeholder" data-photo="1">📸</div>
-        <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath">
+        <div class="photo-placeholder" data-photo="main"><img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;"></div>
         <div class="photo-placeholder" data-photo="2">🎂</div>
+        <!-- <div class="photo-placeholder" data-photo="3" style="display:none">🌟</div>
+        <div class="photo-placeholder" data-photo="4" style="display:none">💫</div>
+        <div class="photo-placeholder" data-photo="5" style="display:none">✨</div> -->
       </div>
       <img src="img/hat.svg" alt="" class="hat">
       <div class="wish">
-        <h3 class="wish-hbd" data-node-name="wishHeading">Joyeux Anniversaire !</h3>
-        <h5 data-node-name="wishText">De toute la famille avec amour 💖</h5>
+        <h3 class="wish-hbd" data-node-name="wishHeading">Happy Birthday !</h3>
+        <h5 data-node-name="wishText">From our hearts 💖 Be happy !</h5>
       </div>
     </div>
 
@@ -1343,7 +1362,7 @@
     <!-- 8. WISHES CAROUSEL -->
     <div class="wishes-section" id="wishes-section">
       <button class="ws-close-btn" onclick="closeWishes()" aria-label="Fermer">×</button>
-      <div class="ws-title" data-node-name="carouselTitle">Ce qu'ils ont voulu te dire 💌</div>
+      <div class="ws-title" data-node-name="carouselTitle">Les mots de chacun</div>
       <div class="ws-carousel">
         <div id="ws-cards-container"></div>
         <div class="ws-nav">
@@ -1357,10 +1376,10 @@
 
     <!-- 9. OUTRO -->
     <div class="nine" data-section="outro">
-      <p data-node-name="outroText">Reviens nous dire si tu as aimé.</p>
-      <p id="replay" data-node-name="replayText">Clique pour revoir ↺</p>
+      <p data-node-name="outroText">On espère que tu as kiffé.</p>
+      <p id="replay" data-node-name="replayText">Revoir ↺</p>
       <button id="revoir-outro-btn" onclick="reviwerWishes()">Revoir les vœux</button>
-      <p class="last-smile" data-node-name="outroSmiley">🥰</p>
+      <p class="last-smile" data-node-name="outroSmiley">:)</p>
     </div>
 
   </div>
@@ -1561,6 +1580,15 @@
       } else if (key === 'photo2') {
         const el = document.querySelector('[data-photo="2"]');
         if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
+      // } else if (key === 'photo3') {
+      //   const el = document.querySelector('[data-photo="3"]');
+      //   if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
+      // } else if (key === 'photo4') {
+      //   const el = document.querySelector('[data-photo="4"]');
+      //   if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
+      // } else if (key === 'photo5') {
+      //   const el = document.querySelector('[data-photo="5"]');
+      //   if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
       } else {
         const el = document.querySelector(`[data-node-name="${key}"]`);
         if (el) el.innerText = val;
@@ -1795,15 +1823,36 @@
     /* ─── Photo position/transform engine ─────────────────── */
     function applyPhotoTransforms(transforms) {
       if (!transforms) return;
-      const mapping = {
+      var photoCount = transforms._photoCount || 3;
+      var mapping = {
         photo1: '[data-photo="1"]',
-        photo2: '[data-node-name="imagePath"]',
+        photo2: '[data-photo="main"]',
         photo3: '[data-photo="2"]',
+        photo4: '[data-photo="3"]',
+        photo5: '[data-photo="4"]',
+        photo6: '[data-photo="5"]',
       };
-      Object.keys(transforms).forEach(function (key) {
-        const t = transforms[key];
-        const el = document.querySelector(mapping[key]);
+      // Show/hide extra photo slots (désactivé)
+      // var showAt = { 3: 4, 4: 5, 5: 6 };
+      // [3, 4, 5].forEach(function(n) {
+      //   var sl = document.querySelector('[data-photo="' + n + '"]');
+      //   if (sl) sl.style.display = photoCount >= showAt[n] ? '' : 'none';
+      // });
+      Object.keys(transforms).forEach(function(key) {
+        if (key === '_photoCount') return;
+        var t = transforms[key];
+        if (!t || typeof t !== 'object') return;
+        var el = document.querySelector(mapping[key]);
         if (!el) return;
+        el.className = el.className.replace(/\bww-frame-\S+/g, '').trim();
+        if (t.frame && t.frame !== 'none') el.classList.add('ww-frame-' + t.frame);
+        var cap = el.querySelector('.ww-caption');
+        if (t.caption) {
+          if (!cap) { cap = document.createElement('div'); cap.className = 'ww-caption'; el.appendChild(cap); }
+          cap.textContent = t.caption;
+        } else if (cap) {
+          cap.remove();
+        }
         el.style.transform = 'translateX(' + (t.x || 0) + 'px) translateY(' + (t.y || 0) + 'px) rotate(' + (t.rotation || 0) + 'deg) scale(' + (t.scale || 1) + ')';
         el.style.zIndex = t.zIndex || 1;
         el.style.position = 'relative';

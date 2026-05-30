@@ -1,0 +1,143 @@
+.root {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: var(--mk-page-bg, #FFFAF6);
+  padding-bottom: 100px;
+}
+
+/* ── Hero ── */
+.hero {
+  background: linear-gradient(160deg, #fce7f3 0%, #ede8f8 55%, #fdf2ff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px 24px;
+}
+
+.avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 800;
+  border: 4px solid rgba(255,255,255,.9);
+  box-shadow: 0 6px 20px rgba(43,26,45,.14);
+  margin-bottom: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.heroName {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 26px; font-weight: 400;
+  color: var(--mk-ink, #2B1A2D);
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.heroRole {
+  font-size: 13px; color: var(--mk-ink-3, #B09AB2);
+  margin: 0 0 20px;
+  font-weight: 500;
+}
+
+/* ── Stats strip ── */
+.statsStrip {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 18px;
+  padding: 14px 0;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 4px 16px rgba(43,26,45,.08);
+  border: 1.5px solid rgba(225,29,72,.06);
+  margin-bottom: 4px;
+}
+.stat {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+}
+.statVal {
+  font-size: 22px; font-weight: 800;
+  color: var(--mk-ink, #2B1A2D);
+  line-height: 1.1;
+  display: flex; align-items: center;
+}
+.statLbl {
+  font-size: 11px; font-weight: 600;
+  color: var(--mk-ink-3, #B09AB2);
+}
+.statSep {
+  width: 1px; height: 36px;
+  background: var(--mk-line, #F2E4EA);
+  flex-shrink: 0;
+}
+
+/* ── Menu list ── */
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 16px 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid var(--mk-line, #F2E4EA);
+  border-radius: 18px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, box-shadow .15s, transform .12s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.menuItem:hover {
+  border-color: var(--mk-rose-soft, #FFB3C1);
+  box-shadow: 0 4px 12px rgba(225,29,72,.08);
+  transform: translateY(-1px);
+}
+.menuItem:active { transform: translateY(0); box-shadow: none; }
+
+.menuIcon {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.menuBody {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 0;
+}
+.menuTitle {
+  font-size: 14.5px; font-weight: 700;
+  color: var(--mk-ink, #2B1A2D);
+}
+.menuSub {
+  font-size: 12.5px; font-weight: 500;
+  color: var(--mk-ink-3, #B09AB2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.menuRight {
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+}
+.chevron { color: var(--mk-ink-3, #B09AB2); }
+
+.proBadge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #FFC95A, #F59E0B);
+  color: #7A4800;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}

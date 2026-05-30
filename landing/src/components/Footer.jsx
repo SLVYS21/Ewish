@@ -1,58 +1,40 @@
-import s from './Footer.module.css';
-
 export default function Footer() {
   return (
-    <footer className={s.footer}>
-      <div className={s.footerInner}>
-        {/* Brand */}
-        <div className={s.footerBrand}>
-          <a href="/" className={s.logo}>my<em>Kado</em></a>
-          <p className={s.tag}>La plateforme de vœux animés pour particuliers, équipes RH et marques en Afrique de l'Ouest.</p>
-          <a href="https://wa.me/22900000000" className={s.whatsapp} target="_blank" rel="noreferrer">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-            </svg>
-            WhatsApp
+    <footer className="footer">
+      <div className="wrap footer-inner">
+        <div className="footer-brand">
+          <a href="#" className="logo logo-light">
+            <span>my</span><em className="serif italic">Kado</em>
           </a>
+          <p>Le studio de vœux animés.<br/>Dakar · Abidjan · partout.</p>
         </div>
-
-        {/* Produit */}
-        <div className={s.footerCol}>
-          <h5>Produit</h5>
-          <ul>
-            <li><a href="#product">Comment ça marche</a></li>
-            <li><a href="#usecases">Cas d'usage</a></li>
-            <li><a href="#pricing">Tarifs</a></li>
-            <li><a href="#templates">Galerie de templates</a></li>
-          </ul>
-        </div>
-
-        {/* Entreprise */}
-        <div className={s.footerCol}>
-          <h5>Entreprise</h5>
-          <ul>
-            <li><a href="#">À propos</a></li>
-            <li><a href="#">Solutions RH</a></li>
-            <li><a href="#">Programme partenaire</a></li>
-            <li><a href="#">Nous contacter</a></li>
-          </ul>
-        </div>
-
-        {/* Légal */}
-        <div className={s.footerCol}>
-          <h5>Légal</h5>
-          <ul>
-            <li><a href="#">Conditions d'utilisation</a></li>
-            <li><a href="#">Politique de confidentialité</a></li>
-            <li><a href="#">Mentions légales</a></li>
-            <li><a href="#">Conformité RGPD</a></li>
-          </ul>
+        <div className="footer-cols">
+          <div>
+            <h5>Produit</h5>
+            <a href="#templates">Templates</a>
+            <a href="#how">Comment ça marche</a>
+            <a href="#pricing">Tarifs</a>
+            <a href="#cagnotte">Cagnottes (bientôt)</a>
+          </div>
+          <div>
+            <h5>Pour</h5>
+            <a href="#usecases">Particuliers</a>
+            <a href="#usecases">Équipes RH</a>
+            <a href="#usecases">Marques &amp; agences</a>
+            <a href="mailto:contact@mykado.app">API · Sur demande</a>
+          </div>
+          <div>
+            <h5>Société</h5>
+            <a href="mailto:contact@mykado.app">Contact</a>
+            <a href="#faq">FAQ</a>
+            <a href="#">Mentions légales</a>
+            <a href="#">Conditions</a>
+          </div>
         </div>
       </div>
-
-      <div className={s.footerMeta}>
-        <div>© {new Date().getFullYear()} myKado · Tous droits réservés</div>
-        <div className={s.made}>Conçu avec attention <strong>en Afrique de l'Ouest</strong></div>
+      <div className="wrap footer-bottom">
+        <span>© {new Date().getFullYear()} myKado · Tous droits réservés</span>
+        <span>Conçu avec ♥ pour l'Afrique francophone &amp; la diaspora</span>
       </div>
     </footer>
   );

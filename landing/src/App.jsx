@@ -1,13 +1,12 @@
 import Navbar       from './components/Navbar';
 import Hero         from './components/Hero';
 import TrustStrip   from './components/TrustStrip';
-import Product      from './components/Product';
-import Features     from './components/Features';
 import Templates    from './components/Templates';
-import UseCases     from './components/UseCases';
 import HowItWorks   from './components/HowItWorks';
+import Features     from './components/Features';
+import UseCases     from './components/UseCases';
 import Pricing      from './components/Pricing';
-import Testimonials from './components/Testimonials';
+import Transparence from './components/Transparence';
 import FAQ          from './components/FAQ';
 import FinalCTA     from './components/FinalCTA';
 import Footer       from './components/Footer';
@@ -25,13 +24,12 @@ export default function App() {
       <main id="main-content">
         <Hero        onOrder={handleRegister} />
         <TrustStrip />
-        <Product />
-        <Features />
-        <Templates   onSelectTemplate={handleRegister} onOrder={handleRegister} />
-        <UseCases />
+        <Templates   onOrder={handleRegister} />
         <HowItWorks />
+        <Features />
+        <UseCases />
         <Pricing     onOrder={handleRegister} />
-        <Testimonials />
+        <Transparence />
         <FAQ />
         <FinalCTA    onOrder={handleRegister} />
       </main>

@@ -1,98 +1,119 @@
-import { useEffect, useRef } from 'react';
-import { useInView } from '../hooks/useInView';
-import s from './Features.module.css';
+import { useReveal } from '../hooks/useReveal';
 
-const FEATURES = [
-  {
-    title: 'Templates animés',
-    desc: '15+ designs pour anniversaires, hommages, départs en retraite, fêtes religieuses et célébrations d\'équipe.',
-    svg: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Décors & arrière-plans',
-    desc: 'Confettis, ballons, motifs floraux, dégradés sur-mesure — adaptez chaque détail à l\'occasion.',
-    svg: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'QR codes stylisés',
-    desc: 'Formes, couleurs et logos personnalisés. Un QR code aussi élégant que votre marque.',
-    svg: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h2v2h-2zM18 14h3M14 18h2M18 18v3M21 18h-1M21 21h-3v-2"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Lien promo intégré',
-    desc: 'Ajoutez l\'URL de votre boutique, votre site ou une offre. La visibilité de votre marque, garantie.',
-    svg: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Vœux collectifs',
-    desc: 'Invitez 5, 50 ou 500 contributeurs. Chacun ajoute son message et sa photo dans un souvenir partagé.',
-    svg: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Livraison garantie 24h',
-    desc: 'Votre animation prête en moins de 24 heures, prête à partager. Sinon, vos crédits sont remboursés.',
-    svg: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M13 2 L3 14 L12 14 L11 22 L21 10 L12 10 Z"/>
-      </svg>
-    ),
-  },
-];
+function QRShape({ shape, featured }) {
+  const matrix = [];
+  for (let y = 0; y < 7; y++) {
+    for (let x = 0; x < 7; x++) {
+      const on = ((x * 3 + y * 7 + (x*y)) % 4) > 0;
+      if (on) matrix.push({ x, y });
+    }
+  }
+  const clipPath = {
+    square: 'none',
+    round:  'circle(48% at 50% 50%)',
+    heart:  "path('M50 90 C 10 60, 10 25, 35 25 C 45 25, 50 35, 50 40 C 50 35, 55 25, 65 25 C 90 25, 90 60, 50 90 Z')",
+    petal:  "path('M50 5 C 75 25, 95 50, 50 95 C 5 50, 25 25, 50 5 Z')",
+  }[shape];
+  return (
+    <div className={`qr-shape ${featured ? 'qr-featured' : ''}`}>
+      <div className="qr-wrap" style={{ clipPath, WebkitClipPath: clipPath }}>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+          {matrix.map((m, i) => (
+            <rect key={i} x={10 + m.x*11} y={10 + m.y*11} width="9" height="9"
+              fill={featured ? 'var(--rose-d)' : 'var(--ink)'} rx="1.5"/>
+          ))}
+        </svg>
+      </div>
+      <span className="qr-label">{shape}</span>
+    </div>
+  );
+}
 
 export default function Features() {
-  const [ref, inView] = useInView();
-
+  const [ref, seen] = useReveal();
   return (
-    <section className={s.features} ref={ref}>
-      <div className={s.wrap}>
-        <div className={s.secHead}>
-          <span className={`${s.eyebrow} ${inView ? s.revealed : s.reveal}`}>
-            <span className={s.dot}></span> Pourquoi myKado
-          </span>
-          <h2 className={`${s.title} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.08s' }}>
-            Une plateforme <em>complète</em>,<br />pas un simple générateur de cartes.
-          </h2>
-          <p className={`${s.sub} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.16s' }}>
-            Chaque détail compte. myKado réunit les outils d'un studio créatif, sans la complexité.
+    <section className="section section-perso">
+      <div className="wrap">
+        <div className="section-head">
+          <span className="eyebrow"><span className="dot"></span> Personnalisation</span>
+          <h2>Vos photos, vos mots,<br/><em>votre signature</em>.</h2>
+          <p>
+            Chaque vœu se conçoit comme un objet artisanal : choisissez votre template,
+            uploadez vos photos, ajoutez votre musique, et habillez le partage à votre image.
           </p>
         </div>
 
-        <div className={s.featuresGrid}>
-          {FEATURES.map((f, i) => (
-            <div
-              key={f.title}
-              className={`${s.fCard} ${inView ? s.revealed : ''}`}
-              style={{ transitionDelay: `${(i % 3) * 0.08}s` }}
-            >
-              <div className={s.fIcon}>{f.svg}</div>
-              <h3>{f.title}</h3>
-              <p>{f.desc}</p>
+        <div ref={ref} className="perso-grid">
+          <div className={`perso-card pc-photos ${seen ? 'revealed' : 'reveal'}`}>
+            <div className="perso-visual">
+              <div className="perso-photos-stack">
+                <div className="pps p0"></div>
+                <div className="pps p1"></div>
+                <div className="pps p2"></div>
+                <div className="pps p3"></div>
+              </div>
+              <div className="perso-music">
+                <div className="perso-music-bars">
+                  <span/><span/><span/><span/><span/><span/><span/>
+                </div>
+                <div className="perso-music-meta">
+                  <div className="pmm-t">Sénégal mon rythme</div>
+                  <div className="pmm-s">Youssou N'Dour · 2:14</div>
+                </div>
+              </div>
             </div>
-          ))}
+            <div className="perso-body">
+              <span className="pill pill-rose">Photos &amp; musique</span>
+              <h3 className="serif italic">Jusqu'à 24 photos, votre bande-son.</h3>
+              <p>
+                Importez vos clichés et choisissez une musique dans la bibliothèque,
+                ou uploadez un MP3 perso. Pas de durée imposée.
+              </p>
+            </div>
+          </div>
+
+          <div className={`perso-card pc-qr ${seen ? 'revealed' : 'reveal'}`} style={{ transitionDelay: '.1s' }}>
+            <div className="perso-visual">
+              <div className="qr-row">
+                <QRShape shape="square"/>
+                <QRShape shape="round"/>
+                <QRShape shape="heart" featured/>
+                <QRShape shape="petal"/>
+              </div>
+            </div>
+            <div className="perso-body">
+              <span className="pill pill-gold">QR code stylisé</span>
+              <h3 className="serif italic">Carré, rond, cœur, pétale — à vos couleurs.</h3>
+              <p>
+                Le QR n'a plus à être laid. Choisissez la forme, l'accent, et même un logo
+                au centre. Imprimable sur invitation papier.
+              </p>
+            </div>
+          </div>
+
+          <div className={`perso-card pc-cta ${seen ? 'revealed' : 'reveal'}`} style={{ transitionDelay: '.2s' }}>
+            <div className="perso-visual">
+              <div className="cta-wish">
+                <div className="cw-h">Joyeux anniversaire,<br/>Aminata.</div>
+                <div className="cw-sub">— De toute l'équipe</div>
+                <div className="cw-buttons">
+                  <span className="cw-btn cw-btn-1">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.5 5.9L0 24l6.3-1.6c1.7 1 3.7 1.5 5.7 1.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+                    WhatsApp Atelier YALA
+                  </span>
+                  <span className="cw-btn cw-btn-2">Voir notre catalogue</span>
+                </div>
+              </div>
+            </div>
+            <div className="perso-body">
+              <span className="pill pill-em">Bouton CTA personnalisé</span>
+              <h3 className="serif italic">Un lien vers vous : site, WhatsApp, offre.</h3>
+              <p>
+                Si vous êtes une marque, chaque vœu envoyé devient un point de contact.
+                Ajoutez le bouton de votre choix — discret, mais présent.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

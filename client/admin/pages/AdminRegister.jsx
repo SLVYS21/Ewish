@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleBtn from '../components/GoogleBtn';
 import s from './AdminLogin.module.css';
 
 const VALUE_CARDS = [
@@ -11,20 +12,37 @@ const VALUE_CARDS = [
 ];
 
 export default function AdminRegister() {
-  const [email, setEmail]     = useState('');
-  const [pass, setPass]       = useState('');
-  const [error, setError]     = useState('');
-  const [loading, setLoading] = useState(false);
-  const [agree, setAgree]     = useState(true);
+  const [name, setName]         = useState('');
+  const [email, setEmail]       = useState('');
+  const [pass, setPass]         = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [agree, setAgree]       = useState(false);
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
   const { register } = useAuth();
   const navigate     = useNavigate();
 
   const submit = async () => {
     setError('');
-    if (!email || !pass) { setError('Tous les champs sont requis.'); return; }
+    if (!name || !email || !pass || !confirmPass) {
+      setError('Tous les champs sont requis.');
+      return;
+    }
+    if (pass !== confirmPass) {
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+    if (pass.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      return;
+    }
+    if (!agree) {
+      setError("Veuillez accepter les conditions d'utilisation pour continuer.");
+      return;
+    }
     setLoading(true);
     try {
-      await register(email, pass, '');
+      await register(email, pass, name);
       navigate('/ewish-admin');
     } catch (e) {
       setError(e.response?.data?.error || 'Erreur lors de la création du compte');
@@ -80,10 +98,24 @@ export default function AdminRegister() {
           C'est gratuit. <strong style={{ color: '#e11d48' }}>3 crédits offerts</strong> à l'inscription.
         </p>
 
+        <GoogleBtn label="S'inscrire avec Google" />
+
+        <div className={s.orDivider}><span>OU</span></div>
+
+        <div className={s.field}>
+          <label>Nom complet</label>
+          <input
+            type="text" value={name} autoComplete="name"
+            placeholder="Votre prénom et nom"
+            onChange={e => setName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-email')?.focus()}
+          />
+        </div>
+
         <div className={s.field}>
           <label>Email professionnel</label>
           <input
-            type="email" value={email} autoComplete="username"
+            id="reg-email" type="email" value={email} autoComplete="username"
             placeholder="vous@mykado.com"
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-pass')?.focus()}
@@ -96,20 +128,38 @@ export default function AdminRegister() {
             id="reg-pass" type="password" value={pass} autoComplete="new-password"
             placeholder="8 caractères minimum"
             onChange={e => setPass(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-confirm')?.focus()}
+          />
+        </div>
+
+        <div className={s.field}>
+          <label>Confirmer le mot de passe</label>
+          <input
+            id="reg-confirm" type="password" value={confirmPass} autoComplete="new-password"
+            placeholder="Répétez votre mot de passe"
+            onChange={e => setConfirmPass(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && submit()}
           />
         </div>
 
         <div className={s.field} style={{ marginBottom: 18 }}>
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontWeight: 400, fontSize: '0.72rem', color: '#52525b', lineHeight: 1.5, textTransform: 'none', letterSpacing: 0 }}>
-            <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} style={{ accentColor: '#e11d48', marginTop: 2 }} />
-            <span>J'accepte les <a style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>conditions d'utilisation</a> et la politique de confidentialité.</span>
+            <input
+              type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)}
+              style={{ accentColor: '#e11d48', marginTop: 2, flexShrink: 0, width: 'auto', padding: 0 }}
+            />
+            <span>
+              J'accepte les{' '}
+              <Link to="/terms" target="_blank" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>conditions d'utilisation</Link>
+              {' '}et la{' '}
+              <Link to="/privacy" target="_blank" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>politique de confidentialité</Link>.
+            </span>
           </label>
         </div>
 
         {error && <div className={s.error}>{error}</div>}
 
-        <button className={s.btn} onClick={submit} disabled={loading}>
+        <button className={s.btn} onClick={submit} disabled={loading || !agree}>
           {loading ? 'Création…' : 'Créer mon compte gratuit →'}
         </button>
 

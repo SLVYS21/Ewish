@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleBtn from '../components/GoogleBtn';
 import s from './AdminLogin.module.css';
 
 export default function AdminLogin() {
@@ -101,10 +102,7 @@ export default function AdminLogin() {
 
         <div className={s.orDivider}><span>OU</span></div>
 
-        <button className={s.btnOutline}>
-          <span className={s.googleDot} />
-          Continuer avec Google
-        </button>
+        <GoogleBtn />
 
         <div className={s.formFooter}>
           Pas encore de compte ?{' '}

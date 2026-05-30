@@ -4,6 +4,20 @@ const Transaction = require('../models/Transaction');
 const { requireAdmin } = require('../middleware/auth');
 const { kkiapay } = require("@kkiapay-org/nodejs-sdk");
 
+// Pack pricing: amount in FCFA → credits awarded
+const PACK_MAP = { 500: 1, 2400: 5, 4500: 10, 10500: 25, 19500: 50, 36000: 100 };
+
+function creditsFromAmount(amountFCFA) {
+  // Exact match first
+  if (PACK_MAP[amountFCFA]) return PACK_MAP[amountFCFA];
+  // Closest lower pack (handles minor KKiaPay rounding)
+  const sorted = Object.keys(PACK_MAP).map(Number).sort((a, b) => b - a);
+  for (const threshold of sorted) {
+    if (amountFCFA >= threshold) return PACK_MAP[threshold];
+  }
+  return 0;
+}
+
 // Initialize KKiaPay SDK
 const k = kkiapay({
   privatekey: process.env.KKIAPAY_PRIVATE_KEY || 'xxxxxxx',
@@ -51,8 +65,7 @@ router.post('/kkiapay-verify', requireAdmin, async (req, res) => {
     k.verify(transactionId).then(async (response) => {
       if (response.status === 'SUCCESS') {
         const amountFCFA = response.amount;
-        // 1 crédit = 100 FCFA
-        const creditsToBuy = Math.floor(amountFCFA / 100);
+        const creditsToBuy = creditsFromAmount(amountFCFA);
 
         if (creditsToBuy <= 0) {
            return res.status(400).json({ error: 'Montant insuffisant pour des crédits' });

@@ -1,285 +1,154 @@
-import { useState, useEffect, useRef } from 'react';
-import { getFonts, uploadFont, deleteFont } from '../utils/api';
-import { Palette, Brush, Baseline, Type, AArrowUp, Moon, Sun, Plus, X, UploadCloud, Eye, Gift, Mail } from 'lucide-react';
+import { useEffect } from 'react';
 import styles from './StyleTab.module.css';
 
-const SYSTEM_FONTS = [
-  'Work Sans',
-  'Inter',
-  'Playfair Display',
-  'Pacifico',
-  'Dancing Script',
-  'Montserrat',
-  'Poppins',
-  'Lato',
-  'Raleway',
-  'Nunito',
+const STYLE_PALETTES = [
+  { id: 'rose',    name: 'Tendre rose',       colors: ['#FFE0E6', '#FFB3C1', '#E11D48'] },
+  { id: 'lilac',   name: 'Lilas onirique',    colors: ['#E5D9F5', '#B59CF0', '#6E4FBA'] },
+  { id: 'mint',    name: 'Menthe frais',      colors: ['#D4F1E5', '#9FE3CB', '#1F6E55'] },
+  { id: 'sunset',  name: 'Coucher de soleil', colors: ['#FFD7C2', '#FFAE82', '#B84C1F'] },
+  { id: 'gold',    name: 'Or doré',           colors: ['#FFE7AD', '#FFC95A', '#A86E00'] },
+  { id: 'night',   name: 'Nuit étoilée',      colors: ['#3A2D5F', '#6B5BA0', '#FFC95A'] },
 ];
 
-const FONT_SIZES = [
-  { value: 'small',  label: 'Small',  desc: '90%'  },
-  { value: 'medium', label: 'Medium', desc: '100%' },
-  { value: 'large',  label: 'Large',  desc: '115%' },
+const TEXT_PALETTES = [
+  { id: 'dark',  name: 'Nuit',    textColor: '#1A1424', textMuted: '#8A8195' },
+  { id: 'light', name: 'Blanc',   textColor: '#FFFFFF', textMuted: '#D0C8D4' },
+  { id: 'sepia', name: 'Sépia',   textColor: '#2C1810', textMuted: '#9E7B6A' },
+  { id: 'gold',  name: 'Doré',    textColor: '#F5E6D3', textMuted: '#C9A97A' },
+  { id: 'slate', name: 'Ardoise', textColor: '#0D1B2A', textMuted: '#607B96' },
+  { id: 'berry', name: 'Grenat',  textColor: '#3B0A1A', textMuted: '#9E4060' },
 ];
 
-const THEMES = [
-  { value: 'light', label: 'Light', icon: <Sun size={14} /> },
-  { value: 'dark',  label: 'Dark',  icon: <Moon size={14} /> },
-];
-
-const PRESETS = [
-  { label: 'Birthday Pink', primary: '#ff69b4', accent: '#ffb347' },
-  { label: 'Ocean Blue',    primary: '#0ea5e9', accent: '#38bdf8' },
-  { label: 'Forest Green',  primary: '#22c55e', accent: '#a3e635' },
-  { label: 'Royal Purple',  primary: '#a855f7', accent: '#ec4899' },
-  { label: 'Sunset',        primary: '#f97316', accent: '#fbbf24' },
-  { label: 'Rose Gold',     primary: '#e11d48', accent: '#f43f5e' },
+const TYPOGRAPHY = [
+  { id: 'serif',  label: 'Élégant',   fontFamily: 'Playfair Display', italic: true  },
+  { id: 'fest',   label: 'Festif',    fontFamily: 'Pacifico'                        },
+  { id: 'mod',    label: 'Moderne',   fontFamily: 'Poppins'                         },
+  { id: 'bold',   label: 'Audacieux', fontFamily: 'Raleway',          bold: true    },
 ];
 
 export default function StyleTab({ style, onChange }) {
   const s = {
-    primaryColor: '#ff69b4',
-    accentColor:  '#ffb347',
-    fontFamily:   'Work Sans',
+    primaryColor: '#E11D48',
+    accentColor:  '#FFB3C1',
+    fontFamily:   'Playfair Display',
     fontSize:     'medium',
-    theme:        'light',
-    textColor:    '#333333',
-    textMuted:    '#888888',
+    textColor:    '#1A1424',
+    textMuted:    '#8A8195',
+    paletteId:    'rose',
+    typographyId: 'serif',
     ...style,
   };
 
-  /* ── Custom fonts state ─────────────────────────────────────── */
-  const [customFonts,   setCustomFonts]   = useState([]);
-  const [uploading,     setUploading]     = useState(false);
-  const [uploadError,   setUploadError]   = useState('');
-  const [fontName,      setFontName]      = useState('');
-  const [showUploader,  setShowUploader]  = useState(false);
-  const fileInputRef = useRef(null);
-
+  /* Load fonts for the panel UI preview */
   useEffect(() => {
-    getFonts()
-      .then(r => setCustomFonts(r.data))
-      .catch(() => {});
+    if (document.querySelector('link[data-mk-typo]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.setAttribute('data-mk-typo', '1');
+    link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400;1,600&family=Pacifico&family=Poppins:wght@400;600&family=Raleway:wght@400;700;900&display=swap';
+    document.head.appendChild(link);
   }, []);
 
-  // Inject @font-face for custom fonts into the editor page itself (for preview)
-  useEffect(() => {
-    customFonts.forEach(font => {
-      if (!document.querySelector(`style[data-font="${font.name}"]`)) {
-        const style = document.createElement('style');
-        style.setAttribute('data-font', font.name);
-        style.textContent = `@font-face { font-family: '${font.name}'; src: url('${font.url}') format('${font.format}'); font-display: swap; }`;
-        document.head.appendChild(style);
-      }
-    });
-  }, [customFonts]);
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!fontName.trim()) { setUploadError("Donne un nom à la font d'abord"); return; }
-
-    setUploading(true);
-    setUploadError('');
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('name', fontName.trim());
-      const r = await uploadFont(form);
-      setCustomFonts(prev => [r.data, ...prev]);
-      setFontName('');
-      setShowUploader(false);
-      onChange('fontFamily', r.data.name);
-    } catch (e) {
-      setUploadError(e.response?.data?.error || 'Upload échoué');
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+  const handlePalette = (p) => {
+    onChange({ primaryColor: p.colors[2], accentColor: p.colors[1], paletteId: p.id });
   };
 
-  const handleDeleteFont = async (font, e) => {
-    e.stopPropagation();
-    if (!confirm(`Supprimer "${font.name}" ?`)) return;
-    try {
-      await deleteFont(font._id);
-      setCustomFonts(prev => prev.filter(f => f._id !== font._id));
-      if (s.fontFamily === font.name) onChange('fontFamily', 'Work Sans');
-    } catch {}
+  const handleTypography = (t) => {
+    onChange({ fontFamily: t.fontFamily, typographyId: t.id });
   };
+
+  const activePaletteId = s.paletteId ||
+    STYLE_PALETTES.find(p => p.colors[2] === s.primaryColor)?.id;
+
+  const activeTypoId = s.typographyId ||
+    TYPOGRAPHY.find(t => t.fontFamily === s.fontFamily)?.id;
+
+  const handleTextPalette = (p) => {
+    onChange({ textColor: p.textColor, textMuted: p.textMuted, textPaletteId: p.id });
+  };
+
+  const activeTextPaletteId = s.textPaletteId ||
+    TEXT_PALETTES.find(p => p.textColor === s.textColor)?.id;
 
   return (
     <div className={styles.root}>
 
-      {/* Color Presets */}
+      {/* ── Palettes ── */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}><Palette size={16} /> Color Presets</h3>
-        <div className={styles.presets}>
-          {PRESETS.map(p => (
+        <div className={styles.groupLabel}>PALETTE DE COULEURS</div>
+        <div className={styles.paletteGrid}>
+          {STYLE_PALETTES.map(p => (
             <button
-              key={p.label}
-              className={`${styles.preset} ${s.primaryColor === p.primary ? styles.presetActive : ''}`}
-              onClick={() => { onChange('primaryColor', p.primary); onChange('accentColor', p.accent); }}
-              title={p.label}
+              key={p.id}
+              className={`${styles.paletteCard} ${activePaletteId === p.id ? styles.paletteCardActive : ''}`}
+              onClick={() => handlePalette(p)}
             >
-              <span className={styles.presetSwatch} style={{
-                background: `linear-gradient(135deg, ${p.primary}, ${p.accent})`
-              }} />
-              <span className={styles.presetLabel}>{p.label}</span>
+              <div className={styles.paletteSwatch}>
+                {p.colors.map((c, i) => (
+                  <span key={i} className={styles.paletteColor} style={{ background: c }} />
+                ))}
+              </div>
+              <div className={styles.paletteName}>{p.name}</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Custom colors */}
+      {/* ── Typography ── */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}><Brush size={16} /> Custom Colors</h3>
-        <div className={styles.colorRow}>
-          <label className={styles.colorLabel}>Primary</label>
-          <div className={styles.colorPair}>
-            <input type="color" value={s.primaryColor}
-              onChange={e => onChange('primaryColor', e.target.value)}
-              className={styles.colorPicker} />
-            <input type="text" value={s.primaryColor}
-              onChange={e => onChange('primaryColor', e.target.value)}
-              className={styles.colorInput} />
-          </div>
-        </div>
-        <div className={styles.colorRow}>
-          <label className={styles.colorLabel}>Accent</label>
-          <div className={styles.colorPair}>
-            <input type="color" value={s.accentColor}
-              onChange={e => onChange('accentColor', e.target.value)}
-              className={styles.colorPicker} />
-            <input type="text" value={s.accentColor}
-              onChange={e => onChange('accentColor', e.target.value)}
-              className={styles.colorInput} />
-          </div>
-        </div>
-      </div>
-
-      {/* Text Colors */}
-      <div className={styles.group}>
-        <h3 className={styles.groupTitle}><Baseline size={16} /> Couleur du texte</h3>
-        <div className={styles.colorRow}>
-          <label className={styles.colorLabel}>Principal</label>
-          <div className={styles.colorPair}>
-            <input type="color" value={s.textColor}
-              onChange={e => onChange('textColor', e.target.value)}
-              className={styles.colorPicker} />
-            <input type="text" value={s.textColor}
-              onChange={e => onChange('textColor', e.target.value)}
-              className={styles.colorInput} />
-          </div>
-        </div>
-        <div className={styles.colorRow}>
-          <label className={styles.colorLabel}>Secondaire</label>
-          <div className={styles.colorPair}>
-            <input type="color" value={s.textMuted}
-              onChange={e => onChange('textMuted', e.target.value)}
-              className={styles.colorPicker} />
-            <input type="text" value={s.textMuted}
-              onChange={e => onChange('textMuted', e.target.value)}
-              className={styles.colorInput} />
-          </div>
-        </div>
-        <div className={styles.textPresets}>
-          <button className={styles.textPresetBtn}
-            onClick={() => { onChange('textColor', '#333333'); onChange('textMuted', '#888888'); }}>
-            <span style={{color:'#333'}}>A</span> Sombre
-          </button>
-          <button className={styles.textPresetBtn}
-            onClick={() => { onChange('textColor', '#ffffff'); onChange('textMuted', '#cccccc'); }}>
-            <span style={{color:'#fff', textShadow:'0 0 2px #666'}}>A</span> Clair
-          </button>
-          <button className={styles.textPresetBtn}
-            onClick={() => { onChange('textColor', '#f5e6d3'); onChange('textMuted', '#c9a97a'); }}>
-            <span style={{color:'#c9a97a'}}>A</span> Doré
-          </button>
-        </div>
-      </div>
-
-      {/* Font Family */}
-      <div className={styles.group}>
-        <h3 className={styles.groupTitle}><Type size={16} /> Police</h3>
-
-        {/* Custom fonts section */}
-        {customFonts.length > 0 && (
-          <div className={styles.fontSection}>
-            <p className={styles.fontSectionLabel}>Mes fonts</p>
-            <div className={styles.fontGrid}>
-              {customFonts.map(font => (
-                <button
-                  key={font._id}
-                  className={`${styles.fontBtn} ${styles.fontCustom} ${s.fontFamily === font.name ? styles.fontActive : ''}`}
-                  style={{ fontFamily: `'${font.name}', sans-serif` }}
-                  onClick={() => onChange('fontFamily', font.name)}
-                >
-                  <span className={styles.fontBtnName}>{font.name}</span>
-                  <span
-                    className={styles.fontDeleteBtn}
-                    onClick={(e) => handleDeleteFont(font, e)}
-                    title="Supprimer"
-                  ><X size={14} /></span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Upload new font */}
-        {showUploader ? (
-          <div className={styles.fontUploader}>
-            <input
-              className={styles.fontNameInput}
-              placeholder="Nom de la font (ex: Clash Display)"
-              value={fontName}
-              onChange={e => setFontName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && fileInputRef.current?.click()}
-            />
-            <label className={`${styles.fontUploadBtn} ${uploading ? styles.fontUploadBtnLoading : ''}`}>
-              {uploading ? <span style={{display:'flex', alignItems:'center', gap:'4px'}}><UploadCloud size={14} /> Upload…</span> : <span style={{display:'flex', alignItems:'center', gap:'4px'}}><UploadCloud size={14} /> Choisir le fichier (.ttf .otf .woff2)</span>}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".ttf,.otf,.woff,.woff2,font/*"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-                disabled={uploading}
-              />
-            </label>
-            {uploadError && <p className={styles.fontError}>{uploadError}</p>}
-            <button className={styles.fontCancelBtn} onClick={() => { setShowUploader(false); setUploadError(''); setFontName(''); }}>
-              Annuler
-            </button>
-          </div>
-        ) : (
-          <button className={styles.addFontBtn} onClick={() => setShowUploader(true)} style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}>
-            <Plus size={14} /> Ajouter une font
-          </button>
-        )}
-
-        {/* System fonts */}
-        <p className={styles.fontSectionLabel} style={{ marginTop: 12 }}>Fonts système</p>
-        <div className={styles.fontGrid}>
-          {SYSTEM_FONTS.map(f => (
+        <div className={styles.groupLabel}>TYPOGRAPHIE</div>
+        <div className={styles.typoGrid}>
+          {TYPOGRAPHY.map(t => (
             <button
-              key={f}
-              className={`${styles.fontBtn} ${s.fontFamily === f ? styles.fontActive : ''}`}
-              style={{ fontFamily: `'${f}', sans-serif` }}
-              onClick={() => onChange('fontFamily', f)}
+              key={t.id}
+              className={`${styles.typoCard} ${activeTypoId === t.id ? styles.typoCardActive : ''}`}
+              onClick={() => handleTypography(t)}
             >
-              {f}
+              <div
+                className={styles.typoAa}
+                style={{
+                  fontFamily: `'${t.fontFamily}', serif`,
+                  fontStyle:  t.italic ? 'italic' : 'normal',
+                  fontWeight: t.bold   ? 900      : 600,
+                }}
+              >
+                Aa
+              </div>
+              <div className={styles.typoLabel}>{t.label}</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Font Size */}
+      {/* ── Couleur du texte ── */}
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}><AArrowUp size={16} /> Font Size</h3>
+        <div className={styles.groupLabel}>COULEUR DU TEXTE</div>
+        <div className={styles.textPaletteGrid}>
+          {TEXT_PALETTES.map(p => (
+            <button
+              key={p.id}
+              className={`${styles.textPaletteCard} ${activeTextPaletteId === p.id ? styles.textPaletteCardActive : ''}`}
+              onClick={() => handleTextPalette(p)}
+            >
+              <div className={styles.textPaletteDots}>
+                <span className={styles.textPaletteDot} style={{ background: p.textColor, border: p.textColor === '#FFFFFF' ? '1.5px solid #ddd' : 'none' }} />
+                <span className={styles.textPaletteDot} style={{ background: p.textMuted }} />
+              </div>
+              <div className={styles.textPaletteName}>{p.name}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Taille ── */}
+      <div className={styles.group}>
+        <div className={styles.groupLabel}>TAILLE DE POLICE</div>
         <div className={styles.sizeRow}>
-          {FONT_SIZES.map(sz => (
+          {[
+            { value: 'small',  label: 'Compact', desc: '90%'  },
+            { value: 'medium', label: 'Normal',  desc: '100%' },
+            { value: 'large',  label: 'Grand',   desc: '115%' },
+          ].map(sz => (
             <button
               key={sz.value}
               className={`${styles.sizeBtn} ${s.fontSize === sz.value ? styles.sizeBtnActive : ''}`}
@@ -289,41 +158,6 @@ export default function StyleTab({ style, onChange }) {
               <small>{sz.desc}</small>
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Theme */}
-      <div className={styles.group}>
-        <h3 className={styles.groupTitle}><Sun size={16} /> Theme</h3>
-        <div className={styles.themeRow}>
-          {THEMES.map(t => (
-            <button
-              key={t.value}
-              className={`${styles.themeBtn} ${s.theme === t.value ? styles.themeBtnActive : ''}`}
-              onClick={() => onChange('theme', t.value)}
-            >
-              <span>{t.icon}</span>
-              <span>{t.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Live preview */}
-      <div className={styles.group}>
-        <h3 className={styles.groupTitle}><Eye size={16} /> Preview</h3>
-        <div className={styles.sampleCard} style={{
-          fontFamily: `'${s.fontFamily}', sans-serif`,
-          fontSize: s.fontSize === 'small' ? '0.85rem' : s.fontSize === 'large' ? '1.05rem' : '0.9rem',
-        }}>
-          <div className={styles.sampleBadge} style={{
-            background: `linear-gradient(135deg, ${s.primaryColor}, ${s.accentColor})`
-          }}>Happy Birthday!</div>
-          <p style={{ color: s.textColor, display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>A warm message just for you <Gift size={14} /></p>
-          <button className={styles.sampleBtn} style={{
-            background: `linear-gradient(135deg, ${s.primaryColor}, ${s.accentColor})`,
-            display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', margin: '0 auto'
-          }}>Voir mes vœux <Mail size={14} /></button>
         </div>
       </div>
     </div>

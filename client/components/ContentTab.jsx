@@ -1,109 +1,87 @@
 import { useState, useRef } from 'react';
-import { Hand, Music, BookOpen, MessageSquare, PartyPopper, Mail, Star, Timer, Upload, Film, ChevronRight } from 'lucide-react';
+import { Music, Camera, ChevronRight, X, Timer } from 'lucide-react';
 import styles from './ContentTab.module.css';
 
-const SECTION_ICONS = {
-  Intro: <Hand size={16} />,
-  Music: <Music size={16} />,
-  Story: <BookOpen size={16} />,
-  Message: <MessageSquare size={16} />,
-  Celebration: <PartyPopper size={16} />,
-  Wishes: <Mail size={16} />,
-  Outro: <Star size={16} />,
-  Mur: <Mail size={16} />,
-};
-
-// Default fields when template isn't loaded from DB yet
+/* ─── Default field schema ─────────────────────────────────────── */
 const DEFAULT_FIELDS = [
-  { key: 'greeting',       label: 'Message d\'accueil',       type: 'text',      section: 'Intro',       placeholder: 'Hiya' },
-  { key: 'name',           label: 'Prénom du destinataire',   type: 'text',      section: 'Intro',       placeholder: 'Lydia', required: true },
-  { key: 'greetingText',   label: 'Note personnelle',         type: 'text',      section: 'Intro',       placeholder: 'Tu comptes énormément pour nous !' },
-  { key: 'musicSrc',       label: 'Fichier musical (URL)',    type: 'url',       section: 'Music',       placeholder: 'https://... .mp3' },
-  { key: 'musicStartTime', label: 'Démarrer à',              type: 'starttime', section: 'Music' },
-  { key: 'albumArt',       label: 'Pochette de l\'album',    type: 'url',       section: 'Music',       placeholder: 'https://... .jpg' },
-  { key: 'trackTitle',     label: 'Titre de la musique',     type: 'text',      section: 'Music',       placeholder: 'Notre chanson' },
-  { key: 'trackArtist',    label: 'Artiste',                 type: 'text',      section: 'Music',       placeholder: 'Artiste' },
-  { key: 'text1',          label: 'Annonce principale',      type: 'text',      section: 'Story',       required: true },
-  { key: 'textInChatBox',  label: 'Message WhatsApp',        type: 'textarea',  section: 'Message',     required: true },
-  { key: 'waName',         label: 'Nom du contact',          type: 'text',      section: 'Message' },
-  { key: 'imagePath',      label: 'Photo principale (URL)',  type: 'url',       section: 'Celebration' },
-  { key: 'photo1',         label: 'Photo latérale gauche',  type: 'url',       section: 'Celebration' },
-  { key: 'photo2',         label: 'Photo latérale droite',  type: 'url',       section: 'Celebration' },
+  { key: 'greeting',       label: "Message d'accueil",      type: 'text',      section: 'Intro',       placeholder: 'Hiya' },
+  { key: 'name',           label: 'Prénom du destinataire', type: 'text',      section: 'Intro',       placeholder: 'Lydia', required: true },
+  { key: 'greetingText',   label: 'Note personnelle',       type: 'text',      section: 'Intro',       placeholder: 'Tu comptes énormément pour nous !' },
+  { key: 'musicSrc',       label: 'Fichier musical',        type: 'url',       section: 'Music',       placeholder: 'https://... .mp3' },
+  { key: 'musicStartTime', label: 'Démarrer à',             type: 'starttime', section: 'Music' },
+  { key: 'albumArt',       label: 'Pochette',               type: 'url',       section: 'Music',       placeholder: 'https://... .jpg' },
+  { key: 'trackTitle',     label: 'Titre',                  type: 'text',      section: 'Music',       placeholder: 'Notre chanson' },
+  { key: 'trackArtist',    label: 'Artiste',                type: 'text',      section: 'Music',       placeholder: 'Artiste' },
+  { key: 'text1',          label: 'Annonce principale',     type: 'text',      section: 'Story',       required: true },
+  { key: 'textInChatBox',  label: 'Message principal',      type: 'textarea',  section: 'Message',     required: true },
+  { key: 'waName',         label: 'Nom du contact',         type: 'text',      section: 'Message' },
+  { key: 'imagePath',      label: 'Photo principale',       type: 'url',       section: 'Celebration' },
+  { key: 'photo1',         label: 'Photo gauche',           type: 'url',       section: 'Celebration' },
+  { key: 'photo2',         label: 'Photo droite',           type: 'url',       section: 'Celebration' },
   { key: 'wishHeading',    label: 'Titre du vœu',           type: 'text',      section: 'Celebration', required: true },
   { key: 'wishText',       label: 'Sous-titre du vœu',      type: 'text',      section: 'Celebration' },
-  { key: 'wish1',          label: 'Paragraphe de vœu 1',    type: 'textarea',  section: 'Wishes' },
-  { key: 'wish2',          label: 'Paragraphe de vœu 2',    type: 'textarea',  section: 'Wishes' },
-  { key: 'wish3',          label: 'Paragraphe de vœu 3',    type: 'textarea',  section: 'Wishes' },
+  { key: 'wish1',          label: 'Vœu 1',                  type: 'textarea',  section: 'Wishes' },
+  { key: 'wish2',          label: 'Vœu 2',                  type: 'textarea',  section: 'Wishes' },
+  { key: 'wish3',          label: 'Vœu 3',                  type: 'textarea',  section: 'Wishes' },
   { key: 'outroText',      label: 'Message de fin',         type: 'text',      section: 'Outro' },
-  { key: 'replayText',     label: 'Texte du bouton revoir', type: 'text',      section: 'Outro' },
+  { key: 'replayText',     label: 'Texte bouton revoir',    type: 'text',      section: 'Outro' },
 ];
 
+const PRIMARY_SECTIONS = new Set(['Intro', 'Story', 'Message']);
+const MUSIC_KEYS = new Set(['musicSrc', 'albumArt', 'trackTitle', 'trackArtist', 'musicHint', 'musicStartTime']);
+const isMusicField = f => MUSIC_KEYS.has(f.key) || f.section === 'Music' || f.section === 'Musique';
+const isPhotoKey = k =>
+  /^(imagePath|photo\d*|albumArt|coverImg|thumbnail)$/i.test(k) ||
+  k.toLowerCase().includes('photo') ||
+  k.toLowerCase().includes('image') ||
+  k.toLowerCase().includes('art');
 
-/* ── Start Time Field ────────────────────────────────────────── */
+/* Default photo fields injected when the template defines none */
+const DEFAULT_PHOTO_FIELDS = [
+  { key: 'imagePath', label: 'Photo principale', type: 'url', section: 'Photos' },
+  { key: 'photo1',    label: 'Photo gauche',      type: 'url', section: 'Photos' },
+  { key: 'photo2',    label: 'Photo droite',      type: 'url', section: 'Photos' },
+];
+
+/* ── Start Time Field ── */
 function StartTimeField({ value, onChange }) {
-  const seconds = parseInt(value) || 0;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-
-  const fmtTime = (s) => {
-    const m = Math.floor(s / 60);
-    const ss = s % 60;
-    return `${m}:${ss.toString().padStart(2, '0')}`;
-  };
-
-  const handleSlider = (e) => onChange(parseInt(e.target.value));
-  const handleMins = (e) => onChange(Math.max(0, parseInt(e.target.value) || 0) * 60 + secs);
-  const handleSecs = (e) => onChange(mins * 60 + Math.max(0, Math.min(59, parseInt(e.target.value) || 0)));
-
+  const s = parseInt(value) || 0;
+  const m = Math.floor(s / 60), sec = s % 60;
+  const fmt = n => `${Math.floor(n/60)}:${(n%60).toString().padStart(2,'0')}`;
   return (
     <div className={styles.startTimeField}>
       <div className={styles.startTimeDisplay}>
-        <span className={styles.startTimeIcon}><Timer size={14} /></span>
-        <span className={styles.startTimeValue}>{fmtTime(seconds)}</span>
+        <Timer size={13} className={styles.startTimeIcon} />
+        <span className={styles.startTimeValue}>{fmt(s)}</span>
         <span className={styles.startTimeHint}>depuis le début</span>
       </div>
-      <input
-        type="range"
-        min={0} max={600} step={1}
-        value={seconds}
-        onChange={handleSlider}
-        className={styles.startTimeSlider}
-      />
+      <input type="range" min={0} max={600} value={s}
+        onChange={e => onChange(parseInt(e.target.value))} className={styles.startTimeSlider} />
       <div className={styles.startTimeMMS}>
         <div className={styles.startTimeMM}>
           <label>min</label>
-          <input type="number" min={0} max={10} value={mins}
-            onChange={handleMins} className={styles.startTimeNum} />
+          <input type="number" min={0} max={10} value={m}
+            onChange={e => onChange((parseInt(e.target.value)||0)*60+sec)} className={styles.startTimeNum} />
         </div>
         <span className={styles.startTimeSep}>:</span>
         <div className={styles.startTimeMM}>
           <label>sec</label>
-          <input type="number" min={0} max={59} value={secs}
-            onChange={handleSecs} className={styles.startTimeNum} />
+          <input type="number" min={0} max={59} value={sec}
+            onChange={e => onChange(m*60+Math.min(59,parseInt(e.target.value)||0))} className={styles.startTimeNum} />
         </div>
-        {seconds > 0 && (
-          <button className={styles.startTimeReset} onClick={() => onChange(0)} title="Remettre à 0">✕</button>
-        )}
+        {s > 0 && <button className={styles.startTimeReset} onClick={() => onChange(0)}>✕</button>}
       </div>
     </div>
   );
 }
 
-/* ── Date Field ──────────────────────────────────────────────── */
+/* ── Date Field ── */
 function DateField({ value, onChange, placeholder }) {
-  // Affiche un date picker natif + calcul automatique du nombre de jours
-  const days = value ? Math.floor((new Date() - new Date(value)) / (1000 * 60 * 60 * 24)) : null;
-
+  const days = value ? Math.floor((Date.now() - new Date(value)) / 86400000) : null;
   return (
     <div className={styles.dateField}>
-      <input
-        type="date"
-        value={value || ''}
-        onChange={e => onChange(e.target.value)}
-        className={styles.dateInput}
-        placeholder={placeholder}
-        max={new Date().toISOString().split('T')[0]}
-      />
+      <input type="date" value={value||''} max={new Date().toISOString().split('T')[0]}
+        onChange={e => onChange(e.target.value)} className={styles.dateInput} placeholder={placeholder} />
       {days !== null && days >= 0 && (
         <div className={styles.dateDays}>
           <span className={styles.dateDaysNum}>{days.toLocaleString('fr-FR')}</span>
@@ -114,186 +92,261 @@ function DateField({ value, onChange, placeholder }) {
   );
 }
 
-export default function ContentTab({ fields, data, onChange, onUpload }) {
-  const [openSections, setOpenSections] = useState({ Intro: true, Music: true, Story: true, Message: true, Celebration: true, Wishes: true, Outro: false, Mur: true });
-  const baseFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
+/* ── Photo Card ── */
+function PhotoCard({ label, value, onChange, onUpload }) {
+  const fileRef = useRef();
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
-  // Always inject musicStartTime after musicSrc, regardless of DB fields
-  const effectiveFields = baseFields.reduce((acc, f) => {
-    acc.push(f);
-    if (f.key === 'musicSrc' && !baseFields.find(x => x.key === 'musicStartTime')) {
-      acc.push({ key: 'musicStartTime', label: 'Démarrer à', type: 'starttime', section: f.section });
-    }
-    return acc;
-  }, []);
-
-  // Group by section
-  const sections = {};
-  effectiveFields.forEach(f => {
-    if (!sections[f.section]) sections[f.section] = [];
-    sections[f.section].push(f);
-  });
-
-  const toggleSection = (name) => setOpenSections(s => ({ ...s, [name]: !s[name] }));
+  const handleFile = async (file) => {
+    if (!file?.type.startsWith('image/')) return;
+    setUploading(true);
+    try { await onUpload(file); } finally { setUploading(false); }
+  };
 
   return (
-    <div className={styles.root}>
-      {Object.entries(sections).map(([sectionName, sectionFields]) => (
-        <Section
-          key={sectionName}
-          name={sectionName}
-          icon={SECTION_ICONS[sectionName] || <BookOpen size={16} />}
-          fields={sectionFields}
-          data={data}
-          onChange={onChange}
-          onUpload={onUpload}
-          open={!!openSections[sectionName]}
-          onToggle={() => toggleSection(sectionName)}
-        />
-      ))}
-    </div>
-  );
-}
-
-function Section({ name, icon, fields, data, onChange, onUpload, open, onToggle }) {
-  return (
-    <div className={styles.section}>
-      <button className={styles.sectionHeader} onClick={onToggle}>
-        <span className={styles.sectionIcon}>{icon}</span>
-        <span className={styles.sectionName}>{name}</span>
-        <span className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}><ChevronRight size={16} /></span>
-      </button>
-      {open && (
-        <div className={styles.sectionBody}>
-          {fields.map(field => (
-            <Field
-              key={field.key}
-              field={field}
-              value={data[field.key] ?? ''}
-              onChange={v => onChange(field.key, v)}
-              onUpload={file => onUpload(file, field.key)}
-            />
-          ))}
+    <div className={styles.photoField}>
+      <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }}
+        onChange={e => handleFile(e.target.files?.[0])} />
+      {value ? (
+        <div className={styles.photoPrimaryCard}>
+          <img src={value} alt="" className={styles.photoThumb} onError={e=>e.target.style.opacity='.3'} />
+          <div className={styles.photoInfo}>
+            <div className={styles.photoTitle}>{label}</div>
+            <div className={styles.photoSub}>Photo ajoutée</div>
+          </div>
+          <div className={styles.photoActions}>
+            <button className={styles.photoChangeBtn} onClick={() => fileRef.current?.click()}>
+              <Camera size={13}/> Changer
+            </button>
+            <button className={styles.photoRemoveBtn} onClick={() => onChange('')}><X size={13}/></button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={`${styles.photoPrimaryCard} ${dragOver ? styles.photoPrimaryCardDrag : ''}`}
+          onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
+        >
+          <span className={styles.photoIconCircle}><Camera size={16}/></span>
+          <div className={styles.photoInfo}>
+            <div className={styles.photoTitle}>{label}</div>
+            <div className={styles.photoSub}>{uploading ? 'Upload en cours…' : 'Aucune photo'}</div>
+          </div>
+          <button className={styles.photoSelectBtn} onClick={() => fileRef.current?.click()} disabled={uploading}>
+            {uploading ? '…' : 'Choisir'}
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-function Field({ field, value, onChange, onUpload }) {
+/* ── Music Section ── */
+function MusicSection({ fields, data, onChange, onUpload }) {
+  const [expanded, setExpanded] = useState(false);
   const fileRef = useRef();
   const [uploading, setUploading] = useState(false);
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
+  const trackTitle  = data.trackTitle  || '';
+  const trackArtist = data.trackArtist || '';
+  const albumArt    = data.albumArt    || '';
+  const musicSrc    = data.musicSrc    || '';
+  const hasTrack    = !!(musicSrc || trackTitle);
+
+  const handleAudioFile = async (file) => {
     if (!file) return;
     setUploading(true);
-    try { await onUpload(file); }
-    finally { setUploading(false); }
+    try { await onUpload(file, 'musicSrc'); } finally { setUploading(false); }
   };
 
-  return (
-    <div className={styles.field}>
-      <label className={styles.label}>
-        {field.label}
-        {field.required && <span className={styles.required}>*</span>}
-      </label>
+  const hasStartTime = fields.some(f => f.key === 'musicStartTime');
+  const hasAlbumArt  = fields.some(f => f.key === 'albumArt');
 
-      {field.type === 'textarea' ? (
-        <textarea
-          className={styles.textarea}
-          placeholder={field.placeholder}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          rows={3}
-        />
-      ) : field.type === 'color' ? (
-        <div className={styles.colorRow}>
-          <input
-            type="color" value={value || '#ff69b4'}
-            onChange={e => onChange(e.target.value)}
-            className={styles.colorPicker}
-          />
-          <input
-            type="text" value={value}
-            onChange={e => onChange(e.target.value)}
-            placeholder="#ff69b4"
-            className={styles.colorText}
-          />
+  return (
+    <div className={styles.musicWrapper}>
+      <div className={styles.musicCard}>
+        {albumArt ? (
+          <img src={albumArt} alt="" className={styles.musicAlbumArt} onError={e=>e.target.style.display='none'}/>
+        ) : (
+          <span className={styles.musicIconCircle}><Music size={16}/></span>
+        )}
+        <div className={styles.musicInfo}>
+          <div className={styles.musicTitle}>{hasTrack ? (trackTitle||'Musique sans titre') : 'Musique d\'ambiance'}</div>
+          <div className={styles.musicSub}>{hasTrack ? (trackArtist||'Artiste inconnu') : 'Aucune musique sélectionnée'}</div>
         </div>
-      ) : field.type === 'url' ? (
-        <div className={styles.urlRow}>
-          <div className={styles.urlRowInputs}>
-            <input
-              type="url" value={value}
-              onChange={e => onChange(e.target.value)}
-              placeholder={field.placeholder || 'https://...'}
-              className={styles.input}
-            />
-            {/* Upload button for image fields */}
-            {(field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
-              <>
-                <input type="file" ref={fileRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
-                <button
-                  className={styles.uploadBtn}
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  title="Upload image"
-                >
-                  {uploading ? '…' : <><Upload size={14} /> Charger</>}
-                </button>
-              </>
-            )}
-            {field.key === 'musicSrc' && (
-              <>
-                <input type="file" ref={fileRef} onChange={handleFileChange} accept="audio/*" style={{ display: 'none' }} />
-                <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload audio">
-                  {uploading ? '…' : <><Music size={14} /> Charger</>}
-                </button>
-              </>
-            )}
-            {field.key === 'videoSrc' && (
-              <>
-                <input type="file" ref={fileRef} onChange={handleFileChange} accept="video/*" style={{ display: 'none' }} />
-                <button className={styles.uploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading} title="Upload vidéo">
-                  {uploading ? '…' : <><Film size={14} /> Charger</>}
-                </button>
-              </>
-            )}
+        <button className={styles.musicChangeBtn} onClick={() => setExpanded(o=>!o)}>
+          {expanded ? 'Fermer' : hasTrack ? 'Modifier' : 'Choisir'}
+        </button>
+      </div>
+
+      {expanded && (
+        <div className={styles.musicExpandedFields}>
+          <input ref={fileRef} type="file" accept="audio/*" style={{display:'none'}}
+            onChange={e => handleAudioFile(e.target.files?.[0])} />
+          <div className={styles.flatFieldRow}>
+            <div className={styles.flatLabel}>FICHIER AUDIO</div>
+            <div className={styles.urlRowInputs}>
+              <input type="text" value={musicSrc} onChange={e=>onChange('musicSrc',e.target.value)}
+                placeholder="https://... .mp3" className={styles.input}/>
+              <button className={styles.uploadBtn} onClick={()=>fileRef.current?.click()} disabled={uploading}>
+                {uploading ? '…' : <><Music size={13}/> Charger</>}
+              </button>
+            </div>
           </div>
-          {/* Preview for image URLs */}
-          {value && (field.key.includes('photo') || field.key.includes('image') || field.key.includes('Art') || field.key.includes('Path') || /^photo\d+$/.test(field.key)) && (
-            <div className={styles.imgPreview}>
-              <img src={value} alt="" onError={e => e.target.style.display = 'none'} />
+          <div className={styles.flatFieldRow}>
+            <div className={styles.flatLabel}>TITRE</div>
+            <input type="text" value={trackTitle} onChange={e=>onChange('trackTitle',e.target.value)}
+              placeholder="Notre chanson" className={styles.input}/>
+          </div>
+          <div className={styles.flatFieldRow}>
+            <div className={styles.flatLabel}>ARTISTE</div>
+            <input type="text" value={trackArtist} onChange={e=>onChange('trackArtist',e.target.value)}
+              placeholder="Artiste" className={styles.input}/>
+          </div>
+          {hasAlbumArt && (
+            <PhotoCard label="POCHETTE D'ALBUM" value={albumArt}
+              onChange={v=>onChange('albumArt',v)} onUpload={f=>onUpload(f,'albumArt')}/>
+          )}
+          {hasStartTime && (
+            <div className={styles.flatFieldRow}>
+              <div className={styles.flatLabel}>DÉMARRER À</div>
+              <StartTimeField value={data.musicStartTime} onChange={v=>onChange('musicStartTime',v)}/>
             </div>
           )}
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Generic flat field ── */
+function FlatField({ field, value, onChange, onUpload }) {
+  const fileRef = useRef();
+  const [uploading, setUploading] = useState(false);
+
+  if (field.type === 'url' && isPhotoKey(field.key)) {
+    return <PhotoCard label={field.label.toUpperCase()} value={value} onChange={onChange}
+      onUpload={f => onUpload(f, field.key)} />;
+  }
+
+  return (
+    <div className={styles.flatFieldRow}>
+      <div className={styles.flatLabel}>
+        {field.label.toUpperCase()}
+        {field.required && <span className={styles.required}> *</span>}
+      </div>
+      {field.type === 'textarea' ? (
+        <textarea className={styles.textarea} placeholder={field.placeholder}
+          value={value} onChange={e=>onChange(e.target.value)} rows={4}/>
+      ) : field.type === 'url' ? (
+        <div className={styles.urlRowInputs}>
+          <input type="url" value={value} onChange={e=>onChange(e.target.value)}
+            placeholder={field.placeholder||'https://...'} className={styles.input}/>
+          {field.key === 'videoSrc' && (<>
+            <input ref={fileRef} type="file" accept="video/*" style={{display:'none'}}
+              onChange={async e => { const f=e.target.files?.[0]; if(!f)return; setUploading(true); try{await onUpload(f,field.key);}finally{setUploading(false);} }}/>
+            <button className={styles.uploadBtn} onClick={()=>fileRef.current?.click()} disabled={uploading}>
+              {uploading?'…':'▶ Charger'}
+            </button>
+          </>)}
+        </div>
       ) : field.type === 'starttime' ? (
-        <StartTimeField value={value} onChange={onChange} />
+        <StartTimeField value={value} onChange={onChange}/>
       ) : field.type === 'date' ? (
-        <DateField value={value} onChange={onChange} placeholder={field.placeholder} />
+        <DateField value={value} onChange={onChange} placeholder={field.placeholder}/>
       ) : field.type === 'layout' ? (
         <div className={styles.layoutGrid}>
-          {(field.options || []).map(opt => (
-            <button
-              key={opt.value}
-              className={`${styles.layoutBtn} ${value === opt.value ? styles.layoutBtnActive : ''}`}
-              onClick={() => onChange(opt.value)}
-              title={opt.label}
-            >
+          {(field.options||[]).map(opt => (
+            <button key={opt.value} onClick={()=>onChange(opt.value)}
+              className={`${styles.layoutBtn} ${value===opt.value?styles.layoutBtnActive:''}`}>
               <span className={styles.layoutIcon}>{opt.icon}</span>
               <span className={styles.layoutLabel}>{opt.label}</span>
             </button>
           ))}
         </div>
       ) : (
-        <input
-          type="text"
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={field.placeholder}
-          className={styles.input}
+        <input type="text" value={value} onChange={e=>onChange(e.target.value)}
+          placeholder={field.placeholder} className={styles.input}/>
+      )}
+    </div>
+  );
+}
+
+/* ── Main export ── */
+export default function ContentTab({ fields, data, onChange, onUpload }) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const baseFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
+
+  /* Inject musicStartTime after musicSrc if missing */
+  const effectiveFields = baseFields.reduce((acc, f) => {
+    acc.push(f);
+    if (f.key === 'musicSrc' && !baseFields.find(x => x.key === 'musicStartTime'))
+      acc.push({ key: 'musicStartTime', label: 'Démarrer à', type: 'starttime', section: 'Musique' });
+    return acc;
+  }, []);
+
+  /* Categorise */
+  const musicFields  = effectiveFields.filter(isMusicField);
+  const photoFields  = effectiveFields.filter(f => f.type === 'url' && isPhotoKey(f.key) && !isMusicField(f));
+
+  /* Always show photo cards — use template's own if defined, else inject defaults */
+  const finalPhotoFields = photoFields.length > 0 ? photoFields : DEFAULT_PHOTO_FIELDS;
+
+  const primaryFields = effectiveFields.filter(f =>
+    PRIMARY_SECTIONS.has(f.section) && !isMusicField(f) && !(f.type === 'url' && isPhotoKey(f.key))
+  );
+  const advancedFields = effectiveFields.filter(f =>
+    !musicFields.includes(f) && !photoFields.includes(f) && !primaryFields.includes(f)
+  );
+
+  return (
+    <div className={styles.flatRoot}>
+
+      {/* ── Destinataire & message primary fields ── */}
+      {primaryFields.map(f => (
+        <FlatField key={f.key} field={f}
+          value={data[f.key] ?? ''}
+          onChange={v => onChange(f.key, v)}
+          onUpload={onUpload}
         />
+      ))}
+
+      {/* ── Photos ── */}
+      {finalPhotoFields.map(f => (
+        <PhotoCard key={f.key} label={f.label}
+          value={data[f.key] ?? ''}
+          onChange={v => onChange(f.key, v)}
+          onUpload={file => onUpload(file, f.key)}
+        />
+      ))}
+
+      {/* ── Musique ── */}
+      {musicFields.length > 0 && (
+        <MusicSection fields={musicFields} data={data} onChange={onChange} onUpload={onUpload} />
+      )}
+
+      {/* ── Champs avancés ── */}
+      {advancedFields.length > 0 && (
+        <div className={styles.advancedBlock}>
+          <button className={styles.advancedToggle} onClick={() => setShowAdvanced(o => !o)}>
+            <ChevronRight size={15} className={showAdvanced ? styles.chevronOpen : styles.chevronIcon}/>
+            Champs avancés
+            <span className={styles.advancedCount}>{advancedFields.length}</span>
+          </button>
+          {showAdvanced && (
+            <div className={styles.advancedContent}>
+              {advancedFields.map(f => (
+                <FlatField key={f.key} field={f}
+                  value={data[f.key] ?? ''}
+                  onChange={v => onChange(f.key, v)}
+                  onUpload={onUpload}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

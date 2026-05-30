@@ -1,5 +1,7 @@
-const router = require('express').Router();
-const jwt = require('jsonwebtoken');
+const router  = require('express').Router();
+const jwt     = require('jsonwebtoken');
+const crypto  = require('crypto');
+const fetch   = require('node-fetch');
 const AdminUser = require('../models/AdminUser');
 const { requireAdmin } = require('../middleware/auth');
 
@@ -68,6 +70,57 @@ router.post('/login', async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: 'none',  // Required for cross-domain cookies
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ user: user.toSafeObject() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/auth/google — verify Google ID token, create/login user
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'Token manquant' });
+
+    const gRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    const info = await gRes.json();
+
+    if (!gRes.ok || !info.sub) return res.status(401).json({ error: 'Token Google invalide' });
+    if (process.env.GOOGLE_CLIENT_ID && info.aud !== process.env.GOOGLE_CLIENT_ID) {
+      return res.status(401).json({ error: 'Token Google invalide (audience)' });
+    }
+
+    let user = await AdminUser.findOne({
+      $or: [{ googleId: info.sub }, { email: info.email.toLowerCase() }],
+    });
+
+    if (!user) {
+      user = new AdminUser({
+        email:    info.email.toLowerCase(),
+        name:     info.name || info.email.split('@')[0],
+        googleId: info.sub,
+        role:     'merchant',
+        password: crypto.randomBytes(32).toString('hex'),
+      });
+      user.merchantId = user._id.toString();
+    } else if (!user.googleId) {
+      user.googleId = info.sub;
+    }
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role, merchantId: user.merchantId },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
+    res.cookie('ww_admin_token', token, {
+      httpOnly: true, secure: true, sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

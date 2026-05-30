@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sphère de vœux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c; --gold-l: #d4b05c; --gold-pale: rgba(201,168,76,0.12);
+      --rose: #e05574;
+      --bg: #06050f; --bg2: #0d0b1c;
+      --text: #f0ede8; --text-dim: rgba(240,237,232,0.48);
+      --ivory: #faf8f4; --ivory-2: #f5f1eb;
+    }
+
+    html { height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── STARS ── */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── HEADER ── */
+    #wall-header {
+      text-align: center;
+      padding: clamp(32px,5vw,56px) 24px clamp(12px,2vw,20px);
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: var(--gold-pale);
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 16px;
+    }
+    .wall-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.9rem, 5vw, 3.1rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .wall-title em { font-style: normal; color: var(--rose); }
+    .wall-subtitle {
+      font-size: 0.86rem;
+      color: var(--text-dim);
+      max-width: 360px;
+      margin: 0 auto 14px;
+      line-height: 1.6;
+    }
+    .wish-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gold);
+      background: var(--gold-pale);
+      padding: 5px 14px;
+      border-radius: 99px;
+    }
+    .wish-count svg { width: 13px; height: 13px; }
+    .header-divider {
+      max-width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 18px auto 0;
+      opacity: 0.35;
+    }
+
+    /* ── DRAG HINT ── */
+    #drag-hint {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      margin-bottom: 6px;
+      opacity: 0.8;
+      transition: opacity 0.4s;
+    }
+    #drag-hint.hide { opacity: 0; }
+
+    /* ── 3D SCENE ── */
+    #scene {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      flex: 1;
+      min-height: 340px;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #scene.dragging { cursor: grabbing; }
+
+    /* Halo glow behind the sphere */
+    #sphere-halo {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, rgba(201,168,76,0.02) 50%, transparent 75%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #sphere-wrap {
+      position: relative;
+      z-index: 2;
+    }
+
+    #sphere {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* Equator ring (inside the sphere, 3D) */
+    .sphere-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.12);
+      pointer-events: none;
+      left: 50%; top: 50%;
+      transform-style: preserve-3d;
+    }
+
+    /* ── POST-IT in 3D ── */
+    .note-3d {
+      position: absolute;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      cursor: pointer;
+      transition: opacity 0.6s ease;
+    }
+    .note-3d:hover .note-inner-3d {
+      box-shadow:
+        0 4px 18px rgba(0,0,0,0.55),
+        0 16px 40px rgba(0,0,0,0.4),
+        0 0 24px rgba(201,168,76,0.25),
+        0 0 0 1.5px rgba(201,168,76,0.35);
+      transform: scale(1.06) rotate(var(--card-rot, 0deg));
+    }
+
+    .note-inner-3d {
+      padding: 15px 13px 13px;
+      border-radius: 3px 3px 5px 5px;
+      position: relative;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.45),
+        0 8px 24px rgba(0,0,0,0.35),
+        0 0 0 1px rgba(255,255,255,0.07);
+      transition: box-shadow 0.3s, transform 0.25s;
+    }
+
+    .note-tape-3d {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%) rotate(var(--tape-rot, -1deg));
+      width: 36px;
+      height: 15px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    .nc0{background:#fef9d7}.nc1{background:#fdeef2}.nc2{background:#eef7f0}
+    .nc3{background:#f0ecfa}.nc4{background:#fef0ea}.nc5{background:#e8f4fd}.nc6{background:#fdf5e4}
+
+    .note-text-3d {
+      font-family: 'Caveat', cursive;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: rgba(26,20,16,0.82);
+      margin-bottom: 9px;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .note-footer-3d {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-top: 1px solid rgba(26,20,16,0.07);
+      padding-top: 7px;
+    }
+    .note-avatar-3d {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      color: #fff;
+      font-family: 'DM Serif Display', serif;
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .note-name-3d {
+      font-size: 0.58rem;
+      font-weight: 600;
+      color: rgba(26,20,16,0.48);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── NOTE MODAL ── */
+    #note-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      background: rgba(6,5,15,0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: background 0.3s;
+      padding: 20px;
+    }
+    #note-modal.open {
+      background: rgba(6,5,15,0.82);
+      pointer-events: all;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    #note-modal-card {
+      max-width: 400px;
+      width: 100%;
+      border-radius: 14px;
+      padding: 32px 26px 26px;
+      position: relative;
+      transform: scale(0.82) translateY(22px);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.45,0.64,1), opacity 0.3s;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 40px rgba(201,168,76,0.08);
+    }
+    #note-modal.open #note-modal-card {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+    .modal-tape {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-1.2deg);
+      width: 44px;
+      height: 18px;
+      background: rgba(255,255,255,0.55);
+      border-radius: 2px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    #modal-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: rgba(26,20,16,0.08);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      color: rgba(26,20,16,0.5);
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    #modal-close:hover { background: rgba(224,85,116,0.12); color: var(--rose); }
+    #modal-photo {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      display: none;
+      object-fit: cover;
+      max-height: 200px;
+    }
+    #modal-audio {
+      width: 100%;
+      display: none;
+      margin-bottom: 14px;
+      accent-color: var(--gold);
+    }
+    #modal-text {
+      font-family: 'Caveat', cursive;
+      font-size: 1.22rem;
+      line-height: 1.65;
+      color: rgba(26,20,16,0.82);
+      margin-bottom: 18px;
+      margin-top: 14px;
+      word-break: break-word;
+    }
+    #modal-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid rgba(26,20,16,0.08);
+      padding-top: 14px;
+    }
+    #modal-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      color: #fff;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    #modal-name { font-size: 0.78rem; font-weight: 600; color: rgba(26,20,16,0.6); }
+    #modal-date { font-size: 0.64rem; color: rgba(26,20,16,0.35); margin-top: 2px; }
+
+    /* ── ADD BUTTON ── */
+    #add-btn {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--gold) 0%, #a8742a 100%);
+      color: #1a1410;
+      border: none;
+      border-radius: 99px;
+      padding: 15px 36px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      box-shadow: 0 8px 28px rgba(201,168,76,0.45), 0 2px 6px rgba(0,0,0,0.35);
+      transition: transform 0.22s, box-shadow 0.22s;
+      white-space: nowrap;
+    }
+    #add-btn:hover {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 14px 40px rgba(201,168,76,0.6), 0 3px 8px rgba(0,0,0,0.35);
+    }
+    #add-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+    /* ── SHEET ── */
+    #add-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(6,5,15,0);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      pointer-events: none;
+      transition: background 0.38s;
+    }
+    #add-overlay.open {
+      background: rgba(6,5,15,0.7);
+      pointer-events: all;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    #add-sheet {
+      background: var(--ivory);
+      border-radius: 22px 22px 0 0;
+      padding: 8px 28px 44px;
+      width: 100%;
+      max-width: 520px;
+      transform: translateY(100%);
+      transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1);
+      position: relative;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+    #add-overlay.open #add-sheet { transform: translateY(0); }
+    .sheet-drag {
+      width: 38px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(26,20,16,0.12);
+      margin: 12px auto 24px;
+    }
+    .sheet-title {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1.55rem;
+      color: #1a1410;
+      margin-bottom: 4px;
+    }
+    .sheet-hint { font-size: 0.8rem; color: rgba(26,20,16,0.45); margin-bottom: 16px; }
+
+    #wish-input {
+      width: 100%;
+      min-height: 100px;
+      max-height: 180px;
+      padding: 14px 16px;
+      resize: none;
+      background: rgba(201,168,76,0.06);
+      border: 1.5px solid rgba(201,168,76,0.22);
+      border-radius: 14px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.15rem;
+      color: #1a1410;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.55;
+    }
+    #wish-input:focus { border-color: var(--gold); }
+    #wish-input::placeholder { color: rgba(26,20,16,0.30); }
+
+    #wish-author {
+      width: 100%;
+      padding: 11px 16px;
+      margin-top: 10px;
+      background: rgba(201,168,76,0.06);
+      border: 1.5px solid rgba(201,168,76,0.22);
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: #1a1410;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #wish-author:focus { border-color: var(--gold); }
+    #wish-author::placeholder { color: rgba(26,20,16,0.30); }
+
+    .color-row { display: flex; gap: 8px; align-items: center; margin: 14px 0 16px; }
+    .color-row > label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(26,20,16,0.45); flex-shrink: 0; }
+    .color-swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.15s, border-color 0.15s; }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active { border-color: #1a1410; transform: scale(1.12); }
+    .swatch-0{background:#fef9d7}.swatch-1{background:#fdeef2}.swatch-2{background:#eef7f0}
+    .swatch-3{background:#f0ecfa}.swatch-4{background:#fef0ea}.swatch-5{background:#e8f4fd}
+
+    .media-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(26,20,16,0.45); margin-bottom: 10px; }
+    .media-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .media-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 99px;
+      border: 1.5px solid rgba(201,168,76,0.25);
+      background: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: rgba(26,20,16,0.45);
+      transition: all 0.18s;
+    }
+    .media-tab:hover { border-color: rgba(201,168,76,0.5); color: rgba(26,20,16,0.72); }
+    .media-tab.active { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+    .media-tab svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .media-panel { display: none; margin-bottom: 4px; }
+    .media-panel.active { display: block; }
+
+    .upload-zone {
+      border: 1.5px dashed rgba(201,168,76,0.35);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(201,168,76,0.03);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: var(--gold-pale); }
+    .upload-zone input { display: none; }
+    .upload-zone-inner { pointer-events: none; }
+    .upload-zone svg { color: var(--gold); margin-bottom: 6px; }
+    .upload-zone p { font-size: 0.76rem; color: rgba(26,20,16,0.45); line-height: 1.5; }
+    .upload-zone small { font-size: 0.66rem; color: rgba(26,20,16,0.25); }
+
+    .media-loading { display: none; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 0.78rem; color: var(--gold); }
+    .media-loading.show { display: flex; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .media-loading svg { animation: spin 0.9s linear infinite; width: 16px; height: 16px; flex-shrink: 0; }
+
+    .media-preview { display: none; position: relative; margin-top: 8px; }
+    .media-preview.show { display: block; }
+    .media-preview img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px; border: 1.5px solid rgba(201,168,76,0.22); display: block; }
+    .media-preview audio { width: 100%; display: block; accent-color: var(--gold); }
+    .media-clear { position: absolute; top: -9px; right: -9px; background: #1a1410; color: var(--gold); border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
+
+    .rec-controls { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 0; }
+    .rec-btn { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; background: var(--rose); color: #fff; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(224,85,116,0.35); }
+    .rec-btn:hover { transform: scale(1.06); }
+    .rec-btn.recording { background: #c0392b; animation: recPulse 1.4s ease-in-out infinite; }
+    .rec-btn svg { width: 20px; height: 20px; }
+    @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.4)} 50%{box-shadow:0 0 0 14px rgba(192,57,43,0)} }
+    .rec-status { font-size: 0.76rem; font-weight: 500; color: rgba(26,20,16,0.45); text-align: center; }
+    .rec-status.active { color: var(--rose); font-weight: 600; }
+
+    #submit-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      padding: 14px 24px;
+      margin-top: 16px;
+      background: var(--gold);
+      color: #1a1410;
+      border: none;
+      border-radius: 99px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      box-shadow: 0 6px 24px rgba(201,168,76,0.30);
+      transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+    }
+    #submit-btn:hover { background: var(--gold-l); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(201,168,76,0.40); }
+    #submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    #submit-btn svg { width: 15px; height: 15px; }
+
+    #close-btn {
+      position: absolute;
+      top: 20px;
+      right: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(26,20,16,0.45);
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 50%;
+      transition: color 0.18s, background 0.18s;
+    }
+    #close-btn:hover { color: #1a1410; background: rgba(26,20,16,0.06); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 600;
+      pointer-events: none;
+      background: var(--gold);
+      color: #1a1410;
+      padding: 10px 22px;
+      border-radius: 99px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.45);
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── EMPTY ── */
+    #empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      position: relative;
+      z-index: 5;
+      display: none;
+    }
+    #empty-state p { font-size: 0.9rem; color: var(--text-dim); margin-top: 12px; }
+
+    @media (max-width: 440px) {
+      #add-sheet { padding: 8px 18px 40px; }
+      .sheet-title { font-size: 1.35rem; }
+      .media-tab { padding: 6px 10px; font-size: 0.72rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<header id="wall-header">
+  <p class="eyebrow">✦ Sphère de vœux</p>
+  <h1 class="wall-title">Pour <em data-node-name="titleName">Sarah</em></h1>
+  <p class="wall-subtitle" data-node-name="subtitle">Faites pivoter la sphère pour explorer chaque vœu.</p>
+  <div class="wish-count" id="wish-count-badge">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <span id="count-num">0</span> vœux
+  </div>
+  <div class="header-divider"></div>
+</header>
+
+<p id="drag-hint">↺ &nbsp;Glissez pour pivoter &nbsp;·&nbsp; Cliquez pour lire</p>
+
+<div id="scene">
+  <div id="sphere-halo"></div>
+  <div id="sphere-wrap">
+    <div id="sphere">
+      <!-- Decorative rings placed in 3D space -->
+      <div class="sphere-ring" id="ring-eq"  style="transform:rotateX(88deg) translateZ(0) translateX(-50%) translateY(-50%)"></div>
+      <div class="sphere-ring" id="ring-mid" style="transform:rotateX(45deg) translateZ(0) translateX(-50%) translateY(-50%)"></div>
+    </div>
+  </div>
+</div>
+
+<div id="empty-state">
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <p>Soyez le premier à laisser un vœu !</p>
+</div>
+
+<!-- Note read modal -->
+<div id="note-modal" onclick="handleModalBgClick(event)">
+  <div id="note-modal-card">
+    <button id="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>
+    <div class="modal-tape"></div>
+    <img id="modal-photo" src="" alt="">
+    <audio id="modal-audio" controls preload="none"></audio>
+    <p id="modal-text"></p>
+    <div id="modal-footer">
+      <div id="modal-avatar"></div>
+      <div>
+        <div id="modal-name"></div>
+        <div id="modal-date"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un vœu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+  Ajouter mon vœu
+</button>
+
+<div id="add-overlay" onclick="handleBgClick(event)" role="dialog" aria-modal="true">
+  <div id="add-sheet">
+    <button id="close-btn" onclick="closeSheet()" aria-label="Fermer">✕</button>
+    <div class="sheet-drag"></div>
+    <h2 class="sheet-title">Votre vœu</h2>
+    <p class="sheet-hint">Écrivez depuis le cœur — ça ne prend que quelques secondes.</p>
+
+    <textarea id="wish-input" placeholder="Votre message…" maxlength="400" rows="4"></textarea>
+    <input id="wish-author" type="text" placeholder="Votre prénom (optionnel)" maxlength="40" autocomplete="given-name">
+
+    <div class="color-row">
+      <label>Couleur</label>
+      <span class="color-swatch swatch-0 active" onclick="pickColor(0,this)"></span>
+      <span class="color-swatch swatch-1" onclick="pickColor(1,this)"></span>
+      <span class="color-swatch swatch-2" onclick="pickColor(2,this)"></span>
+      <span class="color-swatch swatch-3" onclick="pickColor(3,this)"></span>
+      <span class="color-swatch swatch-4" onclick="pickColor(4,this)"></span>
+      <span class="color-swatch swatch-5" onclick="pickColor(5,this)"></span>
+    </div>
+
+    <p class="media-label">Ajouter</p>
+    <div class="media-tabs">
+      <button class="media-tab active" id="tab-none" onclick="switchTab('none')">Texte seulement</button>
+      <button class="media-tab" id="tab-photo" onclick="switchTab('photo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Photo / GIF
+      </button>
+      <button class="media-tab" id="tab-audio" onclick="switchTab('audio')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        Message vocal
+      </button>
+    </div>
+
+    <div class="media-panel" id="panel-photo">
+      <div class="upload-zone" id="photo-zone"
+           onclick="document.getElementById('photo-file').click()"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <input type="file" id="photo-file" accept="image/*" onchange="handlePhotoSelect(event)">
+        <div class="upload-zone-inner">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Cliquez ou glissez une photo / GIF ici</p>
+          <small>JPG, PNG, GIF, WebP — max 10 Mo</small>
+        </div>
+      </div>
+      <div class="media-loading" id="photo-loading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>
+        Envoi en cours…
+      </div>
+      <div class="media-preview" id="photo-preview">
+        <img id="photo-img" src="" alt="">
+        <button class="media-clear" onclick="clearMedia()" aria-label="Supprimer">✕</button>
+      </div>
+    </div>
+
+    <div class="media-panel" id="panel-audio">
+      <div class="rec-controls">
+        <button class="rec-btn" id="rec-btn" onclick="toggleRecording()" aria-label="Enregistrer">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+        </button>
+        <span class="rec-status" id="rec-status">Appuyez pour enregistrer</span>
+      </div>
+      <div class="media-loading" id="audio-loading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>
+        Envoi en cours…
+      </div>
+      <div class="media-preview" id="audio-preview">
+        <audio id="audio-player" controls preload="none"></audio>
+        <button class="media-clear" onclick="clearMedia()" aria-label="Supprimer">✕</button>
+      </div>
+    </div>
+
+    <button id="submit-btn" onclick="submitWish()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      Coller mon vœu
+    </button>
+  </div>
+</div>
+
+<div id="toast">Vœu ajouté ✦</div>
+
+<script>
+/* ════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════ */
+var _d       = window.__WW_DATA__ || {};
+var PUB_ID   = _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
+var API_BASE = _d.apiBase || (PUB_ID ? location.origin : '');
+
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+var wishes        = [];
+var myWishIds     = JSON.parse(localStorage.getItem('ww_my_ids') || '[]');
+var selectedColor = 0;
+var activeTab     = 'none';
+var activeMedia   = { type: 'none', url: '' };
+var mediaRecorder = null;
+var audioChunks   = [];
+var recTimerInt   = null;
+var recSecs       = 0;
+var isSubmitting  = false;
+
+/* ════════════════════════════════════════════
+   3D ROTATION STATE
+════════════════════════════════════════════ */
+var rotX      = 18;
+var rotY      = 0;
+var targetX   = 18;
+var targetY   = 0;
+var isDragging = false;
+var dragDist   = 0;
+var lastPX    = 0;
+var lastPY    = 0;
+var autoRotate = true;
+var autoResumeTimer = null;
+var R         = 280; /* sphere radius, computed in initSphere */
+
+/* ════════════════════════════════════════════
+   SAMPLE DATA (demo fallback)
+════════════════════════════════════════════ */
+var NOW = Date.now();
+var SAMPLE_WISHES = [
+  { text: "Tu es une source d'inspiration pour toute l'équipe. Merci pour tout ce que tu nous as apporté !", name: "Marie",     color: 0, rot: -2.8, ts: NOW - 5*864e5 },
+  { text: "Un immense merci pour ta bienveillance et ta générosité. Tu le mérites vraiment !",               name: "Thomas",    color: 1, rot:  2.2, ts: NOW - 4*864e5 },
+  { text: "Profite bien ! Tu vas tellement nous manquer 💛",                                                 name: "Équipe RH", color: 2, rot: -1.4, ts: NOW - 3*864e5 },
+  { text: "Des années de bons souvenirs ensemble. À toi maintenant de voyager, découvrir, vivre !",          name: "Jean-Paul", color: 3, rot:  3.1, ts: NOW - 2*864e5 },
+  { text: "Tu m'as tellement appris. Merci du fond du cœur.",                                                name: "Camille",   color: 4, rot: -2.5, ts: NOW - 864e5  },
+  { text: "Retraite dorée pour une collègue en or ✨",                                                       name: "David",     color: 5, rot:  1.6, ts: NOW          },
+  { text: "Toujours là avec le sourire, même dans les moments difficiles. Un vrai exemple pour nous.",       name: "Nadia",     color: 6, rot: -3.2, ts: NOW - 6*864e5 },
+  { text: "On t'envie ! Mais surtout, on te souhaite le meilleur pour cette nouvelle aventure.",             name: "Lucas",     color: 0, rot:  2.6, ts: NOW - 7*864e5 },
+  { text: "Merci pour ta patience infinie et ta sagesse. Tu vas nous manquer chaque jour.",                  name: "Sophie",    color: 1, rot: -1.2, ts: NOW - 8*864e5 },
+  { text: "À toutes les réunions du lundi matin qu'on a survécues ensemble 😄 Bonne continuation !",         name: "Alex",      color: 2, rot:  3.5, ts: NOW - 9*864e5 },
+  { text: "La plus belle des journées pour la plus belle des collègues.",                                    name: "Isabelle",  color: 3, rot: -2.0, ts: NOW - 10*864e5},
+  { text: "Voyage, lis, jardine, profite ! C'est ta vie maintenant.",                                        name: "Marc",      color: 4, rot:  1.2, ts: NOW - 11*864e5},
+  { text: "Ce n'est pas un au revoir, c'est un à bientôt pour de belles aventures !",                       name: "Lucie",     color: 5, rot: -2.8, ts: NOW - 12*864e5},
+  { text: "Merci de m'avoir accueilli les bras ouverts quand je suis arrivé dans l'équipe.",                name: "Antoine",   color: 6, rot:  1.5, ts: NOW - 13*864e5},
+  { text: "Ta sagesse et ton humour vont me manquer tous les jours.",                                        name: "Béatrice",  color: 0, rot: -3.0, ts: NOW - 14*864e5},
+];
+
+/* ════════════════════════════════════════════
+   STARS CANVAS
+════════════════════════════════════════════ */
+function initStars() {
+  var canvas = document.getElementById('stars');
+  var ctx    = canvas.getContext('2d');
+  var W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (var i = 0; i < 220; i++) {
+    stars.push({
+      x: Math.random(), y: Math.random(),
+      r: Math.random() * 1.1 + 0.15,
+      o: Math.random() * 0.55 + 0.08,
+      s: Math.random() * 0.06 + 0.01,
+    });
+  }
+
+  (function draw() {
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(function(s) {
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,' + s.o + ')';
+      ctx.fill();
+      s.y += s.s / H;
+      if (s.y > 1) { s.y = -0.01; s.x = Math.random(); }
+    });
+    requestAnimationFrame(draw);
+  })();
+}
+
+/* ════════════════════════════════════════════
+   SPHERE INIT
+════════════════════════════════════════════ */
+function initSphere() {
+  var scene    = document.getElementById('scene');
+  var wrap     = document.getElementById('sphere-wrap');
+  var halo     = document.getElementById('sphere-halo');
+  var vw       = window.innerWidth;
+  var vh       = window.innerHeight;
+  var size     = Math.min(vw * 0.9, vh * 0.56, 660);
+  size         = Math.max(size, 280);
+  R            = size * 0.41;
+
+  var noteW    = Math.max(106, Math.round(R * 0.43));
+
+  wrap.style.cssText  = 'width:' + size + 'px;height:' + size + 'px;perspective:' + Math.round(size * 1.55) + 'px;';
+  halo.style.cssText  = 'width:' + (size * 1.25) + 'px;height:' + (size * 1.25) + 'px;' +
+                        'top:50%;left:50%;transform:translate(-50%,-50%);position:absolute;';
+
+  /* Equator ring sizing */
+  ['ring-eq', 'ring-mid'].forEach(function(id, i) {
+    var el = document.getElementById(id);
+    var d  = R * 2 * (i === 0 ? 1.01 : 0.72);
+    el.style.cssText = 'width:' + d + 'px;height:' + d + 'px;' +
+      'position:absolute;border-radius:50%;border:1px solid rgba(201,168,76,' + (i===0?0.12:0.06) + ');' +
+      'left:50%;top:50%;transform-origin:center center;pointer-events:none;' +
+      'transform:translateX(-50%) translateY(-50%) rotateX(' + (i===0 ? 88 : 55) + 'deg);';
+  });
+
+  document.documentElement.style.setProperty('--note-w', noteW + 'px');
+
+  /* Drag */
+  scene.addEventListener('mousedown',  onDragStart);
+  scene.addEventListener('touchstart', onDragStart, { passive: true });
+  window.addEventListener('mousemove',  onDragMove);
+  window.addEventListener('touchmove',  onDragMove, { passive: false });
+  window.addEventListener('mouseup',    onDragEnd);
+  window.addEventListener('touchend',   onDragEnd);
+}
+
+/* ════════════════════════════════════════════
+   DRAG
+════════════════════════════════════════════ */
+function getPos(e) {
+  var t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX, y: t.clientY };
+}
+
+function onDragStart(e) {
+  isDragging = true;
+  dragDist   = 0;
+  autoRotate = false;
+  clearTimeout(autoResumeTimer);
+  var p = getPos(e);
+  lastPX = p.x; lastPY = p.y;
+  document.getElementById('scene').classList.add('dragging');
+  document.getElementById('drag-hint').classList.add('hide');
+}
+
+function onDragMove(e) {
+  if (!isDragging) return;
+  if (e.cancelable) e.preventDefault();
+  var p  = getPos(e);
+  var dx = p.x - lastPX;
+  var dy = p.y - lastPY;
+  dragDist  += Math.abs(dx) + Math.abs(dy);
+  targetY   += dx * 0.32;
+  targetX   -= dy * 0.32;
+  targetX    = Math.max(-55, Math.min(55, targetX));
+  lastPX = p.x; lastPY = p.y;
+}
+
+function onDragEnd() {
+  isDragging = false;
+  document.getElementById('scene').classList.remove('dragging');
+  autoResumeTimer = setTimeout(function() {
+    if (!isDragging) autoRotate = true;
+  }, 2400);
+}
+
+/* ════════════════════════════════════════════
+   ANIMATION LOOP
+════════════════════════════════════════════ */
+function startLoop() {
+  (function tick() {
+    if (autoRotate) targetY += 0.16;
+    rotX += (targetX - rotX) * 0.07;
+    rotY += (targetY - rotY) * 0.07;
+    document.getElementById('sphere').style.transform =
+      'rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg)';
+    requestAnimationFrame(tick);
+  })();
+}
+
+/* ════════════════════════════════════════════
+   FIBONACCI PLACEMENT
+════════════════════════════════════════════ */
+var TAPE_ROTS = [-2, 0, 1.5, -1, 2, -0.5, 1, -2.5];
+var MAX_ON_SPHERE = 80;
+
+function placeNotes(els) {
+  var n  = els.length;
+  var gr = Math.PI * (3 - Math.sqrt(5)); /* golden angle */
+  var nW = Math.max(106, R * 0.43);
+
+  els.forEach(function(el, i) {
+    var yN  = n === 1 ? 0 : 1 - (i / (n - 1)) * 2;
+    var r   = Math.sqrt(Math.max(0, 1 - yN * yN));
+    var az  = gr * i;                      /* azimuth around Y  */
+    var el_ = Math.asin(Math.max(-1, Math.min(1, yN))); /* elevation */
+
+    var azDeg = az * 180 / Math.PI;
+    var elDeg = el_ * 180 / Math.PI;
+
+    el.style.width = nW + 'px';
+    el.style.left  = 'calc(50% - ' + (nW / 2) + 'px)';
+    el.style.top   = 'calc(50% - 62px)';
+    el.style.transform =
+      'rotateY(' + azDeg + 'deg) rotateX(' + (-elDeg) + 'deg) translateZ(' + R + 'px)';
+  });
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+════════════════════════════════════════════ */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(ts) {
+  return new Date(ts || Date.now()).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+}
+
+function createNote3D(w) {
+  var el  = document.createElement('div');
+  el.className = 'note-3d';
+
+  var tr  = TAPE_ROTS[Math.abs(Math.round((w.rot || 0) * 3)) % TAPE_ROTS.length];
+  var ini = (w.name || 'A').trim().charAt(0).toUpperCase();
+
+  el.innerHTML =
+    '<div class="note-inner-3d nc' + (w.color || 0) + '" style="--card-rot:' + (w.rot||0) + 'deg;transform:rotate(' + (w.rot||0) + 'deg)">' +
+      '<div class="note-tape-3d" style="--tape-rot:' + tr + 'deg"></div>' +
+      '<p class="note-text-3d">' + escHtml(w.text) + '</p>' +
+      '<div class="note-footer-3d">' +
+        '<div class="note-avatar-3d">' + escHtml(ini) + '</div>' +
+        '<div class="note-name-3d">' + escHtml(w.name || 'Anonyme') + '</div>' +
+      '</div>' +
+    '</div>';
+
+  el.addEventListener('click', function() {
+    if (dragDist > 6) return; /* ignore drag release */
+    openModal(w);
+  });
+
+  return el;
+}
+
+function buildSphere(animate) {
+  var sphere = document.getElementById('sphere');
+  var empty  = document.getElementById('empty-state');
+
+  /* Keep rings, remove old notes */
+  var rings = sphere.querySelectorAll('.sphere-ring');
+  sphere.innerHTML = '';
+  rings.forEach(function(r) { sphere.appendChild(r); });
+
+  if (!wishes.length) {
+    empty.style.display = 'block';
+    document.getElementById('count-num').textContent = '0';
+    return;
+  }
+  empty.style.display = 'none';
+  document.getElementById('count-num').textContent = wishes.length;
+
+  var display = wishes.length <= MAX_ON_SPHERE
+    ? wishes
+    : (function() {
+        var c = wishes.slice().sort(function() { return Math.random() - 0.5; });
+        return c.slice(0, MAX_ON_SPHERE);
+      })();
+
+  var els = display.map(function(w) {
+    var el = createNote3D(w);
+    sphere.appendChild(el);
+    return el;
+  });
+
+  placeNotes(els);
+
+  if (animate) {
+    els.forEach(function(el, i) {
+      el.style.opacity = '0';
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.55s ease';
+        el.style.opacity    = '1';
+      }, i * 28 + 80);
+    });
+  }
+}
+
+/* ════════════════════════════════════════════
+   MODAL
+════════════════════════════════════════════ */
+function openModal(w) {
+  autoRotate = false;
+  clearTimeout(autoResumeTimer);
+
+  var card = document.getElementById('note-modal-card');
+  card.className = 'nc' + (w.color || 0);
+
+  document.getElementById('modal-text').textContent  = w.text;
+  document.getElementById('modal-name').textContent  = w.name || 'Anonyme';
+  document.getElementById('modal-date').textContent  = fmtDate(w.ts);
+  document.getElementById('modal-avatar').textContent = (w.name || 'A').trim().charAt(0).toUpperCase();
+
+  var photo = document.getElementById('modal-photo');
+  var audio = document.getElementById('modal-audio');
+  if ((w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl) {
+    photo.src = w.photoUrl; photo.style.display = 'block';
+  } else {
+    photo.style.display = 'none'; photo.src = '';
+  }
+  if (w.mediaType === 'audio' && w.audioUrl) {
+    audio.src = w.audioUrl; audio.style.display = 'block';
+  } else {
+    audio.style.display = 'none'; audio.src = '';
+  }
+
+  document.getElementById('note-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('note-modal').classList.remove('open');
+  autoResumeTimer = setTimeout(function() { autoRotate = true; }, 800);
+}
+
+function handleModalBgClick(e) {
+  if (e.target === document.getElementById('note-modal')) closeModal();
+}
+
+/* ════════════════════════════════════════════
+   API
+════════════════════════════════════════════ */
+async function apiFetch(path, opts) {
+  var res = await fetch(API_BASE + path, opts || {});
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+async function loadWishes() {
+  if (!PUB_ID) {
+    wishes = SAMPLE_WISHES.map(function(w) { return Object.assign({}, w); });
+    buildSphere(true);
+    return;
+  }
+  try {
+    var data = await apiFetch('/api/wishes/' + PUB_ID + '/approved');
+    wishes = data.map(function(w) {
+      return {
+        text:      w.message,
+        name:      w.firstName || 'Anonyme',
+        color:     w.color != null ? w.color : Math.floor(Math.random() * 6),
+        rot:       w.rot   != null ? w.rot   : (Math.random() * 7 - 3.5),
+        ts:        new Date(w.createdAt).getTime(),
+        photoUrl:  w.photoUrl  || '',
+        audioUrl:  w.audioUrl  || '',
+        mediaType: w.mediaType || 'none',
+        _id:       w._id,
+      };
+    });
+    buildSphere(true);
+    setInterval(pollNewWishes, 30000);
+  } catch(e) {
+    wishes = SAMPLE_WISHES.map(function(w) { return Object.assign({}, w); });
+    buildSphere(true);
+  }
+}
+
+async function pollNewWishes() {
+  if (!PUB_ID) return;
+  try {
+    var data = await apiFetch('/api/wishes/' + PUB_ID + '/approved');
+    var ids  = new Set(wishes.map(function(w){ return w._id; }).filter(Boolean));
+    var added = false;
+    data.forEach(function(w) {
+      if (ids.has(w._id)) return;
+      wishes.unshift({
+        text: w.message, name: w.firstName || 'Anonyme',
+        color: w.color != null ? w.color : Math.floor(Math.random() * 6),
+        rot:   w.rot   != null ? w.rot   : (Math.random() * 7 - 3.5),
+        ts: new Date(w.createdAt).getTime(),
+        photoUrl: w.photoUrl || '', audioUrl: w.audioUrl || '',
+        mediaType: w.mediaType || 'none', _id: w._id,
+      });
+      added = true;
+    });
+    if (added) { buildSphere(false); document.getElementById('count-num').textContent = wishes.length; }
+  } catch(e) {}
+}
+
+async function uploadMedia(file) {
+  var form = new FormData();
+  form.append('file', file);
+  var data = await apiFetch('/api/upload', { method: 'POST', body: form });
+  return data.url;
+}
+
+/* ════════════════════════════════════════════
+   SHEET
+════════════════════════════════════════════ */
+function openSheet() {
+  document.getElementById('add-overlay').classList.add('open');
+  autoRotate = false;
+  clearTimeout(autoResumeTimer);
+  setTimeout(function() { document.getElementById('wish-input').focus(); }, 350);
+}
+
+function closeSheet() {
+  document.getElementById('add-overlay').classList.remove('open');
+  if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording(false);
+  autoResumeTimer = setTimeout(function() { autoRotate = true; }, 500);
+}
+
+function handleBgClick(e) {
+  if (e.target === document.getElementById('add-overlay')) closeSheet();
+}
+
+function pickColor(c, el) {
+  selectedColor = c;
+  document.querySelectorAll('.color-swatch').forEach(function(s){ s.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.media-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.media-panel').forEach(function(p){ p.classList.remove('active'); });
+  if (tab !== 'none') document.getElementById('panel-' + tab).classList.add('active');
+  if (tab !== 'audio' && mediaRecorder && mediaRecorder.state === 'recording') stopRecording(false);
+}
+
+/* ════════════════════════════════════════════
+   PHOTO / GIF
+════════════════════════════════════════════ */
+function handleDragOver(e)  { e.preventDefault(); document.getElementById('photo-zone').classList.add('drag-over'); }
+function handleDragLeave()  { document.getElementById('photo-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('photo-zone').classList.remove('drag-over');
+  var f = e.dataTransfer.files[0];
+  if (f && /^image\//.test(f.type)) processPhotoFile(f);
+}
+function handlePhotoSelect(e) { var f = e.target.files[0]; if (f) processPhotoFile(f); }
+
+async function processPhotoFile(file) {
+  if (file.size > 10 * 1024 * 1024) { showToast('Fichier trop grand (max 10 Mo)'); return; }
+  var isGif = file.type === 'image/gif';
+  var reader = new FileReader();
+  reader.onload = function(ev) { document.getElementById('photo-img').src = ev.target.result; };
+  reader.readAsDataURL(file);
+  if (!API_BASE) {
+    activeMedia = { type: isGif ? 'gif' : 'photo', url: URL.createObjectURL(file) };
+    document.getElementById('photo-preview').classList.add('show');
+    document.getElementById('photo-zone').style.display = 'none';
+    return;
+  }
+  document.getElementById('photo-zone').style.display = 'none';
+  document.getElementById('photo-loading').classList.add('show');
+  try {
+    var url = await uploadMedia(file);
+    activeMedia = { type: isGif ? 'gif' : 'photo', url: url };
+    document.getElementById('photo-img').src = url;
+    document.getElementById('photo-preview').classList.add('show');
+  } catch(e) {
+    showToast("Échec de l'envoi — réessayez");
+    document.getElementById('photo-zone').style.display = '';
+  } finally {
+    document.getElementById('photo-loading').classList.remove('show');
+  }
+}
+
+/* ════════════════════════════════════════════
+   AUDIO
+════════════════════════════════════════════ */
+function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording(true);
+  else startRecording();
+}
+
+async function startRecording() {
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks   = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder._stream = stream;
+    mediaRecorder.ondataavailable = function(e){ if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.start(100);
+    recSecs = 0;
+    document.getElementById('rec-status').textContent = 'Enregistrement… 00:00';
+    document.getElementById('rec-status').classList.add('active');
+    document.getElementById('rec-btn').classList.add('recording');
+    recTimerInt = setInterval(function(){
+      recSecs++;
+      var m = String(Math.floor(recSecs / 60)).padStart(2, '0');
+      var s = String(recSecs % 60).padStart(2, '0');
+      document.getElementById('rec-status').textContent = 'Enregistrement… ' + m + ':' + s;
+    }, 1000);
+  } catch(e) { showToast('Microphone inaccessible'); }
+}
+
+function stopRecording(upload) {
+  clearInterval(recTimerInt);
+  document.getElementById('rec-btn').classList.remove('recording');
+  document.getElementById('rec-status').classList.remove('active');
+  document.getElementById('rec-status').textContent = 'Appuyez pour enregistrer';
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+  mediaRecorder.onstop = async function() {
+    if (mediaRecorder._stream) mediaRecorder._stream.getTracks().forEach(function(t){ t.stop(); });
+    if (!upload || !audioChunks.length) return;
+    var blob     = new Blob(audioChunks, { type: 'audio/webm' });
+    var localUrl = URL.createObjectURL(blob);
+    document.getElementById('audio-player').src = localUrl;
+    document.getElementById('audio-preview').classList.add('show');
+    activeMedia = { type: 'audio', url: localUrl };
+    if (!API_BASE) return;
+    document.getElementById('audio-loading').classList.add('show');
+    try {
+      var f   = new File([blob], 'audio.webm', { type: 'audio/webm' });
+      var url = await uploadMedia(f);
+      activeMedia = { type: 'audio', url: url };
+      document.getElementById('audio-player').src = url;
+    } catch(e) { showToast("Échec de l'envoi audio"); }
+    finally { document.getElementById('audio-loading').classList.remove('show'); }
+  };
+  mediaRecorder.stop();
+}
+
+function clearMedia() {
+  activeMedia = { type: 'none', url: '' };
+  document.getElementById('photo-preview').classList.remove('show');
+  document.getElementById('audio-preview').classList.remove('show');
+  document.getElementById('photo-zone').style.display  = '';
+  document.getElementById('photo-file').value           = '';
+  document.getElementById('rec-status').textContent    = 'Appuyez pour enregistrer';
+  document.getElementById('rec-btn').classList.remove('recording');
+  clearInterval(recTimerInt);
+}
+
+/* ════════════════════════════════════════════
+   SUBMIT
+════════════════════════════════════════════ */
+async function submitWish() {
+  if (isSubmitting) return;
+  var text   = document.getElementById('wish-input').value.trim();
+  var author = document.getElementById('wish-author').value.trim();
+  if (!text) {
+    var ta = document.getElementById('wish-input');
+    ta.style.borderColor = '#e05574'; ta.focus();
+    setTimeout(function(){ ta.style.borderColor = ''; }, 1800);
+    return;
+  }
+  var rots = [-3.5,-2.8,-2,-1.5,-1,1,1.5,2,2.5,3,3.5];
+  var rot  = rots[Math.floor(Math.random() * rots.length)];
+  var w = {
+    text:      text,
+    name:      author || 'Anonyme',
+    color:     selectedColor,
+    rot:       rot,
+    ts:        Date.now(),
+    photoUrl:  activeMedia.type !== 'audio' ? (activeMedia.url || '') : '',
+    audioUrl:  activeMedia.type === 'audio' ? (activeMedia.url || '') : '',
+    mediaType: activeMedia.type || 'none',
+  };
+  isSubmitting = true;
+  document.getElementById('submit-btn').disabled = true;
+  if (PUB_ID && API_BASE) {
+    try {
+      var result = await apiFetch('/api/wishes/' + PUB_ID, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName: w.name, message: w.text, color: w.color, rot: w.rot, mediaType: w.mediaType, photoUrl: w.photoUrl, audioUrl: w.audioUrl }),
+      });
+      w._id = result.id;
+      if (w._id) { myWishIds.push(w._id); localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds)); }
+    } catch(e) {}
+  }
+  isSubmitting = false;
+  document.getElementById('submit-btn').disabled = false;
+  wishes.unshift(w);
+  closeSheet();
+  document.getElementById('wish-input').value  = '';
+  document.getElementById('wish-author').value = '';
+  clearMedia();
+  switchTab('none');
+  buildSphere(true);
+  showToast('Vœu ajouté ✦');
+  try { window.parent.postMessage({ type: 'WW_WISH_ADDED', wish: w }, '*'); } catch(e) {}
+}
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+(function init() {
+  var d     = window.__WW_DATA__ || {};
+  var tName = d.titleName || d.title;
+  if (tName)      document.querySelector('[data-node-name="titleName"]').textContent = tName;
+  if (d.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent  = d.subtitle;
+
+  initStars();
+  initSphere();
+  startLoop();
+  loadWishes();
+})();
+
+/* ════════════════════════════════════════════
+   LIVE EDITOR (postMessage)
+════════════════════════════════════════════ */
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  if (e.data.type === 'WW_WISH_NEW') {
+    var w = e.data.wish;
+    if (!w || !w.text) return;
+    wishes.unshift(w);
+    buildSphere(true);
+    document.getElementById('count-num').textContent = wishes.length;
+    return;
+  }
+  if (e.data.type !== 'WW_UPDATE') return;
+  var data = e.data.data;
+  if (!data) return;
+  var tName = data.titleName || data.title;
+  if (tName)       document.querySelector('[data-node-name="titleName"]').textContent = tName;
+  if (data.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent = data.subtitle;
+});
+
+/* ════════════════════════════════════════════
+   KEYBOARD
+════════════════════════════════════════════ */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal(); closeSheet(); }
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (document.getElementById('add-overlay').classList.contains('open')) submitWish();
+  }
+});
+</script>
+</body>
+</html>

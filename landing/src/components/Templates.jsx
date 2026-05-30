@@ -1,375 +1,326 @@
 import { useState, useEffect } from 'react';
-import { useInView } from '../hooks/useInView';
-import s from './Templates.module.css';
+import { TEMPLATES, fmtFCFA, fmtEUR } from '../data';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-// Descriptions et inclusions pour chaque template (fallback si le serveur ne les retourne pas)
-const TEMPLATE_INFO = {
-  'birthday': {
-    cat: 'Anniversaire', credits: 8,
-    name: 'Joyeux Anniversaire',
-    desc: "Animation complète avec photos, musique et vœux personnalisés. L'incontournable.",
-    includes: ["Jusqu'à 24 photos animées", "Musique de bibliothèque ou MP3 perso", "3 styles de typographie", "Lien privé + QR code stylisé"],
-  },
-  'wall-of-wishes': {
-    cat: 'Collectif', credits: 10,
-    name: 'Mur de vœux',
-    desc: 'Un mur interactif où chacun colle son message — comme des post-its numériques.',
-    includes: ["Jusqu'à 30 contributeurs", "Modération avant publication", "6 couleurs de post-it", "Partage par lien d'invitation"],
-  },
-  'special': {
-    cat: 'Premium', credits: 12,
-    name: 'Vœu Spécial',
-    desc: 'Pour les occasions uniques. Effets premium, thème sur-mesure, vidéo HD.',
-    includes: ["Thème sur-mesure (couleurs, logo)", "Particules & transitions premium", "Export vidéo MP4 HD", "Photos & vidéos illimitées"],
-  },
-  'forever': {
-    cat: 'Hommage', credits: 10,
-    name: 'Hommage',
-    desc: 'Sobre, digne, intemporel. Cadres dorés et typographie élégante pour rendre hommage.',
-    includes: ["Cadres & typographie classiques", "Citation ou poème central", "Galerie chronologique", "Lien privé non-indexé"],
-  },
-  'collective-family': {
-    cat: 'Collectif famille', credits: 20,
-    name: 'Collectif Famille',
-    desc: "Chaque proche ajoute son message et sa photo — un souvenir partagé jusqu'à 50 contributeurs.",
-    includes: ["Jusqu'à 50 contributeurs", "Messages texte, audio ou vidéo", "Galerie photos partagée", "Album téléchargeable PDF"],
-  },
-  'collective-pro': {
-    cat: 'Collectif Pro', credits: 30,
-    name: 'Collectif Pro',
-    desc: 'Pour célébrer vos équipes avec classe : branding entreprise, signatures et export HD.',
-    includes: ["Logo & couleurs entreprise", "Sous-domaine personnalisé", "Contributions illimitées", "Statistiques d'engagement"],
-  },
-  'sanctuary': {
-    cat: 'Élégant', credits: 12,
-    name: 'Sanctuary',
-    desc: 'Un cadre serein et minimaliste pour les moments qui comptent vraiment.',
-    includes: ["Mise en page apaisante", "Photos & texte animés", "Musique d'ambiance", "Lien privé"],
-  },
-  'notre-film': {
-    cat: 'Cinématique', credits: 15,
-    name: 'Notre Film',
-    desc: 'Un slideshow cinématique pour raconter votre histoire en images.',
-    includes: ["Transitions cinématiques", "Photos & vidéos mixées", "Bande-son personnalisée", "Format 16:9 HD"],
-  },
+const SIZE_ASPECT = {
+  sq:   '1 / 1',
+  tall: '3 / 4.4',
+  wide: '4 / 2.6',
 };
 
-// Thumbnail CSS variant par nom de template
-const THUMB_KEY = {
-  'birthday': 'birthday',
-  'wall-of-wishes': 'wall',
-  'special': 'special',
-  'forever': 'hommage',
-  'notre-film': 'hommage',
-  'sanctuary': 'special',
-  'collective-family': 'family',
-  'collective-pro': 'pro',
-};
-
-const DEFAULT_LIST = Object.entries(TEMPLATE_INFO).map(([apiName, info]) => ({
-  apiName,
-  thumbKey: THUMB_KEY[apiName] || 'birthday',
-  equiv: `${info.credits * 500} XOF`,
-  ...info,
-}));
-
-const PREFAITS = [
-  { thumbCls: s.t1, label: '30 ans · Rétro',    apiName: 'birthday',          name: 'Anniversaire — 30 ans rétro',     meta: '8 crédits · style vintage' },
-  { thumbCls: s.t2, label: 'Mariage · floral',   apiName: 'collective-family', name: 'Vœux de mariage — floral pastel', meta: '20 crédits · musique douce' },
-  { thumbCls: s.t3, label: 'Naissance · pastel', apiName: 'birthday',          name: 'Bienvenue bébé — pastel',         meta: '8 crédits · galerie ronde' },
-  { thumbCls: s.t4, label: 'Retraite · 25 ans',  apiName: 'collective-pro',    name: 'Départ en retraite — 25 ans',     meta: '30 crédits · signatures illimitées' },
-];
-
-function TemplateThumbnail({ tplKey }) {
-  if (tplKey === 'birthday') return (
-    <div className={`${s.tplThumb} ${s.vBirthday}`}>
-      <div className={s.scene}>
-        <div className={s.c}></div>
-        <div className={s.t}></div>
-        <div className={s.b}></div>
+function PrevBirthday() {
+  return (
+    <div className="tpl-prev tpl-birthday">
+      <div className="confetti">
+        {[...Array(10)].map((_, i) => <i key={i} style={{ left: (i*9+5)+'%', animationDelay: (i*0.4)+'s' }}/>)}
       </div>
-      <span className={`${s.dot} ${s.d1}`}></span>
-      <span className={`${s.dot} ${s.d2}`}></span>
-      <span className={`${s.dot} ${s.d3}`}></span>
-      <span className={`${s.dot} ${s.d4}`}></span>
-    </div>
-  );
-  if (tplKey === 'wall') return (
-    <div className={`${s.tplThumb} ${s.vWall}`}>
-      <div className={s.wallGrid}>
-        <div className={s.note}>♥</div>
-        <div className={s.note}>✦</div>
-        <div className={s.note}>★</div>
-        <div className={s.note}>✿</div>
-        <div className={s.note}>♪</div>
-        <div className={s.note}>●</div>
+      <div className="cake">
+        <div className="flame"></div>
+        <div className="candle"></div>
+        <div className="top"></div>
+        <div className="base"></div>
       </div>
+      <div className="tpl-title serif italic">Joyeux<br/>Anniversaire</div>
+      <div className="tpl-sub">Aminata · 32 ans</div>
     </div>
   );
-  if (tplKey === 'special') return (
-    <div className={`${s.tplThumb} ${s.vSpecial}`}>
-      <span className={`${s.star} ${s.starBig}`}>✦</span>
-      <span className={`${s.star} ${s.s1}`}>✦</span>
-      <span className={`${s.star} ${s.s2}`}>✦</span>
-      <span className={`${s.star} ${s.s3}`}>✦</span>
-      <span className={`${s.star} ${s.s4}`}>✦</span>
+}
+
+function PrevWall() {
+  const notes = [
+    { c: 'gold', t: '♥', txt: 'Bon\nanniv !' },
+    { c: 'rose', t: '✦', txt: 'On t’aime' },
+    { c: 'em',   t: '★', txt: 'Bravo' },
+    { c: 'peach',t: '♪', txt: 'À toi' },
+    { c: 'gold', t: '✿', txt: 'Joyeux' },
+    { c: 'rose', t: '●', txt: 'Câlin' },
+  ];
+  return (
+    <div className="tpl-prev tpl-wall">
+      <div className="wall-grid">
+        {notes.map((n, i) => (
+          <div key={i} className={`note note-${n.c}`} style={{ transform: `rotate(${(i%2?1:-1)*(2+i%4)}deg)` }}>
+            <div className="note-mark">{n.t}</div>
+            <div className="note-txt">{n.txt}</div>
+          </div>
+        ))}
+      </div>
+      <div className="tpl-title serif italic">Mur de vœux</div>
     </div>
   );
-  if (tplKey === 'hommage') return (
-    <div className={`${s.tplThumb} ${s.vHommage}`}>
-      <div className={s.frame}></div>
-      <div className={s.ribbon}>In Memoriam</div>
-    </div>
-  );
-  if (tplKey === 'family') return (
-    <div className={`${s.tplThumb} ${s.vFamily}`}>
-      <div className={s.photos}>
-        <div className={s.ph}>👤</div>
-        <div className={s.ph}>👤</div>
-        <div className={s.ph}>👤</div>
-        <div className={s.ph}>👤</div>
-        <div className={s.ph}>♥</div>
-        <div className={s.ph}>👤</div>
+}
+
+function PrevMariage() {
+  return (
+    <div className="tpl-prev tpl-mariage">
+      <svg className="floral tl" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1">
+        <path d="M30 5 Q35 20 30 30 Q25 20 30 5 Z"/>
+        <path d="M30 30 Q45 25 55 30 Q45 35 30 30 Z"/>
+        <path d="M30 30 Q15 25 5 30 Q15 35 30 30 Z"/>
+        <path d="M30 30 Q35 45 30 55 Q25 45 30 30 Z"/>
+        <circle cx="30" cy="30" r="2" fill="currentColor"/>
+      </svg>
+      <svg className="floral br" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1">
+        <path d="M30 5 Q35 20 30 30 Q25 20 30 5 Z"/>
+        <path d="M30 30 Q45 25 55 30 Q45 35 30 30 Z"/>
+        <path d="M30 30 Q15 25 5 30 Q15 35 30 30 Z"/>
+        <path d="M30 30 Q35 45 30 55 Q25 45 30 30 Z"/>
+        <circle cx="30" cy="30" r="2" fill="currentColor"/>
+      </svg>
+      <div className="mariage-frame">
+        <div className="mariage-sm serif italic">le mariage de</div>
+        <div className="mariage-mono serif">M <span>&amp;</span> A</div>
+        <div className="mariage-date">14 · juin · 2025</div>
       </div>
     </div>
   );
-  if (tplKey === 'pro') return (
-    <div className={`${s.tplThumb} ${s.vPro}`}>
-      <div className={s.proCard}>
-        <div className={s.proLogo}>M</div>
-        <div className={s.proH}>Notre équipe</div>
-        <div className={s.proS}>Hommage collectif</div>
-        <div className={s.proRow}>
-          <span className={s.pip}></span>
-          <span className={s.pip}></span>
-          <span className={s.pip}></span>
-          <span className={s.pip}></span>
-          <span className={s.pip}></span>
+}
+
+function PrevBaby() {
+  return (
+    <div className="tpl-prev tpl-baby">
+      <div className="baby-blob b1"></div>
+      <div className="baby-blob b2"></div>
+      <div className="baby-blob b3"></div>
+      <div className="baby-content">
+        <div className="baby-eye"></div>
+        <div className="tpl-title serif italic">Bienvenue<br/>petite Léa</div>
+        <div className="tpl-sub">3,2 kg · 12 mai</div>
+      </div>
+    </div>
+  );
+}
+
+function PrevRetraite() {
+  return (
+    <div className="tpl-prev tpl-retraite">
+      <div className="retraite-stars">
+        <span style={{ top:'12%', left:'10%' }}>✦</span>
+        <span style={{ top:'24%', right:'18%' }}>·</span>
+        <span style={{ top:'8%', right:'8%' }}>✦</span>
+        <span style={{ bottom:'24%', left:'14%' }}>·</span>
+      </div>
+      <div className="retraite-content">
+        <div className="retraite-sm">25 ans avec nous</div>
+        <div className="retraite-big serif italic">Merci<br/>Mariama.</div>
+        <div className="retraite-signatures">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
         </div>
       </div>
     </div>
   );
-  // Generic fallback
-  return <div className={`${s.tplThumb} ${s.vBirthday}`}></div>;
+}
+
+function PrevTabaski() {
+  return (
+    <div className="tpl-prev tpl-tabaski">
+      <svg className="tabaski-pattern" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <pattern id="tk-p" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M10 0 L20 10 L10 20 L0 10 Z" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.4"/>
+            <circle cx="10" cy="10" r="1" fill="currentColor" opacity="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100" height="100" fill="url(#tk-p)"/>
+      </svg>
+      <div className="tabaski-crescent">
+        <svg viewBox="0 0 40 40">
+          <path d="M30 8 A14 14 0 1 0 30 32 A11 11 0 1 1 30 8 Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div className="tpl-title serif italic">Bonne fête</div>
+      <div className="tpl-sub">à toute la famille</div>
+    </div>
+  );
+}
+
+function PrevHommage() {
+  return (
+    <div className="tpl-prev tpl-hommage">
+      <div className="hommage-frame">
+        <div className="hommage-inner">
+          <div className="hommage-portrait">
+            <svg viewBox="0 0 40 40" fill="currentColor" opacity="0.35">
+              <circle cx="20" cy="15" r="6"/>
+              <path d="M8 38 Q8 24 20 24 Q32 24 32 38 Z"/>
+            </svg>
+          </div>
+          <div className="hommage-name serif italic">Mamadou</div>
+          <div className="hommage-dates">1948 — 2024</div>
+          <div className="hommage-quote serif italic">« Un homme bon ne meurt jamais. »</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PrevBrand() {
+  return (
+    <div className="tpl-prev tpl-brand">
+      <div className="brand-logo">
+        <div className="brand-logomark">★</div>
+        <div className="brand-logoname">YALA</div>
+      </div>
+      <div className="brand-main">
+        <div className="brand-eyebrow">Pour la nouvelle année</div>
+        <div className="brand-headline serif italic">Que 2025<br/>vous comble.</div>
+      </div>
+      <div className="brand-cta">
+        Découvrir l'offre <span>→</span>
+      </div>
+    </div>
+  );
+}
+
+function PrevFilm() {
+  return (
+    <div className="tpl-prev tpl-film">
+      <div className="film-bars t"></div>
+      <div className="film-bars b"></div>
+      <div className="film-frame">
+        <div className="film-play">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div className="film-meta">
+        <span>NOTRE FILM</span>
+        <span>·</span>
+        <span>04:12</span>
+      </div>
+    </div>
+  );
+}
+
+const PREVIEWS = {
+  'birthday-classic': PrevBirthday,
+  'wall-of-wishes':   PrevWall,
+  'mariage-floral':   PrevMariage,
+  'baby':             PrevBaby,
+  'pro-retraite':     PrevRetraite,
+  'tabaski':          PrevTabaski,
+  'hommage':          PrevHommage,
+  'brand-launch':     PrevBrand,
+  'notre-film':       PrevFilm,
+};
+
+function TemplateCard({ tpl, onOpen }) {
+  const Prev = PREVIEWS[tpl.id] || PrevBirthday;
+  const pillColor = tpl.color === 'gold' ? 'gold' : tpl.color === 'rose' ? 'rose' : tpl.color === 'em' ? 'em' : tpl.color === 'peach' ? 'peach' : '';
+  return (
+    <article
+      className={`tpl-card tone-${tpl.color}`}
+      style={{ aspectRatio: SIZE_ASPECT[tpl.size] || '1 / 1' }}
+      onClick={() => onOpen(tpl)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen(tpl)}
+    >
+      <Prev/>
+      <div className="tpl-meta">
+        <div className="tpl-cat">
+          <span className={`pill pill-${pillColor}`}>{tpl.cat}</span>
+          {tpl.badge && <span className="pill pill-em">{tpl.badge}</span>}
+        </div>
+        <div className="tpl-name-row">
+          <h3 className="tpl-name serif italic">{tpl.name}</h3>
+          <div className="tpl-cost"><span className="coin"/>{tpl.credits}</div>
+        </div>
+        <div className="tpl-foot">
+          <span className="tpl-subt">{tpl.sub}</span>
+          <span className="tpl-open">Aperçu →</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function TemplateModal({ tpl, onClose, onCreate }) {
+  const Prev = PREVIEWS[tpl.id] || PrevBirthday;
+  return (
+    <div className="modal" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog" aria-modal="true">
+      <div className="modal-card">
+        <button className="modal-close" onClick={onClose} aria-label="Fermer">×</button>
+
+        <div className={`modal-prev tone-${tpl.color}`}>
+          <div className="modal-prev-inner">
+            <Prev/>
+          </div>
+          <div className="modal-prev-foot">
+            <span className="pill pill-gold"><span className="coin"/>{tpl.credits} crédits pour publier</span>
+            <span className="modal-prev-eq">≈ {fmtFCFA(tpl.credits * 500)} · {fmtEUR(tpl.credits * 500)}</span>
+          </div>
+        </div>
+
+        <div className="modal-body">
+          <div className="modal-tag">{tpl.cat}</div>
+          <h3 className="serif italic modal-name">{tpl.name}</h3>
+          <p className="modal-desc">{tpl.desc}</p>
+
+          <div className="modal-feats">
+            <div><span className="ck">✓</span> Personnalisation 100% gratuite (photos, musique, textes)</div>
+            <div><span className="ck">✓</span> Partage par lien privé + QR code stylisé</div>
+            <div><span className="ck">✓</span> Bouton de redirection (site, WhatsApp, offre)</div>
+            <div><span className="ck">✓</span> Vues illimitées, conservé à vie</div>
+          </div>
+
+          <div className="modal-actions">
+            <button className="btn btn-ghost" onClick={onClose}>Continuer à explorer</button>
+            <button className="btn btn-primary" onClick={() => { onClose(); onCreate(); }}>
+              Personnaliser ce template <span className="arr">→</span>
+            </button>
+          </div>
+
+          <div className="modal-note">
+            <span className="coin"/>
+            <span><strong>Vous ne payez qu'à la publication.</strong> Créez votre compte, personnalisez,
+            puis achetez exactement les crédits qu'il vous faut. Pas d'abonnement.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Templates({ onOrder }) {
-  const [ref, inView] = useInView();
-  const [templates, setTemplates] = useState(DEFAULT_LIST);
-  const [preview, setPreview] = useState(null); // { apiName, info } or null
-  const [iframeReady, setIframeReady] = useState(false);
-
-  // Fetch real template list from server
-  useEffect(() => {
-    fetch(`${API_BASE}/api/templates`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (!Array.isArray(data) || data.length === 0) return;
-        const mapped = data
-          .filter(t => t.active !== false)
-          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-          .map(t => {
-            const info = TEMPLATE_INFO[t.name] || {};
-            return {
-              apiName: t.name,
-              thumbKey: THUMB_KEY[t.name] || 'birthday',
-              cat:     info.cat     || t.category || t.name,
-              credits: t.creditsRequired || info.credits || 5,
-              equiv:   `${(t.creditsRequired || info.credits || 5) * 500} XOF`,
-              name:    t.label      || info.name  || t.name,
-              desc:    info.desc    || t.shortDescription || '',
-              includes: info.includes || t.highlights || [],
-            };
-          });
-        setTemplates(mapped);
-      })
-      .catch(() => {}); // keep default list on failure
-  }, []);
-
-  const openPreview = (tpl) => {
-    setPreview(tpl);
-    setIframeReady(false);
-    document.body.style.overflow = 'hidden';
-  };
-  const closePreview = () => {
-    setPreview(null);
-    document.body.style.overflow = '';
-  };
+  const [open, setOpen] = useState(null);
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') closePreview(); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(null); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+  }, [open]);
+
   return (
-    <section className={s.templates} id="templates" ref={ref}>
-      <div className={s.wrap}>
-        {/* Header */}
-        <div className={s.secHead}>
-          <span className={`${s.eyebrow} ${inView ? s.revealed : s.reveal}`}>
-            <span className={s.dot}></span> Templates &amp; bibliothèque
-          </span>
-          <h2 className={`${s.title} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.08s' }}>
-            Personnalisez <em>gratuitement</em>, publiez avec vos crédits.
-          </h2>
-          <p className={`${s.sub} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.16s' }}>
-            L'éditeur est accessible sans payer. Vous achetez vos crédits uniquement au moment de publier — pas avant.
+    <section className="section section-templates" id="templates">
+      <div className="wrap">
+        <div className="section-head">
+          <span className="eyebrow"><span className="dot"></span> Bibliothèque de templates</span>
+          <h2>Un template <em>pour chaque occasion</em>.</h2>
+          <p>
+            Anniversaires, mariages, naissances, hommages, fêtes religieuses, célébrations
+            d'équipe et campagnes de marque. L'éditeur est gratuit — vous achetez des crédits
+            uniquement pour publier.
           </p>
         </div>
 
-        {/* Flow correct */}
-        <div className={`${s.tplFlow} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.2s' }}>
-          <div className={`${s.step} ${s.s1}`}>
-            <div className={s.ic}>①</div>
-            <div className={s.lab}>Choisissez un template</div>
-            <div className={s.desc}>Aperçu live gratuit</div>
-          </div>
-          <div className={`${s.step} ${s.s2}`}>
-            <div className={s.ic}>②</div>
-            <div className={s.lab}>Personnalisez</div>
-            <div className={s.desc}>Photos, musique, QR… sans payer</div>
-          </div>
-          <div className={`${s.step} ${s.s3}`}>
-            <div className={s.ic}>③</div>
-            <div className={s.lab}>Achetez vos crédits</div>
-            <div className={s.desc}>Seulement pour publier</div>
-          </div>
-          <div className={`${s.step} ${s.s4}`}>
-            <div className={s.ic}>④</div>
-            <div className={s.lab}>Publiez &amp; partagez</div>
-            <div className={s.desc}>Lien privé, WhatsApp</div>
-          </div>
-        </div>
-
-        {/* Templates grid */}
-        <div className={s.templatesGrid}>
-          {templates.map((tpl, i) => (
-            <article
-              key={tpl.apiName}
-              className={`${s.tplCard} ${inView ? s.revealed : s.reveal}`}
-              style={{ transitionDelay: `${(i % 3) * 0.08}s` }}
-            >
-              <div className={s.tplCat}>{tpl.cat}</div>
-              <div className={s.tplCost}>
-                <span className={s.coin} aria-hidden="true"></span>
-                {tpl.credits} crédits
-              </div>
-              <TemplateThumbnail tplKey={tpl.thumbKey} />
-              <div className={s.tplBody}>
-                <h3 className={s.tplName}>{tpl.name}</h3>
-                <p className={s.tplDesc}>{tpl.desc}</p>
-                <div className={s.tplActions}>
-                  <button className={s.btnPreview} onClick={() => openPreview(tpl)}>Aperçu live</button>
-                  <button className={s.btnUnlock} onClick={onOrder}>Commencer</button>
-                </div>
-                <div className={s.tplEquiv}>≈ <strong>{tpl.equiv}</strong></div>
-              </div>
-            </article>
+        <div className="tpl-mosaic">
+          {TEMPLATES.map(t => (
+            <TemplateCard key={t.id} tpl={t} onOpen={setOpen}/>
           ))}
         </div>
 
-        {/* Préfaits */}
-        <div className={`${s.prefaits} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.3s' }}>
-          <div className={s.prefaitsHead}>
-            <div className={s.copy}>
-              <span className={s.tag}><span aria-hidden="true">⚡</span> Préfaits prêts à dupliquer</span>
-              <h3>Pressé ? Partez d'un <em>préfait</em>, déjà configuré.</h3>
-              <p>Une bibliothèque de vœux pré-configurés — changez les noms, les photos et publiez. Idéal quand le temps presse.</p>
-            </div>
-            <button className={s.btnLink} onClick={onOrder}>Voir toute la bibliothèque →</button>
-          </div>
-          <div className={s.prefaitsScroll}>
-            {PREFAITS.map((p, i) => (
-              <div key={i} className={s.prefait}>
-                <div className={`${s.prefaitThumb} ${p.thumbCls}`}>
-                  <span className={s.prefaitLabel}>{p.label}</span>
-                </div>
-                <div className={s.prefaitName}>{p.name}</div>
-                <div className={s.prefaitMeta}>{p.meta}</div>
-                <div className={s.prefaitActions}>
-                  <button className={s.prefaitPreview} onClick={() => openPreview({ apiName: p.apiName, name: p.name, cat: '', credits: 0, includes: [] })}>
-                    👁 Aperçu
-                  </button>
-                  <button className={s.dup} onClick={onOrder}>
-                    Dupliquer <span className={s.arr}>→</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="tpl-foot-note">
+          <span className="pill pill-gold">⊕ &nbsp;Et bien d'autres</span>
+          <span>Nouveaux templates ajoutés chaque mois. Suggestions bienvenues.</span>
         </div>
       </div>
 
-      {/* Preview modal with iframe */}
-      {preview && (
-        <div
-          className={s.modal}
-          onClick={(e) => { if (e.target === e.currentTarget) closePreview(); }}
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Aperçu — ${preview.name}`}
-        >
-          <div className={s.modalCard}>
-            <button className={s.modalClose} onClick={closePreview} aria-label="Fermer l'aperçu">×</button>
-
-            {/* Iframe preview */}
-            <div className={s.modalPreview}>
-              {!iframeReady && (
-                <div className={s.iframeLoader}>
-                  <div className={s.iframeSpinner}></div>
-                  <span className={s.iframeLoaderText}>Chargement de l'aperçu…</span>
-                </div>
-              )}
-              <iframe
-                key={preview.apiName}
-                src={`${API_BASE}/preview/${preview.apiName}`}
-                className={s.previewFrame}
-                title={`Aperçu — ${preview.name}`}
-                sandbox="allow-scripts allow-same-origin"
-                onLoad={() => setIframeReady(true)}
-              />
-            </div>
-
-            {/* Info panel */}
-            <div className={s.modalBody}>
-              <span className={s.modalCat}>{preview.cat}</span>
-              <h3 className={s.modalTitle} id="modalTitle">{preview.name}</h3>
-              {preview.desc && <p className={s.modalDesc}>{preview.desc}</p>}
-              {preview.includes?.length > 0 && (
-                <ul className={s.modalIncludes}>
-                  {preview.includes.map((inc, i) => (
-                    <li key={i}>
-                      <span className={s.ck}>✓</span>
-                      <span>{inc}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {preview.credits > 0 && (
-                <div className={s.modalCost}>
-                  <div>
-                    <div className={s.costLabel}>Coût à la publication</div>
-                    <div className={s.costV}><span className={s.coinLg}></span>{preview.credits} crédits</div>
-                    <div className={s.costEq}>≈ {preview.equiv || `${preview.credits * 500} XOF`}</div>
-                  </div>
-                </div>
-              )}
-              <div className={s.modalNote}>
-                💡 La personnalisation est <strong>100% gratuite</strong>. Vous payez uniquement pour publier.
-              </div>
-              <div className={s.modalActions}>
-                <a href="#pricing" className={s.btnGhost} onClick={closePreview}>Voir les packs</a>
-                <button className={s.btnPrimary} onClick={() => { closePreview(); onOrder(); }}>
-                  Commencer gratuitement <span className={s.arr}>→</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {open && <TemplateModal tpl={open} onClose={() => setOpen(null)} onCreate={onOrder}/>}
     </section>
   );
 }

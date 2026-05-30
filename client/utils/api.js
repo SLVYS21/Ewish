@@ -107,6 +107,7 @@ export default api;
 // ── Auth ──
 export const login = (email, password) => api.post('/auth/login', { email, password }, { withCredentials: true });
 export const register = (email, password, name) => api.post('/auth/register', { email, password, name }, { withCredentials: true });
+export const googleLogin = (credential) => api.post('/auth/google', { credential }, { withCredentials: true });
 export const logout = () => api.post('/auth/logout', {}, { withCredentials: true });
 export const getMe = () => api.get('/auth/me', { withCredentials: true });
 
@@ -149,6 +150,21 @@ export const unpublishPublication = (id) => api.post(`/publications/${id}/unpubl
 // ── Billing ──
 export const buyCredits = (amount) => api.post('/billing/buy-credits', { amount }, { withCredentials: true });
 export const verifyKkiapayTransaction = (transactionId) => api.post('/billing/kkiapay-verify', { transactionId }, { withCredentials: true });
+export const applyPromoCode = (code) => api.post('/billing/apply-promo', { code }, { withCredentials: true });
+
+// ── KYC ──
+export const submitKyc              = (data)        => api.post('/kyc/submit', data, { withCredentials: true });
+export const getKycStatus           = ()            => api.get('/kyc/status', { withCredentials: true });
+export const generateKycMobileToken = ()            => api.post('/kyc/mobile-token', {}, { withCredentials: true });
+export const verifyKycMobileToken   = (token)       => api.get(`/kyc/mobile-verify/${token}`);
+export const submitKycMobile        = (token, d)    => api.post(`/kyc/mobile-submit/${token}`, d);
+export const getKycList             = (params)      => api.get('/kyc/list', { params, withCredentials: true });
+export const updateKycStatus        = (id, data)    => api.patch(`/kyc/${id}`, data, { withCredentials: true });
+
+// ── Contributions ──
+export const getContributions       = (pubId)       => api.get(`/contributions/${pubId}`);
+export const getContributionStats   = (pubId)       => api.get(`/contributions/${pubId}/stats`);
+export const verifyContribution     = (data)        => api.post('/contributions/verify', data);
 
 // ── Super Admin ──
 export const getSuperAdminStats  = ()         => api.get('/superadmin/stats');

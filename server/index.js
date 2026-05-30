@@ -62,7 +62,7 @@ app.use('/site', express.static(TEMPLATES_DIR, { index: false }));
 // ── API (shared, accessible from both subdomains) ─────────────
 app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/templates',    require('./routes/templates'));
-//app.use('/api/orders',       require('./routes/orders'));
+app.use('/api/orders',       require('./routes/orders'));
 app.use('/api/orders',       require('./routes/order-public'));
 app.use('/api/promo',        require('./routes/promo'));
 app.use('/api/upload',       require('./routes/upload'));
@@ -78,6 +78,8 @@ app.use('/api/assets',       require('./routes/assetbank'));
 app.use('/api/suggestions',  require('./routes/suggestions'));
 app.use('/api/prospects',    require('./routes/prospects'));
 app.use('/api/settings',     require('./routes/settings'));
+app.use('/api/kyc',          require('./routes/kyc'));
+app.use('/api/contributions', require('./routes/contributions'));
 
 
 app.use('/collect', require('./routes/collect'));

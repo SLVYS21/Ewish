@@ -630,6 +630,21 @@
       box-shadow: 0 12px 24px -12px rgba(26, 20, 36, 0.2);
     }
 
+    /* ── Photo frames ── */
+    [data-photo="main"] { overflow: hidden; padding: 0; }
+    [data-photo="main"] img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+    .ww-frame-polaroid { background: #fff !important; padding: 5px 5px 22px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.22) !important; border-radius: 3px !important; }
+    .ww-frame-instant  { background: #fff !important; padding: 5px 5px 30px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important; border-radius: 2px !important; }
+    .ww-frame-film     { background: #111 !important; padding: 6px 4px !important; border-top: 10px solid #111 !important; border-bottom: 10px solid #111 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; border-radius: 2px !important; }
+    .ww-frame-vintage  { background: #f5efe0 !important; border: 3px solid #c8a96e !important; padding: 4px !important; box-shadow: inset 0 0 8px rgba(0,0,0,0.1), 0 3px 8px rgba(0,0,0,0.15) !important; border-radius: 2px !important; }
+    .ww-caption { text-align: center; font-size: 0.6rem; color: #555; padding: 2px 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Courier New', monospace; line-height: 1.3; }
+    .ww-frame-polaroid .ww-caption, .ww-frame-instant .ww-caption { color: #333; }
+    .ww-frame-film .ww-caption { color: #bbb; }
+    .ww-frame-vintage .ww-caption { color: #6b5a3a; font-family: Georgia, serif; }
+    .six .photo-grid [data-photo="3"],
+    .six .photo-grid [data-photo="4"],
+    .six .photo-grid [data-photo="5"] { width: 90px; height: 110px; border-radius: 10px; }
+
     .six .hat {
       position: absolute;
       width: -8000px;
@@ -1340,7 +1355,7 @@
         <span data-node-name="greeting">Coucou</span>
         <span data-node-name="name">Prénom</span>
       </h1>
-      <p class="two" data-node-name="greetingText">Tu comptes énormément pour nous !</p>
+      <p class="two" data-node-name="greetingText">Joli prénom btw !</p>
     </div>
 
     <!-- 2. MUSIC INTERLUDE -->
@@ -1348,7 +1363,7 @@
       <div class="iphone-player">
         <div class="album-art-placeholder" id="main-album-art" data-node-name="albumArt">🎵</div>
         <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
-        <p class="track-artist" data-node-name="trackArtist">Artiste</p>
+        <p class="track-artist" data-node-name="trackArtist">Naza</p>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
@@ -1391,7 +1406,7 @@
         </div>
         <div class="wa-body">
           <div class="wa-bubble">
-            <p class="hbd-chatbox wa-bubble-text" data-node-name="textInChatBox">Joyeux anniversaire !!! 🎉 Meilleurs voeux… Blah blah blah.. !</p>
+            <p class="hbd-chatbox wa-bubble-text" data-node-name="textInChatBox">Joyeux anniversaire !!! 🎉 Je suis tellement content(e) que tu existes… T'as pas idée !</p>
             <span class="wa-time">maintenant <span class="wa-ticks">✓✓</span></span>
           </div>
         </div>
@@ -1429,8 +1444,11 @@
     <div class="six" data-section="celebration">
       <div class="photo-grid" id="photo-grid">
         <div class="photo-placeholder" data-photo="1">📸</div>
-        <img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath">
+        <div class="photo-placeholder" data-photo="main"><img src="img/lydia2.png" alt="" class="lydia-dp" data-node-name="imagePath" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;"></div>
         <div class="photo-placeholder" data-photo="2">🎂</div>
+        <!-- <div class="photo-placeholder" data-photo="3" style="display:none">🌟</div>
+        <div class="photo-placeholder" data-photo="4" style="display:none">💫</div>
+        <div class="photo-placeholder" data-photo="5" style="display:none">✨</div> -->
       </div>
       <!-- hat removed (was hidden via width:-8000px in original template) -->
       <div class="wish">
@@ -1446,7 +1464,7 @@
 
     <!-- 10. OUTRO -->
     <div class="nine" data-section="outro">
-      <p data-node-name="outroText">J'espère que tu as kiffé.</p>
+      <p data-node-name="outroText">J'espère que tu as kiffé !</p>
       <p id="replay" data-node-name="replayText">Revoir ↺</p>
       <p class="last-smile" data-node-name="outroSmiley">:)</p>
     </div>
@@ -1981,15 +1999,39 @@
        ============================================================ */
     function applyPhotoTransforms(transforms) {
       if (!transforms) return;
+      var photoCount = transforms._photoCount || 3;
       var mapping = {
         photo1: '[data-photo="1"]',
-        photo2: '[data-node-name="imagePath"]',
+        photo2: '[data-photo="main"]',
         photo3: '[data-photo="2"]',
+        photo4: '[data-photo="3"]',
+        photo5: '[data-photo="4"]',
+        photo6: '[data-photo="5"]',
       };
-      Object.keys(transforms).forEach(function (key) {
+      // Show/hide extra photo slots (désactivé)
+      // var showAt = { 3: 4, 4: 5, 5: 6 };
+      // [3, 4, 5].forEach(function(n) {
+      //   var sl = document.querySelector('[data-photo="' + n + '"]');
+      //   if (sl) sl.style.display = photoCount >= showAt[n] ? '' : 'none';
+      // });
+      Object.keys(transforms).forEach(function(key) {
+        if (key === '_photoCount') return;
         var t = transforms[key];
+        if (!t || typeof t !== 'object') return;
         var el = document.querySelector(mapping[key]);
         if (!el) return;
+        // Frame
+        el.className = el.className.replace(/\bww-frame-\S+/g, '').trim();
+        if (t.frame && t.frame !== 'none') el.classList.add('ww-frame-' + t.frame);
+        // Caption
+        var cap = el.querySelector('.ww-caption');
+        if (t.caption) {
+          if (!cap) { cap = document.createElement('div'); cap.className = 'ww-caption'; el.appendChild(cap); }
+          cap.textContent = t.caption;
+        } else if (cap) {
+          cap.remove();
+        }
+        // Transform
         el.style.transform = 'translateX(' + (t.x || 0) + 'px) translateY(' + (t.y || 0) + 'px) rotate(' + (t.rotation || 0) + 'deg) scale(' + (t.scale || 1) + ')';
         el.style.zIndex = t.zIndex || 1;
         el.style.position = 'relative';
@@ -2082,6 +2124,15 @@
           } else if (key === 'photo2') {
             const el = document.querySelector('[data-photo="2"]');
             if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
+          // } else if (key === 'photo3') {
+          //   const el = document.querySelector('[data-photo="3"]');
+          //   if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
+          // } else if (key === 'photo4') {
+          //   const el = document.querySelector('[data-photo="4"]');
+          //   if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
+          // } else if (key === 'photo5') {
+          //   const el = document.querySelector('[data-photo="5"]');
+          //   if (el) { el.innerHTML = ''; el.style.background = 'none'; const img = document.createElement('img'); img.src = val; img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;'; el.appendChild(img); }
           } else if (key === 'name') {
             const el = document.querySelector('[data-node-name="name"]');
             if (el) el.innerText = val;
