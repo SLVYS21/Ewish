@@ -7,7 +7,7 @@
   <title>On t'aime fort 🎉</title>
   <link rel="preload" href="../BubbleFont-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Pacifico&family=Fredoka+One&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Fredoka+One&display=swap"
     rel="stylesheet">
   <style>
     *,
@@ -17,21 +17,22 @@
     }
 
     :root {
-      --primary: #ff69b4;
-      --accent: #ffb347;
-      --font: 'Nunito', sans-serif;
+      --primary: #E11D74;
+      --accent: #F5B544;
+      --font: 'Outfit', system-ui, sans-serif;
       --fs-scale: 1;
-      --text-color: #333333;
-      --text-muted: #888888;
-      --bg-color: #ffffff;
-      --bg-section: #fff5fb;
-      --bg-section2: #fffaf0;
+      --text-color: #1A1424;
+      --text-muted: #8A8195;
+      --bg: #FBF8F4;
+      --surface: #FFFFFF;
+      --hairline: rgba(26, 20, 36, 0.08);
+      --hairline-strong: rgba(26, 20, 36, 0.14);
     }
 
     body {
       margin: 0;
       font-family: var(--font);
-      background: var(--bg-color);
+      background: var(--bg);
       overflow: hidden;
     }
 
@@ -64,35 +65,39 @@
     }
 
     .pill-btn {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      border: none;
-      border-radius: 50px;
-      color: #fff;
+      background: var(--surface);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 999px;
+      color: var(--text-color);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 14px 7px 7px;
+      gap: 10px;
+      padding: 6px 16px 6px 6px;
       font-family: var(--font);
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      box-shadow: 0 4px 18px rgba(255, 105, 180, 0.45);
-      transition: transform 0.2s;
+      letter-spacing: -0.005em;
+      box-shadow: 0 6px 20px -8px rgba(26, 20, 36, 0.18);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
 
     .pill-btn:hover {
-      transform: scale(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px -8px rgba(26, 20, 36, 0.22);
+      border-color: var(--primary);
     }
 
     .pill-cover-wrap {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.25);
+      background: var(--accent);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.9rem;
+      color: #fff;
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -152,29 +157,40 @@
     }
 
     .iphone-player {
-      background: #fff;
-      border: 1.5px solid rgba(255, 105, 180, 0.18);
+      background: var(--surface);
+      border: 1px solid var(--hairline);
       border-radius: 28px;
-      padding: 28px 24px;
-      width: 280px;
-      box-shadow: 0 20px 60px rgba(255, 105, 180, 0.18), 0 4px 16px rgba(0, 0, 0, 0.06);
+      padding: 26px 22px 24px;
+      width: 288px;
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6) inset,
+        0 24px 60px -20px rgba(26, 20, 36, 0.18),
+        0 4px 16px -4px rgba(26, 20, 36, 0.08);
       pointer-events: auto !important;
       transform: translateZ(0);
-      /* iOS fix */
     }
 
     .album-art-placeholder {
-      width: 200px;
-      height: 200px;
-      border-radius: 20px;
-      margin: 0 auto 20px;
+      width: 244px;
+      height: 244px;
+      border-radius: 18px;
+      margin: 0 auto 22px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 4rem;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      box-shadow: 0 12px 35px rgba(255, 105, 180, 0.35);
+      background: var(--accent);
+      color: rgba(255, 255, 255, 0.85);
       overflow: hidden;
+      position: relative;
+    }
+
+    .album-art-placeholder::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.35), transparent 55%);
     }
 
     .track-title {
@@ -193,7 +209,7 @@
     .progress-bar {
       width: 100%;
       height: 3px;
-      background: var(--text-muted);
+      background: var(--hairline);
       border-radius: 2px;
       margin-bottom: 8px;
       overflow: hidden;
@@ -201,7 +217,7 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--accent));
+      background: var(--primary);
       border-radius: 2px;
       width: 0%;
       transition: width 0.5s linear;
@@ -225,33 +241,41 @@
     .ctrl-btn {
       background: none;
       border: none;
-      color: var(--text-muted);
+      color: var(--text-color);
       cursor: pointer;
-      font-size: 1.4rem;
-      transition: transform 0.2s;
+      padding: 0;
+      transition: transform 0.2s, color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .ctrl-btn:hover {
       transform: scale(1.12);
+      color: var(--primary);
     }
 
     .ctrl-play {
-      width: 52px;
-      height: 52px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: var(--text-muted);
+      background: var(--primary);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
-      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
-      transition: transform 0.2s;
+      box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--primary) 60%, transparent);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .ctrl-play:hover {
+      transform: scale(1.08);
+      box-shadow: 0 14px 30px -8px color-mix(in srgb, var(--primary) 70%, transparent);
     }
 
     .music-hint {
       font-size: 0.88rem;
-      color: #c48aaa;
+      color: var(--text-muted);
       margin-top: 22px;
       font-weight: 300;
     }
@@ -277,12 +301,13 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      color: #dda0cc;
+      color: var(--text-muted);
       margin-bottom: 16px;
     }
 
     .group-name {
-      font-family: 'Pacifico', cursive;
+      font-family: var(--font);
+      font-weight: 800;
       font-size: clamp(1.8rem, 6vw, 3rem);
       color: var(--primary);
       margin-bottom: 20px;
@@ -292,7 +317,7 @@
     .group-message {
       font-size: clamp(1rem, 3vw, 1.4rem);
       font-weight: 300;
-      color: #555;
+      color: var(--text-muted);
       max-width: 500px;
       line-height: 1.7;
     }
@@ -448,7 +473,8 @@
     }
 
     .ws-title {
-      font-family: 'Pacifico', cursive;
+      font-family: var(--font);
+      font-weight: 700;
       font-size: clamp(1.2rem, 4vw, 2rem);
       color: var(--primary);
       margin-bottom: 24px;
@@ -720,37 +746,31 @@
     #revoir-outro-btn {
       display: none;
       margin-top: 24px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      background: var(--primary);
       border: none;
       color: #fff;
-      border-radius: 50px;
-      padding: 12px 32px;
+      border-radius: 999px;
+      padding: 13px 32px;
       font-family: var(--font);
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: -0.005em;
       cursor: pointer;
-      box-shadow: 0 6px 22px rgba(255, 105, 180, 0.45);
+      box-shadow: 0 12px 30px -8px color-mix(in srgb, var(--primary) 50%, transparent);
       transition: transform 0.2s, box-shadow 0.2s;
       animation: rbpulse 2.5s ease-in-out infinite;
       pointer-events: auto;
     }
 
     #revoir-outro-btn:hover {
-      transform: translateY(-3px) scale(1.04);
-      box-shadow: 0 10px 28px rgba(255, 105, 180, 0.55);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px -8px color-mix(in srgb, var(--primary) 60%, transparent);
       animation: none;
     }
 
     @keyframes rbpulse {
-
-      0%,
-      100% {
-        box-shadow: 0 6px 22px rgba(255, 105, 180, 0.45);
-      }
-
-      50% {
-        box-shadow: 0 10px 32px rgba(255, 105, 180, 0.65);
-      }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.035) translateY(-2px); }
     }
 
     /* ─── Mode Revoir les vœux (Full Screen) ─── */
@@ -808,7 +828,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(ellipse 90% 80% at 50% 42%, #fff5fb 0%, #fffbf0 52%, #fff0f8 100%);
+      background: radial-gradient(ellipse 80% 70% at 50% 38%,
+          color-mix(in srgb, var(--accent) 14%, var(--bg)) 0%,
+          var(--bg) 60%,
+          color-mix(in srgb, var(--primary) 8%, var(--bg)) 100%);
       opacity: 1;
       transition: opacity 0.95s ease;
       overflow: hidden;
@@ -825,7 +848,9 @@
       width: 330px;
       height: 330px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 100, 180, 0.17) 0%, transparent 68%);
+      background: radial-gradient(circle,
+          color-mix(in srgb, var(--primary) 18%, transparent) 0%,
+          transparent 65%);
       animation: ibGlow 2.3s ease-in-out infinite alternate;
       pointer-events: none;
     }
@@ -919,12 +944,12 @@
 
     #ib-label {
       margin: 0;
-      font-family: 'Nunito', sans-serif;
-      font-size: clamp(0.88rem, 3.8vw, 1.42rem);
-      font-weight: 300;
-      letter-spacing: 0.16em;
+      font-family: var(--font);
+      font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+      font-weight: 500;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: #b03878;
+      color: var(--text-color);
     }
 
     #ib-line-svg {
@@ -937,7 +962,7 @@
 
     .ib-wavy-line {
       fill: none;
-      stroke: rgba(255, 160, 60, 0.88);
+      stroke: var(--primary);
       stroke-width: 2.2;
       stroke-linecap: round;
       stroke-dasharray: 240;
@@ -1220,7 +1245,7 @@
     </div>
     <div id="ib-burst"></div>
   </div>
-  <div id="tsparticles-confetti" style="position:fixed;inset:0;pointer-events:none;z-index:100"></div>
+  <div id="tsparticles-confetti" style="position:fixed;inset:0;pointer-events:none;z-index:1000"></div>
 
   <div id="music-pill">
     <button class="pill-btn" onclick="toggleMusic()">
@@ -1240,17 +1265,17 @@
     <div class="one" data-section="greeting">
       <h1 class="one" style="font-size:clamp(2.5rem,8vw,4.5rem)">
         <span data-node-name="greeting">Coucou</span>
-        <span data-node-name="name">Prénom</span> 🎉
+        <span data-node-name="name">Sally</span> 🎉
       </h1>
-      <p class="two" data-node-name="greetingText">Notre meuf adorée !</p>
+      <p class="two" data-node-name="greetingText">Notre star du jour !</p>
     </div>
 
     <!-- 2. MUSIC -->
     <div class="music-interlude" data-section="music">
       <div class="iphone-player">
         <div class="album-art-placeholder" id="main-album-art">🎵</div>
-        <p class="track-title" data-node-name="trackTitle">Notre chanson</p>
-        <p class="track-artist" data-node-name="trackArtist">Artiste préféré</p>
+        <p class="track-title" data-node-name="trackTitle">Notre Hymne</p>
+        <p class="track-artist" data-node-name="trackArtist">Team Paiya</p>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
@@ -1279,24 +1304,24 @@
     <!-- 3. FROM THE GROUP -->
     <div class="three from-group" data-section="message">
       <div class="group-label">Un message de</div>
-      <div class="group-name" data-node-name="groupName">Tes meilleurs potes</div>
+      <div class="group-name" data-node-name="groupName">Ta team de choc</div>
       <div class="group-message" data-node-name="groupMessage">
-        Today is your day !
+        Aujourd'hui, c'est TON moment !
       </div>
-      <div class="group-emojis" data-node-name="groupEmojis">🥰 🎂 🎊</div>
+      <div class="group-emojis" data-node-name="groupEmojis">🥂 🎂 🥳</div>
     </div>
 
     <!-- 4. IDEAS -->
     <div class="five" data-section="ideas">
-      <p class="idea-1" data-node-name="text2">On a cherché les mots.</p>
-      <p class="idea-2" data-node-name="text3">On en a trouvé beaucoup.</p>
+      <p class="idea-1" data-node-name="text2">On a essayé d'écrire de grands discours.</p>
+      <p class="idea-2" data-node-name="text3">On a retourné tout le dictionnaire.</p>
       <p class="idea-3">
-        <span data-node-name="text4">Mais surtout, on voulait te dire</span>
-        <strong data-node-name="text4Adjective">merci</strong>.
+        <span data-node-name="text4">Mais au final, le plus simple c'était de te dire</span>
+        <strong data-node-name="text4Adjective">MERCI</strong>.
       </p>
-      <p class="idea-4" data-node-name="text5Entry">Parce que,</p>
+      <p class="idea-4" data-node-name="text5Entry">Tout simplement parce que,</p>
       <p class="idea-5">
-        <span data-node-name="text5Content">Tu es unique !</span>
+        <span data-node-name="text5Content">Tu rends nos vies meilleures !</span>
         <span class="smiley" data-node-name="smiley">:)</span>
       </p>
       <p class="idea-6">
@@ -1318,7 +1343,7 @@
       <img src="img/hat.svg" alt="" class="hat">
       <div class="wish">
         <h3 class="wish-hbd" data-node-name="wishHeading">Happy Birthday !</h3>
-        <h5 data-node-name="wishText">From our hearts 💖 Be happy !</h5>
+        <h5 data-node-name="wishText">De la part de nous tous. Ne change rien ! 💖</h5>
       </div>
     </div>
 
@@ -1376,8 +1401,8 @@
 
     <!-- 9. OUTRO -->
     <div class="nine" data-section="outro">
-      <p data-node-name="outroText">On espère que tu as kiffé.</p>
-      <p id="replay" data-node-name="replayText">Revoir ↺</p>
+      <p data-node-name="outroText">On espère que cette petite attention t'a plu.</p>
+      <p id="replay" data-node-name="replayText">Refaire la scène ↺</p>
       <button id="revoir-outro-btn" onclick="reviwerWishes()">Revoir les vœux</button>
       <p class="last-smile" data-node-name="outroSmiley">:)</p>
     </div>

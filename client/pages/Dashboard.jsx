@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Search, X, Trash2, Edit2, ExternalLink, CircleOff, Eye, QrCode, Plus,
-  ArrowRight, Sparkles, Copy, Star, MonitorPlay,
+  ArrowRight, Sparkles, Copy, Star, MonitorPlay, Zap,
 } from 'lucide-react';
 import {
   getPublications, deletePublication, duplicatePublication, unpublishPublication,
@@ -10,6 +10,7 @@ import {
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import QRCodeModal from '../components/QRCodeModal';
+import { TemplateCard } from './TemplatesGallery';
 import styles from './Dashboard.module.css';
 
 const TEMPLATE_EMOJIS = {
@@ -36,6 +37,29 @@ const QUICK_TONES = {
   butter: { bg: '#FFE7AD', ring: '#F5CC6E', ink: '#8A5800' },
 };
 
+function TopbarHome({ user, onCredits }) {
+  return (
+    <header className={styles.homeTopbar}>
+      <button className={styles.homeTopbarBell} title="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span className={styles.homeTopbarDot} />
+      </button>
+      <button className={styles.homeTopbarCredits} onClick={onCredits}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+          <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+        </svg>
+        <span>{user?.credits ?? 0}</span>
+        <span style={{ fontSize: 16 }}>💎</span>
+      </button>
+    </header>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -49,7 +73,15 @@ export default function Dashboard() {
   const [dupLoading, setDupLoading] = useState(false);
   const [qrModalPub, setQrModalPub] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [creating, setCreating] = useState('');
   const isSuperAdmin = user?.role === 'super_admin';
+
+  /* ── Name modal (create from template) ── */
+  const [nameModal, setNameModal]     = useState(null); // templateName string
+  const [nameInput, setNameInput]     = useState('');
+  const [nameError, setNameError]     = useState('');
+  const [nameLoading, setNameLoading] = useState(false);
+  const nameRef = useRef(null);
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -71,11 +103,24 @@ export default function Dashboard() {
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const handleCreateFromTemplate = async (templateName) => {
+  const handleCreateFromTemplate = (templateName) => {
+    if (creating) return;
+    setNameModal(templateName);
+    setNameInput('');
+    setNameError('');
+    setTimeout(() => nameRef.current?.focus(), 80);
+  };
+
+  const confirmCreateFromTemplate = async () => {
+    const title = nameInput.trim();
+    if (!title) { setNameError('Donne un nom à ta création 👆'); return; }
+    setNameLoading(true); setNameError('');
     try {
-      const res = await createPublication({ templateName, customName: `draft-${Date.now()}`, title: 'Nouvelle création' });
+      const res = await createPublication({ templateName: nameModal, customName: `draft-${Date.now()}`, title });
+      setNameModal(null);
       navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
-    } catch (e) { alert(e.response?.data?.error || 'Erreur'); }
+    } catch (e) { setNameError(e.response?.data?.error || 'Erreur'); }
+    finally { setNameLoading(false); }
   };
 
   const openDupModal = (pub, e) => {
@@ -218,6 +263,41 @@ export default function Dashboard() {
         <QRCodeModal url={`${VITE_API}/s/${qrModalPub.shortCode}`} onClose={() => setQrModalPub(null)} />
       )}
 
+      {/* Name modal */}
+      {nameModal && (
+        <div className={styles.modalOverlay} onClick={() => setNameModal(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <span className={styles.modalIcon}>✨</span>
+              <h2>Nomme ta création</h2>
+              <p>Pour la retrouver facilement dans ton tableau de bord.</p>
+            </div>
+            <div className={styles.modalField}>
+              <label className={styles.modalLabel}>Titre</label>
+              <input
+                ref={nameRef}
+                className={styles.modalInput}
+                value={nameInput}
+                onChange={e => { setNameInput(e.target.value); setNameError(''); }}
+                onKeyDown={e => e.key === 'Enter' && !nameLoading && confirmCreateFromTemplate()}
+                placeholder="ex : Anniversaire de Sarah, Pot de départ Alex…"
+                autoFocus
+              />
+            </div>
+            {nameError && <p className={styles.modalError}>{nameError}</p>}
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancel} onClick={() => setNameModal(null)}>Annuler</button>
+              <button className={styles.modalConfirm} onClick={confirmCreateFromTemplate} disabled={nameLoading}>
+                {nameLoading ? '⏳ Création…' : 'Commencer →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Desktop topbar (bell + credits) ── */}
+      <TopbarHome user={user} onCredits={() => navigate('/ewish-admin/credits')} />
+
       {/* ── Hero greeting ── */}
       <div className={styles.hero}>
         <div className={styles.heroGreeting}>
@@ -257,6 +337,31 @@ export default function Dashboard() {
           })}
         </div>
       </div>
+
+      {/* ── Mobile PRÊT-À-OFFRIR section ── */}
+      {templates.length > 0 && (
+        <div className={styles.mobilePretSection}>
+          <div className={styles.mobilePretHead}>
+            <div className={styles.mobilePretTitle}>
+              <Zap size={12} style={{ color: 'var(--mk-rose)' }} />
+              PRÊT-À-OFFRIR · 1MIN
+            </div>
+            <Link to="/ewish-admin/templates" className={styles.mobileSectionLink}>Tout voir →</Link>
+          </div>
+          <div className={styles.mobilePretRow}>
+            {templates.map(tpl => (
+              <div key={tpl._id} className={styles.mobilePretCardWrap}>
+                <TemplateCard
+                  tpl={tpl}
+                  creating={creating === tpl.name}
+                  onUse={e => { e.stopPropagation(); handleCreateFromTemplate(tpl.name); }}
+                  compact={true}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile creation rows ── */}
       <div className={styles.mobileSectionHead}>
@@ -431,22 +536,12 @@ export default function Dashboard() {
           </header>
           <div className={styles.tplGrid}>
             {templates.map(tpl => (
-              <button
+              <TemplateCard
                 key={tpl._id}
-                className={styles.tplCard}
-                onClick={() => handleCreateFromTemplate(tpl.name)}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--mk-sh-3)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-              >
-                <div className={styles.tplThumb} style={{ background: TEMPLATE_COLORS[tpl.name] || 'linear-gradient(135deg,#FFB3C1,#E11D48)' }}>
-                  <span className={styles.tplEmoji}>{TEMPLATE_EMOJIS[tpl.name] || '🎁'}</span>
-                  <span className={styles.tplCredit}>💎 {tpl.creditsRequired}</span>
-                </div>
-                <div className={styles.tplBody}>
-                  <div className={styles.tplName}>{tpl.label}</div>
-                  <div className={styles.tplDesc}>{tpl.description}</div>
-                </div>
-              </button>
+                tpl={tpl}
+                creating={creating === tpl.name}
+                onUse={e => { e.stopPropagation(); handleCreateFromTemplate(tpl.name); }}
+              />
             ))}
           </div>
         </section>

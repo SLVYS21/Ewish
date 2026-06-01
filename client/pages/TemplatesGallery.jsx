@@ -1,21 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Eye } from 'lucide-react';
-import { getTemplates, createPublication } from '../utils/api';
+import { Search, X, Zap } from 'lucide-react';
+import { getTemplates, createPublication, getPremadePublications, duplicatePublication } from '../utils/api';
 import styles from './TemplatesGallery.module.css';
 
-const TEMPLATE_EMOJIS = {
-  birthday: '🎉',
-  special: '✨',
-  'collective-family': '💝',
-  'collective-pro': '🥂',
-  forever: '💐',
-  sanctuary: '🕊️',
-  'notre-film': '💞',
-  'wall-of-wishes': '🌟',
-  'wall-of-wishes-3d': '🎊',
-};
-
+/* ── Static per-template data ── */
 const TEMPLATE_COLORS = {
   birthday:           'linear-gradient(145deg,#FFB3C1 0%,#FF8DAA 100%)',
   special:            'linear-gradient(145deg,#D7C5F2 0%,#B59CF0 100%)',
@@ -27,50 +16,77 @@ const TEMPLATE_COLORS = {
   'wall-of-wishes':   'linear-gradient(145deg,#FFB3C1 0%,#E11D48 100%)',
   'wall-of-wishes-3d':'linear-gradient(145deg,#FFD7C2 0%,#FF9F7A 100%)',
 };
-
-const TEMPLATE_CAT_LABEL = {
-  birthday:           'Anniversaire',
-  special:            'Occasion spéciale',
-  'collective-family':'Famille',
-  'collective-pro':   'Pro & RH',
-  forever:            'Mariage',
-  sanctuary:          'Spirituel',
-  'notre-film':       'Couple',
-  'wall-of-wishes':   'Mur de vœux',
-  'wall-of-wishes-3d':'Mur de vœux',
+const TEMPLATE_PREVIEW = {
+  birthday:           { emoji: '🎂', text: 'Joyeux anniversaire\n__  !' },
+  'collective-family':{ emoji: '🎉', text: 'Bon anniversaire\n__  !' },
+  forever:            { emoji: '💐', text: 'Le grand jour\nde __' },
+  special:            { emoji: '✈️', text: 'Bonne route,\n__ !' },
+  'collective-pro':   { emoji: '🥂', text: 'Merci pour tout,\n__  !' },
+  'notre-film':       { emoji: '💞', text: 'Notre histoire\n__  ❤️' },
+  'wall-of-wishes':   { emoji: '🌟', text: 'Dépose ton vœu\npour __  !' },
+  'wall-of-wishes-3d':{ emoji: '🎊', text: 'Vœux pour\n__  !' },
+  sanctuary:          { emoji: '🕊️', text: 'En mémoire\nde __' },
 };
-
-const CATEGORIES = [
-  { id: 'all',      label: 'Tous',      emoji: '' },
-  { id: 'birthday', label: 'Anniv',     emoji: '🎂' },
-  { id: 'love',     label: 'Amour',     emoji: '💍' },
-  { id: 'pro',      label: 'Pro / RH',  emoji: '💼' },
-  { id: 'special',  label: 'Spécial',   emoji: '✨' },
-];
-
+const TEMPLATE_SUBTITLE = {
+  birthday:           '« Confetti Rosé »',
+  'collective-family':'« Ballons Magiques »',
+  forever:            '« Pétales Poudrés »',
+  special:            '« Au revoir & Merci »',
+  'collective-pro':   '« Équipe & Fêtes »',
+  'notre-film':       '« Notre Amour »',
+  'wall-of-wishes':   '« Mur de Vœux »',
+  'wall-of-wishes-3d':'« Vœux 3D »',
+  sanctuary:          '« Lumière & Paix »',
+};
 const TEMPLATE_CATEGORY = {
   birthday: 'birthday', forever: 'love', 'notre-film': 'love',
   'collective-pro': 'pro', 'collective-family': 'pro',
   special: 'special', sanctuary: 'special',
   'wall-of-wishes': 'special', 'wall-of-wishes-3d': 'special',
 };
+const CATEGORIES = [
+  { id: 'all',      label: 'Tous',     emoji: '' },
+  { id: 'birthday', label: 'Anniv',    emoji: '🎂' },
+  { id: 'love',     label: 'Amour',    emoji: '💍' },
+  { id: 'pro',      label: 'Pro / RH', emoji: '💼' },
+  { id: 'special',  label: 'Spécial',  emoji: '✨' },
+];
 
 export default function TemplatesGallery() {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
+  const [premades, setPremades]   = useState([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
   const [cat, setCat]             = useState('all');
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [creating, setCreating]   = useState('');
+
+  /* ── Name modal ── */
+  const [nameModal, setNameModal]   = useState(null); // { type:'premade'|'template', data:{} }
+  const [nameInput, setNameInput]   = useState('');
+  const [nameError, setNameError]   = useState('');
+  const [nameLoading, setNameLoading] = useState(false);
+  const nameRef = useRef(null);
 
   const VITE_API = import.meta.env.VITE_API_URL || '';
 
   useEffect(() => {
-    getTemplates().then(r => setTemplates(r.data || [])).finally(() => setLoading(false));
+    Promise.all([getTemplates(), getPremadePublications()])
+      .then(([tplRes, premadeRes]) => {
+        setTemplates(tplRes.data || []);
+        setPremades(premadeRes.data || []);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const filtered = templates.filter(t => {
+  /* ── Filters ── */
+  const filteredPremades = premades.filter(p => {
+    const lbl = (p.premadeLabel || p.title || '').toLowerCase();
+    const matchSearch = !search || lbl.includes(search.toLowerCase());
+    const matchCat = cat === 'all' || TEMPLATE_CATEGORY[p.templateName] === cat;
+    return matchSearch && matchCat;
+  });
+  const filteredTemplates = templates.filter(t => {
     const matchSearch = !search ||
       (t.label || '').toLowerCase().includes(search.toLowerCase()) ||
       (t.description || '').toLowerCase().includes(search.toLowerCase());
@@ -78,19 +94,44 @@ export default function TemplatesGallery() {
     return matchSearch && matchCat;
   });
 
-  const handleUse = async (e, templateName) => {
+  /* ── Name modal handlers ── */
+  const openNameModal = (e, type, data) => {
     e.stopPropagation();
-    if (creating) return;
-    setCreating(templateName);
+    setNameModal({ type, data });
+    setNameInput('');
+    setNameError('');
+    setTimeout(() => nameRef.current?.focus(), 80);
+  };
+  const closeNameModal = () => setNameModal(null);
+
+  const confirmCreate = async () => {
+    const title = nameInput.trim();
+    if (!title) { setNameError('Donne un nom à ta création 👆'); return; }
+    setNameLoading(true);
+    setNameError('');
     try {
-      const res = await createPublication({ templateName, customName: `draft-${Date.now()}`, title: 'Nouvelle création' });
-      navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
+      let pub;
+      if (nameModal.type === 'premade') {
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) + '-' + Date.now();
+        const res = await duplicatePublication(nameModal.data._id, { title, customName: slug });
+        pub = res.data;
+      } else {
+        const res = await createPublication({
+          templateName: nameModal.data.name,
+          customName: `draft-${Date.now()}`,
+          title,
+        });
+        pub = res.data;
+      }
+      navigate(`/ewish-admin/ewish/edit/${pub._id}`);
     } catch (err) {
-      alert(err.response?.data?.error || 'Erreur');
+      setNameError(err.response?.data?.error || 'Erreur lors de la création');
     } finally {
-      setCreating('');
+      setNameLoading(false);
     }
   };
+
+  const isEmpty = filteredPremades.length === 0 && filteredTemplates.length === 0;
 
   return (
     <div className={styles.root}>
@@ -108,10 +149,41 @@ export default function TemplatesGallery() {
         </div>
       )}
 
+      {/* Name modal */}
+      {nameModal && (
+        <div className={styles.nameOverlay} onClick={closeNameModal}>
+          <div className={styles.nameBox} onClick={e => e.stopPropagation()}>
+            <div className={styles.nameBoxHead}>
+              <span className={styles.nameBoxEmoji}>✨</span>
+              <h2 className={styles.nameBoxTitle}>Nomme ta création</h2>
+              <p className={styles.nameBoxSub}>Pour la retrouver facilement dans ton tableau de bord.</p>
+            </div>
+            <input
+              ref={nameRef}
+              className={styles.nameInput}
+              value={nameInput}
+              onChange={e => { setNameInput(e.target.value); setNameError(''); }}
+              onKeyDown={e => e.key === 'Enter' && !nameLoading && confirmCreate()}
+              placeholder="ex : Anniversaire de Sarah, Pot de départ Alex…"
+            />
+            {nameError && <p className={styles.nameError}>{nameError}</p>}
+            <div className={styles.nameActions}>
+              <button className={styles.nameCancel} onClick={closeNameModal}>Annuler</button>
+              <button className={styles.nameConfirm} onClick={confirmCreate} disabled={nameLoading}>
+                {nameLoading ? 'Création…' : 'Commencer →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className={styles.pageHeader}>
-        <div className={styles.headerHand}>Choisis l'ambiance</div>
-        <h1 className={styles.headerTitle}>Galerie de templates</h1>
+        <div className={styles.eyebrow}>
+          <Zap size={11} style={{ marginRight: 4 }} />PRÊT-À-OFFRIR · 1MIN
+        </div>
+        <h1 className={styles.headerTitle}>Éditions prêtes<br/>à offrir</h1>
+        <p className={styles.headerSub}>Tout est designé et rédigé. Change le prénom, publie.</p>
       </div>
 
       {/* Search */}
@@ -128,94 +200,152 @@ export default function TemplatesGallery() {
         )}
       </div>
 
-      {/* Category pills — horizontally scrollable */}
+      {/* Category pills */}
       <div className={styles.catRow}>
-        {CATEGORIES.map(c => {
-          const count = c.id === 'all'
-            ? templates.length
-            : templates.filter(t => TEMPLATE_CATEGORY[t.name] === c.id).length;
-          return (
-            <button
-              key={c.id}
-              className={`${styles.catPill} ${cat === c.id ? styles.catPillActive : ''}`}
-              onClick={() => setCat(c.id)}
-            >
-              {c.emoji && <span>{c.emoji}</span>}
-              {c.label}
-            </button>
-          );
-        })}
+        {CATEGORIES.map(c => (
+          <button
+            key={c.id}
+            className={`${styles.catPill} ${cat === c.id ? styles.catPillActive : ''}`}
+            onClick={() => setCat(c.id)}
+          >
+            {c.emoji && <span>{c.emoji}</span>}
+            {c.label}
+          </button>
+        ))}
       </div>
 
-      {/* Grid */}
+      {/* Content */}
       {loading ? (
         <div className={styles.loadingRow}><div className={styles.spinner}/></div>
-      ) : filtered.length === 0 ? (
-        <div className={styles.empty}>
-          <span>🔍</span>
-          <p>Aucun template trouvé.</p>
-        </div>
+      ) : isEmpty ? (
+        <div className={styles.empty}><span>🔍</span><p>Aucun template trouvé.</p></div>
       ) : (
-        <div className={styles.grid}>
-          {filtered.map(tpl => (
-            <div
-              key={tpl._id}
-              className={styles.card}
-              onClick={e => handleUse(e, tpl.name)}
-            >
-              {/* Thumbnail */}
-              <div
-                className={styles.cardThumb}
-                style={{
-                  background: tpl.thumbnail
-                    ? `url(${tpl.thumbnail}) center/cover no-repeat`
-                    : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)'),
-                }}
-              >
-                <div className={styles.dotOverlay} />
+        <>
+          {/* Premade publications section */}
+          {filteredPremades.length > 0 && (
+            <section className={styles.gallerySection}>
+              <div className={styles.gallerySectionHead}>
+                <span className={styles.gallerySectionLabel}><Zap size={10}/> Éditions complètes · dupliquer et personnaliser</span>
+              </div>
+              <div className={styles.grid}>
+                {filteredPremades.map(p => (
+                  <PremadeCard
+                    key={p._id}
+                    premade={p}
+                    onUse={e => openNameModal(e, 'premade', p)}
+                    onPreview={e => { e.stopPropagation(); setPreviewUrl(`${VITE_API}/preview/${p.templateName}`); }}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
-                {/* Emoji */}
-                {!tpl.thumbnail && (
-                  <span className={styles.cardEmoji}>{TEMPLATE_EMOJIS[tpl.name] || '🎁'}</span>
-                )}
-
-                {/* Badges row */}
-                <div className={styles.badgesRow}>
-                  {(tpl.popular || tpl.name === 'birthday') && (
-                    <span className={styles.popularBadge}>Populaire</span>
-                  )}
-                  <div style={{ flex: 1 }} />
-                  <span className={styles.heartBadge}>
-                    💙 {tpl.creditsRequired ?? 1}
-                  </span>
+          {/* Base templates section */}
+          {filteredTemplates.length > 0 && (
+            <section className={styles.gallerySection}>
+              {filteredPremades.length > 0 && (
+                <div className={styles.gallerySectionHead}>
+                  <span className={styles.gallerySectionLabel}>Templates de base · créer de zéro</span>
                 </div>
-
-                {/* Preview eye */}
-                <button
-                  className={styles.eyeBtn}
-                  onClick={e => { e.stopPropagation(); setPreviewUrl(`${VITE_API}/preview/${tpl.name}`); }}
-                  title="Aperçu"
-                >
-                  <Eye size={14} />
-                </button>
-
-                {/* Loading overlay */}
-                {creating === tpl.name && (
-                  <div className={styles.loadingOverlay}>
-                    <div className={styles.spinnerSm} />
-                  </div>
-                )}
+              )}
+              <div className={styles.grid}>
+                {filteredTemplates.map(tpl => (
+                  <TemplateCard
+                    key={tpl._id}
+                    tpl={tpl}
+                    onUse={e => openNameModal(e, 'template', tpl)}
+                    onPreview={e => { e.stopPropagation(); setPreviewUrl(`${VITE_API}/preview/${tpl.name}`); }}
+                  />
+                ))}
               </div>
-
-              {/* Info */}
-              <div className={styles.cardInfo}>
-                <div className={styles.cardName}>{tpl.label}</div>
-                <div className={styles.cardCat}>{tpl.description || TEMPLATE_CAT_LABEL[tpl.name] || tpl.name}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+            </section>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+/* ── Premade card ── */
+function PremadeCard({ premade, onUse, onPreview }) {
+  const preview  = TEMPLATE_PREVIEW[premade.templateName] || { emoji: '🎁', text: 'Pour\n__ !' };
+  const bg       = premade.thumbnail
+    ? `url(${premade.thumbnail}) center/cover no-repeat`
+    : (TEMPLATE_COLORS[premade.templateName] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
+  const label    = premade.premadeLabel || premade.title || 'Édition prête';
+  const subtitle = TEMPLATE_SUBTITLE[premade.templateName] || '';
+
+  return (
+    <div className={styles.card} onClick={onUse}>
+      <div className={styles.cardThumb} style={{ background: bg }}>
+        <div className={styles.dotOverlay} />
+        {!premade.thumbnail && (
+          <div className={styles.miniCard}>
+            <span className={styles.miniEmoji}>{preview.emoji}</span>
+            <p className={styles.miniText}>{preview.text}</p>
+          </div>
+        )}
+        <div className={styles.badgesRow}>
+          <span className={styles.pretBadge}><Zap size={9}/>PRÊT</span>
+          <div style={{ flex: 1 }} />
+          <span className={styles.heartBadge}>💙 {premade.creditsRequired ?? 1}</span>
+        </div>
+        {onPreview && (
+          <button className={styles.eyeBtn} onClick={onPreview} title="Aperçu">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        )}
+      </div>
+      <div className={styles.cardInfo}>
+        <div className={styles.cardName}>{label}</div>
+        {subtitle && <div className={styles.cardSubtitle}>{subtitle}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ── Base template card (also exported for Dashboard) ── */
+export function TemplateCard({ tpl, creating, onUse, onPreview, compact = false }) {
+  const preview = TEMPLATE_PREVIEW[tpl.name] || { emoji: '🎁', text: 'Pour\n__ !' };
+  const bg      = tpl.thumbnail
+    ? `url(${tpl.thumbnail}) center/cover no-repeat`
+    : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
+  const subtitle = TEMPLATE_SUBTITLE[tpl.name] || '';
+
+  return (
+    <div className={`${styles.card} ${compact ? styles.cardCompact : ''}`} onClick={onUse}>
+      <div className={styles.cardThumb} style={{ background: bg }}>
+        <div className={styles.dotOverlay} />
+        {!tpl.thumbnail && (
+          <div className={styles.miniCard}>
+            <span className={styles.miniEmoji}>{preview.emoji}</span>
+            <p className={styles.miniText}>{preview.text}</p>
+          </div>
+        )}
+        <div className={styles.badgesRow}>
+          <span className={styles.pretBadge}><Zap size={9}/>PRÊT</span>
+          <div style={{ flex: 1 }} />
+          <span className={styles.heartBadge}>💙 {tpl.creditsRequired ?? 1}</span>
+        </div>
+        {onPreview && (
+          <button className={styles.eyeBtn} onClick={onPreview} title="Aperçu">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        )}
+        {creating && (
+          <div className={styles.loadingOverlay}><div className={styles.spinnerSm}/></div>
+        )}
+      </div>
+      <div className={styles.cardInfo}>
+        <div className={styles.cardName}>{tpl.label}</div>
+        {subtitle && <div className={styles.cardSubtitle}>{subtitle}</div>}
+      </div>
     </div>
   );
 }

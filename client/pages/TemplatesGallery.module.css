@@ -6,24 +6,28 @@
 }
 
 /* ── Header ── */
-.pageHeader {
-  padding: 24px 20px 16px;
-}
-.headerHand {
-  font-family: var(--mk-hand, 'Caveat', cursive);
-  font-size: 22px;
+.pageHeader { padding: 24px 20px 16px; }
+
+.eyebrow {
+  display: inline-flex; align-items: center;
+  font-size: 10.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
   color: var(--mk-rose, #E11D48);
-  line-height: 1;
-  margin-bottom: 2px;
+  background: rgba(225,29,72,.07);
+  padding: 4px 10px; border-radius: 999px;
+  margin-bottom: 10px;
 }
+
 .headerTitle {
   font-family: var(--mk-display, 'Instrument Serif'), Georgia, serif;
   font-style: italic;
-  font-size: 34px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-size: 34px; line-height: 1.1; letter-spacing: -0.02em;
   color: var(--mk-ink, #2B1A2D);
-  margin: 0;
+  margin: 0 0 6px;
+}
+.headerSub {
+  font-size: 13.5px; color: var(--mk-ink-2, #7A6A7D);
+  line-height: 1.5; margin: 0;
 }
 
 /* ── Search ── */
@@ -34,50 +38,38 @@
   border: 1.5px solid var(--mk-line-2, #EAD9EE);
   border-radius: 999px;
   margin: 0 16px 16px;
-  box-shadow: 0 2px 8px rgba(43,26,45,.06);
+  box-shadow: 0 2px 8px rgba(43,26,45,.05);
 }
 .searchIcon { color: var(--mk-ink-3, #B09AB2); flex-shrink: 0; }
 .searchInput {
-  flex: 1; border: 0; outline: 0;
-  padding: 12px 0;
+  flex: 1; border: 0; outline: 0; padding: 12px 0;
   font-size: 14px; color: var(--mk-ink, #2B1A2D);
-  background: transparent;
-  font-family: inherit;
+  background: transparent; font-family: inherit;
 }
 .searchInput::placeholder { color: var(--mk-ink-3, #B09AB2); }
 .searchClear {
-  color: var(--mk-ink-3, #B09AB2);
-  display: inline-flex; align-items: center;
-  padding: 4px; border-radius: 6px;
-  transition: color .15s;
+  color: var(--mk-ink-3, #B09AB2); display: inline-flex;
+  align-items: center; padding: 4px; border-radius: 6px; transition: color .15s;
 }
 .searchClear:hover { color: var(--mk-rose, #E11D48); }
 
-/* ── Category pills — no wrap, horizontal scroll ── */
+/* ── Category pills — scrollable ── */
 .catRow {
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding: 0 16px 14px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  display: flex; gap: 8px;
+  flex-wrap: nowrap; overflow-x: auto;
+  padding: 0 16px 16px;
+  scrollbar-width: none; -ms-overflow-style: none;
 }
 .catRow::-webkit-scrollbar { display: none; }
 
 .catPill {
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--mk-ink-2, #7A6A7D);
+  padding: 8px 16px; border-radius: 999px;
+  background: #fff; color: var(--mk-ink-2, #7A6A7D);
   border: 1.5px solid var(--mk-line-2, #EAD9EE);
-  font-weight: 700; font-size: 13.5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all .15s;
-  font-family: inherit;
-  cursor: pointer;
+  font-weight: 700; font-size: 13px;
+  white-space: nowrap; flex-shrink: 0;
+  transition: all .15s; font-family: inherit; cursor: pointer;
 }
 .catPill:hover { border-color: var(--mk-rose-soft, #FFB3C1); color: var(--mk-ink, #2B1A2D); }
 .catPillActive {
@@ -86,7 +78,7 @@
   border-color: var(--mk-ink, #2B1A2D) !important;
 }
 
-/* ── Grid — 2 columns on mobile ── */
+/* ── Grid ── */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -103,117 +95,111 @@
   cursor: pointer;
   transition: transform .2s, box-shadow .2s;
 }
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(43,26,45,.12);
-}
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(43,26,45,.12); }
 .card:active { transform: translateY(0); }
+
+.cardCompact { border-radius: 16px; }
 
 /* Square thumbnail */
 .cardThumb {
-  position: relative;
-  width: 100%;
+  position: relative; width: 100%;
   aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
 
 .dotOverlay {
   position: absolute; inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,.45) 1px, transparent 1px);
-  background-size: 18px 18px;
-  opacity: .6;
+  background-image: radial-gradient(circle, rgba(255,255,255,.4) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: .7;
 }
 
-.cardEmoji {
-  font-size: 52px;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,.15));
+/* Mini greeting card preview */
+.miniCard {
   position: relative; z-index: 1;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  padding: 12px 10px 10px;
+  width: 72%;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.06);
+}
+.miniEmoji {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
+}
+.miniText {
+  font-family: var(--mk-hand, 'Caveat', cursive);
+  font-size: 13.5px;
+  color: var(--mk-ink, #2B1A2D);
+  line-height: 1.35;
+  margin: 0;
+  white-space: pre-line;
 }
 
-/* Badges row inside thumbnail */
+/* Badges row */
 .badgesRow {
   position: absolute;
   top: 10px; left: 10px; right: 10px;
-  display: flex; align-items: center; gap: 6px;
-  z-index: 2;
+  display: flex; align-items: center; gap: 6px; z-index: 2;
 }
-
-.popularBadge {
-  background: var(--mk-ink, #2B1A2D);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 10px; font-weight: 800;
-  letter-spacing: .04em;
-  white-space: nowrap;
+.pretBadge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--mk-ink, #2B1A2D); color: #fff;
+  padding: 4px 9px; border-radius: 999px;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
 }
-
 .heartBadge {
-  background: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.9);
   backdrop-filter: blur(8px);
-  padding: 4px 10px;
-  border-radius: 999px;
+  padding: 4px 9px; border-radius: 999px;
   font-size: 11px; font-weight: 800;
   color: var(--mk-ink, #2B1A2D);
-  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
 }
 
-/* Small preview eye button */
+/* Eye preview btn */
 .eyeBtn {
-  position: absolute;
-  bottom: 10px; right: 10px;
-  z-index: 2;
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.88);
-  backdrop-filter: blur(6px);
+  position: absolute; bottom: 9px; right: 9px; z-index: 2;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,.85); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   color: var(--mk-ink-2, #7A6A7D);
-  transition: background .15s, color .15s;
   box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  transition: background .15s, color .15s;
 }
 .eyeBtn:hover { background: #fff; color: var(--mk-rose, #E11D48); }
 
-/* Loading overlay on card */
+/* Loading overlay */
 .loadingOverlay {
   position: absolute; inset: 0;
-  background: rgba(255,255,255,.65);
-  backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 3;
+  background: rgba(255,255,255,.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 3;
 }
 .spinnerSm {
-  width: 22px; height: 22px;
-  border-radius: 50%;
+  width: 22px; height: 22px; border-radius: 50%;
   border: 2.5px solid rgba(225,29,72,.2);
   border-top-color: var(--mk-rose, #E11D48);
   animation: mk-spin .7s linear infinite;
 }
 
 /* Card info */
-.cardInfo {
-  padding: 10px 12px 12px;
-}
+.cardInfo { padding: 10px 12px 12px; }
 .cardName {
   font-size: 13.5px; font-weight: 800;
-  color: var(--mk-ink, #2B1A2D);
-  margin-bottom: 2px;
-  line-height: 1.3;
+  color: var(--mk-ink, #2B1A2D); margin-bottom: 2px; line-height: 1.3;
 }
-.cardCat {
-  font-size: 12px; font-weight: 500;
-  color: var(--mk-rose, #E11D48);
-  opacity: .75;
+.cardSubtitle {
+  font-size: 11.5px; font-weight: 500;
+  color: var(--mk-rose, #E11D48); opacity: .8;
 }
 
-/* ── States ── */
-.loadingRow {
-  display: flex; align-items: center; justify-content: center;
-  padding: 80px;
-}
+/* States */
+.loadingRow { display: flex; align-items: center; justify-content: center; padding: 80px; }
 .spinner {
   width: 28px; height: 28px; border-radius: 50%;
   border: 2.5px solid rgba(225,29,72,.15);
@@ -226,7 +212,7 @@
 .empty span { font-size: 36px; display: block; margin-bottom: 10px; }
 .empty p { font-size: 14px; }
 
-/* ── Preview modal ── */
+/* Preview modal */
 .previewOverlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(43,26,45,.5); backdrop-filter: blur(8px);
@@ -242,26 +228,95 @@
   padding: 14px 20px; border-bottom: 1px solid var(--mk-line, #F2E4EA);
   font-weight: 700; font-size: 14px;
 }
-.closeBtn {
-  background: var(--mk-blush, #FFF0F3); border-radius: 8px;
-  padding: 6px; color: var(--mk-ink-2, #7A6A7D);
-}
+.closeBtn { background: var(--mk-blush, #FFF0F3); border-radius: 8px; padding: 6px; color: var(--mk-ink-2, #7A6A7D); }
 .previewFrame { flex: 1; border: none; min-height: 500px; }
 
-/* ── Desktop ── */
+/* ── Gallery sections ── */
+.gallerySection { margin-bottom: 8px; }
+.gallerySectionHead {
+  padding: 20px 16px 10px;
+  display: flex; align-items: center;
+}
+.gallerySectionLabel {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--mk-ink-3, #B09AB2);
+}
+
+/* ── Name modal ── */
+.nameOverlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(43,26,45,.45); backdrop-filter: blur(10px);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .nameOverlay { align-items: center; padding: 20px; }
+}
+.nameBox {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 36px;
+  width: 100%; max-width: 440px;
+  box-shadow: 0 -8px 40px rgba(43,26,45,.15);
+}
+@media (min-width: 640px) {
+  .nameBox { border-radius: 24px; padding: 32px 28px 28px; }
+}
+.nameBoxHead { text-align: center; margin-bottom: 20px; }
+.nameBoxEmoji { font-size: 32px; display: block; margin-bottom: 10px; }
+.nameBoxTitle {
+  font-family: var(--mk-display, 'Instrument Serif'), Georgia, serif;
+  font-style: italic; font-size: 22px; color: var(--mk-ink, #2B1A2D);
+  margin: 0 0 6px;
+}
+.nameBoxSub { font-size: 13px; color: var(--mk-ink-2, #7A6A7D); margin: 0; line-height: 1.5; }
+.nameInput {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--mk-line-2, #EAD9EE);
+  border-radius: 12px; outline: none;
+  font-size: 15px; color: var(--mk-ink, #2B1A2D);
+  font-family: inherit; background: var(--mk-cream, #FFFAF6);
+  transition: border-color .15s;
+}
+.nameInput:focus { border-color: var(--mk-rose, #E11D48); }
+.nameInput::placeholder { color: var(--mk-ink-3, #B09AB2); }
+.nameError {
+  font-size: 12.5px; color: var(--mk-rose, #E11D48);
+  margin: 8px 0 0; padding: 0 4px;
+}
+.nameActions {
+  display: flex; gap: 10px; margin-top: 16px;
+}
+.nameCancel {
+  flex: 0 0 auto; padding: 13px 20px;
+  border-radius: 12px; font-size: 14px; font-weight: 600;
+  color: var(--mk-ink-2, #7A6A7D);
+  background: var(--mk-line, #F2E4EA);
+  transition: background .15s;
+}
+.nameCancel:hover { background: var(--mk-line-2, #EAD9EE); }
+.nameConfirm {
+  flex: 1; padding: 13px 20px;
+  border-radius: 12px; font-size: 14px; font-weight: 700;
+  background: var(--mk-ink, #2B1A2D); color: #fff;
+  transition: background .15s, transform .1s;
+}
+.nameConfirm:hover:not(:disabled) { background: #3d2840; transform: translateY(-1px); }
+.nameConfirm:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Desktop */
 @media (min-width: 640px) {
   .root { padding: 0 0 80px; }
   .pageHeader { padding: 32px 32px 20px; }
   .headerTitle { font-size: 48px; }
   .searchWrap { margin: 0 32px 20px; }
   .catRow { padding: 0 32px 16px; }
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 18px;
-    padding: 4px 32px 0;
-  }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; padding: 4px 32px 0; }
   .cardThumb { aspect-ratio: 4 / 3; }
-  .cardEmoji { font-size: 64px; }
+  .miniEmoji { font-size: 36px; }
+  .miniText { font-size: 15px; }
   .cardName { font-size: 15px; }
   .cardInfo { padding: 14px 16px 16px; }
+  .gallerySectionHead { padding: 24px 32px 12px; }
 }

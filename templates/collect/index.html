@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Laisse un vœu 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (from styles.css) ──────────────────────── */
+:root {
+  --mk-cream:       #FFFAF6;
+  --mk-blush:       #FFF1F4;
+  --mk-blush-2:     #FCE0E6;
+  --mk-lilac-bg:    #F6EEFB;
+  --mk-paper:       #FFFFFF;
+
+  --mk-rose:        #E11D48;
+  --mk-rose-2:      #F35C7A;
+  --mk-rose-soft:   #FFB3C1;
+  --mk-rose-pale:   #FFE0E6;
+
+  --mk-lilac:       #9B7EE2;
+  --mk-lilac-soft:  #D7C5F2;
+  --mk-mint:        #6BCFAF;
+  --mk-mint-soft:   #C9EEDF;
+  --mk-butter:      #FFC95A;
+  --mk-butter-soft: #FFE7AD;
+
+  --mk-ink:         #2B1A2D;
+  --mk-ink-2:       #6D5C70;
+  --mk-ink-3:       #A496A5;
+  --mk-ink-4:       #C8BAC9;
+
+  --mk-line:        #F2E4EA;
+  --mk-line-2:      #EAD6DE;
+  --mk-line-strong: #DCC4CE;
+
+  --mk-sh-1:        0 1px 0 rgba(225,29,72,.04), 0 2px 8px rgba(43,26,45,.04);
+  --mk-sh-2:        0 2px 0 rgba(225,29,72,.05), 0 8px 24px rgba(43,26,45,.06);
+  --mk-sh-3:        0 4px 0 rgba(225,29,72,.06), 0 16px 40px rgba(43,26,45,.10);
+  --mk-sh-rose:     0 8px 24px rgba(225,29,72,.22);
+  --mk-sh-lilac:    0 8px 24px rgba(155,126,226,.28);
+
+  --mk-display:     'Instrument Serif', Georgia, serif;
+  --mk-body:        'Plus Jakarta Sans', system-ui, sans-serif;
+  --mk-hand:        'Caveat', cursive;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--mk-body);
+  color: var(--mk-ink);
+  background: var(--mk-cream);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font-family: inherit; color: inherit; }
+::selection { background: var(--mk-rose-pale); color: var(--mk-ink); }
+
+/* ── Shell ──────────────────────────────────────────────── */
+.shell {
+  min-height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--mk-cream);
+}
+.card {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(170deg, #FFE0E6 0%, #FFF6F8 45%, #FFFAF6 100%);
+}
+@media (min-width: 540px) {
+  .shell { background: #F4ECEF; padding: 40px 20px 60px; align-items: center; }
+  .card {
+    min-height: 0;
+    border-radius: 28px;
+    box-shadow: 0 30px 70px rgba(43,26,45,.18), 0 8px 20px rgba(43,26,45,.08);
+    height: 700px;
+    overflow: hidden;
+  }
+}
+
+/* ── Ambient blobs ──────────────────────────────────────── */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Steps ──────────────────────────────────────────────── */
+.step {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.step.active { display: flex; animation: mk-pop .25s cubic-bezier(.4,0,.2,1); }
+@keyframes mk-pop {
+  0%   { transform: scale(.97); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+/* ── Progress dots (pinned bottom, visible on write+sign) ── */
+.dots-bar {
+  display: none;
+  justify-content: center;
+  padding: 12px 0 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+}
+.dots-bar.visible { display: flex; }
+.pdot {
+  height: 7px;
+  border-radius: 99px;
+  transition: all .3s ease;
+  background: var(--mk-line-strong);
+  flex-shrink: 0;
+}
+
+/* ── Confetti ────────────────────────────────────────────── */
+.confetti-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes mk-confetti-fall {
+  0%   { transform: translateY(-20vh) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Float animation for emoji medallion ─────────────────── */
+@keyframes mk-float {
+  0%, 100% { transform: translateY(0)   rotate(0deg); }
+  50%       { transform: translateY(-8px) rotate(2deg); }
+}
+
+/* ── GBtn ────────────────────────────────────────────────── */
+.gbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--mk-body);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+  white-space: nowrap;
+}
+.gbtn:hover:not(:disabled) { transform: translateY(-1px); }
+.gbtn:disabled { opacity: .45; cursor: not-allowed; }
+.gbtn-rose  {
+  background: linear-gradient(135deg, #FF6F8B 0%, #E11D48 100%);
+  color: #fff;
+  box-shadow: var(--mk-sh-rose), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.gbtn-lilac {
+  background: linear-gradient(135deg, #B59CF0 0%, #9B7EE2 100%);
+  color: #fff;
+  box-shadow: var(--mk-sh-lilac), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.gbtn-ghost {
+  background: var(--mk-paper);
+  color: var(--mk-ink);
+  box-shadow: 0 1px 0 var(--mk-line-2), 0 4px 12px rgba(43,26,45,.04);
+  border: 1.5px solid var(--mk-line-2);
+}
+.gbtn-soft {
+  background: var(--mk-rose-pale);
+  color: var(--mk-rose);
+  box-shadow: inset 0 0 0 1px rgba(225,29,72,.10);
+}
+.gbtn-quiet { background: transparent; color: var(--mk-ink-2); }
+.gbtn-lg    { padding: 16px 24px; font-size: 16px; }
+.gbtn-md    { padding: 13px 20px; font-size: 14.5px; }
+.gbtn-sm    { padding: 10px 16px; font-size: 13.5px; }
+.gbtn-full  { width: 100%; }
+
+/* ── FlowTop (back bar) ──────────────────────────────────── */
+.flow-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 16px 22px 0;
+}
+.flow-top-back {
+  display: inline-flex;
+  padding: 9px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.8);
+  color: var(--mk-ink);
+  cursor: pointer;
+  border: none;
+  transition: background .15s;
+  backdrop-filter: blur(6px);
+}
+.flow-top-back:hover { background: rgba(255,255,255,.95); }
+.flow-top-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--mk-ink-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.flow-top-spacer { width: 35px; }
+
+/* ── Error toast ─────────────────────────────────────────── */
+.err-toast {
+  display: none;
+  background: #FFF0F0;
+  border: 1.5px solid var(--mk-rose-soft);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--mk-rose);
+  font-weight: 600;
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.mk-spin {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid var(--mk-rose-pale);
+  border-top-color: var(--mk-rose);
+  animation: mk-spin-r .8s linear infinite;
+  flex-shrink: 0;
+}
+.mk-spin-w { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
+@keyframes mk-spin-r { to { transform: rotate(360deg); } }
+
+/* ── BrandLine ───────────────────────────────────────────── */
+.brand-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--mk-ink-3);
+  font-weight: 600;
+}
+.brand-icon {
+  width: 16px; height: 16px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #FF6F8B, #E11D48);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+}
+.brand-name {
+  font-family: var(--mk-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--mk-ink);
+  font-weight: 400;
+}
+
+/* ── Media chip ──────────────────────────────────────────── */
+.media-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--mk-ink-2);
+  background: var(--mk-blush);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all .15s;
+}
+.media-chip.active {
+  background: var(--mk-rose-pale);
+  color: var(--mk-rose);
+  border-color: var(--mk-rose-soft);
+}
+
+/* ── Amount chip ─────────────────────────────────────────── */
+.amt-chip {
+  padding: 14px 4px;
+  border-radius: 14px;
+  text-align: center;
+  background: #fff;
+  border: 2px solid var(--mk-line-2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.amt-chip:hover { border-color: var(--mk-rose-soft); }
+.amt-chip.active {
+  background: var(--mk-rose-pale);
+  border-color: var(--mk-rose);
+}
+.amt-chip .av { font-weight: 800; font-size: 15px; color: var(--mk-ink); }
+.amt-chip.active .av { color: var(--mk-rose); }
+.amt-chip .ac { font-size: 9.5px; color: var(--mk-ink-3); font-weight: 700; margin-top: 2px; }
+
+/* ── Progress bar ────────────────────────────────────────── */
+.pbar-track {
+  height: 14px;
+  background: var(--mk-lilac-bg);
+  border-radius: 99px;
+  overflow: hidden;
+  position: relative;
+}
+.pbar-fill {
+  position: absolute; inset: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #B59CF0, #9B7EE2);
+}
+.pbar-preview {
+  position: absolute; top: 0; bottom: 0;
+  border-radius: 99px;
+  background: repeating-linear-gradient(45deg, #E11D48, #E11D48 5px, #FF6F8B 5px, #FF6F8B 10px);
+  animation: none;
+}
+
+/* ── Responsive: mobile compact sizes ───────────────────── */
+@media (max-width: 480px) {
+  #s0-medallion    { width: 88px !important; height: 88px !important; font-size: 44px !important; margin-bottom: 18px !important; }
+  #s0-occasion-line{ font-size: 20px !important; }
+  #s0-name         { font-size: clamp(38px, 11vw, 54px) !important; }
+  #s0-age-date     { font-size: 14px !important; margin-bottom: 20px !important; }
+  .s0-body-txt     { font-size: 15.5px !important; }
+  .s0-body-sub     { font-size: 14px !important; }
+  #s0-host-chip    { margin-bottom: 18px !important; }
+
+  /* Write step */
+  .write-h2        { font-size: 30px !important; }
+  .write-sub       { font-size: 14px !important; }
+  #wish-ta         { font-size: 15px !important; }
+
+  /* Sign step */
+  .sign-emoji      { font-size: 48px !important; }
+  .sign-h2         { font-size: 30px !important; }
+  #guest-name-inp  { font-size: 22px !important; padding: 14px 18px !important; }
+
+  /* Sent step */
+  #sent-icon       { width: 92px !important; height: 92px !important; }
+  #sent-hey        { font-size: 22px !important; }
+  .sent-h2         { font-size: 34px !important; }
+  #sent-wish-text  { font-size: 18px !important; }
+  .sent-sub-p      { font-size: 14.5px !important; }
+
+  /* Gift step */
+  #gift-collected  { font-size: 22px !important; }
+  .gift-cotise     { font-size: 18px !important; }
+  .gift-h2         { font-size: 24px !important; }
+  .gift-desc-p     { font-size: 14px !important; }
+
+  /* Thanks step */
+  #thanks-icon     { width: 96px !important; height: 96px !important; font-size: 46px !important; }
+  #thanks-hey      { font-size: 22px !important; }
+  .thanks-h2       { font-size: 28px !important; }
+  .thanks-msg-p    { font-size: 14.5px !important; }
+
+  /* Landing padding */
+  .step > div:first-child { padding-left: 22px !important; padding-right: 22px !important; }
+  .flow-top { padding: 14px 16px 0 !important; }
+
+  /* Gift/Write/Sign inner padding */
+  .step-inner { padding: 16px 22px 16px !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell"><div class="card" id="app">
+
+<!-- Ambient blobs -->
+<div class="blob" id="blob-tr" style="top:-80px;right:-60px;width:240px;height:240px;background:#FFB3C1;opacity:.35;filter:blur(50px);"></div>
+<div class="blob" id="blob-bl" style="bottom:-100px;left:-70px;width:260px;height:260px;background:#D7C5F2;opacity:.3;filter:blur(55px);"></div>
+
+<!-- Confetti layer (shown on landing/sent/thanks) -->
+<div class="confetti-layer" id="confetti-layer"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     STEP 0 · Landing
+══════════════════════════════════════════════════════ -->
+<div class="step active" id="s0">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 40px 32px;">
+
+    <!-- Host chip -->
+    <div id="s0-host-chip" style="display:inline-flex;align-items:center;gap:7px;padding:6px 14px;background:rgba(255,255,255,.7);border-radius:999px;margin-bottom:26px;backdrop-filter:blur(6px);">
+      <!-- Mail icon -->
+      <svg width="13" height="13" fill="none" stroke="var(--mk-rose)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      <span id="s0-host-text" style="font-size:12.5px;font-weight:700;color:var(--mk-ink-2);">Une invitation de …</span>
+    </div>
+
+    <!-- Emoji medallion -->
+    <div id="s0-medallion" style="width:116px;height:116px;border-radius:50%;background:linear-gradient(135deg,#FFB3C1,#FFE0E6);display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:26px;box-shadow:0 16px 40px rgba(225,29,72,.25),inset 0 2px 0 rgba(255,255,255,.4);animation:mk-float 3.5s ease-in-out infinite;">🎉</div>
+
+    <!-- Occasion + Name -->
+    <div id="s0-occasion-line" style="font-family:var(--mk-hand);font-size:26px;color:var(--mk-rose);line-height:1.2;margin-bottom:2px;white-space:nowrap;">c'est l'anniversaire de</div>
+    <h1 id="s0-name" style="font-family:var(--mk-display);font-style:italic;font-size:70px;line-height:1.08;letter-spacing:-.02em;color:var(--mk-ink);margin:0 0 4px;">Sophie</h1>
+    <div id="s0-age-date" style="display:inline-flex;align-items:center;gap:8px;font-size:16px;color:var(--mk-ink-2);font-weight:600;margin-bottom:30px;"></div>
+
+    <!-- Body -->
+    <p class="s0-body-txt" style="font-size:18px;color:var(--mk-ink);line-height:1.5;max-width:420px;margin-bottom:34px;">
+      Laisse-lui un petit mot pour son grand jour.<br>
+      <span id="s0-sub-text" class="s0-body-sub" style="color:var(--mk-ink-2);font-size:15.5px;">Tous les vœux seront réunis sur un joli mur, rien que pour Sophie.</span>
+    </p>
+
+    <!-- CTA -->
+    <button class="gbtn gbtn-rose gbtn-lg" id="s0-cta" onclick="APP.goto('write')" style="max-width:320px;width:100%;">
+      <!-- Heart -->
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></svg>
+      Écrire mon vœu
+      <!-- ArrowRight -->
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+
+    <!-- Social proof -->
+    <div style="display:flex;align-items:center;gap:10px;margin-top:30px;">
+      <div id="s0-avatars" style="display:flex;"></div>
+      <span id="s0-proof-text" style="font-size:13px;color:var(--mk-ink-2);font-weight:600;"></span>
+    </div>
+
+    <div style="margin-top:auto;padding-top:30px;">
+      <div class="brand-line"><span>propulsé par</span><span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;"><span class="brand-icon">🎁</span><span class="brand-name">myKado</span></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     STEP 1 · Write
+══════════════════════════════════════════════════════ -->
+<div class="step" id="s-write">
+  <!-- FlowTop -->
+  <div class="flow-top">
+    <button class="flow-top-back" onclick="APP.goto('landing')">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="flow-top-label">
+      <span id="w-emoji" style="font-size:15px;">🎉</span>
+      <span id="w-label">Pour Sophie</span>
+    </span>
+    <span class="flow-top-spacer"></span>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;padding:20px 22px 16px;">
+    <div style="margin-bottom:20px;">
+      <h2 class="write-h2" style="font-family:var(--mk-display);font-style:italic;font-size:40px;line-height:1.08;letter-spacing:-.02em;color:var(--mk-ink);">Ton petit mot 💌</h2>
+      <p class="write-sub" style="font-size:15.5px;color:var(--mk-ink-2);margin-top:6px;">Un souvenir, un souhait, une blague… ce qui te vient du cœur.</p>
+    </div>
+
+    <!-- Textarea card -->
+    <div style="position:relative;background:#fff;border-radius:22px;padding:18px;box-shadow:var(--mk-sh-2);border:1px solid var(--mk-line);">
+      <textarea id="wish-ta"
+        placeholder="Joyeux anniversaire Sophie ! Je te souhaite…"
+        maxlength="280"
+        rows="6"
+        oninput="APP.onTextChange(this)"
+        style="width:100%;border:0;outline:0;resize:none;font-size:16px;line-height:1.55;font-family:var(--mk-body);color:var(--mk-ink);background:transparent;display:block;"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:12px;border-top:1px solid var(--mk-line);">
+        <div style="display:flex;gap:8px;">
+          <button class="media-chip" id="chip-photo" onclick="APP.toggleMedia('photo')">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="4"/></svg>
+            Photo
+          </button>
+          <button class="media-chip" id="chip-voice" onclick="APP.toggleMedia('voice')">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            Vocal
+          </button>
+        </div>
+        <span id="char-ct" style="font-size:12px;color:var(--mk-ink-3);font-weight:600;">0/280</span>
+      </div>
+    </div>
+
+    <!-- Photo preview pane -->
+    <div id="pane-photo" style="display:none;margin-top:12px;padding:14px;background:var(--mk-blush);border-radius:16px;border:1.5px dashed var(--mk-rose-soft);animation:mk-pop .25s;">
+      <div id="photo-content" style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="document.getElementById('photo-file').click()">
+        <span style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#FFD7E0,#F8C8DC);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📸</span>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:13.5px;color:var(--mk-ink);">Ajoute une photo</div>
+          <div style="font-size:11.5px;color:var(--mk-ink-3);">Une photo de vous, un souvenir…</div>
+        </div>
+        <svg width="18" height="18" fill="none" stroke="var(--mk-rose)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <input type="file" id="photo-file" accept="image/*" style="display:none" onchange="APP.uploadPhoto(this)">
+    </div>
+
+    <!-- Voice preview pane -->
+    <div id="pane-voice" style="display:none;margin-top:12px;padding:16px;background:var(--mk-lilac-bg);border-radius:16px;border:1.5px solid var(--mk-lilac-soft);align-items:center;gap:14px;">
+      <button style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#B59CF0,#9B7EE2);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--mk-sh-lilac);flex-shrink:0;border:none;cursor:pointer;">
+        <span style="width:14px;height:14px;border-radius:3px;background:#fff;display:block;"></span>
+      </button>
+      <div id="waveform" style="flex:1;display:flex;align-items:center;gap:3px;height:32px;"></div>
+      <span style="font-size:12.5px;font-weight:700;color:#6E4FBA;">0:00</span>
+    </div>
+
+    <div id="err-write" class="err-toast" style="margin-top:12px;"></div>
+    <div style="flex:1;"></div>
+    <div style="padding:22px 0 8px;">
+      <button class="gbtn gbtn-rose gbtn-lg gbtn-full" id="btn-write" onclick="APP.step1Next()" disabled>
+        Continuer
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     STEP 2 · Sign
+══════════════════════════════════════════════════════ -->
+<div class="step" id="s-sign">
+  <!-- FlowTop -->
+  <div class="flow-top">
+    <button class="flow-top-back" onclick="APP.goto('write')">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="flow-top-label">
+      <span id="sg-emoji" style="font-size:15px;">🎉</span>
+      <span id="sg-label">Pour Sophie</span>
+    </span>
+    <span class="flow-top-spacer"></span>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:16px 22px 16px;max-width:400px;margin:0 auto;width:100%;text-align:center;">
+    <div class="sign-emoji" style="font-size:60px;margin-bottom:12px;">✍️</div>
+    <h2 class="sign-h2" style="font-family:var(--mk-display);font-style:italic;font-size:40px;line-height:1.08;letter-spacing:-.02em;color:var(--mk-ink);">Et c'est signé… ?</h2>
+    <p id="sign-sub" style="font-size:15.5px;color:var(--mk-ink-2);margin:8px 0 22px;">Sophie saura ainsi de qui vient ce joli mot.</p>
+
+    <input id="guest-name-inp"
+      type="text"
+      placeholder="Ton prénom"
+      maxlength="40"
+      oninput="APP.onNameChange(this)"
+      onkeydown="APP.onNameKeydown(event)"
+      onfocus="this.style.borderColor='var(--mk-rose-soft)';this.style.boxShadow='0 0 0 6px var(--mk-rose-pale)';"
+      onblur="this.style.borderColor='var(--mk-line-2)';this.style.boxShadow='none';"
+      style="width:100%;padding:18px 20px;font-size:26px;font-family:var(--mk-display);font-style:italic;text-align:center;background:#fff;border:2px solid var(--mk-line-2);border-radius:18px;outline:none;letter-spacing:-.01em;transition:border-color .15s,box-shadow .15s;">
+
+    <label style="display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12.5px;color:var(--mk-ink-2);cursor:pointer;justify-content:center;" onclick="APP.toggleAnon()">
+      <span id="anon-box" style="width:18px;height:18px;border-radius:6px;border:2px solid var(--mk-line-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"></span>
+      Rester anonyme
+    </label>
+  </div>
+
+  <div id="err-sign" class="err-toast" style="margin:0 22px 8px;"></div>
+  <div style="padding:22px 22px 8px;">
+    <button class="gbtn gbtn-rose gbtn-lg gbtn-full" id="btn-sign" onclick="APP.submitWish()" disabled>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></svg>
+      Envoyer mon vœu
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     STEP 3 · Sent
+══════════════════════════════════════════════════════ -->
+<div class="step" id="s-sent">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 40px 32px;">
+
+    <!-- Green check circle -->
+    <div id="sent-icon" style="width:92px;height:92px;border-radius:50%;background:linear-gradient(135deg,#C9EEDF,#6BCFAF);color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:22px;box-shadow:0 16px 40px rgba(107,207,175,.4);animation:mk-pop .5s cubic-bezier(.2,1.2,.4,1);">
+      <svg width="46" height="46" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7.5"/></svg>
+    </div>
+
+    <div id="sent-hey" style="font-family:var(--mk-hand);font-size:22px;color:var(--mk-rose);line-height:1.3;margin-bottom:2px;">merci  ! 💕</div>
+    <h2 class="sent-h2" style="font-family:var(--mk-display);font-style:italic;font-size:34px;line-height:1.06;letter-spacing:-.02em;color:var(--mk-ink);margin:4px 0 16px;">Ton vœu est collé au mur</h2>
+
+    <!-- Post-it -->
+    <div style="position:relative;max-width:320px;width:100%;background:#FFF7DA;border-radius:14px;padding:18px 18px 16px;box-shadow:0 14px 30px rgba(43,26,45,.14);transform:rotate(-2deg);margin-bottom:22px;">
+      <!-- Tape strip -->
+      <span style="position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(3deg);width:60px;height:20px;background:rgba(225,29,72,.22);border-radius:3px;display:block;"></span>
+      <p id="sent-wish-text" style="font-family:var(--mk-hand);font-size:18px;color:var(--mk-ink);line-height:1.35;margin-bottom:8px;">"Joyeux anniversaire !"</p>
+      <div id="sent-sig" style="font-size:13px;font-weight:800;color:var(--mk-rose);text-align:right;">— Anonyme</div>
+    </div>
+
+    <p id="sent-sub" class="sent-sub-p" style="font-size:14.5px;color:var(--mk-ink-2);line-height:1.5;max-width:380px;margin-bottom:22px;">
+      Sophie le verra avec les <b style="color:var(--mk-ink);">0 autres</b> le jour J. 🎉
+    </p>
+
+    <button class="gbtn gbtn-lilac gbtn-lg" id="btn-sent" onclick="APP.afterSent()" style="max-width:340px;width:100%;">
+      Encore une chose…
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+  <div style="padding:0 24px 20px;"><div class="brand-line"><span>propulsé par</span><span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;"><span class="brand-icon">🎁</span><span class="brand-name">myKado</span></span></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     STEP 4 · Gift / Cagnotte
+══════════════════════════════════════════════════════ -->
+<div class="step" id="s-gift">
+  <!-- FlowTop -->
+  <div class="flow-top">
+    <button class="flow-top-back" onclick="APP.goto('sent')">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="flow-top-spacer"></span>
+    <span class="flow-top-spacer"></span>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;padding:16px 22px 22px;overflow-y:auto;">
+
+    <!-- CADEAU COMMUN pill -->
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 14px;background:var(--mk-lilac-soft);border-radius:999px;margin-bottom:14px;">
+        <svg width="13" height="13" fill="none" stroke="#6E4FBA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3 2.6-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c2.5.3 5 1.7 5 5"/></svg>
+        <span style="font-size:12px;font-weight:800;letter-spacing:.02em;color:#6E4FBA;">CADEAU COMMUN</span>
+      </div>
+      <div class="gift-cotise" style="font-family:var(--mk-hand);font-size:22px;color:var(--mk-rose);margin-bottom:4px;">et si on se cotisait pour…</div>
+      <h2 id="gift-name" class="gift-h2" style="font-family:var(--mk-display);font-style:italic;font-size:28px;line-height:1.2;letter-spacing:-.02em;color:var(--mk-ink);margin-bottom:8px;">🎁 Cadeau commun</h2>
+      <p id="gift-desc" class="gift-desc-p" style="font-size:15.5px;color:var(--mk-ink-2);max-width:400px;margin:0 auto;"></p>
+    </div>
+
+    <!-- Progress card -->
+    <div style="background:#fff;border-radius:22px;padding:22px;box-shadow:var(--mk-sh-2);border:1px solid var(--mk-line);margin-bottom:20px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <span id="gift-collected" style="font-family:var(--mk-display);font-style:italic;font-size:26px;color:var(--mk-lilac);line-height:1;">65 000</span>
+          <span style="font-size:13px;font-weight:700;color:var(--mk-ink-2);margin-left:6px;">FCFA</span>
+        </div>
+        <span id="gift-goal-lbl" style="font-size:13px;color:var(--mk-ink-3);font-weight:700;">sur 250 000</span>
+      </div>
+      <!-- Bar -->
+      <div class="pbar-track" style="margin-bottom:10px;">
+        <div class="pbar-fill" id="gift-bar-fill" style="width:0%;"></div>
+        <div class="pbar-preview" id="gift-bar-pre" style="left:0;width:0;display:none;"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;">
+        <span id="gift-contributors" style="color:var(--mk-ink-2);font-weight:600;">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:3px;"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3 2.6-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c2.5.3 5 1.7 5 5"/></svg>
+          8 participants
+        </span>
+        <span id="gift-pct" style="font-weight:800;color:var(--mk-lilac);">26%</span>
+      </div>
+    </div>
+
+    <!-- Amount picker -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:12.5px;font-weight:700;color:var(--mk-ink-2);margin-bottom:9px;letter-spacing:.02em;">JE PARTICIPE AVEC</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="amt-grid"></div>
+      <button class="gbtn gbtn-ghost gbtn-sm gbtn-full" style="margin-top:10px;border-radius:14px;border-style:dashed;border-color:var(--mk-line-strong);" onclick="APP.customAmt()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 3.5a2.1 2.1 0 1 1 3 3L7 19.5l-4 1 1-4Z"/></svg>
+        Un autre montant
+      </button>
+    </div>
+
+    <div id="err-gift" class="err-toast" style="margin-bottom:10px;"></div>
+
+    <div style="margin-top:auto;">
+      <button class="gbtn gbtn-lilac gbtn-lg gbtn-full" id="btn-gift" onclick="APP.pay()" disabled>Choisis un montant</button>
+      <button class="gbtn gbtn-quiet gbtn-sm gbtn-full" style="margin-top:10px;" onclick="APP.goto('thanks')">Une autre fois, merci</button>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-size:11px;color:var(--mk-ink-3);">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+        Paiement sécurisé · MTN, Moov, Orange Money
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     STEP 5 · Thanks
+══════════════════════════════════════════════════════ -->
+<div class="step" id="s-thanks">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 40px 32px;">
+
+    <div id="thanks-icon" style="width:116px;height:116px;border-radius:50%;background:linear-gradient(135deg,#FFB3C1,#FFE0E6);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:22px;box-shadow:0 16px 40px rgba(225,29,72,.25);animation:mk-pop .5s cubic-bezier(.2,1.2,.4,1);">💕</div>
+
+    <div id="thanks-hey" style="font-family:var(--mk-hand);font-size:24px;color:var(--mk-rose);line-height:1.3;margin-bottom:2px;">tu es au top !</div>
+    <h2 id="thanks-title" class="thanks-h2" style="font-family:var(--mk-display);font-style:italic;font-size:34px;line-height:1.06;letter-spacing:-.02em;color:var(--mk-ink);margin:4px 0 12px;">Merci pour ton joli mot</h2>
+
+    <!-- Gift receipt (only if gave) -->
+    <div id="thanks-receipt" style="display:none;background:var(--mk-lilac-bg);border-radius:18px;padding:16px 22px;margin-bottom:20px;border:1px solid var(--mk-lilac-soft);width:100%;max-width:340px;">
+      <div style="font-size:13px;color:var(--mk-ink-2);margin-bottom:4px;">Ta contribution au cadeau</div>
+      <div id="thanks-amt" style="font-family:var(--mk-display);font-style:italic;font-size:34px;color:var(--mk-lilac);line-height:1;">0 <span style="font-size:16px;">FCFA</span></div>
+      <div style="font-size:12px;color:var(--mk-ink-3);margin-top:4px;">Tu recevras un reçu par SMS 📲</div>
+    </div>
+
+    <p id="thanks-msg" class="thanks-msg-p" style="font-size:15.5px;color:var(--mk-ink-2);line-height:1.55;max-width:380px;margin-bottom:28px;"></p>
+
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;margin-bottom:24px;">
+      <button id="thanks-wall-btn" class="gbtn gbtn-ghost gbtn-md gbtn-full" style="display:none;" onclick="APP.openWall()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        Voir le mur de vœux
+      </button>
+      <button class="gbtn gbtn-soft gbtn-md gbtn-full" onclick="APP.share()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg>
+        Inviter d'autres proches
+      </button>
+    </div>
+
+    <!-- myKado conversion hook -->
+    <div style="padding:14px 18px;background:#fff;border-radius:18px;border:1px solid var(--mk-line);display:flex;align-items:center;gap:12px;max-width:360px;width:100%;cursor:pointer;" onclick="window.open('https://mykado.store','_blank')">
+      <span style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#FF6F8B,#E11D48);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎁</span>
+      <div style="flex:1;text-align:left;">
+        <div style="font-weight:800;font-size:13.5px;color:var(--mk-ink);">Crée la tienne avec myKado</div>
+        <div style="font-size:11.5px;color:var(--mk-ink-2);">Cartes & cagnottes en 3 minutes</div>
+      </div>
+      <svg width="17" height="17" fill="none" stroke="var(--mk-rose)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+
+    <div style="margin-top:auto;padding-top:26px;">
+      <div class="brand-line"><span>propulsé par</span><span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;"><span class="brand-icon">🎁</span><span class="brand-name">myKado</span></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress dots bar (pinned at bottom, visible only on write+sign) -->
+<div class="dots-bar" id="dots-bar"></div>
+
+</div></div><!-- /card /shell -->
+
+<script>/* __WW_DATA__ */</script>
+<script>
+(function () {
+'use strict';
+
+const D   = window.__WW_DATA__ || {};
+const cag = D.cagnotte || {};
+const AMTS = [2000, 5000, 10000, 20000];
+const STEP_DOTS = { write: 0, sign: 1 }; // dot index while on that step
+
+/* ── State ─────────────────────────────────────────────── */
+const S = {
+  step:   'landing',
+  text:   '',
+  photo:  '',
+  name:   '',
+  anon:   false,
+  amt:    null,
+  gave:   false,
+  paid:   0,
+  wishId: null,
+};
+
+/* ── Helpers ─────────────────────────────────────────────── */
+function $(id) { return document.getElementById(id); }
+function fmt(n) { return Number(n).toLocaleString('fr-FR'); }
+
+function showErr(id, msg) {
+  const el = $(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideErr(id) { $(id).style.display = 'none'; }
+
+/* ── Confetti ────────────────────────────────────────────── */
+const CONF_COLORS = ['#FF8DAA', '#9B7EE2', '#FFC95A', '#6BCFAF', '#FF9F7A'];
+const CONF_SHAPES = ['circle', 'square', 'rect'];
+
+function buildConfetti() {
+  const layer = $('confetti-layer');
+  layer.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const c = CONF_COLORS[i % CONF_COLORS.length];
+    const sh = CONF_SHAPES[i % CONF_SHAPES.length];
+    const w = 6 + Math.random() * 8;
+    const h = sh === 'rect' ? w * 1.8 : w;
+    const radius = sh === 'circle' ? '50%' : sh === 'square' ? '2px' : '4px';
+    const el = document.createElement('span');
+    el.style.cssText = [
+      'position:absolute', `top:-20px`, `left:${Math.random() * 100}%`,
+      `width:${w}px`, `height:${h}px`, `background:${c}`, `border-radius:${radius}`,
+      `transform:rotate(${Math.random() * 360}deg)`,
+      `animation:mk-confetti-fall ${4 + Math.random() * 4}s ease-in ${Math.random() * 4}s infinite`,
+    ].join(';');
+    layer.appendChild(el);
+  }
+}
+
+function setConfetti(visible) {
+  $('confetti-layer').style.opacity = visible ? '1' : '0';
+}
+
+/* ── Progress dots ───────────────────────────────────────── */
+function renderDots(activeDotIdx) {
+  const bar = $('dots-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const d = document.createElement('span');
+    d.className = 'pdot';
+    const isDone = i < activeDotIdx;
+    const isCur  = i === activeDotIdx;
+    d.style.cssText = [
+      `width:${isCur ? 22 : 7}px`,
+      `background:${(isDone || isCur) ? 'var(--mk-rose)' : 'var(--mk-line-strong)'}`,
+      'margin:0 3px',
+    ].join(';');
+    bar.appendChild(d);
+  }
+}
+
+function updateDotsBar(step) {
+  const bar = $('dots-bar');
+  if (step === 'write' || step === 'sign') {
+    bar.classList.add('visible');
+    renderDots(STEP_DOTS[step]);
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+/* ── Navigation ──────────────────────────────────────────── */
+function goto(step) {
+  const from = document.querySelector('.step.active');
+  if (from) from.classList.remove('active');
+
+  const mapId = {
+    landing: 's0',
+    write:   's-write',
+    sign:    's-sign',
+    sent:    's-sent',
+    gift:    's-gift',
+    thanks:  's-thanks',
+  };
+  const el = $(mapId[step]);
+  if (el) el.classList.add('active');
+  S.step = step;
+  updateDotsBar(step);
+  setConfetti(['landing', 'sent', 'thanks'].includes(step));
+  window.scrollTo(0, 0);
+
+  if (step === 'thanks') populateThanks();
+}
+
+/* ── Init ──────────────────────────────────────────────── */
+function init() {
+  // Confetti
+  buildConfetti();
+  setConfetti(true); // start on landing
+
+  const rec = D.recipient || 'Sophie';
+  const occ = D.occasion  || 'anniversaire';
+  const emoji = D.emoji   || '🎉';
+
+  // Step 0
+  if (D.host) $('s0-host-text').textContent = 'Une invitation de ' + D.host;
+  $('s0-medallion').textContent = emoji;
+  $('s0-occasion-line').textContent = 'c\'est l\'' + occ + ' de';
+  $('s0-name').textContent = rec;
+
+  const ageDateEl = $('s0-age-date');
+  const parts = [];
+  if (D.age)  parts.push(D.age);
+  if (D.date) parts.push(D.date);
+  if (parts.length) {
+    parts.forEach((p, i) => {
+      if (i > 0) { const sep = document.createTextNode(' · '); ageDateEl.appendChild(sep); }
+      ageDateEl.appendChild(document.createTextNode(p));
+    });
+  } else {
+    ageDateEl.style.display = 'none';
+  }
+
+  $('s0-sub-text').textContent = 'Tous les vœux seront réunis sur un joli mur, rien que pour ' + rec + '.';
+  document.title = 'Laisse un vœu pour ' + rec + ' 💌';
+
+  // Social proof
+  const recentWishes = D.recentWishes || [];
+  const COLORS = ['#FFB3C1', '#D7C5F2', '#C9EEDF', '#FFE7AD', '#FFD7C2'];
+  const avatarsEl = $('s0-avatars');
+  recentWishes.slice(0, 3).forEach((w, i) => {
+    const span = document.createElement('span');
+    span.style.cssText = [
+      'width:30px', 'height:30px', 'border-radius:50%',
+      `background:${COLORS[i % COLORS.length]}`,
+      'border:2.5px solid var(--mk-cream)',
+      `margin-left:${i ? '-10px' : '0'}`,
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'font-size:12px', 'font-weight:800', 'color:rgba(0,0,0,.5)',
+    ].join(';');
+    span.textContent = (w.name || '?')[0].toUpperCase();
+    avatarsEl.appendChild(span);
+  });
+
+  const count = D.wishCount || 0;
+  const proofEl = $('s0-proof-text');
+  if (count > 0) {
+    proofEl.innerHTML = '<b style="color:var(--mk-ink);">' + count + ' personne' + (count > 1 ? 's' : '') + '</b> ' + (count > 1 ? 'ont' : 'a') + ' déjà laissé un mot';
+  } else {
+    proofEl.innerHTML = 'Sois la <b style="color:var(--mk-ink);">première personne</b> à laisser un mot';
+    avatarsEl.style.display = 'none';
+  }
+
+  // Step 1 placeholder — adapt to occasion
+  const occ2 = (D.occasion || 'anniversaire').toLowerCase();
+  const isAnniv = occ2.includes('anniv') || occ2.includes('birthday');
+  $('wish-ta').placeholder = (isAnniv ? 'Joyeux anniversaire ' : 'Félicitations ') + rec + ' ! Je te souhaite…';
+
+  // FlowTop labels
+  ['w', 'sg'].forEach(pfx => {
+    $(pfx + '-emoji').textContent = emoji;
+    $(pfx + '-label').textContent = 'Pour ' + rec;
+  });
+  $('sign-sub').textContent = rec + ' saura ainsi de qui vient ce joli mot.';
+
+  // Step 3
+  $('sent-sub').innerHTML = rec + ' le verra avec les <b style="color:var(--mk-ink);">' + count + ' autres</b> le jour J. 🎉';
+
+  // Step 4 cagnotte
+  if (cag.name) $('gift-name').textContent = (cag.emoji || '🎁') + ' ' + cag.name;
+  $('gift-desc').textContent = 'Les proches de ' + rec + ' se réunissent pour lui offrir ce cadeau. Tu veux participer ?';
+  $('gift-collected').textContent = fmt(cag.collected || 0);
+  $('gift-goal-lbl').textContent = 'sur ' + fmt(cag.goal || 0);
+  const pct = cag.goal > 0 ? Math.min(100, Math.round((cag.collected / cag.goal) * 100)) : 0;
+  $('gift-bar-fill').style.width = pct + '%';
+  $('gift-pct').textContent = pct + '%';
+  $('gift-contributors').innerHTML = [
+    '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:3px;"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3 2.6-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c2.5.3 5 1.7 5 5"/></svg>',
+    (cag.contributors || 0) + ' participant' + ((cag.contributors || 0) > 1 ? 's' : ''),
+  ].join('');
+
+  // Build amount chips
+  const grid = $('amt-grid');
+  AMTS.forEach(a => {
+    const chip = document.createElement('button');
+    chip.className = 'amt-chip';
+    chip.dataset.a = a;
+    chip.innerHTML = `<div class="av">${a >= 1000 ? (a / 1000) + 'k' : a}</div><div class="ac">FCFA</div>`;
+    chip.onclick = () => pickAmt(a, chip);
+    grid.appendChild(chip);
+  });
+
+  // Build waveform bars
+  const wf = $('waveform');
+  for (let i = 0; i < 22; i++) {
+    const bar = document.createElement('span');
+    bar.style.cssText = [
+      'flex:1',
+      `height:${4 + Math.abs(Math.sin(i * 1.3)) * 26}px`,
+      'background:var(--mk-lilac)',
+      'border-radius:99px',
+      `opacity:${0.4 + (i % 3) * 0.2}`,
+    ].join(';');
+    wf.appendChild(bar);
+  }
+
+  // Sent button: if no cagnotte, say "Voir les vœux" instead
+  if (!cag.enabled) {
+    $('btn-sent').innerHTML = 'Voir les vœux <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  }
+}
+
+/* ── Step 1: Write ───────────────────────────────────────── */
+function onTextChange(el) {
+  S.text = el.value;
+  const n = S.text.length;
+  const ct = $('char-ct');
+  ct.textContent = n + '/280';
+  ct.style.color = n > 250 ? 'var(--mk-rose)' : 'var(--mk-ink-3)';
+  $('btn-write').disabled = S.text.trim().length < 3;
+}
+
+function toggleMedia(type) {
+  const chip  = $('chip-' + type);
+  const pane  = $('pane-' + type);
+  const isOpen = pane.style.display !== 'none' && pane.style.display !== '';
+
+  // Close all
+  ['photo', 'voice'].forEach(t => {
+    $('chip-' + t).classList.remove('active');
+    $('pane-' + t).style.display = 'none';
+  });
+
+  if (!isOpen) {
+    chip.classList.add('active');
+    // voice uses flex layout, photo uses block
+    pane.style.display = type === 'voice' ? 'flex' : 'block';
+    pane.style.animation = 'mk-pop .25s';
+  }
+}
+
+async function uploadPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const content = $('photo-content');
+  content.innerHTML = '<div class="mk-spin" style="margin:0 auto;"></div><span style="font-size:13px;color:var(--mk-ink-3);margin-left:10px;">Upload en cours…</span>';
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await r.json();
+    S.photo = data.url || '';
+    content.innerHTML = [
+      '<img src="' + (S.photo || URL.createObjectURL(file)) + '" alt="" style="width:100%;height:80px;object-fit:cover;border-radius:10px;">',
+    ].join('');
+    content.onclick = null;
+  } catch {
+    content.innerHTML = '<span>📸</span><span style="color:var(--mk-rose);font-size:13px;margin-left:8px;">Échec de l\'upload. Réessaie.</span>';
+  }
+}
+
+function step1Next() {
+  if (S.text.trim().length < 3) return;
+  goto('sign');
+}
+
+/* ── Step 2: Sign ────────────────────────────────────────── */
+function onNameChange(el) {
+  S.name = el.value.trim();
+  $('btn-sign').disabled = !S.anon && S.name.length < 2;
+}
+
+function onNameKeydown(e) {
+  if (e.key === 'Enter' && (S.anon || S.name.length >= 2)) submitWish();
+}
+
+function toggleAnon() {
+  S.anon = !S.anon;
+  const box = $('anon-box');
+  const ni  = $('guest-name-inp');
+  if (S.anon) {
+    box.style.background = 'var(--mk-rose)';
+    box.style.borderColor = 'var(--mk-rose)';
+    box.innerHTML = '<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7.5"/></svg>';
+    ni.disabled = true;
+    ni.style.opacity = '.5';
+    S.name = '';
+  } else {
+    box.style.background = '';
+    box.style.borderColor = 'var(--mk-line-strong)';
+    box.innerHTML = '';
+    ni.disabled = false;
+    ni.style.opacity = '1';
+    ni.focus();
+  }
+  $('btn-sign').disabled = !S.anon && S.name.length < 2;
+}
+
+async function submitWish() {
+  hideErr('err-sign');
+  if (!S.anon && S.name.length < 2) {
+    showErr('err-sign', 'Entre ton prénom pour continuer.');
+    return;
+  }
+  const btn = $('btn-sign');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="mk-spin mk-spin-w"></span> Envoi en cours…';
+
+  const finalName = S.anon ? 'Anonyme' : S.name;
+  try {
+    const res = await fetch('/api/wishes/' + D.publicationId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName:   finalName,
+        message:     S.text.trim(),
+        photoUrl:    S.photo,
+        isAnonymous: S.anon,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+    S.wishId = data._id || data.wish?._id || null;
+
+    // Populate sent screen
+    $('sent-hey').textContent = 'merci ' + (S.anon ? '' : S.name) + ' ! 💕';
+    $('sent-wish-text').textContent = '"' + S.text.trim() + '"';
+    $('sent-sig').textContent = '— ' + finalName;
+    goto('sent');
+  } catch (e) {
+    showErr('err-sign', e.message);
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></svg> Envoyer mon vœu`;
+  }
+}
+
+/* ── Step 3: Sent ────────────────────────────────────────── */
+function afterSent() {
+  goto(cag.enabled ? 'gift' : 'thanks');
+}
+
+/* ── Step 4: Gift ────────────────────────────────────────── */
+function pickAmt(a, chip) {
+  S.amt = S.amt === a ? null : a;
+  document.querySelectorAll('.amt-chip').forEach(c => c.classList.remove('active'));
+  const btn = $('btn-gift');
+
+  if (S.amt !== null) {
+    chip.classList.add('active');
+    btn.textContent = 'Participer · ' + fmt(S.amt) + ' FCFA';
+    btn.disabled = false;
+
+    const p0  = cag.goal > 0 ? Math.min(100, Math.round((cag.collected / cag.goal) * 100)) : 0;
+    const p1  = cag.goal > 0 ? Math.min(100, Math.round(((cag.collected + S.amt) / cag.goal) * 100)) : 0;
+    const pre = $('gift-bar-pre');
+    pre.style.display = 'block';
+    pre.style.left  = p0 + '%';
+    pre.style.width = (p1 - p0) + '%';
+    $('gift-pct').textContent = p1 + '%';
+    $('gift-pct').style.color = 'var(--mk-rose)';
+  } else {
+    btn.textContent = 'Choisis un montant';
+    btn.disabled = true;
+    $('gift-bar-pre').style.display = 'none';
+    const p0 = cag.goal > 0 ? Math.min(100, Math.round((cag.collected / cag.goal) * 100)) : 0;
+    $('gift-pct').textContent = p0 + '%';
+    $('gift-pct').style.color = 'var(--mk-lilac)';
+  }
+}
+
+function customAmt() {
+  const v = prompt('Montant en FCFA (ex : 7500) :');
+  const n = parseInt(v, 10);
+  if (isNaN(n) || n <= 0) return;
+  document.querySelectorAll('.amt-chip[data-custom]').forEach(c => c.remove());
+  const chip = document.createElement('button');
+  chip.className = 'amt-chip';
+  chip.dataset.a = n;
+  chip.dataset.custom = '1';
+  chip.innerHTML = `<div class="av">${n >= 1000 ? (n / 1000) + 'k' : n}</div><div class="ac">FCFA</div>`;
+  chip.onclick = () => pickAmt(n, chip);
+  $('amt-grid').appendChild(chip);
+  document.querySelectorAll('.amt-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  S.amt = n;
+  $('btn-gift').textContent = 'Participer · ' + fmt(n) + ' FCFA';
+  $('btn-gift').disabled = false;
+}
+
+function pay() {
+  if (!S.amt) return;
+  hideErr('err-gift');
+  if (!D.kkiapayKey) {
+    showErr('err-gift', 'Paiement non configuré. Contacte l\'organisateur.');
+    return;
+  }
+  const launch = () => {
+    openKkiapayWidget({
+      amount:   S.amt,
+      api_key:  D.kkiapayKey,
+      sandbox:  D.kkiapaySandbox,
+      name:     S.anon ? 'Anonyme' : S.name,
+      callback: window.location.href,
+    });
+    addSuccessListener(async (resp) => {
+      const txId = resp.transactionId || resp.transaction_id;
+      if (txId) {
+        try {
+          const r = await fetch('/api/contributions/verify', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+              transactionId:   txId,
+              publicationId:   D.publicationId,
+              contributorName: S.anon ? '' : S.name,
+              isAnonymous:     S.anon,
+              wishId:          S.wishId,
+            }),
+          });
+          const d = await r.json();
+          S.paid = d.contribution?.amount || S.amt;
+        } catch { S.paid = S.amt; }
+      }
+      S.gave = true;
+      goto('thanks');
+    });
+  };
+  if (typeof openKkiapayWidget === 'undefined') {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.kkiapay.me/k.js';
+    sc.onload = launch;
+    sc.onerror = () => showErr('err-gift', 'Impossible de charger le module de paiement.');
+    document.head.appendChild(sc);
+  } else {
+    launch();
+  }
+}
+
+/* ── Step 5: Thanks ──────────────────────────────────────── */
+function populateThanks() {
+  const g   = S.gave;
+  const who = S.anon ? '' : S.name;
+  const rec = D.recipient || 'Sophie';
+
+  $('thanks-hey').textContent = 'tu es au top' + (who ? ' ' + who : '') + ' !';
+
+  if (g) {
+    $('thanks-icon').textContent = '🎁';
+    $('thanks-icon').style.background   = 'linear-gradient(135deg,#B59CF0,#9B7EE2)';
+    $('thanks-icon').style.boxShadow    = 'var(--mk-sh-lilac)';
+    $('thanks-title').textContent       = 'Merci pour ta participation';
+    $('thanks-msg').textContent         = 'Grâce à toi, le cadeau de ' + rec + ' se rapproche. On garde ça secret jusqu\'au grand jour ! 🤫';
+    $('thanks-receipt').style.display   = 'block';
+    $('thanks-amt').innerHTML = fmt(S.paid || S.amt || 0) + ' <span style="font-size:16px;">FCFA</span>';
+  } else {
+    $('thanks-icon').textContent = '💕';
+    $('thanks-icon').style.background   = 'linear-gradient(135deg,#FFB3C1,#FFE0E6)';
+    $('thanks-icon').style.boxShadow    = '0 16px 40px rgba(225,29,72,.25)';
+    $('thanks-title').textContent       = 'Merci pour ton joli mot';
+    $('thanks-msg').textContent         = rec + ' va adorer. Reviens le jour J pour découvrir le mur complet.';
+    $('thanks-receipt').style.display   = 'none';
+  }
+  if (D.wallUrl) $('thanks-wall-btn').style.display = 'flex';
+}
+
+/* ── Misc ──────────────────────────────────────────────── */
+function openWall() { if (D.wallUrl) window.open(D.wallUrl, '_blank'); }
+function share() {
+  if (navigator.share) {
+    navigator.share({ title: 'Laisse un vœu !', url: location.href });
+  } else {
+    navigator.clipboard?.writeText(location.href)
+      .then(() => alert('Lien copié !'))
+      .catch(() => alert(location.href));
+  }
+}
+
+/* ── Export ──────────────────────────────────────────────── */
+window.APP = {
+  goto, afterSent,
+  onTextChange, toggleMedia, uploadPhoto, step1Next,
+  onNameChange, onNameKeydown, toggleAnon, submitWish,
+  pickAmt, customAmt, pay,
+  openWall, share,
+};
+
+init();
+})();
+</script>
+</body>
+</html>

@@ -16,66 +16,67 @@ async function minifyHtml(html) {
 }
 
 // Demo data per template — realistic but fake
-const DEMO_DATA = {
-  birthday: {
-    greeting: 'Hiya', name: 'Lydia', greetingText: 'Tu comptes énormément pour nous !',
-    musicHint: 'C\'est mieux avec de la musique 🎶',
-    trackTitle: 'Happy Birthday', trackArtist: 'Stevie Wonder',
-    text2: 'On a cherché les mots.', text3: 'On en a trouvé beaucoup.',
-    text4: 'Mais surtout, on voulait dire', text4Adjective: 'merci',
-    text5Entry: 'Parce que,', text5Content: 'Tu es irremplaçable', smiley: '🥹',
-    bigTextPart1: 'S', bigTextPart2: 'O',
-    wishHeading: 'Joyeux Anniversaire !', wishText: 'Avec tout notre amour 💖',
-    outroText: 'Reviens nous dire si tu as aimé.', replayText: 'Clique pour revoir ↺', outroSmiley: '🥰',
-  },
-  special: {
-    greeting: 'Hiya', name: 'Kofi', greetingText: 'On a cherché et on t\'a trouvé.',
-    musicHint: 'Mets le son 🎶',
-    trackTitle: 'Gold', trackArtist: 'Spandau Ballet',
-    searchQuery: 'meilleure personne du monde',
-    result1Title: 'La personne la plus exceptionnelle recensée à ce jour',
-    result1Domain: 'google.com/featured',
-    result1Snippet: 'Après analyse de 8 milliards de profils, les experts s\'accordent sur un résultat sans appel.',
-    result1Rating: '5',
-    text2: 'On a cherché partout.', text3: 'Et on t\'a trouvé.',
-    text4: 'Parce que t\'es', text4Adjective: 'unique',
-    text5Entry: 'Et surtout,', text5Content: 'Joyeux Anniversaire !', smiley: '🎂',
-    bigTextPart1: 'W', bigTextPart2: 'O',
-    wishHeading: 'Joyeux Anniversaire !', wishText: 'Le meilleur reste à venir 🚀',
-    outroText: 'On espère que tu as aimé.', replayText: 'Revoir ↺', outroSmiley: '🎉',
-  },
-  'collective-family': {
-    greeting: 'Hiya', name: 'Ama', greetingText: 'On t\'aime tellement !',
-    musicHint: 'C\'est mieux avec de la musique 🎶',
-    trackTitle: 'Notre chanson', trackArtist: 'Artiste préféré',
-    groupName: 'La famille', groupMessage: 'On s\'est tous réunis pour te dire quelque chose d\'important…', groupEmojis: '🥰 🎂 🎊',
-    text2: 'On a cherché les mots.', text3: 'On en a trouvé beaucoup.',
-    text4: 'Mais surtout, on voulait dire', text4Adjective: 'merci',
-    text5Entry: 'Parce que,', text5Content: 'Tu es irremplaçable', smiley: '🥹',
-    bigTextPart1: 'S', bigTextPart2: 'O',
-    wishHeading: 'Joyeux Anniversaire !', wishText: 'De toute la famille avec amour 💖',
-    carouselTitle: 'Ce qu\'ils ont voulu te dire 💌',
-    outroText: 'Reviens nous dire si tu as aimé.', replayText: 'Clique pour revoir ↺', outroSmiley: '🥰',
-  },
-  'wall-of-wishes': {
-    titleName: 'Sarah',
-    subtitle:  'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
-    // publicationId intentionally omitted → template falls back to SAMPLE_WISHES
-  },
-  'collective-pro': {
-    greeting: 'Cher', name: 'Alexandre', greetingText: 'Nous tenions à marquer ce moment.',
-    musicHint: 'Prenez un moment pour écouter 🎵',
-    trackTitle: 'Un morceau pour vous', trackArtist: 'Sélection de l\'équipe',
-    groupName: 'L\'équipe Marketing', groupMessage: 'Nous nous sommes réunis pour vous adresser quelques mots qui viennent du cœur.',
-    text2: 'Nous avons cherché les mots justes.', text3: 'Nous en avons trouvé beaucoup.',
-    text4: 'Mais ce qui compte vraiment, c\'est', text4Adjective: 'vous',
-    text5Entry: 'Car,', text5Content: 'Votre présence compte', smiley: '.',
-    bigTextPart1: 'M', bigTextPart2: 'R',
-    wishHeading: 'Joyeux Anniversaire', wishText: 'Avec toute notre considération',
-    carouselTitle: 'Ce que l\'équipe a voulu vous dire',
-    outroText: 'Nous espérons que ce moment vous a touché.', replayText: '↺ Revoir', outroSmiley: '✦',
-  },
-};
+// const DEMO_DATA = {
+//   birthday: {
+//     greeting: 'Hiya', name: 'Lydia', greetingText: 'Tu comptes énormément pour nous !',
+//     musicHint: 'C\'est mieux avec de la musique 🎶',
+//     trackTitle: 'Happy Birthday', trackArtist: 'Stevie Wonder',
+//     text2: 'On a cherché les mots.', text3: 'On en a trouvé beaucoup.',
+//     text4: 'Mais surtout, on voulait dire', text4Adjective: 'merci',
+//     text5Entry: 'Parce que,', text5Content: 'Tu es irremplaçable', smiley: '🥹',
+//     bigTextPart1: 'S', bigTextPart2: 'O',
+//     wishHeading: 'Joyeux Anniversaire !', wishText: 'Avec tout notre amour 💖',
+//     outroText: 'Reviens nous dire si tu as aimé.', replayText: 'Clique pour revoir ↺', outroSmiley: '🥰',
+//   },
+//   special: {
+//     greeting: 'Hiya', name: 'Kofi', greetingText: 'On a cherché et on t\'a trouvé.',
+//     musicHint: 'Mets le son 🎶',
+//     trackTitle: 'Gold', trackArtist: 'Spandau Ballet',
+//     searchQuery: 'meilleure personne du monde',
+//     result1Title: 'La personne la plus exceptionnelle recensée à ce jour',
+//     result1Domain: 'google.com/featured',
+//     result1Snippet: 'Après analyse de 8 milliards de profils, les experts s\'accordent sur un résultat sans appel.',
+//     result1Rating: '5',
+//     text2: 'On a cherché partout.', text3: 'Et on t\'a trouvé.',
+//     text4: 'Parce que t\'es', text4Adjective: 'unique',
+//     text5Entry: 'Et surtout,', text5Content: 'Joyeux Anniversaire !', smiley: '🎂',
+//     bigTextPart1: 'W', bigTextPart2: 'O',
+//     wishHeading: 'Joyeux Anniversaire !', wishText: 'Le meilleur reste à venir 🚀',
+//     outroText: 'On espère que tu as aimé.', replayText: 'Revoir ↺', outroSmiley: '🎉',
+//   },
+//   'collective-family': {
+//     greeting: 'Hiya', name: 'Ama', greetingText: 'On t\'aime tellement !',
+//     musicHint: 'C\'est mieux avec de la musique 🎶',
+//     trackTitle: 'Notre chanson', trackArtist: 'Artiste préféré',
+//     groupName: 'La famille', groupMessage: 'On s\'est tous réunis pour te dire quelque chose d\'important…', groupEmojis: '🥰 🎂 🎊',
+//     text2: 'On a cherché les mots.', text3: 'On en a trouvé beaucoup.',
+//     text4: 'Mais surtout, on voulait dire', text4Adjective: 'merci',
+//     text5Entry: 'Parce que,', text5Content: 'Tu es irremplaçable', smiley: '🥹',
+//     bigTextPart1: 'S', bigTextPart2: 'O',
+//     wishHeading: 'Joyeux Anniversaire !', wishText: 'De toute la famille avec amour 💖',
+//     carouselTitle: 'Ce qu\'ils ont voulu te dire 💌',
+//     outroText: 'Reviens nous dire si tu as aimé.', replayText: 'Clique pour revoir ↺', outroSmiley: '🥰',
+//   },
+//   'wall-of-wishes': {
+//     titleName: 'Sarah',
+//     subtitle:  'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+//     // publicationId intentionally omitted → template falls back to SAMPLE_WISHES
+//   },
+//   'collective-pro': {
+//     greeting: 'Cher', name: 'Alexandre', greetingText: 'Nous tenions à marquer ce moment.',
+//     musicHint: 'Prenez un moment pour écouter 🎵',
+//     trackTitle: 'Un morceau pour vous', trackArtist: 'Sélection de l\'équipe',
+//     groupName: 'L\'équipe Marketing', groupMessage: 'Nous nous sommes réunis pour vous adresser quelques mots qui viennent du cœur.',
+//     text2: 'Nous avons cherché les mots justes.', text3: 'Nous en avons trouvé beaucoup.',
+//     text4: 'Mais ce qui compte vraiment, c\'est', text4Adjective: 'vous',
+//     text5Entry: 'Car,', text5Content: 'Votre présence compte', smiley: '.',
+//     bigTextPart1: 'M', bigTextPart2: 'R',
+//     wishHeading: 'Joyeux Anniversaire', wishText: 'Avec toute notre considération',
+//     carouselTitle: 'Ce que l\'équipe a voulu vous dire',
+//     outroText: 'Nous espérons que ce moment vous a touché.', replayText: '↺ Revoir', outroSmiley: '✦',
+//   },
+// };
+const DEMO_DATA = {};
 
 // Minify HTML — strip comments, collapse whitespace
 // function minifyHtml(html) {
@@ -158,6 +159,20 @@ function injectProtection(html, templateName) {
   html = html.replace('</body>', protectionScript + '\n</body>');
   return html;
 }
+const GFONTS_MAP = {
+  'Outfit':           'Outfit:wght@200;300;400;500;600;700;800',
+  'Work Sans':        'Work+Sans:wght@300;400;500;600;700',
+  'Inter':            'Inter:wght@300;400;500;600;700',
+  'Playfair Display': 'Playfair+Display:wght@400;500;600;700',
+  'Pacifico':         'Pacifico',
+  'Dancing Script':   'Dancing+Script:wght@400;500;600;700',
+  'Montserrat':       'Montserrat:wght@300;400;500;600;700',
+  'Poppins':          'Poppins:wght@300;400;500;600;700',
+  'Lato':             'Lato:wght@300;400;700',
+  'Raleway':          'Raleway:wght@300;400;500;600;700',
+  'Nunito':           'Nunito:wght@300;400;500;600;700',
+};
+
 // GET /preview/:templateName
 router.get('/:templateName', async (req, res) => {
   const { templateName } = req.params;
@@ -183,13 +198,21 @@ router.get('/:templateName', async (req, res) => {
     const demoData  = DEMO_DATA[templateName] || {};
     const demoStyle = template.defaultStyle || {};
     const scale = '1';
+    const fontFamily = demoStyle.fontFamily || 'Outfit';
+    const gfontParam = GFONTS_MAP[fontFamily];
+    const fontLink = gfontParam
+      ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${gfontParam}&display=swap">`
+      : '';
 
     const injection = `
+    ${fontLink}
     <style>
       :root {
-        --primary: ${demoStyle.primaryColor || '#ff69b4'};
-        --accent:  ${demoStyle.accentColor  || '#ffb347'};
-        --font:    '${demoStyle.fontFamily  || 'Work Sans'}', sans-serif;
+        --primary: ${demoStyle.primaryColor || '#E11D74'};
+        --accent:  ${demoStyle.accentColor  || '#F5B544'};
+        --font:    '${fontFamily}', sans-serif;
         --fs-scale: ${scale};
       }
       body { font-family: var(--font) !important; }
