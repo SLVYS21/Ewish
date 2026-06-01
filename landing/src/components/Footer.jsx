@@ -21,14 +21,14 @@ export default function Footer() {
             <a href="#usecases">Particuliers</a>
             <a href="#usecases">Équipes RH</a>
             <a href="#usecases">Marques &amp; agences</a>
-            <a href="mailto:contact@mykado.app">API · Sur demande</a>
+            <a href="mailto:sylvanusboni21@gmail.com">API · Sur demande</a>
           </div>
           <div>
             <h5>Société</h5>
-            <a href="mailto:contact@mykado.app">Contact</a>
+            <a href="mailto:sylvanusboni21@gmail.com">Contact</a>
             <a href="#faq">FAQ</a>
-            <a href="#">Mentions légales</a>
-            <a href="#">Conditions</a>
+            <a href="https://app.mykado.store/terms">Mentions légales</a>
+            <a href="https://app.mykado.store/privacy">Conditions</a>
           </div>
         </div>
       </div>
