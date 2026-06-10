@@ -8,73 +8,76 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Serve.js injects --primary and --accent above this block.
+       These are the fallback values used when no editor style is set. */
     :root {
-      --gold: #c9a84c; --gold-l: #d4b05c; --gold-pale: rgba(201,168,76,0.10);
-      --rose: #e05574; --ink: #1a1410;
-      --ink-2: rgba(26,20,16,0.72); --ink-3: rgba(26,20,16,0.45);
-      --ivory: #faf8f4; --ivory-2: #f5f1eb;
+      --primary:   #c9a84c;
+      --accent:    #e05574;
+      --gold:      var(--primary);
+      --gold-l:    var(--primary);
+      --gold-pale: color-mix(in srgb, var(--primary) 10%, transparent);
+      --rose:      var(--accent);
+      --ink:       #1a1410;
+      --ink-2:     rgba(26,20,16,0.72);
+      --ink-3:     rgba(26,20,16,0.45);
+      --ivory:     #faf8f4;
+      --ivory-2:   #f5f1eb;
     }
 
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--ivory); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
+    body { font-family: var(--font, 'Inter', sans-serif);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.5), transparent 40%),
+        repeating-linear-gradient(45deg, #D9B98E 0 2px, transparent 2px 9px),
+        linear-gradient(160deg, #E7C9A0, #D6B184);
+      background-attachment: fixed;
+      color: var(--ink); min-height: 100vh; overflow-x: hidden; }
 
-    body::after {
-      content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: 0.022;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      background-size: 200px;
-    }
 
-    #bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-    #bg-blobs svg { width: 100%; height: 100%; }
+    #bg-blobs { display: none; }
 
     /* ── HEADER ── */
-    #wall-header { text-align: center; padding: clamp(48px,8vw,80px) 24px clamp(32px,5vw,48px); position: relative; z-index: 10; }
-    .eyebrow { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); background: var(--gold-pale); padding: 5px 14px; border-radius: 99px; margin-bottom: 18px; }
-    .wall-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(2.2rem,6vw,3.6rem); font-weight: 400; font-style: italic; color: var(--ink); line-height: 1.15; margin-bottom: 10px; }
+    #wall-header { text-align: center; padding: clamp(48px,8vw,80px) 24px clamp(36px,5vw,52px); position: relative; z-index: 10; color: #4A331C; }
+    .eyebrow { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #9A7338; background: #FBF4E6; padding: 5px 14px; border-radius: 99px; margin-bottom: 18px; box-shadow: 0 3px 8px rgba(74,51,28,.18); }
+    .wall-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(2.2rem,6vw,3.6rem); font-weight: 400; font-style: italic; color: #3A2814; text-shadow: 0 2px 0 rgba(255,255,255,.35); line-height: 1.15; margin-bottom: 10px; }
     .wall-title em { font-style: normal; color: var(--rose); }
     .wall-subtitle { font-size: 0.88rem; font-weight: 400; color: var(--ink-3); max-width: 380px; margin: 0 auto 18px; line-height: 1.6; }
-    .wish-count { display: inline-flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 600; color: var(--gold); background: var(--gold-pale); padding: 5px 14px; border-radius: 99px; }
+    .wish-count { display: inline-flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 600; color: #9A7338; background: #FBF4E6; padding: 5px 14px; border-radius: 99px; }
     .wish-count svg { width: 13px; height: 13px; }
     .header-divider { max-width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 24px auto 0; opacity: 0.5; }
 
     /* ── NOTES GRID ── */
-    #notes-container { position: relative; z-index: 5; max-width: 1120px; margin: 0 auto; padding: 8px 16px 140px; columns: 2; column-gap: 14px; }
+    #notes-container { position: relative; z-index: 5; max-width: 1060px; margin: 0 auto; padding: 16px 16px 140px; columns: 2; column-gap: 14px; }
     @media (min-width: 540px)  { #notes-container { columns: 3; column-gap: 16px; } }
-    @media (min-width: 780px)  { #notes-container { columns: 4; column-gap: 18px; } }
-    @media (min-width: 1060px) { #notes-container { columns: 5; column-gap: 18px; } }
+    @media (min-width: 780px)  { #notes-container { columns: 4; column-gap: 22px; } }
 
     /* ── POST-IT ── */
-    .note { break-inside: avoid; display: block; margin-bottom: 14px; will-change: transform, opacity; }
-    .note-inner {
-      padding: 22px 18px 20px; border-radius: 3px 3px 6px 6px; position: relative;
-      box-shadow: 0 2px 6px rgba(26,20,16,0.08), 0 8px 24px rgba(26,20,16,0.07), 0 1px 2px rgba(26,20,16,0.05);
-      transition: box-shadow 0.3s, transform 0.3s; cursor: default;
-    }
-    .note:hover .note-inner { box-shadow: 0 6px 20px rgba(26,20,16,0.13), 0 16px 40px rgba(26,20,16,0.10); transform: translateY(-3px) !important; }
-    .note-tape { position: absolute; top: -9px; left: 50%; transform: translateX(-50%) rotate(var(--tape-rot,-1deg)); width: 42px; height: 18px; background: rgba(255,255,255,0.55); border-radius: 2px; box-shadow: 0 1px 4px rgba(26,20,16,0.08); }
-    .nc0{background:#fef9d7}.nc1{background:#fdeef2}.nc2{background:#eef7f0}.nc3{background:#f0ecfa}.nc4{background:#fef0ea}.nc5{background:#e8f4fd}.nc6{background:#fdf5e4}
-
-    /* Note media */
-    .note-photo { width: 100%; max-height: 130px; object-fit: cover; border-radius: 5px; margin-bottom: 10px; display: block; }
-    .note-audio { width: 100%; margin-bottom: 10px; accent-color: var(--gold); display: block; }
-
-    .note-text { font-family: 'Caveat', cursive; font-size: clamp(1rem,2.8vw,1.12rem); line-height: 1.6; color: rgba(26,20,16,0.80); margin-bottom: 16px; word-break: break-word; }
-    .note-footer { display: flex; align-items: center; gap: 9px; border-top: 1px solid rgba(26,20,16,0.06); padding-top: 12px; }
-    .note-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--gold), var(--rose)); color: #fff; font-family: 'DM Serif Display', serif; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
-    .note-meta { min-width: 0; }
-    .note-name { font-size: 0.70rem; font-weight: 600; color: rgba(26,20,16,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .note-date { font-size: 0.62rem; color: rgba(26,20,16,0.32); margin-top: 1px; }
-    .note.is-new .note-inner { outline: 2px solid rgba(201,168,76,0.5); outline-offset: 2px; }
-
-    /* Own-wish delete button */
-    .note-del { position: absolute; top: 8px; right: 8px; background: rgba(26,20,16,0.07); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s, background 0.2s; color: var(--ink-3); font-size: 0.68rem; line-height: 1; }
-    .note:hover .note-del { opacity: 1; }
-    .note-del:hover { background: rgba(224,85,116,0.15); color: var(--rose); }
+    .pin { break-inside: avoid; margin-bottom: 20px; position: relative; padding: 12px 12px 14px; box-shadow: 0 10px 22px rgba(60,40,15,.26); transition: transform 0.3s, box-shadow 0.3s; will-change: transform; }
+    .pin::before { content: ''; position: absolute; top: -7px; left: 50%; width: 46px; height: 16px; transform: translateX(-50%) rotate(-3deg); background: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.5); }
+    .pin.tape-l::before { transform: translateX(-50%) rotate(4deg); }
+    .pin:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(60,40,15,.38); }
+    .pin.is-new { outline: 2px solid rgba(201,168,76,0.5); outline-offset: 2px; }
+    /* Couleurs post-its */
+    .sticky    { background: #FFF7B8; }
+    .sticky.s2 { background: #C6F0C2; }
+    .sticky.s3 { background: #BFE3FF; }
+    .sticky.s4 { background: #FFD3C2; }
+    /* Typographie */
+    .pin .nm { font-family: 'Caveat', cursive; font-size: 17px; font-weight: 700; color: rgba(26,20,16,.75); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pin .tx { font-family: 'Caveat', cursive; font-size: 16px; line-height: 1.3; color: #3A2814; word-break: break-word; }
+    /* Media */
+    .pin .pin-photo { width: 100%; max-height: 120px; object-fit: cover; margin-bottom: 8px; display: block; }
+    .pin .pin-audio { width: 100%; margin-bottom: 8px; display: block; accent-color: var(--gold); }
+    /* Delete button */
+    .pin-del { position: absolute; top: 6px; right: 6px; background: rgba(26,20,16,.07); border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; color: rgba(26,20,16,.5); font-size: 0.65rem; line-height: 1; }
+    .pin:hover .pin-del { opacity: 1; }
+    .pin-del:hover { background: rgba(224,85,116,.15); color: var(--rose); }
 
     /* ── ADD BUTTON ── */
     #add-btn { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--ink) 0%, #2d2018 100%); color: var(--gold); border: none; border-radius: 99px; padding: 15px 36px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; letter-spacing: 0.03em; box-shadow: 0 8px 28px rgba(26,20,16,0.32), 0 2px 6px rgba(26,20,16,0.18); transition: transform 0.22s, box-shadow 0.22s; white-space: nowrap; }
     #add-btn:hover { transform: translateX(-50%) translateY(-3px); box-shadow: 0 14px 40px rgba(26,20,16,0.40), 0 3px 8px rgba(26,20,16,0.2); }
     #add-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+    #add-btn.hidden { display: none; }
 
     /* ── SHEET ── */
     #add-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(26,20,16,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
@@ -97,7 +100,7 @@
     .color-swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.15s, border-color 0.15s; }
     .color-swatch:hover { transform: scale(1.15); }
     .color-swatch.active { border-color: var(--ink); transform: scale(1.12); }
-    .swatch-0{background:#fef9d7}.swatch-1{background:#fdeef2}.swatch-2{background:#eef7f0}.swatch-3{background:#f0ecfa}.swatch-4{background:#fef0ea}.swatch-5{background:#e8f4fd}
+    .swatch-0{background:#FFF7B8}.swatch-1{background:#C6F0C2}.swatch-2{background:#BFE3FF}.swatch-3{background:#FFD3C2}.swatch-4{background:#FFF7B8}.swatch-5{background:#C6F0C2}
 
     /* ── MEDIA SECTION ── */
     .media-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
@@ -143,7 +146,7 @@
 
     /* Submit */
     #submit-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 14px 24px; margin-top: 16px; background: var(--gold); color: var(--ink); border: none; border-radius: 99px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em; box-shadow: 0 6px 24px rgba(201,168,76,0.30); transition: background 0.18s, transform 0.15s, box-shadow 0.18s; }
-    #submit-btn:hover { background: var(--gold-l); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(201,168,76,0.40); }
+    #submit-btn:hover { opacity: 0.88; transform: translateY(-2px); }
     #submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
     #submit-btn svg { width: 15px; height: 15px; }
 
@@ -154,6 +157,9 @@
     #empty-state { text-align: center; padding: 60px 24px; position: relative; z-index: 5; display: none; }
     #empty-state p { font-size: 0.9rem; color: var(--ink-3); margin-top: 12px; }
 
+    /* ── WISHES CLOSED BANNER ── */
+    #wishes-closed { display: none; position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; background: rgba(26,20,16,0.08); border: 1.5px solid rgba(26,20,16,0.12); color: var(--ink-3); border-radius: 99px; padding: 12px 28px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+
     /* ── TOAST ── */
     #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 600; pointer-events: none; background: var(--ink); color: var(--gold); padding: 10px 22px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; opacity: 0; transition: opacity 0.3s, transform 0.3s; white-space: nowrap; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -163,9 +169,103 @@
       .sheet-title { font-size: 1.35rem; }
       .media-tab { padding: 6px 11px; font-size: 0.72rem; }
     }
+
+    /* ── ACCESS CODE GATE ── */
+    #access-gate { position: fixed; inset: 0; z-index: 950; background: rgba(26,20,16,.85); display: none; align-items: center; justify-content: center; }
+    .gate-card { background: var(--ivory); border-radius: 24px; padding: 40px 28px; width: calc(100% - 48px); max-width: 360px; text-align: center; box-shadow: 0 24px 64px rgba(26,20,16,.30); }
+    .gate-input { width: 100%; padding: 12px 16px; margin-top: 8px; border-radius: 14px; border: 1.5px solid rgba(201,168,76,.30); background: rgba(201,168,76,.05); font-family: 'Inter', sans-serif; font-size: .95rem; color: var(--ink); outline: none; text-align: center; letter-spacing: .12em; transition: border-color .2s; box-sizing: border-box; }
+    .gate-input:focus { border-color: var(--gold); }
+    .gate-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px; margin-top: 14px; background: var(--ink); color: var(--gold); border: none; border-radius: 99px; font-family: 'Inter', sans-serif; font-size: .92rem; font-weight: 600; cursor: pointer; letter-spacing: .03em; }
+    .gate-btn:hover { opacity: .88; }
+
+    /* ── CAGNOTTE STRIP ── */
+    #cagnotte-strip { max-width: 520px; margin: 4px auto 16px; padding: 0 18px; }
+    .cagnotte-inner {
+      background: #fff; border-radius: 16px;
+      padding: 12px 16px 10px;
+      box-shadow: 0 10px 22px rgba(60,40,15,.24);
+      transform: rotate(-1deg);
+    }
+    .cagnotte-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .cagnotte-icon { width: 36px; height: 36px; border-radius: 10px; background: #FBF4E6; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .cagnotte-info { flex: 1; min-width: 0; }
+    .cagnotte-name { font-size: 0.85rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cagnotte-stats { font-size: 0.70rem; color: var(--ink-3); margin-top: 2px; }
+    .cagnotte-pct { font-size: 0.95rem; font-weight: 800; color: #C98A3A; white-space: nowrap; flex-shrink: 0; }
+    .cagnotte-track { height: 7px; background: #EADCC2; border-radius: 99px; overflow: hidden; }
+    .cagnotte-fill { height: 100%; background: #C98A3A; border-radius: 99px; transition: width 1.2s ease; }
+
+    /* ── GIFT OVERLAY ──────────────────────────────────── */
+    #gift-overlay {
+      position: fixed; inset: 0; z-index: 700;
+      background: rgba(26,20,16,0); display: flex;
+      align-items: flex-end; justify-content: center;
+      pointer-events: none; transition: background 0.38s;
+    }
+    #gift-overlay.open { background: rgba(26,20,16,0.55); pointer-events: all; }
+    #gift-sheet {
+      background: var(--ivory); border-radius: 22px 22px 0 0;
+      padding: 8px 24px 44px; width: 100%; max-width: 520px;
+      transform: translateY(100%);
+      transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1);
+      max-height: 92vh; overflow-y: auto; position: relative;
+    }
+    #gift-overlay.open #gift-sheet { transform: translateY(0); }
+
+    .gamt-chip {
+      padding: 14px 4px; border-radius: 14px; text-align: center;
+      background: #fff; border: 2px solid rgba(201,168,76,0.25);
+      cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif;
+    }
+    .gamt-chip:hover { border-color: rgba(201,168,76,0.55); }
+    .gamt-chip.active { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+    .gamt-chip .gav { font-weight: 800; font-size: 15px; color: var(--ink); }
+    .gamt-chip.active .gav { color: var(--gold); }
+    .gamt-chip .gac { font-size: 9.5px; color: var(--ink-3); font-weight: 700; margin-top: 2px; }
+
+    .gpbar-track {
+      height: 12px; background: rgba(201,168,76,0.15);
+      border-radius: 99px; overflow: hidden; position: relative;
+    }
+    .gpbar-fill {
+      position: absolute; inset: 0; border-radius: 99px;
+      background: linear-gradient(90deg, var(--gold), var(--accent));
+    }
+    .gpbar-preview {
+      position: absolute; top: 0; bottom: 0; border-radius: 99px;
+      background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 5px, rgba(224,85,116,0.4) 5px, rgba(224,85,116,0.4) 10px);
+    }
+
+    /* ── THANKS OVERLAY ────────────────────────────────── */
+    #thanks-overlay {
+      position: fixed; inset: 0; z-index: 800;
+      background: rgba(26,20,16,0); display: flex;
+      align-items: center; justify-content: center;
+      pointer-events: none; transition: background 0.3s;
+    }
+    #thanks-overlay.open { background: rgba(26,20,16,0.6); pointer-events: all; }
+    #thanks-card {
+      background: var(--ivory); border-radius: 24px;
+      padding: 40px 28px; width: calc(100% - 48px); max-width: 360px;
+      text-align: center;
+      transform: scale(0.85); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.45,0.64,1), opacity 0.3s;
+    }
+    #thanks-overlay.open #thanks-card { transform: scale(1); opacity: 1; }
   </style>
 </head>
 <body>
+
+<div id="access-gate">
+  <div class="gate-card">
+    <div style="font-size:42px;margin-bottom:14px;">🔒</div>
+    <h2 style="font-family:'DM Serif Display',serif;font-style:italic;font-size:22px;color:var(--ink);margin-bottom:8px;">Mur privé</h2>
+    <p style="font-size:13.5px;color:var(--ink-3);line-height:1.55;margin-bottom:18px;">Ce mur est protégé.<br>Entrez le code d'accès pour continuer.</p>
+    <input id="gate-input" class="gate-input" type="text" placeholder="Code d'accès" maxlength="50" autocomplete="off" onkeydown="if(event.key==='Enter')checkGate()">
+    <button class="gate-btn" onclick="checkGate()">🔓 Accéder</button>
+    <div id="gate-err" style="display:none;font-size:12.5px;color:#e05574;margin-top:10px;font-weight:600;">Code incorrect — réessayez.</div>
+  </div>
+</div>
 
 <div id="bg-blobs" aria-hidden="true">
   <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -179,14 +279,28 @@
 </div>
 
 <header id="wall-header">
-  <p class="eyebrow">✦ Mur de vœux</p>
-  <h1 class="wall-title">Pour <em data-node-name="titleName">Prénom</em></h1>
-  <p class="wall-subtitle" data-node-name="subtitle">Partagez ce lien — chacun peut laisser son mot sur ce mur.</p>
+  <p class="eyebrow" data-node="eyebrow">✦ Mur de vœux</p>
+  <h1 class="wall-title">Pour <em data-node="titleName">Prénom</em></h1>
+  <p class="wall-subtitle" data-node="subtitle">Partagez ce lien — chacun peut laisser son mot sur ce mur.</p>
   <div class="wish-count" id="wish-count-badge">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
     <span id="count-num">0</span> vœux
   </div>
   <div class="header-divider"></div>
+
+  <div id="cagnotte-strip" style="display:none">
+    <div class="cagnotte-inner">
+      <div class="cagnotte-row">
+        <div class="cagnotte-icon" id="cag-icon">🎁</div>
+        <div class="cagnotte-info">
+          <div class="cagnotte-name" id="cag-name">Cadeau commun</div>
+          <div class="cagnotte-stats" id="cag-stats"></div>
+        </div>
+        <div class="cagnotte-pct" id="cag-pct">0%</div>
+      </div>
+      <div class="cagnotte-track"><div class="cagnotte-fill" id="cag-fill" style="width:0%"></div></div>
+    </div>
+  </div>
 </header>
 
 <main id="notes-container" role="main" aria-label="Mur de voeux"></main>
@@ -202,8 +316,12 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
   </svg>
-  Ajouter mon vœu
+  Ajouter mon mot
 </button>
+
+<div id="wishes-closed">
+  🔒 Les vœux sont temporairement fermés
+</div>
 
 <div id="add-overlay" role="dialog" aria-modal="true" aria-label="Ajouter un voeu" onclick="handleBgClick(event)">
   <div id="add-sheet">
@@ -291,33 +409,105 @@
 
 <div id="toast">Vœu ajouté ✦</div>
 
+<!-- ══════════════════════════════════════════════════════
+     GIFT OVERLAY (cagnotte — shown after wish submission)
+══════════════════════════════════════════════════════ -->
+<div id="gift-overlay" onclick="handleGiftBgClick(event)">
+  <div id="gift-sheet">
+    <div style="width:38px;height:4px;border-radius:2px;background:rgba(26,20,16,0.12);margin:12px auto 20px;"></div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;background:rgba(201,168,76,0.12);border-radius:999px;margin-bottom:12px;">
+        <svg width="12" height="12" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3 2.6-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c2.5.3 5 1.7 5 5"/></svg>
+        <span style="font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--gold);">CADEAU COMMUN</span>
+      </div>
+      <div style="font-family:'Caveat',cursive;font-size:20px;color:var(--accent);margin-bottom:3px;">et si on se cotisait pour…</div>
+      <h2 id="gift-sheet-name" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--ink);line-height:1.2;margin-bottom:6px;">🎁 Cadeau commun</h2>
+      <p id="gift-sheet-desc" style="font-size:13.5px;color:var(--ink-3);line-height:1.5;max-width:360px;margin:0 auto;"></p>
+    </div>
+
+    <!-- Progress card -->
+    <div style="background:#fff;border-radius:18px;padding:18px;border:1px solid rgba(201,168,76,0.18);margin-bottom:18px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <span id="gift-collected" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--gold);"></span>
+          <span style="font-size:12px;font-weight:700;color:var(--ink-3);margin-left:5px;">FCFA</span>
+        </div>
+        <span id="gift-goal-lbl" style="font-size:12px;color:var(--ink-3);font-weight:700;"></span>
+      </div>
+      <div class="gpbar-track" style="margin-bottom:8px;">
+        <div class="gpbar-fill" id="gift-bar-fill" style="width:0%;"></div>
+        <div class="gpbar-preview" id="gift-bar-pre" style="left:0;width:0;display:none;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;">
+        <span id="gift-contributors" style="color:var(--ink-3);font-weight:600;"></span>
+        <span id="gift-pct" style="font-weight:800;color:var(--gold);"></span>
+      </div>
+    </div>
+
+    <!-- Amount picker -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:8px;letter-spacing:.08em;">JE PARTICIPE AVEC</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="gift-amt-grid"></div>
+      <button onclick="giftCustomAmt()" style="margin-top:9px;width:100%;padding:10px;border-radius:14px;border:1.5px dashed rgba(201,168,76,0.35);background:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">✏️ Un autre montant</button>
+    </div>
+
+    <div id="gift-err" style="display:none;background:rgba(224,85,116,0.08);border:1.5px solid rgba(224,85,116,0.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:10px;"></div>
+
+    <button id="gift-pay-btn" onclick="giftPay()" disabled style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:var(--gold);color:var(--ink);border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.5;transition:all .18s;letter-spacing:.02em;">Choisir un montant</button>
+    <button onclick="skipGift()" style="width:100%;padding:11px;margin-top:10px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">Une autre fois, merci</button>
+    <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;font-size:10.5px;color:var(--ink-3);">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+      Paiement sécurisé · MTN, Moov, Orange Money
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     THANKS OVERLAY
+══════════════════════════════════════════════════════ -->
+<div id="thanks-overlay">
+  <div id="thanks-card">
+    <div id="thanks-icon" style="font-size:54px;margin-bottom:14px;">💕</div>
+    <h2 id="thanks-title" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:26px;color:var(--ink);margin-bottom:8px;line-height:1.2;">Merci pour ton joli mot</h2>
+    <p id="thanks-msg" style="font-size:14px;color:var(--ink-3);line-height:1.55;margin-bottom:20px;"></p>
+    <div id="thanks-receipt" style="display:none;background:rgba(201,168,76,0.08);border-radius:14px;padding:14px 18px;margin-bottom:18px;border:1px solid rgba(201,168,76,0.2);">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:3px;">Ta contribution</div>
+      <div id="thanks-amt" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:var(--gold);line-height:1;"></div>
+    </div>
+    <button onclick="closeThanks()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;background:var(--ink);color:var(--gold);border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.02em;">
+      Voir le mur ✦
+    </button>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
 <script>
 /* ════════════════════════════════════════════════
-   CONFIG
+   CONFIG — from server-injected window.__WW_DATA__
 ═════════════════════════════════════════════════ */
-const _d       = window.__WW_DATA__ || {};
-const PUB_ID   = _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
-const API_BASE = _d.apiBase || (PUB_ID ? location.origin : '');
+var _d       = window.__WW_DATA__ || {};
+var PUB_ID   = _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
+var API_BASE = _d.apiBase || (PUB_ID ? location.origin : '');
 
 /* ════════════════════════════════════════════════
    STATE
 ═════════════════════════════════════════════════ */
-let wishes        = [];
-let myWishIds     = JSON.parse(localStorage.getItem('ww_my_ids') || '[]');
-let selectedColor = 0;
-let activeTab     = 'none';
-let activeMedia   = { type: 'none', url: '' };
-let mediaRecorder = null;
-let audioChunks   = [];
-let recTimerInt   = null;
-let recSecs       = 0;
-let isSubmitting  = false;
+var wishes        = [];
+var myWishIds     = JSON.parse(localStorage.getItem('ww_my_ids') || '[]');
+var selectedColor = 0;
+var activeTab     = 'none';
+var activeMedia   = { type: 'none', url: '' };
+var mediaRecorder = null;
+var audioChunks   = [];
+var recTimerInt   = null;
+var recSecs       = 0;
+var isSubmitting  = false;
 
 /* ════════════════════════════════════════════════
-   SAMPLE DATA (demo fallback)
+   SAMPLE DATA (demo fallback — no PUB_ID)
 ═════════════════════════════════════════════════ */
-const SAMPLE_WISHES = [
+var SAMPLE_WISHES = [
   { text: "Tu es une source d'inspiration pour toute l'équipe. Merci pour tout ce que tu nous as apporté !", name: "Marie",     color: 0, rot: -2.8 },
   { text: "Un immense merci pour ta bienveillance et ta générosité. Tu le mérites vraiment !",               name: "Thomas",    color: 1, rot:  2.2 },
   { text: "Profite bien ! Tu vas tellement nous manquer 💛",                                                 name: "Équipe RH", color: 2, rot: -1.4 },
@@ -335,20 +525,27 @@ const SAMPLE_WISHES = [
 /* ════════════════════════════════════════════════
    API HELPERS
 ═════════════════════════════════════════════════ */
-async function apiFetch(path, opts) {
-  const res = await fetch(API_BASE + path, opts || {});
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
+function apiFetch(path, opts) {
+  return fetch(API_BASE + path, opts || {}).then(function(res) {
+    if (!res.ok) {
+      return res.json().then(function(b) {
+        var e = new Error(b.error || ('HTTP ' + res.status));
+        e.status = res.status; e.code = b.code; throw e;
+      }, function() {
+        var e = new Error('HTTP ' + res.status); e.status = res.status; throw e;
+      });
+    }
+    return res.json();
+  });
 }
 
-async function loadWishes() {
+function loadWishes() {
   if (!PUB_ID) {
     wishes = SAMPLE_WISHES.map(function(w) { return Object.assign({}, w, { ts: Date.now() - Math.random() * 86400000 * 5 }); });
     buildWall(true);
     return;
   }
-  try {
-    var data = await apiFetch('/api/wishes/' + PUB_ID + '/approved');
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
     wishes = data.map(function(w) {
       return {
         text:      w.message,
@@ -364,16 +561,15 @@ async function loadWishes() {
     });
     buildWall(true);
     setInterval(pollNewWishes, 30000);
-  } catch(e) {
+  }).catch(function() {
     wishes = SAMPLE_WISHES.map(function(w) { return Object.assign({}, w, { ts: Date.now() - Math.random() * 86400000 * 5 }); });
     buildWall(true);
-  }
+  });
 }
 
-async function pollNewWishes() {
+function pollNewWishes() {
   if (!PUB_ID) return;
-  try {
-    var data = await apiFetch('/api/wishes/' + PUB_ID + '/approved');
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
     var currentIds = new Set(wishes.map(function(w){ return w._id; }).filter(Boolean));
     data.forEach(function(w) {
       if (currentIds.has(w._id)) return;
@@ -397,17 +593,16 @@ async function pollNewWishes() {
       setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
       document.getElementById('count-num').textContent = wishes.length;
     });
-  } catch(e) {}
+  }).catch(function() {});
 }
 
-async function uploadMedia(file) {
+function uploadMedia(file) {
   var form = new FormData();
   form.append('file', file);
-  var data = await apiFetch('/api/upload', { method: 'POST', body: form });
-  return data.url;
+  return apiFetch('/api/upload', { method: 'POST', body: form }).then(function(data) { return data.url; });
 }
 
-async function deleteWish(id) {
+function deleteWish(id) {
   if (!id) return;
   if (!PUB_ID) {
     wishes = wishes.filter(function(w){ return w._id !== id; });
@@ -415,20 +610,19 @@ async function deleteWish(id) {
     showToast('Vœu supprimé');
     return;
   }
-  try {
-    await apiFetch('/api/wishes/' + id, { method: 'DELETE' });
+  apiFetch('/api/wishes/' + id, { method: 'DELETE' }).then(function() {
     wishes = wishes.filter(function(w){ return w._id !== id; });
     myWishIds = myWishIds.filter(function(i){ return i !== id; });
     localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds));
     buildWall(false);
     showToast('Vœu supprimé');
-  } catch(e) { showToast('Erreur — réessayez'); }
+  }).catch(function() { showToast('Erreur — réessayez'); });
 }
 
 /* ════════════════════════════════════════════════
    RENDER
 ═════════════════════════════════════════════════ */
-var TAPE_ROTS = [-2, 0, 1.5, -1, 2, -0.5, 1, -2.5];
+var STICKY_COLORS = ['sticky','sticky s2','sticky s3','sticky s4'];
 
 function formatDate(ts) {
   return new Date(ts || Date.now()).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
@@ -440,38 +634,23 @@ function escapeHtml(s) {
 
 function createNoteEl(w, isNew) {
   var note = document.createElement('div');
-  note.className = 'note' + (isNew ? ' is-new' : '');
+  var colorIdx = (w.color != null ? w.color : Math.floor(Math.random() * 4)) % 4;
+  var tapeClass = (colorIdx % 2 === 1) ? ' tape-l' : '';
+  note.className = 'pin ' + STICKY_COLORS[colorIdx] + tapeClass + (isNew ? ' is-new' : '');
   if (w._id) note.dataset.id = w._id;
-
-  var tapeRot   = TAPE_ROTS[Math.abs(Math.round((w.rot || 0) * 3)) % TAPE_ROTS.length];
-  var initial   = (w.name || 'A').trim().charAt(0).toUpperCase();
-  var nameLabel = w.name || 'Anonyme';
-  var isOwn     = w._id && myWishIds.indexOf(w._id) !== -1;
-
+  var isOwn = w._id && myWishIds.indexOf(w._id) !== -1;
+  var delBtn = isOwn ? '<button class="pin-del" onclick="deleteWish(\''+escapeHtml(w._id)+'\')">✕</button>' : '';
   var mediaHtml = '';
-  if ((w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl) {
-    mediaHtml = '<img class="note-photo" src="' + escapeHtml(w.photoUrl) + '" alt="" loading="lazy">';
-  } else if (w.mediaType === 'audio' && w.audioUrl) {
-    mediaHtml = '<audio class="note-audio" src="' + escapeHtml(w.audioUrl) + '" controls preload="none"></audio>';
+  if ((w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl) {
+    mediaHtml = '<img class="pin-photo" src="'+escapeHtml(w.photoUrl)+'" alt="" loading="lazy">';
+  } else if (w.mediaType==='audio' && w.audioUrl) {
+    mediaHtml = '<audio class="pin-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none"></audio>';
   }
-
-  var delBtn = isOwn
-    ? '<button class="note-del" onclick="deleteWish(\'' + escapeHtml(w._id) + '\')" title="Supprimer mon voeu">✕</button>'
-    : '';
-
   note.innerHTML =
-    '<div class="note-inner nc' + (w.color || 0) + '" style="transform:rotate(' + (w.rot || 0) + 'deg)">' +
-      '<div class="note-tape" style="--tape-rot:' + tapeRot + 'deg"></div>' +
-      delBtn + mediaHtml +
-      '<p class="note-text">' + escapeHtml(w.text) + '</p>' +
-      '<div class="note-footer">' +
-        '<div class="note-avatar">' + escapeHtml(initial) + '</div>' +
-        '<div class="note-meta">' +
-          '<div class="note-name">' + escapeHtml(nameLabel) + '</div>' +
-          '<div class="note-date">' + formatDate(w.ts) + '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+    delBtn +
+    (mediaHtml || '') +
+    '<div class="nm">'+escapeHtml(w.name||'Anonyme')+'</div>'+
+    '<div class="tx">'+escapeHtml(w.text)+'</div>';
   return note;
 }
 
@@ -488,13 +667,45 @@ function buildWall(animate) {
   document.getElementById('count-num').textContent = wishes.length;
   wishes.forEach(function(w){ container.appendChild(createNoteEl(w, false)); });
   if (animate) {
-    TweenMax.staggerFromTo(container.querySelectorAll('.note'), 0.55,
+    TweenMax.staggerFromTo(container.querySelectorAll('.pin'), 0.55,
       { opacity: 0, y: -36, scale: 0.88 },
       { opacity: 1, y: 0,   scale: 1, ease: Back.easeOut.config(1.3) },
       0.055
     );
   } else {
-    container.querySelectorAll('.note').forEach(function(n){ n.style.opacity = 1; });
+    container.querySelectorAll('.pin').forEach(function(n){ n.style.opacity = 1; });
+  }
+}
+
+/* ════════════════════════════════════════════════
+   ACCESS CODE GATE
+═════════════════════════════════════════════════ */
+function checkGate() {
+  var inp = document.getElementById('gate-input');
+  var err = document.getElementById('gate-err');
+  if (!inp.value.trim()) return;
+  if (inp.value.trim().toLowerCase() === String(_d.accessCode || '').toLowerCase()) {
+    document.getElementById('access-gate').style.display = 'none';
+    err.style.display = 'none';
+  } else {
+    inp.style.borderColor = '#e05574';
+    err.style.display = 'block';
+    setTimeout(function(){ inp.style.borderColor = ''; }, 1800);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   WISHES GATE — show / hide add button
+═════════════════════════════════════════════════ */
+function setWishesEnabled(enabled) {
+  var addBtn = document.getElementById('add-btn');
+  var closedBanner = document.getElementById('wishes-closed');
+  if (enabled) {
+    addBtn.classList.remove('hidden');
+    closedBanner.style.display = 'none';
+  } else {
+    addBtn.classList.add('hidden');
+    closedBanner.style.display = 'block';
   }
 }
 
@@ -546,11 +757,10 @@ function handlePhotoSelect(e) {
   if (file) processPhotoFile(file);
 }
 
-async function processPhotoFile(file) {
+function processPhotoFile(file) {
   if (file.size > 10 * 1024 * 1024) { showToast('Fichier trop grand (max 10 Mo)'); return; }
   var isGif = file.type === 'image/gif';
 
-  // Immediate local preview
   var reader = new FileReader();
   reader.onload = function(ev){ document.getElementById('photo-img').src = ev.target.result; };
   reader.readAsDataURL(file);
@@ -564,17 +774,16 @@ async function processPhotoFile(file) {
 
   document.getElementById('photo-zone').style.display = 'none';
   document.getElementById('photo-loading').classList.add('show');
-  try {
-    var url = await uploadMedia(file);
+  uploadMedia(file).then(function(url) {
     activeMedia = { type: isGif ? 'gif' : 'photo', url: url };
     document.getElementById('photo-img').src = url;
     document.getElementById('photo-preview').classList.add('show');
-  } catch(e) {
+  }).catch(function() {
     showToast("Échec de l'envoi — réessayez");
     document.getElementById('photo-zone').style.display = '';
-  } finally {
+  }).finally(function() {
     document.getElementById('photo-loading').classList.remove('show');
-  }
+  });
 }
 
 /* ════════════════════════════════════════════════
@@ -588,9 +797,8 @@ function toggleRecording() {
   }
 }
 
-async function startRecording() {
-  try {
-    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
     audioChunks   = [];
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder._stream = stream;
@@ -607,9 +815,9 @@ async function startRecording() {
       var s = String(recSecs % 60).padStart(2, '0');
       document.getElementById('rec-status').textContent = 'Enregistrement… ' + m + ':' + s;
     }, 1000);
-  } catch(e) {
+  }).catch(function() {
     showToast('Microphone inaccessible');
-  }
+  });
 }
 
 function stopRecording(upload) {
@@ -619,7 +827,7 @@ function stopRecording(upload) {
   document.getElementById('rec-status').textContent = 'Appuyez pour enregistrer';
   if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
 
-  mediaRecorder.onstop = async function() {
+  mediaRecorder.onstop = function() {
     if (mediaRecorder._stream) mediaRecorder._stream.getTracks().forEach(function(t){ t.stop(); });
     if (!upload || !audioChunks.length) return;
 
@@ -632,16 +840,15 @@ function stopRecording(upload) {
     if (!API_BASE) return;
 
     document.getElementById('audio-loading').classList.add('show');
-    try {
-      var file = new File([blob], 'audio.webm', { type: 'audio/webm' });
-      var url  = await uploadMedia(file);
+    var file = new File([blob], 'audio.webm', { type: 'audio/webm' });
+    uploadMedia(file).then(function(url) {
       activeMedia = { type: 'audio', url: url };
       document.getElementById('audio-player').src = url;
-    } catch(e) {
+    }).catch(function() {
       showToast("Échec de l'envoi audio");
-    } finally {
+    }).finally(function() {
       document.getElementById('audio-loading').classList.remove('show');
-    }
+    });
   };
   mediaRecorder.stop();
 }
@@ -660,7 +867,7 @@ function clearMedia() {
 /* ════════════════════════════════════════════════
    SUBMIT
 ═════════════════════════════════════════════════ */
-async function submitWish() {
+function submitWish() {
   if (isSubmitting) return;
   var text   = document.getElementById('wish-input').value.trim();
   var author = document.getElementById('wish-author').value.trim();
@@ -688,56 +895,91 @@ async function submitWish() {
   isSubmitting = true;
   document.getElementById('submit-btn').disabled = true;
 
+  var afterSubmit = function() {
+    isSubmitting = false;
+    document.getElementById('submit-btn').disabled = false;
+
+    wishes.unshift(w);
+    closeSheet();
+
+    document.getElementById('wish-input').value  = '';
+    document.getElementById('wish-author').value = '';
+    clearMedia();
+    switchTab('none');
+
+    var container = document.getElementById('notes-container');
+    document.getElementById('count-num').textContent  = wishes.length;
+    document.getElementById('empty-state').style.display = 'none';
+
+    var noteEl = createNoteEl(w, true);
+    noteEl.style.opacity = '0';
+    container.insertBefore(noteEl, container.firstChild);
+    TweenMax.fromTo(noteEl, 0.65,
+      { opacity: 0, y: -50, scale: 0.75 },
+      { opacity: 1, y: 0,   scale: 1, ease: Back.easeOut.config(1.6) }
+    );
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
+    showToast('Vœu ajouté ✦');
+
+    try { window.parent.postMessage({ type: 'WW_WISH_ADDED', wish: w }, '*'); } catch(e) {}
+
+    /* Show gift sheet if cagnotte is configured on this wall */
+    var cag = _d.cagnotte || _d.jarConfig || {};
+    if (cag && (cag.name || cag.goal)) {
+      giftState.wishId    = w._id || null;
+      giftState.guestName = (w.name && w.name !== 'Anonyme') ? w.name : '';
+      giftState.gave      = false;
+      giftState.paid      = 0;
+      giftState.amt       = null;
+      /* Reset UI state */
+      document.querySelectorAll('.gamt-chip').forEach(function(c) { c.classList.remove('active'); });
+      var gpBtn = document.getElementById('gift-pay-btn');
+      gpBtn.textContent   = 'Choisir un montant';
+      gpBtn.disabled      = true;
+      gpBtn.style.opacity = '.5';
+      gpBtn.style.cursor  = 'not-allowed';
+      document.getElementById('gift-bar-pre').style.display = 'none';
+      document.getElementById('gift-err').style.display     = 'none';
+      setTimeout(showGiftSheet, 700);
+    }
+  };
+
   if (PUB_ID && API_BASE) {
-    try {
-      var result = await apiFetch('/api/wishes/' + PUB_ID, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          firstName: w.name,
-          message:   w.text,
-          color:     w.color,
-          rot:       w.rot,
-          mediaType: w.mediaType,
-          photoUrl:  w.photoUrl,
-          audioUrl:  w.audioUrl,
-        }),
-      });
+    apiFetch('/api/wishes/' + PUB_ID, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        firstName: w.name,
+        message:   w.text,
+        color:     w.color,
+        rot:       w.rot,
+        mediaType: w.mediaType,
+        photoUrl:  w.photoUrl,
+        audioUrl:  w.audioUrl,
+      }),
+    }).then(function(result) {
       w._id = result.id;
       if (w._id) {
         myWishIds.push(w._id);
         localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds));
       }
-    } catch(e) { /* continue with local display */ }
+      afterSubmit();
+    }).catch(function(err) {
+      isSubmitting = false;
+      document.getElementById('submit-btn').disabled = false;
+      if (err && err.status === 402) {
+        showToast(err.code === 'FREE_LIMIT_REACHED'
+          ? '5 vœux gratuits atteints — le créateur doit activer le mur complet.'
+          : 'Photos & médias disponibles sur les murs activés.');
+      } else if (err && err.status === 403) {
+        showToast(err.message || 'Les vœux sont temporairement fermés.');
+        setWishesEnabled(false);
+      } else { afterSubmit(); }
+    });
+  } else {
+    afterSubmit();
   }
-
-  isSubmitting = false;
-  document.getElementById('submit-btn').disabled = false;
-
-  wishes.unshift(w);
-  closeSheet();
-
-  document.getElementById('wish-input').value  = '';
-  document.getElementById('wish-author').value = '';
-  clearMedia();
-  switchTab('none');
-
-  var container = document.getElementById('notes-container');
-  document.getElementById('count-num').textContent  = wishes.length;
-  document.getElementById('empty-state').style.display = 'none';
-
-  var noteEl = createNoteEl(w, true);
-  noteEl.style.opacity = '0';
-  container.insertBefore(noteEl, container.firstChild);
-  TweenMax.fromTo(noteEl, 0.65,
-    { opacity: 0, y: -50, scale: 0.75, rotation: w.rot * 2 },
-    { opacity: 1, y: 0,   scale: 1,    rotation: 0, ease: Back.easeOut.config(1.6) }
-  );
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
-  showToast('Vœu ajouté ✦');
-
-  try { window.parent.postMessage({ type: 'WW_WISH_ADDED', wish: w }, '*'); } catch(e) {}
 }
 
 /* ════════════════════════════════════════════════
@@ -751,21 +993,251 @@ function showToast(msg) {
 }
 
 /* ════════════════════════════════════════════════
-   INIT
+   GIFT / CAGNOTTE
+═════════════════════════════════════════════════ */
+var giftState = { amt: null, gave: false, paid: 0, wishId: null, guestName: '' };
+var GIFT_DEFAULT_AMTS = [2000, 5000, 10000, 20000];
+
+function fmtNum(n) { return Number(n).toLocaleString('fr-FR'); }
+
+function initCagnotteStrip() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || !cag.enabled) return;
+  document.getElementById('cagnotte-strip').style.display = '';
+  document.getElementById('cag-icon').textContent = cag.emoji || '🎁';
+  document.getElementById('cag-name').textContent = cag.name || 'Cadeau commun';
+  var col = cag.collected || 0, goal = cag.goal || 0, cnt = cag.contributors || 0;
+  var pct = goal > 0 ? Math.min(100, Math.round((col / goal) * 100)) : 0;
+  document.getElementById('cag-stats').textContent =
+    (goal > 0 ? fmtNum(col) + ' / ' + fmtNum(goal) + ' FCFA' : fmtNum(col) + ' FCFA') +
+    (cnt > 0 ? ' · ' + cnt + ' participant' + (cnt !== 1 ? 's' : '') : '');
+  document.getElementById('cag-pct').textContent = pct + '%';
+  document.getElementById('cag-fill').style.width = pct + '%';
+}
+
+function initGiftSheet() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || (!cag.name && !cag.goal)) return;
+
+  var name = (cag.emoji || '🎁') + ' ' + (cag.name || 'Cadeau commun');
+  document.getElementById('gift-sheet-name').textContent = name;
+  document.getElementById('gift-sheet-desc').textContent =
+    'Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';
+
+  var collected = cag.collected || 0;
+  var goal      = cag.goal || 0;
+  document.getElementById('gift-collected').textContent = fmtNum(collected);
+  document.getElementById('gift-goal-lbl').textContent  = goal > 0 ? 'sur ' + fmtNum(goal) : '';
+  var pct = goal > 0 ? Math.min(100, Math.round((collected / goal) * 100)) : 0;
+  document.getElementById('gift-bar-fill').style.width = pct + '%';
+  document.getElementById('gift-pct').textContent       = pct + '%';
+  document.getElementById('gift-contributors').textContent =
+    (cag.contributors || 0) + ' participant' + ((cag.contributors || 0) !== 1 ? 's' : '');
+
+  var grid = document.getElementById('gift-amt-grid');
+  grid.innerHTML = '';
+  var amts = (cag.amountChoices && cag.amountChoices.length) ? cag.amountChoices : GIFT_DEFAULT_AMTS;
+  amts.forEach(function(a) {
+    var chip = document.createElement('button');
+    chip.className = 'gamt-chip';
+    chip.dataset.a = a;
+    chip.innerHTML = '<div class="gav">' + (a >= 1000 ? (a / 1000) + 'k' : a) + '</div><div class="gac">FCFA</div>';
+    chip.onclick = function() { giftPickAmt(a, chip); };
+    grid.appendChild(chip);
+  });
+}
+
+function showGiftSheet() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || (!cag.name && !cag.goal)) return;
+  var el = document.getElementById('gift-overlay');
+  el.style.display = 'flex';
+  setTimeout(function() { el.classList.add('open'); }, 10);
+}
+
+function hideGiftSheet() {
+  var el = document.getElementById('gift-overlay');
+  el.classList.remove('open');
+  setTimeout(function() { el.style.display = 'none'; }, 400);
+}
+
+function handleGiftBgClick(e) {
+  if (e.target === document.getElementById('gift-overlay')) skipGift();
+}
+
+function skipGift() {
+  hideGiftSheet();
+  showThanksOverlay(false);
+}
+
+function giftPickAmt(a, chip) {
+  giftState.amt = (giftState.amt === a) ? null : a;
+  document.querySelectorAll('.gamt-chip').forEach(function(c) { c.classList.remove('active'); });
+  var btn = document.getElementById('gift-pay-btn');
+  var pre = document.getElementById('gift-bar-pre');
+  var cag = _d.cagnotte || _d.jarConfig || {};
+
+  if (giftState.amt !== null) {
+    chip.classList.add('active');
+    btn.textContent   = 'Participer · ' + fmtNum(giftState.amt) + ' FCFA';
+    btn.disabled      = false;
+    btn.style.opacity = '1';
+    btn.style.cursor  = 'pointer';
+    var p0 = cag.goal > 0 ? Math.min(100, Math.round(((cag.collected || 0) / cag.goal) * 100)) : 0;
+    var p1 = cag.goal > 0 ? Math.min(100, Math.round(((cag.collected || 0) + giftState.amt) / cag.goal * 100)) : 0;
+    pre.style.display = 'block';
+    pre.style.left    = p0 + '%';
+    pre.style.width   = (p1 - p0) + '%';
+    document.getElementById('gift-pct').textContent = p1 + '%';
+  } else {
+    var p0 = cag.goal > 0 ? Math.min(100, Math.round(((cag.collected || 0) / cag.goal) * 100)) : 0;
+    btn.textContent   = 'Choisir un montant';
+    btn.disabled      = true;
+    btn.style.opacity = '.5';
+    btn.style.cursor  = 'not-allowed';
+    pre.style.display = 'none';
+    document.getElementById('gift-pct').textContent = p0 + '%';
+  }
+}
+
+function giftCustomAmt() {
+  var v = prompt('Montant en FCFA (ex : 7500) :');
+  var n = parseInt(v, 10);
+  if (isNaN(n) || n <= 0) return;
+  document.querySelectorAll('.gamt-chip[data-custom]').forEach(function(c) { c.remove(); });
+  var chip = document.createElement('button');
+  chip.className = 'gamt-chip';
+  chip.dataset.a = n;
+  chip.dataset.custom = '1';
+  chip.innerHTML = '<div class="gav">' + (n >= 1000 ? (n / 1000) + 'k' : n) + '</div><div class="gac">FCFA</div>';
+  chip.onclick = function() { giftPickAmt(n, chip); };
+  document.getElementById('gift-amt-grid').appendChild(chip);
+  giftPickAmt(n, chip);
+}
+
+function giftPay() {
+  if (!giftState.amt) return;
+  var errEl = document.getElementById('gift-err');
+  errEl.style.display = 'none';
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  var key = cag.kkiapayKey || _d.kkiapayKey || '';
+  if (!key) {
+    errEl.textContent = 'Paiement non configuré. Contacte l\'organisateur.';
+    errEl.style.display = 'block';
+    return;
+  }
+  var launch = function() {
+    openKkiapayWidget({
+      amount:  giftState.amt,
+      api_key: key,
+      sandbox: (_d.kkiapaySandbox !== false),
+      name:    giftState.guestName || 'Anonyme',
+      callback: window.location.href,
+    });
+    addSuccessListener(function(resp) {
+      var txId = resp.transactionId || resp.transaction_id;
+      var afterPay = function() {
+        giftState.gave = true;
+        hideGiftSheet();
+        showThanksOverlay(true);
+      };
+      if (txId) {
+        fetch('/api/contributions/verify', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transactionId:   txId,
+            publicationId:   PUB_ID,
+            contributorName: giftState.guestName || '',
+            isAnonymous:     !giftState.guestName,
+            wishId:          giftState.wishId,
+          }),
+        }).then(function(r) { return r.json(); }).then(function(d) {
+          giftState.paid = (d.contribution && d.contribution.amount) ? d.contribution.amount : giftState.amt;
+        }).catch(function() {
+          giftState.paid = giftState.amt;
+        }).finally(afterPay);
+      } else {
+        giftState.paid = giftState.amt;
+        afterPay();
+      }
+    });
+  };
+  if (typeof openKkiapayWidget === 'undefined') {
+    var sc = document.createElement('script');
+    sc.src = 'https://cdn.kkiapay.me/k.js';
+    sc.onload = launch;
+    sc.onerror = function() {
+      errEl.textContent = 'Impossible de charger le module de paiement.';
+      errEl.style.display = 'block';
+    };
+    document.head.appendChild(sc);
+  } else {
+    launch();
+  }
+}
+
+function showThanksOverlay(gave) {
+  var overlay = document.getElementById('thanks-overlay');
+  if (gave) {
+    document.getElementById('thanks-icon').textContent     = '🎁';
+    document.getElementById('thanks-title').textContent    = 'Merci pour ta participation';
+    document.getElementById('thanks-msg').textContent      = 'Grâce à toi le cadeau se rapproche. On garde ça secret jusqu\'au grand jour ! 🤫';
+    document.getElementById('thanks-receipt').style.display = 'block';
+    document.getElementById('thanks-amt').innerHTML =
+      fmtNum(giftState.paid || giftState.amt || 0) + ' <span style="font-size:14px;font-family:\'Inter\',sans-serif;font-style:normal;">FCFA</span>';
+  } else {
+    document.getElementById('thanks-icon').textContent     = '💕';
+    document.getElementById('thanks-title').textContent    = 'Merci pour ton joli mot';
+    document.getElementById('thanks-msg').textContent      = _d.requireModeration
+      ? 'Ton vœu sera visible après validation par l\'organisateur.'
+      : 'Ton vœu a bien été reçu. Reviens le jour J pour voir le mur complet !';
+    document.getElementById('thanks-receipt').style.display = 'none';
+  }
+  overlay.style.display = 'flex';
+  setTimeout(function() { overlay.classList.add('open'); }, 10);
+  setTimeout(closeThanks, 5000);
+}
+
+function closeThanks() {
+  var overlay = document.getElementById('thanks-overlay');
+  overlay.classList.remove('open');
+  setTimeout(function() { overlay.style.display = 'none'; }, 300);
+}
+
+/* ════════════════════════════════════════════════
+   INIT — apply server config
 ═════════════════════════════════════════════════ */
 (function init() {
   var d = window.__WW_DATA__ || {};
-  var tName = d.titleName || d.title;
-  if (tName)     document.querySelector('[data-node-name="titleName"]').textContent = tName;
-  if (d.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent  = d.subtitle;
+
+  /* Access code gate */
+  if (d.isPrivate && d.accessCode) document.getElementById('access-gate').style.display = 'flex';
+
+  /* Text nodes */
+  if (d.eyebrow)   document.querySelector('[data-node="eyebrow"]').textContent   = d.eyebrow;
+  if (d.titleName) document.querySelector('[data-node="titleName"]').textContent = d.titleName;
+  if (d.subtitle)  document.querySelector('[data-node="subtitle"]').textContent  = d.subtitle;
+
+  /* Wishes gate — controlled by server cagnotteConfig.wishesEnabled */
+  setWishesEnabled(d.wishesEnabled !== false);
+
+  /* Cagnotte strip — shown if cagnotte is enabled */
+  initCagnotteStrip();
+
+  /* Gift sheet — initialize if jarConfig present */
+  initGiftSheet();
+
   loadWishes();
 })();
 
 /* ════════════════════════════════════════════════
-   LIVE EDITOR (postMessage)
+   LIVE EDITOR (postMessage from Editor.jsx)
 ═════════════════════════════════════════════════ */
 window.addEventListener('message', function(e) {
   if (!e.data) return;
+
+  /* New wish injected by editor preview */
   if (e.data.type === 'WW_WISH_NEW') {
     var w = e.data.wish;
     if (!w || !w.text) return;
@@ -782,12 +1254,22 @@ window.addEventListener('message', function(e) {
     setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
     return;
   }
-  if (e.data.type !== 'WW_UPDATE') return;
-  var data = e.data.data;
-  if (!data) return;
-  var tName = data.titleName || data.title;
-  if (tName)      document.querySelector('[data-node-name="titleName"]').textContent = tName;
-  if (data.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent  = data.subtitle;
+
+  /* Live data update from Editor.jsx */
+  if (e.data.type === 'WW_UPDATE') {
+    var data = e.data.data;
+    if (!data) return;
+    if (data.eyebrow   !== undefined) document.querySelector('[data-node="eyebrow"]').textContent   = data.eyebrow   || '✦ Mur de vœux';
+    if (data.titleName !== undefined) document.querySelector('[data-node="titleName"]').textContent = data.titleName || 'Prénom';
+    if (data.subtitle  !== undefined) document.querySelector('[data-node="subtitle"]').textContent  = data.subtitle  || '';
+    return;
+  }
+
+  /* Wishes gate toggle from Editor.jsx */
+  if (e.data.type === 'WW_CONFIG') {
+    if (e.data.wishesEnabled !== undefined) setWishesEnabled(e.data.wishesEnabled);
+    return;
+  }
 });
 
 /* ════════════════════════════════════════════════
