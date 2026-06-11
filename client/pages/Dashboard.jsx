@@ -2,21 +2,22 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Search, X, Trash2, Edit2, ExternalLink, CircleOff, Eye, QrCode, Plus,
-  ArrowRight, Sparkles, Copy, Star, MonitorPlay, Zap,
+  ArrowRight, Sparkles, Copy, Star, Zap, Layers,
 } from 'lucide-react';
 import {
   getPublications, deletePublication, duplicatePublication, unpublishPublication,
-  getTemplates, createPublication, updatePublication,
+  getTemplates, createPublication, updatePublication, getPremadePublications,
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import QRCodeModal from '../components/QRCodeModal';
-import { TemplateCard } from './TemplatesGallery';
+import { TemplateCard, PremadeCard } from './TemplatesGallery';
 import styles from './Dashboard.module.css';
 
 const TEMPLATE_EMOJIS = {
   birthday: '🎂', special: '✨', 'collective-family': '💝',
   'collective-pro': '🥂', forever: '💍', sanctuary: '🕊️',
   'notre-film': '🎬', 'wall-of-wishes': '🌟', 'wall-of-wishes-3d': '🎊',
+  'wall-of-wishes-modern': '💬', 'wall-of-wishes-space': '🚀',
 };
 const TEMPLATE_COLORS = {
   birthday: 'linear-gradient(135deg,#FFB3C1,#FF8DAA)',
@@ -28,56 +29,27 @@ const TEMPLATE_COLORS = {
   'notre-film': 'linear-gradient(135deg,#C2D5F0,#8FB0D8)',
   'wall-of-wishes': 'linear-gradient(135deg,#FFB3C1,#E11D48)',
   'wall-of-wishes-3d': 'linear-gradient(135deg,#FFD7C2,#FF9F7A)',
+  'wall-of-wishes-modern': 'linear-gradient(135deg,#ccc0f5,#e8b0d8)',
+  'wall-of-wishes-space': 'linear-gradient(135deg,#ff8060,#d83070)',
 };
-
-const QUICK_TONES = {
-  rose:   { bg: '#FFE0E6', ring: '#FFB3C1', ink: '#9C1632' },
-  lilac:  { bg: '#E5D9F5', ring: '#C8B3F0', ink: '#5C3A9D' },
-  mint:   { bg: '#D4F1E5', ring: '#A5DEC8', ink: '#1F6E55' },
-  butter: { bg: '#FFE7AD', ring: '#F5CC6E', ink: '#8A5800' },
-};
-
-function TopbarHome({ user, onCredits }) {
-  return (
-    <header className={styles.homeTopbar}>
-      <button className={styles.homeTopbarBell} title="Notifications">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-        <span className={styles.homeTopbarDot} />
-      </button>
-      <button className={styles.homeTopbarCredits} onClick={onCredits}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-          <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
-        </svg>
-        <span>{user?.credits ?? 0}</span>
-        <span style={{ fontSize: 16 }}>💎</span>
-      </button>
-    </header>
-  );
-}
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [pubs, setPubs]         = useState([]);
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [dupModal, setDupModal] = useState(null);
-  const [dupTitle, setDupTitle] = useState('');
-  const [dupSlug, setDupSlug]   = useState('');
-  const [dupError, setDupError] = useState('');
+  const [pubs, setPubs]             = useState([]);
+  const [templates, setTemplates]   = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [dupModal, setDupModal]     = useState(null);
+  const [dupTitle, setDupTitle]     = useState('');
+  const [dupSlug, setDupSlug]       = useState('');
+  const [dupError, setDupError]     = useState('');
   const [dupLoading, setDupLoading] = useState(false);
   const [qrModalPub, setQrModalPub] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [creating, setCreating] = useState('');
+  const [creating, setCreating]     = useState('');
+  const [premades, setPremades]     = useState([]);
   const isSuperAdmin = user?.role === 'super_admin';
 
-  /* ── Name modal (create from template) ── */
-  const [nameModal, setNameModal]     = useState(null); // templateName string
+  const [nameModal, setNameModal]     = useState(null);
   const [nameInput, setNameInput]     = useState('');
   const [nameError, setNameError]     = useState('');
   const [nameLoading, setNameLoading] = useState(false);
@@ -97,28 +69,43 @@ export default function Dashboard() {
     Promise.all([
       getPublications({ mine: 'true', limit: 8 }),
       getTemplates(),
-    ]).then(([pubRes, tplRes]) => {
+      getPremadePublications(),
+    ]).then(([pubRes, tplRes, premadeRes]) => {
       setPubs(pubRes.data || []);
       setTemplates((tplRes.data || []).slice(0, 4));
+      setPremades(premadeRes.data || []);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const handleCreateFromTemplate = (templateName) => {
     if (creating) return;
-    setNameModal(templateName);
-    setNameInput('');
-    setNameError('');
+    setNameModal({ type: 'template', data: { name: templateName } });
+    setNameInput(''); setNameError('');
     setTimeout(() => nameRef.current?.focus(), 80);
   };
 
-  const confirmCreateFromTemplate = async () => {
+  const handleUsePremade = (premade) => {
+    setNameModal({ type: 'premade', data: premade });
+    setNameInput(''); setNameError('');
+    setTimeout(() => nameRef.current?.focus(), 80);
+  };
+
+  const confirmCreate = async () => {
     const title = nameInput.trim();
     if (!title) { setNameError('Donne un nom à ta création 👆'); return; }
     setNameLoading(true); setNameError('');
     try {
-      const res = await createPublication({ templateName: nameModal, customName: `draft-${Date.now()}`, title });
+      let pub;
+      if (nameModal.type === 'premade') {
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) + '-' + Date.now();
+        const res = await duplicatePublication(nameModal.data._id, { title, customName: slug });
+        pub = res.data;
+      } else {
+        const res = await createPublication({ templateName: nameModal.data.name, customName: `draft-${Date.now()}`, title });
+        pub = res.data;
+      }
       setNameModal(null);
-      navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
+      navigate(`/ewish-admin/ewish/edit/${pub._id}`);
     } catch (e) { setNameError(e.response?.data?.error || 'Erreur'); }
     finally { setNameLoading(false); }
   };
@@ -164,71 +151,7 @@ export default function Dashboard() {
 
   return (
     <div className={styles.root}>
-      {/* ── Mobile top bar ── */}
-      <div className={styles.mobileTopBar}>
-        <div className={styles.mobileUserRow}>
-          <div className={styles.mobileAvatar} style={{ background: '#FFE0E6', color: '#9C1632' }}>
-            {(displayName[0] || 'A').toUpperCase()}
-          </div>
-          <div>
-            <div className={styles.mobileGreeting}>{greeting},</div>
-            <div className={styles.mobileName}>{displayName || 'Utilisateur'}</div>
-          </div>
-        </div>
-        <div className={styles.mobileTopActions}>
-          <button className={styles.mobileCreditsBtn} onClick={() => navigate('/ewish-admin/credits')}>
-            <span>💎</span> {user?.credits ?? 0}
-          </button>
-        </div>
-      </div>
-
-      {/* ── Mobile hero ── */}
-      <div className={styles.mobileHero}>
-        <h1 className={styles.mobileHeroTitle}>
-          Qui fait-on sourire<br/>aujourd'hui ? ✨
-        </h1>
-        <div className={styles.mobileOccasions}>
-          {[
-            { e: '🎂', t: 'Anniversaire', c: '#FFE0E6', ink: '#9C1632' },
-            { e: '💍', t: 'Mariage',       c: '#EADEF8', ink: '#5C3A9D' },
-            { e: '🥂', t: 'Pot de départ', c: '#D4F1E5', ink: '#1F6E55' },
-            { e: '✨', t: 'Autre',          c: '#FFF0D6', ink: '#8A5800' },
-          ].map((q, i) => (
-            <button
-              key={i}
-              className={styles.mobileOccasionChip}
-              style={{ background: q.c }}
-              onClick={() => navigate('/ewish-admin/ewish/new')}
-            >
-              <span className={styles.mobileOccasionEmoji}>{q.e}</span>
-              <span className={styles.mobileOccasionLabel} style={{ color: q.ink }}>{q.t}</span>
-            </button>
-          ))}
-        </div>
-        <button className={styles.mobileCreateCta} onClick={() => navigate('/ewish-admin/ewish/new')}>
-          <span className={styles.mobileCtaIcon}><Plus size={22}/></span>
-          <div>
-            <div className={styles.mobileCtaTitle}>Créer en 3 minutes</div>
-            <div className={styles.mobileCtaSub}>3 questions, on s'occupe du reste</div>
-          </div>
-          <ArrowRight size={18} style={{ flexShrink: 0 }}/>
-        </button>
-      </div>
-
-      {/* Preview Modal */}
-      {previewUrl && (
-        <div className={styles.modalOverlay} onClick={() => setPreviewUrl(null)}>
-          <div className={styles.previewModalBox} onClick={e => e.stopPropagation()}>
-            <div className={styles.previewModalHeader}>
-              <span>Aperçu</span>
-              <button onClick={() => setPreviewUrl(null)} className={styles.previewClose}><X size={18}/></button>
-            </div>
-            <iframe src={previewUrl} className={styles.previewIframe} title="Aperçu" />
-          </div>
-        </div>
-      )}
-
-      {/* Dup Modal */}
+      {/* ── Modals ── */}
       {dupModal && (
         <div className={styles.modalOverlay} onClick={closeDupModal}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -263,7 +186,6 @@ export default function Dashboard() {
         <QRCodeModal url={`${VITE_API}/s/${qrModalPub.shortCode}`} onClose={() => setQrModalPub(null)} />
       )}
 
-      {/* Name modal */}
       {nameModal && (
         <div className={styles.modalOverlay} onClick={() => setNameModal(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -279,7 +201,7 @@ export default function Dashboard() {
                 className={styles.modalInput}
                 value={nameInput}
                 onChange={e => { setNameInput(e.target.value); setNameError(''); }}
-                onKeyDown={e => e.key === 'Enter' && !nameLoading && confirmCreateFromTemplate()}
+                onKeyDown={e => e.key === 'Enter' && !nameLoading && confirmCreate()}
                 placeholder="ex : Anniversaire de Sarah, Pot de départ Alex…"
                 autoFocus
               />
@@ -287,7 +209,7 @@ export default function Dashboard() {
             {nameError && <p className={styles.modalError}>{nameError}</p>}
             <div className={styles.modalActions}>
               <button className={styles.modalCancel} onClick={() => setNameModal(null)}>Annuler</button>
-              <button className={styles.modalConfirm} onClick={confirmCreateFromTemplate} disabled={nameLoading}>
+              <button className={styles.modalConfirm} onClick={confirmCreate} disabled={nameLoading}>
                 {nameLoading ? '⏳ Création…' : 'Commencer →'}
               </button>
             </div>
@@ -295,77 +217,116 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Desktop topbar (bell + credits) ── */}
-      <TopbarHome user={user} onCredits={() => navigate('/ewish-admin/credits')} />
+      {/* ── Desktop topbar ── */}
+      <header className={styles.homeTopbar}>
+        <button className={styles.homeTopbarBell} title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span className={styles.homeTopbarDot} />
+        </button>
+        <button className={styles.homeTopbarCredits} onClick={() => navigate('/ewish-admin/credits')}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span>{user?.credits ?? 0}</span>
+        </button>
+      </header>
 
-      {/* ── Hero greeting ── */}
+      {/* ── Mobile top bar ── */}
+      <div className={styles.mobileTopBar}>
+        <div className={styles.mobileUserRow}>
+          <div className={styles.mobileAvatar} style={{ background: '#FFE0E6', color: '#9C1632' }}>
+            {(displayName[0] || 'A').toUpperCase()}
+          </div>
+          <div>
+            <div className={styles.mobileGreeting}>{greeting},</div>
+            <div className={styles.mobileName}>{displayName || 'Utilisateur'}</div>
+          </div>
+        </div>
+        <button className={styles.mobileCreditsBtn} onClick={() => navigate('/ewish-admin/credits')}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          {user?.credits ?? 0}
+        </button>
+      </div>
+
+      {/* ── Desktop hero ── */}
       <div className={styles.hero}>
         <div className={styles.heroGreeting}>
           <span className={styles.heroHand}>{greeting},</span>
           {displayName && <span className={styles.heroName}>{displayName}</span>}
-          <span className={styles.heroSparkle}>✨</span>
         </div>
-        <p className={styles.heroSub}>
-          Qui vas-tu faire sourire aujourd'hui ?
-          Choisis un moment, on s'occupe du reste — promis, ça prend 3 minutes.
-        </p>
+        <p className={styles.heroSub}>Qui vas-tu faire sourire aujourd'hui ?</p>
 
-        {/* Quick actions */}
-        <div className={styles.quickGrid}>
-          {[
-            { color: 'rose',   emoji: '🎂', title: 'Un anniversaire',  sub: 'à fêter cette semaine',      to: '/ewish-admin/ewish/new' },
-            { color: 'lilac',  emoji: '💍', title: 'Un mariage',        sub: 'avec faire-part + RSVP',     to: '/ewish-admin/templates' },
-            { color: 'mint',   emoji: '🥂', title: 'Un pot de départ',  sub: 'le service y mettra du sien', to: '/ewish-admin/templates' },
-            { color: 'butter', emoji: '✨', title: 'Autre chose',        sub: 'explorer tous les templates', to: '/ewish-admin/templates' },
-          ].map((qa, i) => {
-            const t = QUICK_TONES[qa.color];
-            return (
-              <button
-                key={i}
-                className={styles.quickAction}
-                style={{ background: t.bg }}
-                onClick={() => navigate(qa.to)}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = t.ring; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 14px 28px ${t.bg}`; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-              >
-                <div className={styles.quickEmoji}>{qa.emoji}</div>
-                <div className={styles.quickTitle} style={{ color: t.ink }}>{qa.title}</div>
-                <div className={styles.quickSub} style={{ color: t.ink }}>{qa.sub}</div>
-                <ArrowRight size={15} style={{ position: 'absolute', right: 16, top: 18, color: t.ink, opacity: .55 }} />
-              </button>
-            );
-          })}
+        {/* Two pillars */}
+        <div className={styles.pillarsGrid}>
+          <button className={`${styles.pillar} ${styles.pillarWish}`} onClick={() => navigate('/ewish-admin/templates?mode=wish')}>
+            <div className={styles.pillarArt}>
+              <span className={styles.pillarEmoji}>🎂</span>
+            </div>
+            <div className={styles.pillarBody}>
+              <div className={styles.pillarKicker}><Sparkles size={11}/> VŒU ANIMÉ</div>
+              <div className={styles.pillarTitle}>Une carte qui prend vie</div>
+              <div className={styles.pillarSub}>Choisissez un modèle, personnalisez, partagez.</div>
+            </div>
+            <span className={styles.pillarGo}><ArrowRight size={16}/></span>
+          </button>
+
+          <button className={`${styles.pillar} ${styles.pillarWall}`} onClick={() => navigate('/ewish-admin/templates?mode=wall')}>
+            <div className={styles.pillarArt} style={{ background: 'linear-gradient(135deg,#E5D9F5,#C5A9E8)' }}>
+              <span className={styles.pillarEmoji}>🌟</span>
+            </div>
+            <div className={styles.pillarBody}>
+              <div className={styles.pillarKicker} style={{ color: 'var(--mk-lilac)' }}><Layers size={11}/> MUR DE VŒUX</div>
+              <div className={styles.pillarTitle}>Un mur que chacun remplit</div>
+              <div className={styles.pillarSub}>Chacun dépose son mot · gratuit jusqu'à 10 vœux.</div>
+            </div>
+            <span className={`${styles.pillarGo} ${styles.pillarGoLilac}`}><ArrowRight size={16}/></span>
+          </button>
         </div>
       </div>
 
-      {/* ── Mobile PRÊT-À-OFFRIR section ── */}
-      {templates.length > 0 && (
-        <div className={styles.mobilePretSection}>
-          <div className={styles.mobilePretHead}>
-            <div className={styles.mobilePretTitle}>
-              <Zap size={12} style={{ color: 'var(--mk-rose)' }} />
-              PRÊT-À-OFFRIR · 1MIN
-            </div>
-            <Link to="/ewish-admin/templates" className={styles.mobileSectionLink}>Tout voir →</Link>
-          </div>
-          <div className={styles.mobilePretRow}>
-            {templates.map(tpl => (
-              <div key={tpl._id} className={styles.mobilePretCardWrap}>
-                <TemplateCard
-                  tpl={tpl}
-                  creating={creating === tpl.name}
-                  onUse={e => { e.stopPropagation(); handleCreateFromTemplate(tpl.name); }}
-                  compact={true}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ── Mobile hero ── */}
+      <div className={styles.mobileHero}>
+        <div className={styles.mobileHand}>Qui fait-on sourire ?</div>
+        <h1 className={styles.mobileHeroTitle}>Créez un moment<br/>inoubliable</h1>
 
-      {/* ── Mobile creation rows ── */}
+        <div className={styles.mobilePillars}>
+          <button className={`${styles.mobilePillar} ${styles.mobilePillarWish}`} onClick={() => navigate('/ewish-admin/templates?mode=wish')}>
+            <div className={styles.mobilePillarThumb}>
+              <span style={{ fontSize: 28, filter: 'drop-shadow(0 3px 8px rgba(0,0,0,.18))' }}>🎂</span>
+            </div>
+            <div className={styles.mobilePillarBody}>
+              <div className={styles.mobilePillarKicker}><Sparkles size={10}/> VŒU ANIMÉ</div>
+              <div className={styles.mobilePillarTitle}>Une carte qui prend vie</div>
+              <div className={styles.mobilePillarSub}>Choisis un modèle, personnalise, partage.</div>
+            </div>
+            <span className={styles.mobilePillarGo}><ArrowRight size={15}/></span>
+          </button>
+
+          <button className={`${styles.mobilePillar} ${styles.mobilePillarWall}`} onClick={() => navigate('/ewish-admin/templates?mode=wall')}>
+            <div className={styles.mobilePillarThumb} style={{ background: 'linear-gradient(135deg,#E5D9F5,#C5A9E8)' }}>
+              <span style={{ fontSize: 28, filter: 'drop-shadow(0 3px 8px rgba(0,0,0,.18))' }}>✦</span>
+            </div>
+            <div className={styles.mobilePillarBody}>
+              <div className={styles.mobilePillarKicker} style={{ color: 'var(--mk-lilac)' }}><Layers size={10}/> MUR DE VŒUX</div>
+              <div className={styles.mobilePillarTitle}>Un mur que chacun remplit</div>
+              <div className={styles.mobilePillarSub}>Chacun dépose son mot · gratuit jusqu'à 10 vœux.</div>
+            </div>
+            <span className={`${styles.mobilePillarGo} ${styles.mobilePillarGoLilac}`}><ArrowRight size={15}/></span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Mobile: mes créations ── */}
       <div className={styles.mobileSectionHead}>
-        <h2 className={styles.mobileSectionTitle}>Sur mon bureau</h2>
+        <div>
+          <div className={styles.eyebrow}>MES CRÉATIONS</div>
+          <h2 className={styles.mobileSectionTitle}>Sur mon bureau</h2>
+        </div>
         <Link to="/ewish-admin/ewish" className={styles.mobileSectionLink}>Tout voir →</Link>
       </div>
       {!loading && pubs.slice(0, 3).map(pub => {
@@ -374,11 +335,7 @@ export default function Dashboard() {
         const isDraft = !pub.published;
         const hasCagnotte = pub.cagnotte?.goal > 0;
         return (
-          <button
-            key={pub._id}
-            className={styles.mobileCreationRow}
-            onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}
-          >
+          <button key={pub._id} className={styles.mobileCreationRow} onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>
             <span className={styles.mobileRowThumb} style={{ background: bg }}>
               <span className={styles.mobileRowEmoji}>{emoji}</span>
             </span>
@@ -405,7 +362,66 @@ export default function Dashboard() {
         );
       })}
 
-      {/* ── Sur mon bureau ── */}
+      {/* ── Mobile: Prêt-à-offrir ── */}
+      {/* {premades.length > 0 && (
+        <div className={styles.mobilePretSection}>
+          <div className={styles.mobilePretHead}>
+            <div className={styles.mobilePretTitle}>
+              <Zap size={12} style={{ color: 'var(--mk-rose)' }} />
+              PRÊT-À-OFFRIR · 1MIN
+            </div>
+            <Link to="/ewish-admin/templates#premades" className={styles.mobileSectionLink}>Tout voir →</Link>
+          </div>
+          <h3 className={styles.mobilePretSubtitle}>Déjà tout prêt, change le prénom</h3>
+          <div className={styles.mobilePretRow}>
+            {premades.map(p => (
+              <div key={p._id} className={styles.mobilePretCardWrap}>
+                <PremadeCard premade={p} onUse={() => handleUsePremade(p)} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )} */}
+
+      {/* ── Mobile: Templates ── */}
+      {templates.length > 0 && (
+        <div className={styles.mobilePretSection}>
+          <div className={styles.mobilePretHead}>
+            <div className={styles.mobilePretTitle} style={{ color: 'var(--mk-lilac)' }}>POUR TOI</div>
+            <Link to="/ewish-admin/templates" className={styles.mobileSectionLink}>Tout voir →</Link>
+          </div>
+          <h3 className={styles.mobilePretSubtitle}>Si on essayait…</h3>
+          <div className={styles.mobilePretRow}>
+            {templates.map(tpl => (
+              <div key={tpl._id} className={styles.mobilePretCardWrap}>
+                <TemplateCard tpl={tpl} creating={creating === tpl.name} onUse={e => { e.stopPropagation(); handleCreateFromTemplate(tpl.name); }} compact={true} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Desktop: Prêt-à-offrir ── */}
+      {/* {premades.length > 0 && (
+        <section className={styles.section}>
+          <header className={styles.sectionHead}>
+            <div>
+              <div className={styles.eyebrow}><Zap size={10} style={{ marginRight: 4, verticalAlign: -1 }}/>PRÊT-À-OFFRIR · 1MIN</div>
+              <h2 className={styles.sectionTitle}>Déjà tout prêt, change le prénom</h2>
+            </div>
+            <Link to="/ewish-admin/templates#premades" className={styles.sectionAction}>
+              Tout voir <ArrowRight size={14}/>
+            </Link>
+          </header>
+          <div className={styles.tplGrid}>
+            {premades.map(p => (
+              <PremadeCard key={p._id} premade={p} onUse={() => handleUsePremade(p)} />
+            ))}
+          </div>
+        </section>
+      )} */}
+
+      {/* ── Desktop: Sur mon bureau ── */}
       <section className={styles.section}>
         <header className={styles.sectionHead}>
           <div>
@@ -428,14 +444,11 @@ export default function Dashboard() {
               const isDraft = !pub.published;
               const hasCagnotte = pub.cagnotte?.goal > 0;
               return (
-                <div
-                  key={pub._id}
-                  className={styles.pubCard}
+                <div key={pub._id} className={styles.pubCard}
                   onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--mk-sh-3)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--mk-sh-1)'; }}
                 >
-                  {/* Thumb */}
                   <div className={styles.pubThumb} style={{ background: bg }}>
                     <span className={styles.pubEmoji}>{emoji}</span>
                     <span className={`${styles.statusBadge} ${isDraft ? styles.statusDraft : styles.statusLive}`}>
@@ -443,13 +456,9 @@ export default function Dashboard() {
                       {isDraft ? 'BROUILLON' : 'EN LIGNE'}
                     </span>
                     {pub.published && pub.shortCode && (
-                      <button
-                        className={styles.qrBtn}
-                        onClick={e => { e.stopPropagation(); setQrModalPub(pub); }}
-                      ><QrCode size={13}/></button>
+                      <button className={styles.qrBtn} onClick={e => { e.stopPropagation(); setQrModalPub(pub); }}><QrCode size={13}/></button>
                     )}
                   </div>
-                  {/* Body */}
                   <div className={styles.pubBody}>
                     <h3 className={styles.pubTitle}>{pub.title || pub.data?.name || 'Sans titre'}</h3>
                     <div className={styles.pubMeta}>
@@ -467,13 +476,9 @@ export default function Dashboard() {
                         <div className={styles.cagnotteTrack}>
                           <div className={styles.cagnotteFill} style={{ width: Math.min(100, pub.cagnotte.collected / pub.cagnotte.goal * 100) + '%' }}/>
                         </div>
-                        <div style={{ fontSize: 10.5, color: 'var(--mk-ink-3)', marginTop: 4 }}>
-                          {pub.cagnotte.collected?.toLocaleString('fr-FR')} / {pub.cagnotte.goal?.toLocaleString('fr-FR')} FCFA
-                        </div>
                       </div>
                     )}
                   </div>
-                  {/* Actions */}
                   <div className={styles.pubActions} onClick={e => e.stopPropagation()}>
                     {pub.published && (
                       <a href={`${VITE_API}/site/${pub.templateName}/${pub.customName}`} target="_blank" rel="noreferrer" className={styles.actBtn} title="Voir en ligne">
@@ -485,31 +490,20 @@ export default function Dashboard() {
                         <Star size={13} fill={pub.isPremade ? "#E11D48" : "none"} color={pub.isPremade ? "#E11D48" : "currentColor"}/>
                       </button>
                     )}
-                    <button className={styles.actBtn} title="Dupliquer" onClick={e => openDupModal(pub, e)}>
-                      <Copy size={13}/>
-                    </button>
-                    <button className={styles.actBtn} title="Éditer" onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>
-                      <Edit2 size={13}/>
-                    </button>
+                    <button className={styles.actBtn} title="Dupliquer" onClick={e => openDupModal(pub, e)}><Copy size={13}/></button>
+                    <button className={styles.actBtn} title="Éditer" onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}><Edit2 size={13}/></button>
                     {pub.published && (pub.merchantId === user?.merchantId || isSuperAdmin) && (
-                      <button className={styles.actBtn} title="Dépublier" onClick={e => handleUnpublish(pub._id, e)}>
-                        <CircleOff size={13} color="#ef4444"/>
-                      </button>
+                      <button className={styles.actBtn} title="Dépublier" onClick={e => handleUnpublish(pub._id, e)}><CircleOff size={13} color="#ef4444"/></button>
                     )}
                     {(pub.merchantId === user?.merchantId || isSuperAdmin) && (
-                      <button className={`${styles.actBtn} ${styles.actBtnDanger}`} title="Supprimer" onClick={e => handleDelete(pub._id, e)}>
-                        <Trash2 size={13}/>
-                      </button>
+                      <button className={`${styles.actBtn} ${styles.actBtnDanger}`} title="Supprimer" onClick={e => handleDelete(pub._id, e)}><Trash2 size={13}/></button>
                     )}
                   </div>
                 </div>
               );
             })}
 
-            {/* New creation card */}
-            <button
-              className={styles.newCard}
-              onClick={() => navigate('/ewish-admin/ewish/new')}
+            <button className={styles.newCard} onClick={() => navigate('/ewish-admin/ewish/new')}
               onMouseEnter={e => { e.currentTarget.style.background = 'var(--mk-blush)'; e.currentTarget.style.borderColor = 'var(--mk-rose-soft)'; e.currentTarget.style.color = 'var(--mk-rose)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--mk-line-strong)'; e.currentTarget.style.color = 'var(--mk-ink-2)'; }}
             >
@@ -521,14 +515,13 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* ── Pour toi ── */}
+      {/* ── Desktop: Pour toi ── */}
       {templates.length > 0 && (
         <section className={styles.section} style={{ paddingBottom: 80 }}>
           <header className={styles.sectionHead}>
             <div>
               <div className={styles.eyebrow}>POUR TOI</div>
-              <h2 className={styles.sectionTitle}>Et si on essayait…</h2>
-              <p className={styles.sectionSub}>Petites idées selon tes derniers choix.</p>
+              <h2 className={styles.sectionTitle}>Si on essayait…</h2>
             </div>
             <Link to="/ewish-admin/templates" className={styles.sectionAction}>
               Voir tous les templates <ArrowRight size={14}/>
@@ -536,12 +529,7 @@ export default function Dashboard() {
           </header>
           <div className={styles.tplGrid}>
             {templates.map(tpl => (
-              <TemplateCard
-                key={tpl._id}
-                tpl={tpl}
-                creating={creating === tpl.name}
-                onUse={e => { e.stopPropagation(); handleCreateFromTemplate(tpl.name); }}
-              />
+              <TemplateCard key={tpl._id} tpl={tpl} creating={creating === tpl.name} onUse={e => { e.stopPropagation(); handleCreateFromTemplate(tpl.name); }} />
             ))}
           </div>
         </section>

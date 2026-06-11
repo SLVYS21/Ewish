@@ -314,11 +314,11 @@
 .musicCard {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 14px; border-radius: 14px;
-  background: #EDE8F8; border: none;
+  background: #FFF1F4; border: none;
 }
 .musicIconCircle {
   width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-  background: #9B7EE2; color: #fff;
+  background: linear-gradient(135deg, #FF6F8B, #E11D48); color: #fff;
   display: flex; align-items: center; justify-content: center;
 }
 .musicAlbumArt {
@@ -329,13 +329,13 @@
 .musicTitle { font-size: 13px; font-weight: 700; color: var(--mk-ink, #2B1A2D); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .musicSub { font-size: 11px; color: var(--mk-ink-2, #7A6A7D); margin-top: 1px; }
 .musicChangeBtn {
-  background: none; border: none; color: #6E4FBA; font-size: 12px; font-weight: 700;
+  background: none; border: none; color: #E11D48; font-size: 12px; font-weight: 700;
   cursor: pointer; white-space: nowrap; font-family: var(--mk-body, sans-serif);
   padding: 4px 6px; border-radius: 8px; transition: background .15s;
 }
-.musicChangeBtn:hover { background: rgba(110,79,186,.1); }
+.musicChangeBtn:hover { background: rgba(225,29,72,.08); }
 .musicExpandedFields {
   display: flex; flex-direction: column; gap: 12px;
   padding: 14px; border-radius: 14px;
-  background: #F6F0FF; border: 1.5px solid #D7C5F2;
+  background: #FFF8FA; border: 1.5px solid #FFB3C1;
 }

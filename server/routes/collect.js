@@ -13,7 +13,8 @@ const TEMPLATES_DIR = process.env.TEMPLATES_DIR ||
 const EMOJI_MAP = {
   birthday: '🎂', special: '✨', 'collective-family': '🎉',
   'collective-pro': '🏆', forever: '💕', 'notre-film': '🎬',
-  'wall-of-wishes': '💌', sanctuary: '🌸',
+  'wall-of-wishes': '💌', 'wall-of-wishes-modern': '💬', 'wall-of-wishes-space': '🚀',
+  sanctuary: '🌸',
 };
 
 const COLORS = ['#FFB3C1', '#D7C5F2', '#C9EEDF', '#FFDBA4', '#B3D4FF', '#FFC8E8', '#C8F0FF'];
@@ -73,6 +74,11 @@ router.get('/:pubId', async (req, res) => {
         collected,
         contributors,
       },
+      wishesEnabled:      pub.cagnotteConfig?.wishesEnabled !== false,
+      collectTitle:       pub.cagnotteConfig?.collectTitle    || '',
+      collectSubtitle:    pub.cagnotteConfig?.collectSubtitle || '',
+      collectCover:       pub.cagnotteConfig?.collectCover    || '',
+      collectAccentColor: pub.cagnotteConfig?.collectAccentColor || '',
       kkiapayKey:     process.env.KKIAPAY_PUBLIC_KEY || '',
       kkiapaySandbox: process.env.KKIAPAY_SANDBOX === 'true',
     };

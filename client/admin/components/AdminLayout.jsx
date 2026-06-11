@@ -19,7 +19,7 @@ const NAV = [
 
 const NAV_BOTTOM = [
   { to: '/ewish-admin/credits',  icon: <Wallet size={17} />,   label: 'Crédits'    },
-  { to: '/ewish-admin/settings', icon: <Settings size={17} />, label: 'Réglages'   },
+  { to: '/ewish-admin/profile',  icon: <Settings size={17} />, label: 'Réglages'   },
 ];
 
 const SUPER_NAV = [

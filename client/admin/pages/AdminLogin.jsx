@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleBtn from '../components/GoogleBtn';
 import s from './AdminLogin.module.css';
@@ -12,6 +12,8 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const { login }   = useAuth();
   const navigate    = useNavigate();
+  const location    = useLocation();
+  const resetDone   = new URLSearchParams(location.search).get('reset') === '1';
 
   const submit = async () => {
     setError('');
@@ -65,6 +67,11 @@ export default function AdminLogin() {
       <div className={s.formSide}>
         <h2 className={s.formTitle}>Bon retour 👋</h2>
         <p className={s.formSub}>Connectez-vous pour gérer vos créations.</p>
+        {resetDone && (
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,.1)', border: '1px solid rgba(34,197,94,.25)', color: '#166534', fontSize: '0.82rem', marginBottom: 8 }}>
+            ✅ Mot de passe mis à jour. Connectez-vous avec votre nouveau mot de passe.
+          </div>
+        )}
 
         <div className={s.field}>
           <label>Email</label>
@@ -91,7 +98,7 @@ export default function AdminLogin() {
             <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
             Se souvenir de moi
           </label>
-          <a>Oublié ?</a>
+          <Link to="/ewish-admin/forgot-password" style={{ color: '#E11D48', fontWeight: 600, textDecoration: 'none', fontSize: '0.8rem' }}>Oublié ?</Link>
         </div>
 
         {error && <div className={s.error}>{error}</div>}

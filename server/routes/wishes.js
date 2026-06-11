@@ -8,15 +8,41 @@ router.post('/:publicationId', async (req, res) => {
   try {
     const pub = await Publication.findById(req.params.publicationId).lean();
     if (!pub) return res.status(404).json({ error: 'Publication not found' });
-    if (!pub.published) return res.status(403).json({ error: 'Ce mur n\'est pas encore ouvert.' });
+
+    // all wall-of-wishes variants: allow submissions even when unpublished (freemium model)
+    const isWallTemplate = pub.templateName.startsWith('wall-of-wishes');
+    if (!pub.published && !isWallTemplate) {
+      return res.status(403).json({ error: 'Ce mur n\'est pas encore ouvert.' });
+    }
+    if (pub.cagnotteConfig?.wishesEnabled === false) {
+      return res.status(403).json({ error: 'Les vœux sont désactivés pour cette publication.' });
+    }
 
     const { firstName, role, message, photoUrl, audioUrl, videoUrl, color, rot, mediaType } = req.body;
     if (!firstName?.trim() || !message?.trim()) {
       return res.status(400).json({ error: 'firstName and message are required' });
     }
 
+    // Freemium gate: unpublished wall templates → max 5 text wishes, no media
+    if (isWallTemplate && !pub.isPaid) {
+      const hasMedia = photoUrl || audioUrl || videoUrl || (mediaType && mediaType !== 'none');
+      if (hasMedia) {
+        return res.status(402).json({
+          error: 'Le partage de médias nécessite un mur publié.',
+          code: 'MEDIA_REQUIRES_PAID',
+        });
+      }
+      const wishCount = await Wish.countDocuments({ publicationId: req.params.publicationId });
+      if (wishCount >= 5) {
+        return res.status(402).json({
+          error: 'Les 5 premiers vœux gratuits ont été utilisés. Le créateur doit publier le mur pour continuer.',
+          code: 'FREE_LIMIT_REACHED',
+        });
+      }
+    }
+
     const VALID_MEDIA = ['none', 'photo', 'gif', 'audio', 'video'];
-    const autoApprove = pub.templateName === 'wall-of-wishes';
+    const autoApprove = isWallTemplate && !pub.cagnotteConfig?.requireModeration;
 
     const wish = await Wish.create({
       publicationId: req.params.publicationId,

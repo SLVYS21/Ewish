@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import InstallPWA from "./components/InstallPWA";
 
 import Dashboard from "./pages/Dashboard";
+import MyCreations from "./pages/MyCreations";
 import Editor from "./pages/Editor";
 import QuickCreate from "./pages/QuickCreate";
 
@@ -9,6 +10,8 @@ import { AuthProvider, useAuth } from "./admin/context/AuthContext";
 import AdminLayout from "./admin/components/AdminLayout";
 import AdminLogin from "./admin/pages/AdminLogin";
 import AdminRegister from "./admin/pages/AdminRegister";
+import ForgotPassword from "./admin/pages/ForgotPassword";
+import ResetPassword from "./admin/pages/ResetPassword";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import AdminOrders from "./admin/pages/AdminOrders";
 import AdminPublications from "./admin/pages/AdminPublications";
@@ -78,11 +81,13 @@ export default function App() {
         <Routes>
           <Route path="/ewish-admin/login"    element={<AdminLoginGate />} />
           <Route path="/ewish-admin/register" element={<AdminRegisterGate />} />
+          <Route path="/ewish-admin/forgot-password"      element={<ForgotPassword />} />
+          <Route path="/ewish-admin/reset-password/:token" element={<ResetPassword />} />
 
           {/* Protected Admin — with sidebar layout */}
           <Route path="/ewish-admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
-            <Route path="ewish" element={<Dashboard />} />
+            <Route path="ewish" element={<MyCreations />} />
             <Route path="templates"  element={<TemplatesGallery />} />
             <Route path="cagnotte/:id" element={<CagnottePage />} />
             <Route path="credits"    element={<CreditsPage />} />

@@ -147,4 +147,102 @@ router.post('/logout', (req, res) => {
   res.json({ success: true });
 });
 
+/* ── Brevo transactional email helper ──────────────────────── */
+async function sendBrevoEmail({ to, subject, html }) {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        name:  process.env.BREVO_SENDER_NAME  || 'myKado',
+        email: process.env.BREVO_SENDER_EMAIL || 'noreply@mykado.store',
+      },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Brevo ${res.status}: ${body}`);
+  }
+}
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email requis' });
+
+    const user = await AdminUser.findOne({ email: email.toLowerCase() });
+    if (!user) return res.json({ success: true }); // silent — no user enumeration
+
+    const token  = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1h
+    user.resetPasswordToken  = token;
+    user.resetPasswordExpiry = expiry;
+    await user.save();
+
+    const resetUrl = `${process.env.APP_URL || 'https://app.mykado.store'}/ewish-admin/reset-password/${token}`;
+    const expiryStr = expiry.toLocaleString('fr-FR', { timeZone: 'Africa/Dakar' });
+
+    await sendBrevoEmail({
+      to: user.email,
+      subject: 'Réinitialiser votre mot de passe — myKado',
+      html: `
+        <div style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#FFFAF6;border-radius:16px">
+          <div style="text-align:center;margin-bottom:28px">
+            <div style="font-size:2.5rem;line-height:1">🎁</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#2B1A2D;margin-top:8px">myKado</div>
+          </div>
+          <h2 style="font-size:1.05rem;font-weight:700;color:#2B1A2D;margin:0 0 10px">Réinitialisation du mot de passe</h2>
+          <p style="color:#7A6A7D;font-size:0.88rem;line-height:1.65;margin:0 0 24px">
+            Tu as demandé à réinitialiser ton mot de passe. Clique sur le bouton ci-dessous.<br>
+            Ce lien expire dans <strong>1 heure</strong> (${expiryStr}).
+          </p>
+          <a href="${resetUrl}"
+             style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#FF6F8B,#E11D48);color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:0.9rem;margin-bottom:24px">
+            Réinitialiser mon mot de passe →
+          </a>
+          <p style="color:#B4A4B8;font-size:0.75rem;line-height:1.5;margin:0">
+            Si tu n'es pas à l'origine de cette demande, ignore cet email — ton mot de passe reste inchangé.
+          </p>
+        </div>
+      `,
+    });
+
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[forgot-password]', e.message);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi. Réessaie dans un instant.' });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Token et nouveau mot de passe requis' });
+    if (password.length < 6) return res.status(400).json({ error: 'Mot de passe trop court (6 caractères min.)' });
+
+    const user = await AdminUser.findOne({
+      resetPasswordToken:  token,
+      resetPasswordExpiry: { $gt: new Date() },
+    });
+    if (!user) return res.status(400).json({ error: 'Lien invalide ou expiré.' });
+
+    user.password            = password;
+    user.resetPasswordToken  = undefined;
+    user.resetPasswordExpiry = undefined;
+    await user.save();
+
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

@@ -685,6 +685,104 @@
   border-radius: 50%; animation: spin 0.7s linear infinite;
 }
 
+/* ── Advanced look sections ── */
+.advSec {
+  border-top: 1px solid var(--mk-line, #F2E4EA);
+  padding-top: 6px;
+}
+.advSec:first-child { border-top: none; }
+.advSecHeader {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11.5px; font-weight: 800;
+  color: var(--mk-ink-2, #7A6A7D);
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: 10px 16px 6px;
+}
+.advSecDivider {
+  height: 1px; margin: 0 16px 6px;
+  background: linear-gradient(90deg, var(--mk-line, #F2E4EA), transparent);
+}
+
+/* ── Wall access/moderation section ── */
+.wallAccessSection {
+  border-top: 1px solid var(--mk-line, #F2E4EA);
+  margin: 0 -16px -16px;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: #FAFAF8;
+}
+.wallAccessSectionTitle {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 800;
+  color: var(--mk-ink, #2B1A2D);
+  text-transform: uppercase; letter-spacing: .05em;
+  margin-bottom: 4px;
+}
+.wallAccessLabel {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--mk-ink-2, #7A6A7D);
+  margin-top: 4px;
+}
+.wallAccessGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.wallAccessBtn {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 11px 12px; border-radius: 12px;
+  border: 1.5px solid var(--mk-line-2, #EAD9EE);
+  background: #fff; cursor: pointer; text-align: left;
+  font-family: var(--mk-body, sans-serif); transition: all .15s;
+}
+.wallAccessBtn:hover { border-color: #9B7EE2; background: #FAF5FF; }
+.wallAccessBtnActive { border-color: #9B7EE2 !important; background: #F6EEFB !important; }
+.wallAccessBtnIcon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.wallAccessBtnTitle { font-size: 12.5px; font-weight: 700; color: var(--mk-ink, #2B1A2D); }
+.wallAccessBtnSub { font-size: 10.5px; color: var(--mk-ink-3, #A094A3); line-height: 1.4; margin-top: 2px; }
+
+/* ── Wall capabilities info box ── */
+.wallCapabilitiesBox {
+  background: #F6EEFB; border: 1px solid #DDD0F0;
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+  margin-top: 4px;
+}
+.wallCapTitle {
+  font-size: 12px; font-weight: 800; color: var(--mk-ink, #2B1A2D);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+}
+.wallCapRow {
+  display: flex; align-items: center; gap: 8px; font-size: 12px;
+}
+.wallCapCheck { font-size: 14px; width: 18px; flex-shrink: 0; }
+.wallCapLabel { flex: 1; color: var(--mk-ink, #2B1A2D); }
+.wallCapFree { font-size: 11px; font-weight: 700; color: #059669; white-space: nowrap; }
+.wallCapCredit { font-size: 11px; font-weight: 700; color: #9B7EE2; white-space: nowrap; }
+.wallCapKyc { font-size: 11px; font-weight: 700; color: #b45309; white-space: nowrap; }
+.wallCapNote {
+  font-size: 10.5px; color: var(--mk-ink-2, #7A6A7D);
+  line-height: 1.5; border-top: 1px solid #DDD0F0; padding-top: 8px; margin-top: 2px;
+}
+
+/* ── KYC state badges (wall cagnotte tab) ── */
+.kycPendingBadge {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border-radius: 12px;
+  background: #FFFBEB; border: 1.5px solid #FDE68A;
+}
+.kycNoneBadge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 12px;
+  background: #FFF1F4; border: 1.5px solid #FFB3C1;
+}
+.kycVerifyBtn {
+  flex-shrink: 0; padding: 7px 14px; border-radius: 999px;
+  background: linear-gradient(135deg, #FF6F8B, #E11D48); color: #fff;
+  border: none; cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: var(--mk-body, sans-serif); white-space: nowrap;
+  transition: opacity .15s;
+}
+.kycVerifyBtn:hover { opacity: .85; }
+
 /* ── Device toggle ── */
 .deviceToggle {
   display: flex; gap: 2px; align-items: center;

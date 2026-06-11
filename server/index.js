@@ -53,7 +53,10 @@ app.use('/site/special',           express.static(path.join(TEMPLATES_DIR, 'spec
 app.use('/site/collective-family', express.static(path.join(TEMPLATES_DIR, 'collective-family')));
 app.use('/site/collective-pro',    express.static(path.join(TEMPLATES_DIR, 'collective-pro')));
 app.use('/site/notre-film',        express.static(path.join(TEMPLATES_DIR, 'notre-film')));
-app.use('/site/wall-of-wishes',    express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes')));
+app.use('/site/wall-of-wishes',        express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes')));
+app.use('/site/wall-of-wishes-3d',     express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-3d')));
+app.use('/site/wall-of-wishes-modern', express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-modern')));
+app.use('/site/wall-of-wishes-space',  express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-space')));
 app.use('/site/forever',           express.static(path.join(TEMPLATES_DIR, 'forever')));
 app.use('/site/sanctuary',         express.static(path.join(TEMPLATES_DIR, 'sanctuary')));
 // Serve shared template root assets (e.g. BubbleFont.ttf) at /site/<filename>

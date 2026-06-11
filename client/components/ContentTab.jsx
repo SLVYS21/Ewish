@@ -163,6 +163,7 @@ function MusicSection({ fields, data, onChange, onUpload }) {
 
   const hasStartTime = fields.some(f => f.key === 'musicStartTime');
   const hasAlbumArt  = fields.some(f => f.key === 'albumArt');
+  const hasHint      = fields.some(f => f.key === 'musicHint');
 
   return (
     <div className={styles.musicWrapper}>
@@ -213,6 +214,13 @@ function MusicSection({ fields, data, onChange, onUpload }) {
             <div className={styles.flatFieldRow}>
               <div className={styles.flatLabel}>DÉMARRER À</div>
               <StartTimeField value={data.musicStartTime} onChange={v=>onChange('musicStartTime',v)}/>
+            </div>
+          )}
+          {hasHint && (
+            <div className={styles.flatFieldRow}>
+              <div className={styles.flatLabel}>INDICATION (affiché au visiteur)</div>
+              <input type="text" value={data.musicHint||''} onChange={e=>onChange('musicHint',e.target.value)}
+                placeholder="C'est mieux avec de la musique 🎶" className={styles.input}/>
             </div>
           )}
         </div>

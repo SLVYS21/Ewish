@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../admin/context/AuthContext';
 import { getPublications, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug } from '../utils/api';
 import ContentTab from '../components/ContentTab';
 import StyleTab from '../components/StyleTab';
@@ -76,11 +77,11 @@ const TABS = [
   { key: 'content' },
   { key: 'style' },
   { key: 'background' },
-  { key: 'decorations', excludeTemplates: ['wall-of-wishes'] },
-  { key: 'photos',      excludeTemplates: ['wall-of-wishes'] },
+  { key: 'decorations', excludeTemplates: ['wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-space'] },
+  { key: 'photos',      excludeTemplates: ['wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-space'] },
   { key: 'jar',         templates: ['birthday', 'special'] },
   { key: 'confetti',    templatePrefixes: ['birthday', 'special', 'collective'] },
-  { key: 'widgets',     excludeTemplates: ['wall-of-wishes'] },
+  { key: 'widgets',     excludeTemplates: ['wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-space'] },
   { key: 'wishes',      templatePrefixes: ['collective', 'wall-of-wishes'] },
   { key: 'client' },
   { key: 'branding' },
@@ -197,6 +198,7 @@ function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = 
 export default function Editor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [pub, setPub]                     = useState(null);
   const [template, setTemplate]           = useState(null);
@@ -236,11 +238,24 @@ export default function Editor() {
   const [cagnotteImage, setCagnotteImage]     = useState('');
   const [cagnotteDeadline, setCagnotteDeadline] = useState('');
   const [cagnotteImgUploading, setCagnotteImgUploading] = useState(false);
+  const [wishesEnabled, setWishesEnabled]     = useState(true);
+  const [collectTitle, setCollectTitle]       = useState('');
+  const [collectSubtitle, setCollectSubtitle] = useState('');
+  const [collectCover, setCollectCover]       = useState('');
+  const [collectAccentColor, setCollectAccentColor] = useState('');
+  const [collectCoverUploading, setCollectCoverUploading] = useState(false);
+  const [showCollectCustom, setShowCollectCustom] = useState(false);
+  const [showQrCollect, setShowQrCollect]     = useState(false);
   const [showKyc, setShowKyc]                 = useState(false);
-  const [kycDone, setKycDone]                 = useState(false);
+  const kycDone = user?.kycStatus === 'approved';
   const [previewDevice, setPreviewDevice]     = useState('desktop');
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [showAdvancedLook, setShowAdvancedLook] = useState(false);
+  const [minContribution, setMinContribution]   = useState(0);
+  const [maxContribution, setMaxContribution]   = useState(0);
+  const [isPrivate, setIsPrivate]               = useState(false);
+  const [accessCode, setAccessCode]             = useState('');
+  const [requireModeration, setRequireModeration] = useState(false);
 
   const tourSteps = [
     { target: '.tour-step-nav',     content: 'Suivez ces 4 étapes pour personnaliser votre création !', disableBeacon: true, placement: 'bottom' },
@@ -290,6 +305,16 @@ export default function Editor() {
         setCagnotteName(cc.description || '');
         setCagnotteImage(cc.image || '');
         setCagnotteDeadline(cc.deadline ? cc.deadline.slice(0, 10) : '');
+        setWishesEnabled(cc.wishesEnabled !== false);
+        setCollectTitle(cc.collectTitle || '');
+        setCollectSubtitle(cc.collectSubtitle || '');
+        setCollectCover(cc.collectCover || '');
+        setCollectAccentColor(cc.collectAccentColor || '');
+        setMinContribution(cc.minContribution || 0);
+        setMaxContribution(cc.maxContribution || 0);
+        setIsPrivate(cc.isPrivate || false);
+        setAccessCode(cc.accessCode || '');
+        setRequireModeration(cc.requireModeration || false);
 
         if (found.published) {
           setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
@@ -342,10 +367,20 @@ export default function Editor() {
           goal: cagnotteGoal,
           image: cagnotteImage,
           deadline: cagnotteDeadline || null,
+          wishesEnabled,
+          minContribution,
+          maxContribution,
+          collectTitle,
+          collectSubtitle,
+          collectCover,
+          collectAccentColor,
+          isPrivate,
+          accessCode,
+          requireModeration,
         },
       }).catch(() => {});
     }, 800);
-  }, [id, cagnotte, cagnotteName, cagnotteGoal, cagnotteImage, cagnotteDeadline]);
+  }, [id, cagnotte, cagnotteName, cagnotteGoal, cagnotteImage, cagnotteDeadline, wishesEnabled, minContribution, maxContribution, collectTitle, collectSubtitle, collectCover, collectAccentColor, isPrivate, accessCode, requireModeration]);
 
   /* section jump */
   const jumpToSection = useCallback((sectionId) => {
@@ -434,9 +469,17 @@ export default function Editor() {
     try { iframeRef.current?.contentWindow?.postMessage({ type: 'WW_UPDATE', data: { ...data, jarConfig: newJar }, style }, '*'); } catch {}
   };
 
-  const handleCagnotteToggle = (on) => {
-    if (on && !kycDone) { setShowKyc(true); return; }
+  // Wall-of-wishes: allow activating even with pending KYC
+  const handleCagnotteToggleWall = (on) => {
+    if (on && user?.kycStatus === 'none') { setShowKyc(true); return; }
     setCagnotte(on);
+  };
+
+  const handleWishesEnabledChange = (val) => {
+    setWishesEnabled(val);
+    try {
+      iframeRef.current?.contentWindow?.postMessage({ type: 'WW_CONFIG', wishesEnabled: val }, '*');
+    } catch {}
   };
 
   const handleUpload = async (file, fieldKey) => {
@@ -452,7 +495,23 @@ export default function Editor() {
     try {
       await updatePublication(id, {
         data, style: { ...style, backgrounds }, decorations, jarConfig, widgets,
-        cagnotteConfig: { enabled: cagnotte, description: cagnotteName, goal: cagnotteGoal, image: cagnotteImage, deadline: cagnotteDeadline || null },
+        cagnotteConfig: {
+          enabled: cagnotte,
+          description: cagnotteName,
+          goal: cagnotteGoal,
+          image: cagnotteImage,
+          deadline: cagnotteDeadline || null,
+          wishesEnabled,
+          minContribution,
+          maxContribution,
+          collectTitle,
+          collectSubtitle,
+          collectCover,
+          collectAccentColor,
+          isPrivate,
+          accessCode,
+          requireModeration,
+        },
       });
       const r = await publishPublication(id);
       setPublishedUrl(r.data.url);
@@ -483,8 +542,18 @@ export default function Editor() {
   const previewSections = pub ? (TEMPLATE_SECTIONS[pub.templateName] || null) : null;
 
   /* step helpers */
-  const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
-  const currentStep      = STEPS[currentStepIndex];
+  const isWall  = pub?.templateName?.startsWith('wall-of-wishes');
+  const isMixed = ['collective-family', 'collective-pro'].includes(pub?.templateName);
+
+  const displaySteps = STEPS.map(s => {
+    if (s.id === 'Message' && isWall)
+      return { ...s, title: 'Le mur', sub: 'Titre, accès & vœux', emoji: '🧱', color: '#b45309', soft: '#fffbeb', accent: '#fde68a' };
+    if (s.id === 'Cadeau' && !isWall)
+      return { ...s, title: 'Extra', sub: 'Outils & options', emoji: '✨', color: '#047857', soft: '#ECFDF5', accent: '#A7F3D0' };
+    return s;
+  });
+  const currentStepIndex = displaySteps.findIndex(s => s.id === activeStep);
+  const currentStep      = displaySteps[currentStepIndex];
 
   /* look sub-tabs (filtered by template) */
   const lookSubTabs = [
@@ -502,6 +571,146 @@ export default function Editor() {
   const renderStepContent = () => {
     switch (activeStep) {
       case 'Message':
+        if (isWall) {
+          return (
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className={styles.cagnotteField}>
+                <label className={styles.cagnotteFieldLabel}>BADGE DORÉ (EYEBROW)</label>
+                <input
+                  className={styles.cagnotteInput}
+                  value={data.eyebrow || ''}
+                  onChange={e => handleDataChange('eyebrow', e.target.value)}
+                  placeholder="✦ Mur de vœux"
+                  maxLength={60}
+                />
+                <span className={styles.cagnotteFieldHint}>Affiché en badge en haut du mur (ex: ✦ Retraite de Marie)</span>
+              </div>
+              <div className={styles.cagnotteField}>
+                <label className={styles.cagnotteFieldLabel}>PRÉNOM / NOM À L'HONNEUR</label>
+                <input
+                  className={styles.cagnotteInput}
+                  value={data.titleName || ''}
+                  onChange={e => handleDataChange('titleName', e.target.value)}
+                  placeholder="Sophie"
+                  maxLength={50}
+                />
+                <span className={styles.cagnotteFieldHint}>Apparaît dans « Pour <em style={{ fontStyle: 'italic' }}>Sophie</em> »</span>
+              </div>
+              <div className={styles.cagnotteField}>
+                <label className={styles.cagnotteFieldLabel}>SOUS-TITRE</label>
+                <textarea
+                  className={styles.cagnotteInput}
+                  value={data.subtitle || ''}
+                  onChange={e => handleDataChange('subtitle', e.target.value)}
+                  placeholder="Partagez ce lien — chacun peut laisser son mot sur ce mur."
+                  maxLength={200}
+                  rows={3}
+                  style={{ resize: 'vertical', minHeight: 72 }}
+                />
+              </div>
+              {/* ── Accès & modération ── */}
+              <div className={styles.wallAccessSection}>
+                <div className={styles.wallAccessSectionTitle}>
+                  <Shield size={14} /> Accès &amp; modération
+                </div>
+
+                {/* Public / Privé */}
+                <div className={styles.wallAccessLabel}>QUI PEUT VOIR LE MUR ?</div>
+                <div className={styles.wallAccessGrid}>
+                  <button
+                    className={`${styles.wallAccessBtn} ${!isPrivate ? styles.wallAccessBtnActive : ''}`}
+                    onClick={() => setIsPrivate(false)}
+                  >
+                    <span className={styles.wallAccessBtnIcon}>🌐</span>
+                    <div>
+                      <div className={styles.wallAccessBtnTitle}>Public</div>
+                      <div className={styles.wallAccessBtnSub}>Toute personne avec le lien peut voir et participer.</div>
+                    </div>
+                  </button>
+                  <button
+                    className={`${styles.wallAccessBtn} ${isPrivate ? styles.wallAccessBtnActive : ''}`}
+                    onClick={() => setIsPrivate(true)}
+                  >
+                    <span className={styles.wallAccessBtnIcon}>🔒</span>
+                    <div>
+                      <div className={styles.wallAccessBtnTitle}>Privé</div>
+                      <div className={styles.wallAccessBtnSub}>Code d'accès requis pour ouvrir le mur.</div>
+                    </div>
+                  </button>
+                </div>
+                {isPrivate && (
+                  <input
+                    className={styles.cagnotteInput}
+                    value={accessCode}
+                    onChange={e => setAccessCode(e.target.value)}
+                    placeholder="Code d'accès (ex: sophie2025)"
+                    maxLength={30}
+                    style={{ marginTop: 10 }}
+                  />
+                )}
+
+                {/* Recevoir de nouveaux vœux */}
+                <div className={styles.cagnotteToggleRow} style={{ marginTop: 12 }}>
+                  <button
+                    className={styles.cagnotteToggleBtn}
+                    style={{ background: wishesEnabled ? '#9B7EE2' : 'rgba(120,120,128,.2)' }}
+                    onClick={() => handleWishesEnabledChange(!wishesEnabled)}
+                  >
+                    <span className={styles.cagnotteToggleKnob} style={{ left: wishesEnabled ? '22px' : '3px' }} />
+                  </button>
+                  <div>
+                    <div className={styles.cagnotteToggleLabel}>Recevoir de nouveaux vœux</div>
+                    <div className={styles.cagnotteToggleSub}>
+                      {wishesEnabled ? 'Le bouton « Ajouter mon mot » est visible.' : 'Mur en lecture seule — aucun ajout possible.'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Valider avant publication */}
+                <div className={styles.cagnotteToggleRow} style={{ marginTop: 8 }}>
+                  <button
+                    className={styles.cagnotteToggleBtn}
+                    style={{ background: requireModeration ? '#9B7EE2' : 'rgba(120,120,128,.2)' }}
+                    onClick={() => setRequireModeration(v => !v)}
+                  >
+                    <span className={styles.cagnotteToggleKnob} style={{ left: requireModeration ? '22px' : '3px' }} />
+                  </button>
+                  <div>
+                    <div className={styles.cagnotteToggleLabel}>Valider avant publication</div>
+                    <div className={styles.cagnotteToggleSub}>
+                      {requireModeration ? 'Tu approuves chaque vœu avant qu\'il apparaisse sur le mur.' : 'Les vœux s\'affichent instantanément.'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Capacités invités */}
+                <div className={styles.wallCapabilitiesBox}>
+                  <div className={styles.wallCapTitle}>
+                    <span>💎</span> Ce que tes invités peuvent déposer
+                  </div>
+                  <div className={styles.wallCapRow}>
+                    <span className={styles.wallCapCheck}>✓</span>
+                    <span className={styles.wallCapLabel}>5 premiers vœux texte</span>
+                    <span className={styles.wallCapFree}>Gratuit</span>
+                  </div>
+                  <div className={styles.wallCapRow} style={{ opacity: pub?.isPaid ? 1 : 0.55 }}>
+                    <span className={styles.wallCapCheck} style={{ color: pub?.isPaid ? '#9B7EE2' : '#aaa' }}>{pub?.isPaid ? '✓' : '□'}</span>
+                    <span className={styles.wallCapLabel}>Vœux suivants &amp; photos/vidéos/audio</span>
+                    <span className={styles.wallCapCredit}>💎 crédits</span>
+                  </div>
+                  <div className={styles.wallCapRow} style={{ opacity: cagnotte ? 1 : 0.55 }}>
+                    <span className={styles.wallCapCheck} style={{ color: cagnotte ? '#9B7EE2' : '#aaa' }}>{cagnotte ? '✓' : '🎁'}</span>
+                    <span className={styles.wallCapLabel}>Cagnotte cadeau</span>
+                    <span className={styles.wallCapKyc}>💎 +KYC</span>
+                  </div>
+                  <div className={styles.wallCapNote}>
+                    C'est toi qui débloque avec tes crédits — tes invités n'ont jamais à payer pour participer.
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
         return (
           <ContentTab
             fields={template?.fields || []}
@@ -551,9 +760,25 @@ export default function Editor() {
               </button>
               {showAdvancedLook && (
                 <div className={styles.advancedLookContent}>
-                  <BackgroundTab templateName={pub.templateName} backgrounds={backgrounds} onChange={handleBackgroundsChange} />
-                  {showDeco && <DecoTab decorations={decorations} onChange={handleDecorationsChange} />}
-                  {showPhotos && <PhotoLayoutTab transforms={photoTransforms} onChange={handlePhotoTransformsChange} />}
+                  <div className={styles.advSec}>
+                    <div className={styles.advSecHeader}><span>🖼️</span> Fond par section</div>
+                    <div className={styles.advSecDivider} />
+                    <BackgroundTab templateName={pub.templateName} backgrounds={backgrounds} onChange={handleBackgroundsChange} />
+                  </div>
+                  {showDeco && (
+                    <div className={styles.advSec}>
+                      <div className={styles.advSecHeader}><span>✨</span> Décorations</div>
+                      <div className={styles.advSecDivider} />
+                      <DecoTab decorations={decorations} onChange={handleDecorationsChange} />
+                    </div>
+                  )}
+                  {showPhotos && (
+                    <div className={styles.advSec}>
+                      <div className={styles.advSecHeader}><span>📷</span> Mise en page photos</div>
+                      <div className={styles.advSecDivider} />
+                      <PhotoLayoutTab transforms={photoTransforms} onChange={handlePhotoTransformsChange} />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -561,45 +786,102 @@ export default function Editor() {
         );
 
       case 'Cadeau': {
-        const CAGNOTTE_TEMPLATES = ['wall-of-wishes', 'collective-family', 'collective-pro'];
-        const supportsCagnotte = CAGNOTTE_TEMPLATES.includes(pub?.templateName);
+        // ── Simple / Mixte : pas de cagnotte ──────────────────────
+        if (!isWall) {
+          return (
+            <div className={styles.extrasList}>
+              {isMixed && showWishes && (
+                <AccordionCard icon={MailOpen} title="Vœux collectifs" sub="Gérer les messages reçus" color="#047857">
+                  <WishesManager publicationId={pub._id} templateName={pub.templateName} customName={pub.customName} />
+                </AccordionCard>
+              )}
+              {showJar && (
+                <AccordionCard icon={Coffee} title="Jarre de Vœux" sub="Messages audio & écrits" color="#047857">
+                  <JarTab jarConfig={jarConfig} onChange={handleJarChange} templateName={pub.templateName} />
+                </AccordionCard>
+              )}
+              <AccordionCard icon={Megaphone} title="Lien de promotion" sub="Bouton myKado discret" color="#047857">
+                <BrandingTab
+                  show={showBranding} url={brandingUrl} text={brandingText}
+                  onToggle={v  => { setShowBranding(v);  updatePublication(id, { showBranding: v, brandingUrl, brandingText }).catch(() => {}); }}
+                  onUrlChange={v => { setBrandingUrl(v);  updatePublication(id, { showBranding, brandingUrl: v, brandingText }).catch(() => {}); }}
+                  onTextChange={v => { setBrandingText(v); updatePublication(id, { showBranding, brandingUrl, brandingText: v }).catch(() => {}); }}
+                />
+              </AccordionCard>
+            </div>
+          );
+        }
+
+        // ── Wall-of-Wishes : onglet Cagnotte ──────────────────────
+        const kycStatus = user?.kycStatus || 'none';
         return (
           <div className={styles.extrasList}>
-            {!supportsCagnotte && (
-              <div style={{ padding: '16px', margin: '16px', background: '#FFF3CD', borderRadius: '12px', border: '1px solid #FFD66B', fontSize: '13px', color: '#856404' }}>
-                ⚠️ La cagnotte est disponible uniquement pour les templates <strong>Mur de Vœux</strong>, <strong>Collectif Famille</strong> et <strong>Collectif Pro</strong>.
-              </div>
-            )}
-            {/* Pivot banner */}
-            <div className={styles.cadeauBanner}>
-              <span className={styles.cadeauBannerEmoji}>🎁</span>
-              <div>
-                <div className={styles.cadeauBannerTitle}>Et si on lui offrait <em style={{ fontFamily: 'var(--mk-display)' }}>vraiment</em> ce qu'il/elle veut ?</div>
-                <div className={styles.cadeauBannerDesc}>
-                  Active la <strong>cagnotte</strong>. Tes proches voient l'objectif, participent au cadeau commun.
-                  Tu reçois directement sur Mobile Money ou virement.
-                </div>
-              </div>
-            </div>
 
-            {/* Cagnotte toggle */}
-            <div className={styles.cagnotteToggleRow}>
-              <button
-                className={styles.cagnotteToggleBtn}
-                style={{ background: cagnotte ? '#9B7EE2' : 'rgba(120,120,128,.2)' }}
-                onClick={() => handleCagnotteToggle(!cagnotte)}
-              >
-                <span className={styles.cagnotteToggleKnob} style={{ left: cagnotte ? '22px' : '3px' }} />
-              </button>
-              <div>
-                <div className={styles.cagnotteToggleLabel}>Activer l'objectif cadeau</div>
-                <div className={styles.cagnotteToggleSub}>
-                  {cagnotte ? "En ligne — vérification d'identité validée" : 'KYC requis avant publication'}
-                </div>
-              </div>
-            </div>
+            {/* ─ Cagnotte pas encore activée ─ */}
+            {!cagnotte ? (
+              <>
+                {/* État KYC */}
+                {kycStatus === 'pending' && (
+                  <div className={styles.kycPendingBadge}>
+                    <span style={{ fontSize: 22, flexShrink: 0 }}>⏳</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--mk-ink)' }}>Vérification en cours</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--mk-ink-2)', marginTop: 2, lineHeight: 1.4 }}>
+                        Identité en cours de validation (24-48h). Tu peux déjà activer la cagnotte.
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {(kycStatus === 'none' || kycStatus === 'rejected') && (
+                  <div className={styles.kycNoneBadge}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--mk-ink)' }}>🔒 Vérification d'identité</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--mk-ink-2)', marginTop: 2, lineHeight: 1.4 }}>
+                        Pour recevoir les contributions, vérifie ton identité.{kycStatus === 'rejected' && ' (Précédente demande refusée)'}
+                      </div>
+                    </div>
+                    <button className={styles.kycVerifyBtn} onClick={() => setShowKyc(true)}>
+                      Vérifier
+                    </button>
+                  </div>
+                )}
 
-            {cagnotte ? (
+                {/* Pitch */}
+                <div className={styles.cadeauBanner}>
+                  <span className={styles.cadeauBannerEmoji}>🎁</span>
+                  <div>
+                    <div className={styles.cadeauBannerTitle}>Transforme ce mur en collecte cadeau</div>
+                    <div className={styles.cadeauBannerDesc}>
+                      Active la <strong>cagnotte</strong>. Tes invités voient l'objectif, participent au cadeau commun. Tu reçois directement sur Mobile Money ou virement.
+                    </div>
+                  </div>
+                </div>
+
+                {/* Toggle activation */}
+                <div className={styles.cagnotteToggleRow}>
+                  <button
+                    className={styles.cagnotteToggleBtn}
+                    style={{ background: 'rgba(120,120,128,.2)' }}
+                    onClick={() => handleCagnotteToggleWall(true)}
+                  >
+                    <span className={styles.cagnotteToggleKnob} style={{ left: '3px' }} />
+                  </button>
+                  <div>
+                    <div className={styles.cagnotteToggleLabel}>Activer la cagnotte cadeau</div>
+                    <div className={styles.cagnotteToggleSub}>
+                      {kycStatus === 'approved' ? 'Identité vérifiée — prêt à activer ✓' :
+                       kycStatus === 'pending'  ? 'Disponible — vérification en attente' :
+                       'Vérification d\'identité recommandée pour recevoir'}
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.cagnotteHowTo}>
+                  <strong>Comment ça marche ?</strong><br />
+                  Tes invités voient le mur de vœux + un objectif cadeau. Chacun peut contribuer librement. Une barre de progression collective s'affiche en direct.
+                </div>
+              </>
+            ) : (
+              // ─ Cagnotte déjà activée : formulaire direct, sans pitch KYC ─
               <div className={styles.cagnotteForm}>
                 <div className={styles.cagnotteField}>
                   <label className={styles.cagnotteFieldLabel}>QUEL CADEAU ?</label>
@@ -609,6 +891,30 @@ export default function Editor() {
                   <label className={styles.cagnotteFieldLabel}>OBJECTIF (FCFA)</label>
                   <input className={styles.cagnotteInput} type="number" value={cagnotteGoal} onChange={e => setCagnotteGoal(Number(e.target.value))} />
                   <span className={styles.cagnotteFieldHint}>Soit environ {Math.ceil(cagnotteGoal / 656).toLocaleString('fr-FR')} EUR</span>
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <div className={styles.cagnotteField} style={{ flex: 1 }}>
+                    <label className={styles.cagnotteFieldLabel}>MINIMUM (FCFA)</label>
+                    <input
+                      className={styles.cagnotteInput}
+                      type="number" min={0}
+                      value={minContribution}
+                      onChange={e => setMinContribution(Number(e.target.value))}
+                      placeholder="0"
+                    />
+                    <span className={styles.cagnotteFieldHint}>{minContribution > 0 ? `Min ${minContribution.toLocaleString('fr-FR')} FCFA` : 'Aucun minimum'}</span>
+                  </div>
+                  <div className={styles.cagnotteField} style={{ flex: 1 }}>
+                    <label className={styles.cagnotteFieldLabel}>MAXIMUM (FCFA)</label>
+                    <input
+                      className={styles.cagnotteInput}
+                      type="number" min={0}
+                      value={maxContribution}
+                      onChange={e => setMaxContribution(Number(e.target.value))}
+                      placeholder="0"
+                    />
+                    <span className={styles.cagnotteFieldHint}>{maxContribution > 0 ? `Max ${maxContribution.toLocaleString('fr-FR')} FCFA` : 'Aucun maximum'}</span>
+                  </div>
                 </div>
                 <div className={styles.cagnotteField}>
                   <label className={styles.cagnotteFieldLabel}>MÉTHODES DE RÉCEPTION</label>
@@ -648,25 +954,77 @@ export default function Editor() {
                 <div className={styles.cagnotteFees}>
                   <Shield size={13} /> myKado prend <strong>5%</strong> sur les contributions. Plafond : 2 000 000 FCFA/mois.
                 </div>
-              </div>
-            ) : (
-              <div className={styles.cagnotteHowTo}>
-                <strong>Comment ça marche ?</strong><br />
-                Tes invités voient le mur de vœux + un objectif cadeau (ex: PS5). Chacun peut ajouter une contribution (montant libre) en plus de son message. Une barre de progression collective apparaît en direct.
+
+                {/* Désactiver la cagnotte */}
+                <div className={styles.cagnotteField} style={{ borderTop: '1px solid var(--mk-line)', paddingTop: 14, marginTop: 4, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <button
+                    className={styles.cagnotteToggleBtn}
+                    style={{ background: '#9B7EE2' }}
+                    onClick={() => setCagnotte(false)}
+                  >
+                    <span className={styles.cagnotteToggleKnob} style={{ left: '22px' }} />
+                  </button>
+                  <div>
+                    <div className={styles.cagnotteToggleLabel}>Cagnotte active</div>
+                    <div className={styles.cagnotteToggleSub}>Désactiver pour suspendre la collecte.</div>
+                  </div>
+                </div>
+
+                {/* Collect page customization */}
+                <div className={styles.cagnotteField} style={{ borderTop: '1px solid var(--mk-line)', paddingTop: 14, marginTop: 4 }}>
+                  <button
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--mk-body)', fontWeight: 700, fontSize: 13, color: 'var(--mk-ink-2)', padding: '4px 0' }}
+                    onClick={() => setShowCollectCustom(v => !v)}
+                  >
+                    <span style={{ fontSize: 16 }}>🎨</span>
+                    Personnaliser la page de collecte
+                    <ChevronRight size={14} style={{ transform: showCollectCustom ? 'rotate(90deg)' : 'none', transition: 'transform .2s', marginLeft: 'auto' }} />
+                  </button>
+                  {showCollectCustom && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                      <div>
+                        <label className={styles.cagnotteFieldLabel}>TITRE DE LA PAGE</label>
+                        <input className={styles.cagnotteInput} value={collectTitle} onChange={e => setCollectTitle(e.target.value)} placeholder="c'est l'anniversaire de" />
+                      </div>
+                      <div>
+                        <label className={styles.cagnotteFieldLabel}>SOUS-TITRE</label>
+                        <input className={styles.cagnotteInput} value={collectSubtitle} onChange={e => setCollectSubtitle(e.target.value)} placeholder="Laisse un mot et rejoins la cagnotte !" />
+                      </div>
+                      <div>
+                        <label className={styles.cagnotteFieldLabel}>IMAGE DE COUVERTURE</label>
+                        {collectCover ? (
+                          <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 80 }}>
+                            <img src={collectCover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <button onClick={() => setCollectCover('')} style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,.5)', color: '#fff', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>×</button>
+                          </div>
+                        ) : (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1.5px dashed var(--mk-line-2)', cursor: 'pointer', fontSize: 13, color: 'var(--mk-ink-2)', background: 'var(--mk-cream)' }}>
+                            {collectCoverUploading ? '⏳ Upload…' : '🖼️ Ajouter une image de fond'}
+                            <input type="file" accept="image/*" style={{ display: 'none' }} disabled={collectCoverUploading} onChange={async e => {
+                              const f = e.target.files[0]; if (!f) return;
+                              setCollectCoverUploading(true);
+                              try { const r = await uploadFile(f); setCollectCover(r.data.url); }
+                              catch {}
+                              finally { setCollectCoverUploading(false); e.target.value = ''; }
+                            }} />
+                          </label>
+                        )}
+                      </div>
+                      <div>
+                        <label className={styles.cagnotteFieldLabel}>COULEUR D'ACCENT</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <input type="color" value={collectAccentColor || '#E11D48'} onChange={e => setCollectAccentColor(e.target.value)} style={{ width: 40, height: 40, padding: 2, border: '1.5px solid var(--mk-line-2)', borderRadius: 8, cursor: 'pointer', background: 'var(--mk-cream)' }} />
+                          <span style={{ fontSize: 12, color: 'var(--mk-ink-2)' }}>{collectAccentColor || '#E11D48 (défaut)'}</span>
+                          {collectAccentColor && <button onClick={() => setCollectAccentColor('')} style={{ fontSize: 11, color: 'var(--mk-rose)', background: 'none', border: 'none', cursor: 'pointer' }}>Réinitialiser</button>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Extras accordion */}
-            {showJar && (
-              <AccordionCard icon={Coffee} title="Jarre de Vœux" sub="Messages audio & écrits" color="#047857">
-                <JarTab jarConfig={jarConfig} onChange={handleJarChange} templateName={pub.templateName} />
-              </AccordionCard>
-            )}
-            {showWishes && (
-              <AccordionCard icon={MailOpen} title="Vœux collectifs" sub="Messages de groupe" color="#047857">
-                <WishesManager publicationId={pub._id} templateName={pub.templateName} customName={pub.customName} />
-              </AccordionCard>
-            )}
+            {/* Lien de promotion */}
             <AccordionCard icon={Megaphone} title="Lien de promotion" sub="Bouton myKado discret" color="#047857">
               <BrandingTab
                 show={showBranding} url={brandingUrl} text={brandingText}
@@ -720,6 +1078,36 @@ export default function Editor() {
                   <div className={styles.shareHeroTitle} style={{ color: '#9C1632' }}>C'est en ligne !</div>
                   <div className={styles.shareHeroSub}>Ton lien est prêt à être partagé</div>
                 </div>
+
+                {/* Cagnotte collect link — shown when cagnotte is enabled */}
+                {cagnotte && (
+                  <div style={{ margin: '0 16px', padding: '14px 16px', background: 'linear-gradient(135deg,#FFF1F4,#FFE0E6)', border: '1.5px solid #FFB3C1', borderRadius: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+                      <span style={{ fontSize: 14 }}>🎁</span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: '#E11D48', letterSpacing: '.06em', textTransform: 'uppercase' }}>Lien de collecte vœux & cagnotte</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', borderRadius: 10, padding: '8px 12px', border: '1px solid #FFD0D8' }}>
+                      <span style={{ flex: 1, fontSize: 12, color: '#6D5C70', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {import.meta.env.VITE_API_URL}/collect/{id}
+                      </span>
+                      <button
+                        style={{ flexShrink: 0, background: '#E11D48', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+                        onClick={() => { navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL}/collect/${id}`); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                      >
+                        {linkCopied ? <><Check size={12} /> Copié</> : <><Copy size={12} /> Copier</>}
+                      </button>
+                    </div>
+                    <p style={{ fontSize: 11.5, color: '#9B7EE2', marginTop: 8, lineHeight: 1.4 }}>
+                      Ce lien unique sert à la fois à collecter les vœux et les contributions à la cagnotte.
+                    </p>
+                    <button
+                      style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '10px 14px', background: '#fff', border: '1.5px solid #FFB3C1', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#E11D48', justifyContent: 'center' }}
+                      onClick={() => setShowQrCollect(true)}
+                    >
+                      <QrCode size={15} /> Générer l'image à partager (QR)
+                    </button>
+                  </div>
+                )}
 
                 {shortCode && (
                   <div className={styles.shareLinkBox}>
@@ -845,7 +1233,7 @@ export default function Editor() {
 
       {/* ── Progress strip ── */}
       <div className={styles.progressStrip}>
-        <span className={styles.progressLabel}>Étape {currentStepIndex + 1} / {STEPS.length}</span>
+        <span className={styles.progressLabel}>Étape {currentStepIndex + 1} / {displaySteps.length}</span>
         <div className={styles.progressBarWrap}>
           <div
             className={styles.progressBarFill}
@@ -958,7 +1346,7 @@ export default function Editor() {
 
           {/* Step nav */}
           <div className={`${styles.stepNav} tour-step-nav`}>
-            {STEPS.map((step, i) => {
+            {displaySteps.map((step, i) => {
               const isActive = activeStep === step.id;
               const isDone   = currentStepIndex > i;
               return (
@@ -995,15 +1383,15 @@ export default function Editor() {
             <div className={styles.stepFooter}>
               <button
                 className={styles.btnPrev}
-                onClick={() => { const p = STEPS[currentStepIndex - 1]; if (p) setActiveStep(p.id); }}
+                onClick={() => { const p = displaySteps[currentStepIndex - 1]; if (p) setActiveStep(p.id); }}
                 disabled={currentStepIndex === 0}
               >
                 ← Précédent
               </button>
-              {currentStepIndex < STEPS.length - 1 ? (
+              {currentStepIndex < displaySteps.length - 1 ? (
                 <button
                   className={styles.btnNext}
-                  onClick={() => { const n = STEPS[currentStepIndex + 1]; if (n) setActiveStep(n.id); }}
+                  onClick={() => { const n = displaySteps[currentStepIndex + 1]; if (n) setActiveStep(n.id); }}
                   style={{ background: currentStep.color }}
                 >
                   Suivant →
@@ -1081,6 +1469,10 @@ export default function Editor() {
         <QRCodeModal url={`${import.meta.env.VITE_API_URL}/s/${shortCode}`} onClose={() => setShowQrModal(false)} />
       )}
 
+      {showQrCollect && pub.published && (
+        <QRCodeModal url={`${import.meta.env.VITE_API_URL}/collect/${id}`} onClose={() => setShowQrCollect(false)} />
+      )}
+
       {paymentModalOpen && (
         <PaymentModal onClose={() => setPaymentModalOpen(false)} onSuccess={handlePublish} />
       )}
@@ -1091,7 +1483,6 @@ export default function Editor() {
           onClose={() => setShowKyc(false)}
           onDone={() => {
             setShowKyc(false);
-            setKycDone(true);
             setCagnotte(true);
           }}
         />
@@ -1099,7 +1490,7 @@ export default function Editor() {
 
       {/* ── Mobile bottom dock ── */}
       <div className={styles.mobileDock}>
-        {STEPS.map(step => (
+        {displaySteps.map(step => (
           <button
             key={step.id}
             className={`${styles.mobileDockBtn} ${activeStep === step.id ? styles.mobileDockBtnActive : ''}`}
@@ -1121,13 +1512,13 @@ export default function Editor() {
         <div className={styles.mobileSheetContent}>
           {renderStepContent()}
           <div className={styles.mobileSheetFooter}>
-            {currentStepIndex < STEPS.length - 1 ? (
+            {currentStepIndex < displaySteps.length - 1 ? (
               <button
                 className={styles.mobileSheetNext}
                 style={{ background: currentStep.color }}
-                onClick={() => { setActiveStep(STEPS[currentStepIndex + 1].id); }}
+                onClick={() => { setActiveStep(displaySteps[currentStepIndex + 1].id); }}
               >
-                Suivant → {STEPS[currentStepIndex + 1]?.emoji}
+                Suivant → {displaySteps[currentStepIndex + 1]?.emoji}
               </button>
             ) : (
               <button

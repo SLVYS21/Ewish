@@ -82,8 +82,9 @@ router.get('/:templateName/:customName', async (req, res) => {
     }
 
     const isPreview = req.query.preview === '1';
+    const isWallFreemium = pub.templateName.startsWith('wall-of-wishes') && !pub.published;
 
-    if (!pub.published && !isPreview) {
+    if (!pub.published && !isPreview && !isWallFreemium) {
       return res.status(410).send(`
         <html>
         <head>
@@ -201,11 +202,17 @@ router.get('/:templateName/:customName', async (req, res) => {
       html = html.replace('<head>', `<head>\n  ${bubbleFontPreloads}`);
     }
 
+    const isWallTemplate = pub.templateName.startsWith('wall-of-wishes');
+    const wallPrimary    = isWallTemplate ? (s.primaryColor || '#9b87f5') : (s.primaryColor || '#ff69b4');
+    const wallAccent     = isWallTemplate ? (s.accentColor  || '#f5a8be') : (s.accentColor  || '#ffb347');
+
     const injection = `
 <style>
 ${bubbleFontFaces ? bubbleFontFaces + '\n' : ''}${fontFaceCSS ? fontFaceCSS + '\n' : ''}  :root {
-    --primary:    ${s.primaryColor  || '#ff69b4'};
-    --accent:     ${s.accentColor   || '#ffb347'};
+    --primary:    ${wallPrimary};
+    --accent:     ${wallAccent};
+    --gold:       ${wallPrimary};
+    --rose:       ${wallAccent};
     --font:       '${s.fontFamily   || 'Work Sans'}', sans-serif;
     --font-b:     '${s.fontFamily   || 'Work Sans'}', sans-serif;
     --fs-scale:   ${scale};
@@ -219,10 +226,29 @@ ${bgCssLines.join('\n')}
   /* ── Publication data injected by server ── */
   const _rawData = ${JSON.stringify(pub.data || {})};
   const _jarCfg  = ${JSON.stringify(pub.jarConfig || null)};
- 
-  window.__WW_DATA__  = _jarCfg
-    ? { ..._rawData, jarConfig: _jarCfg, publicationId: '${String(pub._id)}', apiBase: '${process.env.API_BASE_URL || ''}' }
-    : { ..._rawData, publicationId: '${String(pub._id)}', apiBase: '${process.env.API_BASE_URL || ''}' };
+
+  window.__WW_DATA__  = {
+    ...(_jarCfg ? { ..._rawData, jarConfig: _jarCfg } : _rawData),
+    publicationId: '${String(pub._id)}',
+    apiBase: '${process.env.API_BASE_URL || ''}',
+    wishesEnabled: ${pub.cagnotteConfig?.wishesEnabled !== false},
+    isPrivate: ${pub.cagnotteConfig?.isPrivate || (isWallTemplate && (pub.data?.isPrivate || false))},
+    accessCode: '${((pub.cagnotteConfig?.accessCode || (isWallTemplate ? pub.data?.accessCode : '')) || '').replace(/'/g, "\\'")}',
+    requireModeration: ${pub.cagnotteConfig?.requireModeration || false},
+    isPaid: ${pub.isPaid || false},
+    minContribution: ${pub.cagnotteConfig?.minContribution || 0},
+    maxContribution: ${pub.cagnotteConfig?.maxContribution || 0},
+    cagnotte: ${pub.cagnotteConfig?.enabled ? JSON.stringify({
+      enabled: true,
+      name: pub.cagnotteConfig.description || '',
+      goal: pub.cagnotteConfig.goal || 0,
+      emoji: '🎁',
+      collected: 0,
+      contributors: 0,
+      minAmount: pub.cagnotteConfig.minContribution || 0,
+      maxAmount: pub.cagnotteConfig.maxContribution || 0,
+    }) : 'null'},
+  };
   window.__WW_STYLE__ = ${JSON.stringify(pub.style || {})};
   window.__WW_META__  = ${JSON.stringify({
     id:           String(pub._id),

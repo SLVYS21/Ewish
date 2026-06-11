@@ -30,6 +30,7 @@ router.get('/', requireAdmin, async (req, res) => {
         $or: [
           { title: { $regex: search, $options: 'i' } },
           { customName: { $regex: search, $options: 'i' } },
+          { shortCode: { $regex: search, $options: 'i' } },
           { 'data.name': { $regex: search, $options: 'i' } },
           { 'data.recipientName': { $regex: search, $options: 'i' } },
           { 'data.recipient': { $regex: search, $options: 'i' } },
@@ -43,7 +44,18 @@ router.get('/', requireAdmin, async (req, res) => {
         Object.assign(query, searchFilter);
       }
     }
-    const pubs = await Publication.find(query).sort('-updatedAt').skip((page - 1) * limit).limit(limit).lean();
+
+    if (req.query.templateName) {
+      query.templateName = req.query.templateName;
+    }
+
+    if (req.query.published === 'true') {
+      query.published = true;
+    } else if (req.query.published === 'false') {
+      query.published = false;
+    }
+
+    const pubs = await Publication.find(query).sort('-updatedAt').skip((page - 1) * limit).limit(Number(limit)).lean();
     res.json(pubs);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -113,9 +125,10 @@ router.patch('/:id', requireOptionalAdmin, async (req, res) => {
       }
     }
 
+
     const update = {
       ...rest,
-      data: data ? { ...existing.data, ...data } : existing.data,
+      data: data ? { ...existing.data, ...data, ...{'ib-name': data.name} } : existing.data,
       style: mergedStyle,
       updatedAt: Date.now(),
     };

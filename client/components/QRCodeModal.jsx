@@ -9,7 +9,6 @@ export default function QRCodeModal({ url, onClose }) {
   const [styleType, setStyleType] = useState('rounded'); // 'square', 'rounded', 'dots', 'classy'
   const [qrColor, setQrColor] = useState('#e60000');
   const [bgColor, setBgColor] = useState('#ffffff');
-  const [isTransparent, setIsTransparent] = useState(true);
   const [qrSrc, setQrSrc] = useState('');
   
   const qrCode = useRef(null);
@@ -38,7 +37,7 @@ export default function QRCodeModal({ url, onClose }) {
 
   useEffect(() => {
     updateQR();
-  }, [url, qrColor, bgColor, isTransparent, styleType]);
+  }, [url, qrColor, bgColor, styleType]);
 
   const updateQR = async () => {
     if (!qrCode.current) return;
@@ -68,7 +67,7 @@ export default function QRCodeModal({ url, onClose }) {
         type: dotsType
       },
       backgroundOptions: {
-        color: isTransparent ? 'transparent' : bgColor,
+        color: bgColor,
       },
       cornersSquareOptions: {
         color: qrColor,
@@ -176,23 +175,12 @@ export default function QRCodeModal({ url, onClose }) {
             
             <div className={styles.colorField}>
               <label>Arrière-plan</label>
-              <input 
-                type="color" 
-                value={bgColor} 
-                onChange={(e) => setBgColor(e.target.value)} 
-                disabled={isTransparent}
-                style={{ opacity: isTransparent ? 0.4 : 1 }}
+              <input
+                type="color"
+                value={bgColor}
+                onChange={(e) => setBgColor(e.target.value)}
               />
             </div>
-            
-            <label className={styles.checkbox}>
-              <input 
-                type="checkbox" 
-                checked={isTransparent} 
-                onChange={(e) => setIsTransparent(e.target.checked)} 
-              />
-              Transparent
-            </label>
           </div>
         </div>
 

@@ -20,6 +20,8 @@ const adminUserSchema = new mongoose.Schema({
   kycMobileToken:       { type: String },
   kycMobileTokenExpiry: { type: Date },
   googleId:             { type: String, default: '' },
+  resetPasswordToken:   { type: String },
+  resetPasswordExpiry:  { type: Date },
 }, { timestamps: true });
 
 adminUserSchema.pre('save', async function(next) {

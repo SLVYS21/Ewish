@@ -20,6 +20,7 @@ export const getPublication = (templateName, customName) => api.get(`/publicatio
 export const createPublication = (data) => api.post('/publications', data);
 export const updatePublication = (id, data) => api.patch(`/publications/${id}`, data);
 export const publishPublication = (id) => api.post(`/publications/${id}/publish`);
+//export const unpublishPublication = (id) => api.post(`/publications/${id}/unpublish`);
 export const deletePublication = (id) => api.delete(`/publications/${id}`);
 
 // export const uploadFile = (file) => {
@@ -111,6 +112,8 @@ export const register = (email, password, name) => api.post('/auth/register', { 
 export const googleLogin = (credential) => api.post('/auth/google', { credential }, { withCredentials: true });
 export const logout = () => api.post('/auth/logout', {}, { withCredentials: true });
 export const getMe = () => api.get('/auth/me', { withCredentials: true });
+export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
+export const resetPassword = (token, password) => api.post('/auth/reset-password', { token, password });
 
 // ── Orders ──
 export const getOrders = (params) => api.get('/orders', { params, withCredentials: true });
@@ -198,4 +201,4 @@ export const deleteProspect  = (id)        => api.delete(`/prospects/${id}`, { w
 
 // ── Settings ──
 export const getSettings     = ()           => api.get('/settings');
-export const updateSettings  = (data)       => api.put('/settings', data, { withCredentials: true });
+export const updateSettings  = (data)       => api.put('/settings', data, { withCredentials: true });

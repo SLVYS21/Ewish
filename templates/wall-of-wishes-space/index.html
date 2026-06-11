@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mur de vœux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Serve.js injects --primary and --accent above this block. */
+    :root {
+      --primary: #ff7055;
+      --accent:  #ff3d6e;
+      --ink:     #1a0e14;
+      --ink-2:   rgba(26,14,20,0.75);
+      --ink-3:   rgba(26,14,20,0.45);
+    }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font, 'Inter', sans-serif);
+      background: linear-gradient(150deg, #ff8060 0%, #ff4878 60%, #d83070 100%);
+      user-select: none; -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    /* ── HEADER OVERLAY ── */
+    #wall-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: clamp(18px,4vw,28px) 20px 0;
+      text-align: center;
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      padding: 4px 12px; border-radius: 99px; margin-bottom: 6px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    .wall-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.6rem,5vw,2.6rem); font-weight: 400; font-style: italic;
+      color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.18); line-height: 1.15;
+    }
+    .wall-title em { font-style: normal; color: rgba(255,255,255,0.85); }
+
+    /* ── COUNT BADGE ── */
+    #wish-count-badge {
+      position: fixed; top: 16px; right: 16px; z-index: 110;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 700; color: #fff;
+      background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25); padding: 5px 12px; border-radius: 99px;
+    }
+    #wish-count-badge svg { width: 12px; height: 12px; }
+
+    /* ── CANVAS VIEWPORT ── */
+    #viewport {
+      position: fixed; inset: 0; overflow: hidden; cursor: grab;
+      will-change: transform;
+    }
+    #viewport.dragging { cursor: grabbing; }
+    #canvas {
+      position: absolute; top: 0; left: 0;
+      width: 4000px; height: 3200px;
+      transform-origin: 0 0;
+    }
+
+    /* ── POLAROID CARD ── */
+    .polar-card {
+      position: absolute;
+      width: 196px;
+      background: #fff;
+      border-radius: 4px 4px 3px 3px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 12px 40px rgba(0,0,0,0.16), 0 2px 4px rgba(0,0,0,0.14);
+      cursor: pointer; transition: box-shadow 0.2s, transform 0.2s;
+      overflow: hidden;
+    }
+    .polar-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.30), 0 20px 60px rgba(0,0,0,0.22);
+      z-index: 10 !important;
+    }
+    .polar-photo {
+      width: 100%; aspect-ratio: 1 / 1; overflow: hidden; background: #f0ede8;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .polar-photo img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+    .polar-photo .photo-placeholder { font-size: 40px; opacity: 0.65; }
+    .photo-initial { font-family: 'DM Serif Display', Georgia, serif; font-size: 56px; font-style: italic; color: rgba(255,255,255,0.80); line-height: 1; user-select: none; }
+    .polar-caption {
+      padding: 10px 12px 14px;
+    }
+    .polar-text {
+      font-family: 'Caveat', cursive; font-size: 1rem; line-height: 1.45;
+      color: var(--ink-2); margin-bottom: 8px; word-break: break-word;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .polar-name {
+      font-family: 'Inter', sans-serif; font-size: 0.68rem; font-weight: 600;
+      color: var(--ink-3); text-align: right; display: block;
+    }
+    .polar-audio {
+      width: calc(100% - 24px); margin: 0 12px 10px; accent-color: #ff6050;
+      display: block;
+    }
+
+    /* ── HINT ── */
+    #drag-hint {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      z-index: 110; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.6); pointer-events: none; transition: opacity 0.5s;
+      white-space: nowrap;
+    }
+    #drag-hint.hidden { opacity: 0; }
+
+    /* ── ADD BUTTON ── */
+    #add-btn {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200;
+      display: inline-flex; align-items: center; gap: 9px;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      color: var(--ink); border: none; border-radius: 99px; padding: 14px 32px;
+      font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.02em;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.10);
+      transition: transform 0.22s, box-shadow 0.22s; white-space: nowrap;
+    }
+    #add-btn:hover { transform: translateX(-50%) translateY(-3px); box-shadow: 0 14px 40px rgba(0,0,0,0.28); }
+    #add-btn.hidden { display: none; }
+    #add-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ── DETAIL OVERLAY ── */
+    #detail-overlay {
+      position: fixed; inset: 0; z-index: 400;
+      background: linear-gradient(150deg, #ff8060 0%, #ff4878 60%, #d83070 100%);
+      display: none; flex-direction: column; align-items: center; justify-content: flex-start;
+      padding: clamp(32px,6vh,60px) 24px 32px; overflow-y: auto;
+      opacity: 0; transition: opacity 0.28s ease;
+    }
+    #detail-overlay.open { display: flex; }
+    #detail-overlay.visible { opacity: 1; }
+
+    #detail-card {
+      background: #fff; border-radius: 5px 5px 4px 4px;
+      width: 100%; max-width: 340px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.40), 0 8px 24px rgba(0,0,0,0.22);
+      overflow: hidden; flex-shrink: 0;
+      transform: translateY(20px) scale(0.96); transition: transform 0.32s cubic-bezier(0.34,1.45,0.64,1);
+    }
+    #detail-overlay.visible #detail-card { transform: translateY(0) scale(1); }
+    #detail-photo-wrap { width: 100%; overflow: hidden; background: #f0ede8; display: none; }
+    #detail-photo { width: 100%; max-height: 340px; object-fit: cover; display: block; }
+    #detail-audio-wrap { padding: 12px 16px 0; display: none; }
+    #detail-audio { width: 100%; accent-color: #ff6050; }
+    #detail-body { padding: 16px 18px 22px; }
+    #detail-text { font-family: 'Caveat', cursive; font-size: 1.25rem; line-height: 1.55; color: var(--ink-2); margin-bottom: 14px; word-break: break-word; }
+    #detail-name { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--ink-3); display: block; text-align: right; }
+
+    #zoom-out-btn {
+      width: 100%; max-width: 340px; padding: 17px;
+      background: rgba(255,255,255,0.92);
+      border: none; border-radius: 16px;
+      font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700;
+      color: var(--ink); cursor: pointer; letter-spacing: 0.02em;
+      margin-top: 20px; margin-bottom: 32px; flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.14);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #zoom-out-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.20); }
+
+    /* ── ADD SHEET ── */
+    #add-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(26,14,20,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
+    #add-overlay.open { background: rgba(26,14,20,0.58); pointer-events: all; }
+    #add-sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 8px 28px 44px; width: 100%; max-width: 520px; transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); position: relative; max-height: 92vh; overflow-y: auto; }
+    #add-overlay.open #add-sheet { transform: translateY(0); }
+    .sheet-drag { width: 38px; height: 4px; border-radius: 2px; background: rgba(0,0,0,0.12); margin: 12px auto 24px; }
+    .sheet-title { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 1.55rem; color: var(--ink); margin-bottom: 4px; }
+    .sheet-hint { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 16px; }
+    #wish-input { width: 100%; min-height: 100px; max-height: 180px; padding: 14px 16px; resize: none; background: rgba(255,112,85,0.05); border: 1.5px solid rgba(255,112,85,0.22); border-radius: 14px; font-family: 'Caveat', cursive; font-size: 1.15rem; color: var(--ink); outline: none; transition: border-color 0.2s; line-height: 1.55; }
+    #wish-input:focus { border-color: var(--primary); }
+    #wish-input::placeholder { color: rgba(26,14,20,0.30); }
+    .wish-field { width: 100%; padding: 11px 16px; margin-top: 10px; background: rgba(255,112,85,0.05); border: 1.5px solid rgba(255,112,85,0.22); border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+    .wish-field:focus { border-color: var(--primary); }
+    .wish-field::placeholder { color: rgba(26,14,20,0.30); }
+    .media-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 10px; }
+    .media-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .media-tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 99px; border: 1.5px solid rgba(255,112,85,0.25); background: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 600; color: var(--ink-3); transition: all 0.18s; }
+    .media-tab:hover { border-color: rgba(255,112,85,0.5); color: var(--ink-2); }
+    .media-tab.active { border-color: var(--primary); color: var(--primary); background: rgba(255,112,85,0.08); }
+    .media-tab svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .media-panel { display: none; margin-bottom: 4px; }
+    .media-panel.active { display: block; }
+    .upload-zone { border: 1.5px dashed rgba(255,112,85,0.35); border-radius: 12px; padding: 20px 16px; text-align: center; cursor: pointer; background: rgba(255,112,85,0.03); transition: border-color 0.2s, background 0.2s; }
+    .upload-zone:hover,.upload-zone.drag-over { border-color: var(--primary); background: rgba(255,112,85,0.08); }
+    .upload-zone input { display: none; }
+    .upload-zone-inner { pointer-events: none; }
+    .upload-zone svg { color: var(--primary); margin-bottom: 6px; }
+    .upload-zone p { font-size: 0.76rem; color: var(--ink-3); line-height: 1.5; }
+    .upload-zone small { font-size: 0.66rem; color: rgba(26,14,20,0.25); }
+    .media-loading { display: none; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 0.78rem; color: var(--primary); }
+    .media-loading.show { display: flex; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .media-loading svg { animation: spin 0.9s linear infinite; width: 16px; height: 16px; flex-shrink: 0; }
+    .media-preview { display: none; position: relative; margin-top: 8px; }
+    .media-preview.show { display: block; }
+    .media-preview img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px; border: 1.5px solid rgba(255,112,85,0.22); display: block; }
+    .media-preview audio { width: 100%; display: block; accent-color: var(--primary); }
+    .media-clear { position: absolute; top: -9px; right: -9px; background: var(--ink); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
+    .rec-controls { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 0; }
+    .rec-btn { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(255,61,110,0.35); }
+    .rec-btn:hover { transform: scale(1.06); }
+    .rec-btn.recording { background: #c0392b; animation: recPulse 1.4s ease-in-out infinite; }
+    .rec-btn svg { width: 20px; height: 20px; }
+    @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.4)} 50%{box-shadow:0 0 0 14px rgba(192,57,43,0)} }
+    .rec-status { font-size: 0.76rem; font-weight: 500; color: var(--ink-3); text-align: center; }
+    .rec-status.active { color: var(--accent); font-weight: 600; }
+    #submit-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 14px 24px; margin-top: 16px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 99px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em; box-shadow: 0 6px 24px rgba(255,112,85,0.35); transition: opacity 0.18s, transform 0.15s; }
+    #submit-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+    #submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    #close-btn { position: absolute; top: 20px; right: 22px; background: none; border: none; cursor: pointer; color: var(--ink-3); font-size: 1.2rem; line-height: 1; padding: 4px; border-radius: 50%; transition: color 0.18s, background 0.18s; }
+    #close-btn:hover { color: var(--ink); background: rgba(0,0,0,0.06); }
+
+    #wishes-closed { display: none; position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; background: rgba(26,14,20,0.80); backdrop-filter: blur(8px); color: rgba(255,255,255,0.75); border-radius: 99px; padding: 12px 28px; font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
+    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 600; pointer-events: none; background: rgba(26,14,20,0.88); color: #fff; padding: 10px 22px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; opacity: 0; transition: opacity 0.3s, transform 0.3s; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── GIFT & THANKS (same pattern as other templates) ── */
+    #gift-overlay { position: fixed; inset: 0; z-index: 700; background: rgba(26,14,20,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
+    #gift-overlay.open { background: rgba(26,14,20,0.58); pointer-events: all; }
+    #gift-sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 8px 24px 44px; width: 100%; max-width: 520px; transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); max-height: 92vh; overflow-y: auto; position: relative; }
+    #gift-overlay.open #gift-sheet { transform: translateY(0); }
+    .gamt-chip { padding: 14px 4px; border-radius: 14px; text-align: center; background: #fff; border: 2px solid rgba(255,112,85,0.25); cursor: pointer; transition: all .15s; }
+    .gamt-chip:hover { border-color: rgba(255,112,85,0.55); }
+    .gamt-chip.active { background: rgba(255,112,85,0.1); border-color: var(--primary); }
+    .gamt-chip .gav { font-weight: 800; font-size: 15px; color: var(--ink); }
+    .gamt-chip.active .gav { color: var(--primary); }
+    .gamt-chip .gac { font-size: 9.5px; color: var(--ink-3); font-weight: 700; margin-top: 2px; }
+    .gpbar-track { height: 12px; background: rgba(255,112,85,0.15); border-radius: 99px; overflow: hidden; position: relative; }
+    .gpbar-fill { position: absolute; inset: 0; border-radius: 99px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .gpbar-preview { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 5px, rgba(255,61,110,0.4) 5px, rgba(255,61,110,0.4) 10px); }
+    #thanks-overlay { position: fixed; inset: 0; z-index: 800; background: rgba(26,14,20,0); display: flex; align-items: center; justify-content: center; pointer-events: none; transition: background 0.3s; }
+    #thanks-overlay.open { background: rgba(26,14,20,0.62); pointer-events: all; }
+    #thanks-card { background: #fff; border-radius: 24px; padding: 40px 28px; width: calc(100% - 48px); max-width: 360px; text-align: center; transform: scale(0.85); opacity: 0; transition: transform 0.4s cubic-bezier(0.34,1.45,0.64,1), opacity 0.3s; }
+    #thanks-overlay.open #thanks-card { transform: scale(1); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="wall-header" aria-hidden="true">
+  <p class="eyebrow" data-node="eyebrow">✦ Mur de vœux</p>
+  <h1 class="wall-title">Pour <em data-node="titleName">Prénom</em></h1>
+</div>
+
+<div id="wish-count-badge">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+  <span id="count-num">0</span>
+</div>
+
+<!-- Canvas -->
+<div id="viewport">
+  <div id="canvas"></div>
+</div>
+
+<p id="drag-hint">Glisse pour explorer · Scroll pour zoomer</p>
+
+<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un vœu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  Ajouter mon vœu
+</button>
+<div id="wishes-closed">🔒 Les vœux sont temporairement fermés</div>
+
+<!-- DETAIL OVERLAY -->
+<div id="detail-overlay">
+  <div id="detail-card">
+    <div id="detail-photo-wrap"><img id="detail-photo" src="" alt=""></div>
+    <div id="detail-audio-wrap"><audio id="detail-audio" controls preload="none"></audio></div>
+    <div id="detail-body">
+      <p id="detail-text"></p>
+      <span id="detail-name"></span>
+    </div>
+  </div>
+  <button id="zoom-out-btn" onclick="closeDetail()">Zoom out</button>
+</div>
+
+<!-- ADD SHEET -->
+<div id="add-overlay" role="dialog" aria-modal="true" onclick="handleBgClick(event)">
+  <div id="add-sheet">
+    <button id="close-btn" onclick="closeSheet()" aria-label="Fermer">✕</button>
+    <div class="sheet-drag"></div>
+    <h2 class="sheet-title">Votre vœu</h2>
+    <p class="sheet-hint">Écrivez depuis le cœur — il apparaîtra sur le mur.</p>
+    <textarea id="wish-input" placeholder="Votre message…" maxlength="400" rows="4"></textarea>
+    <input id="wish-author" class="wish-field" type="text" placeholder="Votre prénom (optionnel)" maxlength="40" autocomplete="given-name">
+    <p class="media-label">Ajouter une photo ou un vocal</p>
+    <div class="media-tabs">
+      <button class="media-tab active" id="tab-none"  onclick="switchTab('none')">Texte seulement</button>
+      <button class="media-tab" id="tab-photo" onclick="switchTab('photo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Photo / GIF
+      </button>
+      <button class="media-tab" id="tab-audio" onclick="switchTab('audio')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>Message vocal
+      </button>
+    </div>
+    <div class="media-panel" id="panel-photo">
+      <div class="upload-zone" id="photo-zone" onclick="document.getElementById('photo-file').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <input type="file" id="photo-file" accept="image/*" onchange="handlePhotoSelect(event)">
+        <div class="upload-zone-inner">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Cliquez ou glissez une photo / GIF</p><small>JPG, PNG, GIF, WebP — max 10 Mo</small>
+        </div>
+      </div>
+      <div class="media-loading" id="photo-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>Envoi en cours…</div>
+      <div class="media-preview" id="photo-preview"><img id="photo-img" src="" alt=""><button class="media-clear" onclick="clearMedia()">✕</button></div>
+    </div>
+    <div class="media-panel" id="panel-audio">
+      <div class="rec-controls">
+        <button class="rec-btn" id="rec-btn" onclick="toggleRecording()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg></button>
+        <span class="rec-status" id="rec-status">Appuyez pour enregistrer</span>
+      </div>
+      <div class="media-loading" id="audio-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>Envoi en cours…</div>
+      <div class="media-preview" id="audio-preview"><audio id="audio-player" controls preload="none"></audio><button class="media-clear" onclick="clearMedia()">✕</button></div>
+    </div>
+    <button id="submit-btn" onclick="submitWish()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Épingler mon vœu
+    </button>
+  </div>
+</div>
+
+<div id="toast">Vœu ajouté ✦</div>
+
+<!-- GIFT OVERLAY -->
+<div id="gift-overlay" onclick="handleGiftBgClick(event)">
+  <div id="gift-sheet">
+    <div style="width:38px;height:4px;border-radius:2px;background:rgba(0,0,0,0.12);margin:12px auto 20px;"></div>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;background:rgba(255,112,85,0.12);border-radius:999px;margin-bottom:12px;"><span style="font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--primary);">CADEAU COMMUN</span></div>
+      <div style="font-family:'Caveat',cursive;font-size:20px;color:var(--accent);margin-bottom:3px;">et si on se cotisait pour…</div>
+      <h2 id="gift-sheet-name" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--ink);line-height:1.2;margin-bottom:6px;">🎁 Cadeau commun</h2>
+      <p id="gift-sheet-desc" style="font-size:13.5px;color:var(--ink-3);line-height:1.5;max-width:360px;margin:0 auto;"></p>
+    </div>
+    <div style="background:rgba(255,112,85,0.06);border-radius:18px;padding:18px;border:1px solid rgba(255,112,85,0.18);margin-bottom:18px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;"><div><span id="gift-collected" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--primary);"></span><span style="font-size:12px;font-weight:700;color:var(--ink-3);margin-left:5px;">FCFA</span></div><span id="gift-goal-lbl" style="font-size:12px;color:var(--ink-3);font-weight:700;"></span></div>
+      <div class="gpbar-track" style="margin-bottom:8px;"><div class="gpbar-fill" id="gift-bar-fill" style="width:0%;"></div><div class="gpbar-preview" id="gift-bar-pre" style="left:0;width:0;display:none;"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;"><span id="gift-contributors" style="color:var(--ink-3);font-weight:600;"></span><span id="gift-pct" style="font-weight:800;color:var(--primary);"></span></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:8px;letter-spacing:.08em;">JE PARTICIPE AVEC</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="gift-amt-grid"></div>
+      <button onclick="giftCustomAmt()" style="margin-top:9px;width:100%;padding:10px;border-radius:14px;border:1.5px dashed rgba(255,112,85,0.35);background:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">✏️ Un autre montant</button>
+    </div>
+    <div id="gift-err" style="display:none;background:rgba(255,61,110,0.08);border:1.5px solid rgba(255,61,110,0.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:10px;"></div>
+    <button id="gift-pay-btn" onclick="giftPay()" disabled style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.5;transition:all .18s;">Choisir un montant</button>
+    <button onclick="skipGift()" style="width:100%;padding:11px;margin-top:10px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">Une autre fois, merci</button>
+    <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;font-size:10.5px;color:var(--ink-3);"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>Paiement sécurisé · MTN, Moov, Orange Money</div>
+  </div>
+</div>
+
+<!-- THANKS OVERLAY -->
+<div id="thanks-overlay">
+  <div id="thanks-card">
+    <div id="thanks-icon" style="font-size:54px;margin-bottom:14px;">💕</div>
+    <h2 id="thanks-title" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:26px;color:var(--ink);margin-bottom:8px;line-height:1.2;">Merci pour ton joli mot</h2>
+    <p id="thanks-msg" style="font-size:14px;color:var(--ink-3);line-height:1.55;margin-bottom:20px;"></p>
+    <div id="thanks-receipt" style="display:none;background:rgba(255,112,85,0.08);border-radius:14px;padding:14px 18px;margin-bottom:18px;border:1px solid rgba(255,112,85,0.2);">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:3px;">Ta contribution</div>
+      <div id="thanks-amt" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:var(--primary);line-height:1;"></div>
+    </div>
+    <button onclick="closeThanks()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.02em;">Voir le mur ✦</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   CONFIG
+════════════════════════════════════════ */
+var _d       = window.__WW_DATA__ || {};
+var PUB_ID   = _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
+var API_BASE = _d.apiBase || (PUB_ID ? location.origin : '');
+
+/* ═══════════════════════════════════════
+   CANVAS STATE
+════════════════════════════════════════ */
+var CANVAS_W = 4000, CANVAS_H = 3200;
+var transform = { x: 0, y: 0, scale: 1 };
+var MIN_SCALE = 0.12, MAX_SCALE = 2.5;
+var isDragging = false, dragStart = { x: 0, y: 0, tx: 0, ty: 0 };
+var cardPositions = [];
+var detailOpen = false;
+var hintHidden = false;
+
+var $viewport = document.getElementById('viewport');
+var $canvas   = document.getElementById('canvas');
+
+function applyTransform(animated) {
+  $canvas.style.transition = animated ? 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none';
+  $canvas.style.transform = 'translate(' + transform.x + 'px,' + transform.y + 'px) scale(' + transform.scale + ')';
+}
+
+function initTransform(positions) {
+  if (!positions || !positions.length) {
+    transform.scale = Math.min(window.innerWidth / CANVAS_W, window.innerHeight / CANVAS_H) * 0.9;
+    transform.x = (window.innerWidth - CANVAS_W * transform.scale) / 2;
+    transform.y = (window.innerHeight - CANVAS_H * transform.scale) / 2;
+    applyTransform(false); return;
+  }
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  positions.forEach(function(p){
+    minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+    maxX = Math.max(maxX, p.x + 196); maxY = Math.max(maxY, p.y + 260);
+  });
+  var pad = 80, contentW = maxX - minX + pad*2, contentH = maxY - minY + pad*2;
+  transform.scale = Math.min(window.innerWidth / contentW, window.innerHeight / contentH, 1) * 0.92;
+  transform.x = (window.innerWidth - contentW * transform.scale) / 2 - (minX - pad) * transform.scale;
+  transform.y = (window.innerHeight - contentH * transform.scale) / 2 - (minY - pad) * transform.scale;
+  applyTransform(false);
+}
+
+/* ═══════════════════════════════════════
+   CARD LAYOUT
+════════════════════════════════════════ */
+function generatePositions(count) {
+  var positions = [];
+  if (count === 0) return positions;
+  var cols = Math.max(2, Math.ceil(Math.sqrt(count * 1.5)));
+  var cellW = Math.min(360, (CANVAS_W - 200) / cols);
+  var cellH = 320;
+  var startX = (CANVAS_W - cols * cellW) / 2;
+  var startY = Math.max(120, (CANVAS_H - Math.ceil(count / cols) * cellH) / 2);
+  for (var i = 0; i < count; i++) {
+    var col = i % cols, row = Math.floor(i / cols);
+    var jx = (Math.random() - 0.5) * cellW * 0.45;
+    var jy = (Math.random() - 0.5) * cellH * 0.45;
+    positions.push({
+      x: startX + col * cellW + jx,
+      y: startY + row * cellH + jy,
+      rot: (Math.random() - 0.5) * 10,
+      z: Math.floor(Math.random() * 5) + 1,
+    });
+  }
+  return positions;
+}
+
+/* ═══════════════════════════════════════
+   WISH STATE
+════════════════════════════════════════ */
+var wishes    = [];
+var myWishIds = JSON.parse(localStorage.getItem('ww_my_ids') || '[]');
+var activeTab  = 'none', activeMedia = { type: 'none', url: '' };
+var mediaRecorder = null, audioChunks = [], recTimerInt = null, recSecs = 0, isSubmitting = false;
+
+var SAMPLE_WISHES = [
+  { text: "HBD!! 🎉 Que cette année soit ta plus belle !", name: "Sarah",     color: 0, photoUrl: '' },
+  { text: "Joyeux anniversaire mon ami. Tu mérites tout le bonheur du monde.", name: "Marc", color: 1, photoUrl: '' },
+  { text: "Happy Birthday! Hope your day is filled with good people and better cake. Your friends at 1221s", name: "1221s", color: 2, photoUrl: '' },
+  { text: "Encore plus belle chaque année ! 🌸",           name: "Mariama",  color: 3, photoUrl: '' },
+  { text: "Santé, longue vie et réussite ! 🥂",            name: "Ibrahim",  color: 4, photoUrl: '' },
+  { text: "Que Dieu te garde, mon enfant. 🙏",              name: "Grand-Mère", color: 5, photoUrl: '' },
+];
+
+function apiFetch(path, opts) { return fetch(API_BASE + path, opts||{}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtNum(n) { return Number(n).toLocaleString('fr-FR'); }
+function uploadMedia(file) { var f=new FormData(); f.append('file',file); return apiFetch('/api/upload',{method:'POST',body:f}).then(function(d){return d.url;}); }
+
+/* ═══════════════════════════════════════
+   LOAD & RENDER
+════════════════════════════════════════ */
+function loadWishes() {
+  if (!PUB_ID) {
+    wishes = SAMPLE_WISHES.map(function(w,i){ return Object.assign({},w,{_id:'s'+i,ts:Date.now()-Math.random()*86400000*5,mediaType:'none',audioUrl:''}); });
+    renderCanvas(); return;
+  }
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
+    wishes = data.map(function(w){ return { text: w.message, name: w.firstName||'Anonyme', color: w.color!=null?w.color:Math.floor(Math.random()*6), ts: new Date(w.createdAt).getTime(), photoUrl: w.photoUrl||'', audioUrl: w.audioUrl||'', mediaType: w.mediaType||'none', _id: w._id }; });
+    renderCanvas(); setInterval(pollNewWishes, 30000);
+  }).catch(function(){ wishes = SAMPLE_WISHES.map(function(w,i){return Object.assign({},w,{_id:'s'+i,ts:Date.now()-Math.random()*86400000*3,mediaType:'none',audioUrl:''});}); renderCanvas(); });
+}
+
+function pollNewWishes() {
+  if (!PUB_ID) return;
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
+    var ids = new Set(wishes.map(function(w){return w._id;}).filter(Boolean));
+    data.forEach(function(w) {
+      if (ids.has(w._id)) return;
+      var wish = { text: w.message, name: w.firstName||'Anonyme', color: w.color!=null?w.color:Math.floor(Math.random()*6), ts: new Date(w.createdAt).getTime(), photoUrl: w.photoUrl||'', audioUrl: w.audioUrl||'', mediaType: w.mediaType||'none', _id: w._id };
+      wishes.push(wish);
+      var pos = { x: 100 + Math.random()*(CANVAS_W-400), y: 100 + Math.random()*(CANVAS_H-400), rot: (Math.random()-0.5)*10, z: 9 };
+      cardPositions.push(pos);
+      var el = createCardEl(wish, pos, wishes.length - 1);
+      $canvas.appendChild(el);
+      el.style.opacity = '0';
+      setTimeout(function(){ el.style.transition = 'opacity 0.5s, transform 0.5s'; el.style.opacity = '1'; }, 50);
+      document.getElementById('count-num').textContent = wishes.length;
+      showToast('Nouveau vœu ajouté ✦');
+    });
+  }).catch(function(){});
+}
+
+var TEXT_BG_GRADS = [
+  'linear-gradient(135deg,#FF9A8B,#FF6A88)',
+  'linear-gradient(135deg,#FFC3A0,#FFAFBD)',
+  'linear-gradient(135deg,#A18CD1,#FBC2EB)',
+  'linear-gradient(135deg,#FFECD2,#FCB69F)',
+  'linear-gradient(135deg,#96FBC4,#F9F586)',
+  'linear-gradient(135deg,#89F7FE,#66A6FF)',
+];
+
+function createCardEl(w, pos, idx) {
+  var el = document.createElement('div');
+  el.className = 'polar-card';
+  el.style.cssText = 'left:'+Math.round(pos.x)+'px;top:'+Math.round(pos.y)+'px;transform:rotate('+pos.rot.toFixed(1)+'deg);z-index:'+pos.z+';';
+
+  var hasPhoto = (w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl;
+  var hasAudio = w.mediaType==='audio' && w.audioUrl;
+
+  var initial = (w.name||'A').trim().charAt(0).toUpperCase();
+  var bg = TEXT_BG_GRADS[(w.color||0) % TEXT_BG_GRADS.length];
+
+  var photoHtml = hasPhoto
+    ? '<div class="polar-photo"><img src="'+escapeHtml(w.photoUrl)+'" alt="" loading="lazy" draggable="false"></div>'
+    : (hasAudio ? '' : '<div class="polar-photo" style="background:'+bg+'"><span class="photo-initial">'+escapeHtml(initial)+'</span></div>');
+  var audioHtml = hasAudio
+    ? '<audio class="polar-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none" onclick="event.stopPropagation()"></audio>'
+    : '';
+
+  el.innerHTML = photoHtml + audioHtml +
+    '<div class="polar-caption">' +
+      '<p class="polar-text">'+escapeHtml(w.text)+'</p>' +
+      '<span class="polar-name">— '+escapeHtml(w.name||'Anonyme')+'</span>' +
+    '</div>';
+
+  el.addEventListener('click', function(e) {
+    if (e.target.tagName === 'AUDIO') return;
+    if (hasDragged) return;
+    openDetail(idx);
+  });
+  return el;
+}
+
+function renderCanvas() {
+  $canvas.innerHTML = '';
+  cardPositions = generatePositions(wishes.length);
+  wishes.forEach(function(w, i) { $canvas.appendChild(createCardEl(w, cardPositions[i], i)); });
+  document.getElementById('count-num').textContent = wishes.length;
+  initTransform(cardPositions);
+}
+
+/* ═══════════════════════════════════════
+   DETAIL VIEW
+════════════════════════════════════════ */
+function openDetail(idx) {
+  var w = wishes[idx];
+  if (!w) return;
+  detailOpen = true;
+
+  var hasPhoto = (w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl;
+  var hasAudio = w.mediaType==='audio' && w.audioUrl;
+
+  var pw = document.getElementById('detail-photo-wrap');
+  var aw = document.getElementById('detail-audio-wrap');
+  pw.style.display = hasPhoto ? '' : 'none';
+  aw.style.display = hasAudio ? '' : 'none';
+  if (hasPhoto) document.getElementById('detail-photo').src = w.photoUrl;
+  if (hasAudio) document.getElementById('detail-audio').src = w.audioUrl;
+  document.getElementById('detail-text').textContent = w.text || '';
+  document.getElementById('detail-name').textContent = '— ' + (w.name || 'Anonyme');
+
+  var overlay = document.getElementById('detail-overlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(function(){
+    overlay.classList.add('open');
+    requestAnimationFrame(function(){ overlay.classList.add('visible'); });
+  });
+}
+
+function closeDetail() {
+  detailOpen = false;
+  var overlay = document.getElementById('detail-overlay');
+  overlay.classList.remove('visible');
+  setTimeout(function(){
+    overlay.classList.remove('open');
+    overlay.style.display = 'none';
+    var a = document.getElementById('detail-audio'); a.pause(); a.src = '';
+  }, 300);
+}
+
+/* ═══════════════════════════════════════
+   PAN INTERACTION
+════════════════════════════════════════ */
+var hasDragged = false;
+var dragDist = 0;
+
+$viewport.addEventListener('mousedown', function(e) {
+  if (detailOpen || document.getElementById('add-overlay').classList.contains('open')) return;
+  if (e.target.closest('.polar-card') && e.target.tagName !== 'AUDIO') {
+    isDragging = true; hasDragged = false; dragDist = 0;
+    dragStart = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y };
+    $viewport.classList.add('dragging');
+    return;
+  }
+  isDragging = true; hasDragged = false; dragDist = 0;
+  dragStart = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y };
+  $viewport.classList.add('dragging');
+});
+
+document.addEventListener('mousemove', function(e) {
+  if (!isDragging) return;
+  var dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+  dragDist = Math.sqrt(dx*dx + dy*dy);
+  if (dragDist > 4) hasDragged = true;
+  transform.x = dragStart.tx + dx;
+  transform.y = dragStart.ty + dy;
+  applyTransform(false);
+});
+
+document.addEventListener('mouseup', function() {
+  if (!isDragging) return;
+  isDragging = false; $viewport.classList.remove('dragging');
+  setTimeout(function(){ hasDragged = false; }, 50);
+});
+
+/* ── WHEEL ZOOM ── */
+$viewport.addEventListener('wheel', function(e) {
+  if (detailOpen) return;
+  e.preventDefault();
+  hideHint();
+  var factor = e.deltaY < 0 ? 1.10 : 0.91;
+  var newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, transform.scale * factor));
+  var cx = e.clientX, cy = e.clientY;
+  transform.x = cx - (cx - transform.x) * (newScale / transform.scale);
+  transform.y = cy - (cy - transform.y) * (newScale / transform.scale);
+  transform.scale = newScale;
+  applyTransform(false);
+}, { passive: false });
+
+/* ── TOUCH PAN + PINCH ── */
+var lastTouches = null;
+
+$viewport.addEventListener('touchstart', function(e) {
+  if (detailOpen || document.getElementById('add-overlay').classList.contains('open')) return;
+  hasDragged = false; dragDist = 0;
+  if (e.touches.length === 1) {
+    isDragging = true;
+    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, tx: transform.x, ty: transform.y };
+  }
+  lastTouches = e.touches;
+}, { passive: true });
+
+$viewport.addEventListener('touchmove', function(e) {
+  if (detailOpen) return;
+  e.preventDefault();
+  hideHint();
+  if (e.touches.length === 1 && isDragging) {
+    var dx = e.touches[0].clientX - dragStart.x, dy = e.touches[0].clientY - dragStart.y;
+    dragDist = Math.sqrt(dx*dx+dy*dy);
+    if (dragDist > 6) hasDragged = true;
+    transform.x = dragStart.tx + dx; transform.y = dragStart.ty + dy;
+    applyTransform(false);
+  } else if (e.touches.length === 2) {
+    var t1 = e.touches[0], t2 = e.touches[1];
+    var dist = Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
+    var mid  = { x: (t1.clientX+t2.clientX)/2, y: (t1.clientY+t2.clientY)/2 };
+    if (lastTouches && lastTouches.length === 2) {
+      var lt1 = lastTouches[0], lt2 = lastTouches[1];
+      var prevDist = Math.hypot(lt2.clientX-lt1.clientX, lt2.clientY-lt1.clientY);
+      var ratio = dist / prevDist;
+      var newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, transform.scale * ratio));
+      transform.x = mid.x - (mid.x - transform.x) * (newScale / transform.scale);
+      transform.y = mid.y - (mid.y - transform.y) * (newScale / transform.scale);
+      transform.scale = newScale;
+      applyTransform(false);
+    }
+    hasDragged = true;
+  }
+  lastTouches = e.touches;
+}, { passive: false });
+
+$viewport.addEventListener('touchend', function(e) {
+  isDragging = false;
+  lastTouches = e.touches;
+  setTimeout(function(){ hasDragged = false; }, 80);
+}, { passive: true });
+
+function hideHint() {
+  if (hintHidden) return;
+  hintHidden = true;
+  document.getElementById('drag-hint').classList.add('hidden');
+}
+
+/* ═══════════════════════════════════════
+   ADD WISH
+════════════════════════════════════════ */
+function setWishesEnabled(on) { document.getElementById('add-btn').classList.toggle('hidden',!on); document.getElementById('wishes-closed').style.display=on?'none':'block'; }
+function openSheet() { document.getElementById('add-overlay').classList.add('open'); setTimeout(function(){ document.getElementById('wish-input').focus(); }, 350); }
+function closeSheet() { document.getElementById('add-overlay').classList.remove('open'); if(mediaRecorder&&mediaRecorder.state==='recording') stopRecording(false); }
+function handleBgClick(e) { if(e.target===document.getElementById('add-overlay')) closeSheet(); }
+
+function switchTab(tab) {
+  activeTab=tab; document.querySelectorAll('.media-tab').forEach(function(t){t.classList.remove('active');}); document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.media-panel').forEach(function(p){p.classList.remove('active');}); if(tab!=='none') document.getElementById('panel-'+tab).classList.add('active');
+  if(tab!=='audio'&&mediaRecorder&&mediaRecorder.state==='recording') stopRecording(false);
+}
+function handleDragOver(e){e.preventDefault();document.getElementById('photo-zone').classList.add('drag-over');}
+function handleDragLeave(){document.getElementById('photo-zone').classList.remove('drag-over');}
+function handleDrop(e){e.preventDefault();document.getElementById('photo-zone').classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f&&/^image\//.test(f.type))processPhotoFile(f);}
+function handlePhotoSelect(e){if(e.target.files[0])processPhotoFile(e.target.files[0]);}
+function processPhotoFile(file) {
+  if(file.size>10*1024*1024){showToast('Fichier trop grand (max 10 Mo)');return;}
+  var isGif=file.type==='image/gif'; var reader=new FileReader(); reader.onload=function(ev){document.getElementById('photo-img').src=ev.target.result;}; reader.readAsDataURL(file);
+  if(!API_BASE){activeMedia={type:isGif?'gif':'photo',url:URL.createObjectURL(file)};document.getElementById('photo-preview').classList.add('show');document.getElementById('photo-zone').style.display='none';return;}
+  document.getElementById('photo-zone').style.display='none'; document.getElementById('photo-loading').classList.add('show');
+  uploadMedia(file).then(function(url){activeMedia={type:isGif?'gif':'photo',url:url};document.getElementById('photo-img').src=url;document.getElementById('photo-preview').classList.add('show');}).catch(function(){showToast("Échec de l'envoi");document.getElementById('photo-zone').style.display='';}).finally(function(){document.getElementById('photo-loading').classList.remove('show');});
+}
+function toggleRecording(){if(mediaRecorder&&mediaRecorder.state==='recording') stopRecording(true); else startRecording();}
+function startRecording(){
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    audioChunks=[]; mediaRecorder=new MediaRecorder(stream); mediaRecorder._stream=stream;
+    mediaRecorder.ondataavailable=function(e){if(e.data.size>0)audioChunks.push(e.data);}; mediaRecorder.start(100); recSecs=0;
+    document.getElementById('rec-status').textContent='Enregistrement… 00:00'; document.getElementById('rec-status').classList.add('active'); document.getElementById('rec-btn').classList.add('recording');
+    recTimerInt=setInterval(function(){recSecs++;var m=String(Math.floor(recSecs/60)).padStart(2,'0'),s=String(recSecs%60).padStart(2,'0');document.getElementById('rec-status').textContent='Enregistrement… '+m+':'+s;},1000);
+  }).catch(function(){showToast('Microphone inaccessible');});
+}
+function stopRecording(upload){
+  clearInterval(recTimerInt); document.getElementById('rec-btn').classList.remove('recording'); document.getElementById('rec-status').classList.remove('active'); document.getElementById('rec-status').textContent='Appuyez pour enregistrer';
+  if(!mediaRecorder||mediaRecorder.state==='inactive') return;
+  mediaRecorder.onstop=function(){
+    if(mediaRecorder._stream) mediaRecorder._stream.getTracks().forEach(function(t){t.stop();});
+    if(!upload||!audioChunks.length) return;
+    var blob=new Blob(audioChunks,{type:'audio/webm'}); var localUrl=URL.createObjectURL(blob); document.getElementById('audio-player').src=localUrl; document.getElementById('audio-preview').classList.add('show'); activeMedia={type:'audio',url:localUrl};
+    if(!API_BASE) return;
+    document.getElementById('audio-loading').classList.add('show');
+    uploadMedia(new File([blob],'audio.webm',{type:'audio/webm'})).then(function(url){activeMedia={type:'audio',url:url};document.getElementById('audio-player').src=url;}).catch(function(){showToast("Échec de l'envoi audio");}).finally(function(){document.getElementById('audio-loading').classList.remove('show');});
+  }; mediaRecorder.stop();
+}
+function clearMedia(){activeMedia={type:'none',url:''};document.getElementById('photo-preview').classList.remove('show');document.getElementById('audio-preview').classList.remove('show');document.getElementById('photo-zone').style.display='';document.getElementById('photo-file').value='';document.getElementById('rec-status').textContent='Appuyez pour enregistrer';document.getElementById('rec-btn').classList.remove('recording');clearInterval(recTimerInt);}
+
+function submitWish() {
+  if(isSubmitting) return;
+  var text=document.getElementById('wish-input').value.trim(), author=document.getElementById('wish-author').value.trim();
+  if(!text){var ta=document.getElementById('wish-input');ta.style.borderColor='var(--accent)';ta.focus();setTimeout(function(){ta.style.borderColor='';},1800);return;}
+  var w={text:text,name:author||'Anonyme',color:Math.floor(Math.random()*6),ts:Date.now(),photoUrl:activeMedia.type!=='audio'?(activeMedia.url||''):'',audioUrl:activeMedia.type==='audio'?(activeMedia.url||''):'',mediaType:activeMedia.type||'none'};
+  isSubmitting=true; document.getElementById('submit-btn').disabled=true;
+  var afterSubmit=function(){
+    isSubmitting=false; document.getElementById('submit-btn').disabled=false;
+    closeSheet(); document.getElementById('wish-input').value=''; document.getElementById('wish-author').value=''; clearMedia(); switchTab('none');
+    var pos={x:transform.x<0?(-transform.x/transform.scale)+window.innerWidth/(2*transform.scale)-98:CANVAS_W/2-98+(Math.random()-0.5)*200, y:CANVAS_H/2-130+(Math.random()-0.5)*200, rot:(Math.random()-0.5)*10, z:20};
+    wishes.push(w); cardPositions.push(pos);
+    var el=createCardEl(w,pos,wishes.length-1);
+    el.style.opacity='0'; $canvas.appendChild(el);
+    setTimeout(function(){el.style.transition='opacity 0.6s ease, transform 0.6s ease';el.style.opacity='1';},30);
+    document.getElementById('count-num').textContent=wishes.length;
+    showToast('Vœu épinglé ✦');
+    try{window.parent.postMessage({type:'WW_WISH_ADDED',wish:w},'*');}catch(e){}
+    var cag=_d.cagnotte||_d.jarConfig||{};
+    if(cag&&cag.enabled&&(cag.name||cag.goal)){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
+    else{showThanksOverlay(false);}
+  };
+  if(PUB_ID&&API_BASE){apiFetch('/api/wishes/'+PUB_ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({firstName:w.name,message:w.text,color:w.color,mediaType:w.mediaType,photoUrl:w.photoUrl,audioUrl:w.audioUrl})}).then(function(r){w._id=r.id;if(w._id){myWishIds.push(w._id);localStorage.setItem('ww_my_ids',JSON.stringify(myWishIds));}afterSubmit();}).catch(function(){afterSubmit();});}
+  else{afterSubmit();}
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg||'Vœu épinglé ✦';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
+
+/* ═══════════════════════════════════════
+   GIFT & THANKS
+════════════════════════════════════════ */
+var giftState={amt:null,gave:false,paid:0,wishId:null,guestName:''};
+var GIFT_DEFAULT_AMTS=[2000,5000,10000,20000];
+function initGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;document.getElementById('gift-sheet-name').textContent=(cag.emoji||'🎁')+' '+(cag.name||'Cadeau commun');document.getElementById('gift-sheet-desc').textContent='Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';var col=cag.collected||0,goal=cag.goal||0;document.getElementById('gift-collected').textContent=fmtNum(col);document.getElementById('gift-goal-lbl').textContent=goal>0?'sur '+fmtNum(goal):'';var pct=goal>0?Math.min(100,Math.round((col/goal)*100)):0;document.getElementById('gift-bar-fill').style.width=pct+'%';document.getElementById('gift-pct').textContent=pct+'%';document.getElementById('gift-contributors').textContent=(cag.contributors||0)+' participant'+((cag.contributors||0)!==1?'s':'');var grid=document.getElementById('gift-amt-grid');grid.innerHTML='';var amts=(cag.amountChoices&&cag.amountChoices.length)?cag.amountChoices:GIFT_DEFAULT_AMTS;amts.forEach(function(a){var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=a;chip.innerHTML='<div class="gav">'+(a>=1000?(a/1000)+'k':a)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(a,chip);};grid.appendChild(chip);});}
+function showGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;var el=document.getElementById('gift-overlay');el.style.display='flex';setTimeout(function(){el.classList.add('open');},10);}
+function hideGiftSheet(){var el=document.getElementById('gift-overlay');el.classList.remove('open');setTimeout(function(){el.style.display='none';},400);}
+function handleGiftBgClick(e){if(e.target===document.getElementById('gift-overlay'))skipGift();}
+function skipGift(){hideGiftSheet();showThanksOverlay(false);}
+function giftPickAmt(a,chip){giftState.amt=(giftState.amt===a)?null:a;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var btn=document.getElementById('gift-pay-btn'),pre=document.getElementById('gift-bar-pre'),cag=_d.cagnotte||_d.jarConfig||{};if(giftState.amt!==null){chip.classList.add('active');btn.textContent='Participer · '+fmtNum(giftState.amt)+' FCFA';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0,p1=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)+giftState.amt)/cag.goal*100)):0;pre.style.display='block';pre.style.left=p0+'%';pre.style.width=(p1-p0)+'%';document.getElementById('gift-pct').textContent=p1+'%';}else{var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0;btn.textContent='Choisir un montant';btn.disabled=true;btn.style.opacity='.5';btn.style.cursor='not-allowed';pre.style.display='none';document.getElementById('gift-pct').textContent=p0+'%';}}
+function giftCustomAmt(){var v=prompt('Montant en FCFA (ex : 7500) :'),n=parseInt(v,10);if(isNaN(n)||n<=0)return;document.querySelectorAll('.gamt-chip[data-custom]').forEach(function(c){c.remove();});var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=n;chip.dataset.custom='1';chip.innerHTML='<div class="gav">'+(n>=1000?(n/1000)+'k':n)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(n,chip);};document.getElementById('gift-amt-grid').appendChild(chip);giftPickAmt(n,chip);}
+function giftPay(){if(!giftState.amt)return;var errEl=document.getElementById('gift-err');errEl.style.display='none';var cag=_d.cagnotte||_d.jarConfig||{},key=(cag&&cag.kkiapayKey)||_d.kkiapayKey||'';if(!key){errEl.textContent='Paiement non configuré.';errEl.style.display='block';return;}var launch=function(){openKkiapayWidget({amount:giftState.amt,api_key:key,sandbox:(_d.kkiapaySandbox!==false),name:giftState.guestName||'Anonyme',callback:window.location.href});addSuccessListener(function(resp){var txId=resp.transactionId||resp.transaction_id,afterPay=function(){giftState.gave=true;hideGiftSheet();showThanksOverlay(true);};if(txId){fetch('/api/contributions/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:txId,publicationId:PUB_ID,contributorName:giftState.guestName||'',isAnonymous:!giftState.guestName,wishId:giftState.wishId})}).then(function(r){return r.json();}).then(function(d){giftState.paid=(d.contribution&&d.contribution.amount)?d.contribution.amount:giftState.amt;}).catch(function(){giftState.paid=giftState.amt;}).finally(afterPay);}else{giftState.paid=giftState.amt;afterPay();}});};if(typeof openKkiapayWidget==='undefined'){var sc=document.createElement('script');sc.src='https://cdn.kkiapay.me/k.js';sc.onload=launch;sc.onerror=function(){errEl.textContent='Impossible de charger le module de paiement.';errEl.style.display='block';};document.head.appendChild(sc);}else{launch();}}
+function showThanksOverlay(gave){var o=document.getElementById('thanks-overlay');if(gave){document.getElementById('thanks-icon').textContent='🎁';document.getElementById('thanks-title').textContent='Merci pour ta participation';document.getElementById('thanks-msg').textContent="Grâce à toi le cadeau se rapproche. On garde ça secret jusqu'au grand jour ! 🤫";document.getElementById('thanks-receipt').style.display='block';document.getElementById('thanks-amt').innerHTML=fmtNum(giftState.paid||giftState.amt||0)+' <span style="font-size:14px;font-family:\'Inter\',sans-serif;font-style:normal;">FCFA</span>';}else{document.getElementById('thanks-icon').textContent='💕';document.getElementById('thanks-title').textContent='Merci pour ton joli mot';document.getElementById('thanks-msg').textContent='Ton vœu a bien été reçu. Reviens le jour J pour voir le mur complet !';document.getElementById('thanks-receipt').style.display='none';}o.style.display='flex';setTimeout(function(){o.classList.add('open');},10);setTimeout(closeThanks,5000);}
+function closeThanks(){var o=document.getElementById('thanks-overlay');o.classList.remove('open');setTimeout(function(){o.style.display='none';},300);}
+
+/* ═══════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+(function init(){
+  var d = window.__WW_DATA__ || {};
+  if(d.eyebrow)   document.querySelector('[data-node="eyebrow"]').textContent   = d.eyebrow;
+  if(d.titleName) document.querySelector('[data-node="titleName"]').textContent = d.titleName;
+  setWishesEnabled(d.wishesEnabled !== false);
+  initGiftSheet();
+  loadWishes();
+  setTimeout(hideHint, 6000);
+})();
+
+window.addEventListener('message', function(e){
+  if(!e.data) return;
+  if(e.data.type==='WW_WISH_NEW'){var w=e.data.wish;if(!w||!w.text)return;var pos={x:CANVAS_W/2-98+(Math.random()-0.5)*300,y:CANVAS_H/2-130+(Math.random()-0.5)*300,rot:(Math.random()-0.5)*18,z:15};wishes.push(w);cardPositions.push(pos);var el=createCardEl(w,pos,wishes.length-1);el.style.opacity='0';$canvas.appendChild(el);setTimeout(function(){el.style.transition='opacity 0.5s';el.style.opacity='1';},30);document.getElementById('count-num').textContent=wishes.length;return;}
+  if(e.data.type==='WW_UPDATE'){var d=e.data.data;if(!d)return;if(d.eyebrow!==undefined)document.querySelector('[data-node="eyebrow"]').textContent=d.eyebrow||'✦ Mur de vœux';if(d.titleName!==undefined)document.querySelector('[data-node="titleName"]').textContent=d.titleName||'Prénom';return;}
+  if(e.data.type==='WW_CONFIG'){if(e.data.wishesEnabled!==undefined)setWishesEnabled(e.data.wishesEnabled);return;}
+});
+
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){closeSheet();closeDetail();}});
+</script>
+</body>
+</html>

@@ -1275,7 +1275,7 @@
     </div>
 
     <div id="ib-text">
-      <p id="ib-label">Joyeux anniversaire <span class="ib-name" id="ib-name">Lydia</span></p>
+      <p id="ib-label">Joyeux anniversaire <span class="ib-name" id="ib-name">Prénom</span></p>
       <span id="ib-underline" aria-hidden="true"></span>
     </div>
 
@@ -1628,6 +1628,8 @@
           break;
         case 'hearts':
           confetti({ particleCount: 80, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4', '#ff1493', '#ff6eb4', '#ffb6c1', '#ff0066'], origin });
+          setTimeout(() => confetti({ particleCount: 70, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4', '#ff1493', '#ff6eb4', '#ffb6c1', '#ff0066'], origin: { x: 0.2, y: 0.5 } }), 600);
+          setTimeout(() => confetti({ particleCount: 70, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4', '#ff1493', '#ff6eb4', '#ffb6c1', '#ff0066'], origin: { x: 0.8, y: 0.5 } }), 1100);
           break;
         case 'emoji_party':
           confetti({ particleCount: 50, spread: 120, startVelocity: 35, shapes: ['emoji'], shapeOptions: { emoji: { value: ['🎉', '🎊', '✨', '🎈', '🥳'] } }, origin });
@@ -1745,7 +1747,7 @@
        ============================================================ */
     function buildBubbleLetters() {
       const nameEl = document.querySelector('[data-node-name="name"]');
-      const rawName = (nameEl ? nameEl.textContent.trim() : 'Lydia').replace(/\s+/g, '');
+      const rawName = (nameEl ? nameEl.textContent.trim() : 'Prénom').replace(/\s+/g, '');
       const letters = rawName.toUpperCase().split('');
       const palette = [
         '#FF3DAA', '#FF5533', '#FFD600', '#44E644',
@@ -1753,27 +1755,36 @@
         '#00DDAA', '#FF6699', '#55BBFF', '#FFB833'
       ];
       const colors = palette.slice().sort(() => Math.random() - 0.5);
-      const hbd = ['H', 'B', 'D'];
-      const result = hbd.concat(letters);
+      const result = ['H', 'B', 'D'].concat(letters);
       const container = document.querySelector('.baloons');
       if (!container) return;
-      const _vw = window.innerWidth || 375;
-      const _letPct = Math.min(20, (5.5 * 16 * 1.1 / _vw) * 100);
-      const _rightBound = Math.max(70, 96 - _letPct);
+
+      const vw = window.innerWidth || 375;
+      const count = result.length;
+
+      // Glyph width estimated from the CSS clamp: at mobile ~256px, desktop ~(13vw).
+      // We distribute in px to keep all letters within [0, vw].
+      const glyphW = Math.min(vw * 0.13, 512);   // mirrors 13vw cap from CSS
+      const gap    = (vw - glyphW) / Math.max(count - 1, 1);
+
       container.innerHTML = '';
       result.forEach(function (letter, idx) {
         const span = document.createElement('span');
         span.textContent = letter;
         span.style.color = colors[idx % colors.length];
-        const baseX = (idx / Math.max(result.length - 1, 1)) * (_rightBound - 4) + 2;
-        const jitter = (Math.random() - 0.5) * 8;
-        span.style.left = Math.max(1, Math.min(_rightBound, baseX + jitter)) + '%';
-        span.style.opacity = '0';
-        span.style.animationName = 'balloon-sway';
-        span.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+
+        // Even distribution in px + small jitter clamped to screen bounds
+        const baseX  = idx * gap;
+        const jitter = (Math.random() - 0.5) * Math.min(gap * 0.3, 20);
+        const xPos   = Math.max(0, Math.min(vw - glyphW, baseX + jitter));
+        span.style.left = Math.round(xPos) + 'px';
+
+        span.style.opacity                = '0';
+        span.style.animationName          = 'balloon-sway';
+        span.style.animationDuration      = (2.2 + Math.random() * 2) + 's';
         span.style.animationTimingFunction = 'ease-in-out';
         span.style.animationIterationCount = 'infinite';
-        span.style.animationDelay = -(Math.random() * 3) + 's';
+        span.style.animationDelay         = -(Math.random() * 3) + 's';
         container.appendChild(span);
       });
     }
@@ -1991,6 +2002,17 @@
         }, 960);
       }, totalDuration);
     }
+
+    /* Pre-fill ib-name before the intro animation starts so the
+       correct recipient name shows during the bubble/text reveal.
+       fetchData() runs later (after dissolve) for the rest of the page. */
+    (function () {
+      var d = window.__WW_DATA__;
+      if (d && d.name) {
+        var ibName = document.getElementById('ib-name');
+        if (ibName) ibName.textContent = d.name;
+      }
+    })();
 
     runIntro();
 

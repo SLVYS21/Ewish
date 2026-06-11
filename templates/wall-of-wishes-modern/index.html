@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mur de vœux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Caveat:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Serve.js injects --primary and --accent above this block. */
+    :root {
+      --primary: #9b87f5;
+      --accent:  #f072a9;
+      --ink:     #18162a;
+      --ink-2:   rgba(24,22,42,0.72);
+      --ink-3:   rgba(24,22,42,0.45);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font, 'Plus Jakarta Sans', 'Inter', sans-serif);
+      background: linear-gradient(180deg, #FBF1F4, #F6EEF8);
+      background-attachment: fixed;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--ink);
+    }
+
+    /* ── HEADER ── */
+    #wall-header {
+      text-align: center;
+      padding: clamp(44px,7vw,72px) 24px clamp(28px,4vw,40px);
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(135deg, #FFC6D4, #C9A8EC);
+      border-radius: 0 0 30px 30px;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      padding: 5px 14px; border-radius: 99px; margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .wall-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(2.2rem,6vw,3.6rem); font-weight: 400; font-style: italic;
+      color: #fff; text-shadow: 0 2px 24px rgba(100,60,160,0.22);
+      line-height: 1.15; margin-bottom: 10px;
+    }
+    .wall-title em { font-style: normal; color: rgba(255,255,255,0.88); }
+    .wall-subtitle { font-size: 0.88rem; color: rgba(255,255,255,0.72); max-width: 380px; margin: 0 auto 18px; line-height: 1.6; }
+    .wish-count {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 0.78rem; font-weight: 600; color: #fff;
+      background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25); padding: 5px 14px; border-radius: 99px;
+    }
+    .wish-count svg { width: 13px; height: 13px; }
+
+    /* ── CAGNOTTE STRIP ── */
+    #cagnotte-strip { max-width: 560px; margin: -14px auto 20px; padding: 0 18px; position: relative; z-index: 3; }
+    .cagnotte-inner {
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-radius: 18px; padding: 14px 16px 12px;
+      box-shadow: 0 8px 22px rgba(180,120,180,0.18); border: 1px solid rgba(255,255,255,0.6);
+    }
+    .cagnotte-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .cagnotte-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: #F4EFFB;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .cagnotte-info { flex: 1; min-width: 0; }
+    .cagnotte-name { font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cagnotte-stats { font-size: 0.72rem; color: var(--ink-3); margin-top: 2px; }
+    .cagnotte-pct { font-size: 1rem; font-weight: 800; color: #8A63D2; white-space: nowrap; flex-shrink: 0; }
+    .cagnotte-track { height: 7px; background: #F4EFFB; border-radius: 99px; overflow: hidden; }
+    .cagnotte-fill { height: 100%; background: #8A63D2; border-radius: 99px; transition: width 1.2s ease; }
+
+    /* ── NOTES GRID ── */
+    #notes-container { position: relative; z-index: 5; max-width: 1080px; margin: 0 auto; padding: 18px 18px 140px; columns: 2; column-gap: 12px; }
+    @media (min-width: 960px)  { #notes-container { columns: 4; column-gap: 16px; } }
+
+    /* ── WISH CARD ── */
+    .note { break-inside: avoid; border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: 0 6px 16px rgba(80,40,80,.08); transition: transform 0.25s, box-shadow 0.25s; cursor: default; will-change: transform; }
+    .note:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(80,40,80,.14); }
+    .note .nm { font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
+    .note .nm .av { width: 22px; height: 22px; font-size: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .note .tx { font-size: 13.5px; line-height: 1.45; margin-top: 9px; color: #271826; word-break: break-word; }
+    .note .card-photo { width: 100%; border-radius: 11px; margin-top: 10px; max-height: 96px; object-fit: cover; display: block; }
+    .note .card-audio { width: 100%; margin-top: 10px; accent-color: var(--primary); display: block; }
+    /* Tone colors */
+    .tone-rose   { background: #FFEDF1; } .tone-rose   .nm { color: #E11D48; }
+    .tone-lilac  { background: #F1EAFB; } .tone-lilac  .nm { color: #8A63D2; }
+    .tone-mint   { background: #E3F5EE; } .tone-mint   .nm { color: #3FA98A; }
+    .tone-butter { background: #FCF1DA; } .tone-butter .nm { color: #E5A93B; }
+    .tone-peach  { background: #FFEDE3; } .tone-peach  .nm { color: #E07A4E; }
+    /* is-new outline */
+    .note.is-new { outline: 2px solid rgba(255,255,255,0.7); outline-offset: 2px; }
+    /* delete button (hover only) */
+    .note-del { background: none; border: none; cursor: pointer; color: rgba(39,24,38,0.4); font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; opacity: 0; margin-left: auto; flex-shrink: 0; }
+    .note:hover .note-del { opacity: 1; }
+    .note-del:hover { color: #E11D48; }
+
+    /* ── ADD BUTTON ── */
+    #add-btn {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--primary);
+      color: #fff; border: none; border-radius: 99px; padding: 15px 36px;
+      font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.02em;
+      box-shadow: 0 8px 28px rgba(155,135,245,0.42), 0 2px 6px rgba(0,0,0,0.10);
+      transition: transform 0.22s, box-shadow 0.22s; white-space: nowrap;
+    }
+    #add-btn:hover { transform: translateX(-50%) translateY(-3px); box-shadow: 0 14px 40px rgba(155,135,245,0.40); }
+    #add-btn.hidden { display: none; }
+    #add-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+    /* ── SHEET ── */
+    #add-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(24,22,42,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
+    #add-overlay.open { background: rgba(24,22,42,0.55); pointer-events: all; }
+    #add-sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 8px 28px 44px; width: 100%; max-width: 520px; transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); position: relative; max-height: 92vh; overflow-y: auto; }
+    #add-overlay.open #add-sheet { transform: translateY(0); }
+    .sheet-drag { width: 38px; height: 4px; border-radius: 2px; background: rgba(0,0,0,0.12); margin: 12px auto 24px; }
+    .sheet-title { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 1.55rem; color: var(--ink); margin-bottom: 4px; }
+    .sheet-hint { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 16px; }
+    #wish-input { width: 100%; min-height: 100px; max-height: 180px; padding: 14px 16px; resize: none; background: rgba(155,135,245,0.05); border: 1.5px solid rgba(155,135,245,0.22); border-radius: 14px; font-family: 'Caveat', cursive; font-size: 1.15rem; color: var(--ink); outline: none; transition: border-color 0.2s; line-height: 1.55; }
+    #wish-input:focus { border-color: var(--primary); }
+    #wish-input::placeholder { color: rgba(24,22,42,0.30); }
+    .wish-field { width: 100%; padding: 11px 16px; margin-top: 10px; background: rgba(155,135,245,0.05); border: 1.5px solid rgba(155,135,245,0.22); border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+    .wish-field:focus { border-color: var(--primary); }
+    .wish-field::placeholder { color: rgba(24,22,42,0.30); }
+    .color-row { display: flex; gap: 8px; align-items: center; margin: 14px 0 16px; }
+    .color-row > label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); flex-shrink: 0; }
+    .color-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; transition: transform 0.15s, border-color 0.15s; }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active { border-color: var(--ink); transform: scale(1.12); }
+    .swatch-0{background:#FFEDF1}.swatch-1{background:#FCF1DA}.swatch-2{background:#F1EAFB}.swatch-3{background:#E3F5EE}.swatch-4{background:#FFEDE3}.swatch-5{background:#E3F5EE}
+    .media-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+    .media-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .media-tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 99px; border: 1.5px solid rgba(155,135,245,0.25); background: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 600; color: var(--ink-3); transition: all 0.18s; }
+    .media-tab:hover { border-color: rgba(155,135,245,0.5); color: var(--ink-2); }
+    .media-tab.active { border-color: var(--primary); color: var(--primary); background: rgba(155,135,245,0.08); }
+    .media-tab svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .media-panel { display: none; margin-bottom: 4px; }
+    .media-panel.active { display: block; }
+    .upload-zone { border: 1.5px dashed rgba(155,135,245,0.35); border-radius: 12px; padding: 20px 16px; text-align: center; cursor: pointer; background: rgba(155,135,245,0.03); transition: border-color 0.2s, background 0.2s; }
+    .upload-zone:hover,.upload-zone.drag-over { border-color: var(--primary); background: rgba(155,135,245,0.08); }
+    .upload-zone input { display: none; }
+    .upload-zone-inner { pointer-events: none; }
+    .upload-zone svg { color: var(--primary); margin-bottom: 6px; }
+    .upload-zone p { font-size: 0.76rem; color: var(--ink-3); line-height: 1.5; }
+    .upload-zone small { font-size: 0.66rem; color: rgba(24,22,42,0.25); }
+    .media-loading { display: none; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 0.78rem; color: var(--primary); }
+    .media-loading.show { display: flex; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .media-loading svg { animation: spin 0.9s linear infinite; width: 16px; height: 16px; flex-shrink: 0; }
+    .media-preview { display: none; position: relative; margin-top: 8px; }
+    .media-preview.show { display: block; }
+    .media-preview img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px; border: 1.5px solid rgba(155,135,245,0.22); display: block; }
+    .media-preview audio { width: 100%; display: block; accent-color: var(--primary); }
+    .media-clear { position: absolute; top: -9px; right: -9px; background: var(--ink); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
+    .rec-controls { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 0; }
+    .rec-btn { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(240,114,169,0.35); }
+    .rec-btn:hover { transform: scale(1.06); }
+    .rec-btn.recording { background: #c0392b; animation: recPulse 1.4s ease-in-out infinite; }
+    .rec-btn svg { width: 20px; height: 20px; }
+    @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.4)} 50%{box-shadow:0 0 0 14px rgba(192,57,43,0)} }
+    .rec-status { font-size: 0.76rem; font-weight: 500; color: var(--ink-3); text-align: center; }
+    .rec-status.active { color: var(--accent); font-weight: 600; }
+    #submit-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 14px 24px; margin-top: 16px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 99px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em; box-shadow: 0 6px 24px rgba(155,135,245,0.30); transition: opacity 0.18s, transform 0.15s; }
+    #submit-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+    #submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    #submit-btn svg { width: 15px; height: 15px; }
+    #close-btn { position: absolute; top: 20px; right: 22px; background: none; border: none; cursor: pointer; color: var(--ink-3); font-size: 1.2rem; line-height: 1; padding: 4px; border-radius: 50%; transition: color 0.18s, background 0.18s; }
+    #close-btn:hover { color: var(--ink); background: rgba(0,0,0,0.06); }
+
+    #empty-state { text-align: center; padding: 60px 24px; display: none; }
+    #empty-state p { font-size: 0.9rem; color: rgba(255,255,255,0.72); margin-top: 12px; }
+    #wishes-closed { display: none; position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; background: rgba(24,22,42,0.85); backdrop-filter: blur(8px); color: rgba(255,255,255,0.75); border-radius: 99px; padding: 12px 28px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 600; pointer-events: none; background: var(--ink); color: #fff; padding: 10px 22px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; opacity: 0; transition: opacity 0.3s, transform 0.3s; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── ACCESS CODE GATE ── */
+    #access-gate { position: fixed; inset: 0; z-index: 950; background: rgba(24,22,42,.85); display: none; align-items: center; justify-content: center; }
+    .gate-card { background: #fff; border-radius: 24px; padding: 40px 28px; width: calc(100% - 48px); max-width: 360px; text-align: center; box-shadow: 0 24px 64px rgba(24,22,42,.30); }
+    .gate-input { width: 100%; padding: 12px 16px; margin-top: 8px; border-radius: 14px; border: 1.5px solid rgba(155,135,245,.30); background: rgba(155,135,245,.05); font-family: 'Inter', sans-serif; font-size: .95rem; color: var(--ink); outline: none; text-align: center; letter-spacing: .12em; transition: border-color .2s; box-sizing: border-box; }
+    .gate-input:focus { border-color: var(--primary); }
+    .gate-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px; margin-top: 14px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 99px; font-family: 'Inter', sans-serif; font-size: .92rem; font-weight: 700; cursor: pointer; letter-spacing: .02em; }
+    .gate-btn:hover { opacity: .88; }
+
+    /* ── GIFT OVERLAY ── */
+    #gift-overlay { position: fixed; inset: 0; z-index: 700; background: rgba(24,22,42,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
+    #gift-overlay.open { background: rgba(24,22,42,0.58); pointer-events: all; }
+    #gift-sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 8px 24px 44px; width: 100%; max-width: 520px; transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); max-height: 92vh; overflow-y: auto; position: relative; }
+    #gift-overlay.open #gift-sheet { transform: translateY(0); }
+    .gamt-chip { padding: 14px 4px; border-radius: 14px; text-align: center; background: #fff; border: 2px solid rgba(155,135,245,0.25); cursor: pointer; transition: all .15s; }
+    .gamt-chip:hover { border-color: rgba(155,135,245,0.55); }
+    .gamt-chip.active { background: rgba(155,135,245,0.1); border-color: var(--primary); }
+    .gamt-chip .gav { font-weight: 800; font-size: 15px; color: var(--ink); }
+    .gamt-chip.active .gav { color: var(--primary); }
+    .gamt-chip .gac { font-size: 9.5px; color: var(--ink-3); font-weight: 700; margin-top: 2px; }
+    .gpbar-track { height: 12px; background: rgba(155,135,245,0.15); border-radius: 99px; overflow: hidden; position: relative; }
+    .gpbar-fill { position: absolute; inset: 0; border-radius: 99px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .gpbar-preview { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 5px, rgba(240,114,169,0.4) 5px, rgba(240,114,169,0.4) 10px); }
+
+    /* ── THANKS ── */
+    #thanks-overlay { position: fixed; inset: 0; z-index: 800; background: rgba(24,22,42,0); display: flex; align-items: center; justify-content: center; pointer-events: none; transition: background 0.3s; }
+    #thanks-overlay.open { background: rgba(24,22,42,0.62); pointer-events: all; }
+    #thanks-card { background: #fff; border-radius: 24px; padding: 40px 28px; width: calc(100% - 48px); max-width: 360px; text-align: center; transform: scale(0.85); opacity: 0; transition: transform 0.4s cubic-bezier(0.34,1.45,0.64,1), opacity 0.3s; }
+    #thanks-overlay.open #thanks-card { transform: scale(1); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div id="access-gate">
+  <div class="gate-card">
+    <div style="font-size:42px;margin-bottom:14px;">🔒</div>
+    <h2 style="font-family:'DM Serif Display',serif;font-style:italic;font-size:22px;color:var(--ink);margin-bottom:8px;">Mur privé</h2>
+    <p style="font-size:13.5px;color:var(--ink-3);line-height:1.55;margin-bottom:18px;">Ce mur est protégé.<br>Entrez le code d'accès pour continuer.</p>
+    <input id="gate-input" class="gate-input" type="text" placeholder="Code d'accès" maxlength="50" autocomplete="off" onkeydown="if(event.key==='Enter')checkGate()">
+    <button class="gate-btn" onclick="checkGate()">🔓 Accéder</button>
+    <div id="gate-err" style="display:none;font-size:12.5px;color:#E11D48;margin-top:10px;font-weight:600;">Code incorrect — réessayez.</div>
+  </div>
+</div>
+
+<header id="wall-header">
+  <p class="eyebrow" data-node="eyebrow">✦ Mur de vœux</p>
+  <h1 class="wall-title">Pour <em data-node="titleName">Prénom</em></h1>
+  <p class="wall-subtitle" data-node="subtitle">Partagez ce lien — chacun peut laisser son mot.</p>
+  <div class="wish-count" id="wish-count-badge">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <span id="count-num">0</span> vœux
+  </div>
+</header>
+
+<div id="cagnotte-strip" style="display:none">
+  <div class="cagnotte-inner">
+    <div class="cagnotte-row">
+      <div class="cagnotte-icon" id="cag-icon">🎁</div>
+      <div class="cagnotte-info">
+        <div class="cagnotte-name" id="cag-name">Cadeau commun</div>
+        <div class="cagnotte-stats" id="cag-stats"></div>
+      </div>
+      <div class="cagnotte-pct" id="cag-pct">0%</div>
+    </div>
+    <div class="cagnotte-track"><div class="cagnotte-fill" id="cag-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<main id="notes-container" role="main" aria-label="Mur de vœux"></main>
+
+<div id="empty-state">
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <p>Soyez le premier à laisser un vœu !</p>
+</div>
+
+<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un vœu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  Ajouter mon vœu
+</button>
+<div id="wishes-closed">🔒 Les vœux sont temporairement fermés</div>
+
+<!-- ADD SHEET -->
+<div id="add-overlay" role="dialog" aria-modal="true" onclick="handleBgClick(event)">
+  <div id="add-sheet">
+    <button id="close-btn" onclick="closeSheet()" aria-label="Fermer">✕</button>
+    <div class="sheet-drag"></div>
+    <h2 class="sheet-title">Votre vœu</h2>
+    <p class="sheet-hint">Écrivez depuis le cœur — ça ne prend que quelques secondes.</p>
+    <textarea id="wish-input" placeholder="Votre message…" maxlength="400" rows="4"></textarea>
+    <input id="wish-author" class="wish-field" type="text" placeholder="Votre prénom (optionnel)" maxlength="40" autocomplete="given-name">
+    <input id="wish-role"   class="wish-field" type="text" placeholder="Votre lien — Maman, Ami, Collègue… (optionnel)" maxlength="40">
+    <div class="color-row">
+      <label>Couleur</label>
+      <span class="color-swatch swatch-0 active" onclick="pickColor(0,this)"></span>
+      <span class="color-swatch swatch-1" onclick="pickColor(1,this)"></span>
+      <span class="color-swatch swatch-2" onclick="pickColor(2,this)"></span>
+      <span class="color-swatch swatch-3" onclick="pickColor(3,this)"></span>
+      <span class="color-swatch swatch-4" onclick="pickColor(4,this)"></span>
+      <span class="color-swatch swatch-5" onclick="pickColor(5,this)"></span>
+    </div>
+    <p class="media-label">Ajouter</p>
+    <div class="media-tabs">
+      <button class="media-tab active" id="tab-none"  onclick="switchTab('none')">Texte seulement</button>
+      <button class="media-tab" id="tab-photo" onclick="switchTab('photo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Photo / GIF
+      </button>
+      <button class="media-tab" id="tab-audio" onclick="switchTab('audio')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>Message vocal
+      </button>
+    </div>
+    <div class="media-panel" id="panel-photo">
+      <div class="upload-zone" id="photo-zone" onclick="document.getElementById('photo-file').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <input type="file" id="photo-file" accept="image/*" onchange="handlePhotoSelect(event)">
+        <div class="upload-zone-inner">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Cliquez ou glissez une photo / GIF</p><small>JPG, PNG, GIF, WebP — max 10 Mo</small>
+        </div>
+      </div>
+      <div class="media-loading" id="photo-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>Envoi en cours…</div>
+      <div class="media-preview" id="photo-preview"><img id="photo-img" src="" alt=""><button class="media-clear" onclick="clearMedia()">✕</button></div>
+    </div>
+    <div class="media-panel" id="panel-audio">
+      <div class="rec-controls">
+        <button class="rec-btn" id="rec-btn" onclick="toggleRecording()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg></button>
+        <span class="rec-status" id="rec-status">Appuyez pour enregistrer</span>
+      </div>
+      <div class="media-loading" id="audio-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>Envoi en cours…</div>
+      <div class="media-preview" id="audio-preview"><audio id="audio-player" controls preload="none"></audio><button class="media-clear" onclick="clearMedia()">✕</button></div>
+    </div>
+    <button id="submit-btn" onclick="submitWish()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Coller mon vœu
+    </button>
+  </div>
+</div>
+
+<div id="toast">Vœu ajouté ✦</div>
+
+<!-- GIFT OVERLAY -->
+<div id="gift-overlay" onclick="handleGiftBgClick(event)">
+  <div id="gift-sheet">
+    <div style="width:38px;height:4px;border-radius:2px;background:rgba(0,0,0,0.12);margin:12px auto 20px;"></div>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;background:rgba(155,135,245,0.12);border-radius:999px;margin-bottom:12px;"><span style="font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--primary);">CADEAU COMMUN</span></div>
+      <div style="font-family:'Caveat',cursive;font-size:20px;color:var(--accent);margin-bottom:3px;">et si on se cotisait pour…</div>
+      <h2 id="gift-sheet-name" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--ink);line-height:1.2;margin-bottom:6px;">🎁 Cadeau commun</h2>
+      <p id="gift-sheet-desc" style="font-size:13.5px;color:var(--ink-3);line-height:1.5;max-width:360px;margin:0 auto;"></p>
+    </div>
+    <div style="background:rgba(155,135,245,0.06);border-radius:18px;padding:18px;border:1px solid rgba(155,135,245,0.18);margin-bottom:18px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;">
+        <div><span id="gift-collected" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--primary);"></span><span style="font-size:12px;font-weight:700;color:var(--ink-3);margin-left:5px;">FCFA</span></div>
+        <span id="gift-goal-lbl" style="font-size:12px;color:var(--ink-3);font-weight:700;"></span>
+      </div>
+      <div class="gpbar-track" style="margin-bottom:8px;"><div class="gpbar-fill" id="gift-bar-fill" style="width:0%;"></div><div class="gpbar-preview" id="gift-bar-pre" style="left:0;width:0;display:none;"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;"><span id="gift-contributors" style="color:var(--ink-3);font-weight:600;"></span><span id="gift-pct" style="font-weight:800;color:var(--primary);"></span></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:8px;letter-spacing:.08em;">JE PARTICIPE AVEC</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="gift-amt-grid"></div>
+      <button onclick="giftCustomAmt()" style="margin-top:9px;width:100%;padding:10px;border-radius:14px;border:1.5px dashed rgba(155,135,245,0.35);background:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">✏️ Un autre montant</button>
+    </div>
+    <div id="gift-err" style="display:none;background:rgba(240,114,169,0.08);border:1.5px solid rgba(240,114,169,0.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:10px;"></div>
+    <button id="gift-pay-btn" onclick="giftPay()" disabled style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.5;transition:all .18s;">Choisir un montant</button>
+    <button onclick="skipGift()" style="width:100%;padding:11px;margin-top:10px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">Une autre fois, merci</button>
+    <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;font-size:10.5px;color:var(--ink-3);"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>Paiement sécurisé · MTN, Moov, Orange Money</div>
+  </div>
+</div>
+
+<!-- THANKS OVERLAY -->
+<div id="thanks-overlay">
+  <div id="thanks-card">
+    <div id="thanks-icon" style="font-size:54px;margin-bottom:14px;">💕</div>
+    <h2 id="thanks-title" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:26px;color:var(--ink);margin-bottom:8px;line-height:1.2;">Merci pour ton joli mot</h2>
+    <p id="thanks-msg" style="font-size:14px;color:var(--ink-3);line-height:1.55;margin-bottom:20px;"></p>
+    <div id="thanks-receipt" style="display:none;background:rgba(155,135,245,0.08);border-radius:14px;padding:14px 18px;margin-bottom:18px;border:1px solid rgba(155,135,245,0.2);">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:3px;">Ta contribution</div>
+      <div id="thanks-amt" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:var(--primary);line-height:1;"></div>
+    </div>
+    <button onclick="closeThanks()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.02em;">Voir le mur ✦</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+<script>
+var _d       = window.__WW_DATA__ || {};
+var PUB_ID   = _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
+var API_BASE = _d.apiBase || (PUB_ID ? location.origin : '');
+
+var wishes = [], myWishIds = JSON.parse(localStorage.getItem('ww_my_ids') || '[]');
+var selectedColor = 0, activeTab = 'none', activeMedia = { type: 'none', url: '' };
+var mediaRecorder = null, audioChunks = [], recTimerInt = null, recSecs = 0, isSubmitting = false;
+
+var SAMPLE_WISHES = [
+  { text: "Mon trésor, joyeux anniversaire. Tu es ma plus belle fierté. ❤️", name: "Maman",         role: "Famille",      color: 0 },
+  { text: "Joyeux anniversaire ma belle ! Tu mérites tout le bonheur.",        name: "Chloé & Marc", role: "Amis proches", color: 1 },
+  { text: "Merci pour ton énergie au quotidien. 🙏",                           name: "Équipe Orange", role: "Travail",      color: 2 },
+  { text: "Bon anniv' ! On fête ça ce week-end 🎉",                            name: "Kevin",         role: "Ami",          color: 3 },
+  { text: "Que cette année soit à la hauteur de ton sourire. 😊",              name: "Awa",           role: "Cousine",      color: 4 },
+  { text: "Force, foi et bonheur pour cette nouvelle année.",                  name: "Ibrahim",       role: "Famille",      color: 5 },
+  { text: "25 ans déjà ! Que du bonheur pour toi. 🌟",                         name: "Fatou Diallo",  role: "Amie",         color: 0 },
+  { text: "Santé, longue vie et réussite, ma fille !",                         name: "Tanté Bijou",   role: "Famille",      color: 1 },
+];
+
+var TONES = ['tone-rose','tone-lilac','tone-mint','tone-butter','tone-peach'];
+var AV_GRADS = [
+  'linear-gradient(135deg,#E11D48,#F35C7A)',
+  'linear-gradient(135deg,#8A63D2,#B48AE8)',
+  'linear-gradient(135deg,#3FA98A,#5DC4A6)',
+  'linear-gradient(135deg,#E5A93B,#F0C056)',
+  'linear-gradient(135deg,#E07A4E,#F09870)'
+];
+
+function apiFetch(path, opts) {
+  return fetch(API_BASE + path, opts || {}).then(function(r) {
+    if (!r.ok) {
+      return r.json().then(function(b) {
+        var e = new Error(b.error || ('HTTP ' + r.status));
+        e.status = r.status; e.code = b.code; throw e;
+      }, function() {
+        var e = new Error('HTTP ' + r.status); e.status = r.status; throw e;
+      });
+    }
+    return r.json();
+  });
+}
+function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(ts) { return new Date(ts || Date.now()).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); }
+function fmtNum(n) { return Number(n).toLocaleString('fr-FR'); }
+function uploadMedia(file) { var f = new FormData(); f.append('file', file); return apiFetch('/api/upload', { method: 'POST', body: f }).then(function(d){ return d.url; }); }
+
+function loadWishes() {
+  if (!PUB_ID) { wishes = SAMPLE_WISHES.map(function(w){ return Object.assign({}, w, { ts: Date.now() - Math.random()*86400000*3 }); }); buildWall(true); return; }
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
+    wishes = data.map(function(w){ return { text: w.message, name: w.firstName||'Anonyme', role: w.role||'', color: w.color!=null?w.color:Math.floor(Math.random()*6), ts: new Date(w.createdAt).getTime(), photoUrl: w.photoUrl||'', audioUrl: w.audioUrl||'', mediaType: w.mediaType||'none', _id: w._id }; });
+    buildWall(true); setInterval(pollNewWishes, 30000);
+  }).catch(function(){ wishes = SAMPLE_WISHES.slice(); buildWall(true); });
+}
+
+function pollNewWishes() {
+  if (!PUB_ID) return;
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
+    var ids = new Set(wishes.map(function(w){ return w._id; }).filter(Boolean));
+    data.forEach(function(w) {
+      if (ids.has(w._id)) return;
+      var wish = { text: w.message, name: w.firstName||'Anonyme', role: w.role||'', color: w.color!=null?w.color:Math.floor(Math.random()*6), ts: new Date(w.createdAt).getTime(), photoUrl: w.photoUrl||'', audioUrl: w.audioUrl||'', mediaType: w.mediaType||'none', _id: w._id, isNew: true };
+      wishes.unshift(wish);
+      var el = createNoteEl(wish, true); el.style.opacity = '0';
+      document.getElementById('notes-container').insertBefore(el, document.getElementById('notes-container').firstChild);
+      TweenMax.fromTo(el, 0.55, { opacity:0, y:-30, scale:0.9 }, { opacity:1, y:0, scale:1, ease:Back.easeOut.config(1.3) });
+      setTimeout(function(){ el.classList.remove('is-new'); }, 3000);
+      document.getElementById('count-num').textContent = wishes.length;
+    });
+  }).catch(function(){});
+}
+
+function createNoteEl(w, isNew) {
+  var card = document.createElement('div');
+  var toneIdx = (w.color != null ? w.color : Math.floor(Math.random() * 5)) % 5;
+  card.className = 'note ' + TONES[toneIdx] + (isNew ? ' is-new' : '');
+  if (w._id) card.dataset.id = w._id;
+  var initial = (w.name||'A').trim().charAt(0).toUpperCase();
+  var isOwn = w._id && myWishIds.indexOf(w._id) !== -1;
+  var delBtn = isOwn ? '<button class="note-del" onclick="deleteWish(\''+escapeHtml(w._id)+'\')">✕</button>' : '';
+  var mediaHtml = '';
+  if ((w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl) {
+    mediaHtml = '<img class="card-photo" src="'+escapeHtml(w.photoUrl)+'" alt="" loading="lazy">';
+  } else if (w.mediaType==='audio' && w.audioUrl) {
+    mediaHtml = '<audio class="card-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none"></audio>';
+  }
+  card.innerHTML =
+    '<div class="nm"><div class="av" style="background:'+AV_GRADS[toneIdx]+'">'+escapeHtml(initial)+'</div>'+escapeHtml(w.name||'Anonyme')+delBtn+'</div>'+
+    (mediaHtml || '')+
+    '<div class="tx">'+escapeHtml(w.text)+'</div>';
+  return card;
+}
+
+function buildWall(animate) {
+  var c = document.getElementById('notes-container'), e = document.getElementById('empty-state');
+  c.innerHTML = '';
+  if (!wishes.length) { e.style.display = 'block'; document.getElementById('count-num').textContent = '0'; return; }
+  e.style.display = 'none'; document.getElementById('count-num').textContent = wishes.length;
+  wishes.forEach(function(w){ c.appendChild(createNoteEl(w, false)); });
+  if (animate) TweenMax.staggerFromTo(c.querySelectorAll('.note'), 0.48, { opacity:0, y:-24, scale:0.93 }, { opacity:1, y:0, scale:1, ease:Back.easeOut.config(1.2) }, 0.045);
+}
+
+function deleteWish(id) {
+  if (!id) return;
+  if (!PUB_ID) { wishes = wishes.filter(function(w){ return w._id!==id; }); buildWall(false); showToast('Vœu supprimé'); return; }
+  apiFetch('/api/wishes/'+id, { method:'DELETE' }).then(function(){ wishes = wishes.filter(function(w){ return w._id!==id; }); myWishIds = myWishIds.filter(function(i){ return i!==id; }); localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds)); buildWall(false); showToast('Vœu supprimé'); }).catch(function(){ showToast('Erreur'); });
+}
+
+function initCagnotteStrip() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || !cag.enabled) return;
+  document.getElementById('cagnotte-strip').style.display = '';
+  document.getElementById('cag-icon').textContent = cag.emoji || '🎁';
+  document.getElementById('cag-name').textContent = cag.name || 'Cadeau commun';
+  var col = cag.collected||0, goal = cag.goal||0, cnt = cag.contributors||0;
+  var pct = goal>0 ? Math.min(100, Math.round((col/goal)*100)) : 0;
+  document.getElementById('cag-stats').textContent = (goal>0 ? fmtNum(col)+' / '+fmtNum(goal)+' FCFA' : fmtNum(col)+' FCFA') + (cnt>0 ? ' · '+cnt+' participant'+(cnt!==1?'s':'') : '');
+  document.getElementById('cag-pct').textContent = pct+'%';
+  document.getElementById('cag-fill').style.width = pct+'%';
+}
+
+function setWishesEnabled(on) { document.getElementById('add-btn').classList.toggle('hidden',!on); document.getElementById('wishes-closed').style.display = on?'none':'block'; }
+
+function checkGate() {
+  var inp = document.getElementById('gate-input');
+  var err = document.getElementById('gate-err');
+  if (!inp.value.trim()) return;
+  if (inp.value.trim().toLowerCase() === String(_d.accessCode||'').toLowerCase()) {
+    document.getElementById('access-gate').style.display = 'none';
+    err.style.display = 'none';
+  } else {
+    inp.style.borderColor = '#E11D48';
+    err.style.display = 'block';
+    setTimeout(function(){ inp.style.borderColor = ''; }, 1800);
+  }
+}
+function openSheet() { document.getElementById('add-overlay').classList.add('open'); setTimeout(function(){ document.getElementById('wish-input').focus(); }, 350); }
+function closeSheet() { document.getElementById('add-overlay').classList.remove('open'); if (mediaRecorder&&mediaRecorder.state==='recording') stopRecording(false); }
+function handleBgClick(e) { if (e.target===document.getElementById('add-overlay')) closeSheet(); }
+function pickColor(c,el) { selectedColor=c; document.querySelectorAll('.color-swatch').forEach(function(s){ s.classList.remove('active'); }); el.classList.add('active'); }
+function switchTab(tab) {
+  activeTab=tab; document.querySelectorAll('.media-tab').forEach(function(t){ t.classList.remove('active'); }); document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.media-panel').forEach(function(p){ p.classList.remove('active'); }); if (tab!=='none') document.getElementById('panel-'+tab).classList.add('active');
+  if (tab!=='audio'&&mediaRecorder&&mediaRecorder.state==='recording') stopRecording(false);
+}
+function handleDragOver(e){ e.preventDefault(); document.getElementById('photo-zone').classList.add('drag-over'); }
+function handleDragLeave(){ document.getElementById('photo-zone').classList.remove('drag-over'); }
+function handleDrop(e){ e.preventDefault(); document.getElementById('photo-zone').classList.remove('drag-over'); var f=e.dataTransfer.files[0]; if(f&&/^image\//.test(f.type)) processPhotoFile(f); }
+function handlePhotoSelect(e){ if(e.target.files[0]) processPhotoFile(e.target.files[0]); }
+function processPhotoFile(file) {
+  if(file.size>10*1024*1024){showToast('Fichier trop grand (max 10 Mo)');return;}
+  var isGif=file.type==='image/gif'; var reader=new FileReader(); reader.onload=function(ev){document.getElementById('photo-img').src=ev.target.result;}; reader.readAsDataURL(file);
+  if(!API_BASE){activeMedia={type:isGif?'gif':'photo',url:URL.createObjectURL(file)};document.getElementById('photo-preview').classList.add('show');document.getElementById('photo-zone').style.display='none';return;}
+  document.getElementById('photo-zone').style.display='none'; document.getElementById('photo-loading').classList.add('show');
+  uploadMedia(file).then(function(url){activeMedia={type:isGif?'gif':'photo',url:url};document.getElementById('photo-img').src=url;document.getElementById('photo-preview').classList.add('show');}).catch(function(){showToast("Échec de l'envoi");document.getElementById('photo-zone').style.display='';}).finally(function(){document.getElementById('photo-loading').classList.remove('show');});
+}
+function toggleRecording(){ if(mediaRecorder&&mediaRecorder.state==='recording') stopRecording(true); else startRecording(); }
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    audioChunks=[]; mediaRecorder=new MediaRecorder(stream); mediaRecorder._stream=stream;
+    mediaRecorder.ondataavailable=function(e){if(e.data.size>0)audioChunks.push(e.data);}; mediaRecorder.start(100); recSecs=0;
+    document.getElementById('rec-status').textContent='Enregistrement… 00:00'; document.getElementById('rec-status').classList.add('active'); document.getElementById('rec-btn').classList.add('recording');
+    recTimerInt=setInterval(function(){recSecs++;var m=String(Math.floor(recSecs/60)).padStart(2,'0'),s=String(recSecs%60).padStart(2,'0');document.getElementById('rec-status').textContent='Enregistrement… '+m+':'+s;},1000);
+  }).catch(function(){showToast('Microphone inaccessible');});
+}
+function stopRecording(upload) {
+  clearInterval(recTimerInt); document.getElementById('rec-btn').classList.remove('recording'); document.getElementById('rec-status').classList.remove('active'); document.getElementById('rec-status').textContent='Appuyez pour enregistrer';
+  if(!mediaRecorder||mediaRecorder.state==='inactive') return;
+  mediaRecorder.onstop=function(){
+    if(mediaRecorder._stream) mediaRecorder._stream.getTracks().forEach(function(t){t.stop();});
+    if(!upload||!audioChunks.length) return;
+    var blob=new Blob(audioChunks,{type:'audio/webm'}); var localUrl=URL.createObjectURL(blob); document.getElementById('audio-player').src=localUrl; document.getElementById('audio-preview').classList.add('show'); activeMedia={type:'audio',url:localUrl};
+    if(!API_BASE) return;
+    document.getElementById('audio-loading').classList.add('show');
+    uploadMedia(new File([blob],'audio.webm',{type:'audio/webm'})).then(function(url){activeMedia={type:'audio',url:url};document.getElementById('audio-player').src=url;}).catch(function(){showToast("Échec de l'envoi audio");}).finally(function(){document.getElementById('audio-loading').classList.remove('show');});
+  }; mediaRecorder.stop();
+}
+function clearMedia(){ activeMedia={type:'none',url:''}; document.getElementById('photo-preview').classList.remove('show'); document.getElementById('audio-preview').classList.remove('show'); document.getElementById('photo-zone').style.display=''; document.getElementById('photo-file').value=''; document.getElementById('rec-status').textContent='Appuyez pour enregistrer'; document.getElementById('rec-btn').classList.remove('recording'); clearInterval(recTimerInt); }
+
+function submitWish() {
+  if(isSubmitting) return;
+  var text=document.getElementById('wish-input').value.trim(), author=document.getElementById('wish-author').value.trim(), role=document.getElementById('wish-role').value.trim();
+  if(!text){var ta=document.getElementById('wish-input');ta.style.borderColor='var(--accent)';ta.focus();setTimeout(function(){ta.style.borderColor='';},1800);return;}
+  var w={text:text,name:author||'Anonyme',role:role,color:selectedColor,ts:Date.now(),photoUrl:activeMedia.type!=='audio'?(activeMedia.url||''):'',audioUrl:activeMedia.type==='audio'?(activeMedia.url||''):'',mediaType:activeMedia.type||'none'};
+  isSubmitting=true; document.getElementById('submit-btn').disabled=true;
+  var afterSubmit=function(){
+    isSubmitting=false; document.getElementById('submit-btn').disabled=false;
+    wishes.unshift(w); closeSheet(); document.getElementById('wish-input').value=''; document.getElementById('wish-author').value=''; document.getElementById('wish-role').value=''; clearMedia(); switchTab('none');
+    document.getElementById('count-num').textContent=wishes.length; document.getElementById('empty-state').style.display='none';
+    var c=document.getElementById('notes-container'); var el=createNoteEl(w,true); el.style.opacity='0'; c.insertBefore(el,c.firstChild);
+    TweenMax.fromTo(el,0.6,{opacity:0,y:-40,scale:0.85},{opacity:1,y:0,scale:1,ease:Back.easeOut.config(1.5)});
+    window.scrollTo({top:0,behavior:'smooth'}); setTimeout(function(){el.classList.remove('is-new');},3000); showToast('Vœu ajouté ✦');
+    try{window.parent.postMessage({type:'WW_WISH_ADDED',wish:w},'*');}catch(e){}
+    var cag=_d.cagnotte||_d.jarConfig||{};
+    if(cag&&cag.enabled&&(cag.name||cag.goal)){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
+    else{showThanksOverlay(false);}
+  };
+  if(PUB_ID&&API_BASE){apiFetch('/api/wishes/'+PUB_ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({firstName:w.name,role:w.role,message:w.text,color:w.color,mediaType:w.mediaType,photoUrl:w.photoUrl,audioUrl:w.audioUrl})}).then(function(r){w._id=r.id;if(w._id){myWishIds.push(w._id);localStorage.setItem('ww_my_ids',JSON.stringify(myWishIds));}afterSubmit();}).catch(function(err){
+    isSubmitting=false; document.getElementById('submit-btn').disabled=false;
+    if(err&&err.status===402){showToast(err.code==='FREE_LIMIT_REACHED'?'5 vœux gratuits atteints — le créateur doit activer le mur complet.':'Photos & médias disponibles sur les murs activés.');}
+    else if(err&&err.status===403){showToast(err.message||'Les vœux sont temporairement fermés.');setWishesEnabled(false);}
+    else{afterSubmit();}
+  });}
+  else{afterSubmit();}
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg||'Vœu ajouté ✦';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
+
+var giftState={amt:null,gave:false,paid:0,wishId:null,guestName:''};
+var GIFT_DEFAULT_AMTS=[2000,5000,10000,20000];
+function initGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;document.getElementById('gift-sheet-name').textContent=(cag.emoji||'🎁')+' '+(cag.name||'Cadeau commun');document.getElementById('gift-sheet-desc').textContent='Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';var col=cag.collected||0,goal=cag.goal||0;document.getElementById('gift-collected').textContent=fmtNum(col);document.getElementById('gift-goal-lbl').textContent=goal>0?'sur '+fmtNum(goal):'';var pct=goal>0?Math.min(100,Math.round((col/goal)*100)):0;document.getElementById('gift-bar-fill').style.width=pct+'%';document.getElementById('gift-pct').textContent=pct+'%';document.getElementById('gift-contributors').textContent=(cag.contributors||0)+' participant'+((cag.contributors||0)!==1?'s':'');var grid=document.getElementById('gift-amt-grid');grid.innerHTML='';var amts=(cag.amountChoices&&cag.amountChoices.length)?cag.amountChoices:GIFT_DEFAULT_AMTS;amts.forEach(function(a){var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=a;chip.innerHTML='<div class="gav">'+(a>=1000?(a/1000)+'k':a)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(a,chip);};grid.appendChild(chip);});}
+function showGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;var el=document.getElementById('gift-overlay');el.style.display='flex';setTimeout(function(){el.classList.add('open');},10);}
+function hideGiftSheet(){var el=document.getElementById('gift-overlay');el.classList.remove('open');setTimeout(function(){el.style.display='none';},400);}
+function handleGiftBgClick(e){if(e.target===document.getElementById('gift-overlay'))skipGift();}
+function skipGift(){hideGiftSheet();showThanksOverlay(false);}
+function giftPickAmt(a,chip){giftState.amt=(giftState.amt===a)?null:a;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var btn=document.getElementById('gift-pay-btn'),pre=document.getElementById('gift-bar-pre'),cag=_d.cagnotte||_d.jarConfig||{};if(giftState.amt!==null){chip.classList.add('active');btn.textContent='Participer · '+fmtNum(giftState.amt)+' FCFA';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0,p1=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)+giftState.amt)/cag.goal*100)):0;pre.style.display='block';pre.style.left=p0+'%';pre.style.width=(p1-p0)+'%';document.getElementById('gift-pct').textContent=p1+'%';}else{var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0;btn.textContent='Choisir un montant';btn.disabled=true;btn.style.opacity='.5';btn.style.cursor='not-allowed';pre.style.display='none';document.getElementById('gift-pct').textContent=p0+'%';}}
+function giftCustomAmt(){var v=prompt('Montant en FCFA (ex : 7500) :'),n=parseInt(v,10);if(isNaN(n)||n<=0)return;document.querySelectorAll('.gamt-chip[data-custom]').forEach(function(c){c.remove();});var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=n;chip.dataset.custom='1';chip.innerHTML='<div class="gav">'+(n>=1000?(n/1000)+'k':n)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(n,chip);};document.getElementById('gift-amt-grid').appendChild(chip);giftPickAmt(n,chip);}
+function giftPay(){if(!giftState.amt)return;var errEl=document.getElementById('gift-err');errEl.style.display='none';var cag=_d.cagnotte||_d.jarConfig||{},key=(cag&&cag.kkiapayKey)||_d.kkiapayKey||'';if(!key){errEl.textContent='Paiement non configuré.';errEl.style.display='block';return;}var launch=function(){openKkiapayWidget({amount:giftState.amt,api_key:key,sandbox:(_d.kkiapaySandbox!==false),name:giftState.guestName||'Anonyme',callback:window.location.href});addSuccessListener(function(resp){var txId=resp.transactionId||resp.transaction_id,afterPay=function(){giftState.gave=true;hideGiftSheet();showThanksOverlay(true);};if(txId){fetch('/api/contributions/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:txId,publicationId:PUB_ID,contributorName:giftState.guestName||'',isAnonymous:!giftState.guestName,wishId:giftState.wishId})}).then(function(r){return r.json();}).then(function(d){giftState.paid=(d.contribution&&d.contribution.amount)?d.contribution.amount:giftState.amt;}).catch(function(){giftState.paid=giftState.amt;}).finally(afterPay);}else{giftState.paid=giftState.amt;afterPay();}});};if(typeof openKkiapayWidget==='undefined'){var sc=document.createElement('script');sc.src='https://cdn.kkiapay.me/k.js';sc.onload=launch;sc.onerror=function(){errEl.textContent='Impossible de charger le module de paiement.';errEl.style.display='block';};document.head.appendChild(sc);}else{launch();}}
+function showThanksOverlay(gave){var o=document.getElementById('thanks-overlay');if(gave){document.getElementById('thanks-icon').textContent='🎁';document.getElementById('thanks-title').textContent='Merci pour ta participation';document.getElementById('thanks-msg').textContent="Grâce à toi le cadeau se rapproche. On garde ça secret jusqu'au grand jour ! 🤫";document.getElementById('thanks-receipt').style.display='block';document.getElementById('thanks-amt').innerHTML=fmtNum(giftState.paid||giftState.amt||0)+' <span style="font-size:14px;font-family:\'Inter\',sans-serif;font-style:normal;">FCFA</span>';}else{document.getElementById('thanks-icon').textContent='💕';document.getElementById('thanks-title').textContent='Merci pour ton joli mot';document.getElementById('thanks-msg').textContent=_d.requireModeration?'Ton vœu sera visible après validation par l\'organisateur.':'Ton vœu a bien été reçu. Reviens le jour J pour voir le mur complet !';document.getElementById('thanks-receipt').style.display='none';}o.style.display='flex';setTimeout(function(){o.classList.add('open');},10);setTimeout(closeThanks,5000);}
+function closeThanks(){var o=document.getElementById('thanks-overlay');o.classList.remove('open');setTimeout(function(){o.style.display='none';},300);}
+
+(function init(){
+  var d=window.__WW_DATA__||{};
+  if(d.isPrivate&&d.accessCode) document.getElementById('access-gate').style.display='flex';
+  if(d.eyebrow)   document.querySelector('[data-node="eyebrow"]').textContent   = d.eyebrow;
+  if(d.titleName) document.querySelector('[data-node="titleName"]').textContent = d.titleName;
+  if(d.subtitle)  document.querySelector('[data-node="subtitle"]').textContent  = d.subtitle;
+  setWishesEnabled(d.wishesEnabled!==false);
+  initCagnotteStrip(); initGiftSheet(); loadWishes();
+})();
+
+window.addEventListener('message', function(e){
+  if(!e.data) return;
+  if(e.data.type==='WW_WISH_NEW'){var w=e.data.wish;if(!w||!w.text)return;wishes.unshift(w);document.getElementById('count-num').textContent=wishes.length;var c=document.getElementById('notes-container');var el=createNoteEl(w,true);el.style.opacity='0';c.insertBefore(el,c.firstChild);TweenMax.fromTo(el,0.6,{opacity:0,y:-40,scale:0.8},{opacity:1,y:0,scale:1,ease:Back.easeOut.config(1.4)});setTimeout(function(){el.classList.remove('is-new');},3000);return;}
+  if(e.data.type==='WW_UPDATE'){var d=e.data.data;if(!d)return;if(d.eyebrow!==undefined)document.querySelector('[data-node="eyebrow"]').textContent=d.eyebrow||'✦ Mur de vœux';if(d.titleName!==undefined)document.querySelector('[data-node="titleName"]').textContent=d.titleName||'Prénom';if(d.subtitle!==undefined)document.querySelector('[data-node="subtitle"]').textContent=d.subtitle||'';return;}
+  if(e.data.type==='WW_CONFIG'){if(e.data.wishesEnabled!==undefined)setWishesEnabled(e.data.wishesEnabled);return;}
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)&&document.getElementById('add-overlay').classList.contains('open'))submitWish();});
+</script>
+</body>
+</html>
