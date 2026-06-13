@@ -103,10 +103,7 @@
     .tone-peach  { background: #FFEDE3; } .tone-peach  .nm { color: #E07A4E; }
     /* is-new outline */
     .note.is-new { outline: 2px solid rgba(255,255,255,0.7); outline-offset: 2px; }
-    /* delete button (hover only) */
-    .note-del { background: none; border: none; cursor: pointer; color: rgba(39,24,38,0.4); font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; opacity: 0; margin-left: auto; flex-shrink: 0; }
-    .note:hover .note-del { opacity: 1; }
-    .note-del:hover { color: #E11D48; }
+
 
     /* ── ADD BUTTON ── */
     #add-btn {
@@ -448,8 +445,6 @@ function createNoteEl(w, isNew) {
   card.className = 'note ' + TONES[toneIdx] + (isNew ? ' is-new' : '');
   if (w._id) card.dataset.id = w._id;
   var initial = (w.name||'A').trim().charAt(0).toUpperCase();
-  var isOwn = w._id && myWishIds.indexOf(w._id) !== -1;
-  var delBtn = isOwn ? '<button class="note-del" onclick="deleteWish(\''+escapeHtml(w._id)+'\')">✕</button>' : '';
   var mediaHtml = '';
   if ((w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl) {
     mediaHtml = '<img class="card-photo" src="'+escapeHtml(w.photoUrl)+'" alt="" loading="lazy">';
@@ -457,7 +452,7 @@ function createNoteEl(w, isNew) {
     mediaHtml = '<audio class="card-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none"></audio>';
   }
   card.innerHTML =
-    '<div class="nm"><div class="av" style="background:'+AV_GRADS[toneIdx]+'">'+escapeHtml(initial)+'</div>'+escapeHtml(w.name||'Anonyme')+delBtn+'</div>'+
+    '<div class="nm"><div class="av" style="background:'+AV_GRADS[toneIdx]+'">'+escapeHtml(initial)+'</div>'+escapeHtml(w.name||'Anonyme')+'</div>'+
     (mediaHtml || '')+
     '<div class="tx">'+escapeHtml(w.text)+'</div>';
   return card;
@@ -472,11 +467,6 @@ function buildWall(animate) {
   if (animate) TweenMax.staggerFromTo(c.querySelectorAll('.note'), 0.48, { opacity:0, y:-24, scale:0.93 }, { opacity:1, y:0, scale:1, ease:Back.easeOut.config(1.2) }, 0.045);
 }
 
-function deleteWish(id) {
-  if (!id) return;
-  if (!PUB_ID) { wishes = wishes.filter(function(w){ return w._id!==id; }); buildWall(false); showToast('Vœu supprimé'); return; }
-  apiFetch('/api/wishes/'+id, { method:'DELETE' }).then(function(){ wishes = wishes.filter(function(w){ return w._id!==id; }); myWishIds = myWishIds.filter(function(i){ return i!==id; }); localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds)); buildWall(false); showToast('Vœu supprimé'); }).catch(function(){ showToast('Erreur'); });
-}
 
 function initCagnotteStrip() {
   var cag = _d.cagnotte || _d.jarConfig || {};
@@ -557,6 +547,7 @@ function submitWish() {
   isSubmitting=true; document.getElementById('submit-btn').disabled=true;
   var afterSubmit=function(){
     isSubmitting=false; document.getElementById('submit-btn').disabled=false;
+    if(_d.requireModeration){closeSheet();document.getElementById('wish-input').value='';document.getElementById('wish-author').value='';document.getElementById('wish-role').value='';clearMedia();switchTab('none');showToast('Ton vœu est en attente de validation ✦');return;}
     wishes.unshift(w); closeSheet(); document.getElementById('wish-input').value=''; document.getElementById('wish-author').value=''; document.getElementById('wish-role').value=''; clearMedia(); switchTab('none');
     document.getElementById('count-num').textContent=wishes.length; document.getElementById('empty-state').style.display='none';
     var c=document.getElementById('notes-container'); var el=createNoteEl(w,true); el.style.opacity='0'; c.insertBefore(el,c.firstChild);
@@ -564,7 +555,7 @@ function submitWish() {
     window.scrollTo({top:0,behavior:'smooth'}); setTimeout(function(){el.classList.remove('is-new');},3000); showToast('Vœu ajouté ✦');
     try{window.parent.postMessage({type:'WW_WISH_ADDED',wish:w},'*');}catch(e){}
     var cag=_d.cagnotte||_d.jarConfig||{};
-    if(cag&&cag.enabled&&(cag.name||cag.goal)){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
+    if(cag&&cag.enabled){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
     else{showThanksOverlay(false);}
   };
   if(PUB_ID&&API_BASE){apiFetch('/api/wishes/'+PUB_ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({firstName:w.name,role:w.role,message:w.text,color:w.color,mediaType:w.mediaType,photoUrl:w.photoUrl,audioUrl:w.audioUrl})}).then(function(r){w._id=r.id;if(w._id){myWishIds.push(w._id);localStorage.setItem('ww_my_ids',JSON.stringify(myWishIds));}afterSubmit();}).catch(function(err){

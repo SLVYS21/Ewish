@@ -28,13 +28,15 @@ import SuperAdminSettings     from "./admin/pages/SuperAdminSettings";
 import SuperAdminKyc          from "./admin/pages/SuperAdminKyc";
 import KycMobilePage          from "./pages/KycMobilePage";
 
-import TemplatesGallery from "./pages/TemplatesGallery";
-import CagnottePage     from "./pages/CagnottePage";
-import CreditsPage      from "./pages/CreditsPage";
-import SharePage        from "./pages/SharePage";
-import TermsPage        from "./pages/TermsPage";
-import PrivacyPage      from "./pages/PrivacyPage";
-import ProfilePage      from "./pages/ProfilePage";
+import TemplatesGallery    from "./pages/TemplatesGallery";
+import TemplateDetailPage  from "./pages/TemplateDetailPage";
+import WallSetup           from "./pages/WallSetup";
+import CagnottePage        from "./pages/CagnottePage";
+import CreditsPage         from "./pages/CreditsPage";
+import SharePage           from "./pages/SharePage";
+import TermsPage           from "./pages/TermsPage";
+import PrivacyPage         from "./pages/PrivacyPage";
+import ProfilePage         from "./pages/ProfilePage";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -88,7 +90,8 @@ export default function App() {
           <Route path="/ewish-admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
             <Route path="ewish" element={<MyCreations />} />
-            <Route path="templates"  element={<TemplatesGallery />} />
+            <Route path="templates"        element={<TemplatesGallery />} />
+            <Route path="template/:name"   element={<TemplateDetailPage />} />
             <Route path="cagnotte/:id" element={<CagnottePage />} />
             <Route path="credits"    element={<CreditsPage />} />
             <Route path="wishes"     element={<AdminWishes />} />
@@ -108,12 +111,13 @@ export default function App() {
             <Route path="super/settings"     element={<RequireSuperAdmin><SuperAdminSettings /></RequireSuperAdmin>} />
             <Route path="super/kyc"          element={<RequireSuperAdmin><SuperAdminKyc /></RequireSuperAdmin>} />
             <Route path="profile"            element={<ProfilePage />} />
+            <Route path="wall/:id"           element={<WallSetup />} />
+            <Route path="share/:id"          element={<SharePage />} />
           </Route>
 
           {/* Full-screen routes — no sidebar */}
           <Route path="/ewish-admin/ewish/new"       element={<RequireAuth><QuickCreate /></RequireAuth>} />
           <Route path="/ewish-admin/ewish/edit/:id"  element={<RequireAuth><Editor /></RequireAuth>} />
-          <Route path="/ewish-admin/share/:id"       element={<RequireAuth><SharePage /></RequireAuth>} />
 
           <Route path="/kyc/mobile/:token" element={<KycMobilePage />} />
           <Route path="/terms"   element={<TermsPage />} />

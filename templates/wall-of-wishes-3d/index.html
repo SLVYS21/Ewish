@@ -1338,6 +1338,15 @@ async function submitWish() {
   }
   isSubmitting = false;
   document.getElementById('submit-btn').disabled = false;
+  if (_d.requireModeration) {
+    closeSheet();
+    document.getElementById('wish-input').value  = '';
+    document.getElementById('wish-author').value = '';
+    clearMedia();
+    switchTab('none');
+    showToast('Ton vœu est en attente de validation ✦');
+    return;
+  }
   wishes.unshift(w);
   closeSheet();
   document.getElementById('wish-input').value  = '';

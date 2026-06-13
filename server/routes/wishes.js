@@ -106,8 +106,8 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/wishes/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /api/wishes/:id — admin only
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const deleted = await Wish.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Not found' });

@@ -68,10 +68,6 @@
     /* Media */
     .pin .pin-photo { width: 100%; max-height: 120px; object-fit: cover; margin-bottom: 8px; display: block; }
     .pin .pin-audio { width: 100%; margin-bottom: 8px; display: block; accent-color: var(--gold); }
-    /* Delete button */
-    .pin-del { position: absolute; top: 6px; right: 6px; background: rgba(26,20,16,.07); border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; color: rgba(26,20,16,.5); font-size: 0.65rem; line-height: 1; }
-    .pin:hover .pin-del { opacity: 1; }
-    .pin-del:hover { background: rgba(224,85,116,.15); color: var(--rose); }
 
     /* ── ADD BUTTON ── */
     #add-btn { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--ink) 0%, #2d2018 100%); color: var(--gold); border: none; border-radius: 99px; padding: 15px 36px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; letter-spacing: 0.03em; box-shadow: 0 8px 28px rgba(26,20,16,0.32), 0 2px 6px rgba(26,20,16,0.18); transition: transform 0.22s, box-shadow 0.22s; white-space: nowrap; }
@@ -279,13 +275,9 @@
 </div>
 
 <header id="wall-header">
-  <p class="eyebrow" data-node="eyebrow">✦ Mur de vœux</p>
+  <p class="eyebrow" data-node="eyebrow">✦ Mur de ...</p>
   <h1 class="wall-title">Pour <em data-node="titleName">Prénom</em></h1>
   <p class="wall-subtitle" data-node="subtitle">Partagez ce lien — chacun peut laisser son mot sur ce mur.</p>
-  <div class="wish-count" id="wish-count-badge">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-    <span id="count-num">0</span> vœux
-  </div>
   <div class="header-divider"></div>
 
   <div id="cagnotte-strip" style="display:none">
@@ -602,22 +594,6 @@ function uploadMedia(file) {
   return apiFetch('/api/upload', { method: 'POST', body: form }).then(function(data) { return data.url; });
 }
 
-function deleteWish(id) {
-  if (!id) return;
-  if (!PUB_ID) {
-    wishes = wishes.filter(function(w){ return w._id !== id; });
-    buildWall(false);
-    showToast('Vœu supprimé');
-    return;
-  }
-  apiFetch('/api/wishes/' + id, { method: 'DELETE' }).then(function() {
-    wishes = wishes.filter(function(w){ return w._id !== id; });
-    myWishIds = myWishIds.filter(function(i){ return i !== id; });
-    localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds));
-    buildWall(false);
-    showToast('Vœu supprimé');
-  }).catch(function() { showToast('Erreur — réessayez'); });
-}
 
 /* ════════════════════════════════════════════════
    RENDER
@@ -638,8 +614,6 @@ function createNoteEl(w, isNew) {
   var tapeClass = (colorIdx % 2 === 1) ? ' tape-l' : '';
   note.className = 'pin ' + STICKY_COLORS[colorIdx] + tapeClass + (isNew ? ' is-new' : '');
   if (w._id) note.dataset.id = w._id;
-  var isOwn = w._id && myWishIds.indexOf(w._id) !== -1;
-  var delBtn = isOwn ? '<button class="pin-del" onclick="deleteWish(\''+escapeHtml(w._id)+'\')">✕</button>' : '';
   var mediaHtml = '';
   if ((w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl) {
     mediaHtml = '<img class="pin-photo" src="'+escapeHtml(w.photoUrl)+'" alt="" loading="lazy">';
@@ -647,7 +621,6 @@ function createNoteEl(w, isNew) {
     mediaHtml = '<audio class="pin-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none"></audio>';
   }
   note.innerHTML =
-    delBtn +
     (mediaHtml || '') +
     '<div class="nm">'+escapeHtml(w.name||'Anonyme')+'</div>'+
     '<div class="tx">'+escapeHtml(w.text)+'</div>';
@@ -899,6 +872,16 @@ function submitWish() {
     isSubmitting = false;
     document.getElementById('submit-btn').disabled = false;
 
+    if (_d.requireModeration) {
+      closeSheet();
+      document.getElementById('wish-input').value  = '';
+      document.getElementById('wish-author').value = '';
+      clearMedia();
+      switchTab('none');
+      showToast('Ton vœu est en attente de validation ✦');
+      return;
+    }
+
     wishes.unshift(w);
     closeSheet();
 
@@ -926,7 +909,7 @@ function submitWish() {
 
     /* Show gift sheet if cagnotte is configured on this wall */
     var cag = _d.cagnotte || _d.jarConfig || {};
-    if (cag && (cag.name || cag.goal)) {
+    if (cag && cag.enabled) {
       giftState.wishId    = w._id || null;
       giftState.guestName = (w.name && w.name !== 'Anonyme') ? w.name : '';
       giftState.gave      = false;

@@ -109,11 +109,12 @@
 .stepNavBtn:hover { background: #FFF1F4; }
 .stepNavBtnActive { border-bottom-color: #E11D48; }
 .stepNavBtnDone { color: #10b981; }
-.stepNavEmoji {
-  font-size: 22px; line-height: 1;
+.stepNavIcon {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
   transition: transform 0.2s;
 }
-.stepNavBtnActive .stepNavEmoji { transform: scale(1.15); }
+.stepNavBtnActive .stepNavIcon { transform: scale(1.12); }
 .stepNavLabel {
   font-size: 0.62rem; font-weight: 700;
   text-align: center; line-height: 1.2; white-space: nowrap;
@@ -353,11 +354,11 @@
 }
 
 .previewFrame {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 24px; overflow: auto;
+  flex: 1; display: flex; align-items: stretch; justify-content: center;
+  padding: 12px; overflow: hidden;
 }
 .iframe {
-  width: 100%; max-width: 700px; height: 100%;
+  width: 100%; max-width: 700px;
   border: none; border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   background: #fff;
@@ -946,7 +947,7 @@
 .mobileDockBtnActive {
   box-shadow: 0 4px 12px rgba(0,0,0,.08);
 }
-.mobileDockEmoji { font-size: 22px; line-height: 1; }
+.mobileDockIcon { display: flex; align-items: center; justify-content: center; }
 .mobileDockLabel { font-size: 11px; font-weight: 700; color: var(--mk-ink-2); }
 
 /* ── Mobile sheet content ── */

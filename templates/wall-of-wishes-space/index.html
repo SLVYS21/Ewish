@@ -746,6 +746,7 @@ function submitWish() {
   isSubmitting=true; document.getElementById('submit-btn').disabled=true;
   var afterSubmit=function(){
     isSubmitting=false; document.getElementById('submit-btn').disabled=false;
+    if(_d.requireModeration){closeSheet();document.getElementById('wish-input').value='';document.getElementById('wish-author').value='';clearMedia();switchTab('none');showToast('Ton vœu est en attente de validation ✦');return;}
     closeSheet(); document.getElementById('wish-input').value=''; document.getElementById('wish-author').value=''; clearMedia(); switchTab('none');
     var pos={x:transform.x<0?(-transform.x/transform.scale)+window.innerWidth/(2*transform.scale)-98:CANVAS_W/2-98+(Math.random()-0.5)*200, y:CANVAS_H/2-130+(Math.random()-0.5)*200, rot:(Math.random()-0.5)*10, z:20};
     wishes.push(w); cardPositions.push(pos);
@@ -756,7 +757,7 @@ function submitWish() {
     showToast('Vœu épinglé ✦');
     try{window.parent.postMessage({type:'WW_WISH_ADDED',wish:w},'*');}catch(e){}
     var cag=_d.cagnotte||_d.jarConfig||{};
-    if(cag&&cag.enabled&&(cag.name||cag.goal)){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
+    if(cag&&cag.enabled){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
     else{showThanksOverlay(false);}
   };
   if(PUB_ID&&API_BASE){apiFetch('/api/wishes/'+PUB_ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({firstName:w.name,message:w.text,color:w.color,mediaType:w.mediaType,photoUrl:w.photoUrl,audioUrl:w.audioUrl})}).then(function(r){w._id=r.id;if(w._id){myWishIds.push(w._id);localStorage.setItem('ww_my_ids',JSON.stringify(myWishIds));}afterSubmit();}).catch(function(){afterSubmit();});}

@@ -1,16 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import {
-  Search, X, Plus, Edit2, Copy, Trash2, ExternalLink, CircleOff, Eye,
-  QrCode, ChevronDown, Filter, Star, ArrowLeft,
-} from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus, Edit2, Copy, Trash2, Share2, MoreHorizontal, X } from 'lucide-react';
 import {
   getPublications, deletePublication, duplicatePublication, unpublishPublication,
-  updatePublication, getTemplates,
+  getTemplates,
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
-import QRCodeModal from '../components/QRCodeModal';
-import styles from './MyCreations.module.css';
 
 const TEMPLATE_COLORS = {
   birthday:               'linear-gradient(135deg,#FFB3C1,#FF8DAA)',
@@ -25,105 +20,202 @@ const TEMPLATE_COLORS = {
   'wall-of-wishes-modern':'linear-gradient(135deg,#ccc0f5,#e8b0d8)',
   'wall-of-wishes-space': 'linear-gradient(135deg,#ff8060,#d83070)',
 };
-const TEMPLATE_EMOJIS = {
-  birthday: '🎂', special: '✨', 'collective-family': '💝',
-  'collective-pro': '🥂', forever: '💍', sanctuary: '🕊️',
-  'notre-film': '🎬', 'wall-of-wishes': '🌟', 'wall-of-wishes-3d': '🎊',
-  'wall-of-wishes-modern': '💬', 'wall-of-wishes-space': '🚀',
-};
 
-const STATUS_OPTIONS = [
-  { value: '', label: 'Tous' },
-  { value: 'true', label: 'En ligne' },
-  { value: 'false', label: 'Brouillons' },
-];
+const WALL_TEMPLATES = new Set([
+  'wall-of-wishes', 'wall-of-wishes-3d', 'wall-of-wishes-modern', 'wall-of-wishes-space',
+]);
+
+const DISPLAY_DOMAIN = (import.meta.env.VITE_API_URL || 'mykado.store')
+  .replace(/^https?:\/\//, '')
+  .replace(/:\d+.*$/, '') || 'mykado.store';
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins  < 2)   return "à l'instant";
+  if (mins  < 60)  return `il y a ${mins}min`;
+  if (hours < 24)  return `il y a ${hours}h`;
+  if (days  === 1) return 'hier';
+  if (days  < 30)  return `il y a ${days}j`;
+  if (days  < 365) return `il y a ${Math.floor(days / 30)} mois`;
+  return `il y a ${Math.floor(days / 365)} an${Math.floor(days / 365) > 1 ? 's' : ''}`;
+}
+
+function CreationRow({ pub, tplLabel, onDelete, onDup }) {
+  const navigate  = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef   = useRef(null);
+
+  const thumbBg = pub.thumbnail
+    ? `url(${pub.thumbnail}) center/cover no-repeat`
+    : (TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#FFB3C1,#E11D48)');
+
+  const isWall  = WALL_TEMPLATES.has(pub.templateName);
+  const isDraft = !pub.published;
+  const editPath = isWall
+    ? `/ewish-admin/wall/${pub._id}`
+    : `/ewish-admin/ewish/edit/${pub._id}`;
+
+  // Row 3 URL: show domain/customName (readable slug)
+  const displayUrl = pub.customName
+    ? `${DISPLAY_DOMAIN}/${pub.customName}`
+    : null;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handle = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [menuOpen]);
+
+  return (
+    <div className="crea-row" onClick={() => navigate(editPath)}>
+
+      {/* Thumbnail */}
+      <div className="crea-thumb" style={{ background: thumbBg }} />
+
+      {/* Main: 4 stacked rows */}
+      <div className="crea-main">
+
+        {/* Row 1 — title + status badge */}
+        <div className="crea-r1">
+          <span className="crea-title">{pub.title || 'Sans titre'}</span>
+          <div className="crea-badges">
+            {isDraft
+              ? <span className="badge badge-draft">Brouillon</span>
+              : <span className="badge badge-live">✓ En ligne</span>}
+            {isWall && <span className="badge badge-wall">Mur</span>}
+          </div>
+        </div>
+
+        {/* Row 2 — template label + shortcode chip */}
+        <div className="crea-r2">
+          <span className="crea-tpl-name">{tplLabel}</span>
+          {pub.shortCode && (
+            <span className="crea-code">{pub.shortCode.toUpperCase()}</span>
+          )}
+        </div>
+
+        {/* Row 3 — URL + relative time */}
+        {(displayUrl || pub.updatedAt) && (
+          <div className="crea-r3">
+            {displayUrl && <span className="crea-url">{displayUrl}</span>}
+            {displayUrl && pub.updatedAt && <span className="crea-dot">·</span>}
+            {pub.updatedAt && <span className="crea-time">{timeAgo(pub.updatedAt)}</span>}
+          </div>
+        )}
+
+        {/* Row 4 — action buttons */}
+        <div className="crea-r4" onClick={e => e.stopPropagation()}>
+          {pub.published && (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => navigate(`/ewish-admin/share/${pub._id}`)}
+            >
+              <Share2 size={13} /> Partager
+            </button>
+          )}
+          <button className="btn-icon" title="Modifier" onClick={() => navigate(editPath)}>
+            <Edit2 size={15} />
+          </button>
+          <div style={{ position: 'relative' }} ref={menuRef}>
+            <button className="btn-icon" title="Plus" onClick={() => setMenuOpen(o => !o)}>
+              <MoreHorizontal size={16} />
+            </button>
+            {menuOpen && (
+              <div className="crea-menu">
+                <button className="sb-item" onClick={() => { setMenuOpen(false); onDup(pub); }}>
+                  <Copy size={14} /> Dupliquer
+                </button>
+                {pub.published && (
+                  <button
+                    className="sb-item"
+                    style={{ color: 'var(--mk-butter)' }}
+                    onClick={async () => {
+                      setMenuOpen(false);
+                      if (!confirm('Dépublier cette création ?')) return;
+                      await unpublishPublication(pub._id);
+                    }}
+                  >
+                    <X size={14} /> Dépublier
+                  </button>
+                )}
+                <button
+                  className="sb-item"
+                  style={{ color: 'var(--mk-accent)' }}
+                  onClick={() => { setMenuOpen(false); onDelete(pub._id); }}
+                >
+                  <Trash2 size={14} /> Supprimer
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MyCreations() {
   const { user } = useAuth();
   const navigate  = useNavigate();
-  const isSuperAdmin = user?.role === 'super_admin';
-  const VITE_API = import.meta.env.VITE_API_URL || '';
 
-  const [pubs, setPubs]               = useState([]);
-  const [templates, setTemplates]     = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [search, setSearch]           = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [tplFilter, setTplFilter]     = useState('');
-  const [showTplDropdown, setShowTplDropdown] = useState(false);
-  const [page, setPage]               = useState(1);
-  const [hasMore, setHasMore]         = useState(false);
-  const searchRef = useRef(null);
+  const [pubs,      setPubs]      = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [search,    setSearch]    = useState('');
+  const [type,      setType]      = useState('all');
+  const [tplFilter, setTplFilter] = useState('all');
 
-  /* ── Dup modal ── */
-  const [dupModal, setDupModal]   = useState(null);
-  const [dupTitle, setDupTitle]   = useState('');
-  const [dupSlug, setDupSlug]     = useState('');
-  const [dupError, setDupError]   = useState('');
+  const [dupModal,   setDupModal]   = useState(null);
+  const [dupTitle,   setDupTitle]   = useState('');
+  const [dupError,   setDupError]   = useState('');
   const [dupLoading, setDupLoading] = useState(false);
 
-  /* ── QR modal ── */
-  const [qrPub, setQrPub] = useState(null);
-
-  /* ── Share sheet ── */
-  const [sharePub, setSharePub] = useState(null);
-
-  const LIMIT = 60;
-
-  const fetchPubs = useCallback(async (reset = false) => {
-    const p = reset ? 1 : page;
+  const fetchPubs = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { mine: 'true', limit: LIMIT, page: p };
-      if (search.trim())   params.search = search.trim();
-      if (statusFilter)    params.published = statusFilter;
-      if (tplFilter)       params.templateName = tplFilter;
-      const res = await getPublications(params);
-      const data = res.data || [];
-      if (reset) {
-        setPubs(data);
-        setPage(1);
-      } else {
-        setPubs(prev => p === 1 ? data : [...prev, ...data]);
-      }
-      setHasMore(data.length === LIMIT);
+      const res = await getPublications({ mine: 'true', limit: 80 });
+      setPubs(res.data || []);
     } catch (_) {}
     setLoading(false);
-  }, [search, statusFilter, tplFilter, page]);
+  }, []);
 
-  useEffect(() => { fetchPubs(true); }, [search, statusFilter, tplFilter]);
-
+  useEffect(() => { fetchPubs(); }, [fetchPubs]);
   useEffect(() => {
     getTemplates().then(r => setTemplates(r.data || [])).catch(() => {});
   }, []);
 
-  const handleDelete = async (id, e) => {
-    e.stopPropagation();
+  // Build name → label map for human-readable template names in cards
+  const tplMap = useMemo(() => {
+    const m = {};
+    templates.forEach(t => { m[t.name] = t.label || t.name; });
+    return m;
+  }, [templates]);
+
+  const handleDelete = async (id) => {
     if (!confirm('Supprimer cette création définitivement ?')) return;
     await deletePublication(id);
     setPubs(p => p.filter(x => x._id !== id));
   };
 
-  const handleUnpublish = async (id, e) => {
-    e.stopPropagation();
-    if (!confirm('Dépublier cette création ?')) return;
-    await unpublishPublication(id);
-    setPubs(p => p.map(x => x._id === id ? { ...x, published: false } : x));
-  };
-
-  const openDup = (pub, e) => {
-    e.stopPropagation();
+  const openDup = (pub) => {
     setDupModal(pub);
     setDupTitle(pub.title + ' (copie)');
-    setDupSlug((pub.customName || 'copie') + '-2');
     setDupError('');
   };
 
   const confirmDup = async () => {
-    if (!dupTitle.trim() || !dupSlug.trim()) { setDupError('Titre et nom requis'); return; }
+    if (!dupTitle.trim()) { setDupError('Titre requis'); return; }
     setDupLoading(true); setDupError('');
     try {
-      const r = await duplicatePublication(dupModal._id, { title: dupTitle.trim(), customName: dupSlug.trim() });
+      const slug = dupTitle.trim().toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) + '-' + Date.now();
+      const r = await duplicatePublication(dupModal._id, { title: dupTitle.trim(), customName: slug });
       setPubs(p => [r.data, ...p]);
       setDupModal(null);
       navigate(`/ewish-admin/ewish/edit/${r.data._id}`);
@@ -131,264 +223,143 @@ export default function MyCreations() {
     finally { setDupLoading(false); }
   };
 
-  const handleTogglePremade = async (id, val, e) => {
-    e.stopPropagation();
-    try {
-      await updatePublication(id, { isPremade: val });
-      setPubs(prev => prev.map(p => p._id === id ? { ...p, isPremade: val } : p));
-    } catch (err) { alert(err.response?.data?.error || 'Erreur'); }
-  };
+  const filtered = pubs.filter(pub => {
+    if (type === 'wish' && WALL_TEMPLATES.has(pub.templateName)) return false;
+    if (type === 'wall' && !WALL_TEMPLATES.has(pub.templateName)) return false;
+    if (tplFilter !== 'all' && pub.templateName !== tplFilter) return false;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      return [pub.title, pub.customName, pub.shortCode].some(s => (s || '').toLowerCase().includes(q));
+    }
+    return true;
+  });
 
-  const tplLabel = tplFilter
-    ? (templates.find(t => t.name === tplFilter)?.label || tplFilter)
-    : 'Tous les templates';
+  const wishTemplates = templates.filter(t => !WALL_TEMPLATES.has(t.name));
+  const wallTemplates = templates.filter(t =>  WALL_TEMPLATES.has(t.name));
 
   return (
-    <div className={styles.root}>
-      {/* ── Dup modal ── */}
+    <div className="page">
+
+      {/* Dup modal */}
       {dupModal && (
-        <div className={styles.overlay} onClick={() => setDupModal(null)}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHead}>
-              <span className={styles.modalIcon}>📋</span>
-              <h2>Dupliquer la création</h2>
-              <p>Template <strong>{dupModal.templateName}</strong> conservé.</p>
-            </div>
-            <label className={styles.field}>
-              <span className={styles.fieldLabel}>Titre</span>
-              <input className={styles.input} value={dupTitle} onChange={e => setDupTitle(e.target.value)} autoFocus />
-            </label>
-            <label className={styles.field} style={{ marginTop: 12 }}>
-              <span className={styles.fieldLabel}>Nom dans l'URL</span>
-              <div className={styles.slugWrap}>
-                <span className={styles.slugPre}>/{dupModal.templateName}/</span>
-                <input className={styles.slugInput} value={dupSlug} onChange={e => setDupSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))} />
-              </div>
-            </label>
-            {dupError && <p className={styles.modalError}>{dupError}</p>}
-            <div className={styles.modalActions}>
-              <button className={styles.btnGhost} onClick={() => setDupModal(null)}>Annuler</button>
-              <button className={styles.btnPrimary} onClick={confirmDup} disabled={dupLoading}>
-                {dupLoading ? '⏳ Duplication…' : <><Copy size={14}/> Dupliquer</>}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── QR modal ── */}
-      {qrPub?.shortCode && (
-        <QRCodeModal url={`${VITE_API}/s/${qrPub.shortCode}`} onClose={() => setQrPub(null)} />
-      )}
-
-      {/* ── Share sheet ── */}
-      {sharePub && (
-        <div className={styles.overlay} onClick={() => setSharePub(null)}>
-          <div className={styles.sheet} onClick={e => e.stopPropagation()}>
-            <div className={styles.sheetGrip} />
-            <h2 className={styles.sheetTitle}>Partager « {sharePub.title} »</h2>
-            {sharePub.published && sharePub.shortCode ? (
-              <>
-                <div className={styles.linkRow}>
-                  <span className={styles.linkBase}>mykado.store/s/</span>
-                  <strong className={styles.linkCode}>{sharePub.shortCode}</strong>
+        <div className="modal-veil" onMouseDown={e => { if (e.target === e.currentTarget) setDupModal(null); }}>
+          <div className="mk-modal">
+            <div className="mk-modal-head">
+              <div>
+                <div className="mk-modal-title">Dupliquer</div>
+                <div className="mk-modal-sub">
+                  Une copie de «&nbsp;{dupModal.title}&nbsp;» sera créée en brouillon.
                 </div>
-                <button className={styles.btnPrimary} style={{ marginTop: 14, width: '100%' }}
-                  onClick={() => { navigator.clipboard?.writeText(`${VITE_API}/s/${sharePub.shortCode}`); }}>
-                  Copier le lien
+              </div>
+              <button className="btn-icon" onClick={() => setDupModal(null)}><X size={18} /></button>
+            </div>
+            <div className="mk-modal-body">
+              <div className="field">
+                <label className="field-label">Nom de la copie</label>
+                <input
+                  className="mk-input"
+                  value={dupTitle}
+                  onChange={e => setDupTitle(e.target.value)}
+                  autoFocus
+                  onKeyDown={e => e.key === 'Enter' && !dupLoading && confirmDup()}
+                />
+                {dupError && <div className="field-error">{dupError}</div>}
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button className="btn btn-ghost" onClick={() => setDupModal(null)}>Annuler</button>
+                <button className="btn btn-primary" onClick={confirmDup} disabled={dupLoading}>
+                  {dupLoading ? 'Duplication…' : <><Copy size={14} /> Dupliquer</>}
                 </button>
-                {sharePub.templateName?.startsWith('wall-of-wishes') && (
-                  <button className={styles.btnGhost} style={{ marginTop: 10, width: '100%' }}
-                    onClick={() => { window.open(`${VITE_API}/s/${sharePub.shortCode}`, '_blank'); }}>
-                    <ExternalLink size={14}/> Voir le mur
-                  </button>
-                )}
-              </>
-            ) : (
-              <p className={styles.sheetNote}>Cette création n'est pas encore publiée. Publiez-la d'abord pour obtenir un lien de partage.</p>
-            )}
-            <button className={styles.btnGhost} style={{ marginTop: 12, width: '100%' }} onClick={() => setSharePub(null)}>Fermer</button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── Header ── */}
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate('/ewish-admin')}>
-          <ArrowLeft size={18} />
-        </button>
+      {/* Page header */}
+      <div className="ph">
         <div>
-          <div className={styles.eyebrow}>MES CRÉATIONS</div>
-          <h1 className={styles.title}>Sur mon bureau</h1>
+          <h1 className="ph-title">Mes créations</h1>
+          <p className="ph-sub">Retrouve, partage ou duplique tout ce que tu as créé.</p>
         </div>
-        <button className={styles.newBtn} onClick={() => navigate('/ewish-admin/ewish/new')}>
-          <Plus size={16}/> Nouvelle création
+        <button className="btn btn-primary" onClick={() => navigate('/ewish-admin/templates')}>
+          <Plus size={15} /> Nouvelle
         </button>
       </div>
 
-      {/* ── Filters bar ── */}
-      <div className={styles.filtersBar}>
-        {/* Search */}
-        <div className={styles.searchBox}>
-          <Search size={15} className={styles.searchIcon} />
+      {/* Toolbar */}
+      <div className="crea-toolbar">
+        <div className="mk-input-wrap" style={{ flex: 1, minWidth: 200 }}>
+          <span className="lead"><Search size={15} /></span>
           <input
-            ref={searchRef}
-            className={styles.searchInput}
+            className="mk-input"
+            placeholder="Rechercher par nom, lien ou code court…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Chercher par titre, URL ou code court…"
           />
-          {search && <button className={styles.searchClear} onClick={() => setSearch('')}><X size={13}/></button>}
         </div>
 
-        {/* Status pills */}
-        <div className={styles.statusPills}>
-          {STATUS_OPTIONS.map(s => (
-            <button
-              key={s.value}
-              className={`${styles.pill} ${statusFilter === s.value ? styles.pillActive : ''}`}
-              onClick={() => setStatusFilter(s.value)}
-            >
-              {s.value === 'true' && <span className={styles.dotLive} />}
-              {s.value === 'false' && <span className={styles.dotDraft} />}
-              {s.label}
+        <div className="mk-seg">
+          {[
+            { value: 'all',  label: 'Tout' },
+            { value: 'wish', label: 'Vœux' },
+            { value: 'wall', label: 'Murs' },
+          ].map(o => (
+            <button key={o.value} className={type === o.value ? 'on' : ''} onClick={() => setType(o.value)}>
+              {o.label}
             </button>
           ))}
         </div>
 
-        {/* Template dropdown */}
-        <div className={styles.dropdownWrap}>
-          <button className={`${styles.pill} ${tplFilter ? styles.pillActive : ''}`} onClick={() => setShowTplDropdown(v => !v)}>
-            <Filter size={13}/> {tplLabel} <ChevronDown size={12}/>
-          </button>
-          {showTplDropdown && (
-            <div className={styles.dropdown} onClick={e => e.stopPropagation()}>
-              <button className={styles.dropdownItem} onClick={() => { setTplFilter(''); setShowTplDropdown(false); }}>
-                Tous les templates
-              </button>
-              {templates.map(t => (
-                <button key={t.name} className={`${styles.dropdownItem} ${tplFilter === t.name ? styles.dropdownItemActive : ''}`}
-                  onClick={() => { setTplFilter(t.name); setShowTplDropdown(false); }}>
-                  {TEMPLATE_EMOJIS[t.name] || '🎁'} {t.label || t.name}
-                </button>
-              ))}
-            </div>
+        <select
+          className="mk-select"
+          style={{ minWidth: 170 }}
+          value={tplFilter}
+          onChange={e => setTplFilter(e.target.value)}
+        >
+          <option value="all">Tous les templates</option>
+          {wishTemplates.length > 0 && (
+            <optgroup label="Vœux animés">
+              {wishTemplates.map(t => <option key={t.name} value={t.name}>{t.label || t.name}</option>)}
+            </optgroup>
           )}
-        </div>
+          {wallTemplates.length > 0 && (
+            <optgroup label="Murs de mots">
+              {wallTemplates.map(t => <option key={t.name} value={t.name}>{t.label || t.name}</option>)}
+            </optgroup>
+          )}
+        </select>
       </div>
 
-      {/* ── Grid ── */}
+      {/* List */}
       {loading && pubs.length === 0 ? (
-        <div className={styles.loadingRow}><div className={styles.spinner}/></div>
-      ) : pubs.length === 0 ? (
-        <div className={styles.empty}>
-          <span className={styles.emptyIcon}>🔍</span>
-          <p>Aucune création trouvée.</p>
-          <button className={styles.btnPrimary} onClick={() => navigate('/ewish-admin/ewish/new')}>
-            <Plus size={15}/> Créer maintenant
-          </button>
+        <div style={{ padding: '40px 0', textAlign: 'center' }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            border: '2.5px solid var(--mk-line)', borderTopColor: 'var(--mk-accent)',
+            animation: 'mk-spin .75s linear infinite', margin: '0 auto',
+          }} />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="e-title">Rien par ici</div>
+          <p style={{ fontSize: 13 }}>
+            {search
+              ? `Aucune création ne correspond à « ${search} ».`
+              : "Crée ton premier vœu ou ton premier mur depuis l'accueil."}
+          </p>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {pubs.map(pub => {
-            const bg = TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#FFB3C1,#E11D48)';
-            const emoji = TEMPLATE_EMOJIS[pub.templateName] || '🎁';
-            const isDraft = !pub.published;
-            const hasCagnotte = pub.cagnotte?.goal > 0 || pub.cagnotteConfig?.goal > 0;
-            const cagGoal = pub.cagnotte?.goal || pub.cagnotteConfig?.goal || 0;
-            const cagCollected = pub.cagnotte?.collected || 0;
-            const cagPct = cagGoal > 0 ? Math.round(cagCollected / cagGoal * 100) : 0;
-            const isWall = pub.templateName?.startsWith('wall-of-wishes');
-            const isMine = pub.merchantId === user?.merchantId || isSuperAdmin;
-            return (
-              <div key={pub._id} className={styles.card} onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>
-                <div className={styles.cardThumb} style={{ background: bg }}>
-                  <span className={styles.cardEmoji}>{emoji}</span>
-                  <span className={`${styles.statusBadge} ${isDraft ? styles.statusDraft : styles.statusLive}`}>
-                    <i className={styles.statusDot} style={{ background: isDraft ? '#FFC95A' : '#6BCFAF', boxShadow: isDraft ? 'none' : '0 0 0 3px rgba(107,207,175,.3)', animation: isDraft ? 'none' : 'mk-pulse-soft 2s infinite' }} />
-                    {isDraft ? 'BROUILLON' : 'EN LIGNE'}
-                  </span>
-                  {pub.published && pub.shortCode && (
-                    <button className={styles.qrBtn} onClick={e => { e.stopPropagation(); setQrPub(pub); }}><QrCode size={12}/></button>
-                  )}
-                  {isWall && (
-                    <span className={styles.wallBadge}>MUR</span>
-                  )}
-                </div>
-
-                <div className={styles.cardBody}>
-                  <div className={styles.cardTitle}>{pub.title || pub.data?.name || 'Sans titre'}</div>
-                  <div className={styles.cardMeta}>
-                    <span>{pub.templateName}</span>
-                    {pub.customName && <><span>·</span><span className={styles.metaCode}>{pub.customName}</span></>}
-                    {pub.shortCode && <><span>·</span><span className={styles.metaShort}>#{pub.shortCode}</span></>}
-                  </div>
-                  <div className={styles.cardDate}>
-                    {new Date(pub.updatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: '2-digit' })}
-                    {pub.published && pub.views != null && (
-                      <><span> · </span><Eye size={10} style={{ verticalAlign: -1, marginRight: 2 }}/>{pub.views || 0} vues</>
-                    )}
-                  </div>
-                  {hasCagnotte && (
-                    <div className={styles.cagBar}>
-                      <div className={styles.cagFill} style={{ width: Math.min(100, cagPct) + '%' }}/>
-                      <div className={styles.cagLabel}>🎁 {cagPct}% collecté</div>
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
-                  {pub.published && pub.shortCode && (
-                    <button className={styles.actBtn} title="Partager" onClick={() => setSharePub(pub)}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                    </button>
-                  )}
-                  {pub.published && (
-                    <a href={`${VITE_API}/site/${pub.templateName}/${pub.customName}`} target="_blank" rel="noreferrer" className={styles.actBtn} title="Voir en ligne" onClick={e => e.stopPropagation()}>
-                      <ExternalLink size={13}/>
-                    </a>
-                  )}
-                  {isSuperAdmin && (
-                    <button className={styles.actBtn} title="Modèle prêt-à-offrir" onClick={e => handleTogglePremade(pub._id, !pub.isPremade, e)}>
-                      <Star size={13} fill={pub.isPremade ? '#E11D48' : 'none'} color={pub.isPremade ? '#E11D48' : 'currentColor'}/>
-                    </button>
-                  )}
-                  <button className={styles.actBtn} title="Dupliquer" onClick={e => openDup(pub, e)}>
-                    <Copy size={13}/>
-                  </button>
-                  <button className={styles.actBtn} title="Éditer" onClick={() => navigate(`/ewish-admin/ewish/edit/${pub._id}`)}>
-                    <Edit2 size={13}/>
-                  </button>
-                  {pub.published && isMine && (
-                    <button className={styles.actBtn} title="Dépublier" onClick={e => handleUnpublish(pub._id, e)}>
-                      <CircleOff size={13} color="#ef4444"/>
-                    </button>
-                  )}
-                  {isMine && (
-                    <button className={`${styles.actBtn} ${styles.actBtnDanger}`} title="Supprimer" onClick={e => handleDelete(pub._id, e)}>
-                      <Trash2 size={13}/>
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* New card */}
-          <button className={styles.newCard} onClick={() => navigate('/ewish-admin/ewish/new')}>
-            <Plus size={28} />
-            <div className={styles.newCardTitle}>Nouvelle création</div>
-            <div className={styles.newCardSub}>Choisir un template</div>
-          </button>
-        </div>
-      )}
-
-      {/* ── Load more ── */}
-      {hasMore && !loading && (
-        <div className={styles.loadMoreRow}>
-          <button className={styles.btnGhost} onClick={() => { setPage(p => p + 1); fetchPubs(false); }}>
-            Charger plus
-          </button>
+        <div className="crea-list">
+          {filtered.map(pub => (
+            <CreationRow
+              key={pub._id}
+              pub={pub}
+              tplLabel={tplMap[pub.templateName] || pub.templateName}
+              onDelete={handleDelete}
+              onDup={openDup}
+            />
+          ))}
         </div>
       )}
     </div>

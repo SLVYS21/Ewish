@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Shield, Check, Loader, Tag, ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Shield, Check, Loader, Tag } from 'lucide-react';
 import { useKKiaPay } from 'kkiapay-react';
 import { useAuth } from '../admin/context/AuthContext';
 import { verifyKkiapayTransaction, applyPromoCode } from '../utils/api';
-import styles from './CreditsPage.module.css';
 
 const PACKS = [
   { id: 'p1',   credits: 1,   price: 500,   perCredit: 500, save: 0 },
@@ -15,23 +13,14 @@ const PACKS = [
   { id: 'p100', credits: 100, price: 36000, perCredit: 360, save: 28 },
 ];
 
-const PAYMENT_METHODS = [
-  { id: 'mtn',  label: 'MTN',   emoji: '📱', color: '#FFC95A' },
-  { id: 'moov', label: 'Moov',  emoji: '📲', color: '#9FE3CB' },
-  { id: 'or',   label: 'Orange',emoji: '🟠', color: '#FFAE82' },
-  { id: 'card', label: 'Carte', emoji: '💳', color: '#B59CF0' },
-];
-
 export default function CreditsPage() {
   const { user, setUser } = useAuth();
-  const navigate = useNavigate();
   const [selected,  setSelected]  = useState('p10');
-  const [method,    setMethod]    = useState('mtn');
   const [promoCode, setPromoCode] = useState('');
-  const [promoInfo, setPromoInfo] = useState(null);  // { value, type, isGift, added }
+  const [promoInfo, setPromoInfo] = useState(null);
   const [promoErr,  setPromoErr]  = useState('');
   const [loading,   setLoading]   = useState(false);
-  const [success,   setSuccess]   = useState(null);  // { credits, added }
+  const [success,   setSuccess]   = useState(null);
   const [err,       setErr]       = useState('');
 
   const kkiapay = useKKiaPay();
@@ -44,21 +33,17 @@ export default function CreditsPage() {
       : Math.max(0, selectedPack.price - promoInfo.value)
     : selectedPack?.price ?? 0;
 
-  // Listen for KKiaPay success callback
   useEffect(() => {
     if (!kkiapay?.addSuccessListener) return;
     const onSuccess = async (response) => {
-      setLoading(true);
-      setErr('');
+      setLoading(true); setErr('');
       try {
         const { data } = await verifyKkiapayTransaction(response.transactionId);
         setSuccess({ credits: data.credits, added: data.credits - currentCredits });
         if (setUser) setUser(prev => ({ ...prev, credits: data.credits }));
       } catch (e) {
         setErr(e.response?.data?.error || 'Erreur de vérification. Contacte le support.');
-      } finally {
-        setLoading(false);
-      }
+      } finally { setLoading(false); }
     };
     kkiapay.addSuccessListener(onSuccess);
   }, [kkiapay, currentCredits, setUser]);
@@ -78,8 +63,7 @@ export default function CreditsPage() {
 
   const handlePromo = async () => {
     if (!promoCode.trim()) return;
-    setPromoErr('');
-    setLoading(true);
+    setPromoErr(''); setLoading(true);
     try {
       const { data } = await applyPromoCode(promoCode.trim());
       if (data.isGift) {
@@ -90,123 +74,123 @@ export default function CreditsPage() {
         setPromoInfo({ value: data.value, type: data.type, isGift: false });
         setPromoCode('');
       }
-    } catch (e) {
-      setPromoErr(e.response?.data?.error || 'Code invalide');
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { setPromoErr(e.response?.data?.error || 'Code invalide'); }
+    finally { setLoading(false); }
   };
 
   if (success) {
     return (
-      <div className={styles.root}>
-        <div className={styles.successBox}>
-          <div className={styles.successCircle}><Check size={40}/></div>
-          <div className={styles.successTitle}>+{success.added} crédit{success.added > 1 ? 's' : ''} ajouté{success.added > 1 ? 's' : ''} !</div>
-          <p className={styles.successSub}>Tu as maintenant <strong>{success.credits}</strong> crédit{success.credits > 1 ? 's' : ''} sur ton compte.</p>
-          <button className={styles.btnPay} onClick={() => setSuccess(null)}>Acheter encore</button>
+      <div className="page">
+        <div style={{ maxWidth: 480, margin: '10vh auto 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--mk-mint-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+            <Check size={38} color="var(--mk-mint)" />
+          </div>
+          <div style={{ fontFamily: 'var(--mk-display)', fontSize: 30, letterSpacing: '-.01em' }}>
+            +{success.added} crédit{success.added > 1 ? 's' : ''} ajouté{success.added > 1 ? 's' : ''} !
+          </div>
+          <p style={{ fontSize: 14, color: 'var(--mk-ink-2)' }}>
+            Tu as maintenant <strong>{success.credits}</strong> crédit{success.credits > 1 ? 's' : ''} sur ton compte.
+          </p>
+          <button className="btn btn-primary" style={{ marginTop: 8, padding: '11px 28px' }} onClick={() => setSuccess(null)}>
+            Acheter encore
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.root}>
-      {/* Back */}
-      <button className={styles.back} onClick={() => navigate(-1)}>
-        <ChevronLeft size={18} /> Retour
-      </button>
+    <div className="page">
 
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.diamondBox}>💎</div>
+      {/* Page header */}
+      <div className="ph">
         <div>
-          <div className={styles.headerHand}>Tes crédits</div>
-          <h1 className={styles.headerTitle}>
-            Tu en as <span style={{ color: 'var(--mk-rose)' }}>{currentCredits}</span>
+          <div style={{ fontSize: 13, color: 'var(--mk-ink-3)', fontWeight: 700, marginBottom: 4 }}>Tes crédits</div>
+          <h1 className="ph-title">
+            Tu en as <span style={{ color: 'var(--mk-accent)' }}>{currentCredits}</span>
           </h1>
-          <p className={styles.headerSub}>1 crédit = 1 publi = 500 FCFA</p>
+          <p className="ph-sub">1 crédit = 1 publi = 500 FCFA</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, background: 'var(--mk-butter-soft)', borderRadius: 'var(--mk-r-sm)', fontSize: 32, flexShrink: 0 }}>
+          💎
         </div>
       </div>
 
       {/* Packs grid */}
-      <div className={styles.packsGrid}>
+      <div className="pack-grid" style={{ marginBottom: 'var(--d-gap)' }}>
         {PACKS.map(p => (
           <button
             key={p.id}
-            className={`${styles.packCard} ${selected === p.id ? styles.packCardActive : ''}`}
-            style={{ border: `2px solid ${selected === p.id ? 'var(--mk-ink)' : (p.popular ? 'var(--mk-rose)' : 'var(--mk-line-2)')}` }}
+            className={`pack-card ${selected === p.id ? 'on' : ''}`}
             onClick={() => { setSelected(p.id); setPromoInfo(null); }}
           >
-            {p.popular && <span className={styles.popularBadge}>POPULAIRE</span>}
+            {p.popular && <div className="pack-pop">POPULAIRE</div>}
+            <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--mk-ink)', lineHeight: 1, marginTop: p.popular ? 10 : 0 }}>
+              {p.credits}
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--mk-ink-3)', marginLeft: 4 }}>
+                crédit{p.credits > 1 ? 's' : ''}
+              </span>
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--mk-accent)', marginTop: 6 }}>
+              {p.price.toLocaleString('fr-FR')}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--mk-ink-3)', fontWeight: 600 }}>
+              FCFA · {p.perCredit} FCFA/crédit
+            </div>
             {p.save > 0 && (
-              <span className={`${styles.saveBadge} ${selected === p.id ? styles.saveBadgeActive : ''}`}>−{p.save}%</span>
+              <div style={{ marginTop: 8, display: 'inline-flex', background: selected === p.id ? 'var(--mk-accent)' : 'var(--mk-blush)', color: selected === p.id ? '#fff' : 'var(--mk-ink-2)', fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 99, transition: 'all .15s' }}>
+                −{p.save}%
+              </div>
             )}
-            <div className={styles.packCredits}>{p.credits} crédit{p.credits > 1 ? 's' : ''}</div>
-            <div className={styles.packPrice}>{p.price.toLocaleString('fr-FR')}</div>
-            <div className={styles.packPerCredit}>FCFA · {p.perCredit} FCFA/crédit</div>
           </button>
         ))}
       </div>
 
       {/* Promo code */}
-      <div className={styles.promoBox}>
-        <div className={styles.promoRow}>
-          <Tag size={14} style={{ color: 'var(--mk-ink-2)', flexShrink: 0 }}/>
+      <div className="card" style={{ padding: '18px 20px', marginBottom: 'var(--d-gap)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Tag size={14} style={{ color: 'var(--mk-ink-2)', flexShrink: 0 }} />
           <input
-            className={styles.promoInput}
+            className="mk-input"
+            style={{ flex: 1, border: 'none', background: 'transparent', padding: '4px 0', fontWeight: 700, letterSpacing: '.06em' }}
             value={promoCode}
             onChange={e => setPromoCode(e.target.value.toUpperCase())}
             placeholder="CODE PROMO"
             onKeyDown={e => e.key === 'Enter' && handlePromo()}
           />
-          <button className={styles.promoBtn} onClick={handlePromo} disabled={loading || !promoCode.trim()}>
+          <button className="btn btn-ghost btn-sm" onClick={handlePromo} disabled={loading || !promoCode.trim()}>
             Appliquer
           </button>
         </div>
-        {promoErr && <p style={{ fontSize: 12, color: '#e74c3c', marginTop: 6 }}>{promoErr}</p>}
+        {promoErr && <p style={{ fontSize: 12, color: 'var(--mk-accent)', marginTop: 8, fontWeight: 600 }}>{promoErr}</p>}
         {promoInfo && !promoInfo.isGift && (
-          <p style={{ fontSize: 12, color: '#1F6E55', marginTop: 6, fontWeight: 600 }}>
-            Code appliqué — {promoInfo.type === 'percent' ? `−${promoInfo.value}%` : `−${promoInfo.value.toLocaleString('fr-FR')} FCFA`}
+          <p style={{ fontSize: 12, color: 'var(--mk-mint)', marginTop: 8, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Check size={12} /> Code appliqué — {promoInfo.type === 'percent' ? `−${promoInfo.value}%` : `−${promoInfo.value.toLocaleString('fr-FR')} FCFA`}
           </p>
         )}
       </div>
 
-      {/* Payment */}
-      <div className={styles.paymentBox}>
-        <div className={styles.paymentTitle}>Méthode de paiement</div>
-        <div className={styles.methodGrid}>
-          {PAYMENT_METHODS.map(m => (
-            <button
-              key={m.id}
-              className={`${styles.methodCard} ${method === m.id ? styles.methodCardActive : ''}`}
-              style={{
-                background: method === m.id ? m.color + '40' : '#fff',
-                border: `2px solid ${method === m.id ? m.color : 'var(--mk-line-2)'}`,
-              }}
-              onClick={() => setMethod(m.id)}
-            >
-              <div className={styles.methodEmoji}>{m.emoji}</div>
-              <div className={styles.methodLabel}>{m.label}</div>
-            </button>
-          ))}
-        </div>
+      {/* Pay button */}
+      {err && <p style={{ fontSize: 13, color: 'var(--mk-accent)', marginBottom: 12, fontWeight: 700 }}>{err}</p>}
+      <button
+        className="btn btn-primary"
+        style={{ width: '100%', padding: '14px 20px', fontSize: 15, justifyContent: 'center' }}
+        onClick={handlePay}
+        disabled={loading}
+      >
+        {loading
+          ? <><Loader size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Vérification…</>
+          : <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2 13.5 9.5 21 11 13.5 12.5 12 20 10.5 12.5 3 11 10.5 9.5Z"/>
+              </svg>
+              Payer {finalPrice.toLocaleString('fr-FR')} FCFA
+            </>
+        }
+      </button>
 
-        {err && <p style={{ fontSize: 13, color: '#e74c3c', marginBottom: 10, fontWeight: 600 }}>{err}</p>}
-
-        <button className={styles.btnPay} onClick={handlePay} disabled={loading}>
-          {loading
-            ? <><Loader size={14} className={styles.spin}/> Vérification…</>
-            : <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 13.5 9.5 21 11 13.5 12.5 12 20 10.5 12.5 3 11 10.5 9.5Z"/></svg>
-                Payer {finalPrice.toLocaleString('fr-FR')} FCFA
-              </>
-          }
-        </button>
-
-        <div className={styles.secureNote}>
-          <Shield size={13}/> Paiement sécurisé via Kkiapay · Tu reçois un SMS de confirmation
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 14, fontSize: 12, color: 'var(--mk-ink-3)', fontWeight: 600 }}>
+        <Shield size={12} /> Paiement sécurisé via Kkiapay · Tu reçois un SMS de confirmation
       </div>
     </div>
   );

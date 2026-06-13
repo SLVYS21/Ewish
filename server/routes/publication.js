@@ -60,7 +60,19 @@ router.get('/', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET by templateName + customName 
+// GET by MongoDB ID
+router.get('/id/:id', requireAdmin, async (req, res) => {
+  try {
+    const pub = await Publication.findById(req.params.id).lean();
+    if (!pub) return res.status(404).json({ error: 'Not found' });
+    if (req.admin.role === 'merchant' && pub.merchantId !== req.admin.merchantId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+    res.json(pub);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET by templateName + customName
 router.get('/:templateName/:customName', async (req, res) => {
   try {
     const pub = await Publication.findOne({

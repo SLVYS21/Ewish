@@ -18,7 +18,7 @@ import { Joyride, STATUS } from 'react-joyride';
 import {
   QrCode, Sparkles, Coffee, Blocks, MailOpen, ClipboardList,
   Megaphone, Info, Copy, Check, X, RefreshCw, Gift, ArrowLeft, ChevronRight,
-  Shield, Lock,
+  Shield, Lock, MessageSquare, Palette, Share2, LayoutTemplate,
 } from 'lucide-react';
 import KycModal from '../components/KycModal';
 import MSheet from '../components/MSheet';
@@ -26,10 +26,10 @@ import styles from './Editor.module.css';
 
 /* ─── Guided steps ────────────────────────────────────────────── */
 const STEPS = [
-  { id: 'Message', n: 1, title: 'Le message',  sub: 'Texte, photos, musique',  emoji: '💬', color: '#E11D48', soft: '#fff1f6', accent: '#fbcfe8' },
-  { id: 'Look',    n: 2, title: 'Le style',    sub: 'Couleurs, fond, ambiance', emoji: '🎨', color: '#6E4FBA', soft: '#F6EEFB', accent: '#D7C5F2' },
-  { id: 'Cadeau',  n: 3, title: 'La cagnotte', sub: 'Objectif cadeau commun',   emoji: '🎁', color: '#9B7EE2', soft: '#F6EEFB', accent: '#E5D9F5' },
-  { id: 'Share',   n: 4, title: 'Le partage',  sub: 'Lien & QR Code',           emoji: '🔗', color: '#b45309', soft: '#fffbeb', accent: '#fde68a' },
+  { id: 'Message', n: 1, title: 'Le message',  sub: 'Texte, photos, musique',  Icon: MessageSquare, color: '#E11D48', soft: '#fff1f6', accent: '#fbcfe8' },
+  { id: 'Look',    n: 2, title: 'Le style',    sub: 'Couleurs, fond, ambiance', Icon: Palette,       color: '#6E4FBA', soft: '#F6EEFB', accent: '#D7C5F2' },
+  { id: 'Cadeau',  n: 3, title: 'La cagnotte', sub: 'Objectif cadeau commun',   Icon: Gift,          color: '#9B7EE2', soft: '#F6EEFB', accent: '#E5D9F5' },
+  { id: 'Share',   n: 4, title: 'Le partage',  sub: 'Lien & QR Code',           Icon: Share2,        color: '#b45309', soft: '#fffbeb', accent: '#fde68a' },
 ];
 
 /* ─── Section jump map — templates with animated GSAP timeline ── */
@@ -248,7 +248,6 @@ export default function Editor() {
   const [showQrCollect, setShowQrCollect]     = useState(false);
   const [showKyc, setShowKyc]                 = useState(false);
   const kycDone = user?.kycStatus === 'approved';
-  const [previewDevice, setPreviewDevice]     = useState('desktop');
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [showAdvancedLook, setShowAdvancedLook] = useState(false);
   const [minContribution, setMinContribution]   = useState(0);
@@ -547,9 +546,9 @@ export default function Editor() {
 
   const displaySteps = STEPS.map(s => {
     if (s.id === 'Message' && isWall)
-      return { ...s, title: 'Le mur', sub: 'Titre, accès & vœux', emoji: '🧱', color: '#b45309', soft: '#fffbeb', accent: '#fde68a' };
+      return { ...s, title: 'Le mur', sub: 'Titre, accès & mots', Icon: LayoutTemplate, color: '#b45309', soft: '#fffbeb', accent: '#fde68a' };
     if (s.id === 'Cadeau' && !isWall)
-      return { ...s, title: 'Extra', sub: 'Outils & options', emoji: '✨', color: '#047857', soft: '#ECFDF5', accent: '#A7F3D0' };
+      return { ...s, title: 'Extra', sub: 'Outils & options', Icon: Sparkles, color: '#047857', soft: '#ECFDF5', accent: '#A7F3D0' };
     return s;
   });
   const currentStepIndex = displaySteps.findIndex(s => s.id === activeStep);
@@ -580,7 +579,7 @@ export default function Editor() {
                   className={styles.cagnotteInput}
                   value={data.eyebrow || ''}
                   onChange={e => handleDataChange('eyebrow', e.target.value)}
-                  placeholder="✦ Mur de vœux"
+                  placeholder="✦ Mur de mots"
                   maxLength={60}
                 />
                 <span className={styles.cagnotteFieldHint}>Affiché en badge en haut du mur (ex: ✦ Retraite de Marie)</span>
@@ -1128,54 +1127,6 @@ export default function Editor() {
                 <button className={styles.btnShareFull} onClick={() => navigate(`/ewish-admin/share/${id}`)}>
                   <Sparkles size={14} /> Page de partage complète — QR, canaux, cagnotte
                 </button>
-
-                <div className={styles.shareActionGrid}>
-                  <button className={styles.shareActionBtn} onClick={() => setShowQrModal(true)}>
-                    <QrCode size={18} /><span>Code QR</span>
-                  </button>
-                  <a
-                    className={styles.shareActionBtn}
-                    href={`https://wa.me/?text=${encodeURIComponent(`${import.meta.env.VITE_API_URL}/s/${shortCode}`)}`}
-                    target="_blank" rel="noreferrer"
-                  >
-                    <span style={{ fontSize: 18 }}>💬</span><span>WhatsApp</span>
-                  </a>
-                </div>
-
-                {shortCode && (
-                  <div className={styles.shareSlugBox}>
-                    <div className={styles.shareSlugLabel}>Personnaliser l'URL</div>
-                    <div className={styles.publishUrlBoxEdit}>
-                      <span className={styles.shortUrlPrefix}>/s/</span>
-                      <input
-                        className={styles.slugInput}
-                        value={slugDraft}
-                        onChange={e => setSlugDraft(e.target.value)}
-                        onBlur={async () => {
-                          if (slugDraft === shortCode) return;
-                          setSlugStatus('saving');
-                          try {
-                            const r = await setCustomSlug(id, slugDraft);
-                            setShortCode(r.data.shortCode);
-                            setSlugStatus('saved');
-                          } catch (err) { setSlugStatus(err.response?.data?.error || 'Erreur'); }
-                        }}
-                        onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setSlugDraft(shortCode); }}
-                        placeholder="mon-lien-custom"
-                      />
-                      {slugStatus === 'saving' && <RefreshCw size={14} className={styles.spinIcon} />}
-                      {slugStatus && slugStatus !== 'saving' && (
-                        <span className={`${styles.slugMsg} ${slugStatus === 'saved' ? styles.slugOk : styles.slugErr}`}>
-                          {slugStatus === 'saved' ? <><Check size={13} /> Sauvegardé</> : slugStatus}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <button className={styles.sharePublishBtn} onClick={handlePublish} disabled={publishing} style={{ marginTop: 4 }}>
-                  {publishing ? <><RefreshCw size={16} className={styles.spinIcon} /> Mise à jour…</> : 'Mettre à jour'}
-                </button>
               </>
             )}
           </div>
@@ -1356,7 +1307,9 @@ export default function Editor() {
                   onClick={() => setActiveStep(step.id)}
                   style={isActive ? { borderBottomColor: step.color, color: step.color, background: step.soft } : {}}
                 >
-                  <span className={styles.stepNavEmoji}>{isDone ? '✓' : step.emoji}</span>
+                  <span className={styles.stepNavIcon}>
+                    {isDone ? <Check size={18} /> : <step.Icon size={18} />}
+                  </span>
                   <span className={styles.stepNavLabel}>{step.title.split(' ').slice(-1)[0]}</span>
                 </button>
               );
@@ -1413,12 +1366,8 @@ export default function Editor() {
         {/* ── Preview ── */}
         <div className={styles.previewArea}>
           <div className={styles.previewBar}>
-            <span className={styles.previewLabel}>Preview</span>
-            <div className={styles.deviceToggle}>
-              <button className={`${styles.deviceBtn} ${previewDevice === 'phone' ? styles.deviceBtnActive : ''}`} onClick={() => setPreviewDevice('phone')}>📱</button>
-              <button className={`${styles.deviceBtn} ${previewDevice === 'desktop' ? styles.deviceBtnActive : ''}`} onClick={() => setPreviewDevice('desktop')}>💻</button>
-            </div>
-            <span className={styles.previewLiveChip}><span className={styles.liveDot} /> Aperçu en direct</span>
+            <span className={styles.previewLabel}>Aperçu</span>
+            <span className={styles.previewLiveChip}><span className={styles.liveDot} /> En direct</span>
             <div className={styles.previewNav}>
               <button
                 className={styles.previewBtn}
@@ -1453,14 +1402,7 @@ export default function Editor() {
             <span className={styles.previewUrl}>/site/{pub.templateName}/{pub.customName}</span>
           </div>
           <div className={`${styles.previewFrame} tour-step-preview`}>
-            {previewDevice === 'phone' ? (
-              <div className={styles.phoneWrap}>
-                <div className={styles.phoneNotch} />
-                <iframe ref={iframeRef} src={previewSrc} title="Preview" className={styles.iframePhone} key={pub._id} />
-              </div>
-            ) : (
-              <iframe ref={iframeRef} src={previewSrc} title="Preview" className={styles.iframe} key={pub._id} />
-            )}
+            <iframe ref={iframeRef} src={previewSrc} title="Preview" className={styles.iframe} key={pub._id} />
           </div>
         </div>
       </div>
@@ -1497,7 +1439,7 @@ export default function Editor() {
             style={activeStep === step.id ? { background: step.soft, color: step.color } : {}}
             onClick={() => { setActiveStep(step.id); setMobileSheetOpen(true); }}
           >
-            <span className={styles.mobileDockEmoji}>{step.emoji}</span>
+            <span className={styles.mobileDockIcon}><step.Icon size={17} /></span>
             <span className={styles.mobileDockLabel}>{step.title.split(' ').slice(-1)[0]}</span>
           </button>
         ))}
@@ -1518,7 +1460,7 @@ export default function Editor() {
                 style={{ background: currentStep.color }}
                 onClick={() => { setActiveStep(displaySteps[currentStepIndex + 1].id); }}
               >
-                Suivant → {displaySteps[currentStepIndex + 1]?.emoji}
+                Suivant — {displaySteps[currentStepIndex + 1]?.title}
               </button>
             ) : (
               <button

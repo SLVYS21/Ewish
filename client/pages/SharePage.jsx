@@ -1,17 +1,26 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
-import { getPublications, getShortLink } from '../utils/api';
-import s from './SharePage.module.css';
-import { ArrowLeft, Image, Share2, Check, Copy, ArrowRight } from 'lucide-react';
+import {
+  getPublicationById, getShortLink, setCustomSlug, publishPublication,
+} from '../utils/api';
+import { useAuth } from '../admin/context/AuthContext';
+import {
+  ArrowLeft, Check, Copy, RefreshCw, Download, Link2, Edit3,
+  Lock, Zap, Coins, Eye, Palette, X, MessageSquare,
+} from 'lucide-react';
+
+/* ─── constants ─── */
+const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
+const FREE_WORDS = 5;
 
 const QR_SHAPES = [
-  { id: 'classic', label: 'Classique', emoji: '⬛' },
-  { id: 'rounded', label: 'Doux',      emoji: '◯' },
-  { id: 'heart',   label: 'Cœur',      emoji: '💖' },
-  { id: 'mykado',  label: 'myKado',    emoji: '🎁' },
-  { id: 'flower',  label: 'Fleur',     emoji: '🌸' },
-  { id: 'star',    label: 'Étoile',    emoji: '⭐' },
+  { id: 'rounded',  label: 'Doux'     },
+  { id: 'classic',  label: 'Classique'},
+  { id: 'heart',    label: 'Cœur'     },
+  { id: 'mykado',   label: 'myKado'   },
+  { id: 'flower',   label: 'Fleur'    },
+  { id: 'star',     label: 'Étoile'   },
 ];
 
 const QR_COLORS = [
@@ -23,259 +32,682 @@ const QR_COLORS = [
   { id: 'night', fg: '#FFD7E0', bg: '#2B1A2D' },
 ];
 
-const CHANNELS = [
-  { id: 'wa',   label: 'WhatsApp', emoji: '💬', color: '#25D366' },
-  { id: 'sms',  label: 'SMS',      emoji: '📩', color: '#9B7EE2' },
-  { id: 'mail', label: 'Email',    emoji: '📧', color: '#FFAE82' },
-  { id: 'fb',   label: 'Facebook', emoji: '📘', color: '#1877F2' },
-  { id: 'tg',   label: 'Telegram', emoji: '✈️', color: '#0088CC' },
-  { id: 'tw',   label: 'X',        emoji: '🐦', color: '#1DA1F2' },
+/* ─── social logos ─── */
+function WhatsAppLogo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+      <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+    </svg>
+  );
+}
+function FacebookLogo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+      <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  );
+}
+function TelegramLogo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+      <circle cx="12" cy="12" r="12" fill="#2CA5E0"/>
+      <path fill="white" d="M5.491 11.74 18.3 6.82c.618-.222 1.16.151.958.988L17.2 17.61c-.16.689-.594.857-1.205.532l-3.27-2.41-1.578 1.52c-.175.175-.322.322-.66.322l.236-3.336 6.08-5.49c.264-.235-.057-.365-.41-.13L6.985 14.29l-3.24-.997c-.7-.22-.714-.7.153-1.033Z"/>
+    </svg>
+  );
+}
+function XLogo() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22">
+      <circle cx="12" cy="12" r="12" fill="#000"/>
+      <path fill="white" d="M13.545 10.239 17.9 5h-1.025l-3.78 4.394L9.952 5H6.5l4.569 6.646L6.5 17.004h1.025l3.993-4.644 3.188 4.644H18.5zm-1.414 1.645-.463-.661-3.68-5.26h1.585l2.974 4.249.463.661 3.863 5.519h-1.585z"/>
+    </svg>
+  );
+}
+function InstagramLogo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+      <defs><radialGradient id="ig" cx="30%" cy="107%" r="150%"><stop offset="0%" stopColor="#ffd600"/><stop offset="50%" stopColor="#ff0069"/><stop offset="100%" stopColor="#7638fa"/></radialGradient></defs>
+      <rect width="24" height="24" rx="6" fill="url(#ig)"/>
+      <circle cx="12" cy="12" r="4" stroke="white" strokeWidth="1.8" fill="none"/>
+      <circle cx="17.5" cy="6.5" r="1.2" fill="white"/>
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="white" strokeWidth="1.8" fill="none"/>
+    </svg>
+  );
+}
+function TikTokLogo() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22">
+      <rect width="24" height="24" rx="6" fill="#010101"/>
+      <path fill="white" d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5 2.592 2.592 0 0 1-2.59-2.5 2.592 2.592 0 0 1 2.59-2.5c.28 0 .54.04.79.1V9.83a5.66 5.66 0 0 0-.79-.05 5.69 5.69 0 0 0-5.69 5.69 5.69 5.69 0 0 0 5.69 5.69 5.69 5.69 0 0 0 5.69-5.69V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/>
+    </svg>
+  );
+}
+
+const NETWORKS = [
+  { id: 'wa',  label: 'WhatsApp',  Logo: WhatsAppLogo,  bg: '#E8FFF1', copy: false, href: (enc, url) => `https://wa.me/?text=${encodeURIComponent('Un petit quelque chose pour toi : ')}${enc}` },
+  { id: 'fb',  label: 'Facebook',  Logo: FacebookLogo,  bg: '#EBF3FF', copy: false, href: (enc, url) => `https://www.facebook.com/sharer/sharer.php?u=${url}` },
+  { id: 'tg',  label: 'Telegram',  Logo: TelegramLogo,  bg: '#E8F7FF', copy: false, href: (enc, url) => `https://t.me/share/url?url=${url}` },
+  { id: 'x',   label: 'X',         Logo: XLogo,         bg: '#F5F5F5', copy: false, href: (enc, url) => `https://twitter.com/intent/tweet?url=${url}` },
+  { id: 'ig',  label: 'Instagram', Logo: InstagramLogo, bg: '#FFF0F7', copy: true  },
+  { id: 'tt',  label: 'TikTok',    Logo: TikTokLogo,    bg: '#F5F5F5', copy: true  },
 ];
 
-function QrPreview({ url, shape, color }) {
+/* ─── QR SVG renderer ─── */
+function QrSvg({ url, shape, color }) {
   const { cells, N } = useMemo(() => {
     if (!url) return { cells: [], N: 21 };
     try {
       const qr = QRCode.create(url, { errorCorrectionLevel: 'M' });
       const size = qr.modules.size;
       const result = [];
-      for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++)
+        for (let x = 0; x < size; x++)
           if (qr.modules.data[y * size + x]) result.push({ x, y });
-        }
-      }
       return { cells: result, N: size };
     } catch { return { cells: [], N: 21 }; }
   }, [url]);
 
   const renderCell = (c, i) => {
-    const cx = c.x + 0.5;
-    const cy = c.y + 0.5;
+    const cx = c.x + 0.5, cy = c.y + 0.5;
     if (shape === 'classic') return <rect key={i} x={c.x} y={c.y} width={1} height={1} fill={color.fg} />;
+    if (shape === 'star')    return <path key={i} d={`M${cx},${c.y+.1}L${cx+.15},${cy-.1}L${cx+.45},${cy-.1}L${cx+.2},${cy+.1}L${cx+.3},${c.y+.45}L${cx},${cy+.25}L${cx-.3},${c.y+.45}L${cx-.2},${cy+.1}L${cx-.45},${cy-.1}L${cx-.15},${cy-.1}Z`} fill={color.fg} />;
     if (shape === 'rounded') return <rect key={i} x={c.x + .05} y={c.y + .05} width={.9} height={.9} rx={.35} fill={color.fg} />;
-    if (shape === 'star') return <path key={i} d={`M${cx},${c.y + .1}L${cx + .15},${cy - .1}L${cx + .45},${cy - .1}L${cx + .2},${cy + .1}L${cx + .3},${c.y + .45}L${cx},${cy + .25}L${cx - .3},${c.y + .45}L${cx - .2},${cy + .1}L${cx - .45},${cy - .1}L${cx - .15},${cy - .1}Z`} fill={color.fg} />;
     return <circle key={i} cx={cx} cy={cy} r={.42} fill={color.fg} />;
   };
 
-  if (!cells.length) return <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#aaa' }}>Génération…</div>;
+  if (!cells.length) return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: 12 }}>…</div>
+  );
 
   return (
     <svg viewBox={`0 0 ${N} ${N}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
       <defs>
         {shape === 'heart' && (
-          <clipPath id="qr-sp-clip" clipPathUnits="userSpaceOnUse">
-            <path d={`M ${N / 2},${N * .92} C -${N * .3},${N * .45} ${N * .1},-${N * .15} ${N / 2},${N * .28} C ${N * .9},-${N * .15} ${N * 1.3},${N * .45} ${N / 2},${N * .92} Z`} />
+          <clipPath id="qr-clip" clipPathUnits="userSpaceOnUse">
+            <path d={`M ${N/2},${N*.92} C -${N*.3},${N*.45} ${N*.1},-${N*.15} ${N/2},${N*.28} C ${N*.9},-${N*.15} ${N*1.3},${N*.45} ${N/2},${N*.92} Z`} />
           </clipPath>
         )}
         {shape === 'mykado' && (
-          <clipPath id="qr-sp-clip" clipPathUnits="userSpaceOnUse">
-            <rect x={1} y={3} width={N - 2} height={N - 4} rx={2} />
-            <path d={`M ${N / 2 - 3},3 C ${N / 2 - 5},-1 ${N / 2 - 9},1 ${N / 2 - 7},5 L${N / 2},5 Z`} />
-            <path d={`M ${N / 2 + 3},3 C ${N / 2 + 5},-1 ${N / 2 + 9},1 ${N / 2 + 7},5 L${N / 2},5 Z`} />
+          <clipPath id="qr-clip" clipPathUnits="userSpaceOnUse">
+            <rect x={1} y={3} width={N-2} height={N-4} rx={2} />
           </clipPath>
         )}
         {shape === 'flower' && (
-          <clipPath id="qr-sp-clip" clipPathUnits="userSpaceOnUse">
-            <circle cx={N / 2} cy={N / 2} r={N * .18} />
-            <circle cx={N / 2} cy={N * .2} r={N * .22} />
-            <circle cx={N / 2} cy={N * .8} r={N * .22} />
-            <circle cx={N * .2} cy={N / 2} r={N * .22} />
-            <circle cx={N * .8} cy={N / 2} r={N * .22} />
-            <circle cx={N * .27} cy={N * .27} r={N * .18} />
-            <circle cx={N * .73} cy={N * .27} r={N * .18} />
-            <circle cx={N * .27} cy={N * .73} r={N * .18} />
-            <circle cx={N * .73} cy={N * .73} r={N * .18} />
+          <clipPath id="qr-clip" clipPathUnits="userSpaceOnUse">
+            <circle cx={N/2} cy={N/2} r={N*.18} />
+            <circle cx={N/2} cy={N*.2} r={N*.22} />
+            <circle cx={N/2} cy={N*.8} r={N*.22} />
+            <circle cx={N*.2} cy={N/2} r={N*.22} />
+            <circle cx={N*.8} cy={N/2} r={N*.22} />
+            <circle cx={N*.27} cy={N*.27} r={N*.18} />
+            <circle cx={N*.73} cy={N*.27} r={N*.18} />
+            <circle cx={N*.27} cy={N*.73} r={N*.18} />
+            <circle cx={N*.73} cy={N*.73} r={N*.18} />
           </clipPath>
         )}
       </defs>
-      <g clipPath={(shape === 'heart' || shape === 'mykado' || shape === 'flower') ? 'url(#qr-sp-clip)' : undefined}>
+      <g clipPath={(shape === 'heart' || shape === 'mykado' || shape === 'flower') ? 'url(#qr-clip)' : undefined}>
         {cells.map(renderCell)}
       </g>
     </svg>
   );
 }
 
+/* ─── Branded QR card ─── */
+function QrCard({ pub, shortCode, shareUrl, shape, color, branded }) {
+  const shortDomain = (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
+  return (
+    <div className="card qr-card" id="mk-qr-card" style={{ background: color.bg, border: '1px solid rgba(0,0,0,.06)', padding: '20px 18px', gap: 14, alignItems: 'center', textAlign: 'center' }}>
+      <div>
+        <div style={{ fontFamily: 'var(--mk-hand)', fontSize: 19, color: color.fg, opacity: .85 }}>Scanne-moi</div>
+        <div style={{ fontFamily: 'var(--mk-display)', fontSize: 20, color: color.fg, fontStyle: 'italic' }}>{pub?.title || 'myKado'}</div>
+      </div>
+      <div className="qr-frame">
+        <QrSvg url={shareUrl || 'https://mykado.store'} shape={shape} color={color} />
+      </div>
+      <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 700, color: color.fg, opacity: .85, letterSpacing: '.04em' }}>
+        {shortCode ? `${shortDomain}/s/${shortCode}` : shortDomain}
+      </div>
+      {branded && (
+        <div style={{ fontSize: 10, fontWeight: 700, color: color.fg, opacity: .55, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+          Propulsé par myKado
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Share networks ─── */
+function ShareNetworks({ shareUrl, onCopy }) {
+  return (
+    <div className="net-row">
+      {NETWORKS.map(n => (
+        <button
+          key={n.id}
+          className="net-btn"
+          style={{ background: n.bg }}
+          onClick={() => {
+            if (n.copy) {
+              navigator.clipboard?.writeText(shareUrl);
+              onCopy?.(`Lien copié — colle-le dans ${n.label}`);
+            } else {
+              window.open(n.href(encodeURIComponent(shareUrl), encodeURIComponent(shareUrl)), '_blank');
+            }
+          }}
+        >
+          <n.Logo />
+          {n.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Toast ─── */
+function Toast({ message }) {
+  if (!message) return null;
+  return <div className="mk-toast">{message}</div>;
+}
+
+/* ─── Unlock view ─── */
+function UnlockView({ pub, onUnlocked }) {
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+  const [unlocking, setUnlocking] = useState(false);
+  const [err, setErr] = useState('');
+
+  const isWall = WALL_NAMES.has(pub?.templateName);
+  const cost = pub?.creditsRequired ?? 1;
+  const credits = user?.credits ?? 0;
+  const enough = credits >= cost;
+
+  const handleUnlock = async () => {
+    if (!enough) { navigate('/ewish-admin/credits'); return; }
+    setUnlocking(true); setErr('');
+    try {
+      await publishPublication(pub._id);
+      if (setUser) setUser(prev => ({ ...prev, credits: (prev.credits ?? 0) - cost }));
+      onUnlocked();
+    } catch (e) {
+      setErr(e.response?.data?.error || 'Erreur lors de la publication');
+    } finally { setUnlocking(false); }
+  };
+
+  const FEATURES = [
+    { icon: <Link2 size={15} />, t: 'Lien court personnalisable', s: 'mykado.store/s/ton-code' },
+    { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>, t: 'QR code à ton image', s: 'Couleurs et formes, export PNG' },
+    { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49"/></svg>, t: 'Partage rapide', s: 'WhatsApp, Facebook, Telegram…' },
+    ...(isWall ? [{ icon: <MessageSquare size={15} />, t: 'Mots illimités', s: 'Avec photos et mise en forme' }] : []),
+  ];
+
+  return (
+    <div className="unlock-hero">
+      <div style={{
+        width: 56, height: 56, borderRadius: '50%',
+        background: 'var(--mk-accent-pale)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Lock size={22} color="var(--mk-accent)" />
+      </div>
+
+      <h1 style={{ fontFamily: 'var(--mk-display)', fontSize: 30, letterSpacing: '-.01em', margin: '16px 0 8px', fontStyle: 'italic' }}>
+        Prêt à partager
+      </h1>
+
+      <p style={{ fontSize: 13.5, color: 'var(--mk-ink-2)', lineHeight: 1.6, maxWidth: '46ch', textAlign: 'center' }}>
+        {isWall
+          ? `Ton mur est déjà actif : les ${FREE_WORDS} premiers mots sont gratuits. Débloque-le pour des mots illimités, le QR code stylé et le partage sur les réseaux.`
+          : `« ${pub?.title} » est prêt. Débloque-le pour obtenir son lien définitif, son QR code et le partage sur les réseaux.`}
+      </p>
+
+      <div className="card" style={{ width: '100%', maxWidth: 420, margin: '22px 0 0', padding: '4px 16px', textAlign: 'left' }}>
+        {FEATURES.map((r, i) => (
+          <div className="setting-row" key={i} style={{ padding: '10px 0', borderBottom: i < FEATURES.length - 1 ? '1px solid var(--mk-line)' : 'none' }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 10,
+              background: 'var(--mk-accent-pale)', display: 'flex',
+              alignItems: 'center', justifyContent: 'center',
+              color: 'var(--mk-accent)', flexShrink: 0,
+            }}>
+              {r.icon}
+            </div>
+            <div className="body">
+              <div className="t">{r.t}</div>
+              <div className="s">{r.s}</div>
+            </div>
+            <Check size={15} style={{ color: 'var(--mk-mint)', flexShrink: 0, marginTop: 6 }} />
+          </div>
+        ))}
+      </div>
+
+      <div style={{ margin: '22px 0 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        {err && <p style={{ fontSize: 12, color: 'var(--mk-accent)', fontWeight: 700 }}>{err}</p>}
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={handleUnlock}
+          disabled={unlocking}
+          style={{ minWidth: 240, justifyContent: 'center' }}
+        >
+          {unlocking
+            ? <><RefreshCw size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
+            : enough
+              ? <><Zap size={16} /> Débloquer avec {cost} crédit{cost > 1 ? 's' : ''}</>
+              : <><Coins size={16} /> Recharger mes crédits</>
+          }
+        </button>
+        <p style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>
+          Il te reste <strong style={{ color: enough ? 'var(--mk-mint)' : 'var(--mk-accent)' }}>{credits} crédit{credits > 1 ? 's' : ''}</strong>
+          {enough
+            ? ` — il t'en restera ${credits - cost} après.`
+            : ` — il t'en faut ${cost}.`}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Personnaliser modal ─── */
+function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, onClose }) {
+  const color = QR_COLORS.find(c => c.id === colorId) || QR_COLORS[0];
+  return (
+    <div className="modal-veil" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="mk-modal" style={{ maxWidth: 520 }}>
+        <div className="mk-modal-head">
+          <div>
+            <div className="mk-modal-title">Personnaliser le QR code</div>
+            <div className="mk-modal-sub">La forme et les couleurs s'appliquent aussi à l'image téléchargée.</div>
+          </div>
+          <button className="btn-icon" onClick={onClose}><X size={18} /></button>
+        </div>
+        <div className="mk-modal-body">
+          <div className="section-label" style={{ marginBottom: 8 }}>Forme</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+            {QR_SHAPES.map(s => (
+              <button
+                key={s.id}
+                className={`pill${shape === s.id ? ' on' : ''}`}
+                onClick={() => setShape(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="section-label" style={{ marginBottom: 8 }}>Couleurs</div>
+          <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
+            {QR_COLORS.map(col => (
+              <button
+                key={col.id}
+                onClick={() => setColorId(col.id)}
+                title={col.id}
+                style={{
+                  width: 44, height: 44, borderRadius: 12,
+                  position: 'relative', overflow: 'hidden',
+                  border: colorId === col.id ? '2.5px solid var(--mk-ink)' : '2.5px solid transparent',
+                  boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.08)',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ position: 'absolute', inset: 0, background: col.bg }} />
+                <span style={{ position: 'absolute', left: '26%', top: '26%', width: '48%', height: '48%', borderRadius: 5, background: col.fg }} />
+              </button>
+            ))}
+          </div>
+
+          <div style={{ height: 180, display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+            <div style={{ width: 160, padding: 12, borderRadius: 14, background: color.bg }}>
+              <QrSvg url={shareUrl || 'https://mykado.store'} shape={shape} color={color} />
+            </div>
+          </div>
+
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>
+            C'est parfait
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Share view (published) ─── */
+function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
+  const navigate = useNavigate();
+  const [shape,      setShape]      = useState('rounded');
+  const [colorId,    setColorId]    = useState('rose');
+  const [branded,    setBranded]    = useState(true);
+  const [customizing,setCustomizing]= useState(false);
+  const [copied,     setCopied]     = useState(false);
+  const [toast,      setToast]      = useState('');
+  const [downloading,setDownloading]= useState(false);
+
+  /* shortcode editing */
+  const [slugEditing, setSlugEditing] = useState(false);
+  const [slugDraft,   setSlugDraft]   = useState(shortCode);
+  const [slugSaving,  setSlugSaving]  = useState(false);
+  const [slugStatus,  setSlugStatus]  = useState('');
+
+  useEffect(() => { setSlugDraft(shortCode); }, [shortCode]);
+
+  const color = QR_COLORS.find(c => c.id === colorId) || QR_COLORS[1];
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
+
+  const handleCopy = useCallback(() => {
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    showToast('Lien copié');
+  }, [shareUrl]);
+
+  const handleSaveSlug = useCallback(async () => {
+    const val = slugDraft.trim();
+    if (val === shortCode) { setSlugEditing(false); return; }
+    if (val.length < 4) { setSlugStatus('Minimum 4 caractères'); return; }
+    setSlugSaving(true); setSlugStatus('');
+    try {
+      const r = await setCustomSlug(pub._id, val);
+      setShortCode(r.data.shortCode);
+      setSlugDraft(r.data.shortCode);
+      setSlugEditing(false);
+      setSlugStatus('saved');
+      setTimeout(() => setSlugStatus(''), 2500);
+      showToast('Code court mis à jour');
+    } catch (err) {
+      setSlugStatus(err.response?.data?.error || 'Ce code est déjà utilisé.');
+    } finally { setSlugSaving(false); }
+  }, [pub._id, slugDraft, shortCode, setShortCode]);
+
+  const handleDownload = useCallback(async () => {
+    if (!shareUrl) return;
+    setDownloading(true);
+    try {
+      const node = document.getElementById('mk-qr-card');
+      const svgEl = node?.querySelector('svg');
+      const W = 720, H = 880;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = color.bg;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(0, 0, W, H, 48);
+      else ctx.rect(0, 0, W, H);
+      ctx.fill();
+      ctx.fillStyle = color.fg;
+      ctx.textAlign = 'center';
+      ctx.font = '44px Caveat, cursive';
+      ctx.globalAlpha = .85;
+      ctx.fillText('Scanne-moi', W / 2, 96);
+      ctx.globalAlpha = 1;
+      ctx.font = "52px 'Instrument Serif', Georgia, serif";
+      ctx.fillText(pub?.title || 'myKado', W / 2, 162);
+      const shortDomain = (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
+      ctx.font = '600 26px ui-monospace, monospace';
+      ctx.globalAlpha = .85;
+      ctx.fillText(shortCode ? `${shortDomain}/s/${shortCode}` : shortDomain, W / 2, H - (branded ? 96 : 56));
+      if (branded) {
+        ctx.globalAlpha = .55;
+        ctx.font = "700 22px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillText('PROPULSÉ PAR MYKADO', W / 2, H - 44);
+      }
+      ctx.globalAlpha = 1;
+      if (svgEl) {
+        const svgStr = new XMLSerializer().serializeToString(svgEl);
+        const img = new Image();
+        await new Promise(res => {
+          img.onload = res;
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+        });
+        ctx.drawImage(img, (W - 460) / 2, 210, 460, 460);
+      }
+      canvas.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `qr-${pub?.customName || 'mykado'}.png`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      });
+      showToast('Image PNG téléchargée');
+    } finally { setDownloading(false); }
+  }, [shareUrl, color, branded, pub, shortCode]);
+
+  const siteUrl = pub
+    ? `${import.meta.env.VITE_API_URL || ''}/site/${pub.templateName}/${pub.customName}`
+    : '';
+
+  return (
+    <>
+      <Toast message={toast} />
+      <div className="share-grid">
+
+        {/* ── Left: QR card column ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+          <QrCard
+            pub={pub}
+            shortCode={shortCode}
+            shareUrl={shareUrl}
+            shape={shape}
+            color={color}
+            branded={branded}
+          />
+
+          <div className="share-dl-row">
+            <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setCustomizing(true)}>
+              <Palette size={15} /> Personnaliser
+            </button>
+            <button
+              className="btn btn-ink"
+              style={{ flex: 1 }}
+              onClick={handleDownload}
+              disabled={downloading || !shareUrl}
+            >
+              {downloading
+                ? <><RefreshCw size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> Génération…</>
+                : <><Download size={13} /> Télécharger PNG</>}
+            </button>
+          </div>
+
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 9,
+            fontSize: 12, color: 'var(--mk-ink-2)', fontWeight: 600,
+            cursor: 'pointer', userSelect: 'none',
+          }}>
+            <input
+              type="checkbox"
+              checked={branded}
+              onChange={e => setBranded(e.target.checked)}
+              style={{ accentColor: 'var(--mk-accent)', width: 15, height: 15 }}
+            />
+            Afficher « Propulsé par myKado » sur l'image
+          </label>
+        </div>
+
+        {/* ── Right: link + networks column ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+
+          {/* Le lien */}
+          <div>
+            <div className="section-label" style={{ marginBottom: 10 }}>Le lien</div>
+            <div className="linkbox">
+              <Link2 size={14} style={{ color: 'var(--mk-ink-3)', flexShrink: 0 }} />
+              <span className="url">{shareUrl || '…'}</span>
+              <button
+                className={`btn btn-sm ${copied ? 'btn-soft' : 'btn-ink'}`}
+                style={{ flexShrink: 0 }}
+                onClick={handleCopy}
+              >
+                {copied ? <><Check size={12} /> Copié</> : <><Copy size={12} /> Copier</>}
+              </button>
+            </div>
+          </div>
+
+          {/* Le code court */}
+          <div>
+            <div className="section-label" style={{ marginBottom: 10 }}>Le code court</div>
+            <div className="card" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ flex: 1 }}>
+                {slugEditing ? (
+                  <div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, color: 'var(--mk-ink-3)' }}>/s/</span>
+                      <input
+                        className="mk-input"
+                        style={{ fontFamily: 'ui-monospace, monospace', letterSpacing: '.1em', textTransform: 'uppercase', fontSize: 13, flex: 1 }}
+                        value={slugDraft}
+                        maxLength={10}
+                        autoFocus
+                        onChange={e => { setSlugDraft(e.target.value.toUpperCase()); setSlugStatus(''); }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') handleSaveSlug();
+                          if (e.key === 'Escape') { setSlugEditing(false); setSlugDraft(shortCode); setSlugStatus(''); }
+                        }}
+                      />
+                      <button className="btn btn-primary btn-sm" onClick={handleSaveSlug} disabled={slugSaving}>
+                        {slugSaving ? <RefreshCw size={12} style={{ animation: 'mk-spin .75s linear infinite' }} /> : 'Enregistrer'}
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => { setSlugEditing(false); setSlugDraft(shortCode); setSlugStatus(''); }}>
+                        Annuler
+                      </button>
+                    </div>
+                    {slugStatus && slugStatus !== 'saved' && (
+                      <div style={{ fontSize: 11, color: 'var(--mk-accent)', marginTop: 6, fontWeight: 700 }}>{slugStatus}</div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, letterSpacing: '.14em' }}>
+                      {shortCode || '—'}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', marginTop: 3 }}>
+                      À saisir sur mykado.store pour retrouver la page.
+                    </div>
+                    {slugStatus === 'saved' && (
+                      <div style={{ fontSize: 11, color: 'var(--mk-mint)', marginTop: 4, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Check size={11} /> Sauvegardé
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              {!slugEditing && (
+                <button className="btn btn-ghost btn-sm" onClick={() => { setSlugEditing(true); setSlugStatus(''); }}>
+                  <Edit3 size={13} /> Personnaliser
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Réseaux */}
+          <div>
+            <div className="section-label" style={{ marginBottom: 10 }}>Partager sur les réseaux</div>
+            <ShareNetworks shareUrl={shareUrl} onCopy={showToast} />
+          </div>
+
+          {/* Voir le mur (wall only) */}
+          {isWall && siteUrl && (
+            <a
+              href={siteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-ghost"
+              style={{ justifyContent: 'center' }}
+            >
+              <Eye size={15} /> Voir le mur comme un invité
+            </a>
+          )}
+        </div>
+      </div>
+
+      {customizing && (
+        <PersonnaliserModal
+          shape={shape}
+          setShape={setShape}
+          colorId={colorId}
+          setColorId={setColorId}
+          shareUrl={shareUrl}
+          onClose={() => setCustomizing(false)}
+        />
+      )}
+    </>
+  );
+}
+
+/* ─── Main page ─── */
 export default function SharePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [pub, setPub]         = useState(null);
-  const [shortCode, setShortCode] = useState('');
-  const [shape, setShape]     = useState('heart');
-  const [color, setColor]     = useState('rose');
-  const [copied, setCopied]   = useState(false);
-  const [showConf, setShowConf] = useState(true);
+
+  const [pub,        setPub]        = useState(null);
+  const [shortCode,  setShortCode]  = useState('');
+  const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
       try {
-        const r = await getPublications({ limit: 1000 });
-        const found = r.data.find(p => p._id === id);
-        if (found) {
-          setPub(found);
-          try { const sl = await getShortLink(id); setShortCode(sl.data.shortCode); } catch {}
+        const r = await getPublicationById(id);
+        if (r.data) {
+          setPub(r.data);
+          try {
+            const sl = await getShortLink(id);
+            setShortCode(sl.data.shortCode || '');
+          } catch {}
         }
       } catch {}
+      finally { setLoading(false); }
     };
     load();
-    const t = setTimeout(() => setShowConf(false), 5000);
-    return () => clearTimeout(t);
   }, [id]);
 
+  if (loading) return (
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2.5px solid var(--mk-line)', borderTopColor: 'var(--mk-accent)', animation: 'mk-spin .75s linear infinite' }} />
+    </div>
+  );
+
+  if (!pub) return (
+    <div className="page">
+      <div className="empty-state"><div className="e-title">Création introuvable</div></div>
+    </div>
+  );
+
+  const isWall   = WALL_NAMES.has(pub.templateName);
+  const editPath = isWall ? `/ewish-admin/wall/${pub._id}` : `/ewish-admin/ewish/edit/${pub._id}`;
+
   const shareUrl = shortCode
-    ? `${import.meta.env.VITE_API_URL}/s/${shortCode}`
-    : pub ? `${import.meta.env.VITE_API_URL}/site/${pub.templateName}/${pub.customName}` : '';
-
-  const selectedColor = QR_COLORS.find(c => c.id === color) || QR_COLORS[1];
-
-  const handleDownload = async () => {
-    if (!shareUrl) return;
-    const dataUrl = await QRCode.toDataURL(shareUrl, {
-      errorCorrectionLevel: 'M',
-      width: 800,
-      margin: 2,
-      color: { dark: selectedColor.fg, light: selectedColor.bg },
-    });
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = `qr-${pub?.customName || 'mykado'}.png`;
-    a.click();
-  };
-
-  const handleShare = (chId) => {
-    if (!shareUrl) return;
-    const enc = encodeURIComponent(shareUrl);
-    const map = {
-      wa:   `https://wa.me/?text=${enc}`,
-      sms:  `sms:?body=${enc}`,
-      mail: `mailto:?subject=Regarde%20ça !&body=${enc}`,
-      fb:   `https://www.facebook.com/sharer/sharer.php?u=${enc}`,
-      tg:   `https://t.me/share/url?url=${enc}`,
-      tw:   `https://twitter.com/intent/tweet?url=${enc}`,
-    };
-    if (map[chId]) window.open(map[chId], '_blank');
-  };
+    ? `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/s/${shortCode}`
+    : `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/site/${pub.templateName}/${pub.customName}`;
 
   return (
-    <div className={s.root}>
-      {showConf && (
-        <div className={s.confettiLayer}>
-          {Array.from({ length: 18 }).map((_, i) => (
-            <span key={i} className={s.confPiece} style={{
-              left: `${(i * 5.5 + 3) % 100}%`,
-              animationDelay: `${(i * 0.18) % 2}s`,
-              background: ['#E11D48','#9B7EE2','#6BCFAF','#FFC95A','#FF9F7A','#FFB3C1'][i % 6],
-            }} />
-          ))}
+    <div className="page">
+      {/* Page header */}
+      <div className="ph">
+        <div>
+          <div className="ph-hand">{pub.published ? 'En ligne' : 'Dernière étape'}</div>
+          <h1 className="ph-title">{pub.published ? 'Partage ta création' : pub.title}</h1>
         </div>
-      )}
-
-      <div className={s.content}>
-        <button className={s.backBtn} onClick={() => navigate(`/ewish-admin/ewish/edit/${id}`)}>
-          <ArrowLeft size={14} /> Retour à l'éditeur
+        <button className="btn btn-ghost" onClick={() => navigate(editPath)}>
+          <ArrowLeft size={14} /> Retour à l'édition
         </button>
-
-        <div className={s.hero}>
-          <div className={s.heroEmoji}>🎉</div>
-          <div className={s.heroHand}>C'est en ligne !</div>
-          <h1 className={s.heroTitle}>Maintenant, partage la magie</h1>
-          <p className={s.heroSub}>
-            Ton lien est prêt. Choisis ton QR Code préféré et envoie-le par WhatsApp, SMS ou imprime-le sur ton invitation.
-          </p>
-        </div>
-
-        <div className={s.grid}>
-          <div className={s.qrPanel}>
-            <div className={s.qrBox} style={{ background: selectedColor.bg }}>
-              <QrPreview url={shareUrl || 'https://mykado.store'} shape={shape} color={selectedColor} />
-              <span className={s.qrLogo}>🎂</span>
-            </div>
-            <div className={s.qrFooter}>
-              <div className={s.qrFootHand}>flashe-moi !</div>
-              <div className={s.qrFootUrl}>{shareUrl}</div>
-            </div>
-            <div className={s.qrActions}>
-              <button className={s.btnGhost} onClick={handleDownload}><Image size={13} /> Télécharger PNG</button>
-              <button className={s.btnRose}><Share2 size={13} /> Partager</button>
-            </div>
-          </div>
-
-          <div className={s.controls}>
-            <div className={s.card}>
-              <div className={s.cardLabel}>TON LIEN MAGIQUE</div>
-              <div className={s.linkRow}>
-                <span className={s.linkEmoji}>🔗</span>
-                <span className={s.linkUrl}>{shareUrl || 'Publication en cours…'}</span>
-                <button
-                  className={`${s.copyBtn} ${copied ? s.copyBtnDone : ''}`}
-                  onClick={() => { if (shareUrl) { navigator.clipboard.writeText(shareUrl); setCopied(true); setTimeout(() => setCopied(false), 1500); } }}
-                >
-                  {copied ? <><Check size={13} /> Copié !</> : <><Copy size={13} /> Copier</>}
-                </button>
-              </div>
-            </div>
-
-            <div className={s.card}>
-              <div className={s.cardLabelRow}>
-                <div>
-                  <div className={s.cardLabel}>FORME DU QR</div>
-                  <div className={s.cardHand}>fais-toi plaisir 💕</div>
-                </div>
-              </div>
-              <div className={s.shapeGrid}>
-                {QR_SHAPES.map(sh => (
-                  <button
-                    key={sh.id}
-                    className={`${s.shapeBtn} ${shape === sh.id ? s.shapeBtnActive : ''}`}
-                    onClick={() => setShape(sh.id)}
-                  >
-                    <span className={s.shapeEmoji}>{sh.emoji}</span>
-                    <span className={s.shapeLabel}>{sh.label}</span>
-                  </button>
-                ))}
-              </div>
-              <div className={s.cardLabel} style={{ marginTop: 18 }}>COULEURS</div>
-              <div className={s.colorRow}>
-                {QR_COLORS.map(c => (
-                  <button
-                    key={c.id}
-                    className={`${s.colorBtn} ${color === c.id ? s.colorBtnActive : ''}`}
-                    style={{ background: c.bg }}
-                    onClick={() => setColor(c.id)}
-                  >
-                    <span className={s.colorDot} style={{ background: c.fg }} />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={s.card}>
-              <div className={s.cardLabel} style={{ marginBottom: 14 }}>PARTAGER PARTOUT</div>
-              <div className={s.channelGrid}>
-                {CHANNELS.map(ch => (
-                  <button
-                    key={ch.id}
-                    className={s.channelBtn}
-                    style={{ background: ch.color + '18', border: `1px solid ${ch.color}33` }}
-                    onClick={() => handleShare(ch.id)}
-                  >
-                    <span className={s.channelEmoji}>{ch.emoji}</span>
-                    {ch.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button className={s.cagnotteBanner} onClick={() => navigate('/ewish-admin/cagnotte/' + id)}>
-              <span className={s.cagnotteEmoji}>🎁</span>
-              <div className={s.cagnotteInfo}>
-                <div className={s.cagnotteBannerTitle}>Suivre la cagnotte cadeau</div>
-                <div className={s.cagnotteBannerSub}>Suivez les contributions de vos proches</div>
-              </div>
-              <ArrowRight size={18} color="var(--mk-ink)" />
-            </button>
-          </div>
-        </div>
       </div>
+
+      {pub.published ? (
+        <ShareView
+          pub={pub}
+          shortCode={shortCode}
+          setShortCode={setShortCode}
+          shareUrl={shareUrl}
+          isWall={isWall}
+        />
+      ) : (
+        <UnlockView
+          pub={pub}
+          onUnlocked={() => setPub(prev => ({ ...prev, published: true }))}
+        />
+      )}
     </div>
   );
 }

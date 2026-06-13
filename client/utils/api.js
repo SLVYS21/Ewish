@@ -15,6 +15,7 @@ export const getTemplates = () => api.get('/templates');
 export const getTemplate = (name) => api.get(`/templates/${name}`);
 
 export const getPublications = (params) => api.get('/publications', { params });
+export const getPublicationById = (id) => api.get(`/publications/id/${id}`, { withCredentials: true });
 export const getPremadePublications = () => api.get('/publications', { params: { premade: 'true' } });
 export const getPublication = (templateName, customName) => api.get(`/publications/${templateName}/${customName}`);
 export const createPublication = (data) => api.post('/publications', data);
