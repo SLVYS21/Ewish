@@ -370,6 +370,7 @@ a { color: inherit; text-decoration: none; }
 .crea-row:hover { border-color: var(--mk-line-strong); }
 .crea-thumb { width: 56px; height: 56px; border-radius: var(--mk-r-xs); flex-shrink: 0; overflow: hidden; }
 .crea-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.crea-r4 { margin-top: 5px; }
 .crea-r1 { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .crea-title { font-size: 14px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .crea-badges { display: flex; gap: 5px; flex-shrink: 0; }
@@ -380,7 +381,19 @@ a { color: inherit; text-decoration: none; }
 .crea-url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .crea-dot { opacity: .45; flex-shrink: 0; }
 .crea-time { white-space: nowrap; flex-shrink: 0; }
-.crea-r4 { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+/* defensive: prevent any cascade from adding borders to row elements */
+.crea-r1, .crea-r2, .crea-r3, .crea-r4 { border: none; background: transparent; }
+.crea-r4 { display: flex; align-items: center; gap: 4px; }
+/* Partager button inside cards — borderless soft pill, no visible line */
+.crea-r4 .btn-ghost {
+  border-radius: var(--mk-r-pill);
+  border: none;
+  background: var(--mk-blush);
+  color: var(--mk-rose);
+  padding: 6px 11px;
+  font-size: 12px;
+}
+.crea-r4 .btn-ghost:hover { background: var(--mk-accent-pale); color: var(--mk-accent); }
 .crea-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; background: var(--mk-paper); border: 1px solid var(--mk-line-2); border-radius: var(--mk-r-xs); box-shadow: var(--mk-sh-2); min-width: 170px; padding: 5px; display: flex; flex-direction: column; }
 
 /* ── Share ── */
@@ -526,7 +539,6 @@ a { color: inherit; text-decoration: none; }
   .crea-toolbar .mk-seg, .crea-toolbar .mk-select, .crea-toolbar .mk-input-wrap { width: 100% !important; }
   .crea-row { padding: 12px 13px; gap: 11px; }
   .crea-thumb { width: 52px; height: 52px; }
-  .crea-r4 { margin-top: 7px; }
 
   /* Wall */
   .wall-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
