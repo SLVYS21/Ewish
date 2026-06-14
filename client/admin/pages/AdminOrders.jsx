@@ -6,8 +6,8 @@ import { Search, Inbox } from 'lucide-react';
 import s from './AdminOrders.module.css';
 
 function fmtPrice(p) { return new Intl.NumberFormat('fr-FR').format(p || 0) + ' FCFA'; }
-function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'; }
-function fmtShort(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—'; }
+function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; }
+function fmtShort(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''; }
 
 const STATUS_LABELS = { pending:'En attente', confirmed:'Confirmée', in_progress:'En cours', delivered:'Livrée', cancelled:'Annulée' };
 const BADGE_CLS     = { pending:s.badgePending, confirmed:s.badgeConfirmed, in_progress:s.badgeProgress, delivered:s.badgeDelivered, cancelled:s.badgeCancelled };
@@ -110,7 +110,7 @@ export default function AdminOrders() {
                     <div className={s.muted}>{o.client.email}</div>
                   </td>
                   <td>{o.templateLabel || o.templateName}</td>
-                  <td>{o.recipientName || '—'}</td>
+                  <td>{o.recipientName || ''}</td>
                   <td className={s.bold}>{fmtPrice(o.finalPrice)}</td>
                   <td><span className={`${s.badge} ${BADGE_CLS[o.status]}`}>{STATUS_LABELS[o.status]}</span></td>
                   <td className={s.muted}>{fmtShort(o.createdAt)}</td>
@@ -141,7 +141,7 @@ export default function AdminOrders() {
       {/* ── Detail Modal ── */}
       <Modal
         open={!!selected} onClose={() => setSelected(null)}
-        title={selected ? `${selected.client.firstName} ${selected.client.lastName||''} — Commande` : ''}
+        title={selected ? `${selected.client.firstName} ${selected.client.lastName||''}  Commande` : ''}
         footer={<>
           <button className={`${s.btn} ${s.btnGhost}`} onClick={() => setSelected(null)}>Fermer</button>
           <button className={`${s.btn} ${s.btnGold}`} onClick={saveDetail} disabled={saving}>{saving ? 'Enregistrement…' : 'Enregistrer'}</button>
@@ -161,9 +161,9 @@ export default function AdminOrders() {
               <div className={s.detailBlockTitle}>Client</div>
               <div className={s.detailGrid}>
                 <div><div className={s.dLabel}>Email</div><div className={s.dValue}>{selected.client.email}</div></div>
-                <div><div className={s.dLabel}>Téléphone</div><div className={s.dValue}>{selected.client.phone||'—'}</div></div>
-                <div><div className={s.dLabel}>Destinataire</div><div className={s.dValue}>{selected.recipientName||'—'}</div></div>
-                <div><div className={s.dLabel}>Occasion</div><div className={s.dValue}>{selected.occasion||'—'}</div></div>
+                <div><div className={s.dLabel}>Téléphone</div><div className={s.dValue}>{selected.client.phone||''}</div></div>
+                <div><div className={s.dLabel}>Destinataire</div><div className={s.dValue}>{selected.recipientName||''}</div></div>
+                <div><div className={s.dLabel}>Occasion</div><div className={s.dValue}>{selected.occasion||''}</div></div>
               </div>
             </div>
 

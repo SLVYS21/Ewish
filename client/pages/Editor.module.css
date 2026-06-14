@@ -522,7 +522,7 @@
 
   .mobilePanelHeader { display: block; }
 
-  /* step nav on mobile — compact, horizontal pills */
+  /* step nav on mobile  compact, horizontal pills */
   .stepNav { overflow-x: auto; scrollbar-width: none; }
   .stepNav::-webkit-scrollbar { display: none; }
   .stepNavBtn { min-width: 72px; padding: 8px 6px; }

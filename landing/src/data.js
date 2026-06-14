@@ -22,7 +22,7 @@ export const TEMPLATES = [
     credits: 10,
     size: 'sq',
     color: 'gold',
-    desc: "Un mur interactif où chaque proche colle son post-it — comme un livre d'or numérique.",
+    desc: "Un mur interactif où chaque proche colle son post-it  comme un livre d'or numérique.",
     badge: 'Cagnotte bientôt',
   },
   {
@@ -33,7 +33,7 @@ export const TEMPLATES = [
     credits: 12,
     size: 'tall',
     color: 'peach',
-    desc: "Pour la demande, le mariage, l'anniversaire de mariage — pastel doux, calligraphie.",
+    desc: "Pour la demande, le mariage, l'anniversaire de mariage  pastel doux, calligraphie.",
   },
   {
     id: 'baby',
@@ -43,7 +43,7 @@ export const TEMPLATES = [
     credits: 8,
     size: 'sq',
     color: 'em',
-    desc: "Annonce de naissance ou baptême — illustrations rondes, palette douce.",
+    desc: "Annonce de naissance ou baptême  illustrations rondes, palette douce.",
   },
   {
     id: 'pro-retraite',
@@ -63,7 +63,7 @@ export const TEMPLATES = [
     credits: 6,
     size: 'sq',
     color: 'gold',
-    desc: "Tabaski, Korité, Magal, Noël, Pâques — motifs traditionnels et palette respectueuse.",
+    desc: "Tabaski, Korité, Magal, Noël, Pâques  motifs traditionnels et palette respectueuse.",
   },
   {
     id: 'hommage',
@@ -83,7 +83,7 @@ export const TEMPLATES = [
     credits: 25,
     size: 'wide',
     color: 'rose',
-    desc: "Pour vos clients ou prospects — logo, couleurs, bouton vers votre site ou WhatsApp.",
+    desc: "Pour vos clients ou prospects  logo, couleurs, bouton vers votre site ou WhatsApp.",
   },
   {
     id: 'notre-film',
@@ -158,7 +158,7 @@ export const FAQS = [
   },
   {
     q: "Quand est-ce que je paie ?",
-    a: "Vous créez un compte gratuit, vous personnalisez librement, et vous achetez des crédits uniquement au moment de publier. La personnalisation est 100% gratuite — vous ne payez jamais avant d'être satisfait.",
+    a: "Vous créez un compte gratuit, vous personnalisez librement, et vous achetez des crédits uniquement au moment de publier. La personnalisation est 100% gratuite  vous ne payez jamais avant d'être satisfait.",
   },
   {
     q: "Quels moyens de paiement acceptez-vous ?",
@@ -166,11 +166,11 @@ export const FAQS = [
   },
   {
     q: "Mes crédits ont-ils une date d'expiration ?",
-    a: "Non. Vos crédits restent disponibles tant que votre compte existe. Utilisez-les pour un vœu cette année et pour un autre l'année prochaine — c'est vous qui décidez.",
+    a: "Non. Vos crédits restent disponibles tant que votre compte existe. Utilisez-les pour un vœu cette année et pour un autre l'année prochaine  c'est vous qui décidez.",
   },
   {
     q: "Et la cagnotte cadeau, comment ça marche ?",
-    a: "C'est notre prochain chantier : sur les vœux collectifs (mariage, départ, anniversaire), chaque contributeur pourra participer à un cadeau commun — une PS5, un voyage, une montre. Le bénéficiaire reçoit le montant directement. Rejoignez la liste d'attente depuis le bandeau du site.",
+    a: "C'est notre prochain chantier : sur les vœux collectifs (mariage, départ, anniversaire), chaque contributeur pourra participer à un cadeau commun  une PS5, un voyage, une montre. Le bénéficiaire reçoit le montant directement. Rejoignez la liste d'attente depuis le bandeau du site.",
   },
   {
     q: "Puis-je intégrer ma marque ?",

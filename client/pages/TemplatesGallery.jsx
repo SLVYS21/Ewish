@@ -49,6 +49,9 @@ export default function TemplatesGallery() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  /* Wall preview sheet (bottom drawer) */
+  const [wallSheet, setWallSheet]   = useState(null); // tpl being previewed
+
   /* Wall naming modal */
   const [wallModal, setWallModal]   = useState(null);
   const [wallTitle, setWallTitle]   = useState('');
@@ -97,6 +100,42 @@ export default function TemplatesGallery() {
   return (
     <div className="page">
 
+      {/* Wall preview sheet */}
+      {wallSheet && (
+        <div className="wall-sheet-veil" onMouseDown={e => { if (e.target === e.currentTarget) setWallSheet(null); }}>
+          <div className="wall-sheet">
+            <div className="wall-sheet-grip" />
+            <div className="wall-sheet-head">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="wall-sheet-title">{wallSheet.label || wallSheet.name}</div>
+                <div className="wall-sheet-desc">{WALL_DESCS[wallSheet.name] || wallSheet.description || ''}</div>
+              </div>
+              <button className="btn-icon" onClick={() => setWallSheet(null)}><X size={18} /></button>
+            </div>
+            <div className="wall-sheet-preview">
+              <iframe
+                src={`${import.meta.env.VITE_API_URL}/preview/${wallSheet.name}`}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                title={wallSheet.label || wallSheet.name}
+                allow="autoplay"
+              />
+            </div>
+            <div className="wall-sheet-foot">
+              <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setWallSheet(null)}>
+                Voir les autres
+              </button>
+              <button
+                className="btn btn-primary"
+                style={{ flex: 1, justifyContent: 'center' }}
+                onClick={() => { setWallSheet(null); openWallModal(wallSheet); }}
+              >
+                Créer ce mur <ArrowRight size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Wall naming modal */}
       {wallModal && (
         <div className="modal-veil" onMouseDown={e => { if (e.target === e.currentTarget) setWallModal(null); }}>
@@ -136,7 +175,7 @@ export default function TemplatesGallery() {
       <div className="ph">
         <div>
           <div className="ph-hand">
-            {mode === 'wish' ? 'Étape 1 — choisis ton ambiance' : 'Étape 1 — choisis ton mur'}
+            {mode === 'wish' ? 'Étape 1  choisis ton ambiance' : 'Étape 1  choisis ton mur'}
           </div>
           <h1 className="ph-title">
             {mode === 'wish' ? 'Crée un vœu animé' : 'Crée un mur de mots'}
@@ -144,7 +183,7 @@ export default function TemplatesGallery() {
           <p className="ph-sub">
             {mode === 'wish'
               ? "Chaque template est une petite expérience animée et musicale. Clique pour voir l'aperçu avant de te lancer."
-              : `Une page où chacun laisse un mot. Les 5 premiers mots sont gratuits — tu débloqueras ensuite pour aller plus loin.`}
+              : `Une page où chacun laisse un mot. Les 5 premiers mots sont gratuits  tu débloqueras ensuite pour aller plus loin.`}
           </p>
         </div>
         <button className="btn btn-ghost" onClick={() => navigate('/ewish-admin')}>
@@ -243,7 +282,7 @@ export default function TemplatesGallery() {
                 <div
                   key={tpl._id}
                   className="card card-hover tpl-card"
-                  onClick={() => openWallModal(tpl)}
+                  onClick={() => setWallSheet(tpl)}
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="tpl-thumb" style={{ height: 158, background: bg }} />

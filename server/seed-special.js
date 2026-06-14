@@ -46,12 +46,12 @@ const specialTemplate = {
 
     // Result 2
     result2Domain: 'wikipedia.org',
-    result2Title: 'Définition de "parfaite" — voir aussi : elle',
+    result2Title: 'Définition de "parfaite"  voir aussi : elle',
     result2Snippet: 'Les dictionnaires du monde entier ont récemment mis à jour leur définition de "parfaite" pour y inclure une photo. Les linguistes sont unanimes.',
 
     // Result 3
     result3Domain: 'guinnessrecords.com',
-    result3Title: 'Record mondial officiel — Personne la plus formidable',
+    result3Title: 'Record mondial officiel  Personne la plus formidable',
     result3Snippet: 'Le Guinness World Records certifie officiellement qu\'aucune méthode connue ne permet de mesurer l\'étendue totale de sa gentillesse. Catégorie : hors-norme.',
 
     // Story
@@ -74,7 +74,7 @@ const specialTemplate = {
 
     // Wishes
     wish1: 'Que cette nouvelle année soit aussi belle que le sourire que tu portes chaque jour.',
-    wish2: 'Tu mérites tout le bonheur du monde — et l\'univers entier le sait.',
+    wish2: 'Tu mérites tout le bonheur du monde  et l\'univers entier le sait.',
     wish3: 'Joyeux anniversaire du fond du cœur. 🎂✨',
 
     // Outro

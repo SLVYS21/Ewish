@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sphère de vœux</title>
+  <title>Sphère de mots</title>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -360,9 +360,11 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: linear-gradient(135deg, var(--gold) 0%, #a8742a 100%);
-      color: #1a1410;
-      border: none;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.35);
       border-radius: 99px;
       padding: 15px 36px;
       font-family: 'Inter', sans-serif;
@@ -370,13 +372,14 @@
       font-weight: 700;
       cursor: pointer;
       letter-spacing: 0.03em;
-      box-shadow: 0 8px 28px rgba(201,168,76,0.45), 0 2px 6px rgba(0,0,0,0.35);
-      transition: transform 0.22s, box-shadow 0.22s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
+      transition: transform 0.22s, box-shadow 0.22s, background 0.22s;
       white-space: nowrap;
     }
     #add-btn:hover {
       transform: translateX(-50%) translateY(-3px);
-      box-shadow: 0 14px 40px rgba(201,168,76,0.6), 0 3px 8px rgba(0,0,0,0.35);
+      background: rgba(255,255,255,0.26);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.4);
     }
     #add-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
 
@@ -606,20 +609,43 @@
       .sheet-title { font-size: 1.35rem; }
       .media-tab { padding: 6px 10px; font-size: 0.72rem; }
     }
+
+    /* ── ADMIN BANNER ── */
+    #admin-banner { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9000; background: rgba(43,26,45,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #fff; padding: 0 16px; height: 44px; align-items: center; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; gap: 10px; }
+    #admin-banner.show { display: flex; }
+    .admin-pub-label { display: inline-flex; align-items: center; gap: 7px; opacity: .85; font-size: 12px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #admin-back { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.14); color: #fff; text-decoration: none; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 10px; transition: background .15s; white-space: nowrap; flex-shrink: 0; }
+    #admin-back:hover { background: rgba(255,255,255,.22); }
+    .admin-live { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.65); font-size: 11.5px; white-space: nowrap; flex-shrink: 0; }
+    .admin-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #6BCFAF; flex-shrink: 0; animation: adminLiveDot 1.8s infinite; }
+    @keyframes adminLiveDot { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+    body.has-admin-banner { padding-top: 44px; }
   </style>
 </head>
 <body>
 
+<div id="admin-banner">
+  <span class="admin-pub-label">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.2-7 10-7 10 7 10 7-3.2 7-10 7-10-7-10-7Z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
+    Aperçu public  c'est ce que voient tes invités.
+  </span>
+  <span class="admin-live"><span class="admin-live-dot"></span>Mise à jour en direct</span>
+  <a id="admin-back" href="#">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    Retour à la gestion
+  </a>
+</div>
+
 <canvas id="stars"></canvas>
 
 <header id="wall-header">
-  <p class="eyebrow">✦ Sphère de vœux</p>
+  <p class="eyebrow">✦ Sphère de mots</p>
   <h1 class="wall-title">Pour <em data-node-name="titleName">Sarah</em></h1>
-  <p class="wall-subtitle" data-node-name="subtitle">Faites pivoter la sphère pour explorer chaque vœu.</p>
-  <div class="wish-count" id="wish-count-badge">
+  <p class="wall-subtitle" data-node-name="subtitle">Faites pivoter la sphère pour explorer chaque mot.</p>
+  <!-- <div class="wish-count" id="wish-count-badge">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-    <span id="count-num">0</span> vœux
-  </div>
+    <span id="count-num">0</span> mots
+  </div> -->
   <div class="header-divider"></div>
 </header>
 
@@ -640,7 +666,7 @@
   <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
   </svg>
-  <p>Soyez le premier à laisser un vœu !</p>
+  <p>Soyez le premier à laisser un mot !</p>
 </div>
 
 <!-- Note read modal -->
@@ -661,19 +687,19 @@
   </div>
 </div>
 
-<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un vœu">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un mot">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
   </svg>
-  Ajouter mon mot
+  Laisser un mot
 </button>
 
 <div id="add-overlay" onclick="handleBgClick(event)" role="dialog" aria-modal="true">
   <div id="add-sheet">
     <button id="close-btn" onclick="closeSheet()" aria-label="Fermer">✕</button>
     <div class="sheet-drag"></div>
-    <h2 class="sheet-title">Votre vœu</h2>
-    <p class="sheet-hint">Écrivez depuis le cœur — ça ne prend que quelques secondes.</p>
+    <h2 class="sheet-title">Votre mot</h2>
+    <p class="sheet-hint">Écrivez depuis le cœur  ça ne prend que quelques secondes.</p>
 
     <textarea id="wish-input" placeholder="Votre message…" maxlength="400" rows="4"></textarea>
     <input id="wish-author" type="text" placeholder="Votre prénom (optionnel)" maxlength="40" autocomplete="given-name">
@@ -711,7 +737,7 @@
         <div class="upload-zone-inner">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <p>Cliquez ou glissez une photo / GIF ici</p>
-          <small>JPG, PNG, GIF, WebP — max 10 Mo</small>
+          <small>JPG, PNG, GIF, WebP  max 10 Mo</small>
         </div>
       </div>
       <div class="media-loading" id="photo-loading">
@@ -742,15 +768,15 @@
     </div>
 
     <button id="submit-btn" onclick="submitWish()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4Z"/>
       </svg>
-      Coller mon vœu
+      Coller mon mot
     </button>
   </div>
 </div>
 
-<div id="toast">Vœu ajouté ✦</div>
+<div id="toast">Mot ajouté ✦</div>
 
 <script>
 /* ════════════════════════════════════════════
@@ -799,7 +825,7 @@ var SAMPLE_WISHES = [
   { text: "Profite bien ! Tu vas tellement nous manquer 💛",                                                 name: "Équipe RH", color: 2, rot: -1.4, ts: NOW - 3*864e5 },
   { text: "Des années de bons souvenirs ensemble. À toi maintenant de voyager, découvrir, vivre !",          name: "Jean-Paul", color: 3, rot:  3.1, ts: NOW - 2*864e5 },
   { text: "Tu m'as tellement appris. Merci du fond du cœur.",                                                name: "Camille",   color: 4, rot: -2.5, ts: NOW - 864e5  },
-  { text: "Retraite dorée pour une collègue en or ✨",                                                       name: "David",     color: 5, rot:  1.6, ts: NOW          },
+  { text: "Retraite dorée pour une collègue en or !",                                                         name: "David",     color: 5, rot:  1.6, ts: NOW          },
   { text: "Toujours là avec le sourire, même dans les moments difficiles. Un vrai exemple pour nous.",       name: "Nadia",     color: 6, rot: -3.2, ts: NOW - 6*864e5 },
   { text: "On t'envie ! Mais surtout, on te souhaite le meilleur pour cette nouvelle aventure.",             name: "Lucas",     color: 0, rot:  2.6, ts: NOW - 7*864e5 },
   { text: "Merci pour ta patience infinie et ta sagesse. Tu vas nous manquer chaque jour.",                  name: "Sophie",    color: 1, rot: -1.2, ts: NOW - 8*864e5 },
@@ -1224,7 +1250,7 @@ async function processPhotoFile(file) {
     document.getElementById('photo-img').src = url;
     document.getElementById('photo-preview').classList.add('show');
   } catch(e) {
-    showToast("Échec de l'envoi — réessayez");
+    showToast("Échec de l'envoi  réessayez");
     document.getElementById('photo-zone').style.display = '';
   } finally {
     document.getElementById('photo-loading').classList.remove('show');
@@ -1344,7 +1370,7 @@ async function submitWish() {
     document.getElementById('wish-author').value = '';
     clearMedia();
     switchTab('none');
-    showToast('Ton vœu est en attente de validation ✦');
+    showToast('Ton mot est en attente de validation ✦');
     return;
   }
   wishes.unshift(w);
@@ -1354,7 +1380,7 @@ async function submitWish() {
   clearMedia();
   switchTab('none');
   buildSphere(true);
-  showToast('Vœu ajouté ✦');
+  showToast('Mot ajouté ✦');
   try { window.parent.postMessage({ type: 'WW_WISH_ADDED', wish: w }, '*'); } catch(e) {}
 }
 
@@ -1377,6 +1403,12 @@ function showToast(msg) {
   if (tName)      document.querySelector('[data-node-name="titleName"]').textContent = tName;
   if (d.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent  = d.subtitle;
 
+  if (d.isAdmin) {
+    var banner = document.getElementById('admin-banner');
+    banner.classList.add('show');
+    document.getElementById('admin-back').href = d.adminReturnUrl || '#';
+    document.body.classList.add('has-admin-banner');
+  }
   initStars();
   initSphere();
   startLoop();

@@ -3,7 +3,7 @@ const Wish = require('../models/Wish');
 const Publication = require('../models/Publication');
 const { requireAdmin } = require('../middleware/auth');
 
-// POST /api/wishes/:publicationId — submit a wish (public)
+// POST /api/wishes/:publicationId  submit a wish (public)
 router.post('/:publicationId', async (req, res) => {
   try {
     const pub = await Publication.findById(req.params.publicationId).lean();
@@ -64,7 +64,7 @@ router.post('/:publicationId', async (req, res) => {
   }
 });
 
-// GET /api/wishes/:publicationId — list all wishes (admin)
+// GET /api/wishes/:publicationId  list all wishes (admin)
 router.get('/:publicationId', async (req, res) => {
   try {
     const wishes = await Wish.find({ publicationId: req.params.publicationId })
@@ -75,7 +75,7 @@ router.get('/:publicationId', async (req, res) => {
   }
 });
 
-// GET /api/wishes/:publicationId/approved — approved + not hidden (template display)
+// GET /api/wishes/:publicationId/approved  approved + not hidden (template display)
 router.get('/:publicationId/approved', async (req, res) => {
   try {
     const wishes = await Wish.find({
@@ -89,7 +89,7 @@ router.get('/:publicationId/approved', async (req, res) => {
   }
 });
 
-// PATCH /api/wishes/:id — approve, hide, or update fields
+// PATCH /api/wishes/:id  approve, hide, or update fields
 router.patch('/:id', async (req, res) => {
   try {
     const existing = await Wish.findById(req.params.id).lean();
@@ -106,7 +106,7 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/wishes/:id — admin only
+// DELETE /api/wishes/:id  admin only
 router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const deleted = await Wish.findByIdAndDelete(req.params.id);
@@ -117,7 +117,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// POST /api/wishes/:publicationId/approve-all — bulk approve (admin convenience)
+// POST /api/wishes/:publicationId/approve-all  bulk approve (admin convenience)
 router.post('/:publicationId/approve-all', async (req, res) => {
   try {
     const result = await Wish.updateMany(

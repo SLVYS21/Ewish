@@ -89,7 +89,7 @@ export default function KycMobilePage() {
 
   const [step, setStep] = useState(0);
 
-  // Step 0 — Document
+  // Step 0  Document
   const [fullName, setFullName] = useState('');
   const [idType, setIdType] = useState('cni');
   const [docPreview, setDocPreview] = useState('');
@@ -97,7 +97,7 @@ export default function KycMobilePage() {
   const [docUploading, setDocUploading] = useState(false);
   const [docError, setDocError] = useState('');
 
-  // Step 1 — Selfie
+  // Step 1  Selfie
   const [selfiePreview, setSelfiePreview] = useState('');
   const [selfieUrl, setSelfieUrl] = useState('');
   const [selfieUploading, setSelfieUploading] = useState(false);
@@ -233,7 +233,7 @@ export default function KycMobilePage() {
         }}>🛡️</div>
         <div style={{ fontWeight: 800, fontSize: 22, color: INK }}>Vérification KYC</div>
         <div style={{ fontSize: 13, color: INK3, marginTop: 4 }}>
-          {userName ? `Bonjour ${userName} — ` : ''}Étape {step + 1} sur 2
+          {userName ? `Bonjour ${userName}  ` : ''}Étape {step + 1} sur 2
         </div>
       </div>
 

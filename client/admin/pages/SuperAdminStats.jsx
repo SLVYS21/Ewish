@@ -10,7 +10,7 @@ function KpiCard({ icon, label, value, sub, color = '#4f46e5' }) {
   return (
     <div className={s.kpiCard} style={{ borderLeftColor: color }}>
       <div className={s.kpiIcon} style={{ color }}>{icon}</div>
-      <div className={s.kpiValue}>{value ?? '—'}</div>
+      <div className={s.kpiValue}>{value ?? ''}</div>
       <div className={s.kpiLabel}>{label}</div>
       {sub && <div className={s.kpiSub}>{sub}</div>}
     </div>
@@ -31,7 +31,7 @@ export default function SuperAdminStats() {
 
   const fmt   = (p) => new Intl.NumberFormat('fr-FR').format(p || 0) + ' FCFA';
   const fmtN  = (n) => new Intl.NumberFormat('fr-FR').format(n || 0);
-  const fmtDt = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const fmtDt = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
   const publishRate = stats?.totalPubs > 0
     ? Math.round(stats.publishedPubs / stats.totalPubs * 100)
@@ -159,8 +159,8 @@ export default function SuperAdminStats() {
                     {transactions.map(tx => (
                       <tr key={tx._id}>
                         <td data-label="Marchand">
-                          <div className={s.adminName}>{tx.adminId?.name || '—'}</div>
-                          <div className={s.adminEmail}>{tx.adminId?.email || '—'}</div>
+                          <div className={s.adminName}>{tx.adminId?.name || ''}</div>
+                          <div className={s.adminEmail}>{tx.adminId?.email || ''}</div>
                         </td>
                         <td data-label="Montant" className={s.bold}>{fmt(tx.amount)}</td>
                         <td data-label="Crédits"><span className={s.creditPill}>+{tx.credits}</span></td>

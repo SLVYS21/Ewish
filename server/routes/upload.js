@@ -85,7 +85,7 @@ router.post('/', (req, res) => {
   });
 });
 
-// GET /api/upload/sign — signed params for direct browser upload
+// GET /api/upload/sign  signed params for direct browser upload
 router.get('/sign', (req, res) => {
   const timestamp = Math.round(Date.now() / 1000);
   const params = { timestamp, folder: 'ewishwell' };

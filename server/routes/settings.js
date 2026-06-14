@@ -7,7 +7,7 @@ const DEFAULTS = {
   wa_support_message: 'Bonjour myKado 👋 J\'ai besoin d\'aide !',
 };
 
-/* ── GET /api/settings  — Public (used by FAB, templates, etc.) */
+/* ── GET /api/settings   Public (used by FAB, templates, etc.) */
 router.get('/', async (req, res) => {
   try {
     const docs = await SiteSettings.find({}).lean();
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-/* ── PUT /api/settings  — Super Admin only */
+/* ── PUT /api/settings   Super Admin only */
 router.put('/', requireSuperAdmin, async (req, res) => {
   try {
     const allowed = ['wa_support_phone', 'wa_support_message'];

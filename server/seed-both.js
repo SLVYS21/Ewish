@@ -46,7 +46,7 @@ const foreverTemplate = {
     photo2:         '',
     photoCaption:   'Toujours aussi belle.',
     photoSub:       'à chaque regard',
-    messageText:    'Je t\'aime infiniment.\n\nChaque jour avec toi est un cadeau.\nJe ne sais pas tout dire avec les mots,\nalors je t\'offre ce moment —\nà scanner quand tu as besoin\nde savoir que tu comptes.',
+    messageText:    'Je t\'aime infiniment.\n\nChaque jour avec toi est un cadeau.\nJe ne sais pas tout dire avec les mots,\nalors je t\'offre ce moment \nà scanner quand tu as besoin\nde savoir que tu comptes.',
     senderName:     'de toi qui t\'aime',
     outroText:      'garde-le près de toi',
     replayText:     'recommencer',
@@ -117,7 +117,7 @@ const sanctuaryTemplate = {
     trackTitle:   'Louange',
     trackArtist:  'Artiste',
     // Les pages sont stockées dans localStorage et/ou ici
-    // pages: []  — géré par le template en JSON
+    // pages: []   géré par le template en JSON
   },
 
   fields: [

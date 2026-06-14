@@ -876,7 +876,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
   z-index: 2;
 }
 
-/* T1 — Birthday */
+/* T1  Birthday */
 .tpl-thumb.v-birthday {
   background:
     radial-gradient(ellipse at 50% 80%, rgba(255,255,255,.6), transparent 60%),
@@ -915,7 +915,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
 .v-birthday .dot.d3 { top: 60%; left: 12%; background: #fff; }
 .v-birthday .dot.d4 { top: 20%; right: 26%; background: #fff; }
 
-/* T2 — Mur de vœux */
+/* T2  Mur de vœux */
 .tpl-thumb.v-wall {
   background:
     linear-gradient(135deg, #fdf6c3 0%, #fce4ec 60%, #ede7f6 100%);
@@ -939,7 +939,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
 .v-wall .note:nth-child(5) { background: #fff; transform: rotate(-2deg); }
 .v-wall .note:nth-child(6) { background: #ffe9c0; transform: rotate(1deg); }
 
-/* T3 — Spécial */
+/* T3  Spécial */
 .tpl-thumb.v-special {
   background:
     radial-gradient(circle at 30% 70%, rgba(255,255,255,.35), transparent 60%),
@@ -966,7 +966,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
   50%      { transform: translate(-50%, -50%) scale(1.1) rotate(15deg); opacity: 1; }
 }
 
-/* T4 — Hommage */
+/* T4  Hommage */
 .tpl-thumb.v-hommage {
   background: linear-gradient(135deg, #1e3a5f 0%, #2c2218 100%);
 }
@@ -1002,7 +1002,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
 .v-hommage .ribbon::before { left: -8px; clip-path: polygon(0 0, 100% 0, 100% 50%, 100% 100%, 0 50%); }
 .v-hommage .ribbon::after  { right: -8px; clip-path: polygon(0 0, 100% 50%, 0 100%, 0 50%); }
 
-/* T5 — Collectif Famille */
+/* T5  Collectif Famille */
 .tpl-thumb.v-family {
   background:
     linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -1031,7 +1031,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
 .v-family .ph:nth-child(5) { transform: rotate(-3deg); background: rgba(255,255,255,.7); color: var(--rose); }
 .v-family .ph:nth-child(6) { transform: rotate(1deg); }
 
-/* T6 — Collectif Pro */
+/* T6  Collectif Pro */
 .tpl-thumb.v-pro {
   background:
     linear-gradient(135deg, #1e3a5f 0%, #0f1e30 100%);

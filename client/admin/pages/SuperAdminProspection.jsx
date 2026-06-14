@@ -203,8 +203,8 @@ export default function SuperAdminProspection() {
                     <div className={s.companyName}>{p.companyName}</div>
                     {p.contactName && <div className={s.contactName}>👤 {p.contactName}</div>}
                   </td>
-                  <td><span className={s.activityTag}>{p.activity || '—'}</span></td>
-                  <td className={s.muted}>{p.source || '—'}</td>
+                  <td><span className={s.activityTag}>{p.activity || ''}</span></td>
+                  <td className={s.muted}>{p.source || ''}</td>
                   <td>
                     <select
                       className={s.statusDropdown}
@@ -215,7 +215,7 @@ export default function SuperAdminProspection() {
                       {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </td>
-                  <td className={s.muted}>{p.lastContactedAt ? new Date(p.lastContactedAt).toLocaleDateString('fr-FR') : '—'}</td>
+                  <td className={s.muted}>{p.lastContactedAt ? new Date(p.lastContactedAt).toLocaleDateString('fr-FR') : ''}</td>
                   <td>
                     <div className={s.rowActions}>
                       {p.phone && (

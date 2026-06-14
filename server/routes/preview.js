@@ -15,7 +15,7 @@ async function minifyHtml(html) {
   });
 }
 
-// Demo data per template — realistic but fake
+// Demo data per template  realistic but fake
 // const DEMO_DATA = {
 //   birthday: {
 //     greeting: 'Hiya', name: 'Lydia', greetingText: 'Tu comptes énormément pour nous !',
@@ -59,7 +59,7 @@ async function minifyHtml(html) {
 //   },
 //   'wall-of-wishes': {
 //     titleName: 'Sarah',
-//     subtitle:  'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+//     subtitle:  'Partagez ce lien  chacun peut laisser son mot sur ce mur.',
 //     // publicationId intentionally omitted → template falls back to SAMPLE_WISHES
 //   },
 //   'collective-pro': {
@@ -78,7 +78,7 @@ async function minifyHtml(html) {
 // };
 const DEMO_DATA = {};
 
-// Minify HTML — strip comments, collapse whitespace
+// Minify HTML  strip comments, collapse whitespace
 // function minifyHtml(html) {
 //   return html
 //     .replace(/<!--(?!FB_PIXEL_ID)[\s\S]*?-->/g, '') // Supprime les commentaires HTML
@@ -177,7 +177,7 @@ const GFONTS_MAP = {
 router.get('/:templateName', async (req, res) => {
   const { templateName } = req.params;
 
-  // Security headers — allow embedding from app origins
+  // Security headers  allow embedding from app origins
   res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store");
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Cache-Control', 'no-store');

@@ -9,7 +9,7 @@ import { Plus, ChevronRight } from 'lucide-react';
 import s from './AdminDashboard.module.css';
 
 function fmtPrice(p) { return new Intl.NumberFormat('fr-FR').format(p || 0) + ' FCFA'; }
-function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—'; }
+function fmtDate(d)  { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''; }
 
 function StatCard({ label, value, sub, color = '#e11d48', emoji }) {
   return (

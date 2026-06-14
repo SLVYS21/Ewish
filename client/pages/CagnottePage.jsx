@@ -164,7 +164,7 @@ export default function CagnottePage() {
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 14 }}>{methodLabel[kycMethod] || kycMethod} · {kycPhone}</div>
                   <div style={{ fontSize: 11.5, color: kycApproved ? 'var(--mk-mint)' : '#E11D48', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    {kycApproved ? <><Check size={12}/> Vérifié — KYC validé</> : '⏳ KYC en cours de validation'}
+                    {kycApproved ? <><Check size={12}/> Vérifié  KYC validé</> : '⏳ KYC en cours de validation'}
                   </div>
                 </div>
               </div>
@@ -210,7 +210,7 @@ export default function CagnottePage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{displayName}</div>
                     <div style={{ fontSize: 12.5, color: 'var(--mk-ink-3)' }}>
-                      #{c.transactionId?.slice(-8) || '—'}
+                      #{c.transactionId?.slice(-8) || ''}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>

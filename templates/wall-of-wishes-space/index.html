@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mur de vœux</title>
+  <title>Mur de mots</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,14 +13,28 @@
     :root {
       --primary: #ff7055;
       --accent:  #ff3d6e;
-      --ink:     #1a0e14;
-      --ink-2:   rgba(26,14,20,0.75);
-      --ink-3:   rgba(26,14,20,0.45);
+      --ink:   #3A1F2A;
+      --ink-2: #855F6C;
+      --ink-3: #BBA0A8;
+      --paper: #FFFFFF;
+      --field: #FFF5F1;
+      --line: #F6E2DA;
+      --line-2: #F0D2C7;
+      --accent-pale: rgba(242,100,61,0.09);
+      --accent-soft: rgba(242,100,61,0.16);
+      --sh-1: 0 1px 2px rgba(60,20,30,.05), 0 2px 8px rgba(60,20,30,.05);
+      --sh-2: 0 4px 14px rgba(60,20,30,.09);
+      --sh-3: 0 18px 48px rgba(60,20,30,.20);
+      --sh-accent: 0 8px 22px rgba(242,100,61,.28);
+      --r-xs: 11px; --r-sm: 15px; --r-md: 20px; --r-lg: 26px; --r-pill: 999px;
+      --display: 'Instrument Serif', Georgia, serif;
+      --body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --hand: 'Caveat', cursive;
     }
 
     html, body { width: 100%; height: 100%; overflow: hidden; }
     body {
-      font-family: var(--font, 'Inter', sans-serif);
+      font-family: var(--font, 'Plus Jakarta Sans', system-ui, sans-serif);
       background: linear-gradient(150deg, #ff8060 0%, #ff4878 60%, #d83070 100%);
       user-select: none; -webkit-user-select: none;
       touch-action: none;
@@ -41,11 +55,11 @@
       border: 1px solid rgba(255,255,255,0.25);
     }
     .wall-title {
-      font-family: 'DM Serif Display', Georgia, serif;
+      font-family: 'Instrument Serif', Georgia, serif;
       font-size: clamp(1.6rem,5vw,2.6rem); font-weight: 400; font-style: italic;
       color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.18); line-height: 1.15;
     }
-    .wall-title em { font-style: normal; color: rgba(255,255,255,0.85); }
+    .wall-title em { font-style: italic; color: rgba(255,255,255,0.90); opacity: .9; }
 
     /* ── COUNT BADGE ── */
     #wish-count-badge {
@@ -119,15 +133,14 @@
     /* ── ADD BUTTON ── */
     #add-btn {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200;
-      display: inline-flex; align-items: center; gap: 9px;
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      color: var(--ink); border: none; border-radius: 99px; padding: 14px 32px;
-      font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
-      cursor: pointer; letter-spacing: 0.02em;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.10);
-      transition: transform 0.22s, box-shadow 0.22s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--primary); color: #fff;
+      padding: 15px 30px; border-radius: var(--r-pill);
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: .01em;
+      box-shadow: var(--sh-accent), 0 4px 14px rgba(0,0,0,.12);
+      transition: transform .18s, filter .18s; white-space: nowrap; cursor: pointer; border: none;
     }
-    #add-btn:hover { transform: translateX(-50%) translateY(-3px); box-shadow: 0 14px 40px rgba(0,0,0,0.28); }
+    #add-btn:hover { transform: translateX(-50%) translateY(-2px); filter: brightness(1.02); }
     #add-btn.hidden { display: none; }
     #add-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
@@ -171,34 +184,62 @@
     #zoom-out-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.20); }
 
     /* ── ADD SHEET ── */
-    #add-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(26,14,20,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
-    #add-overlay.open { background: rgba(26,14,20,0.58); pointer-events: all; }
-    #add-sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 8px 28px 44px; width: 100%; max-width: 520px; transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); position: relative; max-height: 92vh; overflow-y: auto; }
+    #add-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(26,14,20,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s, backdrop-filter .38s; }
+    #add-overlay.open { background: rgba(30,18,22,.5); backdrop-filter: blur(3px); pointer-events: all; }
+    #add-sheet {
+      background: var(--paper); width: 100%; max-width: 520px;
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      max-height: 92%; overflow-y: auto; position: relative;
+      padding: 8px 26px 30px;
+      transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1);
+    }
     #add-overlay.open #add-sheet { transform: translateY(0); }
-    .sheet-drag { width: 38px; height: 4px; border-radius: 2px; background: rgba(0,0,0,0.12); margin: 12px auto 24px; }
-    .sheet-title { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 1.55rem; color: var(--ink); margin-bottom: 4px; }
-    .sheet-hint { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 16px; }
-    #wish-input { width: 100%; min-height: 100px; max-height: 180px; padding: 14px 16px; resize: none; background: rgba(255,112,85,0.05); border: 1.5px solid rgba(255,112,85,0.22); border-radius: 14px; font-family: 'Caveat', cursive; font-size: 1.15rem; color: var(--ink); outline: none; transition: border-color 0.2s; line-height: 1.55; }
-    #wish-input:focus { border-color: var(--primary); }
-    #wish-input::placeholder { color: rgba(26,14,20,0.30); }
-    .wish-field { width: 100%; padding: 11px 16px; margin-top: 10px; background: rgba(255,112,85,0.05); border: 1.5px solid rgba(255,112,85,0.22); border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
-    .wish-field:focus { border-color: var(--primary); }
-    .wish-field::placeholder { color: rgba(26,14,20,0.30); }
-    .media-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 10px; }
-    .media-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-    .media-tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 99px; border: 1.5px solid rgba(255,112,85,0.25); background: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 600; color: var(--ink-3); transition: all 0.18s; }
-    .media-tab:hover { border-color: rgba(255,112,85,0.5); color: var(--ink-2); }
-    .media-tab.active { border-color: var(--primary); color: var(--primary); background: rgba(255,112,85,0.08); }
+    .sheet-drag { width: 40px; height: 4px; border-radius: 99px; background: var(--line-2); margin: 10px auto 18px; }
+    .sheet-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1.12; color: var(--ink); font-weight: 400; margin-bottom: 4px; }
+    .sheet-hint { font-size: 13px; color: var(--ink-3); margin-top: 4px; line-height: 1.5; margin-bottom: 18px; }
+    #wish-input {
+      width: 100%; background: var(--field); border: 1.5px solid var(--line-2);
+      border-radius: var(--r-sm); padding: 13px 15px;
+      font-family: 'Caveat', cursive; font-size: 19px; line-height: 1.5;
+      color: var(--ink); outline: none; resize: none;
+      min-height: 104px; max-height: 200px;
+      transition: border-color .16s, box-shadow .16s;
+    }
+    #wish-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--accent-pale); }
+    #wish-input::placeholder { color: var(--ink-3); }
+    .wish-field {
+      width: 100%; background: var(--field); border: 1.5px solid var(--line-2);
+      border-radius: var(--r-sm); padding: 13px 15px; font-size: 14px;
+      color: var(--ink); outline: none; margin-top: 10px;
+      transition: border-color .16s, box-shadow .16s;
+    }
+    .wish-field:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--accent-pale); }
+    .wish-field::placeholder { color: var(--ink-3); }
+    .media-label { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 10px; display: block; }
+    .media-tabs { display: inline-flex; gap: 6px; background: var(--field); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 4px; width: 100%; margin-bottom: 14px; }
+    .media-tab {
+      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 8px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 700; color: var(--ink-2);
+      background: none; border: none; cursor: pointer; transition: all .15s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .media-tab.active { background: var(--paper); color: var(--primary); box-shadow: var(--sh-1); }
     .media-tab svg { width: 13px; height: 13px; flex-shrink: 0; }
     .media-panel { display: none; margin-bottom: 4px; }
     .media-panel.active { display: block; }
-    .upload-zone { border: 1.5px dashed rgba(255,112,85,0.35); border-radius: 12px; padding: 20px 16px; text-align: center; cursor: pointer; background: rgba(255,112,85,0.03); transition: border-color 0.2s, background 0.2s; }
-    .upload-zone:hover,.upload-zone.drag-over { border-color: var(--primary); background: rgba(255,112,85,0.08); }
+    .upload-zone {
+      border: 1.5px dashed var(--line-2); border-radius: var(--r-sm);
+      padding: 26px 16px; text-align: center; color: var(--ink-3);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      transition: border-color .16s, background .16s; cursor: pointer;
+      background: var(--field);
+    }
+    .upload-zone:hover,.upload-zone.drag-over { border-color: var(--primary); background: var(--accent-pale); }
     .upload-zone input { display: none; }
-    .upload-zone-inner { pointer-events: none; }
-    .upload-zone svg { color: var(--primary); margin-bottom: 6px; }
-    .upload-zone p { font-size: 0.76rem; color: var(--ink-3); line-height: 1.5; }
-    .upload-zone small { font-size: 0.66rem; color: rgba(26,14,20,0.25); }
+    .upload-zone-inner { pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .upload-zone svg { color: var(--primary); }
+    .upload-zone p { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+    .upload-zone small { font-size: 11px; color: var(--ink-3); }
     .media-loading { display: none; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 0.78rem; color: var(--primary); }
     .media-loading.show { display: flex; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -209,48 +250,164 @@
     .media-preview audio { width: 100%; display: block; accent-color: var(--primary); }
     .media-clear { position: absolute; top: -9px; right: -9px; background: var(--ink); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
     .rec-controls { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 0; }
-    .rec-btn { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(255,61,110,0.35); }
+    .rec-btn {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      border: none; cursor: pointer; transition: transform .18s; box-shadow: var(--sh-2);
+    }
     .rec-btn:hover { transform: scale(1.06); }
     .rec-btn.recording { background: #c0392b; animation: recPulse 1.4s ease-in-out infinite; }
-    .rec-btn svg { width: 20px; height: 20px; }
+    .rec-btn svg { width: 22px; height: 22px; }
     @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.4)} 50%{box-shadow:0 0 0 14px rgba(192,57,43,0)} }
-    .rec-status { font-size: 0.76rem; font-weight: 500; color: var(--ink-3); text-align: center; }
-    .rec-status.active { color: var(--accent); font-weight: 600; }
-    #submit-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 14px 24px; margin-top: 16px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 99px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em; box-shadow: 0 6px 24px rgba(255,112,85,0.35); transition: opacity 0.18s, transform 0.15s; }
-    #submit-btn:hover { opacity: 0.88; transform: translateY(-2px); }
-    #submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .rec-status { font-size: 12.5px; font-weight: 600; color: var(--ink-3); text-align: center; }
+    .rec-status.active { color: var(--primary); font-weight: 600; }
+    #submit-btn {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      width: 100%; padding: 13px 22px; margin-top: 16px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: var(--r-pill);
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: .01em;
+      box-shadow: var(--sh-accent);
+      transition: transform .15s, filter .15s;
+    }
+    #submit-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.05); }
+    #submit-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    #submit-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
     #close-btn { position: absolute; top: 20px; right: 22px; background: none; border: none; cursor: pointer; color: var(--ink-3); font-size: 1.2rem; line-height: 1; padding: 4px; border-radius: 50%; transition: color 0.18s, background 0.18s; }
     #close-btn:hover { color: var(--ink); background: rgba(0,0,0,0.06); }
 
-    #wishes-closed { display: none; position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; background: rgba(26,14,20,0.80); backdrop-filter: blur(8px); color: rgba(255,255,255,0.75); border-radius: 99px; padding: 12px 28px; font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
-    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 600; pointer-events: none; background: rgba(26,14,20,0.88); color: #fff; padding: 10px 22px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; opacity: 0; transition: opacity 0.3s, transform 0.3s; white-space: nowrap; }
+    #wishes-closed {
+      display: none; position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      z-index: 200; background: rgba(255,255,255,0.92); color: var(--ink);
+      padding: 12px 24px; border-radius: var(--r-pill); font-size: 13px; font-weight: 700;
+      align-items: center; gap: 8px; white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    }
+    #toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      z-index: 600; pointer-events: none;
+      background: var(--ink); color: #fff;
+      padding: 11px 22px; border-radius: var(--r
+      t-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; box-shadow: var(--sh-3); white-space: nowrap;
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+    }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── GIFT & THANKS (same pattern as other templates) ── */
-    #gift-overlay { position: fixed; inset: 0; z-index: 700; background: rgba(26,14,20,0); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; transition: background 0.38s; }
-    #gift-overlay.open { background: rgba(26,14,20,0.58); pointer-events: all; }
-    #gift-sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 8px 24px 44px; width: 100%; max-width: 520px; transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); max-height: 92vh; overflow-y: auto; position: relative; }
+    /* ── GIFT & THANKS ── */
+    #gift-overlay {
+      position: fixed; inset: 0; z-index: 700;
+      background: rgba(30,18,22,0); display: flex; align-items: flex-end; justify-content: center;
+      pointer-events: none; transition: background 0.38s, backdrop-filter .38s;
+    }
+    #gift-overlay.open { background: rgba(30,18,22,.5); backdrop-filter: blur(3px); pointer-events: all; }
+    #gift-sheet {
+      background: var(--paper); width: 100%; max-width: 520px;
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      padding: 8px 24px 40px; max-height: 92%; overflow-y: auto; position: relative;
+      transform: translateY(100%); transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1);
+    }
     #gift-overlay.open #gift-sheet { transform: translateY(0); }
-    .gamt-chip { padding: 14px 4px; border-radius: 14px; text-align: center; background: #fff; border: 2px solid rgba(255,112,85,0.25); cursor: pointer; transition: all .15s; }
-    .gamt-chip:hover { border-color: rgba(255,112,85,0.55); }
-    .gamt-chip.active { background: rgba(255,112,85,0.1); border-color: var(--primary); }
+    .gamt-chip { padding: 14px 4px; border-radius: var(--r-sm); text-align: center; background: var(--paper); border: 2px solid var(--line); cursor: pointer; transition: all .14s; }
+    .gamt-chip:hover { border-color: var(--line-2); }
+    .gamt-chip.active { background: var(--accent-pale); border-color: var(--primary); }
     .gamt-chip .gav { font-weight: 800; font-size: 15px; color: var(--ink); }
     .gamt-chip.active .gav { color: var(--primary); }
     .gamt-chip .gac { font-size: 9.5px; color: var(--ink-3); font-weight: 700; margin-top: 2px; }
-    .gpbar-track { height: 12px; background: rgba(255,112,85,0.15); border-radius: 99px; overflow: hidden; position: relative; }
-    .gpbar-fill { position: absolute; inset: 0; border-radius: 99px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .gpbar-track { height: 12px; background: var(--accent-pale); border-radius: 99px; overflow: hidden; position: relative; }
+    .gpbar-fill { position: absolute; inset: 0; border-radius: 99px; background: var(--primary); }
     .gpbar-preview { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 5px, rgba(255,61,110,0.4) 5px, rgba(255,61,110,0.4) 10px); }
-    #thanks-overlay { position: fixed; inset: 0; z-index: 800; background: rgba(26,14,20,0); display: flex; align-items: center; justify-content: center; pointer-events: none; transition: background 0.3s; }
-    #thanks-overlay.open { background: rgba(26,14,20,0.62); pointer-events: all; }
-    #thanks-card { background: #fff; border-radius: 24px; padding: 40px 28px; width: calc(100% - 48px); max-width: 360px; text-align: center; transform: scale(0.85); opacity: 0; transition: transform 0.4s cubic-bezier(0.34,1.45,0.64,1), opacity 0.3s; }
-    #thanks-overlay.open #thanks-card { transform: scale(1); opacity: 1; }
+    #thanks-overlay {
+      position: fixed; inset: 0; z-index: 800; display: none;
+      background: rgba(30,18,22,.5); backdrop-filter: blur(3px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    #thanks-overlay.open { display: flex; }
+    #thanks-card {
+      text-align: center; max-width: 380px; width: calc(100% - 48px);
+      background: var(--paper); border-radius: var(--r-lg); padding: 38px 30px;
+      box-shadow: var(--sh-3); animation: m-pop .3s ease both;
+    }
+    @keyframes m-pop { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    #thanks-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--accent-pale); color: var(--primary);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+    }
+
+    /* ── ADMIN BANNER ── */
+    #admin-banner { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9000; background: rgba(43,26,45,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #fff; padding: 0 16px; height: 44px; align-items: center; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; gap: 10px; }
+    #admin-banner.show { display: flex; }
+    .admin-pub-label { display: inline-flex; align-items: center; gap: 7px; opacity: .85; font-size: 12px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #admin-back { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.14); color: #fff; text-decoration: none; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 10px; transition: background .15s; white-space: nowrap; flex-shrink: 0; }
+    #admin-back:hover { background: rgba(255,255,255,.22); }
+    .admin-live { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.65); font-size: 11.5px; white-space: nowrap; flex-shrink: 0; }
+    .admin-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #6BCFAF; flex-shrink: 0; animation: adminLiveDot 1.8s infinite; }
+    @keyframes adminLiveDot { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+    body.has-admin-banner { padding-top: 44px; }
+
+    /* ── CAGNOTTE BUTTON ── */
+    #cagnotte-btn {
+      display: none; position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%); z-index: 200;
+      align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.92); color: var(--ink);
+      border: none;
+      padding: 10px 20px; border-radius: var(--r-pill);
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18); white-space: nowrap; cursor: pointer; transition: transform .18s;
+    }
+    #cagnotte-btn.show { display: inline-flex; }
+    #cagnotte-btn:hover { transform: translateX(-50%) translateY(-2px); }
+
+    /* ── ADDED OVERLAY (post-soumission) ── */
+    #added-overlay { position: fixed; inset: 0; z-index: 700; background: rgba(43,26,45,0); backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); display: flex; align-items: center; justify-content: center; padding: 24px; pointer-events: none; transition: background .3s, backdrop-filter .3s; }
+    #added-overlay.open { background: rgba(43,26,45,.42); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); pointer-events: all; }
+    #added-card { background: #fff; border-radius: 20px; box-shadow: 0 16px 40px rgba(26,14,20,.18); width: 460px; max-width: 100%; max-height: calc(100vh - 64px); overflow-y: auto; transform: translateY(14px); opacity: 0; transition: transform .22s cubic-bezier(.34,1.45,.64,1), opacity .2s; }
+    #added-overlay.open #added-card { transform: translateY(0); opacity: 1; }
+    .added-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 22px 24px 0; }
+    .added-title { font-family: 'DM Serif Display', Georgia, serif; font-size: 23px; font-style: italic; color: var(--ink); line-height: 1.2; }
+    .added-sub { font-size: 12.5px; color: var(--ink-3); margin-top: 5px; line-height: 1.55; }
+    .added-close { padding: 8px; border-radius: 10px; color: var(--ink-3); background: transparent; border: none; cursor: pointer; flex-shrink: 0; }
+    .added-close:hover { background: rgba(26,14,20,.06); color: var(--ink); }
+    .added-body { padding: 18px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .added-net-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .added-net-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 13px 6px; border-radius: var(--r-sm); border: 1px solid var(--line);
+      background: var(--paper); font-size: 11.5px; font-weight: 700; color: var(--ink-2);
+      cursor: pointer; text-decoration: none; transition: transform .15s, border-color .15s;
+    }
+    .added-net-btn:hover { transform: translateY(-2px); border-color: var(--line-2); }
+    .added-cag-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 13px 22px;
+      background: var(--accent-pale); color: var(--primary);
+      border: none; border-radius: var(--r-pill);
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background .15s;
+    }
+    .added-cag-btn:hover { background: var(--accent-soft); }
   </style>
 </head>
 <body>
 
+<div id="admin-banner">
+  <span class="admin-pub-label">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.2-7 10-7 10 7 10 7-3.2 7-10 7-10-7-10-7Z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
+    Aperçu public  c'est ce que voient tes invités.
+  </span>
+  <span class="admin-live"><span class="admin-live-dot"></span>Mise à jour en direct</span>
+  <a id="admin-back" href="#">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    Retour à la gestion
+  </a>
+</div>
+
 <!-- Header -->
 <div id="wall-header" aria-hidden="true">
-  <p class="eyebrow" data-node="eyebrow">✦ Mur de vœux</p>
+  <!-- <p class="eyebrow" data-node="eyebrow">✦ Mur de mots</p> -->
   <h1 class="wall-title">Pour <em data-node="titleName">Prénom</em></h1>
 </div>
 
@@ -266,11 +423,12 @@
 
 <p id="drag-hint">Glisse pour explorer · Scroll pour zoomer</p>
 
-<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un vœu">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  Ajouter mon vœu
+<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un mot">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+  Laisser un mot
 </button>
-<div id="wishes-closed">🔒 Les vœux sont temporairement fermés</div>
+<button id="cagnotte-btn" onclick="showGiftSheet()" aria-label="Participer à la cagnotte"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h18V12H3Z"/><path d="M12 8.5V21"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8.5a2.5 2.5 0 0 1 0-5C9.5 3.5 11 5 12 8.5c1-3.5 2.5-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> Participer à la cagnotte</button>
+<div id="wishes-closed"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Les mots sont temporairement fermés</div>
 
 <!-- DETAIL OVERLAY -->
 <div id="detail-overlay">
@@ -290,8 +448,8 @@
   <div id="add-sheet">
     <button id="close-btn" onclick="closeSheet()" aria-label="Fermer">✕</button>
     <div class="sheet-drag"></div>
-    <h2 class="sheet-title">Votre vœu</h2>
-    <p class="sheet-hint">Écrivez depuis le cœur — il apparaîtra sur le mur.</p>
+    <h2 class="sheet-title">Votre mot</h2>
+    <p class="sheet-hint">Écrivez depuis le cœur  il apparaîtra sur le mur.</p>
     <textarea id="wish-input" placeholder="Votre message…" maxlength="400" rows="4"></textarea>
     <input id="wish-author" class="wish-field" type="text" placeholder="Votre prénom (optionnel)" maxlength="40" autocomplete="given-name">
     <p class="media-label">Ajouter une photo ou un vocal</p>
@@ -309,7 +467,7 @@
         <input type="file" id="photo-file" accept="image/*" onchange="handlePhotoSelect(event)">
         <div class="upload-zone-inner">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <p>Cliquez ou glissez une photo / GIF</p><small>JPG, PNG, GIF, WebP — max 10 Mo</small>
+          <p>Cliquez ou glissez une photo / GIF</p><small>JPG, PNG, GIF, WebP  max 10 Mo</small>
         </div>
       </div>
       <div class="media-loading" id="photo-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>Envoi en cours…</div>
@@ -324,13 +482,39 @@
       <div class="media-preview" id="audio-preview"><audio id="audio-player" controls preload="none"></audio><button class="media-clear" onclick="clearMedia()">✕</button></div>
     </div>
     <button id="submit-btn" onclick="submitWish()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Épingler mon vœu
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4Z"/></svg>
+      Coller mon mot
     </button>
   </div>
 </div>
 
-<div id="toast">Vœu ajouté ✦</div>
+<div id="toast">Mot ajouté ✦</div>
+
+<!-- ADDED OVERLAY  partager + cagnotte après soumission -->
+<div id="added-overlay" onclick="if(event.target===this)closeAddedOverlay()">
+  <div id="added-card">
+    <div class="added-head">
+      <div>
+        <div class="added-title" id="added-title">Ton mot est sur le mur !</div>
+        <div class="added-sub">Fais tourner  plus on est nombreux, plus le mur est beau.</div>
+      </div>
+      <button class="added-close" onclick="closeAddedOverlay()" aria-label="Fermer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg></button>
+    </div>
+    <div class="added-body">
+      <div class="added-net-row">
+        <a id="added-wa" href="#" target="_blank" rel="noopener" class="added-net-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>WhatsApp</a>
+        <a id="added-fb" href="#" target="_blank" rel="noopener" class="added-net-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>
+        <a id="added-tg" href="#" target="_blank" rel="noopener" class="added-net-btn"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#29A9EB"/><path fill="#fff" d="M5.2 11.9l11.6-4.6c.6-.2 1.1.1.9.95l-2 9.4c-.15.66-.55.82-1.1.5l-3-2.23-1.45 1.4c-.16.16-.3.3-.6.3l.2-3.06 5.56-5.03c.24-.21-.05-.33-.37-.12l-6.87 4.33-2.96-.93c-.64-.2-.65-.64.14-.95z"/></svg>Telegram</a>
+        <a id="added-x" href="#" target="_blank" rel="noopener" class="added-net-btn"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="#000"/><path fill="#fff" d="M13.9 10.6 19.4 4.5h-1.6l-4.6 5.2-3.7-5.2H4.5l5.8 8.2-5.8 6.6h1.6l5-5.6 4 5.6h5z"/></svg>X</a>
+        <button class="added-net-btn" onclick="copyWallLink('Instagram')"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ig-gs" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="35%" stop-color="#e6683c"/><stop offset="55%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-gs)"/><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="white" stroke-width="1.5"/><circle cx="17.2" cy="6.8" r="1.2" fill="white"/></svg>Instagram</button>
+        <button class="added-net-btn" onclick="copyWallLink('TikTok')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="#010101" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.13a8.21 8.21 0 004.79 1.52V7.19a4.85 4.85 0 01-1.02-.5z"/><path fill="#69C9D0" opacity="0.5" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.13a8.21 8.21 0 004.79 1.52V7.19a4.85 4.85 0 01-1.02-.5z"/></svg>TikTok</button>
+      </div>
+      <div id="added-cag-section" style="display:none;">
+        <button onclick="openAddedCagnotte()" class="added-cag-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h18V12H3Z"/><path d="M12 8.5V21"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8.5a2.5 2.5 0 0 1 0-5C9.5 3.5 11 5 12 8.5c1-3.5 2.5-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> Participer aussi à la cagnotte</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- GIFT OVERLAY -->
 <div id="gift-overlay" onclick="handleGiftBgClick(event)">
@@ -339,22 +523,22 @@
     <div style="text-align:center;margin-bottom:20px;">
       <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;background:rgba(255,112,85,0.12);border-radius:999px;margin-bottom:12px;"><span style="font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--primary);">CADEAU COMMUN</span></div>
       <div style="font-family:'Caveat',cursive;font-size:20px;color:var(--accent);margin-bottom:3px;">et si on se cotisait pour…</div>
-      <h2 id="gift-sheet-name" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--ink);line-height:1.2;margin-bottom:6px;">🎁 Cadeau commun</h2>
+      <h2 id="gift-sheet-name" style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;color:var(--ink);line-height:1.2;margin-bottom:6px;">Cadeau commun</h2>
       <p id="gift-sheet-desc" style="font-size:13.5px;color:var(--ink-3);line-height:1.5;max-width:360px;margin:0 auto;"></p>
     </div>
     <div style="background:rgba(255,112,85,0.06);border-radius:18px;padding:18px;border:1px solid rgba(255,112,85,0.18);margin-bottom:18px;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;"><div><span id="gift-collected" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:24px;color:var(--primary);"></span><span style="font-size:12px;font-weight:700;color:var(--ink-3);margin-left:5px;">FCFA</span></div><span id="gift-goal-lbl" style="font-size:12px;color:var(--ink-3);font-weight:700;"></span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;"><div><span id="gift-collected" style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;color:var(--primary);"></span><span style="font-size:12px;font-weight:700;color:var(--ink-3);margin-left:5px;">FCFA</span></div><span id="gift-goal-lbl" style="font-size:12px;color:var(--ink-3);font-weight:700;"></span></div>
       <div class="gpbar-track" style="margin-bottom:8px;"><div class="gpbar-fill" id="gift-bar-fill" style="width:0%;"></div><div class="gpbar-preview" id="gift-bar-pre" style="left:0;width:0;display:none;"></div></div>
       <div style="display:flex;justify-content:space-between;font-size:11.5px;"><span id="gift-contributors" style="color:var(--ink-3);font-weight:600;"></span><span id="gift-pct" style="font-weight:800;color:var(--primary);"></span></div>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:8px;letter-spacing:.08em;">JE PARTICIPE AVEC</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="gift-amt-grid"></div>
-      <button onclick="giftCustomAmt()" style="margin-top:9px;width:100%;padding:10px;border-radius:14px;border:1.5px dashed rgba(255,112,85,0.35);background:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">✏️ Un autre montant</button>
+      <button onclick="giftCustomAmt()" style="margin-top:9px;width:100%;padding:10px;border-radius:14px;border:1.5px dashed rgba(255,112,85,0.35);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Un autre montant</button>
     </div>
     <div id="gift-err" style="display:none;background:rgba(255,61,110,0.08);border:1.5px solid rgba(255,61,110,0.3);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:10px;"></div>
-    <button id="gift-pay-btn" onclick="giftPay()" disabled style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.5;transition:all .18s;">Choisir un montant</button>
-    <button onclick="skipGift()" style="width:100%;padding:11px;margin-top:10px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">Une autre fois, merci</button>
+    <button id="gift-pay-btn" onclick="giftPay()" disabled style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px 22px;background:var(--primary);color:#fff;border:none;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.45;transition:all .18s;letter-spacing:.01em;box-shadow:var(--sh-accent);">Choisir un montant</button>
+    <button onclick="skipGift()" style="width:100%;padding:11px;margin-top:10px;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-3);cursor:pointer;font-weight:600;">Une autre fois, merci</button>
     <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;font-size:10.5px;color:var(--ink-3);"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>Paiement sécurisé · MTN, Moov, Orange Money</div>
   </div>
 </div>
@@ -362,14 +546,14 @@
 <!-- THANKS OVERLAY -->
 <div id="thanks-overlay">
   <div id="thanks-card">
-    <div id="thanks-icon" style="font-size:54px;margin-bottom:14px;">💕</div>
-    <h2 id="thanks-title" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:26px;color:var(--ink);margin-bottom:8px;line-height:1.2;">Merci pour ton joli mot</h2>
+    <div id="thanks-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    <h2 id="thanks-title" style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;color:var(--ink);margin-bottom:8px;line-height:1.2;">Merci pour ton joli mot</h2>
     <p id="thanks-msg" style="font-size:14px;color:var(--ink-3);line-height:1.55;margin-bottom:20px;"></p>
     <div id="thanks-receipt" style="display:none;background:rgba(255,112,85,0.08);border-radius:14px;padding:14px 18px;margin-bottom:18px;border:1px solid rgba(255,112,85,0.2);">
       <div style="font-size:12px;color:var(--ink-3);margin-bottom:3px;">Ta contribution</div>
-      <div id="thanks-amt" style="font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:var(--primary);line-height:1;"></div>
+      <div id="thanks-amt" style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;color:var(--primary);line-height:1;"></div>
     </div>
-    <button onclick="closeThanks()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:99px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.02em;">Voir le mur ✦</button>
+    <button onclick="closeThanks()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;background:var(--primary);color:#fff;border:none;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.01em;box-shadow:var(--sh-accent);">Voir le mur</button>
   </div>
 </div>
 
@@ -453,12 +637,12 @@ var activeTab  = 'none', activeMedia = { type: 'none', url: '' };
 var mediaRecorder = null, audioChunks = [], recTimerInt = null, recSecs = 0, isSubmitting = false;
 
 var SAMPLE_WISHES = [
-  { text: "HBD!! 🎉 Que cette année soit ta plus belle !", name: "Sarah",     color: 0, photoUrl: '' },
+  { text: "HBD!! Que cette année soit ta plus belle !", name: "Sarah",     color: 0, photoUrl: '' },
   { text: "Joyeux anniversaire mon ami. Tu mérites tout le bonheur du monde.", name: "Marc", color: 1, photoUrl: '' },
   { text: "Happy Birthday! Hope your day is filled with good people and better cake. Your friends at 1221s", name: "1221s", color: 2, photoUrl: '' },
-  { text: "Encore plus belle chaque année ! 🌸",           name: "Mariama",  color: 3, photoUrl: '' },
-  { text: "Santé, longue vie et réussite ! 🥂",            name: "Ibrahim",  color: 4, photoUrl: '' },
-  { text: "Que Dieu te garde, mon enfant. 🙏",              name: "Grand-Mère", color: 5, photoUrl: '' },
+  { text: "Encore plus belle chaque année !",               name: "Mariama",  color: 3, photoUrl: '' },
+  { text: "Santé, longue vie et réussite !",               name: "Ibrahim",  color: 4, photoUrl: '' },
+  { text: "Que Dieu te garde, mon enfant.",                name: "Grand-Mère", color: 5, photoUrl: '' },
 ];
 
 function apiFetch(path, opts) { return fetch(API_BASE + path, opts||{}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
@@ -495,7 +679,7 @@ function pollNewWishes() {
       el.style.opacity = '0';
       setTimeout(function(){ el.style.transition = 'opacity 0.5s, transform 0.5s'; el.style.opacity = '1'; }, 50);
       document.getElementById('count-num').textContent = wishes.length;
-      showToast('Nouveau vœu ajouté ✦');
+      showToast('Nouveau mot ajouté ✦');
     });
   }).catch(function(){});
 }
@@ -530,7 +714,7 @@ function createCardEl(w, pos, idx) {
   el.innerHTML = photoHtml + audioHtml +
     '<div class="polar-caption">' +
       '<p class="polar-text">'+escapeHtml(w.text)+'</p>' +
-      '<span class="polar-name">— '+escapeHtml(w.name||'Anonyme')+'</span>' +
+      '<span class="polar-name"> '+escapeHtml(w.name||'Anonyme')+'</span>' +
     '</div>';
 
   el.addEventListener('click', function(e) {
@@ -567,7 +751,7 @@ function openDetail(idx) {
   if (hasPhoto) document.getElementById('detail-photo').src = w.photoUrl;
   if (hasAudio) document.getElementById('detail-audio').src = w.audioUrl;
   document.getElementById('detail-text').textContent = w.text || '';
-  document.getElementById('detail-name').textContent = '— ' + (w.name || 'Anonyme');
+  document.getElementById('detail-name').textContent = ' ' + (w.name || 'Anonyme');
 
   var overlay = document.getElementById('detail-overlay');
   overlay.style.display = 'flex';
@@ -694,7 +878,7 @@ function hideHint() {
 /* ═══════════════════════════════════════
    ADD WISH
 ════════════════════════════════════════ */
-function setWishesEnabled(on) { document.getElementById('add-btn').classList.toggle('hidden',!on); document.getElementById('wishes-closed').style.display=on?'none':'block'; }
+function setWishesEnabled(on) { document.getElementById('add-btn').classList.toggle('hidden',!on); document.getElementById('wishes-closed').style.display=on?'none':'inline-flex'; }
 function openSheet() { document.getElementById('add-overlay').classList.add('open'); setTimeout(function(){ document.getElementById('wish-input').focus(); }, 350); }
 function closeSheet() { document.getElementById('add-overlay').classList.remove('open'); if(mediaRecorder&&mediaRecorder.state==='recording') stopRecording(false); }
 function handleBgClick(e) { if(e.target===document.getElementById('add-overlay')) closeSheet(); }
@@ -746,7 +930,7 @@ function submitWish() {
   isSubmitting=true; document.getElementById('submit-btn').disabled=true;
   var afterSubmit=function(){
     isSubmitting=false; document.getElementById('submit-btn').disabled=false;
-    if(_d.requireModeration){closeSheet();document.getElementById('wish-input').value='';document.getElementById('wish-author').value='';clearMedia();switchTab('none');showToast('Ton vœu est en attente de validation ✦');return;}
+    if(_d.requireModeration){closeSheet();document.getElementById('wish-input').value='';document.getElementById('wish-author').value='';clearMedia();switchTab('none');setTimeout(function(){showAddedOverlay(true);},300);return;}
     closeSheet(); document.getElementById('wish-input').value=''; document.getElementById('wish-author').value=''; clearMedia(); switchTab('none');
     var pos={x:transform.x<0?(-transform.x/transform.scale)+window.innerWidth/(2*transform.scale)-98:CANVAS_W/2-98+(Math.random()-0.5)*200, y:CANVAS_H/2-130+(Math.random()-0.5)*200, rot:(Math.random()-0.5)*10, z:20};
     wishes.push(w); cardPositions.push(pos);
@@ -754,24 +938,27 @@ function submitWish() {
     el.style.opacity='0'; $canvas.appendChild(el);
     setTimeout(function(){el.style.transition='opacity 0.6s ease, transform 0.6s ease';el.style.opacity='1';},30);
     document.getElementById('count-num').textContent=wishes.length;
-    showToast('Vœu épinglé ✦');
     try{window.parent.postMessage({type:'WW_WISH_ADDED',wish:w},'*');}catch(e){}
     var cag=_d.cagnotte||_d.jarConfig||{};
-    if(cag&&cag.enabled){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';setTimeout(showGiftSheet,700);}
-    else{showThanksOverlay(false);}
+    if(cag&&cag.enabled){giftState.wishId=w._id||null;giftState.guestName=(w.name&&w.name!=='Anonyme')?w.name:'';giftState.gave=false;giftState.paid=0;giftState.amt=null;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var gpBtn=document.getElementById('gift-pay-btn');gpBtn.textContent='Choisir un montant';gpBtn.disabled=true;gpBtn.style.opacity='.5';gpBtn.style.cursor='not-allowed';document.getElementById('gift-bar-pre').style.display='none';document.getElementById('gift-err').style.display='none';}
+    setTimeout(function(){showAddedOverlay(false);},400);
   };
   if(PUB_ID&&API_BASE){apiFetch('/api/wishes/'+PUB_ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({firstName:w.name,message:w.text,color:w.color,mediaType:w.mediaType,photoUrl:w.photoUrl,audioUrl:w.audioUrl})}).then(function(r){w._id=r.id;if(w._id){myWishIds.push(w._id);localStorage.setItem('ww_my_ids',JSON.stringify(myWishIds));}afterSubmit();}).catch(function(){afterSubmit();});}
   else{afterSubmit();}
 }
 
-function showToast(msg){var t=document.getElementById('toast');t.textContent=msg||'Vœu épinglé ✦';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg||'Mot ajouté ✦';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
+function showAddedOverlay(moderation){var o=document.getElementById('added-overlay');document.getElementById('added-title').textContent=moderation?'Ton mot est en relecture.':'Ton mot est sur le mur !';var url=window.location.href.split('?')[0];var enc=encodeURIComponent('Laisse ton mot sur ce mur : '+url);var encUrl=encodeURIComponent(url);document.getElementById('added-wa').href='https://wa.me/?text='+enc;document.getElementById('added-fb').href='https://www.facebook.com/sharer/sharer.php?u='+encUrl;document.getElementById('added-tg').href='https://t.me/share/url?url='+encUrl;document.getElementById('added-x').href='https://twitter.com/intent/tweet?url='+encUrl;var cag=_d.cagnotte||_d.jarConfig||{};document.getElementById('added-cag-section').style.display=(cag&&cag.enabled)?'block':'none';o.classList.add('open');}
+function closeAddedOverlay(){document.getElementById('added-overlay').classList.remove('open');}
+function copyWallLink(net){var url=window.location.href.split('?')[0];var msg=net?'Lien copié  colle-le dans '+net:'Lien copié ✦';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){showToast(msg);}).catch(function(){showToast('Lien : '+url);});}else{showToast('Lien : '+url);}}
+function openAddedCagnotte(){closeAddedOverlay();setTimeout(showGiftSheet,320);}
 
 /* ═══════════════════════════════════════
    GIFT & THANKS
 ════════════════════════════════════════ */
 var giftState={amt:null,gave:false,paid:0,wishId:null,guestName:''};
 var GIFT_DEFAULT_AMTS=[2000,5000,10000,20000];
-function initGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;document.getElementById('gift-sheet-name').textContent=(cag.emoji||'🎁')+' '+(cag.name||'Cadeau commun');document.getElementById('gift-sheet-desc').textContent='Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';var col=cag.collected||0,goal=cag.goal||0;document.getElementById('gift-collected').textContent=fmtNum(col);document.getElementById('gift-goal-lbl').textContent=goal>0?'sur '+fmtNum(goal):'';var pct=goal>0?Math.min(100,Math.round((col/goal)*100)):0;document.getElementById('gift-bar-fill').style.width=pct+'%';document.getElementById('gift-pct').textContent=pct+'%';document.getElementById('gift-contributors').textContent=(cag.contributors||0)+' participant'+((cag.contributors||0)!==1?'s':'');var grid=document.getElementById('gift-amt-grid');grid.innerHTML='';var amts=(cag.amountChoices&&cag.amountChoices.length)?cag.amountChoices:GIFT_DEFAULT_AMTS;amts.forEach(function(a){var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=a;chip.innerHTML='<div class="gav">'+(a>=1000?(a/1000)+'k':a)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(a,chip);};grid.appendChild(chip);});}
+function initGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;document.getElementById('gift-sheet-name').textContent=(cag.name||'Cadeau commun');document.getElementById('gift-sheet-desc').textContent='Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';var col=cag.collected||0,goal=cag.goal||0;document.getElementById('gift-collected').textContent=fmtNum(col);document.getElementById('gift-goal-lbl').textContent=goal>0?'sur '+fmtNum(goal):'';var pct=goal>0?Math.min(100,Math.round((col/goal)*100)):0;document.getElementById('gift-bar-fill').style.width=pct+'%';document.getElementById('gift-pct').textContent=pct+'%';document.getElementById('gift-contributors').textContent=(cag.contributors||0)+' participant'+((cag.contributors||0)!==1?'s':'');var grid=document.getElementById('gift-amt-grid');grid.innerHTML='';var amts=(cag.amountChoices&&cag.amountChoices.length)?cag.amountChoices:GIFT_DEFAULT_AMTS;amts.forEach(function(a){var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=a;chip.innerHTML='<div class="gav">'+(a>=1000?(a/1000)+'k':a)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(a,chip);};grid.appendChild(chip);});}
 function showGiftSheet(){var cag=_d.cagnotte||_d.jarConfig||{};if(!cag||!cag.enabled)return;var el=document.getElementById('gift-overlay');el.style.display='flex';setTimeout(function(){el.classList.add('open');},10);}
 function hideGiftSheet(){var el=document.getElementById('gift-overlay');el.classList.remove('open');setTimeout(function(){el.style.display='none';},400);}
 function handleGiftBgClick(e){if(e.target===document.getElementById('gift-overlay'))skipGift();}
@@ -779,8 +966,8 @@ function skipGift(){hideGiftSheet();showThanksOverlay(false);}
 function giftPickAmt(a,chip){giftState.amt=(giftState.amt===a)?null:a;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var btn=document.getElementById('gift-pay-btn'),pre=document.getElementById('gift-bar-pre'),cag=_d.cagnotte||_d.jarConfig||{};if(giftState.amt!==null){chip.classList.add('active');btn.textContent='Participer · '+fmtNum(giftState.amt)+' FCFA';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0,p1=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)+giftState.amt)/cag.goal*100)):0;pre.style.display='block';pre.style.left=p0+'%';pre.style.width=(p1-p0)+'%';document.getElementById('gift-pct').textContent=p1+'%';}else{var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0;btn.textContent='Choisir un montant';btn.disabled=true;btn.style.opacity='.5';btn.style.cursor='not-allowed';pre.style.display='none';document.getElementById('gift-pct').textContent=p0+'%';}}
 function giftCustomAmt(){var v=prompt('Montant en FCFA (ex : 7500) :'),n=parseInt(v,10);if(isNaN(n)||n<=0)return;document.querySelectorAll('.gamt-chip[data-custom]').forEach(function(c){c.remove();});var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=n;chip.dataset.custom='1';chip.innerHTML='<div class="gav">'+(n>=1000?(n/1000)+'k':n)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(n,chip);};document.getElementById('gift-amt-grid').appendChild(chip);giftPickAmt(n,chip);}
 function giftPay(){if(!giftState.amt)return;var errEl=document.getElementById('gift-err');errEl.style.display='none';var cag=_d.cagnotte||_d.jarConfig||{},key=(cag&&cag.kkiapayKey)||_d.kkiapayKey||'';if(!key){errEl.textContent='Paiement non configuré.';errEl.style.display='block';return;}var launch=function(){openKkiapayWidget({amount:giftState.amt,api_key:key,sandbox:(_d.kkiapaySandbox!==false),name:giftState.guestName||'Anonyme',callback:window.location.href});addSuccessListener(function(resp){var txId=resp.transactionId||resp.transaction_id,afterPay=function(){giftState.gave=true;hideGiftSheet();showThanksOverlay(true);};if(txId){fetch('/api/contributions/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:txId,publicationId:PUB_ID,contributorName:giftState.guestName||'',isAnonymous:!giftState.guestName,wishId:giftState.wishId})}).then(function(r){return r.json();}).then(function(d){giftState.paid=(d.contribution&&d.contribution.amount)?d.contribution.amount:giftState.amt;}).catch(function(){giftState.paid=giftState.amt;}).finally(afterPay);}else{giftState.paid=giftState.amt;afterPay();}});};if(typeof openKkiapayWidget==='undefined'){var sc=document.createElement('script');sc.src='https://cdn.kkiapay.me/k.js';sc.onload=launch;sc.onerror=function(){errEl.textContent='Impossible de charger le module de paiement.';errEl.style.display='block';};document.head.appendChild(sc);}else{launch();}}
-function showThanksOverlay(gave){var o=document.getElementById('thanks-overlay');if(gave){document.getElementById('thanks-icon').textContent='🎁';document.getElementById('thanks-title').textContent='Merci pour ta participation';document.getElementById('thanks-msg').textContent="Grâce à toi le cadeau se rapproche. On garde ça secret jusqu'au grand jour ! 🤫";document.getElementById('thanks-receipt').style.display='block';document.getElementById('thanks-amt').innerHTML=fmtNum(giftState.paid||giftState.amt||0)+' <span style="font-size:14px;font-family:\'Inter\',sans-serif;font-style:normal;">FCFA</span>';}else{document.getElementById('thanks-icon').textContent='💕';document.getElementById('thanks-title').textContent='Merci pour ton joli mot';document.getElementById('thanks-msg').textContent='Ton vœu a bien été reçu. Reviens le jour J pour voir le mur complet !';document.getElementById('thanks-receipt').style.display='none';}o.style.display='flex';setTimeout(function(){o.classList.add('open');},10);setTimeout(closeThanks,5000);}
-function closeThanks(){var o=document.getElementById('thanks-overlay');o.classList.remove('open');setTimeout(function(){o.style.display='none';},300);}
+function showThanksOverlay(gave){var o=document.getElementById('thanks-overlay');if(gave){document.getElementById('thanks-icon').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';document.getElementById('thanks-title').textContent='Merci pour ta participation';document.getElementById('thanks-msg').textContent="Grâce à toi le cadeau se rapproche. On garde ça secret jusqu'au grand jour !";document.getElementById('thanks-receipt').style.display='block';document.getElementById('thanks-amt').innerHTML=fmtNum(giftState.paid||giftState.amt||0)+' <span style="font-size:14px;font-family:\'Plus Jakarta Sans\',sans-serif;">FCFA</span>';}else{document.getElementById('thanks-icon').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';document.getElementById('thanks-title').textContent='Merci pour ton joli mot';document.getElementById('thanks-msg').textContent='Ton mot a bien été reçu. Reviens le jour J pour voir le mur complet !';document.getElementById('thanks-receipt').style.display='none';}o.classList.add('open');setTimeout(closeThanks,5000);}
+function closeThanks(){var o=document.getElementById('thanks-overlay');o.classList.remove('open');}
 
 /* ═══════════════════════════════════════
    INIT
@@ -791,6 +978,8 @@ function closeThanks(){var o=document.getElementById('thanks-overlay');o.classLi
   if(d.titleName) document.querySelector('[data-node="titleName"]').textContent = d.titleName;
   setWishesEnabled(d.wishesEnabled !== false);
   initGiftSheet();
+  if(d.isAdmin){var b=document.getElementById('admin-banner');b.classList.add('show');document.getElementById('admin-back').href=d.adminReturnUrl||'#';document.body.classList.add('has-admin-banner');}
+  if(d.cagnotte&&d.cagnotte.enabled)document.getElementById('cagnotte-btn').classList.add('show');
   loadWishes();
   setTimeout(hideHint, 6000);
 })();
@@ -798,7 +987,7 @@ function closeThanks(){var o=document.getElementById('thanks-overlay');o.classLi
 window.addEventListener('message', function(e){
   if(!e.data) return;
   if(e.data.type==='WW_WISH_NEW'){var w=e.data.wish;if(!w||!w.text)return;var pos={x:CANVAS_W/2-98+(Math.random()-0.5)*300,y:CANVAS_H/2-130+(Math.random()-0.5)*300,rot:(Math.random()-0.5)*18,z:15};wishes.push(w);cardPositions.push(pos);var el=createCardEl(w,pos,wishes.length-1);el.style.opacity='0';$canvas.appendChild(el);setTimeout(function(){el.style.transition='opacity 0.5s';el.style.opacity='1';},30);document.getElementById('count-num').textContent=wishes.length;return;}
-  if(e.data.type==='WW_UPDATE'){var d=e.data.data;if(!d)return;if(d.eyebrow!==undefined)document.querySelector('[data-node="eyebrow"]').textContent=d.eyebrow||'✦ Mur de vœux';if(d.titleName!==undefined)document.querySelector('[data-node="titleName"]').textContent=d.titleName||'Prénom';return;}
+  if(e.data.type==='WW_UPDATE'){var d=e.data.data;if(!d)return;if(d.eyebrow!==undefined)document.querySelector('[data-node="eyebrow"]').textContent=d.eyebrow||'✦ Mur de mots';if(d.titleName!==undefined)document.querySelector('[data-node="titleName"]').textContent=d.titleName||'Prénom';return;}
   if(e.data.type==='WW_CONFIG'){if(e.data.wishesEnabled!==undefined)setWishesEnabled(e.data.wishesEnabled);return;}
 });
 

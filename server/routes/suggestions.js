@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { requireSuperAdmin, requireAdmin } = require('../middleware/auth');
 const Suggestion = require('../models/Suggestion');
 
-/* ── POST /api/suggestions  — Create a suggestion (any auth user) */
+/* ── POST /api/suggestions   Create a suggestion (any auth user) */
 router.post('/', requireAdmin, async (req, res) => {
   try {
     const { category, message, authorName } = req.body;
@@ -20,7 +20,7 @@ router.post('/', requireAdmin, async (req, res) => {
   }
 });
 
-/* ── GET /api/suggestions/mine — own suggestions */
+/* ── GET /api/suggestions/mine  own suggestions */
 router.get('/mine', requireAdmin, async (req, res) => {
   try {
     const id = req.admin.merchantId || req.admin._id;
@@ -31,7 +31,7 @@ router.get('/mine', requireAdmin, async (req, res) => {
   }
 });
 
-/* ── GET /api/suggestions  — All suggestions (super_admin only) */
+/* ── GET /api/suggestions   All suggestions (super_admin only) */
 router.get('/', requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
@@ -47,7 +47,7 @@ router.get('/', requireAdmin, requireSuperAdmin, async (req, res) => {
   }
 });
 
-/* ── PATCH /api/suggestions/:id — Update status/note (super_admin) */
+/* ── PATCH /api/suggestions/:id  Update status/note (super_admin) */
 router.patch('/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });
@@ -63,7 +63,7 @@ router.patch('/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
   }
 });
 
-/* ── DELETE /api/suggestions/:id — super_admin */
+/* ── DELETE /api/suggestions/:id  super_admin */
 router.delete('/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Accès refusé' });

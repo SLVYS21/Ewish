@@ -37,7 +37,7 @@ export default function InstallPWA() {
       return () => clearTimeout(t);
     }
 
-    // Android / Desktop — wait for native prompt
+    // Android / Desktop  wait for native prompt
     const handler = (e) => {
       e.preventDefault();
       setDeferred(e);

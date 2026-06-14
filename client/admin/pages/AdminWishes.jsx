@@ -5,7 +5,7 @@ import PageShell from '../components/PageShell';
 import { Inbox, Mic, Video, Eye, EyeOff, Check, Trash2, RefreshCw } from 'lucide-react';
 import s from './AdminWishes.module.css';
 
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''; }
 
 export default function AdminWishes() {
   const [pubs, setPubs] = useState([]);
@@ -73,7 +73,7 @@ export default function AdminWishes() {
         {loadingP ? <div className={s.spinner} style={{ width: 20, height: 20 }} /> : (
           <select className={s.pubSelect} value={pubId} onChange={e => setPubId(e.target.value)}>
             <option value="">Sélectionner une publication…</option>
-            {pubs.map(p => <option key={p._id} value={p._id}>{p.title || p.customName} — {p.templateName}</option>)}
+            {pubs.map(p => <option key={p._id} value={p._id}>{p.title || p.customName}  {p.templateName}</option>)}
           </select>
         )}
         {pubId && (

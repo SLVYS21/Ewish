@@ -11,7 +11,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Cloudinary storage — different folders per type
+// Cloudinary storage  different folders per type
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req) => {

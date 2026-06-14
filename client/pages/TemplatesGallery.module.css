@@ -98,7 +98,7 @@
 }
 .searchClear:hover { color: var(--mk-rose, #E11D48); }
 
-/* ── Category pills — scrollable ── */
+/* ── Category pills  scrollable ── */
 .catRow {
   display: flex; gap: 8px;
   flex-wrap: nowrap; overflow-x: auto;
@@ -393,13 +393,13 @@
   transition: left .2s;
 }
 .toggleOn .toggleThumb { left: 23px; }
-/* Wall confirm button — lilac */
+/* Wall confirm button  lilac */
 .nameConfirmWall {
   background: var(--mk-lilac, #9B7EE2) !important;
 }
 .nameConfirmWall:hover:not(:disabled) { background: #7E66C9 !important; }
 
-/* ── Variations — full-page overlay ── */
+/* ── Variations  full-page overlay ── */
 .varOverlay {
   position: fixed; inset: 0; z-index: 250;
   background: var(--mk-cream, #FFFAF6);

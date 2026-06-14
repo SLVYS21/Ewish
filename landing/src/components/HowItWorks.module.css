@@ -39,7 +39,7 @@
   margin-bottom: 20px; position: relative;
 }
 /* Step color variants */
-.step1 { /* default — ivory */ }
+.step1 { /* default  ivory */ }
 .step2 { background: var(--gold-pale) !important; border-color: var(--gold) !important; color: var(--gold-d) !important; }
 .step3 { background: var(--rose-pale) !important; border-color: var(--rose) !important; color: var(--rose) !important; }
 .step4 { background: var(--ink) !important; border-color: var(--ink) !important; color: var(--gold-l) !important; }

@@ -44,7 +44,7 @@ function StatusBadge({ status }) {
 }
 
 function Thumbnail({ url, label }) {
-  if (!url) return <span style={{ fontSize: 12, color: '#B09AB2', fontStyle: 'italic' }}>—</span>;
+  if (!url) return <span style={{ fontSize: 12, color: '#B09AB2', fontStyle: 'italic' }}></span>;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" style={{
       display: 'inline-flex', alignItems: 'center', gap: 5, color: '#6E4FBA',
@@ -102,7 +102,7 @@ export default function SuperAdminKyc() {
   };
 
   const formatDate = (d) => {
-    if (!d) return '—';
+    if (!d) return '';
     return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
@@ -179,8 +179,8 @@ export default function SuperAdminKyc() {
 
                 {/* Method + phone */}
                 <div style={{ minWidth: 120 }}>
-                  <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', fontWeight: 600 }}>{user.kycMethod || '—'}</div>
-                  <div style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>+229 {user.kycPhone || '—'}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', fontWeight: 600 }}>{user.kycMethod || ''}</div>
+                  <div style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>+229 {user.kycPhone || ''}</div>
                 </div>
 
                 {/* Thumbnails */}

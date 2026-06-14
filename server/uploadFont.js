@@ -60,8 +60,8 @@ async function run() {
     }
   }
 
-  console.log(`\nDone — ${count} template(s) updated.`);
-  console.log('Font is served from Cloudinary CDN — cached permanently after first load per region.');
+  console.log(`\nDone  ${count} template(s) updated.`);
+  console.log('Font is served from Cloudinary CDN  cached permanently after first load per region.');
 }
 
 run().catch(err => { console.error(err.message); process.exit(1); });

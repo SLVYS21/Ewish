@@ -156,7 +156,7 @@ a { color: inherit; text-decoration: none; }
 .m-noscroll { scrollbar-width: none; -ms-overflow-style: none; }
 
 /* ══════════════════════════════════════════
-   myKado Redesign — Design System Tokens & Utilities
+   myKado Redesign  Design System Tokens & Utilities
    ══════════════════════════════════════════ */
 
 :root {
@@ -384,7 +384,7 @@ a { color: inherit; text-decoration: none; }
 /* defensive: prevent any cascade from adding borders to row elements */
 .crea-r1, .crea-r2, .crea-r3, .crea-r4 { border: none; background: transparent; }
 .crea-r4 { display: flex; align-items: center; gap: 4px; }
-/* Partager button inside cards — borderless soft pill, no visible line */
+/* Partager button inside cards  borderless soft pill, no visible line */
 .crea-r4 .btn-ghost {
   border-radius: var(--mk-r-pill);
   border: none;
@@ -395,6 +395,31 @@ a { color: inherit; text-decoration: none; }
 }
 .crea-r4 .btn-ghost:hover { background: var(--mk-accent-pale); color: var(--mk-accent); }
 .crea-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; background: var(--mk-paper); border: 1px solid var(--mk-line-2); border-radius: var(--mk-r-xs); box-shadow: var(--mk-sh-2); min-width: 170px; padding: 5px; display: flex; flex-direction: column; }
+
+/* ── Wall preview sheet ── */
+.wall-sheet-veil {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(43,26,45,.45); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.wall-sheet {
+  background: var(--mk-paper); border-radius: 22px 22px 0 0;
+  width: 100%; max-width: 560px;
+  max-height: 88vh; display: flex; flex-direction: column;
+  overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.wall-sheet-grip { width: 40px; height: 4px; border-radius: 99px; background: var(--mk-line-strong); margin: 12px auto 0; flex-shrink: 0; }
+.wall-sheet-head { display: flex; align-items: flex-start; gap: 10px; padding: 16px 20px 12px; flex-shrink: 0; }
+.wall-sheet-title { font-size: 17px; font-weight: 800; color: var(--mk-ink); line-height: 1.2; }
+.wall-sheet-desc { font-size: 12.5px; color: var(--mk-ink-2); line-height: 1.5; margin-top: 3px; }
+.wall-sheet-preview { flex: 1; background: var(--mk-blush); position: relative; min-height: 280px; overflow: hidden; margin: 0 16px; border-radius: var(--mk-r-sm); }
+.wall-sheet-foot { display: flex; gap: 10px; padding: 14px 20px 16px; flex-shrink: 0; }
+@media (min-width: 768px) {
+  .wall-sheet-veil { align-items: center; }
+  .wall-sheet { border-radius: 22px; max-height: 80vh; max-width: 520px; }
+  .wall-sheet-grip { display: none; }
+  .wall-sheet-preview { min-height: 340px; }
+}
 
 /* ── Share ── */
 .share-grid { display: grid; grid-template-columns: 380px minmax(0,1fr); gap: calc(var(--d-gap) + 8px); align-items: start; }
@@ -435,7 +460,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Mobile chrome ── */
 
-/* Mobile top bar — hidden on desktop */
+/* Mobile top bar  hidden on desktop */
 .mk-mobile-topbar {
   display: none;
   height: 52px; flex-shrink: 0; align-items: center; gap: 8px;
@@ -449,7 +474,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 13px; font-weight: 800; border: none; cursor: pointer;
 }
 
-/* Mobile bottom nav — hidden on desktop */
+/* Mobile bottom nav  hidden on desktop */
 .mnav {
   display: none;
   flex-shrink: 0; height: 64px; grid-template-columns: repeat(5, 1fr);
@@ -486,7 +511,7 @@ a { color: inherit; text-decoration: none; }
 
 /* Template preview detail */
 .tplv { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: calc(var(--d-gap) + 8px); align-items: start; }
-.tplv-stage { border-radius: var(--mk-r-lg); position: relative; overflow: hidden; aspect-ratio: 4/4.6; border: 1px solid var(--mk-line); }
+.tplv-stage { border-radius: var(--mk-r-lg); position: relative; overflow: hidden; aspect-ratio: 2/3; border: 1px solid var(--mk-line); }
 .premade-row { display: flex; align-items: center; gap: 13px; padding: 13px; border: 1.5px solid var(--mk-line); border-radius: var(--mk-r-sm); background: var(--mk-paper); width: 100%; text-align: left; transition: border-color .15s, transform .15s; cursor: pointer; }
 .premade-row:hover { border-color: var(--mk-line-strong); transform: translateX(2px); }
 .premade-row.on { border-color: var(--mk-accent); box-shadow: 0 0 0 4px var(--mk-accent-pale); }

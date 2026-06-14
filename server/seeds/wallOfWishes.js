@@ -1,5 +1,5 @@
 /**
- * Seed script — wall-of-wishes demo data
+ * Seed script  wall-of-wishes demo data
  * Usage: node server/seeds/wallOfWishes.js
  *   or:  npm run seed:ww  (from server/)
  */
@@ -34,7 +34,7 @@ async function seed() {
     {
       name:            'wall-of-wishes',
       label:           'Mur de vœux',
-      description:     'Un mur interactif où chacun colle son message — comme des post-its numériques.',
+      description:     'Un mur interactif où chacun colle son message  comme des post-its numériques.',
       price:           4000,
       creditsRequired: 1,
       emoji:           '💌',
@@ -46,11 +46,11 @@ async function seed() {
       featured:        false,
       fields: [
         { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',     required: true },
-        { key: 'subtitle',  label: 'Sous-titre',             type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien — chacun peut laisser son vœu ici.' },
+        { key: 'subtitle',  label: 'Sous-titre',             type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien  chacun peut laisser son vœu ici.' },
       ],
       defaultData: {
         titleName: 'Prénom',
-        subtitle:  'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+        subtitle:  'Partagez ce lien  chacun peut laisser son mot sur ce mur.',
       },
       defaultStyle: {
         primaryColor: '#c9a84c',
@@ -70,10 +70,10 @@ async function seed() {
     pub = await Publication.create({
       templateName: 'wall-of-wishes',
       customName:   'demo',
-      title:        'Mur de vœux — Démo',
+      title:        'Mur de vœux  Démo',
       data: {
         titleName: 'Sarah',
-        subtitle:  'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+        subtitle:  'Partagez ce lien  chacun peut laisser son mot sur ce mur.',
       },
       published:    true,
       showBranding: true,

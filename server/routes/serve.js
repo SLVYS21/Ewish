@@ -19,6 +19,19 @@ try {
 
 const BUBBLE_TEMPLATES = new Set(['birthday', 'collective-family', 'collective-pro', 'special']);
 
+/* ── Wall template design defaults ──────────────────────────────
+   Used to override legacy schema defaults (#ff69b4 / #ffb347 amber)
+   so wall publications always render with their template's brand
+   color when no explicit user customization exists.
+   ─────────────────────────────────────────────────────────────── */
+const WALL_DEFAULTS = {
+  'wall-of-wishes':        { primaryColor: '#E11D48', accentColor: '#E11D48' },
+  'wall-of-wishes-modern': { primaryColor: '#7C5CC9', accentColor: '#7C5CC9' },
+  'wall-of-wishes-3d':     { primaryColor: '#c9a84c', accentColor: '#e05574' },
+  'wall-of-wishes-space':  { primaryColor: '#ff7055', accentColor: '#ff3d6e' },
+};
+const LEGACY_SCHEMA_DEFAULTS = { primaryColor: '#ff69b4', accentColor: '#ffb347' };
+
 /* ── Google Fonts map for system font choices ────────────────────
    Ensures the chosen font is actually fetched in the rendered page.
    ─────────────────────────────────────────────────────────────── */
@@ -63,7 +76,7 @@ function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_li
 }
 
 router.get('/:templateName/:customName', async (req, res) => {
-  // Security headers — allow embedding from app origins
+  // Security headers  allow embedding from app origins
   res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store");
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
@@ -203,8 +216,39 @@ router.get('/:templateName/:customName', async (req, res) => {
     }
 
     const isWallTemplate = pub.templateName.startsWith('wall-of-wishes');
-    const wallPrimary    = isWallTemplate ? (s.primaryColor || '#9b87f5') : (s.primaryColor || '#ff69b4');
-    const wallAccent     = isWallTemplate ? (s.accentColor  || '#f5a8be') : (s.accentColor  || '#ffb347');
+
+    /* Resolve wall colors with smart fallbacks:
+       - explicit user customization wins
+       - legacy schema defaults (#ff69b4/#ffb347) are ignored as if missing
+       - falls back to WALL_DEFAULTS[templateName] (template's design colors) */
+    let wallPrimary, wallAccent;
+    if (isWallTemplate) {
+      const tplDef = WALL_DEFAULTS[pub.templateName] || WALL_DEFAULTS['wall-of-wishes'];
+      const userPrimary = (s.primaryColor && s.primaryColor !== LEGACY_SCHEMA_DEFAULTS.primaryColor) ? s.primaryColor : null;
+      const userAccent  = (s.accentColor  && s.accentColor  !== LEGACY_SCHEMA_DEFAULTS.accentColor)  ? s.accentColor  : null;
+      wallPrimary = userPrimary || tplDef.primaryColor;
+      wallAccent  = userAccent  || tplDef.accentColor;
+    } else {
+      wallPrimary = s.primaryColor || '#ff69b4';
+      wallAccent  = s.accentColor  || '#ffb347';
+    }
+
+    /* Admin detection  show admin banner in wall template when admin views it */
+    let isAdmin = false;
+    let adminReturnUrl = '';
+    if (isWallTemplate) {
+      try {
+        const token = req.cookies?.ww_admin_token;
+        if (token) {
+          const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+          if (decoded) {
+            isAdmin = true;
+            const appOrigin = process.env.APP_URL || (process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://app.mykado.store');
+            adminReturnUrl = `${appOrigin}/ewish-admin/wall/${String(pub._id)}`;
+          }
+        }
+      } catch {}
+    }
 
     const injection = `
 <style>
@@ -238,6 +282,8 @@ ${bgCssLines.join('\n')}
     isPaid: ${pub.isPaid || false},
     minContribution: ${pub.cagnotteConfig?.minContribution || 0},
     maxContribution: ${pub.cagnotteConfig?.maxContribution || 0},
+    isAdmin: ${isAdmin},
+    adminReturnUrl: '${adminReturnUrl}',
     cagnotte: ${pub.cagnotteConfig?.enabled ? JSON.stringify({
       enabled: true,
       name: pub.cagnotteConfig.description || '',

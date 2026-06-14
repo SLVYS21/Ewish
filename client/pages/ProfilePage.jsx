@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
         <div className={styles.statsStrip}>
           <div className={styles.stat}>
-            <span className={styles.statVal}>{pubCount ?? '—'}</span>
+            <span className={styles.statVal}>{pubCount ?? ''}</span>
             <span className={styles.statLbl}>créations</span>
           </div>
           <div className={styles.statSep} />
@@ -137,7 +137,7 @@ export default function ProfilePage() {
           </div>
           <div className={styles.statSep} />
           <div className={styles.stat}>
-            <span className={styles.statVal}>—</span>
+            <span className={styles.statVal}></span>
             <span className={styles.statLbl}>vœux reçus</span>
           </div>
         </div>

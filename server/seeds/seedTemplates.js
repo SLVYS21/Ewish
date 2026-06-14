@@ -1,5 +1,5 @@
 /**
- * Seed corrector — fields en français pour tous les templates
+ * Seed corrector  fields en français pour tous les templates
  * Usage : node server/seeds/seedTemplates.js
  *   ou  : npm run seed:templates  (depuis server/)
  *
@@ -107,7 +107,7 @@ const TEMPLATES = [
   {
     name: 'wall-of-wishes',
     label: 'Mur de vœux',
-    description: "Un mur interactif où chacun colle son message — comme des post-its numériques.",
+    description: "Un mur interactif où chacun colle son message  comme des post-its numériques.",
     price: 5000,
     creditsRequired: 10,
     emoji: '💌',
@@ -119,13 +119,13 @@ const TEMPLATES = [
     featured: false,
     fields: [
       { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
-      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien — laissez votre message ici.' },
+      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien  laissez votre message ici.' },
     ],
     defaultData: {
       titleName: 'Prénom',
-      subtitle: 'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+      subtitle: 'Partagez ce lien  chacun peut laisser son mot sur ce mur.',
     },
-    defaultStyle: { primaryColor: '#c9a84c', accentColor: '#e05574', fontFamily: 'Inter', fontSize: 'medium', theme: 'light' },
+    defaultStyle: { primaryColor: '#E11D48', accentColor: '#E11D48', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
   },
 
   /* ── wall-of-wishes-modern ──────────────────────────────── */
@@ -145,14 +145,14 @@ const TEMPLATES = [
     fields: [
       { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
       { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: '✦ Mur de vœux' },
-      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien — laissez votre message ici.' },
+      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien  laissez votre message ici.' },
     ],
     defaultData: {
       titleName: 'Prénom',
       eyebrow: '✦ Mur de vœux',
-      subtitle: 'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+      subtitle: 'Partagez ce lien  chacun peut laisser son mot sur ce mur.',
     },
-    defaultStyle: { primaryColor: '#9b87f5', accentColor: '#f5a8be', fontFamily: 'Inter', fontSize: 'medium', theme: 'light' },
+    defaultStyle: { primaryColor: '#7C5CC9', accentColor: '#7C5CC9', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
   },
 
   /* ── wall-of-wishes-space ────────────────────────────────── */
@@ -212,9 +212,9 @@ const TEMPLATES = [
       { key: 'result1Snippet', label: 'Extrait résultat #1',        type: 'textarea',  section: 'Google',   placeholder: "Après analyse de 8 milliards de profils, les experts s'accordent…"             },
       { key: 'result1Domain',  label: 'Domaine résultat #1',        type: 'text',      section: 'Google',   placeholder: 'patrimoine-de-l-humanite.org'                                                                 },
       { key: 'result1Rating',  label: 'Note résultat #1',           type: 'text',      section: 'Google',   placeholder: "⭐ 5,0/5 · Avis validés par l'univers entier"                                                },
-      { key: 'result2Title',   label: 'Titre résultat #2',          type: 'text',      section: 'Google',   placeholder: 'Définition de « Parfaite » — Dictionnaire Illustré'                                   },
+      { key: 'result2Title',   label: 'Titre résultat #2',          type: 'text',      section: 'Google',   placeholder: 'Définition de « Parfaite »  Dictionnaire Illustré'                                   },
       { key: 'result2Snippet', label: 'Extrait résultat #2',        type: 'textarea',  section: 'Google',   placeholder: "L'Académie a récemment mis à jour sa définition du mot \"parfaite\" pour y intégrer directement une photo d'elle."    },
-      { key: 'result3Title',   label: 'Titre résultat #3',          type: 'text',      section: 'Google',   placeholder: 'Guinness World Records — Cœur en or certifié'                          },
+      { key: 'result3Title',   label: 'Titre résultat #3',          type: 'text',      section: 'Google',   placeholder: 'Guinness World Records  Cœur en or certifié'                          },
       { key: 'result3Snippet', label: 'Extrait résultat #3',        type: 'textarea',  section: 'Google',   placeholder: "Record officiellement validé : aucune technologie actuelle ne permet de mesurer l'étendue totale de sa bienveillance."                             },
       { key: 'text2',          label: "Phrase de transition 1",     type: 'text',      section: 'Histoire', placeholder: 'On a fouillé le web entier.'                                                          },
       { key: 'text3',          label: "Phrase de transition 2",     type: 'text',      section: 'Histoire', placeholder: 'Passé au crible des milliards de résultats.'                                                    },
@@ -244,9 +244,9 @@ const TEMPLATES = [
       "result1Snippet": "Après l'analyse approfondie de 8 milliards de profils, les experts s'accordent sur un résultat incontestable.",
       "result1Domain": "patrimoine-de-l-humanite.org",
       "result1Rating": "⭐ 5,0/5 · Avis validés par l'univers entier",
-      "result2Title": "Définition de « Parfaite » — Dictionnaire Illustré",
+      "result2Title": "Définition de « Parfaite »  Dictionnaire Illustré",
       "result2Snippet": "L'Académie a récemment mis à jour sa définition du mot \"parfaite\" pour y intégrer directement une photo d'elle.",
-      "result3Title": "Guinness World Records — Cœur en or certifié",
+      "result3Title": "Guinness World Records  Cœur en or certifié",
       "result3Snippet": "Record officiellement validé : aucune technologie actuelle ne permet de mesurer l'étendue totale de sa bienveillance.",
       "text2": "On a fouillé le web entier.",
       "text3": "Passé au crible des milliards de résultats.",
@@ -306,7 +306,7 @@ const TEMPLATES = [
   {
     name: 'collective-family',
     label: 'Collectif Famille',
-    description: "Chaque proche ajoute son message et sa photo — un souvenir partagé jusqu'à 50 contributeurs.",
+    description: "Chaque proche ajoute son message et sa photo  un souvenir partagé jusqu'à 50 contributeurs.",
     price: 2000,
     creditsRequired: 4,
     emoji: '👨‍👩‍👧‍👦',

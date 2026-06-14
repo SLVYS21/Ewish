@@ -2,7 +2,7 @@ import { useReveal } from '../hooks/useReveal';
 
 const steps = [
   { n: '01', t: 'Créez votre compte',     d: "Inscription en 2 minutes. Accès immédiat à l'éditeur.", icon: '👤' },
-  { n: '02', t: 'Personnalisez librement', d: "Photos, musique, textes, QR code, bouton CTA — gratuit.", icon: '✎' },
+  { n: '02', t: 'Personnalisez librement', d: "Photos, musique, textes, QR code, bouton CTA  gratuit.", icon: '✎' },
   { n: '03', t: 'Achetez vos crédits',     d: "Uniquement quand vous publiez. À la carte ou en pack.", icon: '◉' },
   { n: '04', t: 'Partagez par lien ou QR', d: "WhatsApp, email, QR personnalisé. Vu, rejoué, conservé.", icon: '↗' },
 ];

@@ -150,7 +150,7 @@ export default function NewWish() {
               <span style={{ fontSize: 28 }}>{TEMPLATE_EMOJI[selected.name] || '✨'}</span>
             </div>
             <div className={styles.actionContent}>
-              <div className={styles.actionLabel}>ÉTAPE FINALE — POUR QUI ?</div>
+              <div className={styles.actionLabel}>ÉTAPE FINALE  POUR QUI ?</div>
               <div className={styles.actionRow}>
                 <input
                   className={styles.recipientInput}
@@ -184,7 +184,7 @@ export default function NewWish() {
           <span style={{ fontSize: 18 }}>💡</span>
           <div>
             <strong>Vous hésitez ?</strong> Chaque template est entièrement personnalisable.
-            Couleurs, texte, photos — tout change en quelques clics.
+            Couleurs, texte, photos  tout change en quelques clics.
           </div>
         </div>
       </div>

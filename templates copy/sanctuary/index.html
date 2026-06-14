@@ -32,7 +32,7 @@
     }
 
     /* ══════════════════════════════════
-       INTRO — Couverture
+       INTRO  Couverture
     ══════════════════════════════════ */
     #intro {
       position: fixed; inset: 0; z-index: 200;
@@ -731,7 +731,7 @@ const DEFAULT_PAGES = [
     id: 'p1', type: 'verse',
     ref: 'Philippiens 4:6-7',
     text: 'Ne vous inquiétez de rien,\nmais en toute chose faites\nconnaître vos besoins à Dieu\npar des prières et des supplications,\navec des actions de grâces.',
-    author: 'Bible — Épître aux Philippiens',
+    author: 'Bible  Épître aux Philippiens',
   },
   {
     id: 'p2', type: 'prayer',
@@ -744,7 +744,7 @@ const DEFAULT_PAGES = [
     id: 'p3', type: 'verse',
     ref: 'Psaumes 23:1',
     text: 'L\'Éternel est mon berger :\nJe ne manquerai de rien.',
-    author: 'Bible — Psaumes de David',
+    author: 'Bible  Psaumes de David',
   },
 ];
 
@@ -794,7 +794,7 @@ function renderPage(idx) {
     bodyHtml = `
       <div class="verse-ornament">· ✦ ·</div>
       <div class="verse-body">${formatText(pg.text || '')}</div>
-      ${pg.author ? `<div class="verse-author">— ${escHtml(pg.author)}</div>` : ''}
+      ${pg.author ? `<div class="verse-author"> ${escHtml(pg.author)}</div>` : ''}
     `;
   } else if (pg.type === 'prayer') {
     headerRight = `<span class="page-ref">${escHtml(pg.from || '')}</span>`;
@@ -873,7 +873,7 @@ function setStoredPin(p) {
 function openPinModal() {
   const stored = getStoredPin();
   if (!stored) {
-    // First time — setup PIN
+    // First time  setup PIN
     openPinSetup();
     return;
   }
@@ -1120,7 +1120,7 @@ function savePages() {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ data: { pages: pages } }),
-  }).catch(() => {}); // silent fail — localStorage is the fallback
+  }).catch(() => {}); // silent fail  localStorage is the fallback
 }
 
 function loadPages() {

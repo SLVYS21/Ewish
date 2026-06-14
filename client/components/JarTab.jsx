@@ -52,10 +52,10 @@ const DEFAULT_WORDS = {
   birthday: [
     "Tu mérites tout le bonheur du monde 🎂",
     "Une nouvelle année pleine de magie t'attend ✨",
-    "Tu vieillis en beauté — comme du bon vin 🍷",
+    "Tu vieillis en beauté  comme du bon vin 🍷",
     "Que tous tes rêves deviennent réels 🌟",
     "Tu rends la vie de ceux qui t'entourent plus belle 💛",
-    "Continue d'être exactement toi — c'est parfait 🌸",
+    "Continue d'être exactement toi  c'est parfait 🌸",
   ],
   special: [
     "Tu es une force tranquille qui inspire 🌿",
@@ -70,7 +70,7 @@ const DEFAULT_WORDS = {
 const DEFAULT_CATS = [
   { id:'sad',    label:"Quand tu te sens triste",    color:'#4e9eff', bg:'#d0e8ff', words:["Tu n'es pas seul(e) 💙","Cette douleur est temporaire 🌊","Je suis là pour toi 🤝"] },
   { id:'happy',  label:"Quand tu es heureuse",       color:'#f0a030', bg:'#fff3cd', words:["Continue de briller ☀️","Tu mérites cette joie 🌻","Ta joie me rend heureux aussi 🎉"] },
-  { id:'faith',  label:"Quand tu as besoin de foi",  color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon — ça va aller 🌟"] },
+  { id:'faith',  label:"Quand tu as besoin de foi",  color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon  ça va aller 🌟"] },
   { id:'lonely', label:"Quand tu te sens seul(e)",   color:'#c8963e', bg:'#f5e9c8', words:["Tu comptes tellement pour moi 💛","Je pense à toi souvent 🌸"] },
   { id:'doubt',  label:"Quand tu doutes de toi",     color:'#a78bfa', bg:'#f3d9ff', words:["Tu es capable de grandes choses ✨","Je crois en toi, même quand tu n'y crois pas 🌙"] },
 ];
@@ -122,7 +122,7 @@ export default function JarTab({ jarConfig: jarConfigProp, onChange, templateNam
         </div>
       </div>
 
-      {/* Words editor — classic + scroll */}
+      {/* Words editor  classic + scroll */}
       {design !== 'readmewhen' && (
         <div className={s.section}>
           <div className={s.sectionTitle}>
@@ -165,7 +165,7 @@ export default function JarTab({ jarConfig: jarConfigProp, onChange, templateNam
         </div>
       )}
 
-      {/* Categories editor — readmewhen */}
+      {/* Categories editor  readmewhen */}
       {design === 'readmewhen' && (
         <div className={s.section}>
           <div className={s.sectionTitle}>💌 Catégories & messages</div>

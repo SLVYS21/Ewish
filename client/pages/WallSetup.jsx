@@ -221,7 +221,7 @@ function WallSettings({ pub, id, onSave }) {
             <IconBubble bg="var(--mk-mint-soft)" color="var(--mk-mint)"><ShieldCheck size={16} /></IconBubble>
             <div className="body">
               <div className="t">Vérifier avant publication</div>
-              <div className="s">Chaque mot passe par toi avant d'être collé au mur — onglet « Mots ».</div>
+              <div className="s">Chaque mot passe par toi avant d'être collé au mur  onglet « Mots ».</div>
             </div>
             <Toggle on={moderation} onChange={setModeration} />
           </div>
@@ -255,7 +255,7 @@ function WallSettings({ pub, id, onSave }) {
           <IconBubble bg="var(--mk-accent-pale)" color="var(--mk-accent)"><Gift size={16} /></IconBubble>
           <div className="body">
             <div className="t">Activer la cagnotte</div>
-            <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible — jamais les montants individuels.</div>
+            <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible  jamais les montants individuels.</div>
           </div>
           <Toggle on={cagnotteEnabled} onChange={setCagnotteEnabled} />
         </div>
@@ -386,11 +386,11 @@ function WallWords({ id, moderation: moderationEnabled }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--d-gap) + 6px)' }}>
       {toast && <div className="mk-toast">{toast}</div>}
 
-      {/* Pending — only show when moderation is on */}
+      {/* Pending  only show when moderation is on */}
       {moderationEnabled && pending.length > 0 && (
         <div>
           <div className="section-label" style={{ color: 'var(--mk-accent)', marginBottom: 10 }}>
-            <Clock size={13} /> En attente de ta validation — {pending.length}
+            <Clock size={13} /> En attente de ta validation  {pending.length}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
             {pending.map(word => (
@@ -415,7 +415,7 @@ function WallWords({ id, moderation: moderationEnabled }) {
 
       {/* On the wall */}
       <div>
-        <div className="section-label" style={{ marginBottom: 10 }}>Sur le mur — {approved.length}</div>
+        <div className="section-label" style={{ marginBottom: 10 }}>Sur le mur  {approved.length}</div>
         {approved.length === 0 ? (
           <div className="empty-state card" style={{ padding: '28px 20px' }}>
             <div className="e-title">Pas encore de mots</div>
@@ -441,7 +441,7 @@ function WallWords({ id, moderation: moderationEnabled }) {
       {/* Hidden/refused */}
       {hidden.length > 0 && (
         <div>
-          <div className="section-label" style={{ marginBottom: 10 }}>Masqués — {hidden.length}</div>
+          <div className="section-label" style={{ marginBottom: 10 }}>Masqués  {hidden.length}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
             {hidden.map(word => (
               <div key={word._id} className="card word-card" style={{ opacity: .6 }}>
@@ -534,10 +534,10 @@ function WallCagnotte({ pub, id }) {
           </div>
         )}
         <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', margin: '8px 0 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
-          <Eye size={13} /> Les visiteurs du mur voient cette progression — toi seul vois le détail ci-dessous.
+          <Eye size={13} /> Les visiteurs du mur voient cette progression  toi seul vois le détail ci-dessous.
         </p>
 
-        <div className="section-label" style={{ marginBottom: 4 }}>Participations — {contributions.length}</div>
+        <div className="section-label" style={{ marginBottom: 4 }}>Participations  {contributions.length}</div>
         <div>
           {contributions.length === 0 ? (
             <p style={{ fontSize: 13, color: 'var(--mk-ink-3)', padding: '12px 0' }}>Pas encore de contributions.</p>
@@ -561,7 +561,7 @@ function WallCagnotte({ pub, id }) {
         <div className="card" style={{ padding: '20px 22px' }}>
           <div className="section-label" style={{ marginBottom: 10 }}>Récupérer les fonds</div>
           <p style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', lineHeight: 1.6, marginBottom: 14 }}>
-            Avant tout retrait ou transfert, une vérification d'identité (KYC) est demandée — une seule fois.
+            Avant tout retrait ou transfert, une vérification d'identité (KYC) est demandée  une seule fois.
           </p>
           {isKycVerified ? (
             <div className="badge badge-live" style={{ marginBottom: 12 }}>

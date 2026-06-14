@@ -10,7 +10,7 @@ const k = kkiapay({
   sandbox:    process.env.KKIAPAY_SANDBOX === 'true',
 });
 
-// GET /api/contributions/:pubId — public: list confirmed contributions
+// GET /api/contributions/:pubId  public: list confirmed contributions
 router.get('/:pubId', async (req, res) => {
   try {
     const contributions = await Contribution.find({
@@ -35,7 +35,7 @@ router.get('/:pubId/stats', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/contributions/verify — public: verify KKiaPay + save contribution
+// POST /api/contributions/verify  public: verify KKiaPay + save contribution
 router.post('/verify', async (req, res) => {
   try {
     const { transactionId, publicationId, contributorName, isAnonymous, wishId } = req.body;

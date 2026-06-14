@@ -44,7 +44,7 @@ export function compressImage(file, opts = {}) {
   } = opts;
 
   return new Promise((resolve, reject) => {
-    // Skip non-images and tiny files (< 300 KB — not worth recompressing)
+    // Skip non-images and tiny files (< 300 KB  not worth recompressing)
     if (!file.type.startsWith('image/') || file.size < 300_000) {
       return resolve(file);
     }

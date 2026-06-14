@@ -86,7 +86,7 @@ export default function App() {
           <Route path="/ewish-admin/forgot-password"      element={<ForgotPassword />} />
           <Route path="/ewish-admin/reset-password/:token" element={<ResetPassword />} />
 
-          {/* Protected Admin — with sidebar layout */}
+          {/* Protected Admin  with sidebar layout */}
           <Route path="/ewish-admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
             <Route path="ewish" element={<MyCreations />} />
@@ -115,7 +115,7 @@ export default function App() {
             <Route path="share/:id"          element={<SharePage />} />
           </Route>
 
-          {/* Full-screen routes — no sidebar */}
+          {/* Full-screen routes  no sidebar */}
           <Route path="/ewish-admin/ewish/new"       element={<RequireAuth><QuickCreate /></RequireAuth>} />
           <Route path="/ewish-admin/ewish/edit/:id"  element={<RequireAuth><Editor /></RequireAuth>} />
 

@@ -69,13 +69,13 @@ export default function QuickCreate() {
       </div>
 
       <div className={styles.content}>
-        {/* STEP 0 — Occasion */}
+        {/* STEP 0  Occasion */}
         {step === 0 && (
           <div className={styles.stepWrap} style={{ animation: 'mk-pop .3s' }}>
             <div className={styles.stepHeader}>
               <div className={styles.stepHand}>Quelle est l'occasion ?</div>
               <h1 className={styles.stepTitle}>Pour quoi on s'active aujourd'hui ?</h1>
-              <p className={styles.stepSub}>Choisis le moment — on te proposera un template prêt à remplir.</p>
+              <p className={styles.stepSub}>Choisis le moment  on te proposera un template prêt à remplir.</p>
             </div>
             <div className={styles.occasionGrid}>
               {OCCASIONS.map(p => {
@@ -105,7 +105,7 @@ export default function QuickCreate() {
           </div>
         )}
 
-        {/* STEP 1 — Nom */}
+        {/* STEP 1  Nom */}
         {step === 1 && (
           <div className={styles.stepWrapCenter} style={{ animation: 'mk-pop .3s' }}>
             <div className={styles.stepEmojiLarge}>{occ?.emoji}</div>
@@ -124,7 +124,7 @@ export default function QuickCreate() {
           </div>
         )}
 
-        {/* STEP 2 — Quand */}
+        {/* STEP 2  Quand */}
         {step === 2 && (
           <div className={styles.stepWrapCenter} style={{ animation: 'mk-pop .3s' }}>
             <div className={styles.stepHand}>C'est pour quand ?</div>
@@ -156,7 +156,7 @@ export default function QuickCreate() {
           </div>
         )}
 
-        {/* STEP 3 — Recommandation */}
+        {/* STEP 3  Recommandation */}
         {step === 3 && (
           <div className={styles.stepWrapCenter} style={{ animation: 'mk-pop .3s', maxWidth: 680 }}>
             <div className={styles.stepEmojiLarge}>{occ?.emoji}</div>

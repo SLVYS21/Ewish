@@ -171,7 +171,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
           style={{ display: 'none' }}
           onChange={e => handleUpload(e.target.files[0])}
         />
-        <p className={s.hint}>PNG, GIF, WebP, lien HTTPS — gère la transparence</p>
+        <p className={s.hint}>PNG, GIF, WebP, lien HTTPS  gère la transparence</p>
       </div>
 
       {/* Shared Bank */}
@@ -276,7 +276,7 @@ export default function DecoTab({ templateName, decorations = [], onChange }) {
           {/* Position */}
           <div className={s.field}>
             <label className={s.fieldLabel}>Position</label>
-            {/* Visual position picker — 2D click target */}
+            {/* Visual position picker  2D click target */}
             <div
               className={s.posPicker}
               onClick={e => {

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Template = require('../models/Template');
 
-// GET all templates — public: only active ones, sorted by sortOrder
+// GET all templates  public: only active ones, sorted by sortOrder
 router.get('/', async (req, res) => {
   try {
     const templates = await Template.find({ active: { $ne: false } }, '-__v')
@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/templates/:name — admin update (price, description, highlights…)
+// PATCH /api/templates/:name  admin update (price, description, highlights…)
 const { requireAdmin } = require('../middleware/auth');
 router.patch('/:name', requireAdmin, async (req, res) => {
   try {

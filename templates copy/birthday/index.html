@@ -301,7 +301,7 @@
     /* ===== OUTRO ===== */
     .nine p { font-size: 2rem; font-weight: 300; color: var(--text-color)}
 
-    /* Wishes buttons — fixed, completely outside GSAP's reach */
+    /* Wishes buttons  fixed, completely outside GSAP's reach */
     #wishes-float {
       position: fixed; bottom: 120px; left: 50%;
       transform: translateX(-50%);
@@ -630,7 +630,7 @@ function closeWishesIfBg(e) {
 }
 
 /* ============================================================
-   CONFETTI — tsParticles
+   CONFETTI  tsParticles
    ============================================================ */
 function startConfetti() {
   const type = window.__WW_CONFETTI_TYPE__ || 'default';
@@ -695,7 +695,7 @@ function _runConfettiEffect(type) {
     case 'gold_rain':
       confetti({ particleCount: 150, spread: 120, origin: { x: 0.5, y: 0 }, startVelocity: 15, gravity: 0.6, scalar: 1.1, colors: ['#c9a84c','#e8c86a','#f5e07a','#d4af37','#fff8dc'], shapes: ['square','circle'], ticks: 350 });
       break;
-    default: // 'default' — classic colorful confetti
+    default: // 'default'  classic colorful confetti
       confetti({ particleCount: 160, spread: 100, origin, startVelocity: 45, gravity: 0.9 });
       setTimeout(() => confetti({ particleCount: 60, spread: 60, origin: { x: 0.25, y: 0.6 } }), 600);
       setTimeout(() => confetti({ particleCount: 60, spread: 60, origin: { x: 0.75, y: 0.6 } }), 900);
@@ -855,7 +855,7 @@ const animationTimeline = () => {
     .from(".wish h5", 0.5, { autoAlpha: 0, y: 10, skewX: "-15deg" }, "party")
     .add(() => {
       startConfetti();
-      // Button is in fixed #wishes-float — just show it, no TweenMax needed
+      // Button is in fixed #wishes-float  just show it, no TweenMax needed
       const b = document.getElementById('open-wishes-btn');
       b.style.display = 'inline-block';
       b.style.opacity = '1';
@@ -979,24 +979,24 @@ window.addEventListener('message', (e) => {
 });
 
 </script>
-<!-- JAR OF WORDS — 3 designs, inline -->
+<!-- JAR OF WORDS  3 designs, inline -->
 <script>
 (function() {
   /* ─── Default data ─── */
   const DEF_CLASSIC = [
     "Tu mérites tout le bonheur du monde 🎂",
     "Une nouvelle année pleine de magie t'attend ✨",
-    "Tu vieillis en beauté — comme du bon vin 🍷",
+    "Tu vieillis en beauté  comme du bon vin 🍷",
     "Que tous tes rêves deviennent réals 🌟",
     "Tu rends la vie de ceux qui t'entourent plus belle 💛",
-    "Continue d'être exactement toi — c'est parfait 🌸",
+    "Continue d'être exactement toi  c'est parfait 🌸",
     "Cette année sera la meilleure de toutes 🎉",
     "Le monde est meilleur avec toi dedans 🌍",
   ];
   const DEF_CATS = [
     { id:'sad',    label:"Quand tu te sens triste",      color:'#4e9eff', bg:'#d0e8ff', words:["Tu n'es pas seul(e) 💙","Cette douleur est temporaire 🌊","Je suis là pour toi 🤝"] },
     { id:'happy',  label:"Quand tu es heureuse",         color:'#f0a030', bg:'#fff3cd', words:["Continue de briller ☀️","Tu mérites cette joie 🌻","Ta joie me rend heureux aussi 🎉"] },
-    { id:'faith',  label:"Quand tu as besoin de foi",    color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon — ça va aller 🌟"] },
+    { id:'faith',  label:"Quand tu as besoin de foi",    color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon  ça va aller 🌟"] },
     { id:'lonely', label:"Quand tu te sens seul(e)",     color:'#c8963e', bg:'#f5e9c8', words:["Tu comptes tellement pour moi 💛","Je pense à toi souvent 🌸","Tu n'es jamais vraiment seul(e) 🤍"] },
     { id:'doubt',  label:"Quand tu doutes de toi",       color:'#a78bfa', bg:'#f3d9ff', words:["Tu es capable de grandes choses ✨","Je crois en toi, même quand tu n'y crois pas 🌙"] },
   ];
@@ -1124,7 +1124,7 @@ window.addEventListener('message', (e) => {
   }
 
   /* ═══════════════════════════════════
-     DESIGN 1 — CLASSIC
+     DESIGN 1  CLASSIC
   ═══════════════════════════════════ */
   function buildClassic(inner) {
     inner.innerHTML = `
@@ -1167,7 +1167,7 @@ window.addEventListener('message', (e) => {
   }
 
   /* ═══════════════════════════════════
-     DESIGN 2 — READ ME WHEN
+     DESIGN 2  READ ME WHEN
   ═══════════════════════════════════ */
   function buildReadMeWhen(inner) {
     // Hearts SVG jar
@@ -1235,7 +1235,7 @@ window.addEventListener('message', (e) => {
   }
 
   /* ═══════════════════════════════════
-     DESIGN 3 — SCROLL (parchemins)
+     DESIGN 3  SCROLL (parchemins)
   ═══════════════════════════════════ */
   function buildScroll(inner) {
     inner.innerHTML = `

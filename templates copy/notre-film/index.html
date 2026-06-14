@@ -49,7 +49,7 @@
     }
 
     /* ══════════════════════════════════
-       SECTIONS — toutes fixed, empilées
+       SECTIONS  toutes fixed, empilées
     ══════════════════════════════════ */
     .scene {
       position: fixed;
@@ -86,7 +86,7 @@
     }
 
     /* ══════════════════════════════════
-       S1 — ACCUEIL
+       S1  ACCUEIL
        fond: dégradé rose pâle
     ══════════════════════════════════ */
     #s1 {
@@ -317,7 +317,7 @@
     }
 
     /* ══════════════════════════════════
-       S2 — VINYLE
+       S2  VINYLE
        fond: bleu ciel doux
     ══════════════════════════════════ */
     #s2 {
@@ -339,7 +339,7 @@
       z-index: 0;
     }
 
-    /* Disc noir qui tourne — same size as wrapper, no overflow */
+    /* Disc noir qui tourne  same size as wrapper, no overflow */
     .s2-disc {
       position: absolute;
       inset: 0;
@@ -445,7 +445,7 @@
       margin-bottom: 20px;
     }
 
-    /* s2-play-btn removed — pilule handles play/pause */
+    /* s2-play-btn removed  pilule handles play/pause */
 
     .s2-next-btn {
       font-size: calc(.88rem * var(--fs-scale));
@@ -466,7 +466,7 @@
     }
 
     /* ══════════════════════════════════
-       S3 — PHOTOS POLAROID
+       S3  PHOTOS POLAROID
        fond: blanc cassé
     ══════════════════════════════════ */
     #s3 {
@@ -545,7 +545,7 @@
     }
 
     /* ══════════════════════════════════
-       S4 — LETTRE
+       S4  LETTRE
        fond: rose très pâle → blanc
     ══════════════════════════════════ */
     #s4 {
@@ -684,7 +684,7 @@
     }
 
     /* ══════════════════════════════════
-       S5 — VIDÉO
+       S5  VIDÉO
     ══════════════════════════════════ */
     #s5 {
       background: var(--accent);
@@ -761,7 +761,7 @@
           transparent 75%, rgba(0, 0, 0, .4) 100%);
     }
 
-    /* s5-bottom removed — button is now in normal flow */
+    /* s5-bottom removed  button is now in normal flow */
     .s5-replay-btn {
       background: rgba(255, 255, 255, .15);
       backdrop-filter: blur(14px);
@@ -781,7 +781,7 @@
     }
 
     /* ══════════════════════════════════
-       PILULE MUSICALE — Top Right (Mini)
+       PILULE MUSICALE  Top Right (Mini)
     ══════════════════════════════════ */
     #music-pill {
       position: fixed;
@@ -973,7 +973,7 @@
   </div>
 
   <!-- ═══════════════════════════
-     S1 — ACCUEIL
+     S1  ACCUEIL
 ═══════════════════════════ -->
   <div class="scene active" id="s1" data-section="greeting">
     <div class="deco-hearts">
@@ -997,7 +997,7 @@
   </div>
 
   <!-- ═══════════════════════════
-     S2 — VINYLE
+     S2  VINYLE
 ═══════════════════════════ -->
   <div class="scene" id="s2" data-section="music">
     <div class="s2-vinyl-wrap">
@@ -1024,7 +1024,7 @@
   </div>
 
   <!-- ═══════════════════════════
-     S3 — PHOTOS
+     S3  PHOTOS
 ═══════════════════════════ -->
   <div class="scene" id="s3" data-section="celebration">
     <div id="s3-area"></div>
@@ -1035,7 +1035,7 @@
   </div>
 
   <!-- ═══════════════════════════
-     S4 — LETTRE
+     S4  LETTRE
 ═══════════════════════════ -->
   <div class="scene" id="s4" data-section="message">
     <div class="s4-inner">
@@ -1062,7 +1062,7 @@
   </div>
 
   <!-- ═══════════════════════════
-     S5 — VIDÉO
+     S5  VIDÉO
 ═══════════════════════════ -->
   <div class="scene" id="s5">
     <div class="s5-title" data-node-name="videoLabel">Notre film d'amour</div>
@@ -1490,7 +1490,7 @@
           r.style.setProperty('--fs-scale', sc);
         }
         // ── Backgrounds ──────────────────────────────────────────────
-        // Les scenes sont position:fixed — ww-engine les remet en absolute,
+        // Les scenes sont position:fixed  ww-engine les remet en absolute,
         // on corrige après chaque application
         if (style.backgrounds && window.wwEngine) {
           window.wwEngine.applyBackgrounds(style);

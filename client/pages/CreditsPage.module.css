@@ -51,7 +51,7 @@
   font-size: 13px; color: var(--mk-ink-2, #7A6A7D); margin-top: 3px;
 }
 
-/* ── Packs grid — always 2 columns ── */
+/* ── Packs grid  always 2 columns ── */
 .packsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

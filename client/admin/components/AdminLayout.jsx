@@ -211,7 +211,7 @@ export default function AdminLayout() {
             <div className="mk-modal-head">
               <div>
                 <div className="mk-modal-title">Qu'est-ce qu'on crée ?</div>
-                <div className="mk-modal-sub">Choisis le type — tu pourras tout régler ensuite.</div>
+                <div className="mk-modal-sub">Choisis le type  tu pourras tout régler ensuite.</div>
               </div>
               <button className="btn-icon" onClick={() => setMobileCreate(false)} aria-label="Fermer"><X size={18} /></button>
             </div>

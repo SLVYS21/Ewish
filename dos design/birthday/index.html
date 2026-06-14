@@ -319,7 +319,7 @@
     /* ===== OUTRO ===== */
     .nine p { font-size: 2rem; font-weight: 300; color: var(--text-color)}
 
-    /* Wishes buttons — fixed, completely outside GSAP's reach */
+    /* Wishes buttons  fixed, completely outside GSAP's reach */
     #wishes-float {
       position: fixed; bottom: 120px; left: 50%;
       transform: translateX(-50%);
@@ -411,7 +411,7 @@
       stroke-width: 0.9;
       stroke-linecap: round;
     }
-    /* Dashed outer ring — static, spinning */
+    /* Dashed outer ring  static, spinning */
     .ib-ring-outer {
       fill: none;
       stroke: rgba(201, 168, 76, 0.32);
@@ -500,7 +500,7 @@
       background-size: 200px;
     }
 
-    /* ── Ambient floating sparkles — thread intro vibe through animation ── */
+    /* ── Ambient floating sparkles  thread intro vibe through animation ── */
     #ambient-layer { position: fixed; inset: 0; z-index: 3; pointer-events: none; display: none; }
     .amb-spark { position: absolute; overflow: visible; opacity: 0; }
     @keyframes ambFloat {
@@ -535,7 +535,7 @@
     .wish-hbd { font-family: 'DM Serif Display', Georgia, serif !important; }
     .nine p   { font-family: 'DM Serif Display', Georgia, serif; font-style: italic; }
 
-    /* ── SVG Conductor — fil conducteur libre ── */
+    /* ── SVG Conductor  fil conducteur libre ── */
     #conductor-svg {
       position: fixed; inset: 0; width: 100%; height: 100%;
       z-index: 4; pointer-events: none; display: none;
@@ -585,7 +585,7 @@
     <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(225,200,200)"/>
     <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(270,200,200)"/>
     <circle class="ib-dot" cx="200" cy="95"  r="3.5" transform="rotate(315,200,200)"/>
-    <!-- 8 outer petals (every 45°) — draw in sequence -->
+    <!-- 8 outer petals (every 45°)  draw in sequence -->
     <path class="ib-draw ib-petal-out" d="M200 200 C182 168 180 120 200 95 C220 120 218 168 200 200" transform="rotate(0,200,200)"/>
     <path class="ib-draw ib-petal-out" d="M200 200 C182 168 180 120 200 95 C220 120 218 168 200 200" transform="rotate(45,200,200)"/>
     <path class="ib-draw ib-petal-out" d="M200 200 C182 168 180 120 200 95 C220 120 218 168 200 200" transform="rotate(90,200,200)"/>
@@ -622,7 +622,7 @@
      END INTRO OVERLAY
      =================================================== -->
 
-<!-- Ambient floating sparkles — persist after intro, throughout animation -->
+<!-- Ambient floating sparkles  persist after intro, throughout animation -->
 <div id="ambient-layer" aria-hidden="true">
   <svg class="amb-spark as1" viewBox="-5 -5 10 10"><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="#c9a84c"/></svg>
   <svg class="amb-spark as2" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#c9a84c"/></svg>
@@ -639,7 +639,7 @@
   </svg>
 </div>
 
-<!-- SVG Conductor — fil conducteur magique -->
+<!-- SVG Conductor  fil conducteur magique -->
 <svg id="conductor-svg" viewBox="0 0 1000 563" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
     <filter id="cl-glow" x="-40%" y="-40%" width="180%" height="180%">
@@ -648,7 +648,7 @@
     </filter>
   </defs>
 
-  <!-- Route reference — invisible, JS only -->
+  <!-- Route reference  invisible, JS only -->
   <path id="cl-route" visibility="hidden" fill="none"
     d="M -50,268
        C 80,255 145,225 225,195
@@ -885,7 +885,7 @@ function flashScene() {
   el.classList.add('active');
 }
 
-/* ── SVG Conductor — fil conducteur magique ── */
+/* ── SVG Conductor  fil conducteur magique ── */
 function drawStation(id, delaySec) {
   setTimeout(function() {
     var g = document.getElementById(id);
@@ -1021,7 +1021,7 @@ function closeWishesIfBg(e) {
 }
 
 /* ============================================================
-   CONFETTI — tsParticles
+   CONFETTI  tsParticles
    ============================================================ */
 function startConfetti() {
   const type = window.__WW_CONFETTI_TYPE__ || 'default';
@@ -1086,7 +1086,7 @@ function _runConfettiEffect(type) {
     case 'gold_rain':
       confetti({ particleCount: 150, spread: 120, origin: { x: 0.5, y: 0 }, startVelocity: 15, gravity: 0.6, scalar: 1.1, colors: ['#c9a84c','#e8c86a','#f5e07a','#d4af37','#fff8dc'], shapes: ['square','circle'], ticks: 350 });
       break;
-    default: // 'default' — classic colorful confetti
+    default: // 'default'  classic colorful confetti
       confetti({ particleCount: 160, spread: 100, origin, startVelocity: 45, gravity: 0.9 });
       setTimeout(() => confetti({ particleCount: 60, spread: 60, origin: { x: 0.25, y: 0.6 } }), 600);
       setTimeout(() => confetti({ particleCount: 60, spread: 60, origin: { x: 0.75, y: 0.6 } }), 900);
@@ -1301,7 +1301,7 @@ const animationTimeline = () => {
     .from(".wish h5", 0.5, { autoAlpha: 0, y: 10, skewX: "-15deg" }, "party")
     .add(() => {
       startConfetti();
-      // Button is in fixed #wishes-float — just show it, no TweenMax needed
+      // Button is in fixed #wishes-float  just show it, no TweenMax needed
       const b = document.getElementById('open-wishes-btn');
       b.style.display = 'inline-block';
       b.style.opacity = '1';
@@ -1497,24 +1497,24 @@ window.addEventListener('message', (e) => {
 });
 
 </script>
-<!-- JAR OF WORDS — 3 designs, inline -->
+<!-- JAR OF WORDS  3 designs, inline -->
 <script>
 (function() {
   /* ─── Default data ─── */
   const DEF_CLASSIC = [
     "Tu mérites tout le bonheur du monde 🎂",
     "Une nouvelle année pleine de magie t'attend ✨",
-    "Tu vieillis en beauté — comme du bon vin 🍷",
+    "Tu vieillis en beauté  comme du bon vin 🍷",
     "Que tous tes rêves deviennent réals 🌟",
     "Tu rends la vie de ceux qui t'entourent plus belle 💛",
-    "Continue d'être exactement toi — c'est parfait 🌸",
+    "Continue d'être exactement toi  c'est parfait 🌸",
     "Cette année sera la meilleure de toutes 🎉",
     "Le monde est meilleur avec toi dedans 🌍",
   ];
   const DEF_CATS = [
     { id:'sad',    label:"Quand tu te sens triste",      color:'#4e9eff', bg:'#d0e8ff', words:["Tu n'es pas seul(e) 💙","Cette douleur est temporaire 🌊","Je suis là pour toi 🤝"] },
     { id:'happy',  label:"Quand tu es heureuse",         color:'#f0a030', bg:'#fff3cd', words:["Continue de briller ☀️","Tu mérites cette joie 🌻","Ta joie me rend heureux aussi 🎉"] },
-    { id:'faith',  label:"Quand tu as besoin de foi",    color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon — ça va aller 🌟"] },
+    { id:'faith',  label:"Quand tu as besoin de foi",    color:'#3ecf8e', bg:'#d4f1c8', words:["Tu es plus forte que tu ne le crois 💪","Dieu a un plan pour toi 🙏","Tiens bon  ça va aller 🌟"] },
     { id:'lonely', label:"Quand tu te sens seul(e)",     color:'#c8963e', bg:'#f5e9c8', words:["Tu comptes tellement pour moi 💛","Je pense à toi souvent 🌸","Tu n'es jamais vraiment seul(e) 🤍"] },
     { id:'doubt',  label:"Quand tu doutes de toi",       color:'#a78bfa', bg:'#f3d9ff', words:["Tu es capable de grandes choses ✨","Je crois en toi, même quand tu n'y crois pas 🌙"] },
   ];
@@ -1642,7 +1642,7 @@ window.addEventListener('message', (e) => {
   }
 
   /* ═══════════════════════════════════
-     DESIGN 1 — CLASSIC
+     DESIGN 1  CLASSIC
   ═══════════════════════════════════ */
   function buildClassic(inner) {
     inner.innerHTML = `
@@ -1685,7 +1685,7 @@ window.addEventListener('message', (e) => {
   }
 
   /* ═══════════════════════════════════
-     DESIGN 2 — READ ME WHEN
+     DESIGN 2  READ ME WHEN
   ═══════════════════════════════════ */
   function buildReadMeWhen(inner) {
     // Hearts SVG jar
@@ -1753,7 +1753,7 @@ window.addEventListener('message', (e) => {
   }
 
   /* ═══════════════════════════════════
-     DESIGN 3 — SCROLL (parchemins)
+     DESIGN 3  SCROLL (parchemins)
   ═══════════════════════════════════ */
   function buildScroll(inner) {
     inner.innerHTML = `

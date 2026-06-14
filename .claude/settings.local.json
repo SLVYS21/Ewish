@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(dir /s \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\")",
+      "Bash(awk 'NR==182' \"c:/Users/Dell/Downloads/myKado Murs \\(offline\\).html\")"
     ]
   }
 }

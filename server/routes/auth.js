@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    // httpOnly cookie — not accessible from JS
+    // httpOnly cookie  not accessible from JS
     res.cookie('ww_admin_token', token, {
       httpOnly: true,
       secure: true,
@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/google — verify Google ID token, create/login user
+// POST /api/auth/google  verify Google ID token, create/login user
 router.post('/google', async (req, res) => {
   try {
     const { credential } = req.body;
@@ -178,7 +178,7 @@ router.post('/forgot-password', async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email requis' });
 
     const user = await AdminUser.findOne({ email: email.toLowerCase() });
-    if (!user) return res.json({ success: true }); // silent — no user enumeration
+    if (!user) return res.json({ success: true }); // silent  no user enumeration
 
     const token  = crypto.randomBytes(32).toString('hex');
     const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1h
@@ -191,7 +191,7 @@ router.post('/forgot-password', async (req, res) => {
 
     await sendBrevoEmail({
       to: user.email,
-      subject: 'Réinitialiser votre mot de passe — myKado',
+      subject: 'Réinitialiser votre mot de passe  myKado',
       html: `
         <div style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#FFFAF6;border-radius:16px">
           <div style="text-align:center;margin-bottom:28px">
@@ -208,7 +208,7 @@ router.post('/forgot-password', async (req, res) => {
             Réinitialiser mon mot de passe →
           </a>
           <p style="color:#B4A4B8;font-size:0.75rem;line-height:1.5;margin:0">
-            Si tu n'es pas à l'origine de cette demande, ignore cet email — ton mot de passe reste inchangé.
+            Si tu n'es pas à l'origine de cette demande, ignore cet email  ton mot de passe reste inchangé.
           </p>
         </div>
       `,

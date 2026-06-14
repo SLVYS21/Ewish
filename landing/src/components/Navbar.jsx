@@ -19,7 +19,7 @@ export default function Navbar({ onOrder }) {
         <div className="wrap announce-inner">
           <span className="announce-badge">Bientôt</span>
           <span className="announce-text">
-            Les <em>cagnottes cadeaux collectives</em> arrivent sur myKado — vœu + cadeau commun, dans la même page.
+            Les <em>cagnottes cadeaux collectives</em> arrivent sur myKado  vœu + cadeau commun, dans la même page.
           </span>
           <a href="#cagnotte" className="announce-link">Lire le teaser <span>→</span></a>
         </div>

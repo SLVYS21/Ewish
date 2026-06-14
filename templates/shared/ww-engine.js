@@ -1,6 +1,6 @@
 /**
  * ╔══════════════════════════════════════════════════════════════════╗
- * ║  WishWell Runtime Engine  —  ww-engine.js                       ║
+ * ║  WishWell Runtime Engine    ww-engine.js                       ║
  * ║  Shared by ALL templates.                                       ║
  * ║  Reads __WW_STYLE__ and __WW_DECO__ injected by serve.js        ║
  * ║  and applies backgrounds + decoration elements to every section. ║
@@ -99,7 +99,7 @@
         el.style.position = 'absolute';
         el.style.overflow = 'hidden';
       } else {
-        // Fixed element — just ensure overflow is hidden
+        // Fixed element  just ensure overflow is hidden
         el.style.overflow = 'hidden';
       }
     }
@@ -366,7 +366,7 @@
     const from = new Date(fromDate);
     const now   = new Date();
     const ms    = now - from;
-    if (isNaN(ms) || ms < 0) return '—';
+    if (isNaN(ms) || ms < 0) return '';
 
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -427,7 +427,7 @@
         <div class="ww-widget-inner ww-widget-quote-inner">
           <div class="ww-widget-quote-mark">"</div>
           <div class="ww-widget-quote-text">${w.text || ''}</div>
-          ${w.author ? '<div class="ww-widget-quote-author">— ' + w.author + '</div>' : ''}
+          ${w.author ? '<div class="ww-widget-quote-author"> ' + w.author + '</div>' : ''}
         </div>`;
     }
     return wrap;
@@ -550,7 +550,7 @@
     window.addEventListener('message', handleLiveUpdate);
 
     // Expose for manual re-runs (e.g. after GSAP reveals a section)
-    // Expose as window.wwEngine — all templates call window.wwEngine.init() / .applyLiveUpdate()
+    // Expose as window.wwEngine  all templates call window.wwEngine.init() / .applyLiveUpdate()
     window.wwEngine = {
       init: function() {
         var style = window.__WW_STYLE__ || {};

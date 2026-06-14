@@ -43,7 +43,7 @@ export default function AdminLogin() {
             Les plus belles cartes pour vos plus beaux moments.
           </h1>
           <p className={s.valueDesc}>
-            Anniversaires, mariages, événements pro — créez une page personnalisée
+            Anniversaires, mariages, événements pro  créez une page personnalisée
             en quelques minutes. Partagez par un simple lien.
           </p>
         </div>

@@ -189,7 +189,7 @@ function ShareNetworks({ shareUrl, onCopy }) {
           onClick={() => {
             if (n.copy) {
               navigator.clipboard?.writeText(shareUrl);
-              onCopy?.(`Lien copié — colle-le dans ${n.label}`);
+              onCopy?.(`Lien copié  colle-le dans ${n.label}`);
             } else {
               window.open(n.href(encodeURIComponent(shareUrl), encodeURIComponent(shareUrl)), '_blank');
             }
@@ -298,8 +298,8 @@ function UnlockView({ pub, onUnlocked }) {
         <p style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>
           Il te reste <strong style={{ color: enough ? 'var(--mk-mint)' : 'var(--mk-accent)' }}>{credits} crédit{credits > 1 ? 's' : ''}</strong>
           {enough
-            ? ` — il t'en restera ${credits - cost} après.`
-            : ` — il t'en faut ${cost}.`}
+            ? `  il t'en restera ${credits - cost} après.`
+            : `  il t'en faut ${cost}.`}
         </p>
       </div>
     </div>
@@ -579,7 +579,7 @@ function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
                 ) : (
                   <>
                     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, letterSpacing: '.14em' }}>
-                      {shortCode || '—'}
+                      {shortCode || ''}
                     </div>
                     <div style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', marginTop: 3 }}>
                       À saisir sur mykado.store pour retrouver la page.

@@ -147,7 +147,7 @@ function PrevHommage() {
             </svg>
           </div>
           <div className="hommage-name serif italic">Mamadou</div>
-          <div className="hommage-dates">1948 — 2024</div>
+          <div className="hommage-dates">1948  2024</div>
           <div className="hommage-quote serif italic">« Un homme bon ne meurt jamais. »</div>
         </div>
       </div>
@@ -303,7 +303,7 @@ export default function Templates({ onOrder }) {
           <h2>Un template <em>pour chaque occasion</em>.</h2>
           <p>
             Anniversaires, mariages, naissances, hommages, fêtes religieuses, célébrations
-            d'équipe et campagnes de marque. L'éditeur est gratuit — vous achetez des crédits
+            d'équipe et campagnes de marque. L'éditeur est gratuit  vous achetez des crédits
             uniquement pour publier.
           </p>
         </div>

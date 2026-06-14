@@ -78,7 +78,7 @@ export default function Hero({ onOrder }) {
           </h1>
           <p className="hero-sub">
             myKado est une plateforme pour concevoir, personnaliser et partager des
-            vœux animés — anniversaires, mariages, hommages, célébrations d'équipe.
+            vœux animés  anniversaires, mariages, hommages, célébrations d'équipe.
             <strong> Personnalisation gratuite</strong>, paiement en crédits uniquement
             pour publier.
           </p>

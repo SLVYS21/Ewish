@@ -6,7 +6,7 @@ const Transaction = require('../models/Transaction');
 const { requireAdmin } = require('../middleware/auth');
 const { trackEvent } = require('../services/analytics');
 
-// POST /api/track — public, receive pixel events from browser
+// POST /api/track  public, receive pixel events from browser
 router.post('/', async (req, res) => {
   try {
     const { event, templateName, value, fbp, fbc } = req.body;
@@ -20,7 +20,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/analytics — admin dashboard stats
+// GET /api/analytics  admin dashboard stats
 router.get('/', requireAdmin, async (req, res) => {
   try {
     if (req.admin.role === 'merchant') {

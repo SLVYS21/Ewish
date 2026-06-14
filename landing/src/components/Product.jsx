@@ -24,7 +24,7 @@ export default function Product() {
             <span className={s.dot}></span> Qu'est-ce que myKado ?
           </span>
           <h2 className={`${s.title} ${s.reveal}`} data-reveal>
-            Bien plus qu'une carte —<br />
+            Bien plus qu'une carte <br />
             <em>une expérience</em> à offrir.
           </h2>
           <p className={`${s.reveal}`} data-reveal style={{ transitionDelay: '.16s' }}>
@@ -34,15 +34,15 @@ export default function Product() {
             mémorable que vos destinataires reçoivent et conservent.
           </p>
           <p className={`${s.reveal}`} data-reveal style={{ transitionDelay: '.22s' }}>
-            Particuliers, équipes RH ou agences évènementielles — myKado s'adapte au moment,
+            Particuliers, équipes RH ou agences évènementielles  myKado s'adapte au moment,
             à votre budget et à votre charte graphique.
           </p>
           <ul className={s.productList}>
             {[
-              { d: '.28s', strong: 'Éditeur intuitif', desc: '— pas besoin de compétences techniques, glissez-déposez vos photos.' },
-              { d: '.34s', strong: 'Partage instantané', desc: '— un lien privé, un QR code, ou diffusion par WhatsApp et email.' },
-              { d: '.40s', strong: 'Contributions collectives', desc: '— invitez famille ou collègues à ajouter leurs messages.' },
-              { d: '.46s', strong: 'Branding entreprise', desc: "— logos, couleurs et liens promo intégrés à l'animation." },
+              { d: '.28s', strong: 'Éditeur intuitif', desc: ' pas besoin de compétences techniques, glissez-déposez vos photos.' },
+              { d: '.34s', strong: 'Partage instantané', desc: ' un lien privé, un QR code, ou diffusion par WhatsApp et email.' },
+              { d: '.40s', strong: 'Contributions collectives', desc: ' invitez famille ou collègues à ajouter leurs messages.' },
+              { d: '.46s', strong: 'Branding entreprise', desc: " logos, couleurs et liens promo intégrés à l'animation." },
             ].map((item, i) => (
               <li key={i} className={`${s.reveal}`} data-reveal style={{ transitionDelay: item.d }}>
                 <span className={s.tick}>✓</span>

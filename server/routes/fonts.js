@@ -23,7 +23,7 @@ const MIME_TO_FORMAT = {
   'application/octet-stream':'truetype',
 };
 
-// Multer — memory storage (we'll upload to Cloudinary manually for raw files)
+// Multer  memory storage (we'll upload to Cloudinary manually for raw files)
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
@@ -37,7 +37,7 @@ const upload = multer({
   },
 });
 
-/* ── GET /api/fonts — list all custom fonts ─────────────────── */
+/* ── GET /api/fonts  list all custom fonts ─────────────────── */
 router.get('/', async (req, res) => {
   try {
     const fonts = await Font.find({}).sort('-createdAt').lean();
@@ -45,7 +45,7 @@ router.get('/', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-/* ── POST /api/fonts — upload a font file ───────────────────── */
+/* ── POST /api/fonts  upload a font file ───────────────────── */
 router.post('/', requireAdmin, (req, res) => {
   upload.single('file')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
@@ -101,7 +101,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
       const file   = parts.pop().split('.')[0];   // filename without extension
       const folder = parts.slice(parts.indexOf('ewishwell')).join('/');
       await cloudinary.uploader.destroy(`${folder}/${file}`, { resource_type: 'raw' });
-    } catch {}  // Non-blocking — DB delete still happens
+    } catch {}  // Non-blocking  DB delete still happens
 
     await Font.findByIdAndDelete(req.params.id);
     res.json({ success: true });

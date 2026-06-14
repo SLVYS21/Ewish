@@ -104,7 +104,7 @@ export default function PhotoLayoutTab({ transforms = {}, onChange }) {
   return (
     <div className={s.root}>
 
-      {/* ── Photo count segmented control (désactivé — limité à 3 photos) ── */}
+      {/* ── Photo count segmented control (désactivé  limité à 3 photos) ── */}
       {/* <div className={s.countBar}>
         <span className={s.countBarLabel}>Nombre de photos</span>
         <div className={s.countSegment}>
@@ -203,7 +203,7 @@ export default function PhotoLayoutTab({ transforms = {}, onChange }) {
       {/* ── Frame picker ── */}
       <div className={s.section}>
         <div className={s.sectionLabel}>
-          Cadre <span className={s.sectionSub}>— {PHOTO_META[safeActive].label}</span>
+          Cadre <span className={s.sectionSub}> {PHOTO_META[safeActive].label}</span>
         </div>
         <div className={s.frameStrip}>
           {FRAMES.map(fr => (
@@ -222,7 +222,7 @@ export default function PhotoLayoutTab({ transforms = {}, onChange }) {
       {/* ── Caption ── */}
       <div className={s.section}>
         <div className={s.sectionLabel}>
-          Légende <span className={s.sectionSub}>— {PHOTO_META[safeActive].label}</span>
+          Légende <span className={s.sectionSub}> {PHOTO_META[safeActive].label}</span>
         </div>
         <div className={s.captionWrap}>
           <input

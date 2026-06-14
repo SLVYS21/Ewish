@@ -14,7 +14,7 @@
     rel="stylesheet">
   <style>
     /* =====================================================
-      0. BUBBLE FONT (graphic element only — balloon letters)                                
+      0. BUBBLE FONT (graphic element only  balloon letters)                                
       ===================================================== */
     @font-face {
       font-family: 'BubbleFont';
@@ -24,7 +24,7 @@
     }
 
     /* =====================================================
-     1. INJECTED VARIABLES — each color has ONE clear role
+     1. INJECTED VARIABLES  each color has ONE clear role
      -----------------------------------------------------
      --primary    →  ACTIONS & INTERACTIVE
                      (all buttons, primary CTA fills, progress,
@@ -41,13 +41,13 @@
      ===================================================== */
     :root {
       --primary: #E11D74;
-      /* CTA — rose vibrant */
+      /* CTA  rose vibrant */
       --accent: #F5B544;
-      /* surfaces décor — ambré chaud */
+      /* surfaces décor  ambré chaud */
       --text-color: #1A1424;
-      /* texte principal — noir profond */
+      /* texte principal  noir profond */
       --text-muted: #8A8195;
-      /* texte secondaire — gris doux */
+      /* texte secondaire  gris doux */
 
       --font: 'Outfit', system-ui, sans-serif;
       --fs-scale: 1;
@@ -86,7 +86,7 @@
       letter-spacing: -0.005em;
     }
 
-    /* Subtle grain — same vibe as original but lighter */
+    /* Subtle grain  same vibe as original but lighter */
     body::after {
       content: '';
       position: fixed;
@@ -118,7 +118,7 @@
     }
 
     /* =====================================================
-     3. SCENE 1 — GREETING
+     3. SCENE 1  GREETING
      ===================================================== */
     .one h1 {
       font-family: var(--font);
@@ -149,7 +149,7 @@
     }
 
     /* =====================================================
-     4. SCENE 2 — MUSIC PLAYER (the "card")
+     4. SCENE 2  MUSIC PLAYER (the "card")
      ===================================================== */
     .music-interlude {
       display: flex;
@@ -389,7 +389,7 @@
     }
 
     /* =====================================================
-     6. SCENE 3 — "It's your birthday"
+     6. SCENE 3  "It's your birthday"
      ===================================================== */
     .three p {
       font-family: var(--font);
@@ -401,7 +401,7 @@
     }
 
     /* =====================================================
-     7. SCENE 4 — WHATSAPP (brand-mimicking, palette préservée)
+     7. SCENE 4  WHATSAPP (brand-mimicking, palette préservée)
      ===================================================== */
     .four .wa-wrap {
       max-width: 340px;
@@ -525,7 +525,7 @@
     }
 
     /* =====================================================
-     8. SCENE 5 — IDEAS (sequenced punchlines)
+     8. SCENE 5  IDEAS (sequenced punchlines)
      ===================================================== */
     .five p {
       font-family: var(--font);
@@ -576,7 +576,7 @@
     }
 
     /* =====================================================
-     9. SCENE 6 — PHOTOS + WISH
+     9. SCENE 6  PHOTOS + WISH
      ===================================================== */
     .six {
       position: relative;
@@ -870,7 +870,7 @@
     }
 
     /* =====================================================
-     14. WISHES BUTTONS (CTA fixe — toujours PRIMARY)
+     14. WISHES BUTTONS (CTA fixe  toujours PRIMARY)
      ===================================================== */
     #wishes-float {
       position: fixed;
@@ -957,7 +957,7 @@
     }
 
     /* =====================================================
-     16. INTRO — BUBBLE CHARACTERS ANIMATION
+     16. INTRO  BUBBLE CHARACTERS ANIMATION
      (replaces the previous SVG mandala bloom)
      ===================================================== */
     #intro-overlay {
@@ -1033,7 +1033,7 @@
       animation-fill-mode: forwards;
     }
 
-    /* Drop-in keyframe — each letter falls then bounces */
+    /* Drop-in keyframe  each letter falls then bounces */
     @keyframes ibBubbleDrop {
       0% {
         opacity: 0;
@@ -1267,7 +1267,7 @@
 <body>
 
   <!-- ===================================================
-     INTRO — BUBBLE CHARACTERS OVERLAY
+     INTRO  BUBBLE CHARACTERS OVERLAY
      =================================================== -->
   <div id="intro-overlay" aria-hidden="true">
     <div class="ib-bubbles" id="ib-bubbles">
@@ -1554,7 +1554,7 @@
     }
 
     /* ============================================================
-       WISHES MODAL — typewriter
+       WISHES MODAL  typewriter
        ============================================================ */
     let typeWriterIntervals = [];
     function openWishes() {
@@ -1919,7 +1919,7 @@
     };
 
     /* ============================================================
-       INTRO — BUBBLE CHARACTERS
+       INTRO  BUBBLE CHARACTERS
        ============================================================ */
     function runIntro() {
       // Respect reduced motion
@@ -2171,24 +2171,24 @@
     });
   </script>
 
-  <!-- JAR OF WORDS — 3 designs, inline (palette aligned with new role system) -->
+  <!-- JAR OF WORDS  3 designs, inline (palette aligned with new role system) -->
   <script>
     (function () {
       /* ─── Default data ─── */
       const DEF_CLASSIC = [
         "Tu mérites tout le bonheur du monde 🎂",
         "Une nouvelle année pleine de magie t'attend ✨",
-        "Tu vieillis en beauté — comme du bon vin 🍷",
+        "Tu vieillis en beauté  comme du bon vin 🍷",
         "Que tous tes rêves deviennent réels 🌟",
         "Tu rends la vie de ceux qui t'entourent plus belle 💛",
-        "Continue d'être exactement toi — c'est parfait 🌸",
+        "Continue d'être exactement toi  c'est parfait 🌸",
         "Cette année sera la meilleure de toutes 🎉",
         "Le monde est meilleur avec toi dedans 🌍",
       ];
       const DEF_CATS = [
         { id: 'sad', label: "Quand tu te sens triste", color: '#4e9eff', bg: '#d0e8ff', words: ["Tu n'es pas seul(e) 💙", "Cette douleur est temporaire 🌊", "Je suis là pour toi 🤝"] },
         { id: 'happy', label: "Quand tu es heureuse", color: '#f0a030', bg: '#fff3cd', words: ["Continue de briller ☀️", "Tu mérites cette joie 🌻", "Ta joie me rend heureux aussi 🎉"] },
-        { id: 'faith', label: "Quand tu as besoin de foi", color: '#3ecf8e', bg: '#d4f1c8', words: ["Tu es plus forte que tu ne le crois 💪", "Dieu a un plan pour toi 🙏", "Tiens bon — ça va aller 🌟"] },
+        { id: 'faith', label: "Quand tu as besoin de foi", color: '#3ecf8e', bg: '#d4f1c8', words: ["Tu es plus forte que tu ne le crois 💪", "Dieu a un plan pour toi 🙏", "Tiens bon  ça va aller 🌟"] },
         { id: 'lonely', label: "Quand tu te sens seul(e)", color: '#c8963e', bg: '#f5e9c8', words: ["Tu comptes tellement pour moi 💛", "Je pense à toi souvent 🌸", "Tu n'es jamais vraiment seul(e) 🤍"] },
         { id: 'doubt', label: "Quand tu doutes de toi", color: '#a78bfa', bg: '#f3d9ff', words: ["Tu es capable de grandes choses ✨", "Je crois en toi, même quand tu n'y crois pas 🌙"] },
       ];
@@ -2200,7 +2200,7 @@
 
       let design = 'classic', words = [], cats = [], drawn = [];
 
-      /* ─── Styles — Jar palette uses --primary for CTA, --accent for chrome ─── */
+      /* ─── Styles  Jar palette uses --primary for CTA, --accent for chrome ─── */
       const css = document.createElement('style');
       css.textContent = `
     #jar-btn{position:fixed;bottom:28px;right:28px;z-index:8000;

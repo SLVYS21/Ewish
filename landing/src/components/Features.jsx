@@ -83,7 +83,7 @@ export default function Features() {
             </div>
             <div className="perso-body">
               <span className="pill pill-gold">QR code stylisé</span>
-              <h3 className="serif italic">Carré, rond, cœur, pétale — à vos couleurs.</h3>
+              <h3 className="serif italic">Carré, rond, cœur, pétale  à vos couleurs.</h3>
               <p>
                 Le QR n'a plus à être laid. Choisissez la forme, l'accent, et même un logo
                 au centre. Imprimable sur invitation papier.
@@ -95,7 +95,7 @@ export default function Features() {
             <div className="perso-visual">
               <div className="cta-wish">
                 <div className="cw-h">Joyeux anniversaire,<br/>Aminata.</div>
-                <div className="cw-sub">— De toute l'équipe</div>
+                <div className="cw-sub"> De toute l'équipe</div>
                 <div className="cw-buttons">
                   <span className="cw-btn cw-btn-1">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.5 5.9L0 24l6.3-1.6c1.7 1 3.7 1.5 5.7 1.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
@@ -110,7 +110,7 @@ export default function Features() {
               <h3 className="serif italic">Un lien vers vous : site, WhatsApp, offre.</h3>
               <p>
                 Si vous êtes une marque, chaque vœu envoyé devient un point de contact.
-                Ajoutez le bouton de votre choix — discret, mais présent.
+                Ajoutez le bouton de votre choix  discret, mais présent.
               </p>
             </div>
           </div>

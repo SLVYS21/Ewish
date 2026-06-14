@@ -23,7 +23,7 @@ function buildSlug(pub) {
   return slugify(raw, { lower: true, strict: true }).slice(0, 30) || null;
 }
 
-/* ── GET /s/:code — public redirect ──────────────────────────── */
+/* ── GET /s/:code  public redirect ──────────────────────────── */
 router.get('/:code', async (req, res) => {
   try {
     const pub = await Publication.findOne({ shortCode: req.params.code }).lean();
@@ -41,14 +41,14 @@ router.get('/:code', async (req, res) => {
   }
 });
 
-/* ── POST /api/shortlinks/:id — generate or return existing ───── */
+/* ── POST /api/shortlinks/:id  generate or return existing ───── */
 // Called by the editor when a publication is published
 router.post('/:id', async (req, res) => {
   try {
     const pub = await Publication.findById(req.params.id);
     if (!pub) return res.status(404).json({ error: 'Not found' });
 
-    // Already has a short code — just return it
+    // Already has a short code  just return it
     if (pub.shortCode) {
       return res.json({ shortCode: pub.shortCode });
     }
@@ -71,7 +71,7 @@ router.post('/:id', async (req, res) => {
   }
 });
 
-/* ── PATCH /api/shortlinks/:id — set custom slug ─────────────── */
+/* ── PATCH /api/shortlinks/:id  set custom slug ─────────────── */
 router.patch('/:id', async (req, res) => {
   try {
     const { slug } = req.body;

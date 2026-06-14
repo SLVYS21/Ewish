@@ -2,7 +2,7 @@ const router = require('express').Router();
 const Promo = require('../models/Promo');
 const { requireAdmin } = require('../middleware/auth');
 
-// POST /api/promo/validate — public, validate a promo code
+// POST /api/promo/validate  public, validate a promo code
 router.post('/validate', async (req, res) => {
   try {
     const { code, templateName, amount } = req.body;

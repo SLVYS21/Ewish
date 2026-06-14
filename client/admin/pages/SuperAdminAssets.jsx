@@ -136,7 +136,7 @@ export default function SuperAdminAssets() {
           <div className={s.dropPrompt}>
             <Upload size={28} />
             <div>Glissez une image ici ou <span>parcourir</span></div>
-            <div className={s.dropHint}>PNG, JPG, WebP — max 20 Mo</div>
+            <div className={s.dropHint}>PNG, JPG, WebP  max 20 Mo</div>
           </div>
         )}
       </div>

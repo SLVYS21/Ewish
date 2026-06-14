@@ -81,7 +81,7 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
       {/* Main: 4 stacked rows */}
       <div className="crea-main">
 
-        {/* Row 1 — title + status badge */}
+        {/* Row 1  title + status badge */}
         <div className="crea-r1">
           <span className="crea-title">{pub.title || 'Sans titre'}</span>
           <div className="crea-badges">
@@ -92,7 +92,7 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
           </div>
         </div>
 
-        {/* Row 2 — template label + shortcode chip */}
+        {/* Row 2  template label + shortcode chip */}
         <div className="crea-r2">
           <span className="crea-tpl-name">{tplLabel}</span>
           {pub.shortCode && (
@@ -100,7 +100,7 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
           )}
         </div>
 
-        {/* Row 3 — URL + relative time */}
+        {/* Row 3  URL + relative time */}
         {(displayUrl || pub.updatedAt) && (
           <div className="crea-r3">
             {displayUrl && <span className="crea-url">{displayUrl}</span>}
@@ -109,7 +109,7 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
           </div>
         )}
 
-        {/* Row 4 — action buttons */}
+        {/* Row 4  action buttons */}
         <div className="crea-r4" onClick={e => e.stopPropagation()}>
           {pub.published && (
             <button

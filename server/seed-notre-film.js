@@ -93,7 +93,7 @@ async function seed() {
     notreFilmTemplate,
     { upsert: true, new: true }
   );
-  console.log('✅ Seeded:', t.name, '—', t.fields.length, 'champs');
+  console.log('✅ Seeded:', t.name, '', t.fields.length, 'champs');
   await mongoose.disconnect();
   process.exit(0);
 }

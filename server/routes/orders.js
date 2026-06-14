@@ -7,7 +7,7 @@ const { requireAdmin } = require('../middleware/auth');
 const { sendFbEvent } = require('../services/facebook');
 const { trackEvent } = require('../services/analytics');
 
-// POST /api/orders — public, create order from landing page
+// POST /api/orders  public, create order from landing page
 router.post('/', async (req, res) => {
   try {
     const { templateName, client, recipientName, occasion, notes, promoCode, fbp, fbc } = req.body;
@@ -89,7 +89,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/orders — admin only
+// GET /api/orders  admin only
 router.get('/', requireAdmin, async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
@@ -121,7 +121,7 @@ router.get('/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/orders/:id — update status or link publication
+// PATCH /api/orders/:id  update status or link publication
 router.patch('/:id', requireAdmin, async (req, res) => {
   try {
     const existing = await Order.findById(req.params.id).lean();

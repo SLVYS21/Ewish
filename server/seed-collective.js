@@ -51,7 +51,7 @@ const COMMON_COLLECTIVE_FIELDS = [
 const templates = [
   {
     name: 'collective-family',
-    label: 'Collectif — Famille & Amis',
+    label: 'Collectif  Famille & Amis',
     description: 'Un cadeau de groupe chaleureux avec carousel de vœux personnels. Parfait pour famille, amis proches, groupe scolaire.',
     thumbnail: '/thumbnails/collective-family.png',
     collectEnabled: true,
@@ -80,7 +80,7 @@ const templates = [
   },
   {
     name: 'collective-pro',
-    label: 'Collectif — Professionnel',
+    label: 'Collectif  Professionnel',
     description: 'Un hommage élégant de toute une équipe. Typographie serif, palette navy/or. Idéal pour collègue, patron, départ en retraite.',
     thumbnail: '/thumbnails/collective-pro.png',
     collectEnabled: true,

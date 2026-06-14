@@ -165,7 +165,7 @@ export default function CreditsPage() {
         {promoErr && <p style={{ fontSize: 12, color: 'var(--mk-accent)', marginTop: 8, fontWeight: 600 }}>{promoErr}</p>}
         {promoInfo && !promoInfo.isGift && (
           <p style={{ fontSize: 12, color: 'var(--mk-mint)', marginTop: 8, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Check size={12} /> Code appliqué — {promoInfo.type === 'percent' ? `−${promoInfo.value}%` : `−${promoInfo.value.toLocaleString('fr-FR')} FCFA`}
+            <Check size={12} /> Code appliqué  {promoInfo.type === 'percent' ? `−${promoInfo.value}%` : `−${promoInfo.value.toLocaleString('fr-FR')} FCFA`}
           </p>
         )}
       </div>

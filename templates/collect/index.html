@@ -588,7 +588,7 @@ input, textarea { font-family: inherit; color: inherit; }
       <!-- Tape strip -->
       <span style="position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(3deg);width:60px;height:20px;background:rgba(225,29,72,.22);border-radius:3px;display:block;"></span>
       <p id="sent-wish-text" style="font-family:var(--mk-hand);font-size:18px;color:var(--mk-ink);line-height:1.35;margin-bottom:8px;">"Joyeux anniversaire !"</p>
-      <div id="sent-sig" style="font-size:13px;font-weight:800;color:var(--mk-rose);text-align:right;">— Anonyme</div>
+      <div id="sent-sig" style="font-size:13px;font-weight:800;color:var(--mk-rose);text-align:right;"> Anonyme</div>
     </div>
 
     <p id="sent-sub" class="sent-sub-p" style="font-size:14.5px;color:var(--mk-ink-2);line-height:1.5;max-width:380px;margin-bottom:22px;">
@@ -936,7 +936,7 @@ function init() {
     avatarsEl.style.display = 'none';
   }
 
-  // Step 1 placeholder — adapt to occasion
+  // Step 1 placeholder  adapt to occasion
   const occ2 = (D.occasion || 'anniversaire').toLowerCase();
   const isAnniv = occ2.includes('anniv') || occ2.includes('birthday');
   $('wish-ta').placeholder = (isAnniv ? 'Joyeux anniversaire ' : 'Félicitations ') + rec + ' ! Je te souhaite…';
@@ -1110,7 +1110,7 @@ async function submitWish() {
     // Populate sent screen
     $('sent-hey').textContent = 'merci ' + (S.anon ? '' : S.name) + ' ! 💕';
     $('sent-wish-text').textContent = '"' + S.text.trim() + '"';
-    $('sent-sig').textContent = '— ' + finalName;
+    $('sent-sig').textContent = ' ' + finalName;
     goto('sent');
   } catch (e) {
     showErr('err-sign', e.message);

@@ -79,7 +79,7 @@ const publicationSchema = new mongoose.Schema({
     paletteId:     { type: String, default: '' },
     typographyId:  { type: String, default: '' },
 
-    // Background per section — key = section slug
+    // Background per section  key = section slug
     // Special key "global" = fallback for all sections with no specific bg
     backgrounds: {
       type: mongoose.Schema.Types.Mixed,  // { [sectionKey]: sectionBgSchema }
@@ -103,7 +103,7 @@ const publicationSchema = new mongoose.Schema({
   isPremade:   { type: Boolean, default: false, index: true },
   premadeLabel:{ type: String },
 
-  // Analytics — compteur de visites
+  // Analytics  compteur de visites
   views:       { type: Number, default: 0 },
   lastViewedAt:{ type: Date },
 

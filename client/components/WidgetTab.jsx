@@ -105,7 +105,7 @@ function WidgetConfigurator({ type, defaults, onConfirm, onCancel }) {
           <label className={s.label}>Citation</label>
           <textarea className={s.textarea} rows={3} value={cfg.text || ''} onChange={e => setCfg({...cfg, text: e.target.value})} placeholder="Écris la citation ici…" />
           <label className={s.label}>Auteur (optionnel)</label>
-          <input className={s.input} value={cfg.author || ''} onChange={e => setCfg({...cfg, author: e.target.value})} placeholder="— Quelqu'un de sage" />
+          <input className={s.input} value={cfg.author || ''} onChange={e => setCfg({...cfg, author: e.target.value})} placeholder=" Quelqu'un de sage" />
         </>
       )}
 

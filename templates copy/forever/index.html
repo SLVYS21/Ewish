@@ -58,7 +58,7 @@
     #s4.clickable, #s5.clickable { pointer-events: all; }
 
     /* ══════════════════════════
-       S1 — ACCUEIL
+       S1  ACCUEIL
     ══════════════════════════ */
     .s1-hey {
       font-family: var(--font-body);
@@ -102,7 +102,7 @@
     }
 
     /* ══════════════════════════
-       S2 — DÉCOMPTE
+       S2  DÉCOMPTE
     ══════════════════════════ */
     .s2 { background: var(--bg); }
     .s2-label {
@@ -158,7 +158,7 @@
     }
 
     /* ══════════════════════════
-       S3 — PHOTOS
+       S3  PHOTOS
     ══════════════════════════ */
     .s3 { background: var(--bg); }
     .s3-photos {
@@ -213,7 +213,7 @@
     }
 
     /* ══════════════════════════
-       S4 — MESSAGE
+       S4  MESSAGE
     ══════════════════════════ */
     .s4 { background: var(--bg); }
     .s4-btn-wrap {
@@ -257,7 +257,7 @@
       overflow-y: auto;
       width: 100%;
       padding: 0 8px 20px;
-      /* hide scrollbar — show if needed */
+      /* hide scrollbar  show if needed */
       scrollbar-width: thin;
       scrollbar-color: rgba(192,57,43,0.2) transparent;
     }
@@ -293,7 +293,7 @@
     }
 
     /* ══════════════════════════
-       S5 — OUTRO
+       S5  OUTRO
     ══════════════════════════ */
     .s5-heart {
       font-size: 3rem;
@@ -456,7 +456,7 @@ const svgPause = `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentC
     </div>
     <!-- Message (caché jusqu'au clic) -->
     <div class="s4-message-wrap" id="s4-msg-wrap">
-      <div class="s4-ornament">— ♥ —</div>
+      <div class="s4-ornament"> ♥ </div>
       <div class="s4-message-scroll">
         <div class="s4-message-text" id="typed-message"></div>
       </div>
@@ -514,7 +514,7 @@ audio.addEventListener('timeupdate', () => {
 });
 
 /* ══════════════════════════════════════
-   COUNTER — calcul depuis date
+   COUNTER  calcul depuis date
 ══════════════════════════════════════ */
 function calcDays(dateStr) {
   if (!dateStr) return null;
@@ -720,7 +720,7 @@ function animationTimeline() {
         // Type the message
         const msg = _fullMessage || 'Je t\'aime infiniment.';
         typeMessage(msg, () => {
-          // After typing — resume TL after a pause
+          // After typing  resume TL after a pause
           setTimeout(() => tl.resume(), 3500);
         });
       });

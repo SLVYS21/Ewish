@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, X, Music, Plus } from 'lucide-react';
 import { getTemplate, getPremadePublications, createPublication, duplicatePublication } from '../utils/api';
+
+const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
 
 const TEMPLATE_COLORS = {
   birthday:               'linear-gradient(145deg,#FFB3C1 0%,#FF8DAA 100%)',
@@ -65,8 +67,18 @@ export default function TemplateDetailPage() {
     load();
   }, [name, navigate]);
 
+  const isWall = WALL_TEMPLATES.has(name);
+
+  const previewSrc = useMemo(() => {
+    if (picked && picked !== 'zero') {
+      const p = premades.find(x => x._id === picked);
+      if (p) return `${import.meta.env.VITE_API_URL}/site/${p.templateName}/${p.customName}?preview=1`;
+    }
+    return `${import.meta.env.VITE_API_URL}/preview/${name}`;
+  }, [picked, premades, name]);
+
   const openNaming = () => {
-    if (!picked) return;
+    if (!isWall && !picked) return;
     setNaming(true); setTitle(''); setTitleErr('');
     setTimeout(() => inputRef.current?.focus(), 80);
   };
@@ -76,13 +88,14 @@ export default function TemplateDetailPage() {
     if (!t) { setTitleErr('Donne un nom à ta création'); return; }
     setCreating(true); setTitleErr('');
     try {
-      if (picked === 'zero' || !premades.length) {
+      if (isWall || picked === 'zero' || !premades.length) {
         const res = await createPublication({
           templateName: name,
-          customName: `draft-${Date.now()}`,
+          customName: isWall ? `wall-${Date.now()}` : `draft-${Date.now()}`,
           title: t,
+          ...(isWall ? { data: { eyebrow: '✦ Mur de mots', wishesEnabled: true } } : {}),
         });
-        navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
+        navigate(isWall ? `/ewish-admin/wall/${res.data._id}` : `/ewish-admin/ewish/edit/${res.data._id}`);
       } else {
         const premade = premades.find(p => p._id === picked);
         const slug = t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) + '-' + Date.now();
@@ -141,7 +154,7 @@ export default function TemplateDetailPage() {
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                 <button className="btn btn-ghost" onClick={() => setNaming(false)}>Annuler</button>
                 <button className="btn btn-primary" onClick={confirmCreate} disabled={creating}>
-                  {creating ? 'Création…' : <>Ouvrir l'éditeur <ArrowRight size={15} /></>}
+                  {creating ? 'Création…' : isWall ? <>Configurer le mur <ArrowRight size={15} /></> : <>Ouvrir l'éditeur <ArrowRight size={15} /></>}
                 </button>
               </div>
             </div>
@@ -167,27 +180,12 @@ export default function TemplateDetailPage() {
         {/* Left: live preview stage */}
         <div>
           <div className="tplv-stage">
-            <div style={{ position: 'absolute', inset: 0, background: bg }} />
-            {/* Animated scene overlay */}
-            <div style={{
-              position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 10,
-              background: 'rgba(0,0,0,.08)',
-            }}>
-              <span style={{ fontFamily: 'var(--mk-hand)', fontSize: 22, color: '#fff', opacity: .9 }}>Pour toi,</span>
-              <span style={{ fontFamily: 'var(--mk-display)', fontSize: 34, color: '#fff', letterSpacing: '-.01em', textAlign: 'center', padding: '0 24px' }}>
-                {tpl.label || tpl.name}
-              </span>
-              <span style={{ width: 54, height: 3, borderRadius: 2, background: 'rgba(255,255,255,.5)' }} />
-            </div>
-            {/* "Aperçu animé" pill */}
-            <div style={{
-              position: 'absolute', left: 16, bottom: 14, display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,.88)', backdropFilter: 'blur(4px)',
-              borderRadius: 'var(--mk-r-pill)', padding: '7px 14px', fontSize: 12, fontWeight: 700, color: 'var(--mk-ink)',
-            }}>
-              ▶ Aperçu animé
-            </div>
+            <iframe
+              src={previewSrc}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+              title={tpl.label || tpl.name}
+              allow="autoplay"
+            />
           </div>
 
           {/* Feature badges */}
@@ -200,77 +198,100 @@ export default function TemplateDetailPage() {
           </div>
         </div>
 
-        {/* Right: premades + zero + CTA */}
+        {/* Right: wall CTA or premades + zero + CTA */}
         <div>
-          <div className="section-label" style={{ marginBottom: 14 }}>Comment veux-tu démarrer ?</div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-            {/* Premade options */}
-            {premades.map(p => {
-              const swatchBg = p.thumbnail
-                ? `url(${p.thumbnail}) center/cover no-repeat`
-                : (TEMPLATE_COLORS[p.templateName] || 'linear-gradient(145deg,#FFB3C1,#FF8DAA)');
-              return (
+          {isWall ? (
+            <div>
+              <div className="section-label" style={{ marginBottom: 14 }}>À propos de ce mur</div>
+              <p style={{ fontSize: 13.5, color: 'var(--mk-ink-2)', lineHeight: 1.6, marginBottom: 18 }}>
+                {tpl.description || "Une page où chacun peut laisser un message. Partage le lien et les mots s'accumulent en temps réel."}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 18 }}>
                 <button
-                  key={p._id}
-                  className={`premade-row${picked === p._id ? ' on' : ''}`}
-                  onClick={() => setPicked(p._id)}
+                  className="btn btn-primary btn-lg"
+                  onClick={() => { setNaming(true); setTitle(''); setTitleErr(''); setTimeout(() => inputRef.current?.focus(), 80); }}
+                  style={{ width: '100%', justifyContent: 'center' }}
                 >
-                  <span className="premade-swatch" style={{ background: swatchBg }} />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, fontWeight: 800 }}>
-                      {p.premadeLabel || p.title}
-                      <span className="badge" style={{ background: 'var(--mk-mint-soft)', color: 'var(--mk-mint)' }}>Préfait</span>
-                    </span>
-                    {p.premadeDescription && (
-                      <span style={{ display: 'block', fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2 }}>{p.premadeDescription}</span>
-                    )}
-                    {p.data?.music && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--mk-ink-3)', marginTop: 4 }}>
-                        <Music size={12} /> {p.data.music}
-                      </span>
-                    )}
-                  </span>
-                  {picked === p._id && <Check size={18} style={{ color: 'var(--mk-accent)', flexShrink: 0 }} />}
+                  Configurer ce mur <ArrowRight size={16} />
                 </button>
-              );
-            })}
+                <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center', lineHeight: 1.5 }}>
+                  Les 5 premiers mots sont gratuits. Tu débloqueras ensuite pour aller plus loin.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="section-label" style={{ marginBottom: 14 }}>Comment veux-tu démarrer ?</div>
 
-            {/* Partir de zéro */}
-            <button
-              className={`premade-row${picked === 'zero' ? ' on' : ''}`}
-              onClick={() => setPicked('zero')}
-            >
-              <span className="premade-swatch" style={{
-                border: '1.5px dashed var(--mk-line-strong)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--mk-ink-3)', background: 'none',
-              }}>
-                <Plus size={18} />
-              </span>
-              <span style={{ flex: 1 }}>
-                <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800 }}>Partir de zéro</span>
-                <span style={{ display: 'block', fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2 }}>
-                  Tu choisis toi-même le fond, les décorations et la musique.
-                </span>
-              </span>
-              {picked === 'zero' && <Check size={18} style={{ color: 'var(--mk-accent)', flexShrink: 0 }} />}
-            </button>
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                {/* Premade options */}
+                {premades.map(p => {
+                  const swatchBg = p.thumbnail
+                    ? `url(${p.thumbnail}) center/cover no-repeat`
+                    : (TEMPLATE_COLORS[p.templateName] || 'linear-gradient(145deg,#FFB3C1,#FF8DAA)');
+                  return (
+                    <button
+                      key={p._id}
+                      className={`premade-row${picked === p._id ? ' on' : ''}`}
+                      onClick={() => setPicked(p._id)}
+                    >
+                      <span className="premade-swatch" style={{ background: swatchBg }} />
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, fontWeight: 800 }}>
+                          {p.premadeLabel || p.title}
+                          <span className="badge" style={{ background: 'var(--mk-mint-soft)', color: 'var(--mk-mint)' }}>Préfait</span>
+                        </span>
+                        {p.premadeDescription && (
+                          <span style={{ display: 'block', fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2 }}>{p.premadeDescription}</span>
+                        )}
+                        {p.data?.music && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--mk-ink-3)', marginTop: 4 }}>
+                            <Music size={12} /> {p.data.music}
+                          </span>
+                        )}
+                      </span>
+                      {picked === p._id && <Check size={18} style={{ color: 'var(--mk-accent)', flexShrink: 0 }} />}
+                    </button>
+                  );
+                })}
 
-          <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button
-              className="btn btn-primary btn-lg"
-              disabled={!picked}
-              onClick={openNaming}
-              style={{ width: '100%', justifyContent: 'center' }}
-            >
-              Créer à partir de ce template <ArrowRight size={16} />
-            </button>
-            <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center', lineHeight: 1.5 }}>
-              Création et édition gratuites. La publication se débloque avec {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}.
-            </p>
-          </div>
+                {/* Partir de zéro */}
+                <button
+                  className={`premade-row${picked === 'zero' ? ' on' : ''}`}
+                  onClick={() => setPicked('zero')}
+                >
+                  <span className="premade-swatch" style={{
+                    border: '1.5px dashed var(--mk-line-strong)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--mk-ink-3)', background: 'none',
+                  }}>
+                    <Plus size={18} />
+                  </span>
+                  <span style={{ flex: 1 }}>
+                    <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800 }}>Partir de zéro</span>
+                    <span style={{ display: 'block', fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2 }}>
+                      Tu choisis toi-même le fond, les décorations et la musique.
+                    </span>
+                  </span>
+                  {picked === 'zero' && <Check size={18} style={{ color: 'var(--mk-accent)', flexShrink: 0 }} />}
+                </button>
+              </div>
+
+              <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button
+                  className="btn btn-primary btn-lg"
+                  disabled={!picked}
+                  onClick={openNaming}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  Créer à partir de ce template <ArrowRight size={16} />
+                </button>
+                <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center', lineHeight: 1.5 }}>
+                  Création et édition gratuites. La publication se débloque avec {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

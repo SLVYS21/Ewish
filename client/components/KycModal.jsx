@@ -36,7 +36,7 @@ const STEPS = ['Identité', 'Selfie', 'Confirmation'];
 export default function KycModal({ open, onClose, onDone }) {
   const [step, setStep] = useState(0);
 
-  // Step 0 — Identité
+  // Step 0  Identité
   const [fullName, setFullName] = useState('');
   const [idType, setIdType] = useState('');
   const [documentUrl, setDocumentUrl] = useState('');
@@ -44,7 +44,7 @@ export default function KycModal({ open, onClose, onDone }) {
   const [docUploading, setDocUploading] = useState(false);
   const [docUploadError, setDocUploadError] = useState('');
 
-  // Step 1 — Selfie
+  // Step 1  Selfie
   const [selfieUrl, setSelfieUrl] = useState('');
   const [selfiePreview, setSelfiePreview] = useState('');
   const [selfieUploading, setSelfieUploading] = useState(false);
@@ -333,7 +333,7 @@ export default function KycModal({ open, onClose, onDone }) {
                   )}
                 </>
               ) : (
-                // Desktop: QR code only — selfie must be taken on mobile
+                // Desktop: QR code only  selfie must be taken on mobile
                 <>
                   <p style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginBottom: 16 }}>
                     Le selfie doit être pris avec l'appareil photo de votre téléphone. Scannez le QR code ci-dessous pour continuer sur mobile.
@@ -439,7 +439,7 @@ export default function KycModal({ open, onClose, onDone }) {
             </>
           ) : (
             <button className={styles.btnNext} style={{ marginLeft: 'auto' }} onClick={onDone}>
-              C'est parti — activer la cagnotte <ArrowRight size={14}/>
+              C'est parti  activer la cagnotte <ArrowRight size={14}/>
             </button>
           )}
         </div>

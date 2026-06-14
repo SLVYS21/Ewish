@@ -32,7 +32,7 @@ const STEPS = [
   { id: 'Share',   n: 4, title: 'Le partage',  sub: 'Lien & QR Code',           Icon: Share2,        color: '#b45309', soft: '#fffbeb', accent: '#fde68a' },
 ];
 
-/* ─── Section jump map — templates with animated GSAP timeline ── */
+/* ─── Section jump map  templates with animated GSAP timeline ── */
 const TEMPLATE_SECTIONS = {
   birthday:           [
     { id: 'section-greeting', label: 'Intro',     emoji: '👋' },
@@ -544,9 +544,21 @@ export default function Editor() {
   const isWall  = pub?.templateName?.startsWith('wall-of-wishes');
   const isMixed = ['collective-family', 'collective-pro'].includes(pub?.templateName);
 
+  const wallStepTheme = (() => {
+    switch (pub?.templateName) {
+      case 'wall-of-wishes':        return { color: '#E11D48', soft: '#FFF1F4', accent: '#FBCFE0' };
+      case 'wall-of-wishes-modern': return { color: '#7C5CC9', soft: '#F4EEFB', accent: '#D7C5F2' };
+      case 'wall-of-wishes-3d':     return { color: '#c9a84c', soft: '#FBF5E5', accent: '#F0DDA0' };
+      case 'wall-of-wishes-space':  return { color: '#F2643D', soft: '#FFF1EC', accent: '#FED4C2' };
+      default:                      return { color: '#E11D48', soft: '#FFF1F4', accent: '#FBCFE0' };
+    }
+  })();
+
   const displaySteps = STEPS.map(s => {
     if (s.id === 'Message' && isWall)
-      return { ...s, title: 'Le mur', sub: 'Titre, accès & mots', Icon: LayoutTemplate, color: '#b45309', soft: '#fffbeb', accent: '#fde68a' };
+      return { ...s, title: 'Le mur', sub: 'Titre, accès & mots', Icon: LayoutTemplate, ...wallStepTheme };
+    if (s.id === 'Share' && isWall)
+      return { ...s, ...wallStepTheme };
     if (s.id === 'Cadeau' && !isWall)
       return { ...s, title: 'Extra', sub: 'Outils & options', Icon: Sparkles, color: '#047857', soft: '#ECFDF5', accent: '#A7F3D0' };
     return s;
@@ -601,7 +613,7 @@ export default function Editor() {
                   className={styles.cagnotteInput}
                   value={data.subtitle || ''}
                   onChange={e => handleDataChange('subtitle', e.target.value)}
-                  placeholder="Partagez ce lien — chacun peut laisser son mot sur ce mur."
+                  placeholder="Partagez ce lien  chacun peut laisser son mot sur ce mur."
                   maxLength={200}
                   rows={3}
                   style={{ resize: 'vertical', minHeight: 72 }}
@@ -660,7 +672,7 @@ export default function Editor() {
                   <div>
                     <div className={styles.cagnotteToggleLabel}>Recevoir de nouveaux vœux</div>
                     <div className={styles.cagnotteToggleSub}>
-                      {wishesEnabled ? 'Le bouton « Ajouter mon mot » est visible.' : 'Mur en lecture seule — aucun ajout possible.'}
+                      {wishesEnabled ? 'Le bouton « Laisser un mot » est visible.' : 'Mur en lecture seule  aucun ajout possible.'}
                     </div>
                   </div>
                 </div>
@@ -703,7 +715,7 @@ export default function Editor() {
                     <span className={styles.wallCapKyc}>💎 +KYC</span>
                   </div>
                   <div className={styles.wallCapNote}>
-                    C'est toi qui débloque avec tes crédits — tes invités n'ont jamais à payer pour participer.
+                    C'est toi qui débloque avec tes crédits  tes invités n'ont jamais à payer pour participer.
                   </div>
                 </div>
               </div>
@@ -868,8 +880,8 @@ export default function Editor() {
                   <div>
                     <div className={styles.cagnotteToggleLabel}>Activer la cagnotte cadeau</div>
                     <div className={styles.cagnotteToggleSub}>
-                      {kycStatus === 'approved' ? 'Identité vérifiée — prêt à activer ✓' :
-                       kycStatus === 'pending'  ? 'Disponible — vérification en attente' :
+                      {kycStatus === 'approved' ? 'Identité vérifiée  prêt à activer ✓' :
+                       kycStatus === 'pending'  ? 'Disponible  vérification en attente' :
                        'Vérification d\'identité recommandée pour recevoir'}
                     </div>
                   </div>
@@ -1049,7 +1061,7 @@ export default function Editor() {
                 <button className={styles.sharePublishBtn} onClick={handlePublish} disabled={publishing}>
                   {publishing
                     ? <><RefreshCw size={16} className={styles.spinIcon} /> Publication…</>
-                    : <><Sparkles size={15} /> Publier ma création — 3 💎</>}
+                    : <><Sparkles size={15} /> Publier ma création  3 💎</>}
                 </button>
                 <div className={styles.partageLockedList}>
                   {[
@@ -1078,7 +1090,7 @@ export default function Editor() {
                   <div className={styles.shareHeroSub}>Ton lien est prêt à être partagé</div>
                 </div>
 
-                {/* Cagnotte collect link — shown when cagnotte is enabled */}
+                {/* Cagnotte collect link  shown when cagnotte is enabled */}
                 {cagnotte && (
                   <div style={{ margin: '0 16px', padding: '14px 16px', background: 'linear-gradient(135deg,#FFF1F4,#FFE0E6)', border: '1.5px solid #FFB3C1', borderRadius: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
@@ -1125,7 +1137,7 @@ export default function Editor() {
                 )}
 
                 <button className={styles.btnShareFull} onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-                  <Sparkles size={14} /> Page de partage complète — QR, canaux, cagnotte
+                  <Sparkles size={14} /> Page de partage complète  QR, canaux, cagnotte
                 </button>
               </>
             )}
@@ -1460,7 +1472,7 @@ export default function Editor() {
                 style={{ background: currentStep.color }}
                 onClick={() => { setActiveStep(displaySteps[currentStepIndex + 1].id); }}
               >
-                Suivant — {displaySteps[currentStepIndex + 1]?.title}
+                Suivant  {displaySteps[currentStepIndex + 1]?.title}
               </button>
             ) : (
               <button
@@ -1469,7 +1481,7 @@ export default function Editor() {
                 onClick={() => { setMobileSheetOpen(false); handlePublish(); }}
                 disabled={publishing}
               >
-                {pub?.published ? '✨ Mettre à jour' : '✨ Publier — 3 💎'}
+                {pub?.published ? '✨ Mettre à jour' : '✨ Publier  3 💎'}
               </button>
             )}
           </div>

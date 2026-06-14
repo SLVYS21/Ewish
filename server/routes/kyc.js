@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const AdminUser = require('../models/AdminUser');
 const { requireAdmin } = require('../middleware/auth');
 
-// POST /api/kyc/submit — authenticated: save KYC with uploaded photo URLs
+// POST /api/kyc/submit  authenticated: save KYC with uploaded photo URLs
 router.post('/submit', requireAdmin, async (req, res) => {
   try {
     const { fullName, idType, documentUrl, selfieUrl } = req.body;
@@ -39,7 +39,7 @@ router.get('/status', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/kyc/mobile-token — generate short-lived token for mobile continuation
+// POST /api/kyc/mobile-token  generate short-lived token for mobile continuation
 router.post('/mobile-token', requireAdmin, async (req, res) => {
   try {
     const token = crypto.randomBytes(24).toString('hex');
@@ -52,7 +52,7 @@ router.post('/mobile-token', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/kyc/mobile-verify/:token — public: check if token is valid
+// GET /api/kyc/mobile-verify/:token  public: check if token is valid
 router.get('/mobile-verify/:token', async (req, res) => {
   try {
     const user = await AdminUser.findOne({
@@ -64,7 +64,7 @@ router.get('/mobile-verify/:token', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/kyc/mobile-submit/:token — public: submit KYC from mobile (no auth)
+// POST /api/kyc/mobile-submit/:token  public: submit KYC from mobile (no auth)
 router.post('/mobile-submit/:token', async (req, res) => {
   try {
     const user = await AdminUser.findOne({
@@ -90,7 +90,7 @@ router.post('/mobile-submit/:token', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/kyc/list — admin only: list KYC submissions
+// GET /api/kyc/list  admin only: list KYC submissions
 router.get('/list', requireAdmin, async (req, res) => {
   try {
     if (req.admin.role === 'merchant') return res.status(403).json({ error: 'Accès refusé' });
@@ -109,7 +109,7 @@ router.get('/list', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/kyc/:id — admin: approve or reject
+// PATCH /api/kyc/:id  admin: approve or reject
 router.patch('/:id', requireAdmin, async (req, res) => {
   try {
     if (!['super_admin', 'admin'].includes(req.admin.role)) return res.status(403).json({ error: 'Accès refusé' });

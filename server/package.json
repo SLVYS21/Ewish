@@ -7,7 +7,8 @@
     "dev": "nodemon index.js",
     "build": "cp -rf ../templates/* ./templates/",
     "seed:ww": "node seeds/wallOfWishes.js",
-    "seed:templates": "node seeds/seedTemplates.js"
+    "seed:templates": "node seeds/seedTemplates.js",
+    "seed:walls": "node seeds/seedWalls.js"
   },
   "dependencies": {
     "@kkiapay-org/nodejs-sdk": "^1.0.7",

@@ -10,7 +10,7 @@ function CagnotteTeaser() {
         <span className="pill pill-em">⊕ &nbsp;Bientôt sur myKado</span>
         <h3 className="serif italic">Le vœu, et le cadeau commun.</h3>
         <p>
-          Sur les vœux collectifs — mariage, départ en retraite, anniversaire — chaque
+          Sur les vœux collectifs  mariage, départ en retraite, anniversaire  chaque
           contributeur pourra participer à un cadeau commun. Une PS5, un voyage, une
           montre. Le bénéficiaire reçoit le montant directement, sans intermédiaire.
         </p>

@@ -1,5 +1,5 @@
 /**
- * Seed ciblé — birthday uniquement
+ * Seed ciblé  birthday uniquement
  * Usage : node server/seeds/seedBirthday.js
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });

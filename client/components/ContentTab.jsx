@@ -299,7 +299,7 @@ export default function ContentTab({ fields, data, onChange, onUpload }) {
   const musicFields  = effectiveFields.filter(isMusicField);
   const photoFields  = effectiveFields.filter(f => f.type === 'url' && isPhotoKey(f.key) && !isMusicField(f));
 
-  /* Always show photo cards — use template's own if defined, else inject defaults */
+  /* Always show photo cards  use template's own if defined, else inject defaults */
   const finalPhotoFields = photoFields.length > 0 ? photoFields : DEFAULT_PHOTO_FIELDS;
 
   const primaryFields = effectiveFields.filter(f =>

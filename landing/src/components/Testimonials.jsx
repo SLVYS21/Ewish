@@ -3,7 +3,7 @@ import s from './Testimonials.module.css';
 
 const TESTIMONIALS = [
   { initial: 'A', name: 'Aminata K.',     role: 'Pour son mari',           text: "«J’ai commandé pour l’anniversaire de mon mari. Il a fondu en larmes. Les photos, la musique, tout était parfait.»" },
-  { initial: 'C', name: 'Christian M.',   role: 'DRH · 80 personnes',      text: "«Le collectif pro pour notre directeur — 40 collègues ont participé. Une expérience inoubliable, à recommander.»" },
+  { initial: 'C', name: 'Christian M.',   role: 'DRH · 80 personnes',      text: "«Le collectif pro pour notre directeur  40 collègues ont participé. Une expérience inoubliable, à recommander.»" },
   { initial: 'F', name: 'Fatou D.',       role: 'Pour sa mère',            text: "«Simple à commander, livré en 24h, vraiment beau. Ma mère l’a regardé trois fois de suite et l’a envoyé à toute la famille.»" },
   { initial: 'J', name: 'Jean-Pierre T.', role: 'Directeur marketing',     text: "«Notre campagne de fin d’année avec myKado a généré 38% de clics en plus sur notre site. Le QR code a fait la différence.»" },
 ];

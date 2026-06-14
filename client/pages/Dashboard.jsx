@@ -77,7 +77,7 @@ function RecentCard({ pub, tplLabel, onDelete, onDup }) {
       <div className="crea-thumb" style={{ background: thumbBg }} />
 
       <div className="crea-main">
-        {/* Row 1 — title + status */}
+        {/* Row 1  title + status */}
         <div className="crea-r1">
           <span className="crea-title">{pub.title || 'Sans titre'}</span>
           <div className="crea-badges">
@@ -88,7 +88,7 @@ function RecentCard({ pub, tplLabel, onDelete, onDup }) {
           </div>
         </div>
 
-        {/* Row 2 — template label + shortcode */}
+        {/* Row 2  template label + shortcode */}
         <div className="crea-r2">
           <span className="crea-tpl-name">{tplLabel}</span>
           {pub.shortCode && (
@@ -96,7 +96,7 @@ function RecentCard({ pub, tplLabel, onDelete, onDup }) {
           )}
         </div>
 
-        {/* Row 3 — URL */}
+        {/* Row 3  URL */}
         {displayUrl && (
           <div className="crea-r3">
             <span className="crea-url">{displayUrl}</span>
@@ -105,7 +105,7 @@ function RecentCard({ pub, tplLabel, onDelete, onDup }) {
           </div>
         )}
 
-        {/* Row 4 — actions */}
+        {/* Row 4  actions */}
         <div className="crea-r4" onClick={e => e.stopPropagation()}>
           {pub.published && (
             <button

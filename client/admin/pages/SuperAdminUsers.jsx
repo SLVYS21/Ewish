@@ -5,7 +5,7 @@ import PageShell from '../components/PageShell';
 import s from './SuperAdminUsers.module.css';
 
 function fmt(d) {
-  if (!d) return '—';
+  if (!d) return '';
   return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
@@ -55,7 +55,7 @@ function UserDrawer({ userId, onClose, onUpdated }) {
             {/* User info */}
             <div className={s.drawerSection}>
               <div className={s.userAvatar}>{(data.user.name || data.user.email || 'U')[0].toUpperCase()}</div>
-              <div className={s.drawerUserName}>{data.user.name || '—'}</div>
+              <div className={s.drawerUserName}>{data.user.name || ''}</div>
               <div className={s.drawerUserEmail}>{data.user.email}</div>
               <div className={s.drawerMeta}>
                 <span className={s.roleBadge}>{data.user.role}</span>
@@ -199,7 +199,7 @@ export default function SuperAdminUsers() {
                   <div className={s.userCell}>
                     <div className={s.avatar}>{(u.name || u.email || 'U')[0].toUpperCase()}</div>
                     <div>
-                      <div className={s.userName}>{u.name || '—'}</div>
+                      <div className={s.userName}>{u.name || ''}</div>
                       <div className={s.userEmail}>{u.email}</div>
                     </div>
                   </div>

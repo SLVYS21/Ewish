@@ -30,7 +30,7 @@ async function sendFbEvent({
   const accessToken = process.env.FB_ACCESS_TOKEN;
 
   if (!pixelId || !accessToken) {
-    console.warn('⚠️  FB Conversions API not configured — skipping');
+    console.warn('⚠️  FB Conversions API not configured  skipping');
     return null;
   }
 

@@ -10,7 +10,7 @@ function genRef() {
 }
 
 /* ── POST /api/orders/public ─────────────────────────────────── */
-// Route publique — pas d'auth requise
+// Route publique  pas d'auth requise
 router.post('/public', async (req, res) => {
   try {
     const {

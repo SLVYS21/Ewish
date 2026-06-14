@@ -111,7 +111,7 @@ function serveLanding(req, res) {
 // ── React SPA (app subdomain, prod only) ──────────────────────
 // In prod, Nginx proxies app.ewishwell.com → Express, or you can
 // serve the Vite build directly from Express as shown here.
-// In dev, Vite handles app.localhost:3000 — Express just responds
+// In dev, Vite handles app.localhost:3000  Express just responds
 // with a helpful message if you hit :5000 directly.
 const REACT_DIST = path.join(__dirname, '../client/dist');
 
