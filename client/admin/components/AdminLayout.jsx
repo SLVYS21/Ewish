@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Home, Layers, Wallet, Plus, Sparkles, MessageSquare,
   ShieldAlert, BarChart2, Users, Ticket, Images, Cog,
-  User, BadgeCheck, ChevronRight, ShieldCheck, X,
+  User, BadgeCheck, ChevronRight, ShieldCheck, X, LayoutTemplate,
 } from 'lucide-react';
 import WhatsAppFAB from '../../components/WhatsAppFAB';
 
@@ -41,10 +41,10 @@ export default function AdminLayout() {
 
   // Route active states
   const p = location.pathname;
-  const isHome = p === '/ewish-admin' || p.startsWith('/ewish-admin/templates');
+  const isHome = p === '/ewish-admin';
   const isCreations = (p.startsWith('/ewish-admin/ewish') && !p.includes('/new') && !p.includes('/edit')) ||
     p.startsWith('/ewish-admin/wall') || p.startsWith('/ewish-admin/share') || p.startsWith('/ewish-admin/cagnotte');
-  const isCredits = p.startsWith('/ewish-admin/credits');
+  const isTemplates = p.startsWith('/ewish-admin/templates');
   const isProfile = p.startsWith('/ewish-admin/profile');
 
   // Close create dropdown on outside click
@@ -118,11 +118,10 @@ export default function AdminLayout() {
             <span>Mes créations</span>
             <span style={{ flex: 1 }} />
           </button>
-          <button className={`sb-item${isCredits ? ' active' : ''}`} onClick={() => navigate('/ewish-admin/credits')}>
-            <Wallet size={16} />
-            <span>Crédits</span>
+          <button className={`sb-item${isTemplates ? ' active' : ''}`} onClick={() => navigate('/ewish-admin/templates')}>
+            <LayoutTemplate size={16} />
+            <span>Templates</span>
             <span style={{ flex: 1 }} />
-            <span className="sb-credits-pill">{user?.credits ?? 0}</span>
           </button>
         </nav>
 
@@ -194,9 +193,9 @@ export default function AdminLayout() {
             <Plus size={26} />
           </button>
         </div>
-        <button className={`mnav-item${isCredits ? ' on' : ''}`} onClick={() => navigate('/ewish-admin/credits')}>
-          <Wallet size={21} />
-          <span>Crédits</span>
+        <button className={`mnav-item${isTemplates ? ' on' : ''}`} onClick={() => navigate('/ewish-admin/templates')}>
+          <LayoutTemplate size={21} />
+          <span>Templates</span>
         </button>
         <button className={`mnav-item${isProfile ? ' on' : ''}`} onClick={() => navigate('/ewish-admin/profile')}>
           <User size={21} />

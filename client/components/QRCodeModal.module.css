@@ -67,6 +67,12 @@
   background: var(--surface); border: 1.5px solid var(--border);
   cursor: pointer; font-size: 0.75rem; font-weight: 600; color: var(--text-2);
   transition: all 0.2s;
+  min-width: 0;
+  text-align: center;
+  line-height: 1.2;
+}
+.shapeBtn span {
+  white-space: nowrap;
 }
 .shapeBtn:hover { border-color: var(--brand); color: var(--brand); }
 .shapeBtn.active {
@@ -186,4 +192,39 @@
   .scaleWrapper {
     transform: scale(0.65);
   }
+
+  .modal { padding: 22px 18px; gap: 18px; border-radius: 16px; }
+  .title { font-size: 1.25rem; }
+  .controls { padding: 12px; gap: 14px; }
+
+  /* Horizontal scroll for shape pills on mobile — labels stay readable
+     and no longer overflow / get clipped */
+  .shapeSelector {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding: 4px 2px 8px;
+    margin: -4px -2px -8px;
+    scrollbar-width: thin;
+  }
+  .shapeSelector::-webkit-scrollbar { height: 4px; }
+  .shapeSelector::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .shapeBtn {
+    flex: 0 0 auto;
+    min-width: 92px;
+    width: auto;
+    scroll-snap-align: start;
+    padding: 10px 14px;
+  }
+
+  /* Color row stays readable but tighter */
+  .colorRow { gap: 14px; }
+  .colorField { font-size: 0.78rem; }
+
+  /* Actions stay accessible — full width buttons on narrow screens */
+  .actions { flex-direction: column-reverse; gap: 8px; }
+  .actions button { width: 100%; padding: 12px; font-size: 0.9rem; }
 }

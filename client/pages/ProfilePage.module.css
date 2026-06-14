@@ -141,3 +141,32 @@
   font-weight: 800;
   letter-spacing: .04em;
 }
+
+/* ── Logout ── */
+.logoutWrap {
+  padding: 20px 16px 8px;
+  display: flex;
+  justify-content: center;
+}
+.logoutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: #fff;
+  color: #B91C1C;
+  border: 1.5px solid #FFE0E0;
+  border-radius: 14px;
+  padding: 12px 22px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .12s, box-shadow .15s;
+}
+.logoutBtn:hover {
+  background: #FFF5F5;
+  border-color: #FBB6B6;
+  box-shadow: 0 4px 12px rgba(185,28,28,.10);
+  transform: translateY(-1px);
+}
+.logoutBtn:active { transform: translateY(0); box-shadow: none; }

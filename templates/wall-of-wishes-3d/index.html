@@ -1360,7 +1360,20 @@ async function submitWish() {
       });
       w._id = result.id;
       if (w._id) { myWishIds.push(w._id); localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds)); }
-    } catch(e) {}
+    } catch(e) {
+      isSubmitting = false;
+      document.getElementById('submit-btn').disabled = false;
+      if (e && e.status === 402) {
+        showToast(e.code === 'FREE_LIMIT_REACHED'
+          ? '5 mots gratuits atteints — le créateur doit activer le mur complet.'
+          : 'Photos & médias disponibles sur les murs activés.');
+      } else if (e && e.status === 403) {
+        showToast(e.message || 'Les mots sont temporairement fermés.');
+      } else {
+        showToast((e && e.message) || "Échec de l'envoi — réessayez");
+      }
+      return;
+    }
   }
   isSubmitting = false;
   document.getElementById('submit-btn').disabled = false;

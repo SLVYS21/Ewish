@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Gem, CheckCircle2, Clock, AlertCircle, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Gem, CheckCircle2, Clock, AlertCircle, ShieldCheck, LogOut } from 'lucide-react';
 import { useAuth } from '../admin/context/AuthContext';
 import { getPublications } from '../utils/api';
 import KycModal from '../components/KycModal';
@@ -36,10 +36,15 @@ function roleLabel(role) {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate  = useNavigate();
   const [pubCount, setPubCount]   = useState(null);
   const [showKyc,  setShowKyc]    = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/ewish-admin/login');
+  };
 
   useEffect(() => {
     getPublications({ mine: true, limit: 500 })
@@ -168,6 +173,14 @@ export default function ProfilePage() {
             </div>
           </button>
         ))}
+      </div>
+
+      {/* ── Logout (mobile-friendly action) ── */}
+      <div className={styles.logoutWrap}>
+        <button className={styles.logoutBtn} onClick={handleLogout}>
+          <LogOut size={17} />
+          <span>Se déconnecter</span>
+        </button>
       </div>
 
       {showKyc && <KycModal onClose={() => setShowKyc(false)} />}

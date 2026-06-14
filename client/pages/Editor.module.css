@@ -233,6 +233,27 @@
 .shareStep {
   display: flex; flex-direction: column; gap: 12px; padding: 14px;
 }
+
+/* Inline share wrapper — forces share-grid to single column inside editor panel
+   so QR card + link/networks stack vertically regardless of viewport width. */
+.shareInlineWrap { display: flex; flex-direction: column; gap: 14px; }
+.shareInlineWrap :global(.share-grid) { grid-template-columns: 1fr !important; gap: 18px !important; }
+.shareInlineWrap :global(.qr-card)    { padding: 18px 16px !important; gap: 11px !important; }
+.shareInlineWrap :global(.qr-frame)   { width: 170px; height: 170px; }
+.shareInlineWrap :global(.share-dl-row) { flex-wrap: wrap; }
+.shareInlineWrap :global(.share-dl-row .btn) { flex: 1 1 45%; justify-content: center; }
+.shareInlineWrap :global(.net-row)    { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.shareInlineWrap :global(.net-btn)    { padding: 10px 4px; font-size: 10.5px; gap: 5px; }
+.shareInlineWrap :global(.linkbox)    { flex-wrap: wrap; }
+.shareInlineWrap :global(.linkbox .url) { width: 100%; }
+
+/* Cagnotte collect link box (above ShareView) */
+.shareCagnotteBox {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #FFF1F4, #FFE0E6);
+  border: 1.5px solid #FFB3C1;
+  border-radius: 16px;
+}
 .shareHero {
   border-radius: 14px; padding: 18px 14px; text-align: center;
 }

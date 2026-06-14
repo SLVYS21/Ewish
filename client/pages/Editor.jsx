@@ -22,16 +22,17 @@ import {
 } from 'lucide-react';
 import KycModal from '../components/KycModal';
 import MSheet from '../components/MSheet';
+import { ShareView } from './SharePage';
 import styles from './Editor.module.css';
 
 /* ─── Guided steps ────────────────────────────────────────────── */
 const STEPS = [
-  { id: 'Message', n: 1, title: 'Le message',  sub: 'Texte, photos, musique',  Icon: MessageSquare, color: '#E11D48', soft: '#fff1f6', accent: '#fbcfe8' },
-  { id: 'Look',    n: 2, title: 'Le style',    sub: 'Couleurs, fond, ambiance', Icon: Palette,       color: '#6E4FBA', soft: '#F6EEFB', accent: '#D7C5F2' },
-  { id: 'Cadeau',  n: 3, title: 'La cagnotte', sub: 'Objectif cadeau commun',   Icon: Gift,          color: '#9B7EE2', soft: '#F6EEFB', accent: '#E5D9F5' },
-  { id: 'Share',   n: 4, title: 'Le partage',  sub: 'Lien & QR Code',           Icon: Share2,        color: '#b45309', soft: '#fffbeb', accent: '#fde68a' },
+  { id: 'Message', n: 1, title: 'Message',  sub: 'Texte, photos, musique',  Icon: MessageSquare, color: '#E11D48', soft: '#fff1f6', accent: '#fbcfe8' },
+  { id: 'Look',    n: 2, title: 'Style',    sub: 'Couleurs, fond, ambiance', Icon: Palette,       color: '#6E4FBA', soft: '#F6EEFB', accent: '#D7C5F2' },
+  { id: 'Cadeau',  n: 3, title: 'Cagnotte', sub: 'Objectif cadeau commun',   Icon: Gift,          color: '#9B7EE2', soft: '#F6EEFB', accent: '#E5D9F5' },
+  { id: 'Share',   n: 4, title: 'Partage',  sub: 'Lien & QR Code',           Icon: Share2,        color: '#b45309', soft: '#fffbeb', accent: '#fde68a' },
 ];
-
+//partage
 /* ─── Section jump map  templates with animated GSAP timeline ── */
 const TEMPLATE_SECTIONS = {
   birthday:           [
@@ -556,7 +557,7 @@ export default function Editor() {
 
   const displaySteps = STEPS.map(s => {
     if (s.id === 'Message' && isWall)
-      return { ...s, title: 'Le mur', sub: 'Titre, accès & mots', Icon: LayoutTemplate, ...wallStepTheme };
+      return { ...s, title: 'Mur', sub: 'Titre, accès & mots', Icon: LayoutTemplate, ...wallStepTheme };
     if (s.id === 'Share' && isWall)
       return { ...s, ...wallStepTheme };
     if (s.id === 'Cadeau' && !isWall)
@@ -1083,18 +1084,12 @@ export default function Editor() {
                 <div className={styles.partageNote}>Ces options s'activent une fois la création publiée.</div>
               </>
             ) : (
-              <>
-                <div className={styles.shareHero} style={{ background: 'linear-gradient(135deg, #F6EEFB, #FFE0E6)' }}>
-                  <div className={styles.shareHeroEmoji}>🎉</div>
-                  <div className={styles.shareHeroTitle} style={{ color: '#9C1632' }}>C'est en ligne !</div>
-                  <div className={styles.shareHeroSub}>Ton lien est prêt à être partagé</div>
-                </div>
-
+              <div className={styles.shareInlineWrap}>
                 {/* Cagnotte collect link  shown when cagnotte is enabled */}
                 {cagnotte && (
-                  <div style={{ margin: '0 16px', padding: '14px 16px', background: 'linear-gradient(135deg,#FFF1F4,#FFE0E6)', border: '1.5px solid #FFB3C1', borderRadius: 16 }}>
+                  <div className={styles.shareCagnotteBox}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
-                      <span style={{ fontSize: 14 }}>🎁</span>
+                      <Gift size={14} style={{ color: '#E11D48' }} />
                       <span style={{ fontSize: 12, fontWeight: 800, color: '#E11D48', letterSpacing: '.06em', textTransform: 'uppercase' }}>Lien de collecte vœux & cagnotte</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', borderRadius: 10, padding: '8px 12px', border: '1px solid #FFD0D8' }}>
@@ -1120,26 +1115,17 @@ export default function Editor() {
                   </div>
                 )}
 
-                {shortCode && (
-                  <div className={styles.shareLinkBox}>
-                    <span className={styles.shareLinkUrl}>{import.meta.env.VITE_API_URL}/s/{shortCode}</span>
-                    <button
-                      className={`${styles.shareCopyBtn} ${linkCopied ? styles.shareCopyBtnDone : ''}`}
-                      onClick={() => {
-                        navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL}/s/${shortCode}`);
-                        setLinkCopied(true);
-                        setTimeout(() => setLinkCopied(false), 2000);
-                      }}
-                    >
-                      {linkCopied ? <><Check size={14} /> Copié !</> : <><Copy size={14} /> Copier</>}
-                    </button>
-                  </div>
-                )}
-
-                <button className={styles.btnShareFull} onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-                  <Sparkles size={14} /> Page de partage complète  QR, canaux, cagnotte
-                </button>
-              </>
+                {/* Full share UI inline (QR card, link, short code, networks, download) */}
+                <ShareView
+                  pub={pub}
+                  shortCode={shortCode}
+                  setShortCode={setShortCode}
+                  shareUrl={shortCode
+                    ? `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/s/${shortCode}`
+                    : `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/site/${pub.templateName}/${pub.customName}`}
+                  isWall={isWall}
+                />
+              </div>
             )}
           </div>
         );

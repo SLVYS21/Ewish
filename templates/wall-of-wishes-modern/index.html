@@ -114,22 +114,24 @@
     .cagnotte-track { height: 8px; background: var(--accent-pale); border-radius: 99px; overflow: hidden; }
     .cagnotte-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 1s cubic-bezier(.3,.7,.3,1); }
 
-    /* ── NOTES GRID (masonry columns) ──── */
+    /* ── NOTES GRID ───────────────────── */
     #notes-container {
       position: relative; z-index: 5;
       max-width: 1080px; margin: 0 auto;
       padding: 24px 18px 150px;
-      columns: 2; column-gap: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 16px;
+      align-items: start;
     }
-    @media (min-width: 600px) { #notes-container { columns: 3; } }
-    @media (min-width: 900px) { #notes-container { columns: 4; column-gap: 20px; } }
-    @media (min-width: 1240px) { #notes-container { columns: 5; } }
+    @media (min-width: 600px) { #notes-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 900px) { #notes-container { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
+    @media (min-width: 1240px) { #notes-container { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
     /* ── NOTE CARD (.pin) — moderne ──── */
     .pin {
-      break-inside: avoid;
-      margin-bottom: 18px;
       position: relative;
+      min-width: 0;
       border-radius: var(--r-sm);
       padding: 15px 15px 16px;
       word-break: break-word;
@@ -1382,7 +1384,9 @@ function submitWish() {
       } else if (err && err.status === 403) {
         showToast(err.message || 'Les mots sont temporairement fermés.');
         setWishesEnabled(false);
-      } else { afterSubmit(); }
+      } else {
+        showToast((err && err.message) || "Échec de l'envoi — réessayez");
+      }
     });
   } else {
     afterSubmit();

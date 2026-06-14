@@ -370,7 +370,7 @@ function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, on
 }
 
 /* ─── Share view (published) ─── */
-function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
+export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
   const navigate = useNavigate();
   const [shape,      setShape]      = useState('rounded');
   const [colorId,    setColorId]    = useState('rose');
