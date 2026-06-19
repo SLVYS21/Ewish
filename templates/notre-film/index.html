@@ -1018,6 +1018,33 @@
     #scene-flash.active { animation: scFlash 0.6s ease-out forwards; }
     @keyframes scFlash { 0% { opacity:0; } 30% { opacity:1; } 100% { opacity:0; } }
     #scene-flash svg { width: 44px; height: 44px; }
+
+    /* ── Pétales de rose : ambiance continue + bourrasque finale ── */
+    #petal-layer, #petal-burst-layer {
+      position: fixed; inset: 0; overflow: hidden; pointer-events: none;
+    }
+    #petal-layer { z-index: 4; }
+    #petal-burst-layer { z-index: 600; display: none; }
+    .petal {
+      position: absolute;
+      background-image: url('https://image.ibb.co/kyUHab/rose.png');
+      background-size: 100% 100%;
+      will-change: transform;
+    }
+    .petal-ambient { opacity: .45; }
+    .petal-burst { opacity: .95; filter: drop-shadow(0 4px 10px rgba(0,0,0,.18)); }
+
+    #petal-tornado-layer {
+      position: fixed; inset: 0; overflow: visible; pointer-events: none;
+      z-index: 1500; display: none;
+    }
+    .petal-tornado { opacity: .92; filter: drop-shadow(0 3px 8px rgba(0,0,0,.2)); }
+
+    #petal-intro-layer {
+      position: fixed; inset: 0; overflow: visible; pointer-events: none;
+      z-index: 10500; display: none;
+    }
+    .petal-intro { opacity: .95; filter: drop-shadow(0 3px 8px rgba(0,0,0,.2)); }
   </style>
 </head>
 
@@ -1031,6 +1058,14 @@
   <svg class="amb-spark as5" viewBox="-5 -5 10 10"><path d="M0,-3 L0.75,-0.75 L3,0 L0.75,0.75 L0,3 L-0.75,0.75 L-3,0 L-0.75,-0.75 Z" fill="#c9a84c"/></svg>
   <svg class="amb-spark as6" viewBox="-5 -5 10 10"><path d="M0,-3.5 L0.9,-0.9 L3.5,0 L0.9,0.9 L0,3.5 L-0.9,0.9 L-3.5,0 L-0.9,-0.9 Z" fill="#e05574"/></svg>
 </div>
+<!-- Pétales en ambiance continue (discret, tout le site) -->
+<div id="petal-layer" aria-hidden="true"></div>
+<!-- Pétales en bourrasque (intense, moment fort) -->
+<div id="petal-burst-layer" aria-hidden="true"></div>
+<!-- Pétales en tornade (effet de transition entre les scènes) -->
+<div id="petal-tornado-layer" aria-hidden="true"></div>
+<!-- Pétales qui dévoilent l'accueil par-dessus l'intro -->
+<div id="petal-intro-layer" aria-hidden="true"></div>
 <!-- Scene transition sparkle flash -->
 <div id="scene-flash" aria-hidden="true">
   <svg viewBox="-10 -10 20 20" overflow="visible">
@@ -1224,6 +1259,67 @@
     }
 
     /* ══════════════════════════════════════════════
+       PÉTALES DE ROSE
+       ambiance continue (discrète) + bourrasque (moment fort)
+    ══════════════════════════════════════════════ */
+    function petalR(min, max) { return min + Math.random() * (max - min); }
+
+    function startAmbientPetals(total) {
+      const layer = document.getElementById('petal-layer');
+      if (!layer || layer.dataset.started) return;
+      layer.dataset.started = '1';
+
+      const w = window.innerWidth, h = window.innerHeight;
+      TweenLite.set(layer, { perspective: 600 });
+
+      for (let i = 0; i < total; i++) {
+        const el = document.createElement('div');
+        el.className = 'petal petal-ambient';
+        const size = petalR(14, 22);
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        TweenLite.set(el, { x: petalR(0, w), y: petalR(-h, 0), z: petalR(-200, 200) });
+        layer.appendChild(el);
+
+        // Chute lente et continue, décalée dès le départ grâce au delay négatif
+        const fallDur = petalR(16, 26);
+        TweenMax.to(el, fallDur, { y: h + 60, ease: Linear.easeNone, repeat: -1, delay: -petalR(0, fallDur) });
+        // Léger balancement gauche-droite + rotation
+        TweenMax.to(el, petalR(4, 8), { x: '+=' + petalR(40, 90), rotationZ: petalR(0, 180), repeat: -1, yoyo: true, ease: Sine.easeInOut });
+        TweenMax.to(el, petalR(3, 8), { rotationX: petalR(0, 360), rotationY: petalR(0, 360), repeat: -1, yoyo: true, ease: Sine.easeInOut, delay: -petalR(0, 5) });
+      }
+    }
+
+    function burstPetals(total) {
+      const layer = document.getElementById('petal-burst-layer');
+      if (!layer) return;
+      layer.innerHTML = '';
+      layer.style.display = 'block';
+
+      const w = window.innerWidth, h = window.innerHeight;
+      TweenLite.set(layer, { perspective: 600 });
+
+      for (let i = 0; i < total; i++) {
+        const el = document.createElement('div');
+        el.className = 'petal petal-burst';
+        const size = petalR(26, 46);
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        TweenLite.set(el, { x: petalR(0, w), y: petalR(-h * 0.6, -40), z: petalR(-250, 250), rotation: petalR(0, 360) });
+        layer.appendChild(el);
+
+        const fallDur = petalR(2.6, 4.6);
+        TweenMax.to(el, fallDur, {
+          y: h + 120, ease: Power1.easeIn, delay: petalR(0, 0.7),
+          onComplete: () => el.remove()
+        });
+        TweenMax.to(el, petalR(1.6, 3), { x: '+=' + petalR(-90, 90), rotationZ: petalR(0, 260), repeat: 1, yoyo: true, ease: Sine.easeInOut });
+        TweenMax.to(el, petalR(1.2, 2.6), { rotationX: petalR(0, 360), rotationY: petalR(0, 360), repeat: 1, yoyo: true, ease: Sine.easeInOut });
+      }
+      setTimeout(() => { layer.style.display = 'none'; }, 5400);
+    }
+
+    /* ══════════════════════════════════════════════
        STATE
     ══════════════════════════════════════════════ */
     let _current = 0;
@@ -1235,6 +1331,9 @@
     let _isPlaying = false;
     let _startTime = 0;
     const SCENES = ['s1', 's2', 's3', 's4', 's5'];
+    // Vitesse de balayage des pétales qui révèlent une scène (intro + transitions).
+    // Plus la valeur est grande, plus la révélation est lente.
+    const PETAL_REVEAL_DURATION = 1.9;
 
     /* ══════════════════════════════════════════════
        TRANSITIONS
@@ -1268,32 +1367,169 @@
 
       flashScene();
 
-      // Préparation de la scène suivante
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        simpleSceneSwap(fromEl, toEl, dir, idx);
+        return;
+      }
+
+      petalTornadoTransition(fromEl, toEl, dir, () => {
+        _current = idx;
+        _transitioning = false;
+        onSceneEnter(idx);
+      });
+    }
+
+    // Repli simple (sans pétales) pour les utilisateurs en mode "moins d'animations"
+    function simpleSceneSwap(fromEl, toEl, dir, idx) {
       toEl.classList.add('active');
-      // On s'assure que le z-index est supérieur pour la nouvelle scène durant l'anim
       TweenMax.set(toEl, { opacity: 0, y: dir * 50, visibility: 'visible', zIndex: 2 });
       TweenMax.set(fromEl, { zIndex: 1 });
-
-      // Sortie de la scène actuelle
       TweenMax.to(fromEl, 0.45, {
-        opacity: 0,
-        y: dir * -50,
-        ease: Power2.easeIn,
+        opacity: 0, y: dir * -50, ease: Power2.easeIn,
         onComplete: () => {
           fromEl.classList.remove('active');
           TweenMax.set(fromEl, { y: 0, visibility: 'hidden', zIndex: 1 });
-
-          // Entrée de la nouvelle scène
           TweenMax.to(toEl, 0.55, {
-            opacity: 1,
-            y: 0,
-            ease: Power3.easeOut,
+            opacity: 1, y: 0, ease: Power3.easeOut,
             onComplete: () => {
               _current = idx;
               _transitioning = false;
               onSceneEnter(idx);
             }
           });
+        }
+      });
+    }
+
+    /* ══════════════════════════════════════════════
+       TORNADE DE PÉTALES  transition entre les scènes
+       Une colonne dense de pétales tourbillonne en travers
+       de l'écran ; la scène suivante apparaît progressivement
+       dans son sillage (effet "rideau" / wipe reveal).
+    ══════════════════════════════════════════════ */
+    function petalTornadoTransition(fromEl, toEl, dir, onDone) {
+      const w = window.innerWidth, h = window.innerHeight;
+      const bandWidth = Math.min(340, Math.max(220, w * 0.55));
+      const layer = document.getElementById('petal-tornado-layer');
+      layer.innerHTML = '';
+      layer.style.display = 'block';
+
+      const startX = dir === 1 ? w + bandWidth / 2 : -bandWidth / 2;
+      const endX = dir === 1 ? -bandWidth / 2 : w + bandWidth / 2;
+
+      TweenLite.set(layer, { perspective: 600 });
+      layer.style.transform = `translateX(${startX}px)`;
+
+      // Scène suivante : posée derrière la tornade, révélée par un clip-path
+      toEl.classList.add('active');
+      TweenMax.set(toEl, { opacity: 1, y: 0, visibility: 'visible', zIndex: 3 });
+      toEl.style.clipPath = dir === 1 ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)';
+      TweenMax.set(fromEl, { zIndex: 2 });
+
+      // Construction de la colonne tourbillonnante
+      const total = 60;
+      for (let i = 0; i < total; i++) {
+        const el = document.createElement('div');
+        el.className = 'petal petal-tornado';
+        const size = petalR(16, 38);
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        layer.appendChild(el);
+        TweenLite.set(el, {
+          x: petalR(-bandWidth / 2, bandWidth / 2),
+          y: petalR(0, h),
+          z: petalR(-220, 220),
+          rotation: petalR(0, 360)
+        });
+        TweenMax.to(el, petalR(0.5, 1.3), { y: '+=' + petalR(-h * .5, h * .5), repeat: -1, yoyo: true, ease: Sine.easeInOut, delay: -petalR(0, 1.3) });
+        TweenMax.to(el, petalR(0.35, 0.9), { x: '+=' + petalR(-bandWidth * .4, bandWidth * .4), repeat: -1, yoyo: true, ease: Sine.easeInOut, delay: -petalR(0, 0.9) });
+        TweenMax.to(el, petalR(0.4, 1.2), { rotationZ: '+=' + petalR(180, 540), repeat: -1, ease: Linear.easeNone });
+        TweenMax.to(el, petalR(0.6, 1.6), { rotationX: petalR(0, 360), rotationY: petalR(0, 360), repeat: -1, yoyo: true, ease: Sine.easeInOut });
+      }
+
+      // La colonne balaye l'écran ; on synchronise le clip-path sur sa position
+      const state = { x: startX };
+      TweenMax.to(state, PETAL_REVEAL_DURATION, {
+        x: endX,
+        ease: Power1.easeInOut,
+        onUpdate: () => {
+          layer.style.transform = `translateX(${state.x}px)`;
+          if (dir === 1) {
+            const trailingEdge = state.x + bandWidth / 2;
+            const pct = Math.max(0, Math.min(100, (trailingEdge / w) * 100));
+            toEl.style.clipPath = `inset(0 0 0 ${pct}%)`;
+          } else {
+            const trailingEdge = state.x - bandWidth / 2;
+            const pct = Math.max(0, Math.min(100, ((w - trailingEdge) / w) * 100));
+            toEl.style.clipPath = `inset(0 ${pct}% 0 0)`;
+          }
+        },
+        onComplete: () => {
+          toEl.style.clipPath = 'none';
+          layer.style.display = 'none';
+          layer.innerHTML = '';
+          fromEl.classList.remove('active');
+          TweenMax.set(fromEl, { y: 0, visibility: 'hidden', zIndex: 1 });
+          TweenMax.set(toEl, { zIndex: 1 });
+          onDone && onDone();
+        }
+      });
+    }
+
+    /* ══════════════════════════════════════════════
+       PÉTALES DE L'INTRO  rideau qui tombe du haut
+       et dévoile l'accueil au fur et à mesure
+    ══════════════════════════════════════════════ */
+    function introPetalReveal(overlay, onDone) {
+      const w = window.innerWidth, h = window.innerHeight;
+      const bandH = Math.min(260, Math.max(160, h * 0.22));
+      const layer = document.getElementById('petal-intro-layer');
+      layer.innerHTML = '';
+      layer.style.display = 'block';
+
+      const startY = -bandH / 2 - 20;
+      const endY = h + bandH / 2 + 20;
+
+      TweenLite.set(layer, { perspective: 600 });
+      layer.style.transform = `translateY(${startY}px)`;
+
+      // Bande de pétales tourbillonnants, sur toute la largeur de l'écran
+      const total = 70;
+      for (let i = 0; i < total; i++) {
+        const el = document.createElement('div');
+        el.className = 'petal petal-intro';
+        const size = petalR(16, 40);
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        layer.appendChild(el);
+        TweenLite.set(el, {
+          x: petalR(0, w),
+          y: petalR(-bandH / 2, bandH / 2),
+          z: petalR(-220, 220),
+          rotation: petalR(0, 360)
+        });
+        TweenMax.to(el, petalR(0.5, 1.3), { x: '+=' + petalR(-60, 60), repeat: -1, yoyo: true, ease: Sine.easeInOut, delay: -petalR(0, 1.3) });
+        TweenMax.to(el, petalR(0.35, 0.9), { y: '+=' + petalR(-bandH * .35, bandH * .35), repeat: -1, yoyo: true, ease: Sine.easeInOut, delay: -petalR(0, 0.9) });
+        TweenMax.to(el, petalR(0.4, 1.2), { rotationZ: '+=' + petalR(180, 540), repeat: -1, ease: Linear.easeNone });
+        TweenMax.to(el, petalR(0.6, 1.6), { rotationX: petalR(0, 360), rotationY: petalR(0, 360), repeat: -1, yoyo: true, ease: Sine.easeInOut });
+      }
+
+      // La bande descend ; on dévoile l'accueil en clipant l'overlay depuis le haut
+      const state = { y: startY };
+      TweenMax.to(state, PETAL_REVEAL_DURATION, {
+        y: endY,
+        ease: Power1.easeInOut,
+        onUpdate: () => {
+          layer.style.transform = `translateY(${state.y}px)`;
+          const trailingEdge = state.y - bandH / 2;
+          const pct = Math.max(0, Math.min(100, (trailingEdge / h) * 100));
+          overlay.style.clipPath = `inset(${pct}% 0 0 0)`;
+        },
+        onComplete: () => {
+          overlay.style.display = 'none';
+          layer.style.display = 'none';
+          layer.innerHTML = '';
+          onDone && onDone();
         }
       });
     }
@@ -1339,6 +1575,7 @@
     }
 
     function enterS5() {
+      burstPetals(34);
       const vid = document.getElementById('surprise-video');
       if (vid.src && vid.src !== window.location.href) {
         vid.play().catch(() => { });
@@ -1609,6 +1846,7 @@
       Object.keys(data).forEach(k => { if (data[k] != null && data[k] !== '') applyField(k, data[k]); });
 
       showAmbientLayer();
+      startAmbientPetals(9);
 
       // S1 is active by default (class already set in HTML)
       TweenMax.set('#s1', { opacity: 1, visibility: 'visible' });
@@ -1692,7 +1930,7 @@
           burst.appendChild(fp);
         });
       },drawDone+120);
-      setTimeout(()=>{ overlay.classList.add('ib-dissolve'); setTimeout(()=>{ overlay.style.display='none'; init(); },960); },drawDone+1080);
+      setTimeout(()=>{ introPetalReveal(overlay, init); },drawDone+1080);
     }
 
     document.addEventListener('DOMContentLoaded', runIntro);
