@@ -1,0 +1,255 @@
+/* ─────────────────────────────────────────────────────────────
+   Comparatif — WhatsApp / Carte papier / myKado
+   Inspired by Digital Invite's paper-vs-digital pricing table
+   premium minimal · white background · rose accent on myKado
+   ───────────────────────────────────────────────────────────── */
+
+.section {
+  padding: 110px var(--pad-x);
+  background: #ffffff;
+  position: relative;
+}
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+
+/* ─── Head ─── */
+.head {
+  max-width: 720px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: #fff;
+  border: 1px solid rgba(28,22,17,.10);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 600;
+  color: #5A4458;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.eyeDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: 0 0 0 4px rgba(225,29,72,.18);
+}
+.title {
+  font-family: var(--font-sans);
+  font-size: clamp(2.2rem, 4.6vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -.022em;
+  margin: 20px 0 16px;
+  color: #0F0F10;
+  font-weight: 700;
+}
+.title :global(em.it)      { font-size: 1.04em; color: var(--rose-d); }
+.title :global(em.it.gold) { color: var(--gold-d); }
+.sub {
+  font-size: 16.5px;
+  color: #5A4458;
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+/* ─── Grid of columns ─── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* ─── Column ─── */
+.col {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(28,22,17,.08);
+  border-radius: 22px;
+  padding: 32px 24px 28px;
+  display: flex; flex-direction: column;
+  transition: transform .3s cubic-bezier(.34,1.3,.5,1), box-shadow .3s, border-color .3s;
+}
+.col:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px -16px rgba(28,22,17,.16);
+}
+
+/* ─── myKado column — highlight ─── */
+.colHero {
+  border: 2px solid var(--rose);
+  background:
+    radial-gradient(ellipse at top, #FFF7FA 0%, #fff 60%),
+    #fff;
+  box-shadow:
+    0 20px 50px -20px rgba(225,29,72,.30),
+    0 8px 22px -8px rgba(28,22,17,.10);
+  transform: translateY(-8px);
+}
+.colHero:hover {
+  transform: translateY(-12px);
+  box-shadow:
+    0 28px 60px -22px rgba(225,29,72,.36),
+    0 12px 28px -10px rgba(28,22,17,.12);
+}
+.badge {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--rose-soft), var(--rose));
+  color: #fff;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 14px -4px rgba(225,29,72,.45);
+}
+.badge svg { width: 11px; height: 11px; }
+
+/* ─── Column head ─── */
+.colHead {
+  text-align: center;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(28,22,17,.08);
+  margin-bottom: 22px;
+}
+.colName {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: #5A4458;
+  margin-bottom: 10px;
+  letter-spacing: -.01em;
+}
+.colHero .colName {
+  font-size: 26px;
+  color: #0F0F10;
+}
+.colHero .colName span { font-weight: 700; }
+.colHero .colName :global(em.it.rose) { font-size: 1.05em; }
+
+.colPrice {
+  font-family: var(--font-sans);
+  font-size: 34px;
+  font-weight: 800;
+  color: #0F0F10;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.colHero .colPrice {
+  font-size: 40px;
+  background: linear-gradient(135deg, var(--rose-soft), var(--rose-d));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.priceSm {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8E7B8C;
+  margin-left: 4px;
+  -webkit-text-fill-color: #8E7B8C;
+}
+.colTag {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #8E7B8C;
+  font-style: italic;
+}
+.colHero .colTag {
+  color: var(--rose-d);
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* ─── Rows ─── */
+.rows {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex; flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+.row {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14.5px;
+  color: #2B1A2D;
+}
+.rowLbl { flex: 1; line-height: 1.3; }
+
+.mark {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex: none;
+}
+.mark svg { width: 13px; height: 13px; }
+.markYes { background: #EAF7EF; color: #1d7a4e; }
+.markNo  { background: #F4F2F0; color: #B6ABA0; }
+.markMid { background: #FFF6E5; color: #C99A3A; }
+.colHero .markYes { background: var(--rose-pale); color: var(--rose-d); }
+
+/* ─── CTA in myKado col ─── */
+.cta {
+  margin-top: 24px;
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, var(--rose-soft), var(--rose));
+  color: #fff;
+  border: none;
+  padding: 14px 18px;
+  border-radius: 13px;
+  font-family: var(--font-sans);
+  font-weight: 700; font-size: 15px;
+  cursor: pointer;
+  transition: filter .2s, transform .15s, box-shadow .25s;
+  box-shadow: 0 8px 22px -8px rgba(225,29,72,.50);
+}
+.cta:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 12px 26px -8px rgba(225,29,72,.55); }
+.cta svg { width: 15px; height: 15px; }
+
+/* ─── Foot ─── */
+.colFoot {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(28,22,17,.08);
+  text-align: center;
+}
+.footNote {
+  font-size: 12.5px;
+  color: #8E7B8C;
+  font-style: italic;
+}
+.footNoteRose {
+  font-size: 13px;
+  color: var(--rose-d);
+  font-weight: 600;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 960px) {
+  .cards {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin: 0 auto;
+    gap: 28px;
+  }
+  .colHero { transform: none; order: -1; }
+  .colHero:hover { transform: translateY(-4px); }
+}
+
+@media (max-width: 720px) {
+  .section { padding: 80px var(--pad-x); }
+  .head { margin-bottom: 40px; }
+  .col { padding: 28px 22px 24px; }
+  .colHero .colName { font-size: 22px; }
+  .colHero .colPrice { font-size: 34px; }
+  .colPrice { font-size: 28px; }
+}

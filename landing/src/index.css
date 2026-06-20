@@ -24,9 +24,10 @@
   --gold-d:     #9d8230;
   --gold-pale:  #f5ead0;
 
-  --rose:       #d6557a;
-  --rose-d:     #b03c5d;
-  --rose-pale:  #fbe2ea;
+  --rose:       #E11D48;
+  --rose-d:     #B8123A;
+  --rose-pale:  #FFE4EC;
+  --rose-soft:  #FF6F8B;
 
   --emerald:    #2d7159;
   --emerald-pale:#dfece4;
@@ -36,8 +37,10 @@
 
   /* Type */
   --font-display: 'Instrument Serif', 'DM Serif Display', Georgia, serif;
-  --font-sans:    'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+  --font-serif:   'Instrument Serif', 'DM Serif Display', Georgia, serif;
+  --font-sans:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-hand:    'Caveat', 'Bradley Hand', cursive;
+  --font-mono:    ui-monospace, 'Menlo', monospace;
 
   /* Radius */
   --r-xs: 6px;
@@ -73,7 +76,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);
-  background: var(--ivory);
+  background: #ffffff;
   color: var(--ink);
   font-weight: 400;
   font-size: 16px;
@@ -103,6 +106,29 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── Typography utilities ── */
 .serif      { font-family: var(--font-display); }
 .italic     { font-style: italic; }
+.hand       { font-family: var(--font-hand); font-weight: 600; }
+em.it       { font-family: var(--font-display); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+em.it.gold  { color: var(--gold-d); }
+em.it.rose  { color: var(--rose-d); }
+.sep-dot    { color: var(--ink-3); margin: 0 4px; }
+
+/* Hand-drawn rose strikethrough — for "Joyeux anniv" type contrast */
+.strike     {
+  position: relative;
+  color: var(--ink-3);
+  font-weight: 600;
+  font-style: italic;
+  white-space: nowrap;
+}
+.strike::after {
+  content: '';
+  position: absolute;
+  left: -3%; right: -3%; top: 52%;
+  height: .16em;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M2 5 Q 50 2, 100 5 T 198 4' stroke='%23E11D48' stroke-width='3' fill='none' stroke-linecap='round'/></svg>") no-repeat center/100% 100%;
+  transform: rotate(-1.5deg);
+  pointer-events: none;
+}
 .eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 11px; font-weight: 600;
@@ -203,7 +229,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
    TEMPLATES MOSAIC
    ────────────────────────────────────────────────────────────────────── */
 .section-templates {
-  background: var(--ivory);
+  background: #fafafa;
 }
 
 .tpl-mosaic {

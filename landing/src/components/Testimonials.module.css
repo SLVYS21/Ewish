@@ -1,60 +1,163 @@
-.testimonials { padding: 120px var(--pad-x); background: var(--ivory-2); }
+/* ─────────────────────────────────────────────────────────────
+   Testimonials — 3 human stories, no stars
+   ───────────────────────────────────────────────────────────── */
+
+.section {
+  padding: 110px var(--pad-x);
+  background: #FBF5EC;
+  position: relative;
+}
 .wrap { max-width: var(--maxw); margin: 0 auto; }
 
-/* Reveal */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
-.revealed { opacity: 1; transform: none; }
+.reveal    { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.revealed  { opacity: 1; transform: none; }
 
-.secHead { text-align: center; max-width: 720px; margin: 0 auto 64px; }
+.head { text-align: center; max-width: 680px; margin: 0 auto 64px; }
+
 .eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--gold-d); background: var(--gold-pale);
-  padding: 6px 14px; border-radius: 99px;
-  border: 1px solid rgba(201,168,76,0.25);
+  padding: 7px 14px;
+  background: #fff;
+  border: 1px solid rgba(43,26,45,.10);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 600;
+  color: #5A4458;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(201,168,76,.18); }
-.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); margin: 18px 0 16px; color: var(--ink); line-height: 1.1; }
-.title em { font-style: italic; color: var(--rose); }
-.sub { font-size: 1.05rem; color: var(--ink-3); line-height: 1.65; }
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: 0 0 0 4px rgba(225,29,72,.18);
+}
 
-.testGrid {
+.title {
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  margin: 18px 0 16px;
+  color: #2B1A2D;
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 17px;
+  color: #5A4458;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+/* ─── grid ─── */
+.grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
 }
-.tCard {
-  background: var(--paper);
-  border: 1px solid var(--ivory-3);
-  border-radius: var(--r-lg);
-  padding: 26px 24px;
-  display: flex; flex-direction: column;
-  transition: transform .25s ease, box-shadow .3s ease, opacity .9s cubic-bezier(.22,1,.36,1);
-}
-.tCard.revealed:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 
-.tStars { color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
-.tQuote { font-size: 0.9rem; color: var(--ink-2); line-height: 1.65; margin-bottom: 24px; flex: 1; font-style: italic; }
-.tAuthor { display: flex; align-items: center; gap: 12px; }
-.tAvatar {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--rose));
-  color: #fff; display: grid; place-items: center;
-  font-weight: 700; font-size: 0.85rem;
+.card {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(43,26,45,.08);
+  border-radius: 22px;
+  padding: 32px 28px 28px;
+  display: flex; flex-direction: column; gap: 22px;
+  box-shadow: 0 2px 8px rgba(43,26,45,.04);
+  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .9s, translate .9s;
 }
-.tName { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
-.tRole { font-size: 0.76rem; color: var(--ink-3); margin-top: 2px; }
 
-@media (max-width: 1080px) {
-  .testGrid { grid-template-columns: repeat(2, 1fr); }
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px -20px rgba(43,26,45,.18);
 }
-@media (max-width: 640px) {
-  .testimonials { padding: 80px var(--pad-x); }
-  .secHead { margin-bottom: 36px; }
-  .sub { font-size: 0.95rem; }
+
+.quoteMark {
+  width: 36px; height: 36px;
+  color: var(--rose-pale);
+  flex: none;
 }
-@media (max-width: 560px) {
-  .testGrid { grid-template-columns: 1fr; gap: 14px; }
-  .tCard { padding: 20px 18px; }
-  .tQuote { font-size: 0.88rem; }
+
+.quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 21px;
+  line-height: 1.4;
+  color: #2B1A2D;
+  margin: 0;
+  letter-spacing: -.01em;
+  flex: 1;
+}
+
+.author {
+  display: flex; align-items: center; gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(43,26,45,.08);
+}
+
+.avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  flex: none;
+  box-shadow: 0 4px 10px rgba(43,26,45,.15);
+}
+.grad-a { background: linear-gradient(135deg, #FF9F7A, var(--rose)); }
+.grad-b { background: linear-gradient(135deg, #9B7EE2, #6D4FC7); }
+.grad-c { background: linear-gradient(135deg, #6BCFAF, #2D7159); }
+
+.authorMeta { flex: 1; min-width: 0; }
+.authorName {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #2B1A2D;
+  line-height: 1.2;
+}
+.authorWhere {
+  font-weight: 500;
+  color: #8E7B8C;
+  font-size: 13px;
+}
+.authorRole {
+  font-size: 12.5px;
+  color: #5A4458;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+/* ─── bottom bar ─── */
+.bar {
+  margin-top: 56px;
+  display: flex; align-items: center; gap: 18px;
+}
+.barLine {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(43,26,45,.18), transparent);
+}
+.barText {
+  font-size: 14px;
+  color: #5A4458;
+  white-space: nowrap;
+}
+.barText strong {
+  color: #2B1A2D;
+  font-weight: 700;
+}
+
+/* ─── responsive ─── */
+@media (max-width: 980px) {
+  .section { padding: 80px var(--pad-x); }
+  .grid { grid-template-columns: 1fr; gap: 14px; }
+  .head { margin-bottom: 40px; }
+}
+
+@media (max-width: 600px) {
+  .section { padding: 64px var(--pad-x); }
+  .card { padding: 26px 22px 22px; }
+  .quote { font-size: 18px; }
+  .bar { flex-direction: column; gap: 12px; margin-top: 36px; }
+  .barText { white-space: normal; text-align: center; font-size: 13.5px; }
 }

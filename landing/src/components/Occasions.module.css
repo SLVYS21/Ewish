@@ -1,0 +1,201 @@
+/* ─────────────────────────────────────────────────────────────
+   Occasions — 6 entry tiles by life moment
+   ───────────────────────────────────────────────────────────── */
+
+.section {
+  padding: 110px var(--pad-x);
+  background: #fff;
+  position: relative;
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; }
+
+.reveal    { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.revealed  { opacity: 1; transform: none; }
+
+.head { text-align: center; max-width: 720px; margin: 0 auto 64px; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: #FFF7FA;
+  border: 1px solid var(--rose-pale);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--rose-d);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: 0 0 0 4px rgba(225,29,72,.18);
+}
+
+.title {
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  margin: 18px 0 16px;
+  color: #2B1A2D;
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 17px;
+  color: #5A4458;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+/* ─── grid ─── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px 26px 24px;
+  background: #FFFAF6;
+  border: 1.5px solid rgba(43,26,45,.08);
+  border-radius: 22px;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform .35s cubic-bezier(.22,1,.36,1),
+              box-shadow .35s,
+              border-color .25s,
+              background .25s;
+  isolation: isolate;
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  box-shadow: 0 20px 50px -20px rgba(43,26,45,.25);
+}
+
+.tileGlow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--toneFrom, var(--rose-soft)), var(--toneTo, var(--rose)));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity .35s;
+  filter: blur(8px);
+}
+.tile:hover .tileGlow { opacity: .35; }
+
+.tileIco {
+  width: 54px; height: 54px;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  background: var(--toneBg, var(--rose-pale));
+  color: var(--toneFg, var(--rose-d));
+  flex: none;
+  transition: background .25s, color .25s, transform .35s cubic-bezier(.22,1,.36,1);
+}
+.tileIco svg { width: 28px; height: 28px; }
+
+.tile:hover .tileIco {
+  background: var(--toneFg, var(--rose));
+  color: #fff;
+  transform: rotate(-4deg) scale(1.04);
+}
+
+.tileBody { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.tileTitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1.05;
+  color: #2B1A2D;
+  margin: 0;
+  letter-spacing: -.01em;
+}
+.tileSub {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #2B1A2D;
+  margin: 0;
+  line-height: 1.35;
+}
+.tileTeaser {
+  font-size: 13.5px;
+  color: #5A4458;
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+.tileLink {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13.5px; font-weight: 700;
+  color: var(--toneFg, var(--rose-d));
+  margin-top: auto;
+  transition: gap .25s;
+}
+.tileLink svg { width: 14px; height: 14px; transition: transform .25s; }
+.tile:hover .tileLink { gap: 10px; }
+.tile:hover .tileLink svg { transform: translateX(3px); }
+
+/* ─── tone variants ─── */
+.tone-rose {
+  --toneBg: #FFE4EC;
+  --toneFg: var(--rose-d);
+  --toneFrom: var(--rose-soft);
+  --toneTo: var(--rose);
+}
+.tone-peach {
+  --toneBg: #FFE9DA;
+  --toneFg: #C0571F;
+  --toneFrom: #FFB99B;
+  --toneTo: #FF8A55;
+}
+.tone-gold {
+  --toneBg: #FFF1C8;
+  --toneFg: var(--gold-d);
+  --toneFrom: #FFD978;
+  --toneTo: var(--gold);
+}
+.tone-mint {
+  --toneBg: #D8F0E5;
+  --toneFg: #2D7159;
+  --toneFrom: #8FE0C2;
+  --toneTo: #43B58E;
+}
+.tone-lilac {
+  --toneBg: #ECE3FF;
+  --toneFg: #6D4FC7;
+  --toneFrom: #C5B0F5;
+  --toneTo: #9B7EE2;
+}
+.tone-ink {
+  --toneBg: #ECE6E8;
+  --toneFg: #2B1A2D;
+  --toneFrom: #5A4458;
+  --toneTo: #2B1A2D;
+}
+
+/* ─── responsive ─── */
+@media (max-width: 980px) {
+  .section { padding: 80px var(--pad-x); }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .head { margin-bottom: 44px; }
+}
+
+@media (max-width: 600px) {
+  .section { padding: 64px var(--pad-x); }
+  .grid { grid-template-columns: 1fr; gap: 12px; }
+  .tile { padding: 22px 20px 20px; }
+  .tileTitle { font-size: 24px; }
+  .tileIco { width: 46px; height: 46px; }
+  .tileIco svg { width: 24px; height: 24px; }
+}

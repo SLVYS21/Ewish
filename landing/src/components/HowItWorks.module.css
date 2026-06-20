@@ -1,60 +1,162 @@
-.how { padding: 120px var(--pad-x); background: var(--ivory-2); position: relative; }
-.wrap { max-width: var(--maxw); margin: 0 auto; }
+/* ─────────────────────────────────────────────────────────────
+   HowItWorks — 3 steps, no emojis
+   ───────────────────────────────────────────────────────────── */
 
-/* Reveal */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
-.revealed { opacity: 1; transform: none; }
-
-.secHead { text-align: center; max-width: 720px; margin: 0 auto 64px; }
-.eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--gold-d); background: var(--gold-pale);
-  padding: 6px 14px; border-radius: 99px;
-  border: 1px solid rgba(201,168,76,0.25);
-}
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(201,168,76,.18); }
-.title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3.2rem); margin: 18px 0 16px; color: var(--ink); line-height: 1.1; }
-.title em { font-style: italic; color: var(--rose); }
-
-.howGrid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+.section {
+  padding: 110px var(--pad-x);
+  background: #FFFAF6;
   position: relative;
 }
-.howLine {
+.wrap { max-width: var(--maxw); margin: 0 auto; }
+
+.reveal    { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.revealed  { opacity: 1; transform: none; }
+
+.head { text-align: center; max-width: 720px; margin: 0 auto 64px; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: #FFF1C8;
+  border: 1px solid rgba(201,154,58,.30);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--gold-d);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(201,154,58,.18);
+}
+
+.title {
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  margin: 18px 0 16px;
+  color: #2B1A2D;
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 17px;
+  color: #5A4458;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+/* ─── steps ─── */
+.steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.connector {
   position: absolute;
-  top: 28px; left: 6%; right: 6%;
-  height: 1px;
-  background: repeating-linear-gradient(to right, var(--ink-4) 0 6px, transparent 6px 12px);
+  top: 80px;
+  left: 16%; right: 16%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(225,29,72,.35) 0 6px,
+    transparent 6px 12px
+  );
   z-index: 0;
+  pointer-events: none;
 }
-.howStep { position: relative; z-index: 1; text-align: left; }
 
-.howNum {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--ivory);
-  border: 1.5px solid var(--ink);
+.step {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(43,26,45,.08);
+  border-radius: 22px;
+  padding: 32px 28px 28px;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 2px 8px rgba(43,26,45,.04);
+  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .9s, translate .9s;
+  z-index: 1;
+}
+.step:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -20px rgba(43,26,45,.18);
+}
+
+.stepNum {
+  position: absolute;
+  top: -14px; right: 24px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--rose-pale);
+  font-weight: 400;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.stepIco {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--rose-soft), var(--rose));
+  color: #fff;
   display: grid; place-items: center;
-  font-family: var(--font-serif); font-size: 1.5rem; color: var(--ink);
-  margin-bottom: 20px; position: relative;
+  flex: none;
+  box-shadow: 0 6px 14px -4px rgba(225,29,72,.4);
+  z-index: 1;
+  position: relative;
 }
-/* Step color variants */
-.step1 { /* default  ivory */ }
-.step2 { background: var(--gold-pale) !important; border-color: var(--gold) !important; color: var(--gold-d) !important; }
-.step3 { background: var(--rose-pale) !important; border-color: var(--rose) !important; color: var(--rose) !important; }
-.step4 { background: var(--ink) !important; border-color: var(--ink) !important; color: var(--gold-l) !important; }
+.stepIco svg { width: 24px; height: 24px; }
 
-.howStep h3 { font-family: var(--font-serif); font-size: 1.2rem; margin-bottom: 8px; color: var(--ink); }
-.howStep p { font-size: 0.9rem; color: var(--ink-3); line-height: 1.65; }
+.stepTitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.1;
+  color: #2B1A2D;
+  margin: 0;
+  letter-spacing: -.01em;
+}
 
+.stepBody {
+  font-size: 15px;
+  color: #5A4458;
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+
+.stepPill {
+  display: inline-flex; align-items: center; gap: 6px;
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+}
+.pillDot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor;
+}
+.pill-rose { background: var(--rose-pale); color: var(--rose-d); }
+.pill-gold { background: #FFF1C8; color: var(--gold-d); }
+
+/* ─── responsive ─── */
 @media (max-width: 980px) {
-  .howGrid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
-  .howLine { display: none; }
-  .how { padding: 80px var(--pad-x); }
+  .section { padding: 80px var(--pad-x); }
+  .steps { grid-template-columns: 1fr; gap: 14px; }
+  .connector { display: none; }
+  .head { margin-bottom: 44px; }
 }
-@media (max-width: 540px) {
-  .howGrid { grid-template-columns: 1fr; }
-  .how { padding: 60px var(--pad-x); }
-  .secHead { margin-bottom: 40px; }
-  .howNum { width: 46px; height: 46px; font-size: 1.2rem; }
+
+@media (max-width: 600px) {
+  .section { padding: 64px var(--pad-x); }
+  .step { padding: 26px 22px 22px; }
+  .stepTitle { font-size: 22px; }
+  .stepNum { font-size: 44px; top: -10px; right: 18px; }
 }

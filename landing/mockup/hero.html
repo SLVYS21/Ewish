@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>myKado · Hero mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ───────────────────────────── tokens ─────────────────────────── */
+:root{
+  --cream:#FFFAF6;
+  --paper:#FBF5EC;
+  --rose:#E11D48;
+  --rose-deep:#B8123A;
+  --rose-pale:#FFE4EC;
+  --ink:#2B1A2D;
+  --ink-soft:#5A4458;
+  --muted:#8E7B8C;
+  --lilac:#9B7EE2;
+  --butter:#FFC95A;
+  --peach:#FF9F7A;
+  --mint:#6BCFAF;
+  --gold:#C99A3A;
+  --line:rgba(43,26,45,.10);
+  --display:'Instrument Serif', serif;
+  --hand:'Caveat', cursive;
+  --body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --r-sm:10px;
+  --r-md:14px;
+  --r-lg:22px;
+  --shadow-sm:0 1px 2px rgba(43,26,45,.06), 0 2px 6px rgba(225,29,72,.04);
+  --shadow:0 6px 20px -8px rgba(43,26,45,.18), 0 16px 40px -20px rgba(225,29,72,.12);
+  --shadow-lg:0 18px 50px -20px rgba(43,26,45,.30), 0 36px 80px -30px rgba(225,29,72,.18);
+  --maxw:1240px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+em.it{font-family:var(--display);font-style:italic;font-weight:400;letter-spacing:-.01em}
+
+/* ───────────────────────────── navbar ─────────────────────────── */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,250,246,.78);
+  backdrop-filter:saturate(140%) blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.nav-in{
+  max-width:var(--maxw);margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--display);font-style:italic;font-size:26px;color:var(--ink);
+  text-decoration:none;
+}
+.brand .bow{width:30px;height:30px}
+.nav-links{display:flex;gap:30px;font-size:14.5px;color:var(--ink-soft)}
+.nav-links a{color:inherit;text-decoration:none}
+.nav-links a:hover{color:var(--rose)}
+.nav-cta{display:flex;gap:10px;align-items:center}
+.nav-cta a{color:var(--ink-soft);text-decoration:none;font-size:14.5px}
+.nav-cta .btn-mini{
+  background:var(--ink);color:#fff;
+  padding:9px 16px;border-radius:var(--r-md);font-weight:600;font-size:14px;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+  transition:transform .25s, box-shadow .25s;
+}
+.nav-cta .btn-mini:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+
+/* ───────────────────────────── hero ─────────────────────────── */
+.hero{
+  position:relative;
+  padding:64px 32px 100px;
+  overflow:hidden;
+}
+.hero-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55}
+.orb.o1{width:520px;height:520px;background:radial-gradient(circle,#FFD2DE,transparent 65%);top:-160px;left:-120px}
+.orb.o2{width:460px;height:460px;background:radial-gradient(circle,#E9D9FF,transparent 65%);top:120px;right:-140px}
+.orb.o3{width:300px;height:300px;background:radial-gradient(circle,#FFF1C8,transparent 70%);bottom:-40px;left:35%}
+.grid-bg{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(43,26,45,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(43,26,45,.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse at 50% 30%, #000 30%, transparent 70%);
+}
+
+.hero-in{
+  position:relative;z-index:1;
+  max-width:var(--maxw);margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(0, 1.05fr) minmax(0, 1fr);
+  gap:60px;
+  align-items:center;
+}
+
+/* ─── eyebrow ─── */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 14px;
+  background:#fff;border:1px solid var(--line);
+  border-radius:999px;
+  font-size:12.5px;font-weight:600;color:var(--ink-soft);
+  box-shadow:var(--shadow-sm);
+}
+.eyebrow .star{width:12px;height:12px;color:var(--rose)}
+.eyebrow strong{color:var(--ink);font-weight:700}
+.eyebrow del{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.2px}
+
+/* ─── h1 ─── */
+.h1{
+  font-size:clamp(44px, 5.6vw, 78px);
+  line-height:1.02;
+  letter-spacing:-.02em;
+  font-weight:700;
+  color:var(--ink);
+  margin:22px 0 22px;
+}
+.h1 em.it{font-size:1.04em;color:var(--rose-deep)}
+.h1 em.it.gold{color:var(--gold)}
+.h1 .strike{
+  position:relative;
+  color:var(--muted);
+  font-weight:600;
+  font-style:italic;
+  white-space:nowrap;
+}
+.h1 .strike::after{
+  content:'';position:absolute;left:-3%;right:-3%;top:52%;height:.16em;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M2 5 Q 50 2, 100 5 T 198 4' stroke='%23E11D48' stroke-width='3' fill='none' stroke-linecap='round'/></svg>") no-repeat center/100% 100%;
+  transform:rotate(-1.5deg);
+}
+.sep-dot{color:var(--muted);margin:0 4px}
+
+.sub{
+  font-size:18.5px;color:var(--ink-soft);
+  max-width:520px;margin:0 0 30px;
+}
+.sub strong{color:var(--ink);font-weight:700}
+
+/* ─── interactive CTA ─── */
+.cta-wrap{
+  position:relative;
+  background:#fff;
+  border:1.5px solid var(--line);
+  border-radius:18px;
+  padding:8px 8px 8px 22px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:var(--shadow);
+  max-width:520px;
+  transition:border-color .25s, box-shadow .25s, transform .25s;
+}
+.cta-wrap::before{
+  content:'';position:absolute;inset:-2px;border-radius:20px;
+  background:linear-gradient(135deg,#FF6F8B,#E11D48,#9B7EE2);
+  z-index:-1;opacity:0;transition:opacity .35s;
+  filter:blur(8px);
+}
+.cta-wrap:focus-within{border-color:transparent;transform:translateY(-2px)}
+.cta-wrap:focus-within::before{opacity:.55}
+.cta-label{
+  font-family:var(--display);font-style:italic;
+  color:var(--ink);font-size:18px;white-space:nowrap;
+}
+.cta-input{
+  flex:1;border:none;background:transparent;outline:none;
+  font-family:var(--body);font-size:17px;color:var(--ink);
+  padding:14px 0;min-width:0;
+}
+.cta-input::placeholder{color:var(--muted);font-style:italic}
+.cta-btn{
+  background:var(--ink);color:#fff;border:none;
+  padding:13px 18px;border-radius:13px;
+  font-family:var(--body);font-weight:700;font-size:15px;
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  transition:background .2s, transform .15s;
+}
+.cta-btn:hover{background:#1A0E1C;transform:translateY(-1px)}
+.cta-btn svg{width:16px;height:16px}
+
+/* ─── format toggle ─── */
+.formats{
+  display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;
+  max-width:520px;
+}
+.fmt{
+  flex:1;min-width:230px;
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;cursor:pointer;
+  transition:border-color .2s, background .2s, transform .2s;
+}
+.fmt:hover{border-color:var(--rose-pale);background:#FFF7FA;transform:translateY(-1px)}
+.fmt[aria-pressed="true"]{
+  border-color:var(--rose);background:#FFF1F5;
+  box-shadow:inset 0 0 0 1px var(--rose);
+}
+.fmt-ico{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--rose-pale);display:grid;place-items:center;color:var(--rose);flex:none;
+}
+.fmt-ico svg{width:18px;height:18px}
+.fmt[aria-pressed="true"] .fmt-ico{background:var(--rose);color:#fff}
+.fmt-t{font-weight:700;font-size:14.5px;color:var(--ink);line-height:1.15}
+.fmt-s{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+/* ─── trust line ─── */
+.trust{
+  margin-top:26px;display:flex;align-items:center;gap:10px;
+  font-size:13.5px;color:var(--ink-soft);
+}
+.trust .coin{
+  width:20px;height:20px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 30% 30%, #FFE8A3, #C99A3A 70%);
+  box-shadow:inset 0 -2px 4px rgba(0,0,0,.15);
+}
+.trust b{color:var(--ink);font-weight:700}
+.trust .sep{color:var(--muted)}
+
+/* ───────────────────────── STAGE (right side) ───────────────── */
+.stage{
+  position:relative;
+  height:640px;
+  perspective:1400px;
+}
+
+/* common phone */
+.phone{
+  position:absolute;
+  width:280px;height:570px;
+  border-radius:42px;
+  background:#0d0a10;
+  padding:8px;
+  box-shadow:var(--shadow-lg);
+}
+.phone::before{
+  content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:80px;height:18px;background:#0d0a10;border-radius:0 0 14px 14px;z-index:2;
+}
+.screen{
+  position:relative;
+  width:100%;height:100%;
+  border-radius:34px;
+  overflow:hidden;
+  background:#fff;
+}
+
+/* ─── WhatsApp phone (left, tilted) ─── */
+.phone.wa{
+  top:30px;left:0;
+  transform:rotate(-7deg);
+  filter:saturate(.92);
+}
+.wa-screen{background:#E5DDD5}
+.wa-head{
+  background:#075E54;color:#fff;
+  padding:36px 14px 10px;display:flex;align-items:center;gap:10px;
+  font-size:13px;
+}
+.wa-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,#BFA98A,#7E6A4E);
+  display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;
+}
+.wa-name{font-weight:600;font-size:14px;line-height:1.1}
+.wa-status{font-size:11px;opacity:.85}
+.wa-body{
+  padding:14px 12px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='6' cy='6' r='1' fill='%23d4cab8' opacity='.5'/></svg>"),
+    #E5DDD5;
+  height:calc(100% - 88px);
+  display:flex;flex-direction:column;justify-content:flex-end;gap:6px;
+}
+.wa-bubble{
+  align-self:flex-end;
+  max-width:78%;
+  background:#DCF8C6;
+  padding:8px 11px 16px;
+  border-radius:12px 12px 4px 12px;
+  font-size:14.5px;color:#1a1a1a;
+  box-shadow:0 1px 1px rgba(0,0,0,.08);
+  position:relative;
+  font-weight:600;
+  letter-spacing:.5px;
+}
+.wa-bubble .typing{
+  display:inline-block;
+  overflow:hidden;white-space:nowrap;
+  border-right:2px solid #1a1a1a;
+  animation:type 1.4s steps(20, end) forwards, blink .7s step-end 3 forwards;
+  animation-delay:.6s, 2.1s;
+  width:0;
+}
+.wa-bubble .meta{
+  position:absolute;bottom:3px;right:8px;
+  font-size:9.5px;color:#7a8a7a;font-weight:500;letter-spacing:0;
+}
+.wa-bubble .meta svg{vertical-align:middle;margin-left:2px}
+@keyframes type{ from{width:0} to{width:11.5ch} }
+@keyframes blink{ 50%{border-color:transparent} }
+
+.wa-bubble-2{
+  align-self:flex-end;max-width:50%;
+  background:#DCF8C6;padding:8px 12px 16px;
+  border-radius:12px 12px 4px 12px;
+  font-size:18px;color:#1a1a1a;
+  opacity:0;animation:appear .3s ease-out 2.6s forwards;
+  position:relative;
+}
+.wa-bubble-2 .meta{
+  position:absolute;bottom:3px;right:8px;
+  font-size:9.5px;color:#7a8a7a;
+}
+@keyframes appear{from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none}}
+
+.wa-time{
+  text-align:center;font-size:10.5px;color:#5a5a5a;
+  background:rgba(255,255,255,.55);padding:3px 10px;border-radius:8px;
+  align-self:center;margin-bottom:8px;font-weight:500;
+}
+
+/* ─── arrow between phones ─── */
+.vs{
+  position:absolute;
+  left:46%;top:46%;transform:translate(-50%,-50%) rotate(8deg);
+  z-index:5;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-family:var(--hand);color:var(--ink);
+  font-size:24px;font-weight:600;
+  filter:drop-shadow(0 4px 10px rgba(225,29,72,.25));
+}
+.vs span{
+  background:#fff;padding:4px 14px;border-radius:999px;
+  border:1.5px dashed var(--rose);
+  white-space:nowrap;
+}
+.vs-arrow{
+  color:var(--rose);
+  animation:arrowBob 2.2s ease-in-out infinite;
+}
+.vs-arrow svg{width:54px;height:54px}
+@keyframes arrowBob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(6px)}
+}
+
+/* ─── myKado phone (right, prominent) ─── */
+.phone.mk{
+  top:0;right:0;
+  transform:rotate(5deg) translateZ(40px);
+  z-index:3;
+}
+.mk-screen{
+  background:
+    radial-gradient(ellipse at 50% 0%, #FFE0E9 0%, #FFFAF6 45%, #F6ECFF 100%);
+  display:flex;flex-direction:column;
+  padding:40px 16px 16px;
+}
+.mk-eyebrow{
+  display:inline-flex;align-self:center;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:999px;
+  background:#fff;font-size:10px;color:var(--rose);font-weight:700;
+  box-shadow:0 1px 4px rgba(225,29,72,.15);
+}
+.mk-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--rose);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.4);opacity:.6}}
+
+.mk-title{
+  font-family:var(--display);font-style:italic;
+  text-align:center;font-size:32px;line-height:1.05;
+  color:var(--ink);margin:10px 0 2px;
+  letter-spacing:-.01em;
+}
+.mk-name{
+  font-family:var(--display);font-style:italic;
+  text-align:center;font-size:42px;line-height:1;
+  color:var(--rose-deep);margin-bottom:8px;
+  letter-spacing:-.02em;
+  transition:opacity .25s, transform .25s;
+}
+.mk-name.pop{animation:popIn .5s cubic-bezier(.34,1.3,.5,1)}
+@keyframes popIn{
+  0%{transform:scale(.6);opacity:0}
+  60%{transform:scale(1.08);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+.mk-sub{
+  text-align:center;font-size:11.5px;color:var(--ink-soft);
+  margin-bottom:14px;
+}
+
+.mk-photo{
+  width:100%;height:170px;border-radius:18px;
+  background:
+    linear-gradient(135deg, rgba(225,29,72,.25), rgba(155,126,226,.25)),
+    url("https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80") center/cover;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 20px -8px rgba(43,26,45,.4);
+  border:3px solid #fff;
+}
+.mk-photo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 60%, rgba(0,0,0,.35) 100%);
+}
+.mk-photo-cap{
+  position:absolute;bottom:8px;left:10px;right:10px;
+  color:#fff;font-family:var(--hand);font-size:17px;font-weight:600;z-index:1;
+}
+
+/* music wave */
+.mk-music{
+  margin-top:12px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(8px);
+  border-radius:14px;padding:9px 12px;display:flex;align-items:center;gap:10px;
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 4px 12px -4px rgba(43,26,45,.12);
+}
+.mk-music-ico{
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#FF6F8B,#E11D48);
+  display:grid;place-items:center;color:#fff;flex:none;
+}
+.mk-music-ico svg{width:14px;height:14px}
+.mk-music-meta{flex:1;min-width:0}
+.mk-music-t{font-size:11px;color:var(--ink);font-weight:700;line-height:1.1}
+.mk-music-s{font-size:9.5px;color:var(--muted);margin-top:1px}
+.mk-bars{display:flex;align-items:flex-end;gap:2px;height:16px}
+.mk-bars i{
+  width:2px;background:var(--rose);border-radius:2px;
+  animation:bar 1s ease-in-out infinite;
+}
+.mk-bars i:nth-child(1){height:30%;animation-delay:0s}
+.mk-bars i:nth-child(2){height:80%;animation-delay:.1s}
+.mk-bars i:nth-child(3){height:50%;animation-delay:.2s}
+.mk-bars i:nth-child(4){height:95%;animation-delay:.3s}
+.mk-bars i:nth-child(5){height:40%;animation-delay:.4s}
+@keyframes bar{50%{transform:scaleY(.4)}}
+
+/* contributors */
+.mk-contribs{
+  margin-top:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.mk-avatars{display:flex}
+.mk-avatars span{
+  width:24px;height:24px;border-radius:50%;
+  border:2px solid #fff;margin-left:-7px;
+  display:grid;place-items:center;color:#fff;font-size:10px;font-weight:700;
+}
+.mk-avatars span:first-child{margin-left:0}
+.mk-avatars .a1{background:linear-gradient(135deg,#FF9F7A,#E11D48)}
+.mk-avatars .a2{background:linear-gradient(135deg,#9B7EE2,#6D4FC7)}
+.mk-avatars .a3{background:linear-gradient(135deg,#6BCFAF,#3D9678)}
+.mk-avatars .a4{background:linear-gradient(135deg,#FFC95A,#C99A3A)}
+.mk-contribs-text{font-size:11px;color:var(--ink-soft);line-height:1.2}
+.mk-contribs-text b{color:var(--ink);font-weight:700}
+
+/* confetti */
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{
+  position:absolute;top:-10px;
+  width:6px;height:9px;border-radius:1px;
+  animation:fall 4s linear infinite;
+}
+.confetti i:nth-child(1){left:8%;background:#E11D48;animation-delay:0s}
+.confetti i:nth-child(2){left:22%;background:#FFC95A;animation-delay:.6s;transform:rotate(20deg)}
+.confetti i:nth-child(3){left:38%;background:#9B7EE2;animation-delay:1.2s}
+.confetti i:nth-child(4){left:55%;background:#6BCFAF;animation-delay:.3s;transform:rotate(-15deg)}
+.confetti i:nth-child(5){left:70%;background:#FF9F7A;animation-delay:1.8s}
+.confetti i:nth-child(6){left:88%;background:#E11D48;animation-delay:.9s;transform:rotate(30deg)}
+.confetti i:nth-child(7){left:15%;background:#9B7EE2;animation-delay:2.4s}
+.confetti i:nth-child(8){left:62%;background:#FFC95A;animation-delay:3s}
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0);opacity:1}
+  100%{transform:translateY(620px) rotate(360deg);opacity:0}
+}
+
+/* ─── floating accent cards ─── */
+.float{
+  position:absolute;z-index:6;
+  background:#fff;border-radius:14px;padding:12px 14px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.float.qr{
+  bottom:30px;left:-20px;
+  animation:floatY 5s ease-in-out infinite;
+}
+.float.qr .ico{
+  width:42px;height:42px;border-radius:10px;background:var(--ink);
+  display:grid;place-items:center;color:#fff;flex:none;
+}
+.float.qr .ico svg{width:24px;height:24px}
+.float .t{font-weight:700;font-size:13px;line-height:1.1;color:var(--ink)}
+.float .s{font-size:11px;color:var(--muted);margin-top:1px}
+
+.float.note{
+  top:40px;right:-30px;
+  transform:rotate(4deg);
+  background:#FFF7B5;
+  font-family:var(--hand);font-size:18px;
+  color:#5a4818;
+  padding:14px 16px;line-height:1.2;
+  border:none;
+  animation:floatY 6s ease-in-out infinite .8s;
+  max-width:180px;
+}
+.float.note::before{
+  content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%) rotate(-3deg);
+  width:50px;height:14px;background:rgba(225,29,72,.18);
+  border-radius:2px;
+}
+
+.float.contrib{
+  bottom:140px;right:-40px;
+  animation:floatY 5.5s ease-in-out infinite 1.2s;
+}
+.float.contrib .num{
+  font-family:var(--display);font-style:italic;
+  font-size:34px;color:var(--rose-deep);line-height:1;
+}
+@keyframes floatY{
+  0%,100%{transform:translateY(0) rotate(var(--r, 0deg))}
+  50%{transform:translateY(-10px) rotate(var(--r, 0deg))}
+}
+.float.note{--r:4deg}
+
+/* ───────────────────────── responsive ───────────────── */
+@media (max-width: 980px){
+  .hero{padding:32px 22px 70px}
+  .hero-in{grid-template-columns:1fr;gap:36px}
+  .h1{font-size:clamp(38px, 6.4vw, 58px)}
+  .sub{max-width:none}
+  .cta-wrap,.formats{max-width:none}
+
+  /* stage becomes a vertical stack */
+  .stage{
+    height:auto;
+    display:flex;flex-direction:column;align-items:center;
+    perspective:none;
+    padding:10px 0 30px;
+    gap:0;
+  }
+  .phone{position:relative;top:auto;left:auto;right:auto;margin:0 auto}
+  .phone.wa{transform:rotate(-4deg)}
+  .phone.mk{transform:rotate(3deg)}
+
+  /* arrow becomes a vertical separator */
+  .vs{
+    position:relative;left:auto;top:auto;transform:none;
+    margin:14px 0;
+    flex-direction:row;align-items:center;gap:12px;
+  }
+  .vs span{order:1}
+  .vs-arrow{order:2;animation:none}
+  .vs-arrow svg{transform:rotate(60deg);width:46px;height:46px}
+
+  /* float cards repositioned around the stack */
+  .float{animation:none}
+  .float.qr{
+    bottom:auto;left:-6px;
+    top:8px;
+  }
+  .float.note{
+    top:auto;right:-6px;
+    bottom:110px;
+    transform:rotate(5deg);
+    font-size:16px;
+  }
+  .float.contrib{display:none}
+
+  .nav-links{display:none}
+}
+
+@media (max-width: 600px){
+  .nav-in{padding:14px 18px}
+  .brand{font-size:22px}
+  .hero{padding:24px 16px 60px}
+  .h1{font-size:40px;line-height:1.05;margin:18px 0}
+  .h1 .strike{white-space:normal}
+  .sub{font-size:15.5px;margin-bottom:22px}
+
+  /* CTA stacks: label on top, input + button on second row */
+  .cta-wrap{flex-wrap:wrap;padding:10px 10px 10px 16px;gap:6px;border-radius:16px}
+  .cta-label{width:100%;font-size:16px;padding-top:2px}
+  .cta-input{flex:1 1 0;font-size:16px;padding:10px 0;min-width:0}
+  .cta-btn{flex:0 0 auto;padding:12px 14px;font-size:14px}
+
+  .formats{flex-direction:column;gap:8px}
+  .formats .fmt{min-width:0;width:100%}
+
+  /* shrink phones to fit comfortably on small screens */
+  .phone{width:240px;height:488px;border-radius:36px;padding:6px}
+  .phone::before{width:60px;height:14px;top:12px}
+  .screen{border-radius:30px}
+  .wa-head{padding:30px 12px 8px}
+  .mk-screen{padding:32px 14px 14px}
+  .mk-title{font-size:26px}
+  .mk-name{font-size:36px}
+  .mk-photo{height:140px}
+  .mk-music{padding:7px 10px}
+  .mk-music-t{font-size:10.5px}
+
+  /* drop all float cards on small screens — they crowd the stack */
+  .float.qr,.float.note,.float.contrib{display:none}
+}
+
+@media (max-width: 360px){
+  .h1{font-size:34px}
+  .phone{width:220px;height:448px}
+  .mk-photo{height:124px}
+}
+</style>
+</head>
+<body>
+
+<!-- ────────── NAVBAR ────────── -->
+<nav class="nav">
+  <div class="nav-in">
+    <a href="#" class="brand">
+      <svg class="bow" viewBox="0 0 32 32" fill="none">
+        <path d="M16 16 Q8 8 4 12 Q2 16 4 20 Q8 24 16 16 Q24 8 28 12 Q30 16 28 20 Q24 24 16 16Z" fill="#E11D48"/>
+        <circle cx="16" cy="16" r="3" fill="#FFD2DE"/>
+      </svg>
+      myKado
+    </a>
+    <div class="nav-links">
+      <a href="#">Templates</a>
+      <a href="#">Comment ça marche</a>
+      <a href="#">Tarifs</a>
+      <a href="#">Occasions</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#">Connexion</a>
+      <a class="btn-mini" href="#">Créer un vœu
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="14" height="14">
+          <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ────────── HERO ────────── -->
+<header class="hero">
+  <div class="hero-bg">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+    <div class="grid-bg"></div>
+  </div>
+
+  <div class="hero-in">
+
+    <!-- ─── LEFT: copy + CTA ─── -->
+    <div class="hero-copy">
+      <span class="eyebrow">
+        <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
+        Cartes animées <span class="sep-dot">·</span> Murs collectifs <span class="sep-dot">·</span> Cagnottes
+      </span>
+
+      <h1 class="h1">
+        Tu veux faire <em class="it">mieux</em><br/>
+        qu'un <span class="strike">"Joyeux anniv 🎂"</span> sur WhatsApp,<br/>
+        <em class="it gold">sans te ruiner</em> ?
+      </h1>
+
+      <p class="sub">
+        Carte animée pour une personne, mur où toute la famille laisse un mot,
+        cagnotte pour le cadeau commun. <strong>Gratuit</strong> jusqu'à la publication —
+        tu paies juste quand tu envoies.
+      </p>
+
+      <!-- interactive CTA -->
+      <form class="cta-wrap" onsubmit="event.preventDefault(); go();">
+        <span class="cta-label">Pour qui c'est ?</span>
+        <input id="who" class="cta-input" type="text" placeholder="Maman" autocomplete="off"/>
+        <button class="cta-btn" type="submit">
+          Continuer
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+
+      <!-- format toggle -->
+      <div class="formats" role="radiogroup">
+        <button class="fmt" role="radio" aria-pressed="true" data-fmt="solo">
+          <span class="fmt-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="3" width="12" height="18" rx="2"/>
+              <circle cx="12" cy="17" r="1.2" fill="currentColor"/>
+            </svg>
+          </span>
+          <span>
+            <div class="fmt-t">Carte animée</div>
+            <div class="fmt-s">Pour une personne</div>
+          </span>
+        </button>
+        <button class="fmt" role="radio" aria-pressed="false" data-fmt="wall">
+          <span class="fmt-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="7" height="7" rx="1.2"/>
+              <rect x="14" y="4" width="7" height="7" rx="1.2"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.2"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.2"/>
+            </svg>
+          </span>
+          <span>
+            <div class="fmt-t">Mur collectif</div>
+            <div class="fmt-s">Tout un groupe participe</div>
+          </span>
+        </button>
+      </div>
+
+      <div class="trust">
+        <span class="coin"></span>
+        <span><b>1 crédit = 500 FCFA</b> <span class="sep">·</span> sans abonnement <span class="sep">·</span> tu paies seulement pour publier</span>
+      </div>
+    </div>
+
+    <!-- ─── RIGHT: stage with two phones ─── -->
+    <div class="stage">
+
+      <!-- WhatsApp phone (the "before") -->
+      <div class="phone wa">
+        <div class="screen wa-screen">
+          <div class="wa-head">
+            <div class="wa-avatar">M</div>
+            <div>
+              <div class="wa-name">Maman ❤</div>
+              <div class="wa-status">en ligne</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-time">aujourd'hui · 7h42</div>
+            <div class="wa-bubble">
+              <span class="typing">JOYEUX ANNIV</span>
+              <span class="meta">7:42
+                <svg width="12" height="10" viewBox="0 0 16 11" fill="none"><path d="M11.071.653a.5.5 0 0 0-.708 0L4.572 6.444 1.637 3.509a.5.5 0 1 0-.707.707l3.288 3.288a.5.5 0 0 0 .707 0L11.071 1.36a.5.5 0 0 0 0-.707zm4 0a.5.5 0 0 0-.708 0L8.572 6.444 7.94 5.812l-.706.707L8.22 7.504a.5.5 0 0 0 .707 0L15.071 1.36a.5.5 0 0 0 0-.707z" fill="%2353bdeb"/></svg>
+              </span>
+            </div>
+            <div class="wa-bubble wa-bubble-2">
+              🎂🎂🎂
+              <span class="meta">7:42
+                <svg width="12" height="10" viewBox="0 0 16 11" fill="none"><path d="M11.071.653a.5.5 0 0 0-.708 0L4.572 6.444 1.637 3.509a.5.5 0 1 0-.707.707l3.288 3.288a.5.5 0 0 0 .707 0L11.071 1.36a.5.5 0 0 0 0-.707zm4 0a.5.5 0 0 0-.708 0L8.572 6.444 7.94 5.812l-.706.707L8.22 7.504a.5.5 0 0 0 .707 0L15.071 1.36a.5.5 0 0 0 0-.707z" fill="%2353bdeb"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- arrow / "ou ça" -->
+      <div class="vs" aria-hidden="true">
+        <span>ou ça</span>
+        <div class="vs-arrow">
+          <svg viewBox="0 0 60 60" fill="none">
+            <path d="M10 15 Q 25 5, 40 20 T 50 45" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <path d="M45 38 L 52 47 L 42 49" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- myKado phone (the "after") -->
+      <div class="phone mk">
+        <div class="screen mk-screen">
+          <div class="confetti">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="mk-eyebrow"><span class="dot"></span> En direct</div>
+          <div class="mk-title">Joyeux anniversaire</div>
+          <div class="mk-name" id="preview-name">Aminata</div>
+          <div class="mk-sub">32 ans · de toute la famille</div>
+          <div class="mk-photo">
+            <div class="mk-photo-cap">Voilà ton année qui commence</div>
+          </div>
+          <div class="mk-music">
+            <span class="mk-music-ico">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 17V5l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </span>
+            <div class="mk-music-meta">
+              <div class="mk-music-t">Stand By Me</div>
+              <div class="mk-music-s">choisie par Papa</div>
+            </div>
+            <div class="mk-bars"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="mk-contribs">
+            <div class="mk-avatars">
+              <span class="a1">P</span><span class="a2">F</span><span class="a3">K</span><span class="a4">+</span>
+            </div>
+            <div class="mk-contribs-text"><b>24 proches</b> ont laissé un mot</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- floating accent cards -->
+      <div class="float qr">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <div class="t">QR en forme de cœur</div>
+          <div class="s">à coller dans une story</div>
+        </div>
+      </div>
+
+      <div class="float note">
+        Maman a pleuré<br/>en le découvrant.
+      </div>
+
+      <div class="float contrib">
+        <div class="num">+24</div>
+        <div>
+          <div class="t">contributeurs</div>
+          <div class="s">ont laissé un mot</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<script>
+// rotating placeholder
+const placeholders = ['Maman', 'Marie', 'l\'équipe RH', 'Papa', 'Aminata', 'tes mariés', 'Kofi qui part'];
+let idx = 0;
+const input = document.getElementById('who');
+setInterval(() => {
+  if (input.value) return;
+  idx = (idx + 1) % placeholders.length;
+  input.placeholder = placeholders[idx];
+}, 2500);
+
+// live update of preview name
+const preview = document.getElementById('preview-name');
+const defaultName = 'Aminata';
+input.addEventListener('input', () => {
+  const val = input.value.trim();
+  const next = val || defaultName;
+  if (preview.textContent !== next) {
+    preview.textContent = next;
+    preview.classList.remove('pop');
+    void preview.offsetWidth;
+    preview.classList.add('pop');
+  }
+});
+
+// format toggle
+document.querySelectorAll('.fmt').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.fmt').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+  });
+});
+
+function go(){
+  const name = (input.value || 'Maman').trim();
+  alert('→ Editor ouvert avec le prénom pré-rempli : ' + name);
+}
+</script>
+</body>
+</html>

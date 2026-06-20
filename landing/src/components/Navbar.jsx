@@ -32,9 +32,10 @@ export default function Navbar({ onOrder }) {
           </a>
 
           <div className="nav-links">
+            <a href="#comparatif">Pourquoi</a>
+            <a href="#occasions">Occasions</a>
             <a href="#templates">Templates</a>
             <a href="#how">Comment ça marche</a>
-            <a href="#usecases">Pour qui</a>
             <a href="#pricing">Tarifs</a>
             <a href="#faq">FAQ</a>
           </div>
@@ -59,9 +60,10 @@ export default function Navbar({ onOrder }) {
       {menuOpen && (
         <div className="drawer" onClick={close}>
           <div className="drawer-card" onClick={(e) => e.stopPropagation()}>
+            <a href="#comparatif" onClick={close}>Pourquoi</a>
+            <a href="#occasions"  onClick={close}>Occasions</a>
             <a href="#templates"  onClick={close}>Templates</a>
             <a href="#how"        onClick={close}>Comment ça marche</a>
-            <a href="#usecases"   onClick={close}>Pour qui</a>
             <a href="#pricing"    onClick={close}>Tarifs</a>
             <a href="#faq"        onClick={close}>FAQ</a>
             <button className="btn btn-primary" onClick={() => { close(); onOrder(); }}>

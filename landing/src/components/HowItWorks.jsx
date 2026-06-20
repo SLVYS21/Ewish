@@ -1,36 +1,87 @@
-import { useReveal } from '../hooks/useReveal';
+import { useInView } from '../hooks/useInView';
+import s from './HowItWorks.module.css';
 
-const steps = [
-  { n: '01', t: 'Créez votre compte',     d: "Inscription en 2 minutes. Accès immédiat à l'éditeur.", icon: '👤' },
-  { n: '02', t: 'Personnalisez librement', d: "Photos, musique, textes, QR code, bouton CTA  gratuit.", icon: '✎' },
-  { n: '03', t: 'Achetez vos crédits',     d: "Uniquement quand vous publiez. À la carte ou en pack.", icon: '◉' },
-  { n: '04', t: 'Partagez par lien ou QR', d: "WhatsApp, email, QR personnalisé. Vu, rejoué, conservé.", icon: '↗' },
+const STEPS = [
+  {
+    n: '01',
+    title: 'Tu choisis le format',
+    body: "Une carte animée pour une personne, ou un mur où toute la famille / l'équipe écrit. Choisis ton occasion : anniversaire, mariage, départ, hommage…",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+        <rect x="5" y="6" width="10" height="20" rx="2"/>
+        <rect x="18" y="6" width="9" height="9" rx="1.6"/>
+        <rect x="18" y="17" width="9" height="9" rx="1.6"/>
+      </svg>
+    ),
+  },
+  {
+    n: '02',
+    title: 'Tu personnalises gratuit',
+    body: "Prénom, photos, musique, mot manuscrit, palette, cagnotte. L'éditeur est gratuit. Tu joues, tu testes, tu revois autant de fois que tu veux.",
+    pill: { tone: 'rose', text: 'Aucun centime jusqu\'ici' },
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+        <path d="M5 27l5-1 14-14-4-4L6 22l-1 5z" strokeLinejoin="round"/>
+        <path d="M19 8l4 4" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    n: '03',
+    title: 'Tu partages, le moment commence',
+    body: "Lien court + QR en forme de cœur + boutons WhatsApp, Instagram, story. Tu paies les crédits uniquement à ce moment-là — et c'est en ligne.",
+    pill: { tone: 'gold', text: 'Le seul moment où tu paies' },
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+        <circle cx="8" cy="16" r="3"/>
+        <circle cx="24" cy="8" r="3"/>
+        <circle cx="24" cy="24" r="3"/>
+        <path d="M11 14l10-5M11 18l10 5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
 ];
 
 export default function HowItWorks() {
-  const [ref, seen] = useReveal();
+  const [ref, inView] = useInView();
+
   return (
-    <section className="section section-how" id="how" ref={ref}>
-      <div className="wrap">
-        <div className="section-head">
-          <span className="eyebrow"><span className="dot"></span> Comment ça marche</span>
-          <h2>Personnalisez d'abord,<br/><em>payez ensuite</em>.</h2>
-          <p>
-            Pas d'abonnement, pas de mauvaise surprise. Vous voyez exactement ce que
-            coûte votre vœu avant d'engager un centime.
+    <section className={s.section} id="how" ref={ref}>
+      <div className={s.wrap}>
+        <div className={s.head}>
+          <span className={`${s.eyebrow} ${inView ? s.revealed : s.reveal}`}>
+            <span className={s.dot} /> En 3 étapes
+          </span>
+          <h2 className={`${s.title} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.08s' }}>
+            Tu personnalises d'abord.<br/>
+            Tu paies <em className="it gold">seulement</em> pour publier.
+          </h2>
+          <p className={`${s.sub} ${inView ? s.revealed : s.reveal}`} style={{ transitionDelay: '.16s' }}>
+            Pas d'abonnement, pas de mauvaise surprise. Tu vois exactement
+            ce que coûte ton vœu avant d'engager un centime.
           </p>
         </div>
 
-        <div className="how-steps">
-          {steps.map((s, i) => (
-            <div key={s.n} className={`how-step ${seen ? 'revealed' : 'reveal'}`} style={{ transitionDelay: `${i*0.08}s` }}>
-              <div className="how-num serif italic">{s.n}</div>
-              <div className="how-icon">{s.icon}</div>
-              <h3>{s.t}</h3>
-              <p>{s.d}</p>
-              {i === 2 && <span className="how-mark"><span className="coin"/> Le seul moment où vous payez</span>}
+        <div className={s.steps}>
+          {STEPS.map((step, i) => (
+            <div
+              key={step.n}
+              className={`${s.step} ${inView ? s.revealed : s.reveal}`}
+              style={{ transitionDelay: `${i * 0.12}s` }}
+            >
+              <div className={s.stepNum}>{step.n}</div>
+              <div className={s.stepIco}>{step.icon}</div>
+              <h3 className={s.stepTitle}>{step.title}</h3>
+              <p className={s.stepBody}>{step.body}</p>
+              {step.pill && (
+                <span className={`${s.stepPill} ${s[`pill-${step.pill.tone}`]}`}>
+                  <span className={s.pillDot} /> {step.pill.text}
+                </span>
+              )}
             </div>
           ))}
+
+          <div className={s.connector} aria-hidden />
         </div>
       </div>
     </section>

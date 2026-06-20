@@ -1,92 +1,175 @@
-.finalCta {
-  padding: 100px var(--pad-x);
-  background: var(--ink);
-  color: var(--ivory);
-  position: relative; overflow: hidden;
+/* ─────────────────────────────────────────────────────────────
+   FinalCTA — mirror of hero CTA at end of page
+   ───────────────────────────────────────────────────────────── */
+
+.section {
+  padding: 110px var(--pad-x);
+  background: #ffffff;
+  border-top: 1px solid rgba(28,22,17,.06);
+  position: relative;
+  overflow: hidden;
 }
-.finalCta::before {
-  content: ''; position: absolute;
-  width: 600px; height: 600px; top: -200px; right: -100px;
-  background: radial-gradient(circle, rgba(201,168,76,.25), transparent 60%);
-  border-radius: 50%; filter: blur(40px);
-}
-.finalCta::after {
-  content: ''; position: absolute;
-  width: 500px; height: 500px; bottom: -200px; left: -100px;
-  background: radial-gradient(circle, rgba(224,85,116,.18), transparent 60%);
-  border-radius: 50%; filter: blur(40px);
+.wrap {
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
 }
 
-.finalCtaInner {
-  max-width: var(--maxw); margin: 0 auto;
-  position: relative; z-index: 1;
-  display: grid; grid-template-columns: 1.4fr 1fr; gap: 60px;
-  align-items: center;
+.bgOrbs { position: absolute; inset: 0; pointer-events: none; }
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .55;
+}
+.o1 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(255,210,222,.55), transparent 65%); top: -140px; left: -80px; }
+.o2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(233,217,255,.45), transparent 65%); bottom: -120px; right: -60px; }
+
+.card {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(43,26,45,.08);
+  border-radius: 28px;
+  padding: 56px 48px 44px;
+  text-align: center;
+  box-shadow:
+    0 30px 80px -30px rgba(43,26,45,.30),
+    0 12px 30px -10px rgba(225,29,72,.18);
+  z-index: 1;
 }
 
-/* Reveal */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
-.revealed { opacity: 1; transform: none; }
-
-.finalCtaInner h2 {
-  font-family: var(--font-serif);
-  font-size: clamp(2.4rem, 4.5vw, 4rem);
-  color: var(--ivory); line-height: 1.05; margin-bottom: 22px;
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: #FFF7FA;
+  border: 1px solid var(--rose-pale);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--rose-d);
+  letter-spacing: 0;
+  text-transform: none;
 }
-.finalCtaInner h2 em { font-style: italic; color: var(--gold-l); }
-.finalCtaInner p {
-  font-size: 1.05rem; color: var(--ink-4); line-height: 1.6;
-  max-width: 480px; margin-bottom: 32px;
-}
-.finalCtaInner strong { color: var(--ivory); }
-
-.ctaActions { display: flex; gap: 14px; flex-wrap: wrap; }
-
-.btnGold {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 28px; border-radius: 99px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-d));
-  color: var(--ink); border: none; cursor: pointer;
-  font-size: 0.88rem; font-weight: 700; letter-spacing: 0.02em;
-  box-shadow: 0 8px 24px rgba(201,168,76,.32);
-  transition: transform .18s, box-shadow .25s;
-}
-.btnGold:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(201,168,76,.42); }
-.arr { transition: transform .25s ease; }
-.btnGold:hover .arr { transform: translateX(3px); }
-
-.btnGhost {
-  display: inline-flex; align-items: center;
-  padding: 14px 24px; border-radius: 99px;
-  background: transparent; color: var(--ivory);
-  border: 1px solid rgba(255,255,255,.2);
-  font-size: 0.88rem; font-weight: 700;
-  transition: border-color .2s;
-  text-decoration: none;
-}
-.btnGhost:hover { border-color: var(--ivory); }
-
-.finalCtaCard {
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: var(--r-lg);
-  padding: 28px;
-  backdrop-filter: blur(10px);
-}
-.finalCtaCard h4 { font-family: var(--font-serif); font-size: 1.1rem; color: var(--ivory); margin-bottom: 16px; }
-.item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 0;
-  font-size: 0.88rem; color: var(--ink-4);
-}
-.item + .item { border-top: 1px solid rgba(255,255,255,.06); }
-.ic {
-  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(201,168,76,.15); color: var(--gold-l);
-  display: grid; place-items: center; font-size: 0.7rem;
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: 0 0 0 4px rgba(225,29,72,.18);
 }
 
-@media (max-width: 880px) {
-  .finalCtaInner { grid-template-columns: 1fr; gap: 40px; }
-  .finalCta { padding: 80px var(--pad-x); }
+.title {
+  font-family: var(--font-sans);
+  font-size: clamp(2.4rem, 5.4vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: -.025em;
+  margin: 22px 0 14px;
+  color: #2B1A2D;
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 17px;
+  color: #5A4458;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 32px;
+}
+
+/* ─── interactive CTA (mirrors hero) ─── */
+.ctaWrap {
+  position: relative;
+  background: #fff;
+  border: 1.5px solid rgba(43,26,45,.10);
+  border-radius: 18px;
+  padding: 8px 8px 8px 22px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow);
+  max-width: 520px;
+  margin: 0 auto;
+  transition: border-color .25s, box-shadow .25s, transform .25s;
+}
+.ctaWrap::before {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--rose-soft), var(--rose), #9B7EE2);
+  z-index: -1; opacity: 0;
+  transition: opacity .35s;
+  filter: blur(8px);
+}
+.ctaWrap:focus-within { border-color: transparent; transform: translateY(-2px); }
+.ctaWrap:focus-within::before { opacity: .55; }
+
+.ctaLabel {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: #2B1A2D;
+  font-size: 18px;
+  white-space: nowrap;
+}
+.ctaInput {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-family: var(--font-sans);
+  font-size: 17px; color: #2B1A2D;
+  padding: 14px 0;
+  min-width: 0;
+}
+.ctaInput::placeholder { color: #8E7B8C; font-style: italic; }
+
+.ctaBtn {
+  background: linear-gradient(135deg, var(--rose-soft), var(--rose));
+  color: #fff; border: none;
+  padding: 13px 18px; border-radius: 13px;
+  font-family: var(--font-sans);
+  font-weight: 700; font-size: 15px;
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  transition: filter .2s, transform .15s, box-shadow .25s;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -6px rgba(225,29,72,.5);
+}
+.ctaBtn:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 10px 24px -8px rgba(225,29,72,.55); }
+.ctaBtn svg { width: 16px; height: 16px; }
+
+/* ─── fine print ─── */
+.fine {
+  margin-top: 22px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 13.5px; color: #5A4458;
+}
+.coin {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #FFE8A3, #C99A3A 70%);
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,.15);
+  flex: none;
+}
+.fine b { color: #2B1A2D; font-weight: 700; }
+
+.assurances {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(43,26,45,.08);
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 18px 28px;
+}
+.assure {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13.5px; color: #2B1A2D; font-weight: 600;
+}
+.assure svg { width: 16px; height: 16px; color: var(--rose); flex: none; }
+
+/* ─── responsive ─── */
+@media (max-width: 760px) {
+  .section { padding: 80px var(--pad-x); }
+  .card { padding: 40px 28px 32px; border-radius: 24px; }
+}
+
+@media (max-width: 600px) {
+  .section { padding: 64px var(--pad-x); }
+  .card { padding: 32px 22px 28px; }
+  .ctaWrap { flex-wrap: wrap; padding: 10px 10px 10px 16px; gap: 6px; }
+  .ctaLabel { width: 100%; font-size: 16px; padding-top: 2px; }
+  .ctaInput { flex: 1 1 0; font-size: 16px; padding: 10px 0; }
+  .ctaBtn { flex: 0 0 auto; padding: 12px 14px; font-size: 14px; }
+  .assurances { gap: 12px 18px; }
+  .assure { font-size: 12.5px; }
 }
