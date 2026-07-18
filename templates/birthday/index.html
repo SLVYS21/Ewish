@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Fredoka+One&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Inter:wght@400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800&family=Fredoka+One&display=swap"
     rel="stylesheet">
   <style>
     /* =====================================================
@@ -40,24 +40,25 @@
                      "online" status, music track artist)
      ===================================================== */
     :root {
-      --primary: #E11D74;
-      /* CTA  rose vibrant */
-      --accent: #F5B544;
-      /* surfaces décor  ambré chaud */
-      --text-color: #1A1424;
-      /* texte principal  noir profond */
-      --text-muted: #8A8195;
-      /* texte secondaire  gris doux */
+      /* myKado Hybride C+A defaults — remplace injection dynamique via pub.style */
+      --primary: #1E2952;
+      /* CTA — indigo profond */
+      --accent: #E8A33D;
+      /* surfaces décor — or brass warm */
+      --text-color: #161311;
+      /* texte principal — encre stone-900 */
+      --text-muted: #7D7156;
+      /* texte secondaire — stone-500 warm */
 
-      --font: 'Outfit', system-ui, sans-serif;
+      --font: 'Fraunces', 'Outfit', system-ui, serif;
       --fs-scale: 1;
 
-      /* Surfaces neutres dérivées (jamais injectées) */
-      --bg: #FBF8F4;
-      --bg-warm: #FFF6EC;
+      /* Surfaces neutres dérivées (jamais injectées) — ambient crème warm */
+      --bg: #FAF7F0;
+      --bg-warm: #F3EEE1;
       --surface: #FFFFFF;
-      --hairline: rgba(26, 20, 36, 0.08);
-      --hairline-strong: rgba(26, 20, 36, 0.14);
+      --hairline: rgba(22, 19, 17, 0.08);
+      --hairline-strong: rgba(22, 19, 17, 0.14);
     }
 
     /* =====================================================
@@ -1745,6 +1746,10 @@
     /* ============================================================
        BUBBLE LETTERS (timeline ballon scene)
        ============================================================ */
+    // Shared between buildBubbleLetters() (computes the layout) and the
+    // GSAP trigger in the timeline below (plays it at the right moment).
+    let baloonFlightPlan = null;
+
     function buildBubbleLetters() {
       const nameEl = document.querySelector('[data-node-name="name"]');
       const rawName = (nameEl ? nameEl.textContent.trim() : 'Prénom').replace(/\s+/g, '');
@@ -1757,36 +1762,104 @@
       const colors = palette.slice().sort(() => Math.random() - 0.5);
       const result = ['H', 'B', 'D'].concat(letters);
       const container = document.querySelector('.baloons');
-      if (!container) return;
-
-      const vw = window.innerWidth || 375;
-      const count = result.length;
-
-      // Glyph width estimated from the CSS clamp: at mobile ~256px, desktop ~(13vw).
-      // We distribute in px to keep all letters within [0, vw].
-      const glyphW = Math.min(vw * 0.13, 512);   // mirrors 13vw cap from CSS
-      const gap    = (vw - glyphW) / Math.max(count - 1, 1);
+      if (!container) { baloonFlightPlan = { baseDuration: 4.2, fadeDuration: 0.35, totalDuration: 9 }; return; }
 
       container.innerHTML = '';
-      result.forEach(function (letter, idx) {
+
+      const vw = window.innerWidth || 375;
+      const vh = window.innerHeight || 667;
+
+      // 1) Create every letter first (hidden) so we can measure its REAL
+      //    rendered size in THIS browser/viewport, instead of guessing it
+      //    from a vw formula that doesn't match the CSS clamp() floor.
+      const spans = result.map(function (letter, idx) {
         const span = document.createElement('span');
         span.textContent = letter;
         span.style.color = colors[idx % colors.length];
+        span.style.visibility = 'hidden';
+        container.appendChild(span);
+        return span;
+      });
 
-        // Even distribution in px + small jitter clamped to screen bounds
-        const baseX  = idx * gap;
-        const jitter = (Math.random() - 0.5) * Math.min(gap * 0.3, 20);
-        const xPos   = Math.max(0, Math.min(vw - glyphW, baseX + jitter));
-        span.style.left = Math.round(xPos) + 'px';
+      let glyphW = 0, glyphH = 0;
+      spans.forEach(function (span) {
+        const r = span.getBoundingClientRect();
+        glyphW = Math.max(glyphW, r.width);
+        glyphH = Math.max(glyphH, r.height);
+      });
+      // Fallback in the rare case the font hasn't painted yet.
+      if (!glyphW) {
+        const fs = parseFloat(getComputedStyle(spans[0]).fontSize) || vw * 0.13;
+        glyphW = fs * 0.72;
+        glyphH = fs;
+      }
 
-        span.style.opacity                = '0';
-        span.style.animationName          = 'balloon-sway';
-        span.style.animationDuration      = (2.2 + Math.random() * 2) + 's';
+      // 2) These giant letters can't all stand side by side on one row
+      //    without overlapping — so we give them a handful of fixed
+      //    vertical "lanes" (as many as actually fit across the screen)
+      //    and float every letter up through its lane, like a real
+      //    balloon release: lane 0 gets letters 0, lanes+0, 2×lanes+0...
+      //    Letters still launch strictly in reading order (small stagger
+      //    left to right), so the message reads top-to-bottom-of-flight
+      //    as one cascading wave — but each one is free to wobble, spin
+      //    a little and float at its own pace, like a real balloon.
+      const gapX = Math.max(glyphW * 0.18, 16);
+      const gapY = Math.max(glyphH * 0.12, 20);
+      const lanes = Math.max(1, Math.floor(vw / (glyphW + gapX)));
+
+      const laneBlockWidth = lanes * glyphW + (lanes - 1) * gapX;
+      const laneStartX = Math.max((vw - laneBlockWidth) / 2, 0);
+      const laneX = [];
+      for (let l = 0; l < lanes; l++) {
+        laneX.push(laneStartX + l * (glyphW + gapX));
+      }
+
+      const baseDuration = 3.0;                          // average time for ONE letter to float bottom→top
+      const durationMax  = baseDuration * 1.18;           // upper bound of the random per-letter duration below
+      const fadeDuration = 0.35;                          // quick fade as it enters/leaves
+      const startY = vh + glyphH;                         // fully off-screen, below
+      const endY   = -(glyphH * 1.5);                     // fully off-screen, above
+      const verticalSpeed = (startY - endY) / baseDuration;
+      // Small safety margin (×1.08) absorbs the per-letter random duration
+      // below, so two letters sharing a lane never actually catch up to each other.
+      const laneCycleTime = ((glyphH + gapY) / verticalSpeed) * 1.08;
+      const stagger = laneCycleTime / lanes;               // small left-to-right launch wave
+
+      spans.forEach(function (span, idx) {
+        const lane = idx % lanes;
+
+        span.style.left = Math.round(laneX[lane]) + 'px';
+        span.style.top  = '0px';
+        span.style.visibility = '';
+        span.style.opacity = '0';
+
+        // Small CSS-driven sideways wobble for a "balloon in the wind"
+        // feel. Uses margin (not transform) so it never fights with the
+        // GSAP y/rotation tween below.
+        span.style.animationName           = 'balloon-sway';
+        span.style.animationDuration       = (2.2 + Math.random() * 2) + 's';
         span.style.animationTimingFunction = 'ease-in-out';
         span.style.animationIterationCount = 'infinite';
-        span.style.animationDelay         = -(Math.random() * 3) + 's';
-        container.appendChild(span);
+        span.style.animationDelay          = -(Math.random() * 3) + 's';
+
+        span.dataset.flightStartY  = startY;
+        span.dataset.flightEndY    = endY;
+        span.dataset.flightDelay   = (idx * stagger).toFixed(3);
+        // Each balloon floats at its own slightly random pace and gives a
+        // small random tilt as it rises — organic, but never enough to
+        // drift outside its lane's safety margin.
+        span.dataset.flightDuration = (baseDuration * (0.92 + Math.random() * 0.26)).toFixed(3);
+        span.dataset.rot0 = ((Math.random() - 0.5) * 14).toFixed(2);
+        span.dataset.rot1 = ((Math.random() - 0.5) * 22).toFixed(2);
       });
+
+      baloonFlightPlan = {
+        baseDuration: baseDuration,
+        fadeDuration: fadeDuration,
+        // Total time the master timeline should pause on this scene so the
+        // last letter has time to fully float past before the next scene cuts in.
+        totalDuration: (result.length - 1) * stagger + durationMax + 0.6
+      };
     }
 
     /* ============================================================
@@ -1861,21 +1934,31 @@
         .add(() => flashScene())
 
         .add('section-balloons')
-        // --- SIX balloons + birthday ---
+        // --- SIX balloons + birthday: letters float up in lanes, in order, like a balloon release ---
         .add(function () {
           var spans = document.querySelectorAll('.baloons span');
-          [].forEach.call(spans, function (span, i) {
-            TweenMax.fromTo(span,
-              7.5 + Math.random() * 4, // Balloons fly slower (increased duration)
-              { autoAlpha: 0, y: 900 + Math.random() * 700 },
-              {
-                autoAlpha: 1, y: -(700 + Math.random() * 400), ease: Power1.easeOut,
-                delay: i * 0.18 + Math.random() * 0.5
-              }
+          var plan = baloonFlightPlan || { fadeDuration: 0.35 };
+          [].forEach.call(spans, function (span) {
+            var startY    = parseFloat(span.dataset.flightStartY) || 0;
+            var endY      = parseFloat(span.dataset.flightEndY) || 0;
+            var delay     = parseFloat(span.dataset.flightDelay) || 0;
+            var duration  = parseFloat(span.dataset.flightDuration) || plan.baseDuration || 4.2;
+            var rot0      = parseFloat(span.dataset.rot0) || 0;
+            var rot1      = parseFloat(span.dataset.rot1) || 0;
+
+            // Float up, in its own lane, at its own slightly random pace,
+            // with a gentle organic tilt — the small per-letter randomness
+            // stays inside the safety margin baked into the lane timing.
+            TweenMax.fromTo(span, duration,
+              { y: startY, rotation: rot0 },
+              { y: endY, rotation: rot1, ease: Power1.easeOut, delay: delay }
             );
+            // Quick fade in right as it enters, quick fade out right as it leaves.
+            TweenMax.fromTo(span, plan.fadeDuration, { autoAlpha: 0 }, { autoAlpha: 1, delay: delay });
+            TweenMax.to(span, plan.fadeDuration, { autoAlpha: 0, delay: delay + duration - plan.fadeDuration });
           });
         })
-        .to({ _: 0 }, 9, { _: 1 }) // Reduced from 12 to 9 to eliminate dead time
+        .to({ _: 0 }, baloonFlightPlan ? baloonFlightPlan.totalDuration : 9, { _: 1 })
         .from('[data-photo="1"]',    0.7, { x: -160, autoAlpha: 0, ease: Power3.easeOut }, "-=2")
         .from('[data-photo="main"]', 0.7, { y: -140, autoAlpha: 0, ease: Power3.easeOut }, "-=0.6")
         .from('[data-photo="2"]',    0.7, { x:  160, autoAlpha: 0, ease: Power3.easeOut }, "-=0.6")

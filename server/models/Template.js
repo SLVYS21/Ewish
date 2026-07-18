@@ -15,6 +15,10 @@ const templateSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },  // e.g. "birthday"
   label: { type: String, required: true },               // e.g. "Birthday Wish"
   description: String,
+  // 'animation' = page animée (birthday/special/forever…)
+  // 'wall'      = mur de post-its collaboratif
+  // 'invitation'= invitation avec RSVP + mur intégré
+  kind: { type: String, enum: ['animation', 'wall', 'invitation'], default: 'animation', index: true },
   thumbnail: String,
   price: { type: Number, default: 0, required: true },
   priceLabel: { type: String, default: '' },

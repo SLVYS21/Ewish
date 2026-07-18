@@ -1,0 +1,314 @@
+/* ══════════════════════════════════════════════════════════════════
+   CreateModal — bottom sheet / centered modal
+   3 tuiles colorées : Mur / Carte / Cadeau
+   ══════════════════════════════════════════════════════════════════ */
+
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(43, 26, 45, .45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: cmFade .18s ease both;
+  padding: 0;
+}
+@keyframes cmFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sheet {
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 460px;
+  max-height: 92vh;
+  border-radius: 24px 24px 0 0;
+  padding: 0 22px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: cmSlideUp .32s cubic-bezier(.16,1,.3,1) both;
+  padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+}
+@keyframes cmSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.grip {
+  width: 40px; height: 4px;
+  border-radius: 99px;
+  background: #E5DDC9;
+  margin: 10px auto 6px;
+  flex-shrink: 0;
+}
+
+.head {
+  padding: 12px 4px 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+.close {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #F3EFEE;
+  color: #2B2440;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .15s;
+}
+.close:hover { background: #E9E3E1; }
+.info {
+  position: absolute;
+  top: 12px;
+  right: 44px;
+  color: #A79979;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+  display: flex;
+}
+.title {
+  font-family: 'Gabarito', 'Instrument Serif', serif;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: #2B2440;
+  margin-bottom: 8px;
+  padding-right: 60px;
+}
+.subtitle {
+  font-size: 14px;
+  color: #7D7156;
+  line-height: 1.5;
+}
+
+.tileList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 18px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s;
+  min-height: 118px;
+}
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -8px rgba(43,26,45,.15);
+}
+.tile:active {
+  transform: scale(.98);
+}
+.tileBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2;
+}
+.tileTitle {
+  font-family: 'Gabarito', 'Instrument Serif', serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #2B2440;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tileArrow {
+  transition: transform .18s;
+}
+.tile:hover .tileArrow { transform: translateX(4px); }
+.tileDesc {
+  font-size: 13px;
+  color: rgba(43, 36, 64, .68);
+  line-height: 1.45;
+  max-width: 22ch;
+}
+.tileArt {
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+/* ── Tile colors (pastel Kudoboard-inspired) ── */
+.tileBoard {
+  background: linear-gradient(135deg, #D5E4FF 0%, #B7CFF7 100%);
+}
+.tileCard {
+  background: linear-gradient(135deg, #FFDBE1 0%, #FFB8C3 100%);
+}
+.tileGift {
+  background: linear-gradient(135deg, #C7EED8 0%, #9DD9B5 100%);
+}
+
+/* ── Illustrations (CSS scenes) ── */
+.artBoard {
+  width: 80px;
+  height: 76px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  transform: rotate(-6deg);
+}
+.artBoardChip {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+.artBoardChip:nth-child(1) { background: #FFE7AD; }
+.artBoardChip:nth-child(2) { background: #FFFFFF; }
+.artBoardChip:nth-child(3) { background: #D7C5F2; }
+.artBoardChip:nth-child(4) { background: #FFB3C1; }
+.artBoardChip:nth-child(5) { background: #C9EEDF; }
+.artBoardChip:nth-child(6) { background: #FFFFFF; }
+.artBoardChip:nth-child(7) { background: #FFD7C2; }
+.artBoardChip:nth-child(8) { background: #FFC145; }
+.artBoardChip:nth-child(9) { background: #C2D5F0; }
+
+.artCard {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.artCardEnv {
+  width: 72px;
+  height: 60px;
+  background: #FFF3D6;
+  border: 2px solid #D19E39;
+  border-radius: 6px;
+  position: relative;
+  transform: rotate(-8deg);
+}
+.artCardEnv::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30px;
+  background: linear-gradient(160deg, #FFC145 50%, transparent 50%);
+  border-radius: 6px 6px 0 0;
+}
+.artCardHeart {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  color: #E11D48;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.15));
+}
+
+.artGift {
+  position: relative;
+  width: 90px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.artGiftCard {
+  width: 30px;
+  height: 46px;
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+}
+.artGiftCard::after {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 12%;
+  right: 12%;
+  height: 12%;
+  border-radius: 2px;
+  background: rgba(0,0,0,.15);
+}
+.artGiftCard:nth-child(1) {
+  background: linear-gradient(160deg, #F2D68A, #C88B2D);
+  transform: rotate(-10deg) translateY(4px);
+}
+.artGiftCard:nth-child(2) {
+  background: linear-gradient(160deg, #FFB3C1, #C13B3B);
+  transform: translateY(-4px);
+  z-index: 2;
+}
+.artGiftCard:nth-child(3) {
+  background: linear-gradient(160deg, #DFE3EE, #354270);
+  transform: rotate(10deg) translateY(4px);
+}
+
+/* ── Go back button ── */
+.goBackWrap {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 4px;
+  flex-shrink: 0;
+}
+.goBack {
+  padding: 12px 32px;
+  border-radius: 999px;
+  background: transparent;
+  color: #2B2440;
+  font-family: 'Gabarito', system-ui, sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  border: 1.5px solid #E5DDC9;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.goBack:hover {
+  border-color: #CFC3A7;
+  background: #F3EFEE;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Desktop — centered modal instead of bottom sheet
+   ══════════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+  .veil {
+    align-items: center;
+    padding: 24px;
+  }
+  .sheet {
+    border-radius: 24px;
+    max-height: 88vh;
+    animation: cmPop .22s cubic-bezier(.16,1,.3,1) both;
+    padding-bottom: 22px;
+  }
+  @keyframes cmPop {
+    from { transform: scale(.95); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .grip { display: none; }
+  .head { padding-top: 24px; }
+}

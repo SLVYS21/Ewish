@@ -1,0 +1,287 @@
+/* ================================================================
+   myKado — Design System Tokens
+   Direction : Hybride C+A (Afro-Modern Elegance + ergonomie Editorial)
+   Base : fond blanc, UX-first, cohérence complète
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ─────────────────────────────────────────────────────────
+     COULEURS — Palettes brand (10 pas chacune)
+     ───────────────────────────────────────────────────────── */
+
+  /* Indigo (primaire) */
+  --mk-indigo-50:  #F0F2F7;
+  --mk-indigo-100: #DFE3EE;
+  --mk-indigo-200: #B8C0D8;
+  --mk-indigo-300: #8792B8;
+  --mk-indigo-400: #5B6994;
+  --mk-indigo-500: #354270;
+  --mk-indigo-600: #263258;
+  --mk-indigo-700: #1E2952;  /* BASE brand */
+  --mk-indigo-800: #171F3F;
+  --mk-indigo-900: #0F1428;
+
+  /* Or / Brass (accent chaud) */
+  --mk-gold-50:  #FDF7EA;
+  --mk-gold-100: #F9EBC7;
+  --mk-gold-200: #F2D68A;
+  --mk-gold-300: #ECC15A;
+  --mk-gold-400: #E8A33D;  /* BASE brand */
+  --mk-gold-500: #C88B2D;
+  --mk-gold-600: #9F6D22;
+  --mk-gold-700: #77521B;
+  --mk-gold-800: #513815;
+  --mk-gold-900: #2E1F0B;
+
+  /* Argile / Clay (accent secondaire) */
+  --mk-clay-50:  #FBEEEE;
+  --mk-clay-100: #F5D5D5;
+  --mk-clay-200: #E9A6A6;
+  --mk-clay-300: #DA7373;
+  --mk-clay-400: #CB4E4E;
+  --mk-clay-500: #C13B3B;  /* BASE */
+  --mk-clay-600: #A02C2C;
+  --mk-clay-700: #7C2020;
+  --mk-clay-800: #571818;
+  --mk-clay-900: #310D0D;
+
+  /* Stone chaud (neutres) */
+  --mk-stone-50:  #FAF7F0;
+  --mk-stone-100: #F3EEE1;
+  --mk-stone-200: #E5DDC9;
+  --mk-stone-300: #CFC3A7;
+  --mk-stone-400: #A79979;
+  --mk-stone-500: #7D7156;
+  --mk-stone-600: #5F553F;
+  --mk-stone-700: #453E2E;
+  --mk-stone-800: #2C2820;
+  --mk-stone-900: #161311;  /* INK */
+
+  /* Forest (success uniquement) */
+  --mk-forest-50:  #EDF3EF;
+  --mk-forest-500: #4A7060;
+  --mk-forest-700: #2E4A3B;  /* BASE success */
+  --mk-forest-900: #172A21;
+
+  /* ─────────────────────────────────────────────────────────
+     COULEURS — Tokens sémantiques (à utiliser dans le code)
+     ───────────────────────────────────────────────────────── */
+
+  --mk-surface-base:      #FFFFFF;
+  --mk-surface-muted:     var(--mk-stone-50);
+  --mk-surface-elevated:  #FFFFFF;
+  --mk-surface-inverted:  var(--mk-indigo-700);
+
+  --mk-text-primary:      var(--mk-stone-900);
+  --mk-text-secondary:    var(--mk-stone-700);
+  --mk-text-tertiary:     var(--mk-stone-500);
+  --mk-text-inverted:     #FFFFFF;
+  --mk-text-brand:        var(--mk-indigo-700);
+  --mk-text-accent-gold:  var(--mk-gold-600);
+
+  --mk-border-subtle:     var(--mk-stone-100);
+  --mk-border-default:    var(--mk-stone-200);
+  --mk-border-strong:     var(--mk-stone-300);
+  --mk-border-focus:      var(--mk-indigo-700);
+
+  --mk-action-primary:         var(--mk-indigo-700);
+  --mk-action-primary-hover:   var(--mk-indigo-600);
+  --mk-action-primary-press:   var(--mk-indigo-800);
+  --mk-action-secondary:       var(--mk-clay-500);
+  --mk-action-secondary-hover: var(--mk-clay-600);
+  --mk-action-accent-gold:     var(--mk-gold-400);
+
+  --mk-state-success: var(--mk-forest-700);
+  --mk-state-warning: var(--mk-gold-500);
+  --mk-state-error:   var(--mk-clay-600);
+  --mk-state-info:    var(--mk-indigo-500);
+
+  /* ─────────────────────────────────────────────────────────
+     TYPOGRAPHIE
+     ───────────────────────────────────────────────────────── */
+
+  --mk-font-serif: 'Fraunces', ui-serif, Georgia, serif;
+  --mk-font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mk-font-mono:  'DM Mono', ui-monospace, Menlo, monospace;
+
+  /* Type scale — format: size / line-height (letter-spacing géré via classes utility) */
+  --mk-type-display-2xl: 72px;
+  --mk-type-display-xl:  60px;
+  --mk-type-display-lg:  48px;
+  --mk-type-h1:          36px;
+  --mk-type-h2:          30px;
+  --mk-type-h3:          24px;
+  --mk-type-h4:          20px;
+  --mk-type-h5:          18px;
+  --mk-type-body-lg:     18px;
+  --mk-type-body:        16px;
+  --mk-type-body-sm:     14px;
+  --mk-type-caption:     13px;
+  --mk-type-micro:       12px;
+
+  /* Line-heights */
+  --mk-lh-tight:   1.05;   /* display */
+  --mk-lh-snug:    1.2;    /* headings */
+  --mk-lh-normal:  1.4;
+  --mk-lh-relaxed: 1.6;    /* body */
+
+  /* Letter-spacing */
+  --mk-tracking-tighter: -0.03em;
+  --mk-tracking-tight:   -0.01em;
+  --mk-tracking-normal:  0;
+  --mk-tracking-wide:    0.08em;
+
+  /* ─────────────────────────────────────────────────────────
+     SPACING (base 4px)
+     ───────────────────────────────────────────────────────── */
+
+  --mk-space-0:    0;
+  --mk-space-0-5:  2px;
+  --mk-space-1:    4px;
+  --mk-space-1-5:  6px;
+  --mk-space-2:    8px;
+  --mk-space-3:    12px;
+  --mk-space-4:    16px;  /* base unit */
+  --mk-space-5:    20px;
+  --mk-space-6:    24px;
+  --mk-space-8:    32px;
+  --mk-space-10:   40px;
+  --mk-space-12:   48px;
+  --mk-space-16:   64px;
+  --mk-space-20:   80px;
+  --mk-space-24:   96px;
+  --mk-space-32:   128px;
+  --mk-space-40:   160px;
+
+  /* Sémantiques */
+  --mk-space-container-x-mobile:  20px;
+  --mk-space-container-x-tablet:  32px;
+  --mk-space-container-x-desktop: 48px;
+  --mk-space-container-max:       1200px;
+  --mk-space-container-max-narrow: 720px;
+  --mk-space-container-max-marketing: 1280px;
+
+  --mk-space-section-y-mobile:  64px;
+  --mk-space-section-y-desktop: 128px;
+  --mk-space-hero-y-mobile:     80px;
+  --mk-space-hero-y-desktop:    160px;
+
+  --mk-space-card-padding-sm: 16px;
+  --mk-space-card-padding:    24px;
+  --mk-space-card-padding-lg: 32px;
+
+  --mk-space-form-field-gap: 20px;
+  --mk-space-form-group-gap: 32px;
+  --mk-space-form-label-gap: 8px;
+  --mk-space-form-hint-gap:  6px;
+
+  --mk-space-grid-gap-tight: 16px;
+  --mk-space-grid-gap:       24px;
+  --mk-space-grid-gap-loose: 32px;
+
+  /* ─────────────────────────────────────────────────────────
+     RADIUS
+     ───────────────────────────────────────────────────────── */
+
+  --mk-radius-none: 0;
+  --mk-radius-xs:   4px;
+  --mk-radius-sm:   8px;
+  --mk-radius-md:   12px;
+  --mk-radius-lg:   16px;
+  --mk-radius-xl:   20px;
+  --mk-radius-2xl:  28px;
+  --mk-radius-full: 9999px;
+
+  /* ─────────────────────────────────────────────────────────
+     SHADOWS (warm — teinte stone-800 au lieu de black)
+     ───────────────────────────────────────────────────────── */
+
+  --mk-shadow-xs: 0 1px 2px 0 rgba(45, 32, 14, 0.04);
+  --mk-shadow-sm: 0 2px 4px -1px rgba(45, 32, 14, 0.06),
+                  0 1px 2px -1px rgba(45, 32, 14, 0.04);
+  --mk-shadow-md: 0 4px 12px -2px rgba(45, 32, 14, 0.08),
+                  0 2px 4px -2px rgba(45, 32, 14, 0.04);
+  --mk-shadow-lg: 0 12px 24px -6px rgba(45, 32, 14, 0.10),
+                  0 4px 8px -4px rgba(45, 32, 14, 0.06);
+  --mk-shadow-xl: 0 24px 48px -12px rgba(45, 32, 14, 0.14),
+                  0 8px 16px -8px rgba(45, 32, 14, 0.08);
+  --mk-shadow-2xl: 0 32px 64px -16px rgba(45, 32, 14, 0.18),
+                   0 12px 24px -12px rgba(45, 32, 14, 0.10);
+
+  --mk-shadow-brand: 0 12px 32px -8px rgba(30, 41, 82, 0.25);
+  --mk-shadow-gold:  0 8px 24px -6px rgba(232, 163, 61, 0.35);
+
+  --mk-ring-focus:       0 0 0 3px rgba(30, 41, 82, 0.25);
+  --mk-ring-focus-inset: inset 0 0 0 2px rgba(30, 41, 82, 0.6);
+  --mk-ring-error:       0 0 0 3px rgba(160, 44, 44, 0.25);
+
+  /* ─────────────────────────────────────────────────────────
+     MOTION
+     ───────────────────────────────────────────────────────── */
+
+  --mk-duration-instant:   0ms;
+  --mk-duration-fast:      150ms;
+  --mk-duration-base:      250ms;
+  --mk-duration-slow:      400ms;
+  --mk-duration-slower:    600ms;
+  --mk-duration-story:     1000ms;
+  --mk-duration-celebrate: 1600ms;
+
+  --mk-ease-linear:    linear;
+  --mk-ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
+  --mk-ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+  --mk-ease-in:        cubic-bezier(0.32, 0, 0.67, 0);
+  --mk-ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mk-ease-emphasis:  cubic-bezier(0.16, 1, 0.3, 1);
+  --mk-ease-bounce:    cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  --mk-motion-hover:     var(--mk-duration-fast) var(--mk-ease-out);
+  --mk-motion-focus:     var(--mk-duration-fast) var(--mk-ease-out);
+  --mk-motion-state:     var(--mk-duration-base) var(--mk-ease-out);
+  --mk-motion-overlay:   var(--mk-duration-slow) var(--mk-ease-emphasis);
+  --mk-motion-reveal:    var(--mk-duration-slower) var(--mk-ease-spring);
+  --mk-motion-celebrate: var(--mk-duration-celebrate) var(--mk-ease-emphasis);
+
+  /* ─────────────────────────────────────────────────────────
+     ICONS
+     ───────────────────────────────────────────────────────── */
+
+  --mk-icon-stroke:   1.75px;
+  --mk-icon-size-xs:  14px;
+  --mk-icon-size-sm:  16px;
+  --mk-icon-size-md:  20px;
+  --mk-icon-size-lg:  24px;
+  --mk-icon-size-xl:  32px;
+  --mk-icon-size-2xl: 48px;
+
+  /* ─────────────────────────────────────────────────────────
+     Z-INDEX
+     ───────────────────────────────────────────────────────── */
+
+  --mk-z-base:       0;
+  --mk-z-dropdown:   1000;
+  --mk-z-sticky:     1020;
+  --mk-z-fixed:      1030;
+  --mk-z-overlay:    1040;
+  --mk-z-modal:      1050;
+  --mk-z-popover:    1060;
+  --mk-z-toast:      1070;
+  --mk-z-tooltip:    1080;
+}
+
+/* Prefers reduced motion — flatten toutes durées expressives */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mk-duration-fast:      50ms;
+    --mk-duration-base:      50ms;
+    --mk-duration-slow:      50ms;
+    --mk-duration-slower:    50ms;
+    --mk-duration-story:     100ms;
+    --mk-duration-celebrate: 100ms;
+    --mk-ease-spring:   linear;
+    --mk-ease-emphasis: linear;
+    --mk-ease-bounce:   linear;
+  }
+}

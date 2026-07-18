@@ -7,8 +7,11 @@ import {
 import { useAuth } from '../admin/context/AuthContext';
 import {
   ArrowLeft, Check, Copy, RefreshCw, Download, Link2, Edit3,
-  Lock, Zap, Coins, Eye, Palette, X, MessageSquare,
+  Lock, Zap, Coins, Eye, Palette, X, MessageSquare, Mail, Phone, Gift,
+  Sparkles, PenLine, QrCode,
 } from 'lucide-react';
+import QRExport from '../components/QRExport';
+import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
 
 /* ─── constants ─── */
 const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
@@ -306,6 +309,157 @@ function UnlockView({ pub, onUnlocked }) {
   );
 }
 
+/* ─── Envoyer au destinataire ─── */
+function buildRecipientMessage(pub, url) {
+  const d = pub?.data || {};
+  const recipient = (d.recipient || d.titleName || '').trim();
+  const occLabel  = (d.occasionLabel || '').trim().toLowerCase();
+
+  const openers = {
+    anniversary: n => `Coucou ${n} ! Un mur t'attend pour ton anniversaire ✦`,
+    wedding:     n => `${n}, on a préparé un mur de mots pour vos noces ✦`,
+    birth:       n => `Bienvenue à ${n} ! Un mur de mots t'attend ✦`,
+    farewell:    n => `${n}, un dernier mur pour ton départ ✦`,
+    welcome:     n => `Bienvenue ${n} ! Ce mur est pour toi ✦`,
+    thanks:      n => `${n}, on t'a préparé un mur pour te dire merci ✦`,
+    tribute:     n => `Un mur en mémoire de ${n} ✦`,
+    other:       n => `${n}, on a un petit quelque chose pour toi ✦`,
+  };
+  const line1 = recipient
+    ? (openers[d.occasion] || openers.other)(recipient)
+    : `J'ai un petit quelque chose pour toi ✦`;
+  const line2 = occLabel
+    ? `Ouvre-le ici (${occLabel}) : ${url}`
+    : `Ouvre-le ici : ${url}`;
+  return `${line1}\n${line2}`;
+}
+
+function RecipientInvite({ pub, shareUrl, showToast, isWall }) {
+  const recipient = (pub?.data?.recipient || pub?.data?.titleName || '').trim();
+  const initial = useMemo(() => buildRecipientMessage(pub, shareUrl), [pub, shareUrl]);
+  const [msg, setMsg] = useState(initial);
+  const [editing, setEditing] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  useEffect(() => { setMsg(initial); }, [initial]);
+
+  const enc = encodeURIComponent(msg);
+  const waHref   = `https://wa.me/?text=${enc}`;
+  const mailHref = `mailto:?subject=${encodeURIComponent(
+    recipient ? `Un mur pour toi, ${recipient}` : 'Un petit quelque chose pour toi'
+  )}&body=${enc}`;
+  const smsHref  = `sms:?&body=${enc}`;
+
+  const openHref = (href) => {
+    try { window.open(href, '_blank'); } catch { window.location.href = href; }
+  };
+
+  const copyLink = () => {
+    if (!shareUrl) return;
+    navigator.clipboard?.writeText(shareUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+    showToast?.('Lien destinataire copié');
+  };
+
+  return (
+    <div className="card" style={{ padding: '18px 20px', borderColor: 'var(--mk-accent-soft)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <div style={{
+          width: 34, height: 34, borderRadius: 'var(--mk-r-xs)',
+          background: 'var(--mk-accent-pale)', color: 'var(--mk-accent)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Gift size={17} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 800 }}>
+            {recipient ? `Envoyer à ${recipient}` : 'Envoyer au destinataire'}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2, lineHeight: 1.4 }}>
+            {isWall
+              ? <>Le lien qui déclenche le déballage <Sparkles size={11} style={{ display: 'inline', verticalAlign: -1 }} /> et les confettis.</>
+              : 'Un message personnalisé, prêt à envoyer.'}
+          </div>
+        </div>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => setEditing(v => !v)}
+        >
+          {editing ? <><Check size={12} /> OK</> : <><Edit3 size={12} /> Modifier</>}
+        </button>
+      </div>
+
+      {isWall && (
+        <div className="linkbox" style={{ marginBottom: 10 }}>
+          <Link2 size={13} style={{ color: 'var(--mk-ink-3)', flexShrink: 0 }} />
+          <span className="url" style={{ fontSize: 12 }}>{shareUrl || '…'}</span>
+          <button
+            className={`btn btn-sm ${copiedLink ? 'btn-soft' : 'btn-ink'}`}
+            style={{ flexShrink: 0 }}
+            onClick={copyLink}
+          >
+            {copiedLink ? <><Check size={12} /> Copié</> : <><Copy size={12} /> Copier</>}
+          </button>
+        </div>
+      )}
+
+      {editing ? (
+        <textarea
+          className="mk-textarea"
+          rows={4}
+          value={msg}
+          onChange={e => setMsg(e.target.value)}
+          style={{ fontSize: 13, marginBottom: 10 }}
+        />
+      ) : (
+        <div style={{
+          background: 'var(--mk-blush)', border: '1px solid var(--mk-line-2)',
+          borderRadius: 'var(--mk-r-xs)', padding: '10px 12px', marginBottom: 10,
+          fontSize: 12.5, color: 'var(--mk-ink-2)', lineHeight: 1.55, whiteSpace: 'pre-line',
+        }}>
+          {msg}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        <button
+          className="btn btn-primary"
+          style={{ background: '#25D366', boxShadow: 'none', justifyContent: 'center' }}
+          onClick={() => openHref(waHref)}
+        >
+          <MessageSquare size={14} /> WhatsApp
+        </button>
+        <a
+          className="btn btn-ghost"
+          href={mailHref}
+          style={{ justifyContent: 'center' }}
+        >
+          <Mail size={14} /> Email
+        </a>
+        <a
+          className="btn btn-ghost"
+          href={smsHref}
+          style={{ justifyContent: 'center' }}
+        >
+          <Phone size={14} /> SMS
+        </a>
+      </div>
+
+      <button
+        className="btn btn-soft"
+        style={{ width: '100%', marginTop: 8, justifyContent: 'center' }}
+        onClick={() => {
+          navigator.clipboard?.writeText(msg);
+          showToast?.('Message copié');
+        }}
+      >
+        <Copy size={13} /> Copier le message
+      </button>
+    </div>
+  );
+}
+
 /* ─── Personnaliser modal ─── */
 function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, onClose }) {
   const color = QR_COLORS.find(c => c.id === colorId) || QR_COLORS[0];
@@ -370,7 +524,7 @@ function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, on
 }
 
 /* ─── Share view (published) ─── */
-export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
+export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSlugUpdated }) {
   const navigate = useNavigate();
   const [shape,      setShape]      = useState('rounded');
   const [colorId,    setColorId]    = useState('rose');
@@ -379,6 +533,8 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
   const [copied,     setCopied]     = useState(false);
   const [toast,      setToast]      = useState('');
   const [downloading,setDownloading]= useState(false);
+  const [qrExportOpen, setQrExportOpen] = useState(false);
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
 
   /* shortcode editing */
   const [slugEditing, setSlugEditing] = useState(false);
@@ -390,18 +546,30 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
 
   const color = QR_COLORS.find(c => c.id === colorId) || QR_COLORS[1];
 
+  /* Sur un mur : deux liens distincts.
+     - shareUrl        → lien destinataire (déballage + confettis)
+     - collectUrl      → même URL + ?collect=1 pour les contributeurs
+     Pour un autre type de publication, un seul lien suffit. */
+  const collectUrl = useMemo(() => {
+    if (!shareUrl) return '';
+    if (!isWall) return shareUrl;
+    return shareUrl.includes('?') ? `${shareUrl}&collect=1` : `${shareUrl}?collect=1`;
+  }, [shareUrl, isWall]);
+
+  const primaryShareUrl = isWall ? collectUrl : shareUrl;
+
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
   };
 
   const handleCopy = useCallback(() => {
-    if (!shareUrl) return;
-    navigator.clipboard.writeText(shareUrl);
+    if (!primaryShareUrl) return;
+    navigator.clipboard.writeText(primaryShareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    showToast('Lien copié');
-  }, [shareUrl]);
+    showToast(isWall ? 'Lien contributeurs copié' : 'Lien copié');
+  }, [primaryShareUrl, isWall]);
 
   const handleSaveSlug = useCallback(async () => {
     const val = slugDraft.trim();
@@ -422,7 +590,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
   }, [pub._id, slugDraft, shortCode, setShortCode]);
 
   const handleDownload = useCallback(async () => {
-    if (!shareUrl) return;
+    if (!primaryShareUrl) return;
     setDownloading(true);
     try {
       const node = document.getElementById('mk-qr-card');
@@ -472,7 +640,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
       });
       showToast('Image PNG téléchargée');
     } finally { setDownloading(false); }
-  }, [shareUrl, color, branded, pub, shortCode]);
+  }, [primaryShareUrl, color, branded, pub, shortCode]);
 
   const siteUrl = pub
     ? `${import.meta.env.VITE_API_URL || ''}/site/${pub.templateName}/${pub.customName}`
@@ -481,18 +649,86 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
   return (
     <>
       <Toast message={toast} />
+
+      {isWall && (
+        <div className="card" style={{
+          padding: '16px 20px', marginBottom: 18,
+          background: 'linear-gradient(135deg, var(--mk-accent-pale) 0%, var(--mk-blush) 100%)',
+          borderColor: 'var(--mk-accent-soft)',
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14,
+        }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 'var(--mk-r-xs)',
+              background: 'var(--mk-ink)', color: '#fff', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <PenLine size={17} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--mk-ink)', marginBottom: 4 }}>
+                Lien 1 · Contributeurs
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', lineHeight: 1.5 }}>
+                À partager largement pour <strong>récolter des mots</strong>. Ouvre directement l'écriture, sans cérémonie.
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 'var(--mk-r-xs)',
+              background: 'var(--mk-accent)', color: '#fff', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Gift size={17} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--mk-accent)', marginBottom: 4 }}>
+                Lien 2 · Destinataire
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', lineHeight: 1.5 }}>
+                À envoyer <strong>uniquement à la personne à qui tu offres</strong>. Déclenche le déballage + confettis.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="share-grid">
 
         {/* ── Left: QR card column ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+          {isWall && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase',
+              color: 'var(--mk-ink)', alignSelf: 'flex-start',
+            }}>
+              <span style={{
+                width: 20, height: 20, borderRadius: 6, background: 'var(--mk-ink)',
+                color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 900,
+              }}>1</span>
+              QR du lien contributeurs
+            </div>
+          )}
           <QrCard
             pub={pub}
             shortCode={shortCode}
-            shareUrl={shareUrl}
+            shareUrl={primaryShareUrl}
             shape={shape}
             color={color}
             branded={branded}
           />
+
+          {isWall && (
+            <div style={{
+              fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+            }}>
+              <PenLine size={12} /> Le scan ouvre directement l'écriture d'un mot
+            </div>
+          )}
 
           <div className="share-dl-row">
             <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setCustomizing(true)}>
@@ -502,13 +738,23 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
               className="btn btn-ink"
               style={{ flex: 1 }}
               onClick={handleDownload}
-              disabled={downloading || !shareUrl}
+              disabled={downloading || !primaryShareUrl}
             >
               {downloading
                 ? <><RefreshCw size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> Génération…</>
                 : <><Download size={13} /> Télécharger PNG</>}
             </button>
           </div>
+
+          {/* Export QR unifié (myKado design system) */}
+          <button
+            className="btn btn-ghost"
+            style={{ width: '100%', marginTop: 8 }}
+            onClick={() => setQrExportOpen(true)}
+            disabled={!primaryShareUrl}
+          >
+            <QrCode size={15} /> Exporter en QR (formes, fonds, tailles)
+          </button>
 
           <label style={{
             display: 'flex', alignItems: 'center', gap: 9,
@@ -528,12 +774,30 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
         {/* ── Right: link + networks column ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
 
-          {/* Le lien */}
+          {/* ─── LIEN 1 : Contributeurs ─── */}
+          {isWall && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase',
+              color: 'var(--mk-ink)',
+            }}>
+              <span style={{
+                width: 20, height: 20, borderRadius: 6, background: 'var(--mk-ink)',
+                color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 900,
+              }}>1</span>
+              Récolter des mots
+            </div>
+          )}
+
+          {/* Le lien (contributeurs pour un mur, sinon lien général) */}
           <div>
-            <div className="section-label" style={{ marginBottom: 10 }}>Le lien</div>
+            <div className="section-label" style={{ marginBottom: 10 }}>
+              {isWall ? 'Lien pour tes contributeurs' : 'Le lien'}
+            </div>
             <div className="linkbox">
               <Link2 size={14} style={{ color: 'var(--mk-ink-3)', flexShrink: 0 }} />
-              <span className="url">{shareUrl || '…'}</span>
+              <span className="url">{primaryShareUrl || '…'}</span>
               <button
                 className={`btn btn-sm ${copied ? 'btn-soft' : 'btn-ink'}`}
                 style={{ flexShrink: 0 }}
@@ -600,22 +864,71 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
             </div>
           </div>
 
+          {/* Personnaliser le lien myKado (nouveau slug canonique /c/:slug /m/:slug /g/:slug) */}
+          {pub?._id && (
+            <button
+              className="btn btn-ghost btn-sm"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => setLinkModalOpen(true)}
+            >
+              <Link2 size={13} /> Personnaliser le lien myKado
+            </button>
+          )}
+
           {/* Réseaux */}
           <div>
-            <div className="section-label" style={{ marginBottom: 10 }}>Partager sur les réseaux</div>
-            <ShareNetworks shareUrl={shareUrl} onCopy={showToast} />
+            <div className="section-label" style={{ marginBottom: 10 }}>
+              {isWall ? 'Partager le lien contributeurs' : 'Partager sur les réseaux'}
+            </div>
+            <ShareNetworks shareUrl={primaryShareUrl} onCopy={showToast} />
           </div>
 
-          {/* Voir le mur (wall only) */}
-          {isWall && siteUrl && (
+          {isWall && (
             <a
-              href={siteUrl}
+              href={collectUrl}
               target="_blank"
               rel="noreferrer"
-              className="btn btn-ghost"
-              style={{ justifyContent: 'center' }}
+              className="btn btn-ghost btn-sm"
+              style={{ justifyContent: 'center', alignSelf: 'flex-start' }}
             >
-              <Eye size={15} /> Voir le mur comme un invité
+              <PenLine size={13} /> Prévisualiser l'écriture d'un mot
+            </a>
+          )}
+
+          {/* ─── LIEN 2 : Destinataire ─── */}
+          {isWall && (
+            <>
+              <div style={{
+                height: 1, background: 'var(--mk-line)',
+                margin: '4px -4px 4px',
+              }} />
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase',
+                color: 'var(--mk-accent)',
+              }}>
+                <span style={{
+                  width: 20, height: 20, borderRadius: 6, background: 'var(--mk-accent)',
+                  color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 900,
+                }}>2</span>
+                Offrir le mur au destinataire
+              </div>
+            </>
+          )}
+
+          {/* Envoyer au destinataire (walls surtout) */}
+          <RecipientInvite pub={pub} shareUrl={shareUrl} showToast={showToast} isWall={isWall} />
+
+          {isWall && (
+            <a
+              href={shareUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-ghost btn-sm"
+              style={{ justifyContent: 'center', alignSelf: 'flex-start' }}
+            >
+              <Sparkles size={13} /> Prévisualiser le déballage
             </a>
           )}
         </div>
@@ -627,8 +940,29 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall }) {
           setShape={setShape}
           colorId={colorId}
           setColorId={setColorId}
-          shareUrl={shareUrl}
+          shareUrl={primaryShareUrl}
           onClose={() => setCustomizing(false)}
+        />
+      )}
+
+      {/* myKado — nouveau QR export unifié (design system) */}
+      <QRExport
+        open={qrExportOpen}
+        onClose={() => setQrExportOpen(false)}
+        url={primaryShareUrl || ''}
+        defaultTitle={pub?.title || pub?.customName || ''}
+      />
+
+      {/* myKado — personnaliser le lien canonique /c/:slug /m/:slug /g/:slug */}
+      {pub?._id && (
+        <PersonalizeLinkModal
+          open={linkModalOpen}
+          onClose={() => setLinkModalOpen(false)}
+          publicationId={pub._id}
+          currentSlug={pub.slug || ''}
+          brique={pub.brique || 'carte'}
+          suggestedBase={pub.title || pub.customName || ''}
+          onUpdated={(newSlug) => onSlugUpdated?.(newSlug)}
         />
       )}
     </>
@@ -701,6 +1035,7 @@ export default function SharePage() {
           setShortCode={setShortCode}
           shareUrl={shareUrl}
           isWall={isWall}
+          onSlugUpdated={(newSlug) => setPub((prev) => (prev ? { ...prev, slug: newSlug } : prev))}
         />
       ) : (
         <UnlockView

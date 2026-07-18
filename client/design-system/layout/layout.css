@@ -1,0 +1,82 @@
+/* ================================================================
+   myKado — Layout primitives
+   ================================================================ */
+
+/* Container — largeurs standardisées avec padding-x responsive */
+.mk-container {
+  width: 100%;
+  max-width: var(--mk-space-container-max);
+  margin-inline: auto;
+  padding-inline: var(--mk-space-container-x-mobile);
+}
+@media (min-width: 768px) {
+  .mk-container { padding-inline: var(--mk-space-container-x-tablet); }
+}
+@media (min-width: 1024px) {
+  .mk-container { padding-inline: var(--mk-space-container-x-desktop); }
+}
+.mk-container--narrow    { max-width: var(--mk-space-container-max-narrow); }
+.mk-container--marketing { max-width: var(--mk-space-container-max-marketing); }
+.mk-container--full      { max-width: 100%; padding-inline: 0; }
+
+/* Section — vertical rhythm cohérent pour landing/marketing */
+.mk-section {
+  padding-block: var(--mk-space-section-y-mobile);
+}
+@media (min-width: 1024px) {
+  .mk-section { padding-block: var(--mk-space-section-y-desktop); }
+}
+.mk-section--hero {
+  padding-block: var(--mk-space-hero-y-mobile);
+}
+@media (min-width: 1024px) {
+  .mk-section--hero { padding-block: var(--mk-space-hero-y-desktop); }
+}
+.mk-section--muted {
+  background: var(--mk-surface-muted);
+}
+.mk-section--inverted {
+  background: var(--mk-surface-inverted);
+  color: var(--mk-text-inverted);
+}
+
+/* Stack — flex-column with gap prop via CSS var */
+.mk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mk-stack-gap, var(--mk-space-4));
+}
+.mk-stack--horizontal {
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Grid — auto-fill grid with gap */
+.mk-grid {
+  display: grid;
+  gap: var(--mk-grid-gap, var(--mk-space-grid-gap));
+  grid-template-columns: repeat(var(--mk-grid-cols, 1), minmax(0, 1fr));
+}
+@media (min-width: 640px)  { .mk-grid--sm-2 { --mk-grid-cols: 2; } }
+@media (min-width: 768px)  { .mk-grid--md-2 { --mk-grid-cols: 2; } .mk-grid--md-3 { --mk-grid-cols: 3; } }
+@media (min-width: 1024px) { .mk-grid--lg-3 { --mk-grid-cols: 3; } .mk-grid--lg-4 { --mk-grid-cols: 4; } }
+
+/* Divider — soft horizontal line */
+.mk-divider {
+  border: none;
+  height: 1px;
+  background: var(--mk-border-subtle);
+  margin-block: var(--mk-space-6);
+}
+.mk-divider--gold {
+  background: var(--mk-action-accent-gold);
+  height: 1px;
+  opacity: 0.6;
+}
+.mk-divider--vertical {
+  width: 1px;
+  height: auto;
+  align-self: stretch;
+  margin-block: 0;
+  margin-inline: var(--mk-space-3);
+}

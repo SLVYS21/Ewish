@@ -59,11 +59,27 @@ const GRADIENT_PRESETS = [
   { label: 'Warm Ivory', value: 'linear-gradient(160deg, #fdfaf5 0%, #f5ede0 100%)' },
 ];
 
+const TAG_LABELS = {
+  birthday: 'Anniv',   festive: 'Festif',    gold: 'Doré',
+  pastel:   'Pastel',  pink: 'Rose',         sparkles: 'Paillettes',
+  colorful: 'Coloré',  minimal: 'Minimal',
+  wedding:  'Mariage', romantic: 'Romantique', floral: 'Floral',
+  elegant:  'Élégant',
+  birth:    'Naissance', baby: 'Bébé',       soft: 'Doux',
+  sky:      'Ciel',
+  pro:      'Pro',     farewell: 'Départ',   welcome: 'Bienvenue',
+  tribute:  'Hommage', night: 'Nuit',        stars: 'Étoiles',
+  warm:     'Chaleureux',
+  abstract: 'Abstrait',
+  nature:   'Nature',  green: 'Vert',
+};
+
 export default function BackgroundTab({ templateName, backgrounds = {}, onChange }) {
   const sections = TEMPLATE_SECTIONS[templateName] || TEMPLATE_SECTIONS.birthday;
   const [activeSection, setActiveSection] = useState(sections[0].key);
   const [uploading, setUploading] = useState(false);
   const [bankAssets, setBankAssets] = useState([]);
+  const [bankTag, setBankTag] = useState('all');
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -71,6 +87,13 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
       .then(r => setBankAssets(r.data))
       .catch(() => {});
   }, []);
+
+  const availableTags = Array.from(
+    new Set(bankAssets.flatMap(a => a.tags || []))
+  ).sort();
+  const filteredAssets = bankTag === 'all'
+    ? bankAssets
+    : bankAssets.filter(a => (a.tags || []).includes(bankTag));
 
   const current = backgrounds[activeSection] || DEFAULT_SECTION;
 
@@ -273,11 +296,49 @@ export default function BackgroundTab({ templateName, backgrounds = {}, onChange
                 <label className={s.fieldLabel} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Library size={14} /> Banque d'images
                 </label>
+                <span style={{ fontSize: 11, color: 'var(--mk-ink-3, #A496A5)' }}>
+                  {filteredAssets.length} / {bankAssets.length}
+                </span>
               </div>
+
+              {availableTags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '10px 0 12px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setBankTag('all')}
+                    style={{
+                      padding: '5px 10px', borderRadius: 999, fontSize: 11.5, fontWeight: 700,
+                      border: '1px solid ' + (bankTag === 'all' ? '#2B1A2D' : '#EAD6DE'),
+                      background: bankTag === 'all' ? '#2B1A2D' : '#fff',
+                      color:      bankTag === 'all' ? '#fff'     : '#6D5C70',
+                      cursor: 'pointer', touchAction: 'manipulation',
+                    }}
+                  >
+                    Tous
+                  </button>
+                  {availableTags.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setBankTag(tag)}
+                      style={{
+                        padding: '5px 10px', borderRadius: 999, fontSize: 11.5, fontWeight: 700,
+                        border: '1px solid ' + (bankTag === tag ? '#2B1A2D' : '#EAD6DE'),
+                        background: bankTag === tag ? '#2B1A2D' : '#fff',
+                        color:      bankTag === tag ? '#fff'     : '#6D5C70',
+                        cursor: 'pointer', touchAction: 'manipulation',
+                      }}
+                    >
+                      {TAG_LABELS[tag] || tag}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div className={s.bankGrid}>
-                {bankAssets.map(asset => (
-                  <div 
-                    key={asset._id} 
+                {filteredAssets.map(asset => (
+                  <div
+                    key={asset._id}
                     className={`${s.bankItem} ${current.value === asset.url ? s.bankItemActive : ''}`}
                     onClick={() => update({ type: 'image', value: asset.url })}
                     title={asset.name}

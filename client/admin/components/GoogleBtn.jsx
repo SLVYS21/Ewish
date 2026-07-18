@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import s from '../pages/AdminLogin.module.css';
 
-export default function GoogleBtn({ label = 'Continuer avec Google', redirectTo = '/ewish-admin/ewish' }) {
+export default function GoogleBtn({ label = 'Continuer avec Google', redirectTo = '/ewish-admin' }) {
   const { googleLogin } = useAuth();
   const navigate = useNavigate();
   const [error, setError]   = useState('');

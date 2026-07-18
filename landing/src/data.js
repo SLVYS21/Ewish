@@ -87,13 +87,13 @@ export const TEMPLATES = [
   },
   {
     id: 'notre-film',
-    name: 'Notre film',
+    name: 'Cinéma',
     sub: 'Slideshow cinématique',
     cat: 'Personnel',
     credits: 15,
     size: 'sq',
     color: 'ink',
-    desc: "Photos et vidéos mixées, transitions cinéma, bande-son personnalisée. Format 16:9.",
+    desc: "Scène par scène, photos et vidéos mixées, transitions cinéma, bande-son personnalisée. Pour anniversaire, mariage ou hommage.",
   },
 ];
 

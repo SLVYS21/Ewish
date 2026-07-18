@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import InstallPWA from "./components/InstallPWA";
 
 import Dashboard from "./pages/Dashboard";
@@ -31,12 +32,17 @@ import KycMobilePage          from "./pages/KycMobilePage";
 import TemplatesGallery    from "./pages/TemplatesGallery";
 import TemplateDetailPage  from "./pages/TemplateDetailPage";
 import WallSetup           from "./pages/WallSetup";
+import WallShareHub        from "./pages/WallShareHub";
+import WizardWall          from "./wall-wizard/WizardWall";
 import CagnottePage        from "./pages/CagnottePage";
 import CreditsPage         from "./pages/CreditsPage";
 import SharePage           from "./pages/SharePage";
 import TermsPage           from "./pages/TermsPage";
 import PrivacyPage         from "./pages/PrivacyPage";
 import ProfilePage         from "./pages/ProfilePage";
+import DesignSystem        from "./pages/DesignSystem";
+import CreerBrique         from "./pages/CreerBrique";
+import { ToastProvider }   from "./design-system";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -66,6 +72,23 @@ function AdminRegisterGate() {
   return <AdminRegister />;
 }
 
+/* RouteTransition : replay .mk-anim-fade-in au changement d'URL.
+   Rerender via un `key` incrementé sur pathname change. */
+function RouteTransition({ children }) {
+  const location = useLocation();
+  const [key, setKey] = useState(0);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    setKey(k => k + 1);
+  }, [location.pathname]);
+  return (
+    <div key={key} className="mk-anim-fade-in" style={{ minHeight: '100%' }}>
+      {children}
+    </div>
+  );
+}
+
 function Spinner() {
   return (
     <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFAF6" }}>
@@ -78,8 +101,10 @@ function Spinner() {
 export default function App() {
   return (
     <AuthProvider>
+      <ToastProvider>
       <BrowserRouter>
         <InstallPWA />
+        <RouteTransition>
         <Routes>
           <Route path="/ewish-admin/login"    element={<AdminLoginGate />} />
           <Route path="/ewish-admin/register" element={<AdminRegisterGate />} />
@@ -112,21 +137,27 @@ export default function App() {
             <Route path="super/kyc"          element={<RequireSuperAdmin><SuperAdminKyc /></RequireSuperAdmin>} />
             <Route path="profile"            element={<ProfilePage />} />
             <Route path="wall/:id"           element={<WallSetup />} />
+            <Route path="wall/:id/share"     element={<WallShareHub />} />
             <Route path="share/:id"          element={<SharePage />} />
           </Route>
 
           {/* Full-screen routes  no sidebar */}
           <Route path="/ewish-admin/ewish/new"       element={<RequireAuth><QuickCreate /></RequireAuth>} />
           <Route path="/ewish-admin/ewish/edit/:id"  element={<RequireAuth><Editor /></RequireAuth>} />
+          <Route path="/ewish-admin/wall/new"        element={<RequireAuth><WizardWall /></RequireAuth>} />
 
           <Route path="/kyc/mobile/:token" element={<KycMobilePage />} />
           <Route path="/terms"   element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/design-system" element={<DesignSystem />} />
+          <Route path="/app/creer"     element={<CreerBrique />} />
 
           <Route path="/" element={<Navigate to="/ewish-admin" replace />} />
           <Route path="*" element={<Navigate to="/ewish-admin" replace />} />
         </Routes>
+        </RouteTransition>
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

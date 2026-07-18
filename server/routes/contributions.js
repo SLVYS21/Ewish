@@ -56,6 +56,25 @@ router.post('/verify', async (req, res) => {
       wishId: wishId || null,
       status: 'confirmed',
     });
+
+    // Notif propriétaire du mur (fire-and-forget)
+    (async () => {
+      const { notify, ownerUserIdForPublication } = require('../services/notifications');
+      const ownerId = await ownerUserIdForPublication(publicationId);
+      if (!ownerId) return;
+      const Contribution2 = require('../models/Contribution');
+      const total = await Contribution2.aggregate([
+        { $match: { publicationId: contribution.publicationId, status: 'confirmed' } },
+        { $group: { _id: null, sum: { $sum: '$amount' } } },
+      ]);
+      notify.cagnotteContribution(ownerId, {
+        publicationId,
+        amount: response.amount,
+        currency: 'XOF',
+        total: total?.[0]?.sum,
+      });
+    })().catch(() => {});
+
     res.json({ success: true, contribution });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

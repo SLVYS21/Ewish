@@ -8,7 +8,8 @@
     "build": "cp -rf ../templates/* ./templates/",
     "seed:ww": "node seeds/wallOfWishes.js",
     "seed:templates": "node seeds/seedTemplates.js",
-    "seed:walls": "node seeds/seedWalls.js"
+    "seed:walls": "node seeds/seedWalls.js",
+    "seed:invitations": "node seeds/seedInvitations.js"
   },
   "dependencies": {
     "@kkiapay-org/nodejs-sdk": "^1.0.7",

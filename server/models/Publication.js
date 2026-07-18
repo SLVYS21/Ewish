@@ -68,16 +68,17 @@ const publicationSchema = new mongoose.Schema({
   },
 
   style: {
-    primaryColor: { type: String, default: '#ff69b4' },
-    accentColor:  { type: String, default: '#ffb347' },
-    textColor:    { type: String, default: '#333333' },
-    textMuted:    { type: String, default: '#888888' },
-    fontFamily:   { type: String, default: 'Work Sans' },
+    /* myKado defaults — Hybride C+A signature (indigo + gold + crème) */
+    primaryColor: { type: String, default: '#1E2952' },
+    accentColor:  { type: String, default: '#E8A33D' },
+    textColor:    { type: String, default: '#161311' },
+    textMuted:    { type: String, default: '#7D7156' },
+    fontFamily:   { type: String, default: 'Fraunces' },
     fontSize:     { type: String, default: 'medium' },
     theme:        { type: String, default: 'light' },
     confettiType:  { type: String, default: 'fireworks' },
-    paletteId:     { type: String, default: '' },
-    typographyId:  { type: String, default: '' },
+    paletteId:     { type: String, default: 'mk-signature' },
+    typographyId:  { type: String, default: 'mk-editorial' },
 
     // Background per section  key = section slug
     // Special key "global" = fallback for all sections with no specific bg
@@ -117,6 +118,15 @@ const publicationSchema = new mongoose.Schema({
 
   isPaid:      { type: Boolean, default: false },
   shortCode:   { type: String, unique: true, sparse: true },
+
+  // URL canonique myKado — slug obligatoire visible dans /c/:slug /m/:slug /g/:slug
+  // Auto-généré à la sauvegarde si absent, via pre-save hook (voir bas du fichier)
+  // ASCII a-z 0-9 - _, 3–40 chars, unique
+  slug:        { type: String, unique: true, sparse: true, index: true },
+
+  // Brique dénormalisée depuis Template.kind pour le routing (redirect /s/ → /c/|/m/|/g/)
+  // Rempli à la création à partir du template. Valeur : 'carte' | 'mur' | 'cadeau'
+  brique:      { type: String, enum: ['carte', 'mur', 'cadeau'], index: true },
   cagnotteConfig: {
     enabled:           { type: Boolean, default: false },
     description:       { type: String,  default: '' },
@@ -134,11 +144,63 @@ const publicationSchema = new mongoose.Schema({
     accessCode:        { type: String,  default: '' },
     requireModeration: { type: Boolean, default: false },
   },
+
+  // Invitation + RSVP (templates kind='invitation')
+  invitationConfig: {
+    enabled:          { type: Boolean, default: false },
+    mode:             { type: String, enum: ['public', 'list'], default: 'public' },
+    eventDate:        { type: Date },
+    eventTime:        { type: String, default: '' },        // "19:30"
+    location:         { type: String, default: '' },
+    locationUrl:      { type: String, default: '' },        // Google Maps link
+    rsvpDeadline:     { type: Date },
+    allowMaybe:       { type: Boolean, default: true },
+    allowPlusOnes:    { type: Boolean, default: false },
+    maxPlusOnes:      { type: Number,  default: 0 },
+    messageOnAccept:  { type: Boolean, default: true },     // message → post-it sur le mur
+    linkedWallTemplate: {
+      type: String,
+      enum: ['none', 'wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-space'],
+      default: 'wall-of-wishes',
+    },
+    notifyEmail:        { type: String, default: '' },
+    notifyOnEachRsvp:   { type: Boolean, default: false },
+    confirmationMessage:{ type: String, default: '' },      // message affiché après réponse
+  },
+
   createdAt:   { type: Date, default: Date.now },
   updatedAt:   { type: Date, default: Date.now },
 }, { timestamps: true });
 
 publicationSchema.index({ templateName: 1, customName: 1 }, { unique: true });
 //publicationSchema.index({ shortCode: 1 }, { unique: true, sparse: true });
+
+/* ─── Slug auto-generation (pre-save hook) ───────────────────────────
+   Génère un slug unique à partir du titre ou customName si absent.
+   Ne touche jamais un slug déjà présent (pour permettre la personnalisation).
+   Doc: notes/ux-rules.md §2, notes/sitemap.md
+   ─────────────────────────────────────────────────────────────────── */
+const { generateUniqueSlug, isValidSlug } = require('../utils/slug');
+
+const KIND_TO_BRIQUE = { animation: 'carte', wall: 'mur', invitation: 'carte' };
+
+publicationSchema.pre('save', async function (next) {
+  try {
+    // Slug auto-generation si absent ou invalide
+    if (!this.slug || !isValidSlug(this.slug)) {
+      const source = this.title || this.customName || 'creation';
+      this.slug = await generateUniqueSlug(this.constructor, source, { _id: { $ne: this._id } });
+    }
+    // Brique auto-populate depuis Template.kind si absente
+    if (!this.brique && this.templateName) {
+      const Template = require('./Template');
+      const tpl = await Template.findOne({ name: this.templateName }).select('kind').lean();
+      if (tpl?.kind) this.brique = KIND_TO_BRIQUE[tpl.kind] || 'carte';
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = mongoose.model('Publication', publicationSchema);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { resetPassword } from '../../utils/api';
+import PasswordInput from '../components/PasswordInput';
 import s from './AdminLogin.module.css';
 
 export default function ResetPassword() {
@@ -38,8 +39,8 @@ export default function ResetPassword() {
 
         <div className={s.field}>
           <label>Nouveau mot de passe</label>
-          <input
-            type="password" value={password} autoComplete="new-password"
+          <PasswordInput
+            value={password} autoComplete="new-password"
             placeholder="6 caractères minimum"
             onChange={e => setPass(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && document.getElementById('rp-confirm')?.focus()}
@@ -48,8 +49,8 @@ export default function ResetPassword() {
 
         <div className={s.field}>
           <label>Confirmer le mot de passe</label>
-          <input
-            id="rp-confirm" type="password" value={confirm} autoComplete="new-password"
+          <PasswordInput
+            id="rp-confirm" value={confirm} autoComplete="new-password"
             placeholder="••••••••"
             onChange={e => setConf(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && submit()}

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sphère de mots</title>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,6 +67,7 @@
       margin-bottom: 8px;
     }
     .wall-title em { font-style: normal; color: var(--rose); }
+    .wall-title .title-prefix { display: block; font-size: 0.48em; font-style: normal; letter-spacing: 0; margin-bottom: 4px; opacity: 0.72; color: var(--text-dim); }
     .wall-subtitle {
       font-size: 0.86rem;
       color: var(--text-dim);
@@ -594,15 +596,27 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── EMPTY ── */
+    /* ── EMPTY STATE (Noto emoji animé) ── */
     #empty-state {
       text-align: center;
-      padding: 60px 24px;
+      padding: 40px 24px 60px;
       position: relative;
       z-index: 5;
       display: none;
     }
-    #empty-state p { font-size: 0.9rem; color: var(--text-dim); margin-top: 12px; }
+    #empty-state .empty-emoji {
+      width: 128px; height: 128px; display: block; margin: 0 auto 14px;
+      image-rendering: -webkit-optimize-contrast;
+      filter: drop-shadow(0 6px 24px rgba(201,168,76,.35));
+    }
+    #empty-state .empty-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.35rem; line-height: 1.2;
+      color: var(--text); font-weight: 400; font-style: italic;
+      margin-bottom: 6px;
+    }
+    #empty-state .empty-title em { font-style: normal; color: var(--rose); }
+    #empty-state .empty-sub { font-size: 0.86rem; color: var(--text-dim); max-width: 300px; margin: 0 auto; line-height: 1.6; }
 
     @media (max-width: 440px) {
       #add-sheet { padding: 8px 18px 40px; }
@@ -639,8 +653,10 @@
 <canvas id="stars"></canvas>
 
 <header id="wall-header">
-  <p class="eyebrow">✦ Sphère de mots</p>
-  <h1 class="wall-title">Pour <em data-node-name="titleName">Sarah</em></h1>
+  <h1 class="wall-title">
+    <span class="title-prefix" data-node-name="titlePrefix">Pour</span>
+    <em data-node-name="titleName">Sarah</em>
+  </h1>
   <p class="wall-subtitle" data-node-name="subtitle">Faites pivoter la sphère pour explorer chaque mot.</p>
   <!-- <div class="wish-count" id="wish-count-badge">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -663,10 +679,14 @@
 </div>
 
 <div id="empty-state">
-  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-  <p>Soyez le premier à laisser un mot !</p>
+  <img class="empty-emoji"
+       src="https://fonts.gstatic.com/s/e/notoemoji/latest/270d_fe0f/512.webp"
+       alt=""
+       width="128" height="128"
+       loading="lazy" decoding="async" draggable="false"
+       onerror="this.onerror=null;this.src='https://fonts.gstatic.com/s/e/notoemoji/latest/270d_fe0f/512.gif'">
+  <p class="empty-title">La sphère attend son <em>premier mot</em></p>
+  <p class="empty-sub">Sois la première voix — écris ce qui te vient, sincèrement.</p>
 </div>
 
 <!-- Note read modal -->
@@ -687,7 +707,7 @@
   </div>
 </div>
 
-<button id="add-btn" onclick="openSheet()" aria-label="Ajouter un mot">
+<button id="add-btn" onclick="openSheet()" aria-label="Laisser un mot">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
   </svg>
@@ -1003,6 +1023,11 @@ function placeNotes(els) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function cldThumb(url, tx) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.indexOf('/upload/') === -1) return url;
+  return url.replace('/upload/', '/upload/' + tx + '/');
+}
 function fmtDate(ts) {
   return new Date(ts || Date.now()).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
 }
@@ -1093,7 +1118,7 @@ function openModal(w) {
   var photo = document.getElementById('modal-photo');
   var audio = document.getElementById('modal-audio');
   if ((w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl) {
-    photo.src = w.photoUrl; photo.style.display = 'block';
+    photo.src = cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200,c_limit'); photo.style.display = 'block';
   } else {
     photo.style.display = 'none'; photo.src = '';
   }
@@ -1408,12 +1433,37 @@ function showToast(msg) {
 }
 
 /* ════════════════════════════════════════════
+   TITRE ÉVÉNEMENTIEL
+════════════════════════════════════════════ */
+var TITLE_PREFIXES = {
+  anniversary: 'Joyeux anniversaire,',
+  birthday:    'Joyeux anniversaire,',
+  wedding:     'Mariage ·',
+  birth:       'Bienvenue,',
+  farewell:    'Bon vent,',
+  welcome:     'Bienvenue,',
+  graduation:  'Bravo,',
+  thanks:      'Merci,',
+  tribute:     'Pour toujours,'
+};
+function applyTitle3d(d) {
+  var prefixEl = document.querySelector('[data-node-name="titlePrefix"]');
+  var nameEl   = document.querySelector('[data-node-name="titleName"]');
+  var tName = d.titleName || d.title;
+  if (nameEl && tName) nameEl.textContent = tName;
+  var explicit = (d.titlePrefix || '').trim();
+  if (prefixEl) {
+    if (explicit) prefixEl.textContent = explicit;
+    else if (d.occasion && TITLE_PREFIXES[d.occasion]) prefixEl.textContent = TITLE_PREFIXES[d.occasion];
+  }
+}
+
+/* ════════════════════════════════════════════
    INIT
 ════════════════════════════════════════════ */
 (function init() {
   var d     = window.__WW_DATA__ || {};
-  var tName = d.titleName || d.title;
-  if (tName)      document.querySelector('[data-node-name="titleName"]').textContent = tName;
+  applyTitle3d(d);
   if (d.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent  = d.subtitle;
 
   if (d.isAdmin) {
@@ -1444,8 +1494,13 @@ window.addEventListener('message', function(e) {
   if (e.data.type !== 'WW_UPDATE') return;
   var data = e.data.data;
   if (!data) return;
-  var tName = data.titleName || data.title;
-  if (tName)       document.querySelector('[data-node-name="titleName"]').textContent = tName;
+  if (data.titleName !== undefined || data.title !== undefined || data.titlePrefix !== undefined || data.occasion !== undefined) {
+    if (data.titleName   !== undefined) _d.titleName   = data.titleName;
+    if (data.title       !== undefined) _d.title       = data.title;
+    if (data.titlePrefix !== undefined) _d.titlePrefix = data.titlePrefix;
+    if (data.occasion    !== undefined) _d.occasion    = data.occasion;
+    applyTitle3d(_d);
+  }
   if (data.subtitle) document.querySelector('[data-node-name="subtitle"]').textContent = data.subtitle;
 });
 

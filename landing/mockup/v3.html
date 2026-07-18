@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>myKado — Cartes cadeaux numériques au Bénin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lobster&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wine:#270c27;            /* primary brand — deep wine purple (YGAG signature) */
+  --wine-2:#3a1a3a;
+  --wine-3:#4d2750;
+  --slate-50:#F8FAFC;
+  --slate-100:#F1F5F9;
+  --slate-200:#E2E8F0;
+  --slate-400:#94A3B8;
+  --slate-500:#64748B;
+  --slate-600:#475569;
+  --slate-700:#334155;
+  --slate-900:#0F172A;
+  --coral:#EE4D5F;
+  --coral-dark:#DA3D4F;
+  --green:#16A34A;
+  --amber:#F59E0B;
+  --white:#FFFFFF;
+  --body:'Inter', system-ui, -apple-system, sans-serif;
+  --script:'Lobster', cursive;
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:22px;
+  --shadow-card:0 1px 3px rgba(15,23,42,.06), 0 4px 12px rgba(15,23,42,.04);
+  --shadow-hover:0 4px 14px rgba(15,23,42,.10), 0 12px 36px rgba(39,12,39,.08);
+  --maxw:1280px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--white);color:var(--wine);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+
+/* ── Topbar ── */
+.topbar{background:var(--wine);color:#fff;font-size:12.5px;padding:8px 16px;text-align:center;letter-spacing:.01em}
+.topbar strong{color:#FFD6E0;font-weight:600}
+.topbar a{text-decoration:underline;font-weight:600;margin-left:6px}
+
+/* ── Header ── */
+.header{background:#fff;border-bottom:1px solid var(--slate-200);position:sticky;top:0;z-index:50}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:24px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--script);font-size:32px;color:var(--wine);letter-spacing:.5px;line-height:1}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--coral);margin-top:4px}
+.header-search{flex:1;max-width:480px;position:relative}
+.header-search input{width:100%;height:42px;background:var(--slate-100);border:1px solid transparent;border-radius:999px;padding:0 18px 0 44px;font-size:14px;color:var(--wine);outline:none;transition:all .15s}
+.header-search input::placeholder{color:var(--slate-500)}
+.header-search input:focus{background:#fff;border-color:var(--wine);box-shadow:0 0 0 4px rgba(39,12,39,.06)}
+.header-search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--slate-500)}
+.header-actions{display:flex;align-items:center;gap:10px}
+.iconbtn{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--wine);background:transparent;border:none;cursor:pointer;position:relative;transition:background .15s}
+.iconbtn:hover{background:var(--slate-100)}
+.iconbtn svg{width:20px;height:20px}
+.iconbtn .badge{position:absolute;top:6px;right:6px;background:var(--coral);color:#fff;font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.btn:hover{transform:translateY(-1px)}
+.btn-wine{background:var(--wine);color:#fff}
+.btn-wine:hover{background:var(--wine-2)}
+.btn-coral{background:var(--coral);color:#fff}
+.btn-coral:hover{background:var(--coral-dark);box-shadow:0 6px 18px -4px rgba(238,77,95,.5)}
+.btn-outline{background:#fff;color:var(--wine);border:1.5px solid var(--wine)}
+.btn-outline:hover{background:var(--wine);color:#fff}
+.btn-ghost{background:transparent;color:var(--wine);font-weight:500}
+.btn-ghost:hover{background:var(--slate-100)}
+.btn-lg{padding:13px 24px;font-size:14.5px}
+
+/* ── Tabs ── */
+.tabs-wrap{background:#fff;border-bottom:1px solid var(--slate-200)}
+.tabs{display:flex;gap:6px;padding:14px 0;align-items:center}
+.tab{flex:0 0 auto;background:var(--slate-100);border-radius:14px 14px 0 0;padding:18px 26px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;font-weight:600;color:var(--slate-600);transition:all .2s;border:none;font-family:inherit;font-size:15px;text-align:left}
+.tab.active{background:var(--wine);color:#fff}
+.tab:not(.active):hover{background:var(--slate-200);color:var(--wine)}
+.tab .ic{width:40px;height:40px;border-radius:10px;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tab.active .ic{background:rgba(255,255,255,.12)}
+.tab .ic svg{width:22px;height:22px}
+.tab .meta{display:flex;flex-direction:column;gap:2px;line-height:1.15}
+.tab .meta strong{font-size:16px;letter-spacing:-.01em}
+.tab .meta small{font-size:12px;font-weight:500;opacity:.8}
+.tab.active .meta small{color:rgba(255,255,255,.78)}
+
+/* ── Hero banner ── */
+.hero{padding:36px 0 40px;background:var(--white)}
+.hero-banner{background:linear-gradient(120deg, var(--wine) 0%, var(--wine-3) 100%);border-radius:var(--r-xl);padding:50px 56px;color:#fff;position:relative;overflow:hidden;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;min-height:280px}
+.hero-banner::after{content:"";position:absolute;top:-100px;right:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(closest-side, rgba(238,77,95,.4), transparent);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;letter-spacing:.04em;margin-bottom:18px;width:fit-content}
+.hero-eyebrow .d{width:6px;height:6px;border-radius:50%;background:var(--coral)}
+.hero h1{font-size:clamp(32px,4vw,46px);font-weight:700;line-height:1.08;letter-spacing:-.02em;margin:0 0 14px}
+.hero h1 .accent{font-family:var(--script);font-weight:400;color:#FFD6E0;font-size:1.15em;font-style:italic;font-weight:400}
+.hero p{font-size:16px;color:rgba(255,255,255,.78);margin:0 0 26px;max-width:460px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.hero-cards-stack{position:relative;display:flex;justify-content:flex-end;align-items:center;height:240px}
+.hero-card{position:absolute;width:200px;height:130px;border-radius:12px;padding:18px;box-shadow:0 18px 40px -10px rgba(0,0,0,.45);display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.hero-card .top{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;font-weight:700}
+.hero-card .name{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.hero-card .amount{font-size:16px;font-weight:700}
+.hero-card.c1{background:linear-gradient(135deg,#EE4D5F,#B83547);transform:translateX(-30px) rotate(-6deg);z-index:1}
+.hero-card.c2{background:linear-gradient(135deg,#F59E0B,#D97706);transform:translateX(60px) translateY(20px) rotate(4deg);z-index:2}
+.hero-card.c3{background:linear-gradient(135deg,#0B6BCB,#0A4D8C);transform:translateX(150px) translateY(-10px) rotate(-3deg);z-index:3}
+
+/* ── Sections ── */
+section{padding:48px 0}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;gap:24px;flex-wrap:wrap}
+.section-head h2{font-size:26px;font-weight:700;letter-spacing:-.015em;color:var(--wine);margin:0}
+.section-head .see-more{font-size:13.5px;color:var(--wine);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.section-head .see-more:hover{color:var(--coral)}
+.section-head .see-more svg{width:14px;height:14px}
+
+/* ── Filter pills ── */
+.filters{display:flex;gap:8px;overflow-x:auto;padding:8px 0 16px;margin-bottom:8px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.pill{flex:0 0 auto;background:#fff;border:1px solid var(--slate-200);color:var(--wine);font-size:13px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer;transition:all .15s}
+.pill:hover{border-color:var(--wine)}
+.pill.active{background:var(--wine);color:#fff;border-color:var(--wine)}
+
+/* ── Brand grid ── */
+.brand-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.bcard{background:#fff;border:1px solid var(--slate-200);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column}
+.bcard:hover{border-color:var(--wine);box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.bcard .visual{aspect-ratio:1.35/1;background:linear-gradient(135deg,var(--c1,#270c27),var(--c2,#3a1a3a));display:flex;align-items:center;justify-content:center;color:#fff;position:relative}
+.bcard .visual::before{content:"";position:absolute;top:14px;left:14px;width:32px;height:22px;background:rgba(255,255,255,.16);border-radius:4px}
+.bcard .visual .nm{font-size:22px;font-weight:800;letter-spacing:-.01em;text-align:center;padding:0 16px}
+.bcard .visual .nm.script{font-family:var(--script);font-weight:400;font-size:30px;letter-spacing:0}
+.bcard .info{padding:14px 16px;display:flex;flex-direction:column;gap:3px}
+.bcard .info .name{font-size:14.5px;font-weight:700;color:var(--wine)}
+.bcard .info .cat{font-size:12px;color:var(--slate-500);font-weight:500}
+.bcard .info .price{font-size:12.5px;color:var(--wine);font-weight:600;margin-top:4px}
+/* color variants */
+.bcard.v1{--c1:#270c27;--c2:#4d2750}
+.bcard.v2{--c1:#D7263D;--c2:#A11C30}
+.bcard.v3{--c1:#F59E0B;--c2:#D97706}
+.bcard.v4{--c1:#0B6BCB;--c2:#0A4D8C}
+.bcard.v5{--c1:#16A34A;--c2:#108039}
+.bcard.v6{--c1:#7C3AED;--c2:#5B21B6}
+.bcard.v7{--c1:#0F766E;--c2:#0A5550}
+.bcard.v8{--c1:#EE4D5F;--c2:#B83547}
+.bcard.v9{--c1:#E11D48;--c2:#9F0A2D}
+.bcard.v10{--c1:#1F2937;--c2:#0F172A}
+.bcard.v11{--c1:#0E7490;--c2:#0A5468}
+.bcard.v12{--c1:#B45309;--c2:#92400E}
+
+/* ── Occasions row ── */
+.occ-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.occ-chip{aspect-ratio:1/1;border-radius:var(--r-lg);background:var(--slate-100);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;text-align:center;padding:14px;border:1px solid transparent}
+.occ-chip:hover{border-color:var(--wine);transform:translateY(-2px)}
+.occ-chip .emoji-replacement{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.occ-chip svg{width:24px;height:24px;color:#fff}
+.occ-chip .lbl{font-size:13.5px;font-weight:600;color:var(--wine);line-height:1.2}
+.occ-chip.o1 .emoji-replacement{background:#EE4D5F}
+.occ-chip.o2 .emoji-replacement{background:#F59E0B}
+.occ-chip.o3 .emoji-replacement{background:#16A34A}
+.occ-chip.o4 .emoji-replacement{background:#7C3AED}
+.occ-chip.o5 .emoji-replacement{background:#0B6BCB}
+.occ-chip.o6 .emoji-replacement{background:#0F766E}
+
+/* ── Group gifting promo ── */
+.group-promo{background:linear-gradient(120deg,var(--slate-100) 0%, #fff 100%);border:1px solid var(--slate-200);border-radius:var(--r-xl);padding:50px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin:24px 0}
+.group-promo .label{display:inline-flex;align-items:center;gap:8px;background:rgba(39,12,39,.06);color:var(--wine);padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
+.group-promo h3{font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:0 0 14px;color:var(--wine)}
+.group-promo h3 .accent{font-family:var(--script);font-weight:400;color:var(--coral);font-style:normal;font-weight:400}
+.group-promo p{margin:0 0 24px;font-size:15.5px;color:var(--slate-600);max-width:440px;line-height:1.55}
+.group-promo .features{display:grid;gap:10px;margin-bottom:24px}
+.group-promo .feat{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--wine);font-weight:500}
+.group-promo .feat svg{width:18px;height:18px;color:var(--coral);flex-shrink:0}
+.group-mock{position:relative;display:flex;justify-content:center;align-items:center;min-height:260px}
+.gm-circle{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--wine),var(--wine-3));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;letter-spacing:.03em;text-transform:uppercase;box-shadow:0 12px 30px -8px rgba(39,12,39,.4)}
+.gm-contributor{position:absolute;background:#fff;border:1px solid var(--slate-200);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow-card);display:flex;align-items:center;gap:10px;font-size:13px;color:var(--wine);font-weight:600}
+.gm-contributor .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#D97706)}
+.gm-contributor .av.a2{background:linear-gradient(135deg,#16A34A,#0B6BCB)}
+.gm-contributor .av.a3{background:linear-gradient(135deg,#7C3AED,#EE4D5F)}
+.gm-contributor .av.a4{background:linear-gradient(135deg,#F59E0B,#16A34A)}
+.gm-contributor .amount{color:var(--slate-500);font-size:11.5px;font-weight:600}
+.gm-contributor.p1{top:10%;left:0}
+.gm-contributor.p2{top:30%;right:5%}
+.gm-contributor.p3{bottom:20%;left:8%}
+.gm-contributor.p4{bottom:5%;right:0}
+
+/* ── Steps band ── */
+.steps{background:var(--slate-50);padding:64px 0;border-top:1px solid var(--slate-200);border-bottom:1px solid var(--slate-200)}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+.step{text-align:center}
+.step .num{width:48px;height:48px;border-radius:50%;background:var(--wine);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;margin:0 auto 14px}
+.step h4{font-size:15px;font-weight:700;color:var(--wine);margin:0 0 6px}
+.step p{font-size:13.5px;color:var(--slate-600);margin:0;line-height:1.5}
+
+/* ── Press / Trust ── */
+.trust-row{display:flex;justify-content:center;align-items:center;gap:60px;flex-wrap:wrap;padding:36px 0;opacity:.7}
+.trust-row .chip{font-size:18px;font-weight:800;color:var(--wine);letter-spacing:.04em;text-transform:uppercase}
+.trust-row .chip.script{font-family:var(--script);font-weight:400;text-transform:none;font-size:24px;letter-spacing:0}
+
+/* ── Solutions section ── */
+.sol{padding:80px 0;background:var(--wine);color:#fff}
+.sol-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.sol-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.10);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;letter-spacing:.04em;margin-bottom:18px;color:#FFD6E0}
+.sol h2{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1.08;margin:0 0 18px;color:#fff}
+.sol h2 .accent{font-family:var(--script);font-weight:400;color:#FFD6E0;font-style:normal}
+.sol p{font-size:16px;color:rgba(255,255,255,.78);margin:0 0 28px;max-width:480px;line-height:1.55}
+.sol ul{list-style:none;padding:0;margin:0 0 32px;display:grid;gap:14px}
+.sol ul li{display:flex;align-items:center;gap:12px;font-size:14.5px;color:#fff}
+.sol ul li svg{width:18px;height:18px;color:var(--coral);flex-shrink:0}
+.sol-visual{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:var(--r-xl);padding:34px;backdrop-filter:blur(10px)}
+.sol-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
+.sol-row:last-child{border-bottom:none}
+.sol-row .left{display:flex;align-items:center;gap:12px}
+.sol-row .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#B83547)}
+.sol-row .av.a2{background:linear-gradient(135deg,#F59E0B,#D97706)}
+.sol-row .av.a3{background:linear-gradient(135deg,#16A34A,#0F766E)}
+.sol-row .av.a4{background:linear-gradient(135deg,#7C3AED,#5B21B6)}
+.sol-row .name{font-weight:600;color:#fff}
+.sol-row .sub{font-size:12px;color:rgba(255,255,255,.55)}
+.sol-row .amt{font-weight:700;color:#fff}
+
+/* ── Footer ── */
+.footer{background:#1a081a;color:rgba(255,255,255,.62);padding:60px 0 28px;font-size:13.5px}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:36px;margin-bottom:42px}
+.footer h6{color:#fff;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 16px}
+.footer ul{list-style:none;padding:0;margin:0;display:grid;gap:11px}
+.footer ul a:hover{color:var(--coral)}
+.footer .brand-foot{font-family:var(--script);font-size:34px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px;line-height:1}
+.footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,.4);flex-wrap:wrap;gap:14px}
+.foot-pay{display:flex;gap:10px;align-items:center}
+.foot-pay span{background:rgba(255,255,255,.06);padding:5px 11px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.04em}
+
+@media(max-width:1080px){
+  .brand-grid{grid-template-columns:repeat(4,1fr)}
+  .occ-row{grid-template-columns:repeat(6,1fr)}
+}
+@media(max-width:880px){
+  .header-search{display:none}
+  .tabs{overflow-x:auto;padding:14px 0 0;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .hero-banner,.group-promo,.sol-grid{grid-template-columns:1fr;padding:34px}
+  .hero-cards-stack{height:200px;margin-top:20px}
+  .brand-grid{grid-template-columns:repeat(3,1fr)}
+  .occ-row{grid-template-columns:repeat(3,1fr)}
+  .steps-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:30px}
+}
+@media(max-width:560px){
+  .brand-grid{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:28px}
+  .footer-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Topbar ═══ -->
+<div class="topbar">
+  Livraison instantanée par WhatsApp · Paiement Mobile Money <strong>MTN MoMo, Moov, Celtiis</strong>
+</div>
+
+<!-- ═══ Header ═══ -->
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="brand"><span class="dot"></span>myKado</a>
+    <div class="header-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" placeholder="Rechercher une enseigne, une catégorie, une occasion…" />
+    </div>
+    <div class="header-actions">
+      <button class="iconbtn" aria-label="Mon compte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <button class="iconbtn" aria-label="Mon panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="badge">2</span>
+      </button>
+      <a href="#login" class="btn btn-wine">Connexion</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ TABS ═══ -->
+<div class="tabs-wrap">
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active">
+        <div class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        </div>
+        <div class="meta"><strong>Cadeaux Personnels</strong><small>1 personne offre à 1 personne</small></div>
+      </button>
+      <a href="/groupe" class="tab">
+        <div class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="meta"><strong>Cadeaux de Groupe</strong><small>Plusieurs proches · un seul cadeau</small></div>
+      </a>
+      <a href="/occasions" class="tab" style="margin-left:auto">
+        <div class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.8 5.8 21 7 14 2 9.3 9 8.5 12 2"/></svg>
+        </div>
+        <div class="meta"><strong>Promos</strong><small>Cartes en édition limitée</small></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Hero banner ═══ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-banner">
+      <div>
+        <div class="hero-eyebrow"><span class="d"></span> Nouveau · 10 enseignes partenaires au Bénin</div>
+        <h1>Offrez un cadeau, <span class="accent">faites un moment.</span></h1>
+        <p>Cartes cadeaux numériques des plus grandes enseignes locales. Personnalisez avec photos, musique, prénom. Livrées instantanément par WhatsApp.</p>
+        <div class="hero-actions">
+          <a href="#brands" class="btn btn-coral btn-lg">Choisir une enseigne
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#occasions" class="btn btn-ghost btn-lg" style="background:rgba(255,255,255,.12);color:#fff">Par occasion</a>
+        </div>
+      </div>
+      <div class="hero-cards-stack">
+        <div class="hero-card c1"><div class="top">Erevan</div><div class="name">25 000 F</div></div>
+        <div class="hero-card c2"><div class="top">Total Energies</div><div class="name">10 000 F</div></div>
+        <div class="hero-card c3"><div class="top">MTN MoMo</div><div class="name">5 000 F</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Filter pills ═══ -->
+<div class="container">
+  <div class="filters">
+    <button class="pill active">Tout</button>
+    <button class="pill">Supermarché</button>
+    <button class="pill">Carburant</button>
+    <button class="pill">Telco</button>
+    <button class="pill">Restauration</button>
+    <button class="pill">Cinéma</button>
+    <button class="pill">Voyage</button>
+    <button class="pill">Beauté</button>
+    <button class="pill">Mode</button>
+    <button class="pill">Tech</button>
+  </div>
+</div>
+
+<!-- ═══ Featured brands ═══ -->
+<section id="brands" style="padding-top:8px">
+  <div class="container">
+    <div class="section-head">
+      <h2>Cartes en vedette</h2>
+      <a href="#all" class="see-more">Tout voir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+    </div>
+
+    <div class="brand-grid">
+      <a class="bcard v1"><div class="visual"><div class="nm">EREVAN</div></div>
+        <div class="info"><div class="name">Erevan</div><div class="cat">Supermarché</div><div class="price">De 5 000 à 250 000 F</div></div>
+      </a>
+      <a class="bcard v2"><div class="visual"><div class="nm">Total</div></div>
+        <div class="info"><div class="name">Total Energies</div><div class="cat">Carburant</div><div class="price">De 5 000 à 50 000 F</div></div>
+      </a>
+      <a class="bcard v3"><div class="visual"><div class="nm">MTN</div></div>
+        <div class="info"><div class="name">MTN Mobile Money</div><div class="cat">Recharge & Forfait</div><div class="price">De 1 000 à 20 000 F</div></div>
+      </a>
+      <a class="bcard v4"><div class="visual"><div class="nm script">Canal</div></div>
+        <div class="info"><div class="name">Canal Olympia</div><div class="cat">Cinéma</div><div class="price">À partir de 3 000 F</div></div>
+      </a>
+      <a class="bcard v5"><div class="visual"><div class="nm">MOOV</div></div>
+        <div class="info"><div class="name">Moov Africa</div><div class="cat">Recharge & Forfait</div><div class="price">De 1 000 à 20 000 F</div></div>
+      </a>
+      <a class="bcard v6"><div class="visual"><div class="nm script">ASKY</div></div>
+        <div class="info"><div class="name">ASKY Airlines</div><div class="cat">Voyage</div><div class="price">À partir de 25 000 F</div></div>
+      </a>
+      <a class="bcard v7"><div class="visual"><div class="nm">CHAMPION</div></div>
+        <div class="info"><div class="name">Champion</div><div class="cat">Supermarché</div><div class="price">De 5 000 à 100 000 F</div></div>
+      </a>
+      <a class="bcard v8"><div class="visual"><div class="nm">KFC</div></div>
+        <div class="info"><div class="name">KFC Bénin</div><div class="cat">Restauration</div><div class="price">De 5 000 à 30 000 F</div></div>
+      </a>
+      <a class="bcard v9"><div class="visual"><div class="nm script">Glele</div></div>
+        <div class="info"><div class="name">Glele Mode</div><div class="cat">Mode & accessoires</div><div class="price">De 10 000 à 75 000 F</div></div>
+      </a>
+      <a class="bcard v10"><div class="visual"><div class="nm">CFAO</div></div>
+        <div class="info"><div class="name">CFAO Motors</div><div class="cat">Auto & service</div><div class="price">À partir de 25 000 F</div></div>
+      </a>
+      <a class="bcard v11"><div class="visual"><div class="nm">CELTIIS</div></div>
+        <div class="info"><div class="name">Celtiis Cash</div><div class="cat">Recharge & Forfait</div><div class="price">De 1 000 à 15 000 F</div></div>
+      </a>
+      <a class="bcard v12"><div class="visual"><div class="nm script">Privilège</div></div>
+        <div class="info"><div class="name">Le Privilège</div><div class="cat">Restaurant gastro</div><div class="price">De 15 000 à 100 000 F</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Occasions ═══ -->
+<section id="occasions">
+  <div class="container">
+    <div class="section-head">
+      <h2>Par occasion</h2>
+      <a href="#all-occ" class="see-more">Toutes les occasions <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+    </div>
+
+    <div class="occ-row">
+      <a class="occ-chip o1">
+        <div class="emoji-replacement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-1a3 3 0 0 0-3-3v0a3 3 0 0 0-3 3v0M10 7H9a3 3 0 0 0-3-3v0a3 3 0 0 0-3 3v0M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8"/><line x1="3" y1="11" x2="21" y2="11"/></svg></div>
+        <div class="lbl">Anniversaire</div>
+      </a>
+      <a class="occ-chip o2">
+        <div class="emoji-replacement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="15.5 14 17 21 12 18 7 21 8.5 14"/></svg></div>
+        <div class="lbl">Mariage</div>
+      </a>
+      <a class="occ-chip o3">
+        <div class="emoji-replacement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c0-3.5 2.5-6 5-6 1.5 0 2.5.5 3.5 1.5 1-1 2-1.5 3.5-1.5 2.5 0 5 2.5 5 6 0 3-2 5-5 5h-7c-3 0-5-2-5-5z"/></svg></div>
+        <div class="lbl">Naissance</div>
+      </a>
+      <a class="occ-chip o4">
+        <div class="emoji-replacement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.8 5.8 21 7 14 2 9.3 9 8.5 12 2"/></svg></div>
+        <div class="lbl">Tabaski · Noël</div>
+      </a>
+      <a class="occ-chip o5">
+        <div class="emoji-replacement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.5C21 13 12 22 12 22S3 13 3 8.5a9 9 0 1 1 18 0z"/></svg></div>
+        <div class="lbl">Saint-Valentin</div>
+      </a>
+      <a class="occ-chip o6">
+        <div class="emoji-replacement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-6 0v4"/><rect x="2" y="9" width="20" height="13" rx="2"/></svg></div>
+        <div class="lbl">Merci</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Group gifting promo ═══ -->
+<section>
+  <div class="container">
+    <div class="group-promo">
+      <div>
+        <div class="label">Cadeaux de Groupe</div>
+        <h3>Plusieurs proches, <span class="accent">un seul cadeau.</span></h3>
+        <p>Mariage, anniversaire 60 ans, départ retraite, naissance. Lancez une collecte, invitez vos proches, et offrez ensemble une carte cadeau d'envergure. Aucun virement à se renvoyer.</p>
+        <div class="features">
+          <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Chaque proche contribue par Mobile Money</div>
+          <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Mur de mots collectif joint au cadeau</div>
+          <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Le destinataire reçoit une grande carte cadeau</div>
+        </div>
+        <a href="/groupe" class="btn btn-wine">Lancer un cadeau de groupe
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="group-mock">
+        <div class="gm-circle">Carte<br>180 000 F</div>
+        <div class="gm-contributor p1"><div class="av"></div>Aïcha <span class="amount">+ 25 000 F</span></div>
+        <div class="gm-contributor p2"><div class="av a2"></div>Jules <span class="amount">+ 50 000 F</span></div>
+        <div class="gm-contributor p3"><div class="av a3"></div>Sandra <span class="amount">+ 35 000 F</span></div>
+        <div class="gm-contributor p4"><div class="av a4"></div>Romaric <span class="amount">+ 70 000 F</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Steps ═══ -->
+<section class="steps">
+  <div class="container">
+    <div class="steps-grid">
+      <div class="step">
+        <div class="num">1</div>
+        <h4>Choisissez</h4>
+        <p>Une enseigne et un montant, ou une carte par occasion.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h4>Personnalisez</h4>
+        <p>Photos, prénom, musique, message animé.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h4>Payez</h4>
+        <p>Mobile Money en 30 secondes. Visa pour la diaspora.</p>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <h4>WhatsApp</h4>
+        <p>Le destinataire ouvre son lien et sa carte se révèle.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Trust ═══ -->
+<section style="padding:20px 0">
+  <div class="container">
+    <div class="trust-row">
+      <span class="chip">EREVAN</span>
+      <span class="chip script">Total</span>
+      <span class="chip">MTN</span>
+      <span class="chip script">Canal</span>
+      <span class="chip">MOOV</span>
+      <span class="chip">CHAMPION</span>
+      <span class="chip script">KFC</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Solutions B2B ═══ -->
+<section class="sol">
+  <div class="container sol-grid">
+    <div>
+      <div class="sol-eyebrow">myKado @Work</div>
+      <h2>Pour vos salariés, <span class="accent">le même moment.</span></h2>
+      <p>Programme cadeau RH automatisé : anniversaires, ancienneté, naissances, fêtes religieuses. Une seule plateforme, votre branding, vos enseignes préférées.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Envoi automatique le jour J</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cartes co-brandées entreprise</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Reporting & exports comptables</li>
+      </ul>
+      <a href="/work" class="btn btn-coral btn-lg">Demander une démo
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="sol-visual">
+      <div class="sol-row"><div class="left"><div class="av"></div><div><div class="name">Aminata Sossa</div><div class="sub">Anniversaire · Erevan</div></div></div><div class="amt">25 000 F</div></div>
+      <div class="sol-row"><div class="left"><div class="av a2"></div><div><div class="name">Jules Hounnou</div><div class="sub">Ancienneté · Total</div></div></div><div class="amt">15 000 F</div></div>
+      <div class="sol-row"><div class="left"><div class="av a3"></div><div><div class="name">Fatou Adjovi</div><div class="sub">Naissance · Champion</div></div></div><div class="amt">20 000 F</div></div>
+      <div class="sol-row"><div class="left"><div class="av a4"></div><div><div class="name">+ 38 salariés</div><div class="sub">Cette semaine</div></div></div><div class="amt" style="color:#FFD6E0">680 000 F</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-foot"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:var(--coral);display:inline-block"></span>myKado</div>
+        <p style="margin:0;max-width:260px;line-height:1.55">Cartes cadeaux numériques des plus grandes enseignes du Bénin. Made in Cotonou.</p>
+      </div>
+      <div>
+        <h6>Acheter</h6>
+        <ul>
+          <li><a href="#brands">Cartes Personnelles</a></li>
+          <li><a href="/groupe">Cartes de Groupe</a></li>
+          <li><a href="#occasions">Par occasion</a></li>
+          <li><a href="#promo">Promos</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Entreprises</h6>
+        <ul>
+          <li><a href="/work">myKado @Work</a></li>
+          <li><a href="/work#demo">Demander une démo</a></li>
+          <li><a href="/work#api">API</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Aide</h6>
+        <ul>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="#redemption">Utiliser ma carte</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Société</h6>
+        <ul>
+          <li><a href="#about">À propos</a></li>
+          <li><a href="#cgv">CGV</a></li>
+          <li><a href="#legal">Mentions légales</a></li>
+          <li><a href="#privacy">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 myKado · Cotonou, Bénin</div>
+      <div class="foot-pay">
+        <span>MTN MoMo</span><span>Moov Money</span><span>Celtiis</span><span>VISA</span><span>Mastercard</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

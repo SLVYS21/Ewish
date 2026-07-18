@@ -23,7 +23,10 @@ function buildSlug(pub) {
   return slugify(raw, { lower: true, strict: true }).slice(0, 30) || null;
 }
 
-/* ── GET /s/:code  public redirect ──────────────────────────── */
+/* ── GET /s/:code  public redirect ────────────────────────────
+   Backward compat non négociable — cartes déjà livrées.
+   Voir notes/sitemap.md §Backward compat.
+   Redirige vers /c|/m|/g/:slug si disponible, sinon fallback /site/... */
 router.get('/:code', async (req, res) => {
   try {
     const pub = await Publication.findOne({ shortCode: req.params.code }).lean();
@@ -34,7 +37,14 @@ router.get('/:code', async (req, res) => {
         </body></html>
       `);
     }
-    // Permanent redirect to full URL
+
+    // Nouvelle forme canonique — si slug + brique dispo
+    if (pub.slug && pub.brique) {
+      const prefix = { carte: 'c', mur: 'm', cadeau: 'g' }[pub.brique] || 'c';
+      return res.redirect(301, `/${prefix}/${pub.slug}`);
+    }
+
+    // Fallback legacy — cartes historiques sans slug
     res.redirect(301, `/site/${pub.templateName}/${pub.customName}`);
   } catch (e) {
     res.status(500).send('<h1>Erreur serveur</h1>');

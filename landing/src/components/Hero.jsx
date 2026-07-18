@@ -1,120 +1,64 @@
-import { useState, useEffect } from 'react';
-import CardsCarousel from './CardsCarousel';
 import s from './Hero.module.css';
 
-const PLACEHOLDERS = ['Maman', 'Marie', "l'équipe RH", 'Papa', 'Aminata', 'tes mariés', 'Kofi qui part'];
-
-export default function Hero({ onOrder }) {
-  const [name, setName] = useState('');
-  const [placeholder, setPlaceholder] = useState(PLACEHOLDERS[0]);
-  const [format, setFormat] = useState('solo');
-
-  useEffect(() => {
-    let i = 0;
-    const id = setInterval(() => {
-      if (name) return;
-      i = (i + 1) % PLACEHOLDERS.length;
-      setPlaceholder(PLACEHOLDERS[i]);
-    }, 2500);
-    return () => clearInterval(id);
-  }, [name]);
-
-  const submit = (e) => {
-    e.preventDefault();
-    onOrder?.();
-  };
-
+export default function Hero({ onCreate }) {
   return (
-    <header className={s.hero}>
-      <div className={s.heroIn}>
-
-        <span className={s.eyebrow}>
-          <span className={s.eyebrowDot} />
-          Cartes animées · Murs collectifs · Cagnottes
-        </span>
-
-        <h1 className={s.h1}>
-          Tu veux faire <em className="it">mieux</em><br/>
-          qu'un <span className="strike">"Joyeux anniv 🎂"</span> sur WhatsApp,<br/>
-          <em className="it gold">sans te ruiner</em> ?
-        </h1>
-
-        <p className={s.sub}>
-          Carte animée pour une personne, mur où toute la famille laisse un mot,
-          cagnotte pour le cadeau commun. Gratuit jusqu'à la publication.
-        </p>
-
-        <form className={s.ctaWrap} onSubmit={submit}>
-          <span className={s.ctaLabel}>Pour qui c'est ?</span>
-          <input
-            type="text"
-            className={s.ctaInput}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={placeholder}
-            autoComplete="off"
-            aria-label="Pour qui c'est ?"
-          />
-          <button className={s.ctaBtn} type="submit">
-            Continuer
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
-              <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </form>
-
-        <div className={s.formats} role="radiogroup" aria-label="Type de vœu">
-          <button
-            type="button"
-            role="radio"
-            aria-checked={format === 'solo'}
-            className={`${s.fmt} ${format === 'solo' ? s.fmtActive : ''}`}
-            onClick={() => setFormat('solo')}
-          >
-            <span className={s.fmtIco}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <rect x="6" y="3" width="12" height="18" rx="2"/>
-                <circle cx="12" cy="17" r="1.2" fill="currentColor"/>
+    <section className={s.hero}>
+      <div className="mk-container">
+        <div className={s.grid}>
+          <div>
+            <span className="eyebrow">Cartes · Murs · Cadeaux</span>
+            <h1 className={s.h1}>
+              Vous voulez faire <em className={`serif ${s.gold}`}>mieux</em><br />
+              qu'un <span className={s.strike}>"Joyeux anniv"</span><br />
+              sur WhatsApp&nbsp;?
+            </h1>
+            <p className={s.sub}>
+              Une carte animée pour une personne, un mur où tout le monde laisse un mot,
+              un cadeau qui arrive avec le message. Gratuit jusqu'à la publication.
+            </p>
+            <div className={s.actions}>
+              <button className="mk-btn mk-btn-primary mk-btn-lg" onClick={onCreate}>
+                Célébrer quelqu'un
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                </svg>
+              </button>
+              <a href="#comment" className="mk-btn mk-btn-ghost mk-btn-lg">Voir comment ça marche</a>
+            </div>
+            <div className={s.trust}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--mk-forest-700)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
               </svg>
-            </span>
-            <span>
-              <div className={s.fmtT}>Carte animée</div>
-              <div className={s.fmtS}>Pour une personne</div>
-            </span>
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={format === 'wall'}
-            className={`${s.fmt} ${format === 'wall' ? s.fmtActive : ''}`}
-            onClick={() => setFormat('wall')}
-          >
-            <span className={s.fmtIco}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <rect x="3" y="4" width="7" height="7" rx="1.2"/>
-                <rect x="14" y="4" width="7" height="7" rx="1.2"/>
-                <rect x="3" y="14" width="7" height="7" rx="1.2"/>
-                <rect x="14" y="14" width="7" height="7" rx="1.2"/>
-              </svg>
-            </span>
-            <span>
-              <div className={s.fmtT}>Mur collectif</div>
-              <div className={s.fmtS}>Tout un groupe participe</div>
-            </span>
-          </button>
-        </div>
+              Gratuit jusqu'à la publication · Aucune carte bancaire requise
+            </div>
+          </div>
 
-        <div className={s.trust}>
-          <span className={s.coin} />
-          <span>
-            <b>1 crédit = 500 FCFA</b>{' '}
-            <span className="sep-dot">·</span> sans abonnement{' '}
-            <span className="sep-dot">·</span> tu paies seulement pour publier
-          </span>
+          <div className={s.cluster}>
+            <div className={`${s.card} ${s.card1}`}>
+              <div className={s.cPhoto} />
+              <div className={s.cTitle}>Bon anniv Amina&nbsp;!</div>
+              <div className={s.cMsg}>30 ans, ça se fête. Je pense à toi ma sœur.</div>
+              <div className={s.cSig}>— Fatou</div>
+            </div>
+            <div className={`${s.card} ${s.card2}`}>
+              <div className={s.cTitle}>Bienvenue Yannick&nbsp;!</div>
+              <div className={s.cMsg}>Toute l'équipe est ravie de t'accueillir. On va bien s'amuser.</div>
+              <div className={s.cSig}>— Les collègues</div>
+            </div>
+            <div className={`${s.card} ${s.card3}`}>
+              <span className={s.badge}>+ CADEAU</span>
+              <div className={s.cTitle} style={{ marginTop: 8 }}>Merci Kwame</div>
+              <div className={s.cMsg}>Pour ces 5 années. Bonne suite avec ta famille.</div>
+              <div className={s.cSig}>— Toute la boîte</div>
+            </div>
+            <div className={`${s.card} ${s.card4}`}>
+              <div className={s.cTitle}>On t'aime, maman</div>
+              <div className={s.cMsg}>De la part de tous les enfants et petits-enfants.</div>
+              <div className={s.cSig}>— La famille</div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <CardsCarousel />
-    </header>
+    </section>
   );
 }

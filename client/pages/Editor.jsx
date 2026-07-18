@@ -11,6 +11,8 @@ import PhotoLayoutTab from '../components/PhotoLayoutTab';
 import JarTab from '../components/JarTab';
 import ConfettiTab from '../components/ConfettiTab';
 import WishesManager from '../components/WishesManager';
+import InvitationTab from '../components/InvitationTab';
+import RsvpManager from '../components/RsvpManager';
 import ClientTab from '../components/ClientTab';
 import QRCodeModal from '../components/QRCodeModal';
 import PaymentModal from '../admin/components/PaymentModal';
@@ -256,6 +258,7 @@ export default function Editor() {
   const [isPrivate, setIsPrivate]               = useState(false);
   const [accessCode, setAccessCode]             = useState('');
   const [requireModeration, setRequireModeration] = useState(false);
+  const [invitationConfig, setInvitationConfig]   = useState(null);
 
   const tourSteps = [
     { target: '.tour-step-nav',     content: 'Suivez ces 4 étapes pour personnaliser votre création !', disableBeacon: true, placement: 'bottom' },
@@ -315,6 +318,8 @@ export default function Editor() {
         setIsPrivate(cc.isPrivate || false);
         setAccessCode(cc.accessCode || '');
         setRequireModeration(cc.requireModeration || false);
+
+        setInvitationConfig(found.invitationConfig || null);
 
         if (found.published) {
           setPublishedUrl(`/site/${found.templateName}/${found.customName}`);
@@ -381,6 +386,21 @@ export default function Editor() {
       }).catch(() => {});
     }, 800);
   }, [id, cagnotte, cagnotteName, cagnotteGoal, cagnotteImage, cagnotteDeadline, wishesEnabled, minContribution, maxContribution, collectTitle, collectSubtitle, collectCover, collectAccentColor, isPrivate, accessCode, requireModeration]);
+
+  /* invitation config autosave */
+  const invitationTimer = useRef(null);
+  const handleInvitationChange = useCallback((next) => {
+    setInvitationConfig(next);
+    setSaveStatus('unsaved');
+    clearTimeout(invitationTimer.current);
+    invitationTimer.current = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        await updatePublication(id, { invitationConfig: next });
+        setSaveStatus('saved');
+      } catch { setSaveStatus('unsaved'); }
+    }, 700);
+  }, [id]);
 
   /* section jump */
   const jumpToSection = useCallback((sectionId) => {
@@ -544,6 +564,7 @@ export default function Editor() {
   /* step helpers */
   const isWall  = pub?.templateName?.startsWith('wall-of-wishes');
   const isMixed = ['collective-family', 'collective-pro'].includes(pub?.templateName);
+  const isInvitation = template?.kind === 'invitation';
 
   const wallStepTheme = (() => {
     switch (pub?.templateName) {
@@ -556,6 +577,12 @@ export default function Editor() {
   })();
 
   const displaySteps = STEPS.map(s => {
+    if (s.id === 'Message' && isInvitation)
+      return { ...s, title: 'Invitation', sub: 'Texte, photos', Icon: MailOpen, color: '#7C5CC9', soft: '#F4EEFB', accent: '#D7C5F2' };
+    if (s.id === 'Cadeau' && isInvitation)
+      return { ...s, title: 'RSVP', sub: 'Date, invités, réponses', Icon: ClipboardList, color: '#7C5CC9', soft: '#F4EEFB', accent: '#D7C5F2' };
+    if (s.id === 'Share' && isInvitation)
+      return { ...s, color: '#7C5CC9', soft: '#F4EEFB', accent: '#D7C5F2' };
     if (s.id === 'Message' && isWall)
       return { ...s, title: 'Mur', sub: 'Titre, accès & mots', Icon: LayoutTemplate, ...wallStepTheme };
     if (s.id === 'Share' && isWall)
@@ -798,6 +825,31 @@ export default function Editor() {
         );
 
       case 'Cadeau': {
+        // ── Invitation : config RSVP + tableau des réponses ──────
+        if (isInvitation) {
+          const publicUrl = pub
+            ? `${import.meta.env.VITE_API_URL || ''}/site/${pub.templateName}/${pub.customName}`
+            : '';
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <InvitationTab
+                publicationId={pub?._id}
+                invitationConfig={invitationConfig}
+                onChange={handleInvitationChange}
+                publicUrl={publicUrl}
+              />
+              <div style={{
+                margin: '8px 16px 0', padding: '12px 14px',
+                background: '#F4EEFB', border: '1px solid #D7C5F2',
+                borderRadius: 12, fontSize: 12.5, color: '#6E4FBA', fontWeight: 600,
+              }}>
+                Réponses reçues
+              </div>
+              {pub?._id && <RsvpManager publicationId={pub._id} />}
+            </div>
+          );
+        }
+
         // ── Simple / Mixte : pas de cagnotte ──────────────────────
         if (!isWall) {
           return (

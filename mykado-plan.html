@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>myKado — Plan & Schéma des blocs</title>
+<style>
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --border: #e6e3dd;
+    --border-strong: #cfcac0;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --text-soft: #9a9a9a;
+
+    --accent: #e85d44;
+    --accent-soft: #fdece7;
+
+    --carte: #e85d44;
+    --carte-soft: #fdece7;
+    --mur: #3b82c4;
+    --mur-soft: #e6f0f9;
+    --cadeau: #d4a017;
+    --cadeau-soft: #fbf3d9;
+    --business: #6b5b95;
+    --business-soft: #efeaf6;
+
+    --ok: #2f8f5c;
+    --warn: #b8860b;
+    --pending: #6b6b6b;
+
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header.top {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 32px 20px;
+  }
+  header.top h1 {
+    font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  header.top p {
+    margin: 0; color: var(--text-muted); font-size: 13px;
+  }
+
+  nav.side {
+    position: fixed; top: 0; left: 0;
+    width: 220px; height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 10;
+  }
+  nav.side .brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  nav.side .brand-name {
+    font-weight: 700; font-size: 15px; letter-spacing: -0.02em;
+  }
+  nav.side .brand-tag {
+    font-size: 11px; color: var(--text-soft); margin-top: 2px;
+  }
+  nav.side a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 20px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 2px solid transparent;
+  }
+  nav.side a:hover { color: var(--text); background: rgba(0,0,0,0.02); }
+  nav.side a.active {
+    color: var(--text); font-weight: 600;
+    border-left-color: var(--accent); background: var(--accent-soft);
+  }
+  nav.side .num {
+    display: inline-flex; width: 20px; height: 20px;
+    align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    background: var(--border); color: var(--text-muted);
+    border-radius: 4px;
+  }
+  nav.side a.active .num { background: var(--accent); color: white; }
+
+  main {
+    margin-left: 220px;
+    padding: 40px 48px 120px;
+    max-width: 1400px;
+  }
+
+  section {
+    margin-bottom: 64px;
+  }
+  section > h2 {
+    font-size: 22px; margin: 0 0 6px; letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section > h2 .num-badge {
+    display: inline-flex; width: 28px; height: 28px;
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--text); color: var(--bg);
+    border-radius: 6px;
+  }
+  section > .lead {
+    color: var(--text-muted); margin: 0 0 24px; max-width: 720px;
+  }
+
+  h3 { font-size: 15px; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h4 { font-size: 13px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 1100px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 720px)  { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } main { margin-left: 0; padding: 24px 16px 80px; } nav.side { display: none; } }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: var(--border); color: var(--text);
+  }
+  .tag.carte    { background: var(--carte-soft);    color: var(--carte); }
+  .tag.mur      { background: var(--mur-soft);      color: var(--mur); }
+  .tag.cadeau   { background: var(--cadeau-soft);   color: var(--cadeau); }
+  .tag.business { background: var(--business-soft); color: var(--business); }
+  .tag.phase    { background: #eee; color: var(--text); font-family: monospace; }
+  .tag.new      { background: #10b981; color: white; }
+  .tag.done     { background: var(--ok); color: white; }
+  .tag.ai       { background: #111; color: #f0f0f0; }
+
+  .icon { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .icon-lg { width: 24px; height: 24px; }
+  .icon-xl { width: 32px; height: 32px; }
+
+  /* Overview flow */
+  .flow-map {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+  }
+  .flow-row {
+    display: grid; gap: 24px; align-items: center;
+    grid-template-columns: 1fr 40px 1fr 40px 1fr;
+    margin-bottom: 20px;
+  }
+  .flow-arrow {
+    text-align: center; color: var(--text-soft);
+  }
+  .flow-node {
+    padding: 14px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    text-align: center;
+    background: white;
+  }
+  .flow-node .title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .flow-node .sub { color: var(--text-muted); font-size: 12px; }
+
+  /* Espaces user */
+  .space-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    background: var(--surface);
+  }
+  .space-card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .space-card .title { font-weight: 700; font-size: 15px; }
+  .space-card ul { margin: 8px 0 0; padding-left: 18px; }
+  .space-card li { margin-bottom: 4px; color: var(--text-muted); font-size: 12px; }
+
+  /* Brique blocks */
+  .brique {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .brique .head {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brique.carte    .head { background: var(--carte-soft); border-bottom-color: var(--carte); }
+  .brique.mur      .head { background: var(--mur-soft); border-bottom-color: var(--mur); }
+  .brique.cadeau   .head { background: var(--cadeau-soft); border-bottom-color: var(--cadeau); }
+  .brique.business .head { background: var(--business-soft); border-bottom-color: var(--business); }
+  .brique .head .title { font-weight: 700; font-size: 15px; }
+  .brique .head .sub { color: var(--text-muted); font-size: 11px; margin-left: auto; }
+  .brique .body { padding: 14px 18px 18px; }
+  .brique .body h5 { font-size: 11px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); font-weight: 600; }
+  .brique .body h5:first-child { margin-top: 0; }
+  .brique .body ul { margin: 0; padding-left: 16px; }
+  .brique .body li { font-size: 12px; margin-bottom: 3px; }
+  .brique .relations {
+    padding: 10px 18px;
+    background: #fafaf7;
+    border-top: 1px dashed var(--border);
+    font-size: 11px; color: var(--text-muted);
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+
+  /* Parcours */
+  .parcours {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 18px 20px;
+  }
+  .parcours .head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .parcours .letter {
+    display: inline-flex; width: 28px; height: 28px;
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--text); color: white;
+    border-radius: 6px;
+  }
+  .parcours .title { font-weight: 700; font-size: 14px; }
+  .parcours .actor { font-size: 11px; color: var(--text-soft); margin-left: auto; }
+  .parcours .steps {
+    font-size: 11px; color: var(--text-muted);
+    padding: 8px 10px; background: #fafaf7; border-radius: 6px;
+    margin-bottom: 12px; font-family: monospace;
+  }
+  .parcours h5 {
+    font-size: 10px; margin: 10px 0 6px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-soft); font-weight: 700;
+  }
+  .checklist { list-style: none; padding: 0; margin: 0; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 5px 0; font-size: 12px;
+    border-bottom: 1px dashed #f0efe9;
+  }
+  .checklist li:last-child { border-bottom: 0; }
+  .checklist input[type="checkbox"] {
+    margin-top: 3px; accent-color: var(--accent); cursor: pointer;
+    flex-shrink: 0;
+  }
+  .checklist label { flex: 1; cursor: pointer; }
+  .checklist input:checked + label {
+    text-decoration: line-through; color: var(--text-soft);
+  }
+
+  /* Phases timeline */
+  .phase {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 18px 20px;
+    position: relative;
+  }
+  .phase .head {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+  }
+  .phase .num {
+    display: inline-flex; width: 36px; height: 36px;
+    align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; font-family: monospace;
+    background: var(--text); color: var(--bg);
+    border-radius: 8px;
+  }
+  .phase .name { font-weight: 700; font-size: 15px; }
+  .phase .desc { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+
+  /* Backgrounds pipeline */
+  .pipeline {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .pipe-node {
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px;
+    background: var(--surface); text-align: center;
+  }
+  .pipe-node .letter {
+    display: inline-flex; width: 26px; height: 26px;
+    align-items: center; justify-content: center;
+    background: var(--accent); color: white;
+    border-radius: 6px; font-weight: 700; font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .pipe-node h4 { margin-bottom: 6px; color: var(--text); text-transform: none; letter-spacing: 0; font-size: 13px; }
+  .pipe-node ul { margin: 0; padding-left: 16px; text-align: left; font-size: 11px; color: var(--text-muted); }
+  .pipe-node li { margin-bottom: 3px; }
+
+  /* IA innovation */
+  .ai-cat {
+    border: 1px solid var(--border);
+    border-left: 3px solid #111;
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--surface);
+  }
+  .ai-cat h4 {
+    color: var(--text); text-transform: none; letter-spacing: 0;
+    font-size: 13px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ai-cat ul { margin: 0; padding-left: 16px; font-size: 12px; }
+  .ai-cat li { margin-bottom: 4px; color: var(--text-muted); }
+  .ai-cat li b { color: var(--text); font-weight: 600; }
+
+  /* Décisions */
+  .decision {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: var(--surface);
+    margin-bottom: 12px;
+  }
+  .decision .q { font-weight: 700; margin-bottom: 6px; font-size: 14px; }
+  .decision .opts { color: var(--text-muted); font-size: 12px; }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    padding: 12px; border: 1px dashed var(--border);
+    border-radius: 8px; margin-bottom: 20px;
+    font-size: 11px; color: var(--text-muted);
+    align-items: center;
+  }
+
+  .rel-arrow {
+    color: var(--text-soft); margin: 0 4px;
+  }
+
+  .note {
+    background: #fff8e6;
+    border: 1px solid #f0dfa8;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px; color: #6b5416;
+    margin-bottom: 20px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+</style>
+</head>
+<body>
+
+<nav class="side">
+  <div class="brand">
+    <div class="brand-name">myKado</div>
+    <div class="brand-tag">Plan &amp; schéma — v1</div>
+  </div>
+  <a href="#overview" data-nav><span class="num">0</span> Vue d'ensemble</a>
+  <a href="#spaces" data-nav><span class="num">1</span> Espaces user</a>
+  <a href="#briques" data-nav><span class="num">2</span> Les 3 briques</a>
+  <a href="#parcours" data-nav><span class="num">3</span> Parcours (A–I)</a>
+  <a href="#backgrounds" data-nav><span class="num">4</span> Backgrounds</a>
+  <a href="#gifs" data-nav><span class="num">5</span> GIFs &amp; médias</a>
+  <a href="#business" data-nav><span class="num">6</span> Business</a>
+  <a href="#phases" data-nav><span class="num">7</span> Phases</a>
+  <a href="#ia" data-nav><span class="num">8</span> Innovations IA</a>
+  <a href="#decisions" data-nav><span class="num">9</span> À décider</a>
+</nav>
+
+<main>
+
+<header class="top">
+  <h1>myKado — Plan complet &amp; schéma des blocs</h1>
+  <p>Toutes les briques, leurs relations, les parcours utilisateur à valider, et les tâches phasées. Les cases cochées sont sauvegardées dans ton navigateur.</p>
+</header>
+
+<div style="height:24px"></div>
+
+<div class="legend">
+  <span><b>Légende :</b></span>
+  <span class="tag carte">Carte</span>
+  <span class="tag mur">Mur</span>
+  <span class="tag cadeau">Cadeau</span>
+  <span class="tag business">Business</span>
+  <span class="tag phase">Phase X</span>
+  <span class="tag ai">IA</span>
+  <span class="tag new">Nouveau</span>
+  <span style="margin-left:auto; color:var(--text-soft);">Design system : à redéfinir (pas Neo Brutalism)</span>
+</div>
+
+<!-- ============ 0. VUE D'ENSEMBLE ============ -->
+<section id="overview">
+  <h2><span class="num-badge">0</span> Vue d'ensemble — flux du produit</h2>
+  <p class="lead">Le produit s'organise sur 3 axes : <b>quatre espaces utilisateur</b>, <b>trois briques produit</b> (avec un module transversal cadeau), et <b>un moteur de découverte</b> (backgrounds, GIFs, IA).</p>
+
+  <div class="flow-map">
+    <div class="flow-row">
+      <div class="flow-node" style="background:var(--carte-soft); border-color:var(--carte);">
+        <div class="title">1 · Espaces user</div>
+        <div class="sub">Créer / Recevoir / Contribuer / Business</div>
+      </div>
+      <div class="flow-arrow">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </div>
+      <div class="flow-node" style="background:var(--mur-soft); border-color:var(--mur);">
+        <div class="title">2 · Briques produit</div>
+        <div class="sub">Carte · Mur · Cadeau (transversal)</div>
+      </div>
+      <div class="flow-arrow">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </div>
+      <div class="flow-node" style="background:var(--cadeau-soft); border-color:var(--cadeau);">
+        <div class="title">3 · Moteurs</div>
+        <div class="sub">Backgrounds · GIFs · IA · Business Auto</div>
+      </div>
+    </div>
+
+    <div style="border-top:1px dashed var(--border); padding-top:20px; margin-top:8px;">
+      <h4 style="margin-bottom:12px;">Relations principales</h4>
+      <div class="grid grid-2">
+        <div style="font-size:12px; color:var(--text-muted);">
+          <b>Le mur</b> <span class="rel-arrow">→</span> peut recevoir un <span class="tag cadeau">Cadeau</span> attaché (pot commun)<br>
+          <b>La carte</b> <span class="rel-arrow">→</span> peut recevoir un <span class="tag cadeau">Cadeau</span> attaché (mono-cadeau)<br>
+          <b>Business</b> <span class="rel-arrow">→</span> génère automatiquement des <span class="tag mur">Murs</span> (birthday tracker)<br>
+          <b>Cadeau</b> <span class="rel-arrow">→</span> peut être <b>standalone</b> (sans carte/mur associé)
+        </div>
+        <div style="font-size:12px; color:var(--text-muted);">
+          <b>Toutes les briques</b> <span class="rel-arrow">→</span> puisent dans <b>Moteur Backgrounds</b><br>
+          <b>Mur &amp; Carte</b> <span class="rel-arrow">→</span> exploitent le <b>GIF picker</b> (curé + Giphy)<br>
+          <b>Toutes les briques</b> <span class="rel-arrow">→</span> exposent des <b>features IA</b> (musique, voix, génération, écriture)<br>
+          <b>Mur</b> <span class="rel-arrow">→</span> découverte <b>TikTok-scroll</b> + exports PDF/vidéo
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. ESPACES USER ============ -->
+<section id="spaces">
+  <h2><span class="num-badge">1</span> Les 4 espaces utilisateur</h2>
+  <p class="lead">Quatre points d'entrée distincts avec des besoins et interfaces différents.</p>
+
+  <div class="grid grid-4">
+    <div class="space-card">
+      <div class="head">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <div class="title">Créer</div>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);">B2C individuel — choisit sa brique, personnalise, envoie</div>
+      <ul>
+        <li>3 CTAs : carte, mur, cadeau</li>
+        <li>Wizard 7 étapes unifié</li>
+        <li>Éditeur avec preview live</li>
+      </ul>
+    </div>
+
+    <div class="space-card">
+      <div class="head">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M22 7H2v5h20zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <div class="title">Recevoir</div>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);">Destinataire — ouvre la carte/le mur/le cadeau</div>
+      <ul>
+        <li>Animation d'unwrap cinématique</li>
+        <li>Découverte TikTok-scroll (murs)</li>
+        <li>Exports &amp; partages</li>
+      </ul>
+    </div>
+
+    <div class="space-card">
+      <div class="head">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM20 8v6M23 11h-6"/></svg>
+        <div class="title">Contribuer</div>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);">Invité sur un mur — dépose un message</div>
+      <ul>
+        <li>Sans compte requis (guest)</li>
+        <li>Texte + photo + vidéo + GIF + audio</li>
+        <li>Post privé optionnel</li>
+      </ul>
+    </div>
+
+    <div class="space-card" style="border-left:3px solid var(--business);">
+      <div class="head">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>
+        <div class="title">Business</div>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);">Admin RH / manager — automatise les milestones équipe</div>
+      <ul>
+        <li>Import équipe + calendrier</li>
+        <li>Auto-génération murs</li>
+        <li>Brand library + analytics</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. LES 3 BRIQUES ============ -->
+<section id="briques">
+  <h2><span class="num-badge">2</span> Les 3 briques produit</h2>
+  <p class="lead">Chaque brique a un format technique et des relations avec les autres.</p>
+
+  <div class="grid grid-3">
+
+    <div class="brique carte">
+      <div class="head">
+        <svg class="icon icon-lg" style="color:var(--carte)" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z M8 8h8M8 12h5M8 16h6"/></svg>
+        <div class="title">Carte</div>
+        <div class="sub">ex-« voeu »</div>
+      </div>
+      <div class="body">
+        <h5>Nature</h5>
+        <ul>
+          <li>Format mono-contributeur animé</li>
+          <li>Unwrap cinématique plein écran</li>
+          <li>Templates : birthday, special, forever, notre-film, sanctuary</li>
+        </ul>
+        <h5>Personnalisation</h5>
+        <ul>
+          <li>Background par section (existant)</li>
+          <li>Texte, photos, décorations, widgets</li>
+          <li>Musique + confetti + IA (v2)</li>
+        </ul>
+        <h5>Livraison</h5>
+        <ul>
+          <li>Lien direct OU programmée</li>
+          <li>WhatsApp / email / SMS / QR</li>
+        </ul>
+      </div>
+      <div class="relations">
+        Relations :
+        <span class="tag cadeau">+ Cadeau attaché</span>
+        <span class="tag mur">Toggle → mur</span>
+        <span class="tag phase">Phase 2</span>
+      </div>
+    </div>
+
+    <div class="brique mur">
+      <div class="head">
+        <svg class="icon icon-lg" style="color:var(--mur)" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <div class="title">Mur</div>
+        <div class="sub">ex-« board / wall »</div>
+      </div>
+      <div class="body">
+        <h5>Nature</h5>
+        <ul>
+          <li>Format collaboratif multi-contributeurs</li>
+          <li>Templates : wall-of-wishes (modern / 3d / space)</li>
+          <li>Auto-titre &amp; unwrap intro (existant)</li>
+        </ul>
+        <h5>Vues destinataire</h5>
+        <ul>
+          <li>Grille masonry par défaut</li>
+          <li><b>Mode TikTok-scroll</b> — swipe vertical plein écran <span class="tag new">Nouveau</span></li>
+          <li>Slideshow presentation (projection)</li>
+        </ul>
+        <h5>Exports &amp; extras</h5>
+        <ul>
+          <li>Export PDF livre souvenir <span class="tag new">Nouveau</span></li>
+          <li>Export vidéo mp4 avec musique <span class="tag new">Nouveau</span></li>
+          <li>Impression physique (poster / livre)</li>
+        </ul>
+      </div>
+      <div class="relations">
+        Relations :
+        <span class="tag cadeau">+ Pot cadeau commun</span>
+        <span class="tag carte">Toggle → carte</span>
+        <span class="tag business">Auto-généré par Business</span>
+        <span class="tag phase">Phase 3</span>
+      </div>
+    </div>
+
+    <div class="brique cadeau">
+      <div class="head">
+        <svg class="icon icon-lg" style="color:var(--cadeau)" viewBox="0 0 24 24"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <div class="title">Cadeau</div>
+        <div class="sub">ex-« gift »</div>
+      </div>
+      <div class="body">
+        <h5>Nature</h5>
+        <ul>
+          <li>Module transversal (standalone OU attaché)</li>
+          <li>Gift card retailer OU partenaire local</li>
+          <li>Pot commun ou mono</li>
+        </ul>
+        <h5>Sources</h5>
+        <ul>
+          <li>Reloadly (Amazon, Netflix, Spotify, PSN…)</li>
+          <li>Partenaires locaux v2 (ciné, spa, restos)</li>
+          <li>Don caritatif (v2)</li>
+        </ul>
+        <h5>Wallet destinataire</h5>
+        <ul>
+          <li>Redéemer immédiatement</li>
+          <li>Transférer à quelqu'un d'autre</li>
+          <li>Swap retailer</li>
+        </ul>
+      </div>
+      <div class="relations">
+        Relations :
+        <span class="tag carte">Attaché à carte</span>
+        <span class="tag mur">Attaché à mur (pot)</span>
+        <span class="tag business">Cadeau corporate en masse</span>
+        <span class="tag phase">Phase 6</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 3. PARCOURS ============ -->
+<section id="parcours">
+  <h2><span class="num-badge">3</span> Parcours utilisateurs — checklist de vérification</h2>
+  <p class="lead">Neuf parcours à valider. Coche pour marquer comme vérifié / résolu — les états sont sauvés localement.</p>
+
+  <div class="grid grid-2">
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">A</span>
+        <span class="title">Créateur de carte</span>
+        <span class="actor">B2C · <span class="tag carte">Carte</span></span>
+      </div>
+      <div class="steps">landing → CTA "carte" → wizard → éditeur → preview → livraison</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pA">
+        <li><input type="checkbox" id="pA1"><label for="pA1">Création guest sans compte, sauvegarde après</label></li>
+        <li><input type="checkbox" id="pA2"><label for="pA2">Destinataire anonyme accepté ("à ma prof")</label></li>
+        <li><input type="checkbox" id="pA3"><label for="pA3">Preview animation en boucle pendant édition</label></li>
+        <li><input type="checkbox" id="pA4"><label for="pA4">Switch template sans perdre le contenu</label></li>
+        <li><input type="checkbox" id="pA5"><label for="pA5">Toggle carte↔mur si le user change d'avis</label></li>
+        <li><input type="checkbox" id="pA6"><label for="pA6">Livraison programmée timezone-aware + reminder expéditeur J-1</label></li>
+        <li><input type="checkbox" id="pA7"><label for="pA7">Notification à l'expéditeur quand ouverte</label></li>
+        <li><input type="checkbox" id="pA8"><label for="pA8">Re-share / forward possible</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">B</span>
+        <span class="title">Créateur de mur</span>
+        <span class="actor">B2C · <span class="tag mur">Mur</span></span>
+      </div>
+      <div class="steps">CTA "mur" → occasion+destinataire+date → template → config → invite contributeurs</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pB">
+        <li><input type="checkbox" id="pB1"><label for="pB1">Auto-titre "Joyeux anniv Marie" (déjà OK)</label></li>
+        <li><input type="checkbox" id="pB2"><label for="pB2">Import contacts WhatsApp / CSV</label></li>
+        <li><input type="checkbox" id="pB3"><label for="pB3">Reminders auto J-3, J-1 aux contributeurs</label></li>
+        <li><input type="checkbox" id="pB4"><label for="pB4">Modération pré ou post publication</label></li>
+        <li><input type="checkbox" id="pB5"><label for="pB5">Limites plan (Gratuit 20, Premium ∞)</label></li>
+        <li><input type="checkbox" id="pB6"><label for="pB6">Cadeau attaché (pot commun) activable</label></li>
+        <li><input type="checkbox" id="pB7"><label for="pB7">Suivi temps réel (compteur, notifs)</label></li>
+        <li><input type="checkbox" id="pB8"><label for="pB8">Cover configurable + auto-preview</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">C</span>
+        <span class="title">Contributeur (invité)</span>
+        <span class="actor">B2C · <span class="tag mur">Mur</span></span>
+      </div>
+      <div class="steps">reçoit lien → landing mur → clic "Ajouter" → éditeur post → publier</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pC">
+        <li><input type="checkbox" id="pC1"><label for="pC1">Guest post sans compte</label></li>
+        <li><input type="checkbox" id="pC2"><label for="pC2">Post privacy toggle (visible destinataire seul)</label></li>
+        <li><input type="checkbox" id="pC3"><label for="pC3">Compression client photo/vidéo avant upload</label></li>
+        <li><input type="checkbox" id="pC4"><label for="pC4">GIF picker : catégories curées d'abord</label></li>
+        <li><input type="checkbox" id="pC5"><label for="pC5">Audio recording direct depuis micro</label></li>
+        <li><input type="checkbox" id="pC6"><label for="pC6">Vidéo recording direct depuis caméra</label></li>
+        <li><input type="checkbox" id="pC7"><label for="pC7">Lien pour modifier son message plus tard</label></li>
+        <li><input type="checkbox" id="pC8"><label for="pC8">Anti double-post (device fingerprint) sauf autorisé</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">D</span>
+        <span class="title">Destinataire d'un mur</span>
+        <span class="actor">B2C · <span class="tag mur">Mur</span></span>
+      </div>
+      <div class="steps">reçoit lien → landing → animation unwrap → découverte</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pD">
+        <li><input type="checkbox" id="pD1"><label for="pD1">Grille masonry par défaut</label></li>
+        <li><input type="checkbox" id="pD2"><label for="pD2"><b>Mode TikTok-scroll</b> : clic sur message → plein écran → swipe vertical + auto-play <span class="tag new">Nouveau</span></label></li>
+        <li><input type="checkbox" id="pD3"><label for="pD3">Réaction cœur par message</label></li>
+        <li><input type="checkbox" id="pD4"><label for="pD4">Slideshow presentation (fullscreen auto-scroll)</label></li>
+        <li><input type="checkbox" id="pD5"><label for="pD5">Export PDF livre souvenir <span class="tag new">Nouveau</span></label></li>
+        <li><input type="checkbox" id="pD6"><label for="pD6">Export vidéo mp4 avec musique <span class="tag new">Nouveau</span></label></li>
+        <li><input type="checkbox" id="pD7"><label for="pD7">Impression physique poster / livre</label></li>
+        <li><input type="checkbox" id="pD8"><label for="pD8">Message groupé "merci" aux contributeurs</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">E</span>
+        <span class="title">Recherche background</span>
+        <span class="actor">Tous · Backgrounds</span>
+      </div>
+      <div class="steps">éditeur → onglet Background → parcourir/rechercher → apply</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pE">
+        <li><input type="checkbox" id="pE1"><label for="pE1">Pré-filtre par occasion (choisie au wizard)</label></li>
+        <li><input type="checkbox" id="pE2"><label for="pE2">Chips thème / couleur / type</label></li>
+        <li><input type="checkbox" id="pE3"><label for="pE3">Recherche texte libre avec autocomplete</label></li>
+        <li><input type="checkbox" id="pE4"><label for="pE4">Onglets sources (myKado / Pexels / Unsplash / Giphy / IA / Mes uploads)</label></li>
+        <li><input type="checkbox" id="pE5"><label for="pE5">Bouton "Générer avec IA" <span class="tag ai">IA</span></label></li>
+        <li><input type="checkbox" id="pE6"><label for="pE6">Preview instantané + favoris user</label></li>
+        <li><input type="checkbox" id="pE7"><label for="pE7">Upload custom (Premium)</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">F</span>
+        <span class="title">Sélection GIF (contributeur)</span>
+        <span class="actor">B2C · GIFs</span>
+      </div>
+      <div class="steps">post éditeur → bouton GIF → catégories curées → (fallback) Giphy</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pF">
+        <li><input type="checkbox" id="pF1"><label for="pF1"><b>Bibliothèque myKado curée</b> : 12 cat × 20 GIFs bien choisis</label></li>
+        <li><input type="checkbox" id="pF2"><label for="pF2">Catégories : Anniv, Célébration, Cœur, Merci, Bravo, Bienvenue, Départ, Gâteau, Ballons, Danse, Rire, Câlin</label></li>
+        <li><input type="checkbox" id="pF3"><label for="pF3">Bouton "Chercher plus" → Giphy search</label></li>
+        <li><input type="checkbox" id="pF4"><label for="pF4">Preview avant sélection</label></li>
+        <li><input type="checkbox" id="pF5"><label for="pF5">Rapatriement Cloudinary quand GIF Giphy choisi</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours">
+      <div class="head">
+        <span class="letter">G</span>
+        <span class="title">Envoyeur de cadeau</span>
+        <span class="actor">B2C · <span class="tag cadeau">Cadeau</span></span>
+      </div>
+      <div class="steps">CTA "cadeau" → retailer → montant → destinataire → paiement → livraison</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pG">
+        <li><input type="checkbox" id="pG1"><label for="pG1">Standalone OU attaché à carte/mur</label></li>
+        <li><input type="checkbox" id="pG2"><label for="pG2">Pot commun (contributeurs multiples, cap, deadline)</label></li>
+        <li><input type="checkbox" id="pG3"><label for="pG3">Destinataire peut swap / transférer</label></li>
+        <li><input type="checkbox" id="pG4"><label for="pG4">Wallet destinataire (cumul multi-cadeaux)</label></li>
+        <li><input type="checkbox" id="pG5"><label for="pG5">Livraison code digital + email + WhatsApp</label></li>
+        <li><input type="checkbox" id="pG6"><label for="pG6">Politique expiration + refund</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours" style="border-left:3px solid var(--business);">
+      <div class="head">
+        <span class="letter">H</span>
+        <span class="title">Admin Business (RH)</span>
+        <span class="actor">B2B · <span class="tag business">Business</span></span>
+      </div>
+      <div class="steps">compte Business → dashboard → calendrier → import équipe → automations</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pH">
+        <li><input type="checkbox" id="pH1"><label for="pH1">Import CSV / Google Sheets / Slack / HRIS</label></li>
+        <li><input type="checkbox" id="pH2"><label for="pH2">Types milestones : anniv, ancienneté, welcome, farewell, promotion, retraite, condoléances</label></li>
+        <li><input type="checkbox" id="pH3"><label for="pH3">Config par milestone : template, J-X à l'avance, deadline</label></li>
+        <li><input type="checkbox" id="pH4"><label for="pH4"><b>Auto-envoi du lien à toute l'équipe SAUF au fêté</b></label></li>
+        <li><input type="checkbox" id="pH5"><label for="pH5">Livraison J+0 au fêté (email / Slack)</label></li>
+        <li><input type="checkbox" id="pH6"><label for="pH6">Dashboard analytics : participation, engagement</label></li>
+        <li><input type="checkbox" id="pH7"><label for="pH7">Brand Media library org-scoped</label></li>
+        <li><input type="checkbox" id="pH8"><label for="pH8">Intégration Slack / Teams (canal + bouton contrib)</label></li>
+        <li><input type="checkbox" id="pH9"><label for="pH9">Rôles : owner / manager / viewer</label></li>
+        <li><input type="checkbox" id="pH10"><label for="pH10">Facturation par siège actif OU par mur</label></li>
+        <li><input type="checkbox" id="pH11"><label for="pH11">Rapport RGPD + purge à la sortie de l'employé</label></li>
+      </ul>
+    </div>
+
+    <div class="parcours" style="border-left:3px solid var(--business);">
+      <div class="head">
+        <span class="letter">I</span>
+        <span class="title">Employé destinataire (Business)</span>
+        <span class="actor">B2B · <span class="tag business">Business</span></span>
+      </div>
+      <div class="steps">jour J → email/Slack "Ton équipe a un message" → clic → mur cinématique</div>
+      <h5>Points à valider</h5>
+      <ul class="checklist" data-key="pI">
+        <li><input type="checkbox" id="pI1"><label for="pI1"><b>Ne voit jamais le mur en préparation</b></label></li>
+        <li><input type="checkbox" id="pI2"><label for="pI2">Détection absence (auto-report)</label></li>
+        <li><input type="checkbox" id="pI3"><label for="pI3">Consentement RGPD à l'onboarding</label></li>
+        <li><input type="checkbox" id="pI4"><label for="pI4">Désactivation possible à tout moment</label></li>
+        <li><input type="checkbox" id="pI5"><label for="pI5">Téléchargement mur en souvenir perso</label></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 4. BACKGROUNDS ============ -->
+<section id="backgrounds">
+  <h2><span class="num-badge">4</span> Moteur de backgrounds — 4 sous-chantiers</h2>
+  <p class="lead">Différenciateur n°1. Ni KudoBoard ni ThankBox n'ont ce niveau : ils ont un catalogue fermé.</p>
+
+  <div class="pipeline">
+    <div class="pipe-node">
+      <span class="letter">A</span>
+      <h4>Sources</h4>
+      <ul>
+        <li>Pexels (existant)</li>
+        <li>Unsplash (à ajouter)</li>
+        <li>Giphy (GIFs)</li>
+        <li>Cloudinary CDN</li>
+        <li>Bank propriétaire</li>
+        <li>IA générative <span class="tag ai">IA</span></li>
+      </ul>
+    </div>
+    <div class="pipe-node">
+      <span class="letter">B</span>
+      <h4>UX découverte</h4>
+      <ul>
+        <li>Pré-filtre occasion</li>
+        <li>Chips thème / couleur / type</li>
+        <li>Search + autocomplete</li>
+        <li>Onglets sources</li>
+        <li>Bouton "Générer IA"</li>
+        <li>Favoris user</li>
+      </ul>
+    </div>
+    <div class="pipe-node">
+      <span class="letter">C</span>
+      <h4>Curation</h4>
+      <ul>
+        <li>Auto-tag (vision API / CLIP)</li>
+        <li>Tags occasion + style + contexte</li>
+        <li>Pondération par occasion</li>
+        <li>Validation admin</li>
+        <li>Blacklist qualité</li>
+      </ul>
+    </div>
+    <div class="pipe-node">
+      <span class="letter">D</span>
+      <h4>Performance</h4>
+      <ul>
+        <li>Rapatriement Cloudinary</li>
+        <li>AVIF > WebP > JPEG</li>
+        <li>Responsive f_auto,q_auto</li>
+        <li>Blurhash placeholder</li>
+        <li>IndexedDB cache</li>
+        <li>Preload sélection</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. GIFS & MEDIAS ============ -->
+<section id="gifs">
+  <h2><span class="num-badge">5</span> GIFs &amp; médias — bibliothèque curée d'abord</h2>
+  <p class="lead">Le contributeur voit d'abord une sélection de qualité classée par catégorie. Il ne va sur Giphy qu'en fallback.</p>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>Bibliothèque myKado curée</h3>
+      <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">12 catégories × 20 GIFs pré-choisis (qualité, bon goût, cohérence culturelle)</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        <span class="tag">Anniv</span>
+        <span class="tag">Célébration</span>
+        <span class="tag">Cœur</span>
+        <span class="tag">Merci</span>
+        <span class="tag">Bravo</span>
+        <span class="tag">Bienvenue</span>
+        <span class="tag">Départ</span>
+        <span class="tag">Gâteau</span>
+        <span class="tag">Ballons</span>
+        <span class="tag">Danse</span>
+        <span class="tag">Rire</span>
+        <span class="tag">Câlin</span>
+      </div>
+      <h4 style="margin-top:16px;">Process</h4>
+      <ul style="font-size:12px; color:var(--text-muted);">
+        <li>Sélection manuelle initiale (curation admin)</li>
+        <li>Chaque GIF stocké sur Cloudinary (perf)</li>
+        <li>Tags cross-occasion (un GIF peut apparaître dans 2 cat)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Fallback Giphy</h3>
+      <ul style="font-size:12px; color:var(--text-muted); padding-left:16px; margin:0;">
+        <li>Bouton "Chercher plus" en bas de la biblio myKado</li>
+        <li>Ouvre un search Giphy intégré (API officielle)</li>
+        <li>Preview avant sélection</li>
+        <li>Au clic → rapatriement automatique Cloudinary</li>
+        <li>Suggestion future : proposer d'ajouter le GIF sélectionné à la biblio curée (admin review)</li>
+      </ul>
+      <h4 style="margin-top:12px;">Autres médias</h4>
+      <ul style="font-size:12px; color:var(--text-muted); padding-left:16px; margin:0;">
+        <li>Audio : upload OU enregistrement micro direct</li>
+        <li>Vidéo : upload OU enregistrement webcam direct</li>
+        <li>Compression client avant upload (browser-image-compression)</li>
+        <li>Stickers auto-générés depuis photo <span class="tag ai">IA</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. BUSINESS ============ -->
+<section id="business">
+  <h2><span class="num-badge">6</span> myKado for Business — automatisations équipe</h2>
+  <p class="lead">Espace dédié RH / manager. Enregistrement des dates clés de l'équipe → génération auto des murs sans que le fêté ne le voit venir.</p>
+
+  <div class="card" style="border-left:3px solid var(--business);">
+    <div class="grid grid-2">
+      <div>
+        <h3>Flow d'automatisation (par milestone)</h3>
+        <ol style="font-size:12px; color:var(--text-muted); padding-left:18px; margin:0;">
+          <li><b>Admin RH</b> importe l'équipe (CSV / Slack / HRIS) avec dates clés</li>
+          <li>Configure les <b>règles par type de milestone</b> (template, J-X, deadline)</li>
+          <li>J-X : le système <b>crée automatiquement</b> le mur (background + cover + config)</li>
+          <li>Envoi automatique du lien à <b>toute l'équipe sauf au fêté</b></li>
+          <li>Relance auto J-3, J-1 aux non-contributeurs</li>
+          <li>J+0 : livraison au fêté (email / Slack notif) → mur cinématique</li>
+          <li>Post-événement : dashboard analytics + option d'export</li>
+        </ol>
+      </div>
+      <div>
+        <h3>Types de milestones supportés</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;">
+          <span class="tag business">Anniversaire</span>
+          <span class="tag business">Ancienneté</span>
+          <span class="tag business">Welcome</span>
+          <span class="tag business">Farewell</span>
+          <span class="tag business">Promotion</span>
+          <span class="tag business">Retraite</span>
+          <span class="tag business">Naissance enfant</span>
+          <span class="tag business">Mariage</span>
+          <span class="tag business">Condoléances</span>
+          <span class="tag business">Récompense trimestrielle</span>
+        </div>
+        <h4>Features complémentaires Business</h4>
+        <ul style="font-size:12px; color:var(--text-muted); padding-left:16px; margin:0;">
+          <li>Brand Media library (logo, backgrounds, signatures)</li>
+          <li>Intégration Slack / Teams / WhatsApp Business</li>
+          <li>Compagnon rédaction <span class="tag ai">IA</span> (suggère messages non-génériques)</li>
+          <li>Cadeaux corporate en masse (mono / bundle)</li>
+          <li>Analytics : taux participation, engagement, chaleur des messages</li>
+          <li>RGPD : consentement onboarding, purge à la sortie</li>
+          <li>Rôles : owner / manager / viewer</li>
+          <li>Facturation par siège actif</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. PHASES ============ -->
+<section id="phases">
+  <h2><span class="num-badge">7</span> Phases d'exécution</h2>
+  <p class="lead">Dix phases (0 à 9). Coche les tâches au fur et à mesure — la progression est sauvée dans ton navigateur.</p>
+
+  <div class="grid grid-2">
+
+    <div class="phase">
+      <div class="head"><span class="num">0</span><div><div class="name">Alignement &amp; doc</div><div class="desc">Valider vision + questions ouvertes</div></div></div>
+      <ul class="checklist" data-key="ph0">
+        <li><input type="checkbox" id="ph0-1"><label for="ph0-1">Valider cette synthèse</label></li>
+        <li><input type="checkbox" id="ph0-2"><label for="ph0-2">Définir direction visuelle (design system)</label></li>
+        <li><input type="checkbox" id="ph0-3"><label for="ph0-3">Répondre aux 3 questions ouvertes</label></li>
+        <li><input type="checkbox" id="ph0-4"><label for="ph0-4">Prioriser l'ordre des phases</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">1</span><div><div class="name">Fondations unifiées</div><div class="desc">Renommage + Dashboard 3 CTAs + Wizard</div></div></div>
+      <ul class="checklist" data-key="ph1">
+        <li><input type="checkbox" id="ph1-1"><label for="ph1-1">Renommage global copy voeu→carte, board→mur, gift→cadeau</label></li>
+        <li><input type="checkbox" id="ph1-2"><label for="ph1-2">Dashboard 3 CTAs (+1 Business si org)</label></li>
+        <li><input type="checkbox" id="ph1-3"><label for="ph1-3">Wizard unifié 7 étapes</label></li>
+        <li><input type="checkbox" id="ph1-4"><label for="ph1-4">Toggle carte↔mur dans l'éditeur</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">2</span><div><div class="name">Cartes v2</div><div class="desc"><span class="tag carte">Carte</span></div></div></div>
+      <ul class="checklist" data-key="ph2">
+        <li><input type="checkbox" id="ph2-1"><label for="ph2-1">Preview animation loop en édition</label></li>
+        <li><input type="checkbox" id="ph2-2"><label for="ph2-2">Delivery scheduling timezone-aware</label></li>
+        <li><input type="checkbox" id="ph2-3"><label for="ph2-3">Notif "ouvert par le destinataire"</label></li>
+        <li><input type="checkbox" id="ph2-4"><label for="ph2-4">Re-share / forward</label></li>
+        <li><input type="checkbox" id="ph2-5"><label for="ph2-5">Musique fond bibliothèque + upload</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">3</span><div><div class="name">Murs v3</div><div class="desc"><span class="tag mur">Mur</span></div></div></div>
+      <ul class="checklist" data-key="ph3">
+        <li><input type="checkbox" id="ph3-1"><label for="ph3-1"><b>Mode TikTok-scroll</b> plein écran + swipe vertical <span class="tag new">Nouveau</span></label></li>
+        <li><input type="checkbox" id="ph3-2"><label for="ph3-2">Export PDF livre souvenir <span class="tag new">Nouveau</span></label></li>
+        <li><input type="checkbox" id="ph3-3"><label for="ph3-3">Export vidéo mp4 avec musique <span class="tag new">Nouveau</span></label></li>
+        <li><input type="checkbox" id="ph3-4"><label for="ph3-4">Slideshow presentation mode</label></li>
+        <li><input type="checkbox" id="ph3-5"><label for="ph3-5">Print physique (Printful / Gelato)</label></li>
+        <li><input type="checkbox" id="ph3-6"><label for="ph3-6">Réactions cœur par message</label></li>
+        <li><input type="checkbox" id="ph3-7"><label for="ph3-7">Post privacy toggle contributeur</label></li>
+        <li><input type="checkbox" id="ph3-8"><label for="ph3-8">Import contacts WhatsApp / CSV</label></li>
+        <li><input type="checkbox" id="ph3-9"><label for="ph3-9">Reminders auto contributeurs</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">4</span><div><div class="name">GIFs &amp; médias</div><div class="desc">Bibliothèque curée + Giphy fallback</div></div></div>
+      <ul class="checklist" data-key="ph4">
+        <li><input type="checkbox" id="ph4-1"><label for="ph4-1">Curation 12 cat × 20 GIFs</label></li>
+        <li><input type="checkbox" id="ph4-2"><label for="ph4-2">Picker : catégories curées d'abord</label></li>
+        <li><input type="checkbox" id="ph4-3"><label for="ph4-3">Fallback Giphy avec search</label></li>
+        <li><input type="checkbox" id="ph4-4"><label for="ph4-4">Rapatriement Cloudinary auto</label></li>
+        <li><input type="checkbox" id="ph4-5"><label for="ph4-5">Enregistrement audio direct micro</label></li>
+        <li><input type="checkbox" id="ph4-6"><label for="ph4-6">Enregistrement vidéo direct caméra</label></li>
+        <li><input type="checkbox" id="ph4-7"><label for="ph4-7">Compression client photo/vidéo</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">5</span><div><div class="name">Backgrounds v2</div><div class="desc">Chantier prioritaire · 4 sous-chantiers</div></div></div>
+      <ul class="checklist" data-key="ph5">
+        <li><input type="checkbox" id="ph5-1"><label for="ph5-1">A · Sources : Unsplash + Giphy (Pexels OK)</label></li>
+        <li><input type="checkbox" id="ph5-2"><label for="ph5-2">B · UX BackgroundTab refonte (onglets + chips + search)</label></li>
+        <li><input type="checkbox" id="ph5-3"><label for="ph5-3">C · Pipeline auto-tagging (vision API)</label></li>
+        <li><input type="checkbox" id="ph5-4"><label for="ph5-4">D · Cloudinary f_auto,q_auto + blurhash + IndexedDB</label></li>
+        <li><input type="checkbox" id="ph5-5"><label for="ph5-5">Générateur IA (Flux via Replicate) <span class="tag ai">IA</span></label></li>
+        <li><input type="checkbox" id="ph5-6"><label for="ph5-6">Sauvegarde favoris user</label></li>
+        <li><input type="checkbox" id="ph5-7"><label for="ph5-7">Upload custom (Premium)</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">6</span><div><div class="name">Cadeaux</div><div class="desc"><span class="tag cadeau">Cadeau</span></div></div></div>
+      <ul class="checklist" data-key="ph6">
+        <li><input type="checkbox" id="ph6-1"><label for="ph6-1">Modèles Gift + GiftPot</label></li>
+        <li><input type="checkbox" id="ph6-2"><label for="ph6-2">Intégration Reloadly</label></li>
+        <li><input type="checkbox" id="ph6-3"><label for="ph6-3">Partenaires locaux (v2)</label></li>
+        <li><input type="checkbox" id="ph6-4"><label for="ph6-4">Flow standalone "Envoyer un cadeau"</label></li>
+        <li><input type="checkbox" id="ph6-5"><label for="ph6-5">Flow attaché carte / mur</label></li>
+        <li><input type="checkbox" id="ph6-6"><label for="ph6-6">Wallet destinataire (cumul, swap, transfert)</label></li>
+        <li><input type="checkbox" id="ph6-7"><label for="ph6-7">Politique refund + expiration</label></li>
+      </ul>
+    </div>
+
+    <div class="phase" style="border-left:3px solid var(--business);">
+      <div class="head"><span class="num">7</span><div><div class="name">Business</div><div class="desc"><span class="tag business">Business</span></div></div></div>
+      <ul class="checklist" data-key="ph7">
+        <li><input type="checkbox" id="ph7-1"><label for="ph7-1">Compte org + rôles</label></li>
+        <li><input type="checkbox" id="ph7-2"><label for="ph7-2">Import équipe (CSV → Slack/HRIS v2)</label></li>
+        <li><input type="checkbox" id="ph7-3"><label for="ph7-3">Calendrier équipe (milestones)</label></li>
+        <li><input type="checkbox" id="ph7-4"><label for="ph7-4">Config automations par milestone</label></li>
+        <li><input type="checkbox" id="ph7-5"><label for="ph7-5">Moteur cron J-X → mur auto → lien sauf fêté</label></li>
+        <li><input type="checkbox" id="ph7-6"><label for="ph7-6">Consentement RGPD employé</label></li>
+        <li><input type="checkbox" id="ph7-7"><label for="ph7-7">Brand Media library</label></li>
+        <li><input type="checkbox" id="ph7-8"><label for="ph7-8">Intégration Slack / Teams</label></li>
+        <li><input type="checkbox" id="ph7-9"><label for="ph7-9">Dashboard analytics</label></li>
+        <li><input type="checkbox" id="ph7-10"><label for="ph7-10">Facturation par siège actif</label></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="head"><span class="num">8</span><div><div class="name">Landing &amp; monétisation</div><div class="desc">Refonte + pricing + SEO</div></div></div>
+      <ul class="checklist" data-key="ph8">
+        <li><input type="checkbox" id="ph8-1"><label for="ph8-1">Refonte landing (design à définir)</label></li>
+        <li><input type="checkbox" id="ph8-2"><label for="ph8-2">Pricing 3 tiers : Gratuit / Premium / Business</label></li>
+        <li><input type="checkbox" id="ph8-3"><label for="ph8-3">Paywalls (custom bg, scheduling, exports, cadeaux, Brand, automations, API)</label></li>
+        <li><input type="checkbox" id="ph8-4"><label for="ph8-4">SEO : 1 page par occasion</label></li>
+      </ul>
+    </div>
+
+    <div class="phase" style="border-left:3px solid #111;">
+      <div class="head"><span class="num">9</span><div><div class="name">Innovation IA (exploration)</div><div class="desc"><span class="tag ai">IA</span> · à prototyper</div></div></div>
+      <ul class="checklist" data-key="ph9">
+        <li><input type="checkbox" id="ph9-1"><label for="ph9-1">Nouveaux formats de carte (scène, vinyl, story, jeu, AR, 3D)</label></li>
+        <li><input type="checkbox" id="ph9-2"><label for="ph9-2">Musique personnalisée (Suno / Udio)</label></li>
+        <li><input type="checkbox" id="ph9-3"><label for="ph9-3">Voice cloning + lipsync photo</label></li>
+        <li><input type="checkbox" id="ph9-4"><label for="ph9-4">Ghost writer IA</label></li>
+        <li><input type="checkbox" id="ph9-5"><label for="ph9-5">Photo → vidéo 5s (Runway / Sora)</label></li>
+        <li><input type="checkbox" id="ph9-6"><label for="ph9-6">Reveal collectif synchrone</label></li>
+        <li><input type="checkbox" id="ph9-7"><label for="ph9-7">Voice-over IA du mur</label></li>
+        <li><input type="checkbox" id="ph9-8"><label for="ph9-8">Traduction multilingue auto</label></li>
+        <li><input type="checkbox" id="ph9-9"><label for="ph9-9">Time capsule (déverrouillage différé)</label></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 8. INNOVATIONS IA ============ -->
+<section id="ia">
+  <h2><span class="num-badge">8</span> Innovations IA — pistes à explorer</h2>
+  <p class="lead">Enterrer le paper-fold classique. Six catégories pour révolutionner l'expérience carte / mur / cadeau.</p>
+
+  <div class="grid grid-2">
+
+    <div class="ai-cat">
+      <h4><svg class="icon" viewBox="0 0 24 24"><path d="M20 12l-4 4H4V4h16z"/></svg> Nouveaux formats de carte</h4>
+      <ul>
+        <li><b>Carte-scène</b> : zoom dans un décor animé où les éléments racontent le message</li>
+        <li><b>Carte-parcours</b> : le destinataire "marche" dans un couloir de souvenirs</li>
+        <li><b>Carte-vinyl</b> : disque qui tourne, aiguille tombe, chanson custom</li>
+        <li><b>Carte-story</b> format 9:16 tap-to-progress (Instagram-like)</li>
+        <li><b>Carte-jeu</b> : mini puzzle / quiz pour déverrouiller le message</li>
+        <li><b>Carte-AR</b> : scan QR → apparition en réalité augmentée</li>
+        <li><b>Carte-3D</b> scène navigable (Three.js)</li>
+      </ul>
+    </div>
+
+    <div class="ai-cat">
+      <h4><svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg> Musique personnalisée</h4>
+      <ul>
+        <li><b>Suno / Udio</b> : chanson custom depuis un prompt "jazz 60 ans maman, thème voyage"</li>
+        <li><b>Voice cloning</b> (ElevenLabs) : voix du créateur dit le message</li>
+        <li><b>Lipsync photo</b> (D-ID / HeyGen) : photo animée qui chante</li>
+        <li><b>Karaoké mur</b> : chaque contributeur enregistre 1 ligne d'une chanson</li>
+        <li>Bibliothèque royalty-free classée par ambiance / tempo</li>
+      </ul>
+    </div>
+
+    <div class="ai-cat">
+      <h4><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 8h16M8 4v16"/></svg> Génération de contenu</h4>
+      <ul>
+        <li><b>Ghost writer</b> : 3 versions du message selon relation + ton</li>
+        <li><b>Photo → animation</b> : parallaxe, clignement, sourire (Runway / Pika)</li>
+        <li><b>Photo → vidéo 5s</b> cinématique (Runway Gen-3, Sora)</li>
+        <li><b>Sticker generator</b> : découpe visage → sticker animé</li>
+        <li><b>Auto-collage</b> : N photos → composition esthétique pour cover mur</li>
+      </ul>
+    </div>
+
+    <div class="ai-cat">
+      <h4><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6 2 2 6 2 12s4 10 10 10 10-4 10-10S18 2 12 2zM8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg> Expérience destinataire</h4>
+      <ul>
+        <li><b>Emotion detection</b> (webcam) : reveal adapté (confetti si sourire)</li>
+        <li><b>Reveal collectif</b> synchrone (room + proches connectés)</li>
+        <li><b>Voice-over IA</b> : le mur "lu" par une voix au choix</li>
+        <li><b>Version podcast</b> : export audio de tout le mur</li>
+        <li><b>Traduction auto</b> multilingue (FR → EN si préf destinataire)</li>
+      </ul>
+    </div>
+
+    <div class="ai-cat">
+      <h4><svg class="icon" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg> Business &amp; automations</h4>
+      <ul>
+        <li><b>HR bot Slack</b> : rappelle milestones + crée le mur en 1 clic</li>
+        <li><b>Compagnon rédaction</b> : suggère messages non-génériques basés sur rôle</li>
+        <li><b>Photo-book annuel</b> : compilation auto des murs / employé</li>
+        <li><b>Sentiment analyzer</b> : mesure de la chaleur des messages (culture RH)</li>
+      </ul>
+    </div>
+
+    <div class="ai-cat">
+      <h4><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg> Mémoires &amp; long-terme</h4>
+      <ul>
+        <li><b>Time capsule</b> : mur programmé pour se déverrouiller dans X mois/années</li>
+        <li><b>Livre de vie</b> : compilation de tous les murs reçus par une personne</li>
+        <li><b>Continuité générationnelle</b> : mur transmis (baptême → 18 ans)</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 9. DECISIONS ============ -->
+<section id="decisions">
+  <h2><span class="num-badge">9</span> À décider — questions ouvertes</h2>
+  <p class="lead">Ce qui bloque encore le figement du plan final.</p>
+
+  <div class="decision">
+    <div class="q">1. Design system myKado</div>
+    <div class="opts">Neo Brutalism écarté. Direction visuelle à définir. Références inspirantes ? (Notion / Linear / Cash App / Duolingo / Airbnb / autre ?)</div>
+  </div>
+
+  <div class="decision">
+    <div class="q">2. Priorité Business vs B2C</div>
+    <div class="opts">Démarrer B2C pur (Business en Phase 7) OU intégrer Business dès Phase 1 (levier revenu B2B) ?</div>
+  </div>
+
+  <div class="decision">
+    <div class="q">3. Top 3 innovations IA à remonter en Phase 3</div>
+    <div class="opts">Parmi la section 8, lesquelles t'excitent le plus ? (Ex. Musique custom + Ghost writer + Reveal collectif)</div>
+  </div>
+
+  <div class="decision">
+    <div class="q">4. Vue par défaut du mur destinataire</div>
+    <div class="opts">Grille masonry + clic → TikTok-scroll (mixte) OU TikTok-scroll direct dès l'arrivée (immersif) ?</div>
+  </div>
+
+  <div class="decision">
+    <div class="q">5. Pricing v1</div>
+    <div class="opts">Freemium ThankBox-like (payer pour envoyer) OU credits KudoBoard-like (bundles) OU hybride ?</div>
+  </div>
+
+  <div class="decision">
+    <div class="q">6. Point d'entrée d'implémentation</div>
+    <div class="opts">Phase 1 (fondations renaming) OU Phase 5 (backgrounds — ta priorité affichée) OU Phase 3 (TikTok-scroll pour prouver la démo) ?</div>
+  </div>
+
+  <div class="decision">
+    <div class="q">7. Refonte propre vs rebase</div>
+    <div class="opts">Rebase existant (rapide) OU refonte propre KudoBoard-like (propre, +3 semaines) OU hybride (garder cartes/murs, refaire cadeaux+Business) ?</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  // Persist checkboxes to localStorage
+  const STORAGE_KEY = 'mykado-plan-state-v1';
+  const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (state[cb.id]) cb.checked = true;
+    cb.addEventListener('change', () => {
+      state[cb.id] = cb.checked;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    });
+  });
+
+  // Sticky nav active state
+  const links = document.querySelectorAll('nav.side a[data-nav]');
+  const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  sections.forEach(s => s && io.observe(s));
+</script>
+
+</body>
+</html>

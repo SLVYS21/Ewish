@@ -2,6 +2,15 @@ import { useEffect } from 'react';
 import styles from './StyleTab.module.css';
 
 const STYLE_PALETTES = [
+  /* ─── myKado Hybride C+A (signature) ─── */
+  { id: 'mk-signature',   name: 'myKado signature', colors: ['#F3EEE1', '#E8A33D', '#1E2952'] },
+  { id: 'mk-terre',       name: 'Terre chaude',     colors: ['#F5D5D5', '#E8A33D', '#C13B3B'] },
+  { id: 'mk-foret',       name: 'Forêt sacrée',     colors: ['#EDF3EF', '#E8A33D', '#2E4A3B'] },
+  { id: 'mk-nuit-doree',  name: 'Nuit dorée',       colors: ['#1E2952', '#E8A33D', '#161311'] },
+  { id: 'mk-argile',      name: 'Argile & or',      colors: ['#F9EBC7', '#C13B3B', '#9F6D22'] },
+  { id: 'mk-indigo-clair',name: 'Indigo clair',     colors: ['#DFE3EE', '#E8A33D', '#354270'] },
+
+  /* ─── Legacy pastel (conservé pour compat, à retirer plus tard) ─── */
   { id: 'rose',    name: 'Tendre rose',       colors: ['#FFE0E6', '#FFB3C1', '#E11D48'] },
   { id: 'lilac',   name: 'Lilas onirique',    colors: ['#E5D9F5', '#B59CF0', '#6E4FBA'] },
   { id: 'mint',    name: 'Menthe frais',      colors: ['#D4F1E5', '#9FE3CB', '#1F6E55'] },
@@ -11,6 +20,13 @@ const STYLE_PALETTES = [
 ];
 
 const TEXT_PALETTES = [
+  /* ─── myKado Hybride C+A ─── */
+  { id: 'mk-ink',    name: 'Encre myKado', textColor: '#161311', textMuted: '#7D7156' },
+  { id: 'mk-indigo', name: 'Indigo doux',  textColor: '#1E2952', textMuted: '#5B6994' },
+  { id: 'mk-creme',  name: 'Sur crème',    textColor: '#FFFFFF', textMuted: '#F3EEE1' },
+  { id: 'mk-brasse', name: 'Or sur nuit',  textColor: '#E8A33D', textMuted: '#C88B2D' },
+
+  /* ─── Legacy ─── */
   { id: 'dark',  name: 'Nuit',    textColor: '#1A1424', textMuted: '#8A8195' },
   { id: 'light', name: 'Blanc',   textColor: '#FFFFFF', textMuted: '#D0C8D4' },
   { id: 'sepia', name: 'Sépia',   textColor: '#2C1810', textMuted: '#9E7B6A' },
@@ -20,6 +36,11 @@ const TEXT_PALETTES = [
 ];
 
 const TYPOGRAPHY = [
+  /* ─── myKado Hybride C+A ─── */
+  { id: 'mk-editorial', label: 'Éditorial (myKado)', fontFamily: 'Fraunces',      italic: false },
+  { id: 'mk-moderne',   label: 'Moderne (myKado)',   fontFamily: 'Inter'                        },
+
+  /* ─── Legacy ─── */
   { id: 'serif',  label: 'Élégant',   fontFamily: 'Playfair Display', italic: true  },
   { id: 'fest',   label: 'Festif',    fontFamily: 'Pacifico'                        },
   { id: 'mod',    label: 'Moderne',   fontFamily: 'Poppins'                         },
@@ -28,14 +49,14 @@ const TYPOGRAPHY = [
 
 export default function StyleTab({ style, onChange }) {
   const s = {
-    primaryColor: '#E11D48',
-    accentColor:  '#FFB3C1',
-    fontFamily:   'Playfair Display',
+    primaryColor: '#1E2952',  /* myKado indigo */
+    accentColor:  '#E8A33D',  /* myKado gold */
+    fontFamily:   'Fraunces',
     fontSize:     'medium',
-    textColor:    '#1A1424',
-    textMuted:    '#8A8195',
-    paletteId:    'rose',
-    typographyId: 'serif',
+    textColor:    '#161311',  /* stone-900 */
+    textMuted:    '#7D7156',  /* stone-500 */
+    paletteId:    'mk-signature',
+    typographyId: 'mk-editorial',
     ...style,
   };
 
@@ -45,7 +66,7 @@ export default function StyleTab({ style, onChange }) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.setAttribute('data-mk-typo', '1');
-    link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400;1,600&family=Pacifico&family=Poppins:wght@400;600&family=Raleway:wght@400;700;900&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;1,400;1,600&family=Pacifico&family=Poppins:wght@400;600&family=Raleway:wght@400;700;900&display=swap';
     document.head.appendChild(link);
   }, []);
 

@@ -71,6 +71,7 @@ app.use('/api/promo',        require('./routes/promo'));
 app.use('/api/upload',       require('./routes/upload'));
 app.use('/api/track',        require('./routes/analytics'));
 app.use('/api/wishes',       require('./routes/wishes'));
+app.use('/api/invitations',  require('./routes/invitations'));
 app.use('/api/publications',  require('./routes/publication'));
 app.use('/api/analytics',    require('./routes/analytics'));
 app.use('/api/shortlinks',   require('./routes/shortlinks'));
@@ -83,12 +84,17 @@ app.use('/api/prospects',    require('./routes/prospects'));
 app.use('/api/settings',     require('./routes/settings'));
 app.use('/api/kyc',          require('./routes/kyc'));
 app.use('/api/contributions', require('./routes/contributions'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 
 app.use('/collect', require('./routes/collect'));
 app.use('/s',       require('./routes/shortlinks'));
 app.use('/preview', require('./routes/preview'));
 app.use('/site',    require('./routes/serve'));
+
+// Canonical brique URLs (myKado) — /c/:slug /m/:slug /g/:slug
+// Résout et redirige vers /site/… — voir notes/sitemap.md
+app.use('/',        require('./routes/canonical'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '2.0.0' }));
 
@@ -179,8 +185,20 @@ app.use((req, res) => {
 // ── MongoDB + start ───────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/wishwell';
 mongoose.connect(MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB connected');
+
+    // Précharge tous les templates en cache mémoire (minifiés)
+    try {
+      const { preloadTemplates } = require('./utils/templateCache');
+      const Template = require('./models/Template');
+      const names = (await Template.find({}, 'name').lean()).map(t => t.name);
+      await preloadTemplates(names);
+      console.log(`✅ Templates préchargés en cache (${names.length})`);
+    } catch (err) {
+      console.warn('⚠  Preload templates failed:', err.message);
+    }
+
     app.listen(PORT, () => {
       console.log(`\n🚀 myKado server on :${PORT}`);
       if (PROD) {

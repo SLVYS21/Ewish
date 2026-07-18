@@ -1,12 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Home, Layers, Wallet, Plus, Sparkles, MessageSquare,
+  Home, Layers, Wallet, Plus, Sparkles,
   ShieldAlert, BarChart2, Users, Ticket, Images, Cog,
-  User, BadgeCheck, ChevronRight, ShieldCheck, X, LayoutTemplate,
+  User, BadgeCheck, ShieldCheck, LayoutTemplate,
 } from 'lucide-react';
 import WhatsAppFAB from '../../components/WhatsAppFAB';
+import NotificationBell from '../../components/NotificationBell';
+import Kado from '../../components/Kado';
+import CreateModal from '../../components/CreateModal';
 
 const SUPER_NAV = [
   { to: '/ewish-admin/admin',             label: 'Tableau de bord',  Icon: BarChart2  },
@@ -33,7 +36,6 @@ export default function AdminLayout() {
   const location = useLocation();
   const [createOpen, setCreateOpen] = useState(false);
   const [mobileCreate, setMobileCreate] = useState(false);
-  const createRef = useRef(null);
 
   const isSuperAdmin = user?.role === 'super_admin';
   const displayName = user?.name || user?.email || 'Utilisateur';
@@ -46,14 +48,6 @@ export default function AdminLayout() {
     p.startsWith('/ewish-admin/wall') || p.startsWith('/ewish-admin/share') || p.startsWith('/ewish-admin/cagnotte');
   const isTemplates = p.startsWith('/ewish-admin/templates');
   const isProfile = p.startsWith('/ewish-admin/profile');
-
-  // Close create dropdown on outside click
-  useEffect(() => {
-    if (!createOpen) return;
-    const handle = (e) => { if (createRef.current && !createRef.current.contains(e.target)) setCreateOpen(false); };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, [createOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -71,10 +65,12 @@ export default function AdminLayout() {
 
       {/* ── Mobile top bar ── */}
       <header className="mk-mobile-topbar">
-        <div className="sb-logo" style={{ cursor: 'pointer', fontSize: 21, padding: 0 }} onClick={() => navigate('/ewish-admin')}>
-          <span>myKado</span><span className="dot" />
+        <div className="sb-logo" style={{ cursor: 'pointer', fontSize: 21, padding: 0, gap: 6 }} onClick={() => navigate('/ewish-admin')}>
+          <Kado mode="logo" size={30} cycle={['jump', 'wink', 'confetti', 'love', 'drop']} cycleInterval={4200} />
+          <span>myKado</span>
         </div>
         <div style={{ flex: 1 }} />
+        <NotificationBell authOk={!!user} />
         <button className="mtopbar-credits" onClick={() => navigate('/ewish-admin/credits')}>
           <Wallet size={13} />
           <strong>{user?.credits ?? 0}</strong>
@@ -83,28 +79,16 @@ export default function AdminLayout() {
 
       {/* ── Sidebar (desktop) ── */}
       <aside className="sidebar">
-        <div className="sb-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/ewish-admin')}>
+        <div className="sb-logo" style={{ cursor: 'pointer', gap: 8 }} onClick={() => navigate('/ewish-admin')}>
+          <Kado mode="logo" size={36} cycle={['jump', 'wink', 'confetti', 'love', 'drop']} cycleInterval={4200} />
           <span className="word">myKado</span>
-          <span className="dot" />
         </div>
         <div className="sb-tag">Des vœux qui font des souvenirs</div>
 
-        {/* Créer dropdown */}
-        <div style={{ position: 'relative' }} ref={createRef}>
-          <button className="sb-create" onClick={() => setCreateOpen(o => !o)}>
-            <Plus size={16} /> <span>Créer</span>
-          </button>
-          {createOpen && (
-            <div className="sb-create-menu">
-              <button className="sb-item" onClick={() => goCreate('wish')}>
-                <Sparkles size={15} /> <span>Vœu animé</span>
-              </button>
-              <button className="sb-item" onClick={() => goCreate('wall')}>
-                <MessageSquare size={15} /> <span>Mur de mots</span>
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Créer button — opens unified CreateModal */}
+        <button className="sb-create" onClick={() => setCreateOpen(true)}>
+          <Plus size={16} /> <span>Créer</span>
+        </button>
 
         {/* Main nav */}
         <nav className="sb-nav">
@@ -149,6 +133,9 @@ export default function AdminLayout() {
 
         {/* User footer */}
         <div className="sb-foot">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 6px 8px' }}>
+            <NotificationBell authOk={!!user} />
+          </div>
           <button className="sb-user" onClick={() => navigate('/ewish-admin/profile')}>
             <span className="sb-avatar" style={avatarColors(displayName)}>{initials}</span>
             <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
@@ -203,42 +190,12 @@ export default function AdminLayout() {
         </button>
       </nav>
 
-      {/* ── Mobile create modal ── */}
-      {mobileCreate && (
-        <div className="modal-veil" onMouseDown={(e) => { if (e.target === e.currentTarget) setMobileCreate(false); }}>
-          <div className="mk-modal">
-            <div className="mk-modal-head">
-              <div>
-                <div className="mk-modal-title">Qu'est-ce qu'on crée ?</div>
-                <div className="mk-modal-sub">Choisis le type  tu pourras tout régler ensuite.</div>
-              </div>
-              <button className="btn-icon" onClick={() => setMobileCreate(false)} aria-label="Fermer"><X size={18} /></button>
-            </div>
-            <div className="mk-modal-body">
-              <button className="mcreate-opt" onClick={() => goCreate('wish')}>
-                <span className="icon-bubble" style={{ background: 'var(--mk-accent-pale)', color: 'var(--mk-accent)' }}>
-                  <Sparkles size={18} />
-                </span>
-                <span className="body">
-                  <span className="t">Vœu animé</span>
-                  <span className="s">Un message animé et musical, rien que pour une personne.</span>
-                </span>
-                <ChevronRight size={18} style={{ color: 'var(--mk-ink-3)', flexShrink: 0 }} />
-              </button>
-              <button className="mcreate-opt" onClick={() => goCreate('wall')}>
-                <span className="icon-bubble" style={{ background: 'var(--mk-lilac-soft)', color: 'var(--mk-lilac)' }}>
-                  <MessageSquare size={18} />
-                </span>
-                <span className="body">
-                  <span className="t">Mur de mots</span>
-                  <span className="s">Une page où chacun laisse un mot, avec cagnotte en option.</span>
-                </span>
-                <ChevronRight size={18} style={{ color: 'var(--mk-ink-3)', flexShrink: 0 }} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Unified create modal (desktop + mobile) ── */}
+      <CreateModal
+        open={createOpen || mobileCreate}
+        onClose={() => { setCreateOpen(false); setMobileCreate(false); }}
+        onSelect={goCreate}
+      />
 
       <WhatsAppFAB />
     </div>

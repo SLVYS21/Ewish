@@ -51,6 +51,24 @@ const storage = new CloudinaryStorage({
     const isAudio      = file.mimetype.startsWith('audio/');
     const isVideo      = file.mimetype.startsWith('video/');
     const isBackground = req.body?.hint === 'background';
+
+    let transformation;
+    if (isAudio) {
+      transformation = undefined;
+    } else if (isVideo) {
+      transformation = [{
+        width: 1080, crop: 'limit',
+        quality: 'auto:good',
+        video_codec: 'auto',
+        bit_rate: '1500k',
+        fetch_format: 'auto',
+      }];
+    } else if (isBackground) {
+      transformation = [{ width: 1400, height: 1400, crop: 'limit', quality: 75, fetch_format: 'webp' }];
+    } else {
+      transformation = [{ width: 1600, crop: 'limit', quality: 'auto:good', fetch_format: 'auto' }];
+    }
+
     return {
       folder:        isAudio ? 'ewishwell/audio'
                    : isVideo ? 'ewishwell/videos'
@@ -58,11 +76,8 @@ const storage = new CloudinaryStorage({
                    : 'ewishwell/images',
       resource_type: (isAudio || isVideo) ? 'video' : 'image',
       public_id:     `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      ...((isAudio || isVideo) ? {} : {
-        transformation: isBackground
-          ? [{ width: 1400, height: 1400, crop: 'limit', quality: 75, fetch_format: 'webp' }]
-          : [{ quality: 'auto:good', fetch_format: 'auto' }],
-      }),
+      ...(transformation ? { transformation } : {}),
+      ...(isVideo ? { eager: [{ format: 'mp4' }], eager_async: true } : {}),
     };
   },
 });

@@ -1,0 +1,213 @@
+.root {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 14px 16px 32px;
+}
+
+.section {
+  background: #fff;
+  border: 1px solid var(--mk-line, #F2E4EA);
+  border-radius: 14px;
+  padding: 14px 14px 16px;
+}
+.sectionHead {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.sectionIcon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  background: #F4EEFB; color: #7C5CC9;
+  border-radius: 8px;
+}
+.sectionTitle {
+  font-size: 13px; font-weight: 700; color: var(--mk-ink, #2B1A2D);
+  letter-spacing: .01em;
+}
+.sectionBody { display: flex; flex-direction: column; gap: 12px; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.label {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  color: var(--mk-ink-2, #7A6A7D);
+  text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.labelIcon { color: #9B7EE2; display: inline-flex; }
+
+.input, .textarea {
+  width: 100%;
+  border: 1.5px solid var(--mk-line, #F2E4EA);
+  background: #FFFAFC;
+  border-radius: 10px;
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--mk-ink, #2B1A2D);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.input:focus, .textarea:focus {
+  outline: none;
+  border-color: #9B7EE2;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(155,126,226,.12);
+}
+.textarea { resize: vertical; min-height: 56px; line-height: 1.45; }
+
+/* ── Toggle ── */
+.toggleRow { display: flex; align-items: flex-start; gap: 12px; }
+.toggle {
+  flex-shrink: 0;
+  width: 40px; height: 23px; border-radius: 999px; border: none;
+  background: #E8DDEF;
+  position: relative; cursor: pointer;
+  transition: background .2s;
+  margin-top: 2px;
+}
+.toggleOn { background: #7C5CC9; }
+.toggleKnob {
+  position: absolute; top: 2.5px; left: 2.5px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff;
+  transition: left .2s;
+}
+.toggleOn .toggleKnob { left: 19px; }
+.toggleText { flex: 1; }
+.toggleLabel {
+  font-size: 13px; font-weight: 600; color: var(--mk-ink, #2B1A2D);
+  line-height: 1.3;
+}
+.toggleHint {
+  font-size: 11.5px; color: var(--mk-ink-3, #A097A4);
+  margin-top: 2px; line-height: 1.4;
+}
+
+/* ── Mode cards ── */
+.modeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.modeCard {
+  background: #FFFAFC;
+  border: 1.5px solid var(--mk-line, #F2E4EA);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.modeCard:hover { background: #fff; border-color: #D7C5F2; }
+.modeCardActive {
+  background: #F4EEFB;
+  border-color: #7C5CC9;
+  box-shadow: 0 0 0 3px rgba(124,92,201,.12);
+}
+.modeTitle { font-size: 13px; font-weight: 700; color: var(--mk-ink, #2B1A2D); margin-bottom: 4px; }
+.modeDesc { font-size: 11.5px; color: var(--mk-ink-2, #7A6A7D); line-height: 1.4; }
+
+/* ── Guest actions ── */
+.guestActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btnGhost {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--mk-line, #F2E4EA);
+  background: #fff;
+  border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  color: var(--mk-ink, #2B1A2D);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.btnGhost:hover { background: #F4EEFB; border-color: #D7C5F2; }
+.btnGhost:disabled { opacity: .5; cursor: not-allowed; }
+.btnGhostSmall {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px;
+  border: 1.5px solid var(--mk-line, #F2E4EA);
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--mk-ink-2, #7A6A7D);
+}
+.btnPrimary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 10px;
+  background: #7C5CC9;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btnPrimary:hover { background: #6E4FBA; }
+
+.btnIcon, .btnIconDanger {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  color: var(--mk-ink-2, #7A6A7D);
+}
+.btnIcon:hover { background: #F4EEFB; color: #7C5CC9; }
+.btnIconDanger:hover { background: #FEEDED; color: #E11D48; }
+
+/* ── Guest list ── */
+.draftRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 1fr auto auto;
+  gap: 6px;
+  background: #FFFAFC;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--mk-line, #F2E4EA);
+}
+.guestList { display: flex; flex-direction: column; gap: 6px; }
+.guestRow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  background: #FFFAFC;
+  border: 1px solid var(--mk-line, #F2E4EA);
+  border-radius: 10px;
+}
+.guestInfo { flex: 1; min-width: 0; }
+.guestName {
+  font-size: 13px; font-weight: 600; color: var(--mk-ink, #2B1A2D);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.guestSub {
+  font-size: 11.5px; color: var(--mk-ink-2, #7A6A7D);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.guestStatus { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.badgeOk {
+  font-size: 10.5px; font-weight: 700; padding: 3px 8px;
+  background: #DCFCE7; color: #15803D; border-radius: 999px;
+}
+.badgePending {
+  font-size: 10.5px; font-weight: 700; padding: 3px 8px;
+  background: #FEF3C7; color: #B45309; border-radius: 999px;
+}
+
+.muted { color: var(--mk-ink-3, #A097A4); font-size: 12px; }
+.empty {
+  padding: 18px;
+  background: #FFFAFC;
+  border: 1px dashed var(--mk-line, #F2E4EA);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--mk-ink-2, #7A6A7D);
+}
+
+.error {
+  background: #FEEDED; color: #B91C1C;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 540px) {
+  .row { grid-template-columns: 1fr; }
+  .draftRow { grid-template-columns: 1fr 1fr; }
+  .draftRow > button { grid-column: span 1; }
+}

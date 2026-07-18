@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Formulaire  myKado</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap"
@@ -186,7 +186,19 @@
       outline: none;
       transition: border-color .2s;
       appearance: none;
+      touch-action: manipulation;
     }
+
+    /* iOS Safari : évite le zoom automatique au focus (déclenché si font-size < 16px). */
+    @media (max-width: 768px) {
+      .field input,
+      .field textarea,
+      .field select {
+        font-size: 16px;
+      }
+    }
+
+    button, a, [role="button"] { touch-action: manipulation; }
 
     .field input::placeholder,
     .field textarea::placeholder {

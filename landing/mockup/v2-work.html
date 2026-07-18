@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>myKado @Work — Le cadeau salarié, automatisé.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFFAF6; --paper:#FBF5EC; --white:#FFFFFF;
+  --rose:#E11D48; --rose-deep:#B8123A; --rose-pale:#FFE4EC;
+  --ink:#2B1A2D; --ink-soft:#5A4458; --muted:#8E7B8C;
+  --lilac:#9B7EE2; --butter:#FFC95A; --peach:#FF9F7A; --mint:#6BCFAF; --gold:#C99A3A;
+  --line:rgba(43,26,45,.10); --line-dark:rgba(255,255,255,.10);
+  --display:'Instrument Serif', serif; --hand:'Caveat', cursive; --body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --r-sm:10px; --r-md:14px; --r-lg:22px; --r-xl:32px;
+  --shadow-sm:0 1px 2px rgba(43,26,45,.06), 0 2px 6px rgba(225,29,72,.04);
+  --shadow:0 6px 20px -8px rgba(43,26,45,.18), 0 16px 40px -20px rgba(225,29,72,.12);
+  --shadow-lg:0 18px 50px -20px rgba(43,26,45,.30), 0 36px 80px -30px rgba(225,29,72,.18);
+  --maxw:1240px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--white);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+em.it{font-family:var(--display);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+
+.topbar{background:var(--ink);color:#fff;font-size:13px;padding:9px 16px;text-align:center;letter-spacing:.01em}
+.topbar strong{color:#FFD6E0;font-weight:600}
+
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:26px;letter-spacing:-.01em}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--rose)}
+.brand .pill{font-family:var(--body);font-size:11px;font-weight:800;color:#fff;background:var(--ink);padding:3px 9px;border-radius:6px;letter-spacing:.05em;margin-left:6px;text-transform:uppercase}
+.nav ul{display:flex;list-style:none;gap:28px;margin:0;padding:0;font-size:14.5px;font-weight:500;color:var(--ink-soft)}
+.nav ul a:hover{color:var(--rose)}
+.nav-cta{display:flex;align-items:center;gap:12px}
+.solo-switch{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-soft);padding:8px 14px;border-radius:999px;border:1px dashed var(--line);transition:all .15s}
+.solo-switch:hover{border-color:var(--ink);color:var(--ink)}
+.solo-switch svg{width:14px;height:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14.5px;cursor:pointer;border:none;transition:transform .15s ease, box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn-outline-light{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.btn-outline-light:hover{border-color:#fff;background:rgba(255,255,255,.06)}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#1a0e1c;box-shadow:var(--shadow)}
+.btn-rose{background:var(--rose);color:#fff}
+.btn-rose:hover{background:var(--rose-deep);box-shadow:0 8px 24px -8px rgba(225,29,72,.5)}
+.btn-lg{padding:14px 26px;font-size:15px}
+
+/* ── Hero Business ── */
+.hero{padding:64px 0 100px;position:relative;overflow:hidden;background:linear-gradient(180deg, var(--cream) 0%, #fff 100%)}
+.hero-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:60px;align-items:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(43,26,45,.06);color:var(--ink);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:22px}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--rose)}
+.hero h1{font-family:var(--display);font-size:clamp(40px,5.2vw,70px);font-weight:400;line-height:1.04;letter-spacing:-.025em;margin:0 0 22px}
+.hero h1 em{color:var(--rose);font-style:italic}
+.hero-sub{font-size:18.5px;color:var(--ink-soft);max-width:520px;margin:0 0 32px;line-height:1.55}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px}
+.hero-stats{display:flex;gap:38px;flex-wrap:wrap}
+.hero-stats .stat{display:flex;flex-direction:column;gap:4px}
+.hero-stats .num{font-family:var(--display);font-size:34px;color:var(--ink);letter-spacing:-.02em;line-height:1}
+.hero-stats .lbl{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+
+/* ── Hero dashboard ── */
+.dash{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+.dash-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbf8f4)}
+.dash-head .title{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14.5px}
+.dash-head .title .ic{width:30px;height:30px;border-radius:8px;background:var(--rose-pale);color:var(--rose-deep);display:flex;align-items:center;justify-content:center}
+.dash-head .title .ic svg{width:16px;height:16px}
+.dash-head .live{display:flex;align-items:center;gap:6px;font-size:11px;color:#0a8a5a;text-transform:uppercase;letter-spacing:.1em;font-weight:700;background:#e8f7ef;padding:5px 10px;border-radius:999px}
+.dash-head .live .d{width:7px;height:7px;border-radius:50%;background:#0a8a5a;animation:pulseG 2s infinite}
+@keyframes pulseG{0%{box-shadow:0 0 0 0 rgba(10,138,90,.6)}70%{box-shadow:0 0 0 8px rgba(10,138,90,0)}100%{box-shadow:0 0 0 0 rgba(10,138,90,0)}}
+.dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);padding:18px 22px;gap:14px;border-bottom:1px solid var(--line)}
+.kpi{display:flex;flex-direction:column;gap:4px}
+.kpi .num{font-family:var(--display);font-size:30px;color:var(--ink);letter-spacing:-.02em;line-height:1}
+.kpi .num small{font-size:14px;font-family:var(--body);color:var(--muted);font-weight:600;margin-left:4px}
+.kpi .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.kpi.up .num{color:#0a8a5a}
+.dash-rows{padding:8px 0}
+.drow{display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;padding:14px 22px;align-items:center;border-bottom:1px solid var(--line);font-size:14px}
+.drow:last-child{border-bottom:none}
+.drow .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FFE4EC,#E11D48);flex-shrink:0}
+.drow .av.a2{background:linear-gradient(135deg,#FFC95A,#FF9F7A)}
+.drow .av.a3{background:linear-gradient(135deg,#6BCFAF,#9B7EE2)}
+.drow .av.a4{background:linear-gradient(135deg,#9B7EE2,#E11D48)}
+.drow .name{font-weight:600}
+.drow .sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.drow .partner{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-soft);font-weight:600;background:var(--paper);padding:5px 10px;border-radius:999px}
+.drow .partner .b{width:18px;height:18px;border-radius:5px;background:var(--rose-pale);color:var(--rose-deep);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:11px;font-weight:600}
+.drow .amount{font-family:var(--display);font-size:18px;color:var(--ink)}
+.drow .status{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 9px;border-radius:6px}
+.status-ok{color:#0a8a5a;background:#e8f7ef}
+.status-pending{color:#C99A3A;background:#fff5dd}
+
+/* ── Trust band ── */
+.trust{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:46px 0}
+.trust-label{text-align:center;font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:24px;font-weight:600}
+.trust-row{display:flex;justify-content:center;align-items:center;gap:60px;flex-wrap:wrap;opacity:.78}
+.brand-chip{font-family:var(--display);font-size:22px;color:var(--ink);letter-spacing:-.01em;font-style:italic}
+.brand-chip.bold{font-family:var(--body);font-weight:800;font-style:normal;letter-spacing:.05em;font-size:18px;text-transform:uppercase}
+
+/* ── Sections ── */
+section{padding:96px 0;position:relative}
+.section-head{text-align:center;margin-bottom:56px}
+.section-eyebrow{font-size:13px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;font-weight:700;margin-bottom:14px}
+.section-title{font-family:var(--display);font-size:clamp(34px,4vw,52px);font-weight:400;line-height:1.08;letter-spacing:-.02em;margin:0 auto 18px;max-width:760px}
+.section-sub{font-size:17px;color:var(--ink-soft);max-width:620px;margin:0 auto;line-height:1.55}
+
+/* ── Piliers ── */
+.pillars{background:var(--paper);border-top:1px solid var(--line)}
+.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.pillar{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:36px 30px;transition:transform .2s ease, box-shadow .2s ease;position:relative;overflow:hidden}
+.pillar:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.pillar-ic{width:54px;height:54px;border-radius:14px;background:var(--rose-pale);color:var(--rose-deep);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.pillar-ic svg{width:26px;height:26px}
+.pillar h3{font-family:var(--display);font-size:26px;font-weight:400;margin:0 0 10px;letter-spacing:-.015em}
+.pillar p{margin:0 0 16px;color:var(--ink-soft);font-size:15px;line-height:1.55}
+.pillar ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.pillar ul li{font-size:13.5px;color:var(--ink);font-weight:500;display:flex;align-items:center;gap:8px}
+.pillar ul li svg{width:14px;height:14px;color:var(--rose);flex-shrink:0}
+
+/* ── Use cases ── */
+.cases{background:#fff}
+.cases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.case{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:24px;transition:transform .15s ease, box-shadow .15s ease;cursor:pointer;position:relative;overflow:hidden}
+.case:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.case .badge{position:absolute;top:18px;right:18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.case .ic{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.case .ic svg{width:22px;height:22px}
+.case.c1{--c1:#E11D48;--c2:#FF6B8E}
+.case.c2{--c1:#C99A3A;--c2:#FFD978}
+.case.c3{--c1:#6BCFAF;--c2:#A8E6CF}
+.case.c4{--c1:#9B7EE2;--c2:#C5A8FF}
+.case.c5{--c1:#FF9F7A;--c2:#FFC95A}
+.case.c6{--c1:#B8123A;--c2:#E11D48}
+.case h4{font-family:var(--display);font-size:24px;font-weight:400;letter-spacing:-.015em;margin:0 0 8px}
+.case p{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.5}
+
+/* ── Dashboard showcase ── */
+.showcase{background:var(--ink);color:#fff;position:relative;overflow:hidden}
+.showcase::before{content:"";position:absolute;top:-200px;left:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(closest-side, rgba(225,29,72,.22), transparent);pointer-events:none}
+.showcase::after{content:"";position:absolute;bottom:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(closest-side, rgba(155,126,226,.18), transparent);pointer-events:none}
+.showcase .section-head{position:relative;z-index:1}
+.showcase .section-title{color:#fff}
+.showcase .section-sub{color:rgba(255,255,255,.7)}
+.showcase .section-eyebrow{color:#FFD6E0}
+.show-wrap{position:relative;z-index:1;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-xl);overflow:hidden;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));backdrop-filter:blur(20px);box-shadow:0 40px 100px -30px rgba(0,0,0,.6)}
+.show-bar{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.2)}
+.show-bar .dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.3)}
+.show-bar .dot.r{background:#FF6B6B}.show-bar .dot.y{background:#FFCB6B}.show-bar .dot.g{background:#6BCFAF}
+.show-bar .url{margin-left:14px;background:rgba(255,255,255,.08);padding:7px 16px;border-radius:8px;font-size:13px;color:rgba(255,255,255,.7);font-family:monospace;flex:1;max-width:340px}
+.show-body{display:grid;grid-template-columns:240px 1fr;min-height:560px}
+.show-side{background:rgba(0,0,0,.18);border-right:1px solid rgba(255,255,255,.06);padding:24px 0}
+.side-brand{padding:0 22px 22px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:16px;display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:22px}
+.side-brand .d{width:8px;height:8px;border-radius:50%;background:var(--rose)}
+.side-brand .p{font-family:var(--body);font-size:10px;font-weight:800;background:rgba(225,29,72,.2);color:#FFD6E0;padding:3px 7px;border-radius:5px;letter-spacing:.06em}
+.side-nav{display:flex;flex-direction:column;gap:4px;padding:0 12px}
+.side-nav a{padding:10px 14px;border-radius:8px;font-size:13.5px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:11px;font-weight:500}
+.side-nav a svg{width:16px;height:16px}
+.side-nav a.active{background:rgba(225,29,72,.18);color:#fff}
+.show-main{padding:30px 32px}
+.show-tabs{display:flex;gap:24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:24px;font-size:14px}
+.show-tabs a{padding:0 0 14px;color:rgba(255,255,255,.5);font-weight:500;position:relative}
+.show-tabs a.on{color:#fff;font-weight:600}
+.show-tabs a.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--rose)}
+.show-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.show-kpi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px}
+.show-kpi .lbl{font-size:11.5px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px}
+.show-kpi .v{font-family:var(--display);font-size:28px;color:#fff;letter-spacing:-.02em;line-height:1}
+.show-kpi .v small{font-size:13px;font-family:var(--body);color:rgba(255,255,255,.5);font-weight:600;margin-left:4px}
+.show-kpi .delta{font-size:12px;color:#6BCFAF;font-weight:700;margin-top:6px}
+.show-chart{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:22px;height:200px;display:flex;align-items:flex-end;gap:6px;position:relative}
+.bar-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:3px}
+.bar-col i{display:block;border-radius:3px;background:linear-gradient(180deg, var(--rose), var(--rose-deep))}
+.bar-col i.b2{background:linear-gradient(180deg, #FFD6E0, rgba(225,29,72,.3))}
+.bar-col span{font-size:10.5px;color:rgba(255,255,255,.5);text-align:center;margin-top:6px;font-weight:600}
+
+/* ── Pricing ── */
+.pricing{background:var(--paper);border-top:1px solid var(--line)}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+.price{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:36px 30px;display:flex;flex-direction:column;position:relative;transition:transform .2s ease, box-shadow .2s ease}
+.price:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.price.featured{background:var(--ink);color:#fff;transform:scale(1.04)}
+.price.featured:hover{transform:scale(1.04) translateY(-4px)}
+.price .tag{position:absolute;top:-12px;right:24px;background:var(--rose);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:6px}
+.price h4{font-family:var(--display);font-size:30px;font-weight:400;margin:0 0 6px;letter-spacing:-.015em}
+.price .pitch{font-size:14px;color:var(--ink-soft);margin:0 0 24px;min-height:42px}
+.price.featured .pitch{color:rgba(255,255,255,.65)}
+.price .amount{font-family:var(--display);font-size:48px;letter-spacing:-.02em;line-height:1;margin-bottom:6px}
+.price .amount small{font-size:16px;font-family:var(--body);color:var(--ink-soft);font-weight:600;margin-left:6px}
+.price.featured .amount small{color:rgba(255,255,255,.6)}
+.price .unit{font-size:13px;color:var(--muted);margin-bottom:28px}
+.price.featured .unit{color:rgba(255,255,255,.55)}
+.price ul{list-style:none;padding:0;margin:0 0 28px;display:grid;gap:11px;flex:1}
+.price ul li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--ink);line-height:1.45}
+.price.featured ul li{color:rgba(255,255,255,.88)}
+.price ul li svg{flex-shrink:0;width:18px;height:18px;color:var(--rose);margin-top:2px}
+.price.featured ul li svg{color:#FFD6E0}
+
+/* ── Deployment steps ── */
+.deploy-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;position:relative}
+.deploy-steps::before{content:"";position:absolute;top:30px;left:10%;right:10%;height:2px;background:repeating-linear-gradient(to right, var(--line) 0, var(--line) 8px, transparent 8px, transparent 16px);z-index:0}
+.dstep{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:24px 22px;position:relative;z-index:1}
+.dstep-num{width:60px;height:60px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:28px;margin:0 auto 18px;box-shadow:0 6px 18px -6px rgba(43,26,45,.4)}
+.dstep h4{font-size:16px;font-weight:700;margin:0 0 8px;color:var(--ink);text-align:center}
+.dstep p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5;text-align:center}
+
+/* ── Testimonials ── */
+.testimonials{background:#fff}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.test{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);padding:32px 28px;position:relative}
+.test .q{font-family:var(--display);font-size:60px;color:var(--rose-pale);position:absolute;top:10px;left:24px;line-height:1}
+.test p{font-size:15.5px;color:var(--ink);line-height:1.6;margin:24px 0 22px;position:relative;z-index:1}
+.test-who{display:flex;align-items:center;gap:12px}
+.test-who .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFC95A,#FF9F7A)}
+.test-who .av.a2{background:linear-gradient(135deg,#9B7EE2,#E11D48)}
+.test-who .av.a3{background:linear-gradient(135deg,#6BCFAF,#9B7EE2)}
+.test-who .name{font-weight:700;font-size:14.5px;color:var(--ink)}
+.test-who .role{font-size:13px;color:var(--muted)}
+
+/* ── FAQ ── */
+.faq{background:var(--paper);border-top:1px solid var(--line)}
+.faq-list{max-width:780px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--line);padding:22px 0;cursor:pointer}
+.faq-item summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:600;color:var(--ink)}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary .plus{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:transform .25s ease}
+.faq-item[open] summary .plus{transform:rotate(45deg);background:var(--rose);color:#fff;border-color:var(--rose)}
+.faq-item .ans{padding:14px 0 0;color:var(--ink-soft);font-size:15px;line-height:1.6;max-width:680px}
+
+/* ── Final CTA ── */
+.final-cta{background:var(--ink);color:#fff;text-align:center;padding:120px 0;position:relative;overflow:hidden}
+.final-cta::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0, rgba(225,29,72,.25), transparent 50%);pointer-events:none}
+.final-cta .container{position:relative;z-index:1}
+.final-cta h2{font-family:var(--display);font-size:clamp(40px,5vw,68px);font-weight:400;letter-spacing:-.02em;line-height:1.08;margin:0 auto 22px;max-width:760px;color:#fff}
+.final-cta h2 em{color:#FFD6E0;font-style:italic}
+.final-cta p{font-size:17.5px;color:rgba(255,255,255,.75);max-width:520px;margin:0 auto 36px}
+.final-cta .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ── Footer ── */
+.footer{background:var(--ink);color:rgba(255,255,255,.7);padding:56px 0 26px;font-size:14px;border-top:1px solid rgba(255,255,255,.08)}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:50px;margin-bottom:42px}
+.footer h6{color:#fff;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 18px}
+.footer ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.footer ul a:hover{color:#FFD6E0}
+.footer .brand-foot{font-family:var(--display);font-size:30px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.footer .brand-foot .p{font-family:var(--body);font-size:11px;font-weight:800;background:rgba(225,29,72,.18);color:#FFD6E0;padding:3px 9px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase}
+.footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,.5);flex-wrap:wrap;gap:14px}
+
+@media(max-width:980px){
+  .hero-grid{grid-template-columns:1fr;gap:60px}
+  .show-body{grid-template-columns:1fr}
+  .show-side{display:none}
+  .pillars-grid,.cases-grid,.price-grid,.deploy-steps,.test-grid,.footer-grid,.show-kpis,.dash-kpis{grid-template-columns:1fr 1fr;gap:18px}
+  .nav ul{display:none}
+  section{padding:64px 0}
+  .price.featured{transform:none}
+  .price.featured:hover{transform:translateY(-4px)}
+}
+@media(max-width:580px){
+  .pillars-grid,.cases-grid,.price-grid,.deploy-steps,.test-grid,.footer-grid,.show-kpis,.dash-kpis{grid-template-columns:1fr}
+  .trust-row{gap:30px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  Pilote 2026 ouvert · <strong>Programme cadeaux RH</strong> tout-en-un. Démo gratuite en 15 min.
+</div>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="brand">
+      <span class="dot"></span>myKado <span class="pill">@Work</span>
+    </div>
+    <ul>
+      <li><a href="#cas">Cas d'usage</a></li>
+      <li><a href="#portail">Portail</a></li>
+      <li><a href="#tarifs">Tarifs</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="/" class="solo-switch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9M5 10v10h14V10"/></svg>
+        myKado pour particuliers
+      </a>
+      <a href="#login" class="btn btn-ghost">Connexion</a>
+      <a href="#demo" class="btn btn-primary">Demander une démo</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span> Programme cadeaux salariés · Made in Africa</div>
+      <h1>Le cadeau salarié, <em>automatisé</em>.</h1>
+      <p class="hero-sub">Anniversaires, ancienneté, naissances, fêtes religieuses. myKado @Work envoie automatiquement à vos collaborateurs des cartes cadeaux animées des plus grandes enseignes locales. Vous configurez une fois. Le reste tourne tout seul.</p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-rose btn-lg">Demander une démo
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#portail" class="btn btn-outline btn-lg">Voir le portail
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="num">92<small>%</small></div><div class="lbl">Taux d'utilisation</div></div>
+        <div class="stat"><div class="num">4,8<small>/5</small></div><div class="lbl">Satisfaction salariés</div></div>
+        <div class="stat"><div class="num">15<small>min</small></div><div class="lbl">Setup initial</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="dash">
+        <div class="dash-head">
+          <div class="title">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+            Campagne · Anniversaires décembre
+          </div>
+          <div class="live"><span class="d"></span>En direct</div>
+        </div>
+        <div class="dash-kpis">
+          <div class="kpi"><div class="num">42</div><div class="lbl">À envoyer</div></div>
+          <div class="kpi up"><div class="num">38</div><div class="lbl">Envoyés</div></div>
+          <div class="kpi"><div class="num">1,2<small>M FCFA</small></div><div class="lbl">Budget</div></div>
+        </div>
+        <div class="dash-rows">
+          <div class="drow">
+            <div class="av"></div>
+            <div>
+              <div class="name">Aminata Sossa</div>
+              <div class="sub">15 décembre · 28 ans</div>
+            </div>
+            <div class="partner"><div class="b">E</div>Erevan</div>
+            <div class="amount">25 000 F</div>
+          </div>
+          <div class="drow">
+            <div class="av a2"></div>
+            <div>
+              <div class="name">Jules Hounnou</div>
+              <div class="sub">17 décembre · 42 ans</div>
+            </div>
+            <div class="partner"><div class="b" style="background:#FFE7CC;color:#C99A3A">T</div>Total</div>
+            <div class="amount">15 000 F</div>
+          </div>
+          <div class="drow">
+            <div class="av a3"></div>
+            <div>
+              <div class="name">Fatou Adjovi</div>
+              <div class="sub">19 décembre · 35 ans</div>
+            </div>
+            <div class="partner"><div class="b" style="background:#E8E1FF;color:#9B7EE2">M</div>MTN</div>
+            <div class="amount">10 000 F</div>
+          </div>
+          <div class="drow">
+            <div class="av a4"></div>
+            <div>
+              <div class="name">Romaric Adékambi</div>
+              <div class="sub">22 décembre · 31 ans</div>
+            </div>
+            <div class="partner"><div class="b" style="background:#FFE4B5;color:#C99A3A">K</div>KFC</div>
+            <div class="amount">10 000 F</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <div class="container">
+    <div class="trust-label">Ils nous font confiance</div>
+    <div class="trust-row">
+      <span class="brand-chip bold">BANK OF AFRICA</span>
+      <span class="brand-chip">Ecobank</span>
+      <span class="brand-chip bold">ORABANK</span>
+      <span class="brand-chip">Société Générale</span>
+      <span class="brand-chip bold">GROUPE CFAO</span>
+      <span class="brand-chip">Bénin Telecoms</span>
+    </div>
+  </div>
+</div>
+
+<section class="pillars" id="pourquoi">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Pourquoi @Work</div>
+      <h2 class="section-title">Le cadeau salarié, version <em class="it">2026</em>.</h2>
+      <p class="section-sub">Finis les bons d'achat papier, les enveloppes Wave, et les emails Excel le matin de l'anniversaire. myKado @Work fait tourner votre programme cadeau comme une horloge.</p>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Automatisation</h3>
+        <p>Le bon cadeau, à la bonne personne, au bon moment — sans intervention RH.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Calendrier d'anniversaires auto</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Déclencheurs : ancienneté, fêtes</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Envoi WhatsApp programmé</li>
+        </ul>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        </div>
+        <h3>Branding intégré</h3>
+        <p>Vos couleurs, votre logo, votre signature. Le cadeau porte votre marque, pas la nôtre.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cartes co-brandées</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Vidéo signée par votre dirigeant</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Sous-domaine white-label</li>
+        </ul>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+        </div>
+        <h3>ROI mesurable</h3>
+        <p>Vous voyez ce qui marche, ce qui ne marche pas, et combien ça vous coûte au centime.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Taux d'ouverture & d'utilisation</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Budget temps réel par équipe</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Export comptable & paie</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cases" id="cas">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Cas d'usage</div>
+      <h2 class="section-title">Six moments qui comptent <em class="it">vraiment</em>.</h2>
+      <p class="section-sub">Un programme RH cadeau cohérent qui suit chaque salarié tout au long de l'année — sans jamais qu'on l'oublie.</p>
+    </div>
+
+    <div class="cases-grid">
+      <div class="case c1">
+        <div class="badge">Le pilier</div>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 14l1.5 7-5-3-5 3 1.5-7"/></svg></div>
+        <h4>Anniversaires</h4>
+        <p>Une carte le jour J, choisie selon les goûts du salarié. Envoyée à 9h sur WhatsApp.</p>
+      </div>
+      <div class="case c2">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h4>Ancienneté</h4>
+        <p>1 an, 5 ans, 10 ans. Cartes graduées selon le palier. Fidélisation visible.</p>
+      </div>
+      <div class="case c3">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c0-3.5 2.5-6 5-6 1.5 0 2.5.5 3.5 1.5 1-1 2-1.5 3.5-1.5 2.5 0 5 2.5 5 6 0 3-2 5-5 5h-7c-3 0-5-2-5-5z"/></svg></div>
+        <h4>Naissances</h4>
+        <p>Carte naissance pour bébé + maman. Pastel, durable, doux. Envoi le lendemain.</p>
+      </div>
+      <div class="case c4">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
+        <h4>Tabaski · Noël · Korité</h4>
+        <p>Fêtes religieuses respectées et célébrées. Calendrier multi-confessions intégré.</p>
+      </div>
+      <div class="case c5">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></svg></div>
+        <h4>Performance</h4>
+        <p>Récompense flash. Le manager déclenche, le salarié reçoit dans la journée.</p>
+      </div>
+      <div class="case c6">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-3.5l-1-2h-5l-1 2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><circle cx="13" cy="14" r="3"/></svg></div>
+        <h4>Cadeaux clients & partenaires</h4>
+        <p>Pour vos top clients, fournisseurs, prescripteurs. Branding 100 % entreprise.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase" id="portail">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Le portail</div>
+      <h2 class="section-title">Tout votre programme cadeau <em class="it">sur un seul écran</em>.</h2>
+      <p class="section-sub">Importez votre fichier salariés. Configurez vos campagnes. Mesurez l'impact. Aucun outil supplémentaire à apprendre.</p>
+    </div>
+
+    <div class="show-wrap">
+      <div class="show-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <div class="url">work.mykado.store / campagnes</div>
+      </div>
+      <div class="show-body">
+        <aside class="show-side">
+          <div class="side-brand"><span class="d"></span>myKado <span class="p">@Work</span></div>
+          <nav class="side-nav">
+            <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Vue d'ensemble</a>
+            <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Campagnes</a>
+            <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Salariés</a>
+            <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>Analytics</a>
+            <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Facturation</a>
+            <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .4 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.4 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .4-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.4-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.4H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.4 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Paramètres</a>
+          </nav>
+        </aside>
+
+        <div class="show-main">
+          <div class="show-tabs">
+            <a class="on">Toutes les campagnes</a>
+            <a>Anniversaires</a>
+            <a>Fêtes</a>
+            <a>Ancienneté</a>
+          </div>
+
+          <div class="show-kpis">
+            <div class="show-kpi"><div class="lbl">Cartes envoyées</div><div class="v">1 247</div><div class="delta">+18% vs nov.</div></div>
+            <div class="show-kpi"><div class="lbl">Taux d'ouverture</div><div class="v">96<small>%</small></div><div class="delta">+2,4%</div></div>
+            <div class="show-kpi"><div class="lbl">Taux d'utilisation</div><div class="v">92<small>%</small></div><div class="delta">+4,8%</div></div>
+            <div class="show-kpi"><div class="lbl">Budget consommé</div><div class="v">12,4<small>M FCFA</small></div><div class="delta" style="color:#FFD6E0">82% du budget annuel</div></div>
+          </div>
+
+          <div class="show-chart">
+            <div class="bar-col"><i style="height:30%"></i><i class="b2" style="height:18%"></i><span>Jan</span></div>
+            <div class="bar-col"><i style="height:42%"></i><i class="b2" style="height:24%"></i><span>Fév</span></div>
+            <div class="bar-col"><i style="height:55%"></i><i class="b2" style="height:32%"></i><span>Mar</span></div>
+            <div class="bar-col"><i style="height:48%"></i><i class="b2" style="height:28%"></i><span>Avr</span></div>
+            <div class="bar-col"><i style="height:60%"></i><i class="b2" style="height:35%"></i><span>Mai</span></div>
+            <div class="bar-col"><i style="height:72%"></i><i class="b2" style="height:42%"></i><span>Juin</span></div>
+            <div class="bar-col"><i style="height:65%"></i><i class="b2" style="height:38%"></i><span>Juil</span></div>
+            <div class="bar-col"><i style="height:50%"></i><i class="b2" style="height:30%"></i><span>Août</span></div>
+            <div class="bar-col"><i style="height:68%"></i><i class="b2" style="height:40%"></i><span>Sep</span></div>
+            <div class="bar-col"><i style="height:78%"></i><i class="b2" style="height:46%"></i><span>Oct</span></div>
+            <div class="bar-col"><i style="height:85%"></i><i class="b2" style="height:52%"></i><span>Nov</span></div>
+            <div class="bar-col"><i style="height:95%"></i><i class="b2" style="height:58%"></i><span>Déc</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="tarifs">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Tarifs</div>
+      <h2 class="section-title">Un prix par salarié. <em class="it">Sans surprise.</em></h2>
+      <p class="section-sub">Pas de licence à payer pour la techno. Vous ne payez que pour ce qui sort en cadeau. La plateforme est offerte avec.</p>
+    </div>
+
+    <div class="price-grid">
+      <div class="price">
+        <h4>Découverte</h4>
+        <p class="pitch">Pour tester sur une équipe avant déploiement global.</p>
+        <div class="amount">Gratuit<small>· 3 mois</small></div>
+        <div class="unit">Jusqu'à 25 salariés</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Campagne anniversaires</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>5 formats animés</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Branding myKado</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Support email</li>
+        </ul>
+        <a href="#demo" class="btn btn-outline">Commencer gratuitement</a>
+      </div>
+
+      <div class="price featured">
+        <div class="tag">Le plus choisi</div>
+        <h4>Standard</h4>
+        <p class="pitch">Pour les PME et grandes équipes qui veulent un programme cohérent.</p>
+        <div class="amount">350 F<small>/ salarié / mois</small></div>
+        <div class="unit">Cartes en sus, à la valeur</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Toutes les campagnes (6 cas d'usage)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Branding entreprise complet</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Vidéo signée dirigeant</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Analytics & exports</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Account manager dédié</li>
+        </ul>
+        <a href="#demo" class="btn btn-rose">Demander une démo</a>
+      </div>
+
+      <div class="price">
+        <h4>Sur mesure</h4>
+        <p class="pitch">Pour grandes entreprises, banques, telcos, ONG, multinationales.</p>
+        <div class="amount">Sur devis</div>
+        <div class="unit">À partir de 500 salariés</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Tout le plan Standard</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Sous-domaine white-label</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>API & SSO (HRIS, AD)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>SLA contractuel</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cartes co-développées avec vos enseignes</li>
+        </ul>
+        <a href="#demo" class="btn btn-outline">Parler à l'équipe</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Déploiement</div>
+      <h2 class="section-title">De zéro à votre première campagne <em class="it">en 48h</em>.</h2>
+      <p class="section-sub">On vous accompagne. Vous ne touchez ni au code, ni à la techno.</p>
+    </div>
+
+    <div class="deploy-steps">
+      <div class="dstep"><div class="dstep-num">1</div><h4>Démo & cadrage</h4><p>15 min pour comprendre vos besoins et chiffrer votre budget.</p></div>
+      <div class="dstep"><div class="dstep-num">2</div><h4>Import salariés</h4><p>CSV, Excel, ou intégration HRIS. On gère l'import avec vous.</p></div>
+      <div class="dstep"><div class="dstep-num">3</div><h4>Setup campagnes</h4><p>Vous choisissez les cas, les montants, les enseignes. Branding co-construit.</p></div>
+      <div class="dstep"><div class="dstep-num">4</div><h4>Premier envoi</h4><p>On lance la première campagne ensemble. Suivi en temps réel.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Ils en parlent</div>
+      <h2 class="section-title">DRH, dirigeants, marketing — <em class="it">on les a transformés</em>.</h2>
+    </div>
+
+    <div class="test-grid">
+      <div class="test">
+        <div class="q">"</div>
+        <p>On a fait toutes les anniversaires de l'équipe avec myKado @Work cette année. 38 salariés, chacun avec sa carte de son enseigne préférée. Coût ? Moitié moins que nos bons d'achat papier d'avant. Et personne ne perd la carte.</p>
+        <div class="test-who"><div class="av"></div><div><div class="name">Aurélien D.</div><div class="role">DRH · Société de service · Cotonou</div></div></div>
+      </div>
+      <div class="test">
+        <div class="q">"</div>
+        <p>Le moment où mon dirigeant a vu son visage apparaître dans la vidéo cadeau qu'il a signée pour ses 240 salariés, il a pleuré. C'est devenu notre arme RH numéro un pour 2026.</p>
+        <div class="test-who"><div class="av a2"></div><div><div class="name">Mireille T.</div><div class="role">Directrice Marketing · Banque</div></div></div>
+      </div>
+      <div class="test">
+        <div class="q">"</div>
+        <p>L'export comptable se fait en deux clics. Les services paie nous adorent. Avant on bricolait des fichiers Excel, maintenant tout est traçable, tout est facturé clean. Game changer.</p>
+        <div class="test-who"><div class="av a3"></div><div><div class="name">Patrick K.</div><div class="role">CFO · ONG internationale</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Questions fréquentes</div>
+      <h2 class="section-title">Tout ce que vous voulez <em class="it">savoir</em>.</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>Combien de temps faut-il pour lancer notre premier programme ?<span class="plus">+</span></summary>
+        <div class="ans">48 heures en moyenne. 15 min de démo, 1 jour pour importer vos salariés et choisir les enseignes, puis configuration des campagnes le second jour. Pour les déploiements grande entreprise (500+), comptez 1 à 2 semaines avec intégration HRIS.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Quels modes de facturation acceptez-vous ?<span class="plus">+</span></summary>
+        <div class="ans">Facturation mensuelle ou annuelle. Virement bancaire pour les entreprises, Mobile Money pour les TPE. Devis et factures PRO-format avec TVA pour la zone CEDEAO. Settlement avec nos partenaires invisible pour vous.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Les cartes peuvent-elles être co-brandées à nos couleurs ?<span class="plus">+</span></summary>
+        <div class="ans">Oui, dès le plan Standard. Vous fournissez logo, couleurs et signature visuelle. À partir du plan Sur Mesure, vous obtenez un sous-domaine dédié (programme.votreentreprise.com) avec branding intégral.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Comment gérez-vous les départs et arrivées dans nos effectifs ?<span class="plus">+</span></summary>
+        <div class="ans">Soit vous mettez à jour le fichier salariés manuellement (CSV), soit via intégration HRIS automatique (Lucca, PayFit, BambooHR, ou API custom). Les anciens salariés sont désactivés, les nouveaux entrent dans le calendrier des campagnes.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Et si un salarié veut utiliser sa carte chez une autre enseigne ?<span class="plus">+</span></summary>
+        <div class="ans">Vous pouvez configurer vos campagnes avec des cartes multi-enseignes (le salarié choisit lui-même parmi vos partenaires) ou cartes mono-enseigne imposée. Au choix selon votre culture d'entreprise.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Vos données salariés sont-elles sécurisées ?<span class="plus">+</span></summary>
+        <div class="ans">Données stockées dans des serveurs hébergés en zone UEMOA, chiffrement au repos et en transit, accès journalisé. Conformité loi 2017-20 sur les données personnelles au Bénin. Audit de sécurité disponible pour le plan Sur Mesure.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="container">
+    <h2>Et si vos salariés se sentaient <em>vraiment vus</em> ?</h2>
+    <p>15 minutes de démo pour découvrir comment myKado @Work peut transformer votre culture cadeau dès le mois prochain.</p>
+    <div class="actions">
+      <a href="#demo" class="btn btn-rose btn-lg">Demander une démo</a>
+      <a href="#login" class="btn btn-outline-light btn-lg">J'ai déjà un compte</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-foot">myKado <span class="p">@Work</span></div>
+        <p style="margin:0;max-width:280px;line-height:1.55">Le programme cadeau RH du continent africain. Made in Cotonou.</p>
+      </div>
+      <div>
+        <h6>Produit</h6>
+        <ul>
+          <li><a href="#cas">Cas d'usage</a></li>
+          <li><a href="#portail">Portail</a></li>
+          <li><a href="#tarifs">Tarifs</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Particuliers</h6>
+        <ul>
+          <li><a href="/">myKado pour particuliers</a></li>
+          <li><a href="/#cartes">Offrir une carte</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Société</h6>
+        <ul>
+          <li><a href="#about">À propos</a></li>
+          <li><a href="#contact">Contact commercial</a></li>
+          <li><a href="#legal">Mentions légales</a></li>
+          <li><a href="#cgv">CGV entreprise</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 myKado @Work · Cotonou, Bénin</div>
+      <div>Une marque myKado</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "Bash(dir /s \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\")",
-      "Bash(awk 'NR==182' \"c:/Users/Dell/Downloads/myKado Murs \\(offline\\).html\")"
+      "Bash(awk 'NR==182' \"c:/Users/Dell/Downloads/myKado Murs \\(offline\\).html\")",
+      "PowerShell(Get-Content *)",
+      "WebSearch",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\" -Directory | Where-Object { $_.Name -notin @\\('node_modules', '.git'\\) })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\client\" -Directory | Where-Object { $_.Name -ne 'node_modules' })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\server\" -Directory | Where-Object { $_.Name -ne 'node_modules' })",
+      "PowerShell(ls \"C:\\\\Users\\\\Dell\\\\Downloads\\\\happy birtdhay\\\\Ewishes\\\\templates\" -Directory | ForEach-Object { $_.Name })",
+      "WebFetch(domain:yougotagift.com)",
+      "PowerShell(Get-ChildItem 'C:\\\\Users\\\\Dell\\\\Downloads' | Where-Object { $_.Name -match 'Gift' } | Select-Object Name, Length, LastWriteTime)",
+      "Bash(cmd.exe *)",
+      "Bash(powershell -Command \"Get-ChildItem -Directory | Select-Object Name\")",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(New-Item *)",
+      "PowerShell(Move-Item *)",
+      "Bash(node *)",
+      "PowerShell(Test-Path *)",
+      "Bash(npm run *)",
+      "Bash(npx vite *)"
     ]
   }
 }

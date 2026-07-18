@@ -490,6 +490,199 @@
     container.appendChild(zone);
   }
 
+  /* ─── Confetti (canvas générique) ────────────────────────────────
+     Fire d'une salve depuis le centre. ~140 pièces, 4,5 s. */
+  function fireConfetti(opts) {
+    opts = opts || {};
+    var canvas = document.getElementById('ww-confetti-canvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'ww-confetti-canvas';
+      canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9998;';
+      document.body.appendChild(canvas);
+    }
+    var ctx = canvas.getContext('2d');
+    var DPR = window.devicePixelRatio || 1;
+    canvas.width  = window.innerWidth  * DPR;
+    canvas.height = window.innerHeight * DPR;
+    canvas.style.width  = window.innerWidth  + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    var COLORS = opts.colors || ['#E11D48','#F59E0B','#22C55E','#3B82F6','#A855F7','#EC4899','#FDE047'];
+    var N = opts.count || 140;
+    var originY = opts.originY || (window.innerHeight / 2);
+    var originX = opts.originX || (window.innerWidth  / 2);
+    var pieces = [];
+    for (var i = 0; i < N; i++) {
+      pieces.push({
+        x: originX + (Math.random() - .5) * 80,
+        y: originY + (Math.random() - .5) * 20,
+        vx: (Math.random() - .5) * 14,
+        vy: -Math.random() * 15 - 6,
+        g:  0.36,
+        s:  6 + Math.random() * 6,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - .5) * .4,
+        c: COLORS[(Math.random() * COLORS.length) | 0],
+        shape: Math.random() < .5 ? 'rect' : 'circle',
+      });
+    }
+    var start = performance.now();
+    function tick(now) {
+      var t = (now - start) / 1000;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      pieces.forEach(function (p) {
+        p.vy += p.g;
+        p.x  += p.vx;
+        p.y  += p.vy;
+        p.rot += p.vr;
+        p.vx *= 0.995;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.c;
+        ctx.globalAlpha = Math.max(0, 1 - t / 4.5);
+        if (p.shape === 'rect') ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 1.4);
+        else { ctx.beginPath(); ctx.arc(0, 0, p.s / 2, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
+      });
+      if (t < 4.5) requestAnimationFrame(tick);
+      else ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ─── Intro "déballage" (partagée entre les 4 murs) ────────────
+     - Ne s'affiche qu'une fois par session (sessionStorage).
+     - Ne s'affiche pas en preview iframe (éditeur) ni en mode admin.
+     - Confettis si data.festive === true. */
+  function injectUnwrapStyles() {
+    if (document.getElementById('ww-unwrap-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'ww-unwrap-styles';
+    st.textContent = [
+      '#ww-unwrap{position:fixed;inset:0;z-index:9999;background:var(--bg,#FBF5EC);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity .55s ease, transform .55s ease;}',
+      '#ww-unwrap.gone{opacity:0;pointer-events:none;transform:scale(1.05);}',
+      '.ww-uw-scene{position:relative;display:flex;flex-direction:column;align-items:center;gap:28px;padding:0 24px;text-align:center;}',
+      '.ww-uw-box{position:relative;width:156px;height:156px;background:linear-gradient(135deg, var(--accent,#E11D48), var(--accent-2,#C99A3A));border-radius:14px;box-shadow:0 22px 50px rgba(43,26,20,.28), inset 0 -6px 12px rgba(0,0,0,.15);animation:ww-uw-bob 1.6s ease-in-out infinite;transform-origin:center;}',
+      '.ww-uw-box::before{content:"";position:absolute;top:-6px;bottom:-6px;left:50%;width:22px;transform:translateX(-50%);background:linear-gradient(180deg, #FFF7E4, #F1D89A);box-shadow:0 0 10px rgba(255,247,228,.45);border-radius:3px;}',
+      '.ww-uw-box::after{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:22px;transform:translateY(-50%);background:linear-gradient(90deg, #FFF7E4, #F1D89A);box-shadow:0 0 10px rgba(255,247,228,.45);border-radius:3px;}',
+      '.ww-uw-bow{position:absolute;top:-28px;left:50%;transform:translateX(-50%);width:54px;height:28px;background:radial-gradient(circle at 25% 50%, #FFF7E4 0 12px, transparent 13px), radial-gradient(circle at 75% 50%, #FFF7E4 0 12px, transparent 13px), linear-gradient(#F1D89A, #F1D89A) center/8px 12px no-repeat;filter:drop-shadow(0 3px 4px rgba(0,0,0,.15));}',
+      '.ww-uw-label{font-family:var(--display,"Instrument Serif", Georgia, serif);font-size:30px;letter-spacing:-.01em;color:var(--ink,#3B2A1E);line-height:1.1;}',
+      '.ww-uw-label em{font-style:italic;color:var(--accent,#E11D48);}',
+      '.ww-uw-hint{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3,#AC9D8E);animation:ww-uw-pulse 1.6s ease-in-out infinite;}',
+      '@keyframes ww-uw-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}',
+      '@keyframes ww-uw-pulse{0%,100%{opacity:.55}50%{opacity:1}}',
+      '@keyframes ww-uw-open{0%{transform:scale(1) rotate(0)}40%{transform:scale(1.12) rotate(-3deg)}70%{transform:scale(1.05) rotate(4deg)}100%{transform:scale(.3) rotate(-8deg);opacity:0}}',
+      '.ww-uw-box.opening{animation:ww-uw-open .75s cubic-bezier(.6,-.2,.4,1.4) forwards;}',
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  function isCollectMode() {
+    try { return /(^|[?&])collect=1(&|$)/.test(window.location.search); }
+    catch (e) { return false; }
+  }
+
+  /* ─── Wall banner (image d'en-tête) ────────────────────────────
+     Lit d.bannerImage et l'insère au-dessus du header du mur.       */
+  function injectWallBanner() {
+    var d = window.__WW_DATA__ || {};
+    var header = document.getElementById('wall-header');
+    if (!header) return;
+    if (!d.bannerImage) return;
+    if (document.getElementById('ww-wall-banner')) return;
+
+    if (!document.getElementById('ww-wall-banner-styles')) {
+      var st = document.createElement('style');
+      st.id = 'ww-wall-banner-styles';
+      st.textContent = [
+        '#ww-wall-banner{position:relative;width:100%;aspect-ratio:16/6;max-height:340px;overflow:hidden;background:#000;}',
+        '#ww-wall-banner img{width:100%;height:100%;object-fit:cover;display:block;}',
+        '#ww-wall-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,var(--header-bg,#FBF5EC) 100%);pointer-events:none;}',
+        '@media (max-width:640px){#ww-wall-banner{aspect-ratio:16/9;}}',
+      ].join('\n');
+      document.head.appendChild(st);
+    }
+
+    var wrap = document.createElement('div');
+    wrap.id = 'ww-wall-banner';
+    var img = document.createElement('img');
+    img.src = d.bannerImage;
+    img.alt = '';
+    img.loading = 'eager';
+    wrap.appendChild(img);
+    header.parentNode.insertBefore(wrap, header);
+  }
+
+  function initWallOpening() {
+    var d = window.__WW_DATA__ || {};
+    var isWall = !!document.getElementById('wall-header');
+    if (!isWall) return;
+    if (d.isAdmin) return;
+    try { if (window.self !== window.top) return; } catch (e) { return; }
+    if (d.isPrivate && d.accessCode) return;
+
+    // Collect mode : le contributeur vient écrire un mot. Pas de cérémonie,
+    // on révèle le mur et on ouvre la feuille d'ajout.
+    if (isCollectMode()) {
+      reveal();
+      setTimeout(function () {
+        if (typeof window.openSheet === 'function') window.openSheet();
+      }, 500);
+      return;
+    }
+
+    var seenKey = 'ww-unwrap-' + (d.publicationId || 'x');
+    try { if (sessionStorage.getItem(seenKey) === '1') { reveal(); return; } } catch (e) {}
+
+    var recipient = (d.recipient || d.titleName || '').toString();
+    // Pas de recipient ⇒ pas d'intro personnalisée : on révèle simplement.
+    if (!recipient.trim()) { reveal(); return; }
+
+    injectUnwrapStyles();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'ww-unwrap';
+    overlay.innerHTML =
+      '<div class="ww-uw-scene">' +
+        '<div class="ww-uw-box"><div class="ww-uw-bow"></div></div>' +
+        '<div class="ww-uw-label">Pour <em></em></div>' +
+        '<div class="ww-uw-hint">Touche pour ouvrir</div>' +
+      '</div>';
+    overlay.querySelector('.ww-uw-label em').textContent = recipient;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    try { sessionStorage.setItem(seenKey, '1'); } catch (e) {}
+
+    var box = overlay.querySelector('.ww-uw-box');
+    var opened = false;
+    function open() {
+      if (opened) return;
+      opened = true;
+      box.classList.add('opening');
+      setTimeout(function () {
+        overlay.classList.add('gone');
+        reveal();
+        // Mode destinataire : confettis systématiques.
+        fireConfetti();
+        setTimeout(function () {
+          overlay.remove();
+          document.body.style.overflow = '';
+        }, 650);
+      }, 700);
+    }
+    overlay.addEventListener('click', open, { once: true });
+    setTimeout(open, 2200);
+  }
+
+  function reveal() {
+    var header = document.getElementById('wall-header');
+    if (header) header.classList.add('reveal');
+  }
+
   /* ─── Bootstrap ─────────────────────────────────────────────────── */
   ready(function () {
     injectKeyframes();
@@ -551,7 +744,14 @@
 
     // Expose for manual re-runs (e.g. after GSAP reveals a section)
     // Expose as window.wwEngine  all templates call window.wwEngine.init() / .applyLiveUpdate()
+    /* ─── Wall banner (image d'en-tête) : partagé entre les 4 murs ─── */
+    injectWallBanner();
+
+    /* ─── Wall opening : unwrap intro + confetti (partagé entre les 4 murs) ─── */
+    initWallOpening();
+
     window.wwEngine = {
+      fireConfetti: fireConfetti,
       init: function() {
         var style = window.__WW_STYLE__ || {};
         var decos = window.__WW_DECO__  || [];

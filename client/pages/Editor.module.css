@@ -1,4 +1,4 @@
-.root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #FFFAF6; }
+.root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #FFFFFF; }
 
 /* ── Topbar ── */
 .topbar {

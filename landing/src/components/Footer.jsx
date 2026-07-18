@@ -1,40 +1,57 @@
+import s from './Footer.module.css';
+
 export default function Footer() {
   return (
-    <footer className="footer">
-      <div className="wrap footer-inner">
-        <div className="footer-brand">
-          <a href="#" className="logo logo-light">
-            <span>my</span><em className="serif italic">Kado</em>
-          </a>
-          <p>Le studio de vœux animés.<br/>Dakar · Abidjan · partout.</p>
+    <footer className={s.footer}>
+      <div className="mk-container">
+        <div className={s.grid}>
+          <div className={s.brand}>
+            <div className={s.brandName}>
+              myKado <span className={s.brandDot} />
+            </div>
+            <p className={s.tagline}>
+              Célébrer les personnes qui comptent, où qu'elles soient.
+              Une carte, un mur, un cadeau — trois briques pour toutes les occasions.
+            </p>
+          </div>
+          <div>
+            <div className={s.colTitle}>Produit</div>
+            <div className={s.links}>
+              <a href="#briques">Cartes</a>
+              <a href="#briques">Murs</a>
+              <a href="#briques">Cadeaux</a>
+              <a href="#tarifs">Tarifs</a>
+            </div>
+          </div>
+          <div>
+            <div className={s.colTitle}>Entreprise</div>
+            <div className={s.links}>
+              <a href="#business">Pour les équipes</a>
+              <a href="#business">Demander une démo</a>
+              <a href="#">À propos</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+          <div>
+            <div className={s.colTitle}>Légal</div>
+            <div className={s.links}>
+              <a href="/terms">Mentions légales</a>
+              <a href="/privacy">Confidentialité</a>
+              <a href="#">Cookies</a>
+            </div>
+          </div>
         </div>
-        <div className="footer-cols">
-          <div>
-            <h5>Produit</h5>
-            <a href="#templates">Templates</a>
-            <a href="#how">Comment ça marche</a>
-            <a href="#pricing">Tarifs</a>
-            <a href="#cagnotte">Cagnottes (bientôt)</a>
-          </div>
-          <div>
-            <h5>Pour</h5>
-            <a href="#usecases">Particuliers</a>
-            <a href="#usecases">Équipes RH</a>
-            <a href="#usecases">Marques &amp; agences</a>
-            <a href="mailto:sylvanusboni21@gmail.com">API · Sur demande</a>
-          </div>
-          <div>
-            <h5>Société</h5>
-            <a href="mailto:sylvanusboni21@gmail.com">Contact</a>
-            <a href="#faq">FAQ</a>
-            <a href="https://app.mykado.store/terms">Mentions légales</a>
-            <a href="https://app.mykado.store/privacy">Conditions</a>
+        <div className={s.bar}>
+          <div>© 2026 myKado — From Africa to the World</div>
+          <div className={s.currency}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            XOF · EUR · USD
           </div>
         </div>
-      </div>
-      <div className="wrap footer-bottom">
-        <span>© {new Date().getFullYear()} myKado · Tous droits réservés</span>
-        <span>Conçu avec ♥ pour l'Afrique francophone &amp; la diaspora</span>
       </div>
     </footer>
   );

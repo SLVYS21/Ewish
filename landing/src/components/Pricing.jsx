@@ -1,69 +1,121 @@
-import { useReveal } from '../hooks/useReveal';
-import { PLANS, fmtFCFA, fmtEUR } from '../data';
+import { useState } from 'react';
+import s from './Pricing.module.css';
 
-export default function Pricing({ onOrder }) {
-  const [ref, seen] = useReveal();
+const Check = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const PRICES = {
+  XOF: {
+    carte:  { price: '1 500', unit: 'XOF' },
+    mur:    { price: '3 000', unit: 'XOF' },
+    cadeau: { price: 'Variable', unit: '' },
+  },
+  EUR: {
+    carte:  { price: '2,50', unit: '€' },
+    mur:    { price: '4,90', unit: '€' },
+    cadeau: { price: 'Variable', unit: '' },
+  },
+  USD: {
+    carte:  { price: '2.99', unit: 'USD' },
+    mur:    { price: '5.99', unit: 'USD' },
+    cadeau: { price: 'Variable', unit: '' },
+  },
+};
+
+const CURRENCIES = [
+  { id: 'XOF', label: 'XOF (Afrique de l\'Ouest)' },
+  { id: 'EUR', label: 'EUR (Europe)' },
+  { id: 'USD', label: 'USD (International)' },
+];
+
+const PLANS = [
+  {
+    id: 'carte',
+    name: 'Carte',
+    desc: 'Une carte animée pour un destinataire. Musique, photos, texte, décorations.',
+    features: ['Musique intégrée', 'Jusqu\'à 3 photos', 'Export QR, lien, partage'],
+    ctaLabel: 'Créer une carte',
+    featured: false,
+  },
+  {
+    id: 'mur',
+    name: 'Mur',
+    desc: 'Un mur collaboratif illimité pour toute une famille ou une équipe.',
+    features: [
+      'Contributeurs illimités',
+      'Photos, GIFs, audios, vidéos',
+      'Cagnotte + modération',
+      '4 vues (défilement, 3D, TikTok, projection)',
+    ],
+    ctaLabel: 'Créer un mur',
+    featured: true,
+  },
+  {
+    id: 'cadeau',
+    name: 'Cadeau',
+    desc: 'Le montant de ton choix + une commission fixe très basse. Attaché à une carte ou un mur.',
+    features: ['Mobile Money local', 'Cartes cadeaux partenaires', 'Retrait cash ou utilisation'],
+    ctaLabel: 'Envoyer un cadeau',
+    featured: false,
+  },
+];
+
+export default function Pricing({ onCreate }) {
+  const [currency, setCurrency] = useState('XOF');
+
   return (
-    <section className="section section-pricing" id="pricing" ref={ref}>
-      <div className="wrap">
-        <div className="section-head section-head-c">
-          <span className="eyebrow"><span className="dot"></span> Tarifs</span>
-          <h2>Payez en <em>crédits</em>.<br/>Économisez avec les packs.</h2>
-          <p>
-            Une unité simple. Des bonus dégressifs. Aucun abonnement. Vos crédits
-            ne s'expirent jamais.
+    <section id="tarifs" className="mk-section mk-section-muted">
+      <div className="mk-container">
+        <div className="mk-sec-head">
+          <span className="eyebrow">Simple et transparent</span>
+          <h2 className="mk-sec-h2">
+            Un tarif par création.<br />Aucun abonnement.
+          </h2>
+          <p className="mk-sec-sub">
+            Tu paies uniquement quand tu es prêt à envoyer. Prix ajustés à ta zone géographique.
           </p>
         </div>
 
-        <div className="pricing-explain">
-          <div className="pe-coin">
-            <span className="coin coin-lg"/>
-            <span className="serif italic pe-eq">1 crédit = 500 FCFA</span>
-            <span className="pe-eur">≈ 0,76 €</span>
-          </div>
-          <p>
-            Une animation personnelle coûte de 5 à 12 crédits. Un projet collectif d'équipe
-            entre 20 et 30 crédits. Achetez à la carte, sans surprise.
-          </p>
-        </div>
-
-        <div className="plans">
-          {PLANS.map((p, i) => (
-            <article key={p.name} className={`plan ${p.featured ? 'featured' : ''} ${seen ? 'revealed' : 'reveal'}`} style={{ transitionDelay: `${i*0.08}s` }}>
-              {p.featured && <span className="plan-badge">★ Plus populaire</span>}
-              <div className="plan-name serif italic">{p.name}</div>
-              <div className="plan-pitch">{p.pitch}</div>
-
-              <div className="plan-credits">
-                <span className="pc-num serif italic">{p.credits}</span>
-                <span className="pc-lab">crédits</span>
-                {p.bonus > 0 && <span className="pc-bonus">+ {p.bonus} offerts</span>}
-              </div>
-
-              <div className="plan-price">
-                <strong>{fmtFCFA(p.priceXOF)}</strong>
-                <span className="plan-eur">{fmtEUR(p.priceXOF)}</span>
-              </div>
-
-              <div className="plan-divider"></div>
-
-              <ul className="plan-perks">
-                {p.perks.map((perk, j) => (
-                  <li key={j}><span className="ck">✓</span> {perk}</li>
-                ))}
-              </ul>
-
-              <button className={`btn ${p.featured ? 'btn-primary' : 'btn-ghost'} plan-cta`} onClick={onOrder}>
-                Acheter {p.credits}{p.bonus > 0 ? `+${p.bonus}` : ''} crédits <span className="arr">→</span>
-              </button>
-            </article>
+        <div className={s.tabs}>
+          {CURRENCIES.map((c) => (
+            <button
+              key={c.id}
+              className={`${s.tab} ${currency === c.id ? s.tabActive : ''}`}
+              onClick={() => setCurrency(c.id)}
+            >
+              {c.label}
+            </button>
           ))}
         </div>
 
-        <p className="pricing-foot">
-          Achat groupé pour un événement ou une campagne ?{' '}
-          <a href="mailto:contact@mykado.app">Demandez un devis sur mesure.</a>
-        </p>
+        <div className={s.grid}>
+          {PLANS.map((plan) => {
+            const p = PRICES[currency][plan.id];
+            return (
+              <div key={plan.id} className={`${s.plan} ${plan.featured ? s.featured : ''}`}>
+                <div className={s.name}>{plan.name}</div>
+                <div className={s.price}>
+                  {p.price} <small>{p.unit}</small>
+                </div>
+                <div className={s.desc}>{plan.desc}</div>
+                <ul className={s.list}>
+                  {plan.features.map((f) => (
+                    <li key={f}><Check />{f}</li>
+                  ))}
+                </ul>
+                <button
+                  className={`mk-btn ${plan.featured ? 'mk-btn-primary' : 'mk-btn-outline'}`}
+                  onClick={onCreate}
+                >
+                  {plan.ctaLabel}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

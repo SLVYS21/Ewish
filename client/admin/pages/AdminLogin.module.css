@@ -1,222 +1,368 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&display=swap');
+/* ══════════════════════════════════════════════════════════════════
+   Admin Login / Register — redesign 2026-07-10
+   Split layout : Kado mascot (pink→lilac pastel) | form (white)
+   Palette Kado (rose #FF5470, lilac #7C5CFF, ink #2B2440)
+   ══════════════════════════════════════════════════════════════════ */
 
-/* ── Root ── */
 .root {
   min-height: 100vh;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: #FFFFFF;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  color: #2B1A2D;
+  color: #2B2440;
+  box-sizing: border-box;
+}
+
+/* ── Main split card ─────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 1180px;
+  min-height: 640px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #FFFFFF;
+  border-radius: 28px;
   overflow: hidden;
+  box-shadow:
+    0 2px 4px rgba(43, 36, 64, .04),
+    0 20px 48px -12px rgba(43, 36, 64, .12);
+  border: 1px solid #F4E8EC;
 }
 
-/* ── Left: brand panel ── */
-.valueSide {
-  flex: 1;
-  position: relative; overflow: hidden;
-  background: linear-gradient(160deg, #fff1f4 0%, #fce7f3 40%, #fbcfe8 100%);
-  padding: 48px;
-  display: flex; flex-direction: column; justify-content: space-between;
+/* ── Left: brand / mascot panel ──────────────────────────────────── */
+.brandPanel {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, #FDDBE8 0%, #F7E1F2 45%, #E8DBF7 100%);
+  padding: 56px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 24px;
 }
 
-.valueLogo {
+.brandMascot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 240px;
+  height: 240px;
+}
+
+.brandTitle {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 1.5rem; font-weight: 800; color: #2B1A2D;
-  letter-spacing: -0.02em;
-  display: flex; align-items: center; gap: 8px;
-}
-.valueLogo .logoBox {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: linear-gradient(135deg, #e11d48, #f59e0b);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  box-shadow: 0 4px 12px rgba(225,29,72,.25);
-}
-.valueLogo span { color: #e11d48; }
-
-.valueTagline {
-  font-size: 0.68rem; font-weight: 800; color: #be185d;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  margin-top: 40px; margin-bottom: 12px;
+  font-size: 32px;
+  font-weight: 800;
+  color: #2B2440;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  margin: 0;
+  max-width: 380px;
 }
 
-.valueHeadline {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-style: italic;
-  font-size: 2.4rem; font-weight: 400; line-height: 1.1;
-  color: #2B1A2D; max-width: 380px; margin-bottom: 16px;
-  letter-spacing: -0.02em;
+.brandDesc {
+  font-size: 15px;
+  color: #5D5474;
+  line-height: 1.55;
+  max-width: 360px;
+  margin: 0;
 }
 
-.valueDesc {
-  font-size: 0.88rem; color: #52525b; line-height: 1.55;
-  max-width: 380px; margin-bottom: 0;
-}
-
-/* Floating preview card */
-.floatingCard {
-  position: absolute; right: -24px; bottom: 100px;
-  width: 180px; height: 260px;
-  border-radius: 18px; overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,.18);
-  transform: rotate(6deg);
-  background: linear-gradient(160deg, #fff1f4 0%, #fce7f3 60%, #fbcfe8 100%);
-  display: flex; flex-direction: column;
-  align-items: center; padding: 24px 16px; gap: 8px;
+/* Sparkles decorative (very subtle, ambient) */
+.brandSparkle {
+  position: absolute;
   pointer-events: none;
+  opacity: .5;
 }
-.floatingAvatar {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: linear-gradient(135deg, #e11d48, #f97316);
-  border: 3px solid #fff; box-shadow: 0 4px 14px rgba(0,0,0,.15);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; font-weight: 800; color: #fff;
-  font-family: 'Inter', sans-serif;
-}
-.floatingCardTitle {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-style: italic; font-size: 0.85rem; font-weight: 700;
-  text-align: center; color: #1f1717;
-}
-.floatingCardName {
-  font-size: 1.3rem; font-weight: 800; font-style: italic;
-  color: #e11d48; text-align: center;
-  font-family: 'Playfair Display', Georgia, serif;
-}
-.floatingCardMsg {
-  font-size: 0.6rem; text-align: center; color: #52525b; line-height: 1.5;
-}
-.floatingDots { position: absolute; inset: 0; pointer-events: none; }
+.brandSparkle1 { top: 12%;  left: 12%; }
+.brandSparkle2 { top: 22%;  right: 14%; }
+.brandSparkle3 { bottom: 18%; right: 20%; }
 
-.valueFooter {
-  display: flex; gap: 20px;
-  font-size: 0.72rem; color: #9f1239; font-weight: 600;
-}
-
-/* ── Right: form side ── */
+/* ── Right: form panel ───────────────────────────────────────────── */
+.formPanel,
 .formSide {
-  width: 440px; flex-shrink: 0;
-  background: #fff;
-  padding: 48px 56px;
-  display: flex; flex-direction: column; justify-content: center;
-  overflow-y: auto;
+  padding: 56px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #FFFFFF;
+}
+/* Legacy single-column pages (ForgotPassword, ResetPassword) — center the card */
+.formSide {
+  width: 100%;
+  max-width: 440px;
+  background: #FFFFFF;
+  border-radius: 24px;
+  border: 1px solid #F4E8EC;
+  box-shadow: 0 2px 4px rgba(43,36,64,.04), 0 20px 48px -12px rgba(43,36,64,.12);
+  margin: 0 auto;
 }
 
+.formHeader {
+  text-align: center;
+  margin-bottom: 28px;
+}
 .formTitle {
-  font-size: 1.5rem; font-weight: 800; color: #1f1717; margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #2B2440;
+  letter-spacing: -.02em;
+  margin: 0 0 8px;
 }
-.formSub { font-size: 0.84rem; color: #71717a; margin-bottom: 28px; line-height: 1.5; }
+.formSub {
+  font-size: 15px;
+  color: #8C859E;
+  margin: 0;
+  line-height: 1.5;
+}
 
-/* ── Fields ── */
-.field { margin-bottom: 16px; }
+/* ── Segmented tabs Login / Register ─────────────────────────────── */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: #F3F0F5;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5D5474;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tab:hover { color: #2B2440; }
+.tabActive {
+  background: #FFFFFF;
+  color: #2B2440;
+  font-weight: 700;
+  box-shadow:
+    0 1px 2px rgba(43,36,64,.06),
+    0 2px 6px rgba(43,36,64,.08);
+}
+
+/* ── Google button ───────────────────────────────────────────────── */
+.btnOutline {
+  width: 100%;
+  padding: 12px 20px;
+  border: 1.5px solid #EAD6DE;
+  border-radius: 10px;
+  background: #FFFFFF;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2B2440;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background .15s, border-color .15s;
+}
+.btnOutline:hover { background: #FAF7F9; border-color: #DCC4CE; }
+.btnOutline:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ── OR divider ──────────────────────────────────────────────────── */
+.orDivider {
+  position: relative;
+  text-align: center;
+  margin: 22px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8C859E;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.orDivider span {
+  background: #FFFFFF;
+  padding: 0 14px;
+  position: relative;
+  z-index: 1;
+}
+.orDivider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #EAD6DE;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────── */
+.field {
+  margin-bottom: 16px;
+}
 .field label {
-  display: block; font-size: 0.72rem; font-weight: 700;
-  color: #3f3f46; margin-bottom: 6px; letter-spacing: .02em;
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2B2440;
+  margin-bottom: 6px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 .field input {
-  width: 100%; padding: 12px 14px;
-  border: 1.5px solid #e4e4e7; border-radius: 10px;
-  font-size: 0.88rem; font-family: 'Inter', sans-serif; color: #1f1717;
-  background: #fafafa; outline: none; box-sizing: border-box;
-  transition: all .15s;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #EAD6DE;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #2B2440;
+  background: #FFFFFF;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .15s, box-shadow .15s;
 }
+.field input::placeholder { color: #B5AFC0; }
 .field input:focus {
-  border-color: #e11d48; background: #fff;
-  box-shadow: 0 0 0 3px rgba(225,29,72,.1);
+  border-color: #FF5470;
+  box-shadow: 0 0 0 3px rgba(255, 84, 112, .12);
 }
 
 .fieldRow {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.75rem; margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 20px;
 }
 .fieldRow label {
-  display: flex; align-items: center; gap: 6px;
-  color: #3f3f46; cursor: pointer;
-}
-.fieldRow label input[type="checkbox"] { accent-color: #e11d48; }
-.fieldRow a { color: #e11d48; font-weight: 600; cursor: pointer; text-decoration: none; }
-
-.error {
-  color: #dc2626; font-size: 0.75rem; font-weight: 500;
-  background: rgba(220,38,38,.06); border: 1px solid rgba(220,38,38,.18);
-  border-radius: 8px; padding: 8px 12px; margin: 10px 0;
-}
-
-/* ── Buttons ── */
-.btn {
-  width: 100%; padding: 13px 20px;
-  background: linear-gradient(135deg, #e11d48, #f59e0b);
-  color: #fff; border: none; border-radius: 12px;
-  font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700;
-  cursor: pointer; box-shadow: 0 6px 18px rgba(225,29,72,.28);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .2s;
-}
-.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(225,29,72,.38); }
-.btn:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
-
-.orDivider {
-  position: relative; text-align: center; margin: 22px 0; font-size: 0.7rem; color: #a1a1aa;
-}
-.orDivider span { background: #fff; padding: 0 12px; position: relative; z-index: 1; }
-.orDivider::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: 1px; background: #e4e4e7;
-}
-
-.btnOutline {
-  width: 100%; padding: 11px 20px;
-  border: 1.5px solid #e4e4e7; border-radius: 12px;
-  background: #fff; font-family: 'Inter', sans-serif;
-  font-size: 0.88rem; font-weight: 600; color: #1f1717;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #5D5474;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: background .15s;
+  font-weight: 500;
 }
-.btnOutline:hover { background: #fafafa; }
-.googleDot {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: conic-gradient(from -45deg, #4285F4, #34A853, #FBBC05, #EA4335);
-  flex-shrink: 0;
+.fieldRow label input[type="checkbox"] { accent-color: #FF5470; }
+.fieldRow a {
+  color: #FF5470;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 13px;
+}
+.fieldRow a:hover { text-decoration: underline; }
+
+/* ── Error ───────────────────────────────────────────────────────── */
+.error {
+  color: #B83C51;
+  font-size: 13px;
+  font-weight: 500;
+  background: #FFF3F5;
+  border: 1px solid #FFDCE3;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
 }
 
+/* ── Success (password reset done) ───────────────────────────────── */
+.success {
+  color: #00695A;
+  font-size: 13px;
+  font-weight: 500;
+  background: #E6F5F0;
+  border: 1px solid #B7E4D5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Main submit button (dark ink) ───────────────────────────────── */
+.btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: #2B2440;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .15s, box-shadow .2s, background .15s;
+  box-shadow: 0 2px 4px rgba(43, 36, 64, .12), 0 6px 16px rgba(43, 36, 64, .16);
+}
+.btn:hover {
+  background: #1E1A2E;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(43, 36, 64, .18), 0 10px 24px rgba(43, 36, 64, .22);
+}
+.btn:disabled {
+  opacity: .55;
+  transform: none;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── Footer terms ────────────────────────────────────────────────── */
 .formFooter {
-  margin-top: 24px; font-size: 0.82rem; color: #71717a; text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #8C859E;
+  text-align: center;
+  line-height: 1.6;
 }
-.formFooter a { color: #e11d48; font-weight: 700; text-decoration: none; cursor: pointer; }
+.formFooter a {
+  color: #5D5474;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.formFooter a:hover { color: #2B2440; }
 
-/* ── Register: value cards ── */
-.valueCards { display: flex; flex-direction: column; gap: 10px; }
-.valueCard {
-  display: flex; align-items: flex-start; gap: 12px;
-  background: rgba(255,255,255,.6); border-radius: 12px; padding: 12px;
-  backdrop-filter: blur(4px);
+/* ── Mobile — brand panel hidden, form full ─────────────────────── */
+@media (max-width: 900px) {
+  .root {
+    padding: 0;
+    background: #FFFFFF;
+  }
+  .card {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+  .brandPanel { display: none; }
+  .formPanel {
+    padding: 40px 24px;
+    max-width: 440px;
+    margin: 0 auto;
+    width: 100%;
+  }
 }
-.valueCardIcon {
-  width: 38px; height: 38px; border-radius: 10px; background: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
-}
-.valueCardTitle { font-size: 0.84rem; font-weight: 700; color: #1f1717; }
-.valueCardDesc  { font-size: 0.74rem; color: #71717a; margin-top: 2px; line-height: 1.4; }
 
-/* Social proof */
-.socialProof {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; color: #9f1239; font-weight: 600;
-}
-.avatarStack { display: flex; }
-.avatarStackItem {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 2px solid #fff; margin-left: -8px; display: flex;
-  align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: #52525b;
-}
-.avatarStackItem:first-child { margin-left: 0; }
-
-/* ── Mobile ── */
-@media (max-width: 768px) {
-  .root { flex-direction: column; }
-  .valueSide { display: none; }
-  .formSide { width: 100%; padding: 40px 28px; min-height: 100vh; }
+@media (max-width: 480px) {
+  .formPanel { padding: 32px 20px; }
+  .formTitle { font-size: 22px; }
+  .formSub { font-size: 14px; }
 }

@@ -2,42 +2,37 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleBtn from '../components/GoogleBtn';
+import PasswordInput from '../components/PasswordInput';
+import Kado from '../../components/Kado';
 import s from './AdminLogin.module.css';
 
-const VALUE_CARDS = [
-  { icon: '🎂', title: '5 templates clé en main',   desc: 'Anniversaire, mariage, événement…' },
-  { icon: '💸', title: '3 crédits gratuits offerts', desc: 'Pas de carte requise pour commencer' },
-  { icon: '📲', title: 'Mobile Money intégré',       desc: 'MTN, Moov, Wave, carte bancaire' },
-  { icon: '⏱', title: 'Sites publiés en 1 clic',    desc: 'Lien court + QR code générés' },
-];
-
 export default function AdminRegister() {
-  const [name, setName]         = useState('');
-  const [email, setEmail]       = useState('');
-  const [pass, setPass]         = useState('');
+  const [name, setName]               = useState('');
+  const [email, setEmail]             = useState('');
+  const [pass, setPass]               = useState('');
   const [confirmPass, setConfirmPass] = useState('');
-  const [agree, setAgree]       = useState(false);
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [agree, setAgree]             = useState(false);
+  const [error, setError]             = useState('');
+  const [loading, setLoading]         = useState(false);
   const { register } = useAuth();
   const navigate     = useNavigate();
 
   const submit = async () => {
     setError('');
     if (!name || !email || !pass || !confirmPass) {
-      setError('Tous les champs sont requis.');
+      setError('All fields are required.');
       return;
     }
     if (pass !== confirmPass) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError("Passwords don't match.");
       return;
     }
     if (pass.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      setError('Password must be at least 8 characters.');
       return;
     }
     if (!agree) {
-      setError("Veuillez accepter les conditions d'utilisation pour continuer.");
+      setError('Please accept the terms to continue.');
       return;
     }
     setLoading(true);
@@ -45,128 +40,165 @@ export default function AdminRegister() {
       await register(email, pass, name);
       navigate('/ewish-admin');
     } catch (e) {
-      setError(e.response?.data?.error || 'Erreur lors de la création du compte');
+      setError(e.response?.data?.error || 'Account creation failed.');
     } finally { setLoading(false); }
   };
 
   return (
     <div className={s.root}>
+      <div className={s.card}>
 
-      {/* ── Left: value props ── */}
-      <div className={s.valueSide}>
-        <div className={s.valueLogo}>
-          <span className={s.logoBox}>🎁</span>
-          my<span>Kado</span>
-        </div>
-
-        <div>
-          <h1 className={s.valueHeadline}>
-            Lancez votre première carte en moins de 5 minutes.
-          </h1>
-          <div className={s.valueCards}>
-            {VALUE_CARDS.map((c, i) => (
-              <div key={i} className={s.valueCard}>
-                <div className={s.valueCardIcon}>{c.icon}</div>
-                <div>
-                  <div className={s.valueCardTitle}>{c.title}</div>
-                  <div className={s.valueCardDesc}>{c.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={s.socialProof}>
-          <div className={s.avatarStack}>
-            {[
-              { bg: '#fbcfe8', l: 'S' }, { bg: '#fde68a', l: 'M' },
-              { bg: '#bfdbfe', l: 'K' }, { bg: '#bbf7d0', l: 'A' },
-            ].map((a, i) => (
-              <div key={i} className={s.avatarStackItem} style={{ background: a.bg }}>
-                {a.l}
-              </div>
-            ))}
-          </div>
-          +240 marchands déjà inscrits cette semaine
-        </div>
-      </div>
-
-      {/* ── Right: form ── */}
-      <div className={s.formSide}>
-        <h2 className={s.formTitle}>Créer mon compte</h2>
-        <p className={s.formSub}>
-          C'est gratuit. <strong style={{ color: '#e11d48' }}>3 crédits offerts</strong> à l'inscription.
-        </p>
-
-        <GoogleBtn label="S'inscrire avec Google" />
-
-        <div className={s.orDivider}><span>OU</span></div>
-
-        <div className={s.field}>
-          <label>Nom complet</label>
-          <input
-            type="text" value={name} autoComplete="name"
-            placeholder="Votre prénom et nom"
-            onChange={e => setName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-email')?.focus()}
-          />
-        </div>
-
-        <div className={s.field}>
-          <label>Email professionnel</label>
-          <input
-            id="reg-email" type="email" value={email} autoComplete="username"
-            placeholder="vous@mykado.com"
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-pass')?.focus()}
-          />
-        </div>
-
-        <div className={s.field}>
-          <label>Mot de passe</label>
-          <input
-            id="reg-pass" type="password" value={pass} autoComplete="new-password"
-            placeholder="8 caractères minimum"
-            onChange={e => setPass(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-confirm')?.focus()}
-          />
-        </div>
-
-        <div className={s.field}>
-          <label>Confirmer le mot de passe</label>
-          <input
-            id="reg-confirm" type="password" value={confirmPass} autoComplete="new-password"
-            placeholder="Répétez votre mot de passe"
-            onChange={e => setConfirmPass(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && submit()}
-          />
-        </div>
-
-        <div className={s.field} style={{ marginBottom: 18 }}>
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontWeight: 400, fontSize: '0.72rem', color: '#52525b', lineHeight: 1.5, textTransform: 'none', letterSpacing: 0 }}>
-            <input
-              type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)}
-              style={{ accentColor: '#e11d48', marginTop: 2, flexShrink: 0, width: 'auto', padding: 0 }}
+        {/* ── Left: brand panel with Kado mascot ── */}
+        <aside className={s.brandPanel} aria-hidden>
+          <div className={s.brandMascot}>
+            <Kado
+              size={220}
+              cycle={['jump', 'levitate', 'confetti']}
+              cycleInterval={4200}
+              ambient
             />
-            <span>
-              J'accepte les{' '}
-              <Link to="/terms" target="_blank" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>conditions d'utilisation</Link>
-              {' '}et la{' '}
-              <Link to="/privacy" target="_blank" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>politique de confidentialité</Link>.
-            </span>
-          </label>
-        </div>
+          </div>
+          <h2 className={s.brandTitle}>Let's get the party started!</h2>
+          <p className={s.brandDesc}>
+            Create beautiful digital wishes and share them with your loved ones.
+          </p>
+        </aside>
 
-        {error && <div className={s.error}>{error}</div>}
+        {/* ── Right: form ── */}
+        <section className={s.formPanel}>
+          <div className={s.formHeader}>
+            <h1 className={s.formTitle}>Welcome to myKado</h1>
+            <p className={s.formSub}>Create your account to continue</p>
+          </div>
 
-        <button className={s.btn} onClick={submit} disabled={loading || !agree}>
-          {loading ? 'Création…' : 'Créer mon compte gratuit →'}
-        </button>
+          <div className={s.tabs} role="tablist">
+            <Link
+              to="/ewish-admin/login"
+              className={s.tab}
+              role="tab"
+              aria-selected="false"
+            >
+              Login
+            </Link>
+            <button className={`${s.tab} ${s.tabActive}`} role="tab" aria-selected="true">
+              Register
+            </button>
+          </div>
 
-        <div className={s.formFooter}>
-          Déjà un compte ?{' '}
-          <Link to="/ewish-admin/login">Se connecter</Link>
-        </div>
+          <GoogleBtn label="Continue with Google" />
+
+          <div className={s.orDivider}><span>Or continue with</span></div>
+
+          <div className={s.field}>
+            <label htmlFor="reg-name">Full name</label>
+            <input
+              id="reg-name"
+              type="text"
+              value={name}
+              autoComplete="name"
+              placeholder="Your first and last name"
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-email')?.focus()}
+            />
+          </div>
+
+          <div className={s.field}>
+            <label htmlFor="reg-email">Email</label>
+            <input
+              id="reg-email"
+              type="email"
+              value={email}
+              autoComplete="username"
+              placeholder="your.email@example.com"
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-pass')?.focus()}
+            />
+          </div>
+
+          <div className={s.field}>
+            <label htmlFor="reg-pass">Password</label>
+            <PasswordInput
+              id="reg-pass"
+              value={pass}
+              autoComplete="new-password"
+              placeholder="secret-you-wont-forget"
+              onChange={e => setPass(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-confirm')?.focus()}
+            />
+          </div>
+
+          <div className={s.field}>
+            <label htmlFor="reg-confirm">Confirm password</label>
+            <PasswordInput
+              id="reg-confirm"
+              value={confirmPass}
+              autoComplete="new-password"
+              placeholder="Repeat your password"
+              onChange={e => setConfirmPass(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+            />
+          </div>
+
+          <div className={s.field} style={{ marginBottom: 18 }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 8,
+                fontWeight: 500,
+                fontSize: 13,
+                color: '#5D5474',
+                lineHeight: 1.5,
+                textTransform: 'none',
+                letterSpacing: 0,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={agree}
+                onChange={e => setAgree(e.target.checked)}
+                style={{
+                  accentColor: '#FF5470',
+                  marginTop: 3,
+                  flexShrink: 0,
+                  width: 'auto',
+                  padding: 0,
+                }}
+              />
+              <span>
+                I accept the{' '}
+                <Link
+                  to="/terms"
+                  target="_blank"
+                  style={{ color: '#FF5470', fontWeight: 700, textDecoration: 'none' }}
+                >
+                  Terms of Service
+                </Link>
+                {' '}and{' '}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  style={{ color: '#FF5470', fontWeight: 700, textDecoration: 'none' }}
+                >
+                  Privacy Policy
+                </Link>.
+              </span>
+            </label>
+          </div>
+
+          {error && <div className={s.error}>{error}</div>}
+
+          <button className={s.btn} onClick={submit} disabled={loading || !agree}>
+            {loading ? 'Creating account…' : 'Create Account'}
+          </button>
+
+          <div className={s.formFooter}>
+            By clicking continue, you agree to our{' '}
+            <Link to="/terms" target="_blank">Terms of Service</Link>
+            {' '}and{' '}
+            <Link to="/privacy" target="_blank">Privacy Policy</Link>
+          </div>
+        </section>
       </div>
     </div>
   );

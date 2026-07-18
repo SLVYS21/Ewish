@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>myKado — La carte cadeau qui se déballe comme un film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFFAF6;
+  --paper:#FBF5EC;
+  --white:#FFFFFF;
+  --rose:#E11D48;
+  --rose-deep:#B8123A;
+  --rose-pale:#FFE4EC;
+  --ink:#2B1A2D;
+  --ink-soft:#5A4458;
+  --muted:#8E7B8C;
+  --lilac:#9B7EE2;
+  --butter:#FFC95A;
+  --peach:#FF9F7A;
+  --mint:#6BCFAF;
+  --gold:#C99A3A;
+  --line:rgba(43,26,45,.10);
+  --display:'Instrument Serif', serif;
+  --hand:'Caveat', cursive;
+  --body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --r-sm:10px;
+  --r-md:14px;
+  --r-lg:22px;
+  --r-xl:32px;
+  --shadow-sm:0 1px 2px rgba(43,26,45,.06), 0 2px 6px rgba(225,29,72,.04);
+  --shadow:0 6px 20px -8px rgba(43,26,45,.18), 0 16px 40px -20px rgba(225,29,72,.12);
+  --shadow-lg:0 18px 50px -20px rgba(43,26,45,.30), 0 36px 80px -30px rgba(225,29,72,.18);
+  --maxw:1240px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+em.it{font-family:var(--display);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.hand{font-family:var(--hand);font-weight:600}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+
+/* ── Top bar ── */
+.topbar{background:var(--ink);color:#fff;font-size:13px;padding:9px 16px;text-align:center;letter-spacing:.01em}
+.topbar strong{color:#FFD6E0;font-weight:600}
+
+/* ── Nav ── */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,250,246,.92);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:26px;letter-spacing:-.01em}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--rose)}
+.nav ul{display:flex;list-style:none;gap:28px;margin:0;padding:0;font-size:14.5px;font-weight:500;color:var(--ink-soft)}
+.nav ul a:hover{color:var(--rose)}
+.nav-cta{display:flex;align-items:center;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14.5px;cursor:pointer;border:none;transition:transform .15s ease, box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#1a0e1c;box-shadow:var(--shadow)}
+.btn-rose{background:var(--rose);color:#fff}
+.btn-rose:hover{background:var(--rose-deep);box-shadow:0 8px 24px -8px rgba(225,29,72,.5)}
+.btn-lg{padding:14px 26px;font-size:15px}
+
+/* ── Hero ── */
+.hero{padding:60px 0 90px;position:relative;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--rose-pale);color:var(--rose-deep);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:22px}
+.hero-eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--rose);box-shadow:0 0 0 0 rgba(225,29,72,.7);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(225,29,72,.6)}70%{box-shadow:0 0 0 10px rgba(225,29,72,0)}100%{box-shadow:0 0 0 0 rgba(225,29,72,0)}}
+.hero h1{font-family:var(--display);font-size:clamp(42px,5.4vw,72px);font-weight:400;line-height:1.04;letter-spacing:-.025em;margin:0 0 22px}
+.hero h1 .accent{color:var(--rose);font-style:italic}
+.hero-sub{font-size:18.5px;color:var(--ink-soft);max-width:520px;margin:0 0 32px;line-height:1.55}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:34px}
+.hero-trust{display:flex;align-items:center;gap:14px;font-size:13.5px;color:var(--muted)}
+.hero-trust .stack{display:flex}
+.hero-trust .stack span{width:32px;height:32px;border-radius:50%;border:2px solid var(--cream);margin-left:-8px;background:linear-gradient(135deg,#FFE4EC,#9B7EE2)}
+.hero-trust .stack span:nth-child(1){margin-left:0;background:linear-gradient(135deg,#FFC95A,#FF9F7A)}
+.hero-trust .stack span:nth-child(2){background:linear-gradient(135deg,#6BCFAF,#9B7EE2)}
+.hero-trust .stack span:nth-child(3){background:linear-gradient(135deg,#E11D48,#FF9F7A)}
+
+/* Phone mockup */
+.phone-wrap{position:relative;display:flex;justify-content:center}
+.phone{width:320px;height:640px;background:#1a0e1c;border-radius:46px;padding:14px;box-shadow:var(--shadow-lg);position:relative;transform:rotate(-3deg)}
+.phone::before{content:"";position:absolute;top:18px;left:50%;transform:translateX(-50%);width:110px;height:24px;background:#000;border-radius:14px;z-index:5}
+.phone-screen{width:100%;height:100%;background:linear-gradient(160deg,#fff5f7 0%, #fce8ed 55%, #fef5f7 100%);border-radius:34px;overflow:hidden;position:relative}
+.phone-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 28px;text-align:center}
+.phone-greet{font-family:var(--display);font-size:34px;color:var(--rose-deep);margin-bottom:18px}
+.phone-circle{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,#FFE4EC,#E11D48);box-shadow:0 18px 50px -12px rgba(225,29,72,.55);display:flex;align-items:center;justify-content:center;margin-bottom:22px;position:relative}
+.phone-circle::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px dashed rgba(225,29,72,.35);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.phone-circle svg{width:48px;height:48px;color:#fff}
+.phone-sub{font-size:13.5px;color:var(--ink-soft);max-width:220px;line-height:1.45}
+.phone-pill{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(43,26,45,.85);backdrop-filter:blur(8px);color:#fff;padding:10px 14px;border-radius:999px;display:flex;align-items:center;gap:10px;font-size:12.5px;width:230px}
+.phone-pill .ic{width:26px;height:26px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center}
+.phone-pill .ic svg{width:14px;height:14px;color:#fff}
+.phone-pill .bar{flex:1;height:3px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+.phone-pill .bar i{display:block;height:100%;width:42%;background:var(--rose);border-radius:2px}
+
+/* Floating cards around phone */
+.fcard{position:absolute;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink)}
+.fcard .badge{width:30px;height:30px;border-radius:8px;background:var(--rose-pale);display:flex;align-items:center;justify-content:center;color:var(--rose-deep);font-family:var(--display);font-size:16px}
+.fcard.f1{top:60px;left:0;animation:float 4s ease-in-out infinite}
+.fcard.f2{top:200px;right:0;animation:float 4.5s ease-in-out infinite reverse}
+.fcard.f3{bottom:60px;left:10px;animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* ── Trust band ── */
+.trust{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:36px 0}
+.trust-label{text-align:center;font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:22px;font-weight:600}
+.trust-row{display:flex;justify-content:center;align-items:center;gap:60px;flex-wrap:wrap;opacity:.72}
+.brand-chip{font-family:var(--display);font-size:24px;color:var(--ink);letter-spacing:-.01em;font-style:italic}
+.brand-chip.bold{font-family:var(--body);font-weight:800;font-style:normal;letter-spacing:.05em;font-size:20px;text-transform:uppercase}
+
+/* ── Sections ── */
+section{padding:96px 0;position:relative}
+.section-head{text-align:center;margin-bottom:56px}
+.section-eyebrow{font-size:13px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;font-weight:700;margin-bottom:14px}
+.section-title{font-family:var(--display);font-size:clamp(34px,4vw,52px);font-weight:400;line-height:1.08;letter-spacing:-.02em;margin:0 auto 18px;max-width:760px}
+.section-sub{font-size:17px;color:var(--ink-soft);max-width:580px;margin:0 auto;line-height:1.55}
+
+/* ── Piliers ── */
+.pillars{background:var(--white);border-top:1px solid var(--line)}
+.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.pillar{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);padding:36px 30px;transition:transform .2s ease, box-shadow .2s ease}
+.pillar:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.pillar-ic{width:54px;height:54px;border-radius:14px;background:var(--rose-pale);color:var(--rose-deep);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.pillar-ic svg{width:26px;height:26px}
+.pillar h3{font-family:var(--display);font-size:26px;font-weight:400;margin:0 0 10px;letter-spacing:-.015em}
+.pillar p{margin:0;color:var(--ink-soft);font-size:15px;line-height:1.55}
+
+/* ── Partner grid ── */
+.partners-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.partner-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:22px;transition:transform .15s ease, box-shadow .15s ease;cursor:pointer;position:relative;overflow:hidden}
+.partner-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.partner-card .logo{height:54px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:24px;font-style:italic;color:var(--ink);margin-bottom:14px;letter-spacing:-.01em}
+.partner-card .logo.bold{font-family:var(--body);font-weight:800;font-style:normal;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.partner-card .cat{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:600}
+.partner-card .meta{font-size:14px;color:var(--ink-soft);font-weight:500}
+.partner-card .accent-bar{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rose)}
+.partner-card.c2 .accent-bar{background:var(--butter)}
+.partner-card.c3 .accent-bar{background:var(--mint)}
+.partner-card.c4 .accent-bar{background:var(--lilac)}
+.partner-card.c5 .accent-bar{background:var(--peach)}
+.partner-card.c6 .accent-bar{background:var(--gold)}
+.partner-card.c7 .accent-bar{background:var(--rose-deep)}
+.partner-card.c8 .accent-bar{background:#3B82F6}
+.see-all{text-align:center;margin-top:36px}
+
+/* ── Occasions ── */
+.occasions{background:var(--paper)}
+.occ-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.occ-card{position:relative;border-radius:var(--r-lg);overflow:hidden;aspect-ratio:1.15/1;cursor:pointer;transition:transform .25s ease}
+.occ-card:hover{transform:scale(1.02)}
+.occ-card .bg{position:absolute;inset:0;background:linear-gradient(160deg,var(--c1),var(--c2));z-index:1}
+.occ-card .ornament{position:absolute;inset:0;z-index:2;opacity:.3}
+.occ-card .body{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;color:#fff}
+.occ-card .body h4{font-family:var(--display);font-size:32px;font-weight:400;margin:0 0 4px;letter-spacing:-.015em}
+.occ-card .body p{margin:0;font-size:13.5px;opacity:.92}
+.occ-card .corner-tag{position:absolute;top:18px;left:18px;background:rgba(255,255,255,.22);backdrop-filter:blur(8px);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;z-index:4}
+.occ-anniversaire{--c1:#E11D48;--c2:#FF6B8E}
+.occ-mariage{--c1:#C99A3A;--c2:#FFE4B5}
+.occ-naissance{--c1:#6BCFAF;--c2:#A8E6CF}
+.occ-tabaski{--c1:#9B7EE2;--c2:#C5A8FF}
+.occ-valentin{--c1:#B8123A;--c2:#E11D48}
+.occ-merci{--c1:#FF9F7A;--c2:#FFC95A}
+
+/* ── How it works ── */
+.how-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;position:relative}
+.how-steps::before{content:"";position:absolute;top:30px;left:8%;right:8%;height:2px;background:repeating-linear-gradient(to right, var(--line) 0, var(--line) 8px, transparent 8px, transparent 16px);z-index:0}
+.step{background:var(--white);border:1px solid var(--line);border-radius:var(--r-md);padding:24px 18px;text-align:center;position:relative;z-index:1}
+.step-num{width:60px;height:60px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:28px;margin:0 auto 18px;box-shadow:0 6px 18px -6px rgba(43,26,45,.4)}
+.step-num.active{background:var(--rose);box-shadow:0 6px 18px -6px rgba(225,29,72,.55)}
+.step h4{font-size:15px;font-weight:700;margin:0 0 8px;color:var(--ink)}
+.step p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* ── Animation formats ── */
+.formats{background:var(--white);border-top:1px solid var(--line)}
+.fmt-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.fmt{position:relative;border-radius:var(--r-lg);overflow:hidden;aspect-ratio:.72/1;cursor:pointer;border:1px solid var(--line);transition:transform .2s ease, box-shadow .2s ease}
+.fmt:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.fmt .bg{position:absolute;inset:0;background:linear-gradient(170deg,var(--c1),var(--c2));z-index:1}
+.fmt .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;z-index:3;box-shadow:0 8px 20px -6px rgba(0,0,0,.3)}
+.fmt .play svg{width:22px;height:22px;color:var(--ink);margin-left:3px}
+.fmt .label{position:absolute;bottom:0;left:0;right:0;padding:18px 18px 18px;z-index:3;color:#fff;background:linear-gradient(to top, rgba(0,0,0,.65), transparent)}
+.fmt .label h5{font-family:var(--display);font-size:22px;font-weight:400;margin:0 0 2px;letter-spacing:-.015em}
+.fmt .label p{font-size:12.5px;margin:0;opacity:.88}
+.fmt-birthday{--c1:#FF6B8E;--c2:#FFC95A}
+.fmt-cinema{--c1:#2B1A2D;--c2:#5A4458}
+.fmt-wall{--c1:#9B7EE2;--c2:#FFE4EC}
+.fmt-wall-modern{--c1:#6BCFAF;--c2:#A8E6CF}
+.fmt-forever{--c1:#C99A3A;--c2:#FFE4B5}
+
+/* ── Pro section ── */
+.pro{background:var(--ink);color:#fff;position:relative;overflow:hidden}
+.pro::before{content:"";position:absolute;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(closest-side, rgba(225,29,72,.25), transparent);pointer-events:none}
+.pro-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1}
+.pro h2{font-family:var(--display);font-size:clamp(36px,4.2vw,56px);font-weight:400;letter-spacing:-.02em;line-height:1.08;margin:0 0 22px;color:#fff}
+.pro h2 em{color:#FFD6E0;font-style:italic}
+.pro .lead{font-size:17px;color:rgba(255,255,255,.78);margin-bottom:36px;max-width:480px;line-height:1.55}
+.pro-list{list-style:none;padding:0;margin:0 0 36px;display:grid;gap:14px}
+.pro-list li{display:flex;align-items:flex-start;gap:14px;font-size:15px;color:rgba(255,255,255,.92)}
+.pro-list li svg{flex-shrink:0;width:22px;height:22px;color:#FFD6E0;margin-top:2px}
+.pro-list li strong{display:block;font-weight:600;margin-bottom:2px;color:#fff}
+.pro-list li span{font-size:13.5px;color:rgba(255,255,255,.7)}
+.pro-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-lg);padding:32px;backdrop-filter:blur(12px)}
+.pro-card-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
+.pro-card-row:last-child{border-bottom:none}
+.pro-card-row .left{display:flex;align-items:center;gap:12px}
+.pro-card-row .ic{width:36px;height:36px;border-radius:8px;background:rgba(225,29,72,.18);color:#FFD6E0;display:flex;align-items:center;justify-content:center}
+.pro-card-row .ic svg{width:18px;height:18px}
+.pro-card-row .name{font-weight:600;color:#fff}
+.pro-card-row .sub{font-size:12px;color:rgba(255,255,255,.55)}
+.pro-card-row .amount{font-family:var(--display);font-size:18px;color:#fff}
+.pro-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.pro-card-head h5{font-size:15px;margin:0;color:#fff}
+.pro-card-head .live{display:flex;align-items:center;gap:6px;font-size:11px;color:#6BCFAF;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.pro-card-head .live .d{width:7px;height:7px;border-radius:50%;background:#6BCFAF;box-shadow:0 0 0 0 rgba(107,207,175,.6);animation:pulse2 2s infinite}
+@keyframes pulse2{0%{box-shadow:0 0 0 0 rgba(107,207,175,.6)}70%{box-shadow:0 0 0 8px rgba(107,207,175,0)}100%{box-shadow:0 0 0 0 rgba(107,207,175,0)}}
+
+/* ── Testimonials ── */
+.testimonials{background:var(--paper)}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.test{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:32px 28px;position:relative}
+.test .q{font-family:var(--display);font-size:60px;color:var(--rose-pale);position:absolute;top:10px;left:24px;line-height:1}
+.test p{font-size:15.5px;color:var(--ink);line-height:1.6;margin:24px 0 22px;position:relative;z-index:1}
+.test-who{display:flex;align-items:center;gap:12px}
+.test-who .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFE4EC,#E11D48)}
+.test-who .av.a2{background:linear-gradient(135deg,#FFC95A,#FF9F7A)}
+.test-who .av.a3{background:linear-gradient(135deg,#6BCFAF,#9B7EE2)}
+.test-who .name{font-weight:700;font-size:14.5px;color:var(--ink)}
+.test-who .role{font-size:13px;color:var(--muted)}
+
+/* ── FAQ ── */
+.faq-list{max-width:780px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--line);padding:22px 0;cursor:pointer}
+.faq-item summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:600;color:var(--ink)}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary .plus{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:transform .25s ease}
+.faq-item[open] summary .plus{transform:rotate(45deg);background:var(--rose);color:#fff;border-color:var(--rose)}
+.faq-item .ans{padding:14px 0 0;color:var(--ink-soft);font-size:15px;line-height:1.6;max-width:680px}
+
+/* ── Final CTA ── */
+.final-cta{background:linear-gradient(160deg, var(--rose-pale) 0%, var(--cream) 100%);text-align:center;padding:110px 0}
+.final-cta h2{font-family:var(--display);font-size:clamp(40px,5vw,68px);font-weight:400;letter-spacing:-.02em;line-height:1.08;margin:0 auto 22px;max-width:760px}
+.final-cta h2 em{color:var(--rose);font-style:italic}
+.final-cta p{font-size:17.5px;color:var(--ink-soft);max-width:520px;margin:0 auto 36px}
+.final-cta .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ── Footer ── */
+.footer{background:var(--ink);color:rgba(255,255,255,.7);padding:56px 0 26px;font-size:14px}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:50px;margin-bottom:42px}
+.footer h6{color:#fff;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 18px}
+.footer ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.footer ul a:hover{color:#FFD6E0}
+.footer .brand-foot{font-family:var(--display);font-size:30px;color:#fff;margin-bottom:14px}
+.footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,.5);flex-wrap:wrap;gap:14px}
+.foot-pay{display:flex;gap:12px;align-items:center}
+.foot-pay span{background:rgba(255,255,255,.08);padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:600;letter-spacing:.04em}
+
+/* ── Responsive ── */
+@media(max-width:920px){
+  .hero-grid{grid-template-columns:1fr;gap:60px}
+  .phone-wrap{margin-top:24px}
+  .pillars-grid,.partners-grid,.occ-grid,.fmt-grid,.how-steps,.test-grid,.pro-grid,.footer-grid{grid-template-columns:1fr 1fr;gap:18px}
+  .pro-grid{grid-template-columns:1fr;gap:50px}
+  .nav ul{display:none}
+  section{padding:64px 0}
+}
+@media(max-width:580px){
+  .pillars-grid,.partners-grid,.occ-grid,.fmt-grid,.how-steps,.test-grid,.footer-grid{grid-template-columns:1fr}
+  .trust-row{gap:30px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  Nouveau · <strong>Cartes cadeaux animées</strong> chez 10+ enseignes au Bénin. Paiement Mobile Money.
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="brand"><span class="dot"></span>myKado</div>
+    <ul>
+      <li><a href="#cartes">Cartes</a></li>
+      <li><a href="#partenaires">Enseignes</a></li>
+      <li><a href="#occasions">Occasions</a></li>
+      <li><a href="#pro">Pour entreprises</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#login" class="btn btn-ghost">Connexion</a>
+      <a href="#cartes" class="btn btn-primary">Offrir une carte</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="pulse"></span> Nouveau · La carte cadeau version cinéma</div>
+      <h1>Offrez une <span class="accent">carte cadeau</span> qui se déballe comme un film.</h1>
+      <p class="hero-sub">Choisissez une enseigne, un montant et un format animé. Le destinataire ouvre un mini-film personnalisé avec ses photos, son prénom, et sa carte cadeau à utiliser chez l'enseigne. Paiement Mobile Money. Livraison instantanée par WhatsApp.</p>
+      <div class="hero-actions">
+        <a href="#cartes" class="btn btn-rose btn-lg">Offrir une carte
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#pro" class="btn btn-outline btn-lg">Pour les entreprises</a>
+      </div>
+      <div class="hero-trust">
+        <div class="stack"><span></span><span></span><span></span></div>
+        <div>+ 3 200 cadeaux animés déjà offerts en Afrique francophone</div>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="fcard f1">
+        <div class="badge">E</div>
+        Erevan · 25 000 FCFA
+      </div>
+      <div class="fcard f2">
+        <div class="badge" style="background:#FFE7CC;color:#C99A3A">T</div>
+        Total · 10 000 FCFA
+      </div>
+      <div class="fcard f3">
+        <div class="badge" style="background:#E8E1FF;color:#9B7EE2">M</div>
+        MTN · 5 000 FCFA
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-scene">
+            <div class="phone-greet">Coucou Aminata,</div>
+            <div class="phone-circle">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <div class="phone-sub">J'ai quelque chose de spécial pour toi.<br>Clique pour découvrir.</div>
+          </div>
+          <div class="phone-pill">
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="bar"><i></i></div>
+            <span>0:14</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ TRUST BAND ═══ -->
+<div class="trust">
+  <div class="container">
+    <div class="trust-label">Nos enseignes partenaires</div>
+    <div class="trust-row">
+      <span class="brand-chip bold">EREVAN</span>
+      <span class="brand-chip">Total Energies</span>
+      <span class="brand-chip bold">MTN</span>
+      <span class="brand-chip">Canal Olympia</span>
+      <span class="brand-chip bold">MOOV</span>
+      <span class="brand-chip">ASKY</span>
+      <span class="brand-chip bold">CHAMPION</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PILIERS ═══ -->
+<section class="pillars">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Pourquoi myKado</div>
+      <h2 class="section-title">Pas un email avec un code. <em class="it">Un moment.</em></h2>
+      <p class="section-sub">myKado réinvente le cadeau à distance. Le destinataire ne reçoit pas une carte — il vit une expérience qui se termine par une carte à utiliser dans la vraie vie.</p>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M8 14h.01M12 14h.01"/></svg>
+        </div>
+        <h3>Cartes animées</h3>
+        <p>5 formats cinématiques signés myKado : Anniversaire, Cinéma, Mur de vœux, Mur Moderne, Forever. Photos, musique, prénom du destinataire.</p>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+        </div>
+        <h3>10+ enseignes triées</h3>
+        <p>Pas une marketplace de 1000 marques inconnues. Un réseau curaté de grandes enseignes locales : supermarché, carburant, telco, restauration, voyage.</p>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>
+        </div>
+        <h3>Mobile Money natif</h3>
+        <p>MTN MoMo, Moov Money, Celtiis Cash. Paiement en FCFA en 30 secondes. La diaspora paie aussi en EUR, USD, GBP avec carte bancaire.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PARTENAIRES ═══ -->
+<section id="partenaires" style="background:var(--paper)">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Notre réseau</div>
+      <h2 class="section-title">Les enseignes <em class="it">qu'on aime vraiment</em>.</h2>
+      <p class="section-sub">Un réseau premium signé partenaire par partenaire. Pas de boutique anonyme. Que des marques reconnues, présentes physiquement, avec un service après-vente qui répond.</p>
+    </div>
+
+    <div class="partners-grid">
+      <div class="partner-card c1"><div class="accent-bar"></div>
+        <div class="logo bold">EREVAN</div>
+        <div class="cat">Supermarché</div>
+        <div class="meta">De 5 000 à 250 000 FCFA</div>
+      </div>
+      <div class="partner-card c2"><div class="accent-bar"></div>
+        <div class="logo">Total Energies</div>
+        <div class="cat">Carburant</div>
+        <div class="meta">De 5 000 à 50 000 FCFA</div>
+      </div>
+      <div class="partner-card c3"><div class="accent-bar"></div>
+        <div class="logo bold">MTN</div>
+        <div class="cat">Recharge & Forfait</div>
+        <div class="meta">De 1 000 à 20 000 FCFA</div>
+      </div>
+      <div class="partner-card c4"><div class="accent-bar"></div>
+        <div class="logo">Canal Olympia</div>
+        <div class="cat">Cinéma</div>
+        <div class="meta">À partir de 3 000 FCFA</div>
+      </div>
+      <div class="partner-card c5"><div class="accent-bar"></div>
+        <div class="logo bold">MOOV</div>
+        <div class="cat">Recharge & Forfait</div>
+        <div class="meta">De 1 000 à 20 000 FCFA</div>
+      </div>
+      <div class="partner-card c6"><div class="accent-bar"></div>
+        <div class="logo">ASKY Airlines</div>
+        <div class="cat">Voyage</div>
+        <div class="meta">À partir de 25 000 FCFA</div>
+      </div>
+      <div class="partner-card c7"><div class="accent-bar"></div>
+        <div class="logo bold">CHAMPION</div>
+        <div class="cat">Supermarché</div>
+        <div class="meta">De 5 000 à 100 000 FCFA</div>
+      </div>
+      <div class="partner-card c8"><div class="accent-bar"></div>
+        <div class="logo">KFC</div>
+        <div class="cat">Restauration</div>
+        <div class="meta">De 5 000 à 30 000 FCFA</div>
+      </div>
+    </div>
+
+    <div class="see-all">
+      <a href="#all" class="btn btn-outline btn-lg">Voir toutes les enseignes
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ OCCASIONS ═══ -->
+<section class="occasions" id="occasions">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Par occasion</div>
+      <h2 class="section-title">Une carte multi-enseignes <em class="it">pour chaque moment</em>.</h2>
+      <p class="section-sub">Pas envie de choisir l'enseigne ? Offrez une carte d'occasion. Le destinataire la dépense où il veut, parmi nos partenaires.</p>
+    </div>
+
+    <div class="occ-grid">
+      <div class="occ-card occ-anniversaire">
+        <div class="bg"></div>
+        <div class="corner-tag">Best-seller</div>
+        <div class="body"><h4>Anniversaire</h4><p>Le grand classique. Confettis, prénom, gâteau qui s'allume.</p></div>
+      </div>
+      <div class="occ-card occ-mariage">
+        <div class="bg"></div>
+        <div class="body"><h4>Mariage</h4><p>Tous les invités contribuent. Un mur, un cagnotte de cartes.</p></div>
+      </div>
+      <div class="occ-card occ-naissance">
+        <div class="bg"></div>
+        <div class="body"><h4>Naissance</h4><p>Pour bébé et maman. Pastel, doux, durable.</p></div>
+      </div>
+      <div class="occ-card occ-tabaski">
+        <div class="bg"></div>
+        <div class="body"><h4>Tabaski · Noël</h4><p>Fêtes familiales. Cartes multi-enseignes, paquet d'occasion.</p></div>
+      </div>
+      <div class="occ-card occ-valentin">
+        <div class="bg"></div>
+        <div class="body"><h4>Saint-Valentin</h4><p>Format Cinéma. Vos photos, votre musique, sa carte.</p></div>
+      </div>
+      <div class="occ-card occ-merci">
+        <div class="bg"></div>
+        <div class="body"><h4>Merci</h4><p>Hommage, remerciement, départ. Sobre et chaleureux.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Comment ça marche</div>
+      <h2 class="section-title">Cinq étapes. <em class="it">Trois minutes.</em></h2>
+      <p class="section-sub">Pas de compte à créer. Pas d'app à installer. Vous payez, votre proche reçoit un lien WhatsApp et ouvre son cadeau.</p>
+    </div>
+
+    <div class="how-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Choisissez une enseigne</h4>
+        <p>Erevan, Total, MTN, KFC, Canal Olympia… ou une carte multi-enseignes par occasion.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Choisissez un montant</h4>
+        <p>De 1 000 à 250 000 FCFA selon l'enseigne. Affichage instantané en EUR pour la diaspora.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Choisissez un format animé</h4>
+        <p>Anniversaire, Cinéma, Mur de vœux, Mur Moderne, Forever. Personnalisez avec photos et musique.</p>
+      </div>
+      <div class="step">
+        <div class="step-num active">4</div>
+        <h4>Payez en Mobile Money</h4>
+        <p>MTN MoMo, Moov Money, Celtiis Cash. Ou carte bancaire depuis l'étranger.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <h4>Livraison WhatsApp</h4>
+        <p>Le destinataire reçoit un lien. Il ouvre son mini-film. Sa carte se révèle à la fin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FORMATS ANIMATION ═══ -->
+<section class="formats" id="cartes">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Formats d'animation</div>
+      <h2 class="section-title">5 formats signés myKado, <em class="it">choisis par occasion</em>.</h2>
+      <p class="section-sub">Chaque format est une mini-expérience scénique. Trente à soixante secondes d'émotion avant que la carte cadeau n'apparaisse.</p>
+    </div>
+
+    <div class="fmt-grid">
+      <div class="fmt fmt-birthday">
+        <div class="bg"></div>
+        <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="label"><h5>Birthday</h5><p>Anniversaire</p></div>
+      </div>
+      <div class="fmt fmt-cinema">
+        <div class="bg"></div>
+        <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="label"><h5>Cinéma</h5><p>Scènes & souvenirs</p></div>
+      </div>
+      <div class="fmt fmt-wall">
+        <div class="bg"></div>
+        <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="label"><h5>Wall of Wishes</h5><p>Collectif</p></div>
+      </div>
+      <div class="fmt fmt-wall-modern">
+        <div class="bg"></div>
+        <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="label"><h5>Wall Modern</h5><p>Corporate-friendly</p></div>
+      </div>
+      <div class="fmt fmt-forever">
+        <div class="bg"></div>
+        <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="label"><h5>Forever</h5><p>Hommage & éternité</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRO ═══ -->
+<section class="pro" id="pro">
+  <div class="container pro-grid">
+    <div>
+      <div class="section-eyebrow" style="color:#FFD6E0">Pour les entreprises</div>
+      <h2>Offrez à vos salariés un cadeau <em>dont ils se souviendront.</em></h2>
+      <p class="lead">myKado @Work transforme votre programme RH cadeau. Anniversaires, ancienneté, naissances, fêtes religieuses, performance. Tout automatisé, tout personnalisé, tout mesurable.</p>
+
+      <ul class="pro-list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><strong>myKado @Work — Portail RH</strong><span>Upload fichier salariés, calendrier anniversaires, envoi auto le jour J.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><strong>myKado Studio — Campagnes</strong><span>Fête des mères, fin d'année, anniversaire entreprise. Branding intégral à vos couleurs.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><strong>myKado API — Intégration</strong><span>Plug HRIS, CRM, banque, telco. Documentation, SDK, sandbox.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><strong>White-Label</strong><span>Votre propre boutique cadeau animée, propulsée par myKado.</span></div>
+        </li>
+      </ul>
+
+      <a href="#demo" class="btn btn-rose btn-lg">Demander une démo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="pro-card">
+      <div class="pro-card-head">
+        <h5>Campagne anniversaires · Décembre</h5>
+        <div class="live"><span class="d"></span>En direct</div>
+      </div>
+      <div class="pro-card-row">
+        <div class="left">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="name">Aminata Sossa</div><div class="sub">Erevan · Birthday</div></div>
+        </div>
+        <div class="amount">25 000 F</div>
+      </div>
+      <div class="pro-card-row">
+        <div class="left">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="name">Jules Hounnou</div><div class="sub">Total · Cinéma</div></div>
+        </div>
+        <div class="amount">15 000 F</div>
+      </div>
+      <div class="pro-card-row">
+        <div class="left">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="name">Fatou Adjovi</div><div class="sub">KFC · Birthday</div></div>
+        </div>
+        <div class="amount">10 000 F</div>
+      </div>
+      <div class="pro-card-row">
+        <div class="left">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="name">+ 42 salariés</div><div class="sub">À envoyer cette semaine</div></div>
+        </div>
+        <div class="amount" style="color:#FFD6E0">680 000 F</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="testimonials">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Ils en parlent</div>
+      <h2 class="section-title">Le cadeau est devenu <em class="it">un événement</em>.</h2>
+    </div>
+
+    <div class="test-grid">
+      <div class="test">
+        <div class="q">"</div>
+        <p>J'ai offert un Cinéma à ma mère depuis Paris pour ses 60 ans. Elle est passée chercher son bon Erevan deux jours après. Le mini-film, elle l'a montré à toute la famille à Cotonou. Du jamais vu.</p>
+        <div class="test-who">
+          <div class="av"></div>
+          <div><div class="name">Sandra K.</div><div class="role">Diaspora · Paris</div></div>
+        </div>
+      </div>
+      <div class="test">
+        <div class="q">"</div>
+        <p>On a fait toutes les anniversaires de l'équipe avec myKado @Work cette année. 38 salariés, chacun avec sa carte de son enseigne préférée. Coût ? Moitié moins que nos bons d'achat papier d'avant.</p>
+        <div class="test-who">
+          <div class="av a2"></div>
+          <div><div class="name">Aurélien D.</div><div class="role">DRH · Cotonou</div></div>
+        </div>
+      </div>
+      <div class="test">
+        <div class="q">"</div>
+        <p>Le wall of wishes pour le mariage de ma sœur a explosé. 47 invités, 47 cartes cadeaux qui s'empilent. Au lieu d'un enveloppe d'argent perdue, elle a un portefeuille de bons à dépenser pendant un an.</p>
+        <div class="test-who">
+          <div class="av a3"></div>
+          <div><div class="name">Marie A.</div><div class="role">Mariage · Porto-Novo</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Questions fréquentes</div>
+      <h2 class="section-title">Tout ce que vous voulez <em class="it">savoir</em>.</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>Comment ça marche concrètement pour le destinataire ?<span class="plus">+</span></summary>
+        <div class="ans">Le destinataire reçoit un lien WhatsApp (ou SMS). Il clique, regarde son mini-film personnalisé avec ses photos et son prénom, et à la fin la carte cadeau s'affiche avec un QR code et un montant. Il va dans le magasin de l'enseigne, montre son QR au caissier, et utilise sa carte comme un bon classique.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Quels moyens de paiement acceptez-vous ?<span class="plus">+</span></summary>
+        <div class="ans">MTN Mobile Money, Moov Money, Celtiis Cash pour le Bénin. Wave et Orange Money pour la zone UEMOA. Visa, Mastercard et Apple Pay pour la diaspora. Le tarif s'affiche en FCFA et en EUR / USD.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Combien de temps pour livrer ?<span class="plus">+</span></summary>
+        <div class="ans">Instantané. Le destinataire reçoit son lien dans les 30 secondes après le paiement, par WhatsApp ou SMS. Aucun délai de fabrication.</div>
+      </details>
+      <details class="faq-item">
+        <summary>La carte cadeau a-t-elle une durée de validité ?<span class="plus">+</span></summary>
+        <div class="ans">Oui, 12 mois à partir de la date d'achat. Le destinataire reçoit un rappel automatique 30 jours avant expiration.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Puis-je personnaliser le film avec mes photos ?<span class="plus">+</span></summary>
+        <div class="ans">Oui. Selon le format, vous uploadez 1 à 12 photos, ajoutez le prénom du destinataire, une musique (MP3), et un message. La personnalisation est 100 % gratuite — vous ne payez qu'au moment d'envoyer.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Comment fonctionne myKado @Work pour les entreprises ?<span class="plus">+</span></summary>
+        <div class="ans">Vous créez un compte entreprise, importez votre fichier salariés (CSV ou via API HRIS), et configurez vos campagnes : anniversaires, ancienneté, fêtes. Les envois sont automatiques. Vous suivez en temps réel le taux d'utilisation, le budget, et la satisfaction.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA ═══ -->
+<section class="final-cta">
+  <div class="container">
+    <h2>Offrez votre premier cadeau <em>animé</em> aujourd'hui.</h2>
+    <p>Trois minutes pour créer. Une seconde pour l'envoyer. Une vie pour s'en souvenir.</p>
+    <div class="actions">
+      <a href="#cartes" class="btn btn-rose btn-lg">Offrir une carte</a>
+      <a href="#pro" class="btn btn-outline btn-lg">Démo entreprise</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-foot">myKado</div>
+        <p style="margin:0;max-width:280px;line-height:1.55">La carte cadeau qui se déballe comme un film. Made in Cotonou, pour l'Afrique francophone.</p>
+      </div>
+      <div>
+        <h6>Produit</h6>
+        <ul>
+          <li><a href="#cartes">Cartes animées</a></li>
+          <li><a href="#partenaires">Enseignes</a></li>
+          <li><a href="#occasions">Occasions</a></li>
+          <li><a href="#how">Comment ça marche</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Entreprises</h6>
+        <ul>
+          <li><a href="#pro">myKado @Work</a></li>
+          <li><a href="#studio">myKado Studio</a></li>
+          <li><a href="#api">myKado API</a></li>
+          <li><a href="#demo">Demander une démo</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Société</h6>
+        <ul>
+          <li><a href="#about">À propos</a></li>
+          <li><a href="#legal">Mentions légales</a></li>
+          <li><a href="#cgv">CGV</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 myKado · Cotonou, Bénin</div>
+      <div class="foot-pay">
+        <span>MTN MoMo</span>
+        <span>Moov Money</span>
+        <span>Celtiis</span>
+        <span>VISA</span>
+        <span>Mastercard</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,41 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&display=swap');
+/* myKado Design System (Hybride C+A — Afro-Modern + Editorial) */
+@import './design-system/tokens.css';
+@import './design-system/typography.css';
+@import './design-system/primitives/primitives.css';
+@import './design-system/composed/composed.css';
+@import './design-system/layout/layout.css';
+
+/* Legacy pastel tokens — DEPRECATED, kept for backwards compat during migration */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&family=Gabarito:wght@600;700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── myKado Design Tokens ── */
+  /* ── myKado Design Tokens — alignés sur la palette Kado (mascotte) ── */
 
   /* Surfaces */
-  --mk-cream:    #FFFAF6;
-  --mk-blush:    #FFF1F4;
-  --mk-blush-2:  #FCE0E6;
-  --mk-lilac-bg: #F6EEFB;
+  --mk-cream:    #FFFFFF;
+  --mk-blush:    #FFF3F5;
+  --mk-blush-2:  #FFDCE3;
+  --mk-lilac-bg: #F1ECFF;
   --mk-paper:    #FFFFFF;
 
-  /* Brand */
-  --mk-rose:      #E11D48;
-  --mk-rose-2:    #F35C7A;
-  --mk-rose-soft: #FFB3C1;
-  --mk-rose-pale: #FFE0E6;
+  /* Brand — dérivés directs de --k-box (#FF5470) */
+  --mk-rose:      #FF5470;
+  --mk-rose-2:    #FF7A8F;
+  --mk-rose-soft: #FFB3C0;
+  --mk-rose-pale: #FFF3F5;
+  --mk-rose-deep: #D6465E;
+  --mk-rose-edge: #B83C51;
 
-  /* Accents */
-  --mk-lilac:       #9B7EE2;
-  --mk-lilac-soft:  #D7C5F2;
-  --mk-mint:        #6BCFAF;
-  --mk-mint-soft:   #C9EEDF;
-  --mk-butter:      #FFC95A;
-  --mk-butter-soft: #FFE7AD;
+  /* Accents — mint / violet / sky viennent des confettis Kado */
+  --mk-lilac:       #7C5CFF;
+  --mk-lilac-soft:  #EDE7FF;
+  --mk-mint:        #00A48D;
+  --mk-mint-soft:   #CFF2ED;
+  --mk-butter:      #FFC145;
+  --mk-butter-soft: #FFF0C9;
   --mk-peach:       #FF9F7A;
   --mk-peach-soft:  #FFD7C2;
+  --mk-sky:         #5CC8FF;
+  --mk-sky-soft:    #DAF1FF;
 
-  /* Ink */
-  --mk-ink:   #2B1A2D;
-  --mk-ink-2: #6D5C70;
-  --mk-ink-3: #A496A5;
-  --mk-ink-4: #C8BAC9;
+  /* Ribbon = accent chaud décoratif (mascotte) */
+  --mk-ribbon:      #FFC145;
+  --mk-ribbon-dark: #D19E39;
+  --mk-ribbon-hi:   #FFB02E;
 
-  /* Lines */
-  --mk-line:        #F2E4EA;
+  /* Ink — aligné sur --k-ink (#2B2440) */
+  --mk-ink:   #2B2440;
+  --mk-ink-2: #5D5474;
+  --mk-ink-3: #8C859E;
+  --mk-ink-4: #B5AFC0;
+
+  /* Lines — tirent vers le rose de la mascotte */
+  --mk-line:        #F4E8EC;
   --mk-line-2:      #EAD6DE;
   --mk-line-strong: #DCC4CE;
 
@@ -47,26 +64,27 @@
   --mk-r-xl:   36px;
   --mk-r-pill: 999px;
 
-  /* Shadows */
-  --mk-sh-1: 0 1px 0 rgba(225,29,72,.04), 0 2px 8px rgba(43,26,45,.04);
-  --mk-sh-2: 0 2px 0 rgba(225,29,72,.05), 0 8px 24px rgba(43,26,45,.06);
-  --mk-sh-3: 0 4px 0 rgba(225,29,72,.06), 0 16px 40px rgba(43,26,45,.10);
-  --mk-sh-rose:  0 8px 24px rgba(225,29,72,.22);
-  --mk-sh-lilac: 0 8px 24px rgba(155,126,226,.28);
+  /* Shadows — colorées par la palette Kado (rose #FF5470, ink #2B2440, lilac #7C5CFF) */
+  --mk-sh-1: 0 1px 0 rgba(255,84,112,.04), 0 2px 8px rgba(43,36,64,.04);
+  --mk-sh-2: 0 2px 0 rgba(255,84,112,.05), 0 8px 24px rgba(43,36,64,.06);
+  --mk-sh-3: 0 4px 0 rgba(255,84,112,.06), 0 16px 40px rgba(43,36,64,.10);
+  --mk-sh-rose:  0 8px 24px rgba(255,84,112,.24);
+  --mk-sh-lilac: 0 8px 24px rgba(124,92,255,.28);
+  --mk-sh-butter: 0 8px 24px rgba(255,193,69,.28);
 
   /* Typography */
   --mk-display: 'Instrument Serif', Georgia, serif;
   --mk-body:    'Plus Jakarta Sans', system-ui, sans-serif;
   --mk-hand:    'Caveat', cursive;
 
-  /* ── Legacy aliases (keep old code working) ── */
-  --brand:        #E11D48;
-  --brand-light:  #FFE0E6;
-  --brand-dark:   #be185d;
-  --accent:       #FFC95A;
-  --accent-light: #FFE7AD;
-  --green:        #6BCFAF;
-  --red:          #ef4444;
+  /* ── Legacy aliases (keep old code working) — pointés sur la palette Kado ── */
+  --brand:        #FF5470;
+  --brand-light:  #FFDCE3;
+  --brand-dark:   #D6465E;
+  --accent:       #FFC145;
+  --accent-light: #FFF0C9;
+  --green:        #00A48D;
+  --red:          #FF5470;
 
   --bg:       var(--mk-cream);
   --surface:  var(--mk-paper);
@@ -94,15 +112,17 @@
 html, body, #root {
   height: 100%;
   font-family: var(--mk-body);
-  background: var(--mk-cream);
+  background: #FFFFFF;
   color: var(--mk-ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-input, textarea, select { font-family: inherit; color: inherit; }
-a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+input, textarea, select { font-family: inherit; color: inherit; touch-action: manipulation; }
+a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipulation; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -112,6 +132,9 @@ a { color: inherit; text-decoration: none; }
 
 /* Focus */
 :focus-visible { outline: 3px solid var(--mk-rose-soft); outline-offset: 2px; border-radius: 6px; }
+
+/* Selection tinted rose */
+::-moz-selection { background: var(--mk-rose-pale); color: var(--mk-ink); }
 
 /* Utilities */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -138,8 +161,8 @@ a { color: inherit; text-decoration: none; }
   100% { transform: translateX(100%); }
 }
 @keyframes mk-pulse-soft {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(225,29,72,.45); }
-  70%       { box-shadow: 0 0 0 14px rgba(225,29,72,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,84,112,.48); }
+  70%       { box-shadow: 0 0 0 14px rgba(255,84,112,0); }
 }
 @keyframes mk-slide-up {
   from { opacity: 0; transform: translateY(18px); }
@@ -149,6 +172,59 @@ a { color: inherit; text-decoration: none; }
 @keyframes m-sheet-up {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
+}
+@keyframes mk-slide-down {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes mk-slide-left {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mk-slide-right {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mk-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes mk-panel-in-bottom {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes mk-panel-in-top {
+  from { opacity: 0; transform: translateY(-28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes mk-panel-in-left {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mk-panel-in-right {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Easing utilities (courbes pré-définies) ──
+   Utilisées partout : .mk-ease-out (générique), .mk-ease-emphasis (spring). */
+.mk-anim-fade-in       { animation: mk-fade-in .28s cubic-bezier(.4,0,.2,1) both; }
+.mk-anim-slide-up      { animation: mk-slide-up .35s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-slide-down    { animation: mk-slide-down .35s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-slide-left    { animation: mk-slide-left .35s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-slide-right   { animation: mk-slide-right .35s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-panel-bottom  { animation: mk-panel-in-bottom .38s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-panel-top     { animation: mk-panel-in-top    .38s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-panel-left    { animation: mk-panel-in-left   .38s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-panel-right   { animation: mk-panel-in-right  .38s cubic-bezier(.16,1,.3,1) both; }
+.mk-anim-pop           { animation: mk-pop .28s cubic-bezier(.4,0,.2,1) both; }
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .mk-anim-fade-in, .mk-anim-slide-up, .mk-anim-slide-down,
+  .mk-anim-slide-left, .mk-anim-slide-right,
+  .mk-anim-panel-bottom, .mk-anim-panel-top, .mk-anim-panel-left, .mk-anim-panel-right,
+  .mk-anim-pop { animation: none !important; }
 }
 
 /* ── Mobile utilities ── */
@@ -160,23 +236,25 @@ a { color: inherit; text-decoration: none; }
    ══════════════════════════════════════════ */
 
 :root {
-  /* Redesign accent aliases */
-  --mk-accent:      #E11D48;
-  --mk-accent-soft: #fce4ea;
-  --mk-accent-pale: #fff0f3;
-  --mk-accent-deep: #b0152e;
-  --mk-sh-accent:   0 8px 24px rgba(225,29,72,.24);
+  /* Redesign accent aliases — palette Kado (mascotte) */
+  --mk-accent:      #FF5470;
+  --mk-accent-soft: #FFDCE3;
+  --mk-accent-pale: #FFF3F5;
+  --mk-accent-deep: #D6465E;
+  --mk-sh-accent:   0 8px 24px rgba(255,84,112,.28);
 
-  /* Mint fix */
-  --mk-mint:        #2E9C77;
-  --mk-mint-soft:   #DDF3EA;
+  /* Mint — version lisible du confetti mint #00C2A8 */
+  --mk-mint:        #00A48D;
+  --mk-mint-soft:   #CFF2ED;
 
-  /* Butter fix */
+  /* Butter / Gold — ribbon Kado (#FFC145) + version texte lisible */
   --mk-butter:      #B07A00;
-  --mk-butter-soft: #FFF3D6;
+  --mk-butter-soft: #FFF0C9;
+  --mk-gold:        #FFC145;
+  --mk-gold-hi:     #FFB02E;
 
-  /* Lilac soft fix */
-  --mk-lilac-soft:  #F6EEFB;
+  /* Lilac — violet des confettis Kado */
+  --mk-lilac-soft:  #EDE7FF;
 
   /* Density system */
   --d-page: 36px;
@@ -199,7 +277,7 @@ a { color: inherit; text-decoration: none; }
   padding: 22px 14px 14px;
   height: 100vh;
 }
-.sb-logo { display: flex; align-items: baseline; gap: 2px; padding: 0 10px 4px; font-family: var(--mk-display); font-size: 26px; letter-spacing: -.01em; }
+.sb-logo { display: flex; align-items: center; gap: 8px; padding: 0 10px 4px; font-family: 'Gabarito', var(--mk-display), sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.01em; color: #2B2440; }
 .sb-logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mk-accent); display: inline-block; margin-left: 3px; }
 .sb-tag { padding: 0 10px 18px; font-size: 11px; color: var(--mk-ink-3); letter-spacing: .04em; }
 
@@ -401,12 +479,14 @@ a { color: inherit; text-decoration: none; }
   position: fixed; inset: 0; z-index: 200;
   background: rgba(43,26,45,.45); backdrop-filter: blur(6px);
   display: flex; align-items: flex-end; justify-content: center;
+  animation: mk-fade-in .22s ease both;
 }
 .wall-sheet {
   background: var(--mk-paper); border-radius: 22px 22px 0 0;
   width: 100%; max-width: 560px;
   max-height: 88vh; display: flex; flex-direction: column;
   overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: m-sheet-up .34s cubic-bezier(.16,1,.3,1) both;
 }
 .wall-sheet-grip { width: 40px; height: 4px; border-radius: 99px; background: var(--mk-line-strong); margin: 12px auto 0; flex-shrink: 0; }
 .wall-sheet-head { display: flex; align-items: flex-start; gap: 10px; padding: 16px 20px 12px; flex-shrink: 0; }
@@ -435,7 +515,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Wall management ── */
 .wall-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--mk-line); margin-bottom: calc(var(--d-gap) + 6px); }
-.wall-tab { padding: 11px 16px; font-size: 13.5px; font-weight: 700; color: var(--mk-ink-3); border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 8px; transition: color .15s; background: none; border-top: none; border-left: none; border-right: none; cursor: pointer; }
+.wall-tab { padding: 11px 16px; font-size: 13.5px; font-weight: 700; color: var(--mk-ink-3); border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 8px; transition: color .18s ease, border-bottom-color .22s cubic-bezier(.16,1,.3,1); background: none; border-top: none; border-left: none; border-right: none; cursor: pointer; }
 .wall-tab:hover { color: var(--mk-ink); }
 .wall-tab.on { color: var(--mk-accent); border-bottom-color: var(--mk-accent); }
 .wall-tab .count { font-size: 10.5px; background: var(--mk-accent); color: #fff; border-radius: 99px; padding: 1px 7px; font-weight: 800; }
@@ -523,6 +603,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 768px) {
+  /* iOS Safari : empêcher le zoom automatique quand on focus un input.
+     Le zoom ne se déclenche que si font-size < 16px. */
+  input, textarea, select,
+  .mk-input, .mk-textarea, .mk-select {
+    font-size: 16px !important;
+  }
+
   .mk-app { grid-template-columns: 1fr; display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
   .sidebar { display: none; }
   .mk-main { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 80px; }

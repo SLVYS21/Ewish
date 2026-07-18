@@ -13,6 +13,7 @@ const wishSchema = new mongoose.Schema({
   mediaType:  { type: String, enum: ['none', 'photo', 'gif', 'audio', 'video'], default: 'none' },
   approved:   { type: Boolean, default: false },
   hidden:     { type: Boolean, default: false },
+  pendingPayment: { type: Boolean, default: false, index: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Wish', wishSchema);

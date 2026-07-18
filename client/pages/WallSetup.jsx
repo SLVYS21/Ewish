@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Check, Loader2, ExternalLink, Share2,
   Upload, X, Eye, Inbox, ShieldCheck, Shield, Lock, Gift,
-  Trash2, RotateCcw, Clock,
+  Trash2, RotateCcw, Clock, LockKeyhole, Zap,
 } from 'lucide-react';
 import {
   updatePublication, publishPublication, uploadFile, getPublicationById,
@@ -11,6 +11,7 @@ import {
   getContributions, getContributionStats,
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
+import NotoEmoji from '../components/NotoEmoji';
 
 const TEMPLATE_LABELS = {
   'wall-of-wishes':        'Mur Classique',
@@ -80,6 +81,7 @@ function WallSettings({ pub, id, onSave }) {
   const [phrase, setPhrase]           = useState(d.subtitle || d.phrase || '');
   const [bannerImage, setBannerImage] = useState(d.bannerImage || '');
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const bannerFileRef = useRef(null);
 
   const [reception, setReception]           = useState(cc.wishesEnabled !== false && d.wishesEnabled !== false);
   const [moderation, setModeration]         = useState(cc.requireModeration || false);
@@ -107,7 +109,7 @@ function WallSettings({ pub, id, onSave }) {
       try {
         await updatePublication(id, {
           title: wallTitle,
-          data: { subtitle: phrase, bannerImage, eyebrow: '✦ Mur de mots' },
+          data: { subtitle: phrase, bannerImage },
         });
         onSave('saved');
       } catch { onSave('unsaved'); }
@@ -186,19 +188,30 @@ function WallSettings({ pub, id, onSave }) {
                   </button>
                 </div>
               ) : (
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: uploadingBanner ? 'not-allowed' : 'pointer' }}>
+                <>
                   <button
+                    type="button"
                     className="btn btn-ghost btn-sm"
-                    style={{ pointerEvents: 'none' }}
                     disabled={uploadingBanner}
+                    onClick={() => bannerFileRef.current?.click()}
                   >
                     {uploadingBanner
                       ? <><Loader2 size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> Chargement…</>
                       : <><Upload size={13} /> Ajouter une image</>}
                   </button>
-                  <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploadingBanner}
-                    onChange={e => handleBannerUpload(e.target.files[0])} />
-                </label>
+                  <input
+                    ref={bannerFileRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    disabled={uploadingBanner}
+                    onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) handleBannerUpload(f);
+                      e.target.value = '';
+                    }}
+                  />
+                </>
               )}
             </div>
           </div>
@@ -310,7 +323,7 @@ function WallSettings({ pub, id, onSave }) {
 /* ─────────────────────────────────────────────────────────── */
 /* Mots tab                                                    */
 /* ─────────────────────────────────────────────────────────── */
-function WallWords({ id, moderation: moderationEnabled }) {
+function WallWords({ id, moderation: moderationEnabled, isPaid, onRequestPay }) {
   const [words, setWords]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast]   = useState('');
@@ -334,7 +347,11 @@ function WallWords({ id, moderation: moderationEnabled }) {
       await updateWish(wordId, { approved: true, hidden: false });
       setWords(prev => prev.map(w => w._id === wordId ? { ...w, approved: true, hidden: false } : w));
       showToast('Mot collé au mur ✓');
-    } catch { /* ignore */ }
+    } catch (e) {
+      if (e.response?.status === 402) {
+        showToast('Ce mot est verrouillé  publie le mur pour le débloquer');
+      }
+    }
   };
 
   const refuse = async (wordId) => {
@@ -375,9 +392,10 @@ function WallWords({ id, moderation: moderationEnabled }) {
     </div>
   );
 
-  /* server: approved=bool, hidden=bool (no status field) */
-  const pending  = words.filter(w => !w.approved && !w.hidden);
-  const approved = words.filter(w =>  w.approved && !w.hidden);
+  /* server: approved=bool, hidden=bool, pendingPayment=bool */
+  const locked   = words.filter(w =>  w.pendingPayment && !w.hidden);
+  const pending  = words.filter(w => !w.approved && !w.hidden && !w.pendingPayment);
+  const approved = words.filter(w =>  w.approved && !w.hidden && !w.pendingPayment);
   const hidden   = words.filter(w =>  w.hidden);
 
   const wordName = (w) => [w.firstName, w.role].filter(Boolean).join(' · ') || 'Anonyme';
@@ -385,6 +403,49 @@ function WallWords({ id, moderation: moderationEnabled }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--d-gap) + 6px)' }}>
       {toast && <div className="mk-toast">{toast}</div>}
+
+      {/* Verrouillés  au-delà des 5 mots gratuits, ou avec média sur mur non-payé */}
+      {locked.length > 0 && (
+        <div>
+          <div className="section-label" style={{ color: 'var(--mk-accent)', marginBottom: 10 }}>
+            <LockKeyhole size={13} /> Verrouillés  {locked.length}
+          </div>
+          <div className="card" style={{
+            padding: '16px 18px', marginBottom: 12,
+            background: 'var(--mk-accent-pale)', borderColor: 'var(--mk-accent-soft)',
+            display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap',
+          }}>
+            <NotoEmoji name="wrapped-gift" size={44} style={{ flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 3 }}>
+                {locked.length} {locked.length > 1 ? 'mots attendent' : 'mot attend'} d'être révélé{locked.length > 1 ? 's' : ''}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', lineHeight: 1.5 }}>
+                Les contributeurs ont pu écrire librement. Publie ton mur pour que tous ces mots apparaissent d'un coup.
+              </div>
+            </div>
+            <button className="btn btn-primary" onClick={onRequestPay}>
+              <Zap size={14} /> Publier le mur
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+            {locked.map(word => (
+              <div key={word._id} className="card word-card" style={{ opacity: .8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="word-msg" style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <LockKeyhole size={13} style={{ flexShrink: 0, marginTop: 3, color: 'var(--mk-accent)' }} />
+                    <span>{word.message}</span>
+                  </div>
+                  <div className="word-by">{wordName(word)} · {timeAgo(word.createdAt)}</div>
+                </div>
+                <button className="btn-icon" title="Supprimer" onClick={() => remove(word._id)}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pending  only show when moderation is on */}
       {moderationEnabled && pending.length > 0 && (
@@ -417,7 +478,8 @@ function WallWords({ id, moderation: moderationEnabled }) {
       <div>
         <div className="section-label" style={{ marginBottom: 10 }}>Sur le mur  {approved.length}</div>
         {approved.length === 0 ? (
-          <div className="empty-state card" style={{ padding: '28px 20px' }}>
+          <div className="empty-state card" style={{ padding: '28px 20px', textAlign: 'center' }}>
+            <NotoEmoji name="writing-hand" size={56} style={{ marginBottom: 10 }} />
             <div className="e-title">Pas encore de mots</div>
             <p style={{ fontSize: 13 }}>Partage le lien du mur pour recevoir les premiers.</p>
           </div>
@@ -564,8 +626,8 @@ function WallCagnotte({ pub, id }) {
             Avant tout retrait ou transfert, une vérification d'identité (KYC) est demandée  une seule fois.
           </p>
           {isKycVerified ? (
-            <div className="badge badge-live" style={{ marginBottom: 12 }}>
-              <ShieldCheck size={12} /> Identité vérifiée
+            <div className="badge badge-live" style={{ marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <ShieldCheck size={12} /> Identité vérifiée <NotoEmoji name="sparkles" size={14} />
             </div>
           ) : (
             <div className="badge badge-draft" style={{ marginBottom: 12 }}>
@@ -609,7 +671,7 @@ export default function WallSetup() {
   const [pubError, setPubError] = useState('');
   const [toast, setToast]       = useState('');
   const [tab, setTab]           = useState('settings');
-  const [wordCounts, setWordCounts] = useState({ pending: 0, ok: 0 });
+  const [wordCounts, setWordCounts] = useState({ pending: 0, ok: 0, locked: 0 });
 
   const pubRef = useRef(null);
 
@@ -636,8 +698,9 @@ export default function WallSetup() {
     getWishes(id).then(r => {
       const ws = r.data || [];
       setWordCounts({
-        pending: ws.filter(w => !w.approved && !w.hidden).length,
-        ok:      ws.filter(w =>  w.approved && !w.hidden).length,
+        pending: ws.filter(w => !w.approved && !w.hidden && !w.pendingPayment).length,
+        ok:      ws.filter(w =>  w.approved && !w.hidden && !w.pendingPayment).length,
+        locked:  ws.filter(w =>  w.pendingPayment && !w.hidden).length,
       });
     }).catch(() => {});
   }, [id]);
@@ -649,7 +712,13 @@ export default function WallSetup() {
       const updated = await getPublicationById(id);
       pubRef.current = updated.data;
       setPub(updated.data);
-      showToast('Le mur est en ligne ! 🎉');
+      showToast(
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <NotoEmoji name="partying-face" size={22} />
+          Le mur est en ligne !
+          <NotoEmoji name="party-popper" size={22} />
+        </span>
+      );
     } catch (err) {
       setPubError(err.response?.data?.error || 'Erreur lors de la publication');
     } finally { setPublishing(false); }
@@ -671,7 +740,7 @@ export default function WallSetup() {
 
   const tabs = [
     { id: 'settings', label: 'Réglages',  icon: '⚙' },
-    { id: 'words',    label: 'Mots',       icon: '💬', count: wordCounts.pending },
+    { id: 'words',    label: 'Mots',       icon: '💬', count: wordCounts.pending + wordCounts.locked },
     { id: 'cagnotte', label: 'Cagnotte',   icon: '🎁' },
   ];
 
@@ -694,7 +763,14 @@ export default function WallSetup() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {isPublished
             ? <span className="badge badge-live"><Check size={11} /> En ligne</span>
-            : <span className="badge badge-draft">{wordCounts.ok} / 5 mots gratuits</span>
+            : <span className="badge badge-draft">
+                {Math.min(wordCounts.ok, 5)} / 5 mots gratuits
+                {wordCounts.locked > 0 && (
+                  <span style={{ marginLeft: 6, color: 'var(--mk-accent)', fontWeight: 700 }}>
+                     · <LockKeyhole size={10} style={{ display: 'inline', verticalAlign: -1 }} /> {wordCounts.locked} verrouillé{wordCounts.locked > 1 ? 's' : ''}
+                  </span>
+                )}
+              </span>
           }
           <span style={{ fontSize: 12, color: 'var(--mk-ink-3)', display: 'flex', alignItems: 'center', gap: 5 }}>
             {saveStatus === 'saving'  && <><Loader2 size={12} style={{ animation: 'mk-spin .75s linear infinite' }} /> Sauvegarde…</>}
@@ -734,38 +810,47 @@ export default function WallSetup() {
         ))}
       </div>
 
-      {/* Tab content */}
-      {tab === 'settings' && (
-        <>
-          <WallSettings pub={pub} id={id} onSave={setSaveStatus} />
-          {pubError && (
-            <div style={{ marginTop: 12, color: 'var(--mk-accent)', fontSize: 13, fontWeight: 600, padding: '10px 14px', background: 'var(--mk-accent-pale)', borderRadius: 'var(--mk-r-xs)' }}>
-              {pubError}
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: 10, marginTop: 'var(--d-gap)', flexWrap: 'wrap' }}>
-            {isPublished && siteUrl && (
-              <a href={siteUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
-                <ExternalLink size={14} /> Voir le mur
-              </a>
+      {/* Tab content — key={tab} déclenche l'animation à chaque switch */}
+      <div key={tab} className="mk-anim-fade-in">
+        {tab === 'settings' && (
+          <>
+            <WallSettings pub={pub} id={id} onSave={setSaveStatus} />
+            {pubError && (
+              <div style={{ marginTop: 12, color: 'var(--mk-accent)', fontSize: 13, fontWeight: 600, padding: '10px 14px', background: 'var(--mk-accent-pale)', borderRadius: 'var(--mk-r-xs)' }}>
+                {pubError}
+              </div>
             )}
-            <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handlePublish} disabled={publishing}>
-              {publishing
-                ? <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
-                : isPublished ? <><Check size={16} /> Mettre à jour</> : 'Publier le mur'
-              }
-            </button>
-            {isPublished && (
-              <button className="btn btn-ghost" onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-                <Share2 size={14} /> QR Code & Partage
+            <div style={{ display: 'flex', gap: 10, marginTop: 'var(--d-gap)', flexWrap: 'wrap' }}>
+              {isPublished && siteUrl && (
+                <a href={siteUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                  <ExternalLink size={14} /> Voir le mur
+                </a>
+              )}
+              <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handlePublish} disabled={publishing}>
+                {publishing
+                  ? <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
+                  : isPublished ? <><Check size={16} /> Mettre à jour</> : 'Publier le mur'
+                }
               </button>
-            )}
-          </div>
-        </>
-      )}
+              {isPublished && (
+                <button className="btn btn-ghost" onClick={() => navigate(`/ewish-admin/share/${id}`)}>
+                  <Share2 size={14} /> QR Code & Partage
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
-      {tab === 'words' && <WallWords id={id} moderation={moderation} />}
-      {tab === 'cagnotte' && <WallCagnotte pub={pub} id={id} />}
+        {tab === 'words' && (
+          <WallWords
+            id={id}
+            moderation={moderation}
+            isPaid={pub?.isPaid}
+            onRequestPay={handlePublish}
+          />
+        )}
+        {tab === 'cagnotte' && <WallCagnotte pub={pub} id={id} />}
+      </div>
 
       {/* Toast */}
       {toast && <div className="mk-toast">{toast}</div>}

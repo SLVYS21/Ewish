@@ -1,157 +1,95 @@
-# Ewishes  myKado
+Kudoboard-Thank Box Like
 
-**myKado** est une plateforme de création et de partage de vœux animés, adressée aux particuliers, aux équipes RH et aux marques d'Afrique francophone et de la diaspora. Elle combine un modèle SaaS (paiement en crédits) avec une future couche de cagnotte collective (crowdfunding de cadeau).
+Projet myKado:
+Le marché africain, plus précisément ouest africain est à prendre dans ce domaine.
+From Africa to the World.
+Bien définir le pricing, parce que la cible n'est pas seulement le marché africain mais aussi prévoir s'étendre au marché internationnal avec d'autres devises comme l'EUR et le USD..
 
----
+Le projet se développe sur trois axes :
+1. Les cartes animées
+2. Les boards / Murs de mots
+3. Les cadeaux directs
 
-## Vision produit
+1. Les cartes animées: 
+Ce sont de belles cartes animées (GSAP.. 3D.. WebGL.. fun transitions.. éléments de décoration (pétales, ballons, confettis)) que l'utilisateur peut personnaliser rapidement avec:
+	- Musique (lien youtube ou Spotify) (Prévoir des suggestion de musique en fonction de la zone géographique de l'utilisateur)
+	- Photos du destinataire (Le créateur peut upload jusqu'à trois photos du destinataire)..
+	- Texte à l'endroit du destinataire.
+	- GIFs | Vidéos (Maybe)
+Tâches à prévoir: Chercher les liens des musiques de suggestion
+		  Chercher des idées d'animation pour de potentiels thèmes et les noter
+		  Les élément de décorations
 
-### Le problème
-Les vœux numériques restent banals  un message WhatsApp ou une carte e-mail jetable. Il n'existe pas de solution mémorable, partageable et adaptée au contexte africain (Mobile Money, langues, occasions locales comme Tabaski ou Korité).
+Le créateur peut attacher à sa carte un cadeau(A venir).
+L'exportation peut se faire par:
+	- code QR [Carré | Circulaire | Coeur]
+	- Copier le lien
+	- Partager via les réseaux ou par Email
+Pricing: payement à la carte + plus le prix de la carte cadeau attachée à la carte.
 
-### La réponse myKado
-Un studio de vœux animés où chaque création est :
-- **personnalisable gratuitement** (photos, musique, QR code, bouton CTA)
-- **publiée contre des crédits** (1 crédit = 500 FCFA ≈ 0,76 €)
-- **partageable par lien ou QR**  scan, regarde, conserve
 
-### Le pivot cagnotte (bientôt)
-Sur les vœux collectifs (anniversaire, mariage, départ en retraite), myKado proposera aux contributeurs de participer à un cadeau commun  une PS5, un voyage, une montre. Le bénéficiaire reçoit le montant directement. SaaS + crowdfunding dans la même page.
+2. Les boards | Mur de mots
+Comme son nom l'indique il s'agit d'un type de cartes collaboratifs. Les fonctionnalités sont:
+	- Le créateur crée un mur et définit:
+		- Choisit le thème, le genre de confettis, le genre de post its
+		- La modération (Vérification avant apparition sur le mur).
+		- L'acceptation des cadeaux (cartes)(KYC requis)
+		- Activation d'une cagnotte (Les invités peuvent laisser un mot) (KYC requis)
+		- Activer la réception de photos, GIFs, Audios ou Vidéos
+		- Ajouter une musique au mur !
+		- Epingler un mot sur le mur
+		- Mur public (les invités voient les mots des autres invités) ou privé (les invités ne voient pas les mots des autres invités)
+	- Les invités peuvent laisser un mot  sur le mur sans avoir de comptes.. (Mais juste après avoir rempli, on leur montre un bouton pour leur demander s'ils veulent créer le leur)
+	- Définir une liste stricte d'invités (avec le mail) pour qu'on le leur envoie directement
+	- Un mot sur le mur, c'est une carte avec mot + (image | vidéo | GIF | Rien) + Signature
+	- Export:
+		- Code QR [Coeur | Carré | Cercle]
+		- Copier le lien
+		- Partager sur les réseaux
+	
+Les invités peuvent:
+	- Laisser un mot sur le mur
+	- Envoyer des cadeaux ou participer à la cagnotte si c'est actif sur le mur
+	- Si le mur est public, décider si le mot était visible seulement par le créateur et le destinaire du mur
+	- Créer son mur ou partager après avoir laissé son mot !
+Quand le destinataire reçoit son mur, il a le titre du mur et quand il clique sur ouvrir.. explosion de confettis et ensuite il peut:
+	- Faire défiler toute sa liste de mots du haut vers le bas ou en se déplacer dans l'espace 3D en fonction du type du mur
+	- Cliquer sur une carte qui s'ouvre au milier pour qu'il le voie bien et ensuite il peut faire défiler les cartes un à un.. un peu comme un fil d'actualités tiktok
+	- Il peut choisir de projeter et là les mots défilent comme un statut WhatsApp tour à tour.. 
+	- Si la liste des invités est bien définie (avec mails), il peut leur répondre en un bouton et un texte !
+	- Export:
+		- Code QR [Coeur | Carré | Cercle]
+		- Copier le lien
+		- Partager sur les réseaux
+	- Retirer ses cadeaux (en argent) ou les utiliser dans une entreprise partenaire (Netflix, Amazone, ) (Création de compte requis - KYC)
+Un utilisateur:
+	Peut voir ses murs et cartes (Donnés, Reçus, Invitations, Brouillons..)
+Pricing: Payment au mur
+Potentielles tâches: La liste de GIFs à utiliser
 
----
+3. Les cartes cadeaux
+Ce sont des cartes d'achats auprès d'entreprises en lignes principalement et peut être locales ou des cartes d'argent like une carte Momo au Bénin.. quand tu l'actives ça recharge ton compte du montant de la carte.. voilà le concept en bref.
 
-## Modèle économique
+4. Calendriers
+Un utilisateur peut remplir un calendrier de potentielles dates.. en attendant de recevoir des notifications Jour J-3 à J-1
 
-| Action | Coût |
-|---|---|
-| Création d'un compte | Gratuit |
-| Personnalisation complète | Gratuit |
-| Publication d'un vœu personnel | 5–12 crédits |
-| Publication d'un vœu collectif | 20–30 crédits |
-| 1 crédit | 500 FCFA · ≈ 0,76 € |
+5. myKado for business
+myKado destiné au entreprises qui ont un certain nombre d'employés et qui ont ou veulent créer une culture entreprise.
+myKado permet aux entreprises:
+	- Organiser la cohésion sociale pour différents events like: Anniversaire, Naissances, mariage, Retirement, Fête de fin d'année etc
+	- Personnaliser les murs avec leur logo et leurs liens
+	- Avoir des cartes digitales pour dire merci à leurs clients et pouvoir les rediriger vers leur interfaces again (Marketing)
+	- Reconnaissance des employers like,, meilleur employé du mois ou autre
+	- Avoir des factures pour leur compta
+	- D'autres choses qui viendront.. beaucoup plus
 
-**Packs de crédits :** Découverte (5 cr / 2 500 FCFA), Essentiel (12+2 cr / 6 000 FCFA), Pro (30+6 cr / 15 000 FCFA), Entreprise (80+20 cr / 40 000 FCFA).
+6. Idées à explorer
+	- Générer de la musique avec l'IA
+	- Pour le plan business prévoir un plan d'entreprise pour que les entreprises puissent l'envoyer à leur client pour les fêtes ou après un achat..
 
-**Moyens de paiement :** Wave, Orange Money, MTN Money, Visa, Mastercard.
 
----
+Dashboard Admin:
+_______________
 
-## Architecture du monorepo
-
-```
-Ewishes/
-├── client/              # Éditeur de vœux (React + Vite)
-│   └── components/      # PhotoLayoutTab, ContentTab, etc.
-├── landing/             # Landing page marketing (React + Vite)
-│   └── src/
-│       ├── components/  # Navbar, Hero, Templates, Pricing…
-│       ├── data.js      # TEMPLATES, PLANS, FAQS, fmtFCFA, fmtEUR
-│       ├── hooks/
-│       │   ├── useReveal.js   # IntersectionObserver reveal
-│       │   └── useInView.js
-│       ├── App.jsx
-│       └── index.css    # Design system complet (tokens, composants)
-├── server/              # API Node.js/Express
-│   └── routes/          # /api/templates, /preview/:name…
-└── templates/           # Templates HTML animés
-    ├── birthday/
-    ├── wall-of-wishes-3d/
-    ├── special/
-    ├── collective-family/
-    └── collective-pro/
-```
-
----
-
-## Landing page  design system
-
-La landing (`landing/`) utilise une identité visuelle cohérente :
-
-### Typographie
-- **Instrument Serif**  display, titres italiques, romanticisme
-- **Bricolage Grotesque**  UI, texte courant, variable weight
-- **JetBrains Mono**  données numériques (prix, codes)
-
-### Palette
-```css
---ivory:      #f7f3eb   /* fond principal */
---paper:      #fefcf7   /* cartes */
---cream:      #fbf6ec   /* fonds sombres */
---ink:        #1c1611   /* texte */
---gold:       #c9a84c   /* accent principal */
---rose:       #d6557a   /* CTA, emphase */
---emerald:    #2d7159   /* succès, cagnotte */
---peach:      #f1a06e   /* template mariage/baby */
-```
-
-### Sections (ordre de la page)
-1. **Announce bar**  teaser cagnotte + badge "Bientôt"
-2. **Nav**  sticky, blur, menu mobile drawer
-3. **Hero**  phone mockup animé, floating cards QR + "+24 contributeurs"
-4. **TrustStrip**  Wave / Orange Money / MTN / Visa / Mastercard + badge "Aucun frais caché"
-5. **Templates**  mosaïque Pinterest 3 colonnes, 9 templates avec prévisualisations CSS, modal détail
-6. **HowItWorks**  4 étapes, badge "le seul moment où vous payez" à l'étape 3
-7. **Features** (Personnalisation)  photos & musique / QR stylisé / bouton CTA marque
-8. **UseCases**  Particuliers / RH / Marques + module cagnotte teaser avec démo barre de progression
-9. **Pricing**  4 packs, prix en FCFA + équivalent EUR pour la diaspora
-10. **Transparence**  tableau ligne-par-ligne (frais d'inscription = 0, frais de partage = 0…)
-11. **FAQ**  7 questions dont cagnotte, accordion
-12. **FinalCTA**  fond sombre, déco typographique
-13. **Footer**  colonnes Produit / Pour / Société
-
----
-
-## Démarrage local
-
-```bash
-# Landing page
-cd landing
-npm install
-npm run dev       # http://localhost:5173
-
-# Éditeur client
-cd client
-npm install
-npm run dev       # http://localhost:5174
-
-# Serveur API
-cd server
-npm install
-npm start         # http://localhost:5000
-```
-
-Variables d'environnement (`landing/.env`) :
-```
-VITE_APP_URL=http://localhost:3000
-VITE_API_URL=http://localhost:5000
-```
-
----
-
-## Templates disponibles
-
-| Nom | Catégorie | Crédits |
-|---|---|---|
-| Anniversaire | Personnel | 8 |
-| Mur de vœux | Collectif | 10 |
-| Mariage floral | Personnel | 12 |
-| Bienvenue (naissance) | Personnel | 8 |
-| Départ en retraite | Pro | 20 |
-| Tabaski / fêtes religieuses | Personnel | 6 |
-| Hommage | Personnel | 10 |
-| Vœu de marque | Pro | 25 |
-| Notre film (cinématique) | Personnel | 15 |
-
----
-
-## Enjeux clés
-
-- **Transparence**  pas de frais cachés, prix annoncé avant paiement, personnalisation toujours gratuite
-- **Afrique d'abord**  Mobile Money prioritaire, FCFA affiché, occasions locales (Tabaski, Korité, Magal)
-- **Diaspora**  équivalent EUR affiché, Visa/Mastercard accepté
-- **Confiance RH**  conformité RGPD, lien privé non-indexé, collectif jusqu'à 100 contributeurs
-- **Pivot cagnotte**  coexistence SaaS + crowdfunding dans la même expérience, teaser discret en attendant le lancement
-
----
-
-*myKado  Le studio de vœux animés. Dakar · Abidjan · partout.*
+L'administrateur:
+    - 

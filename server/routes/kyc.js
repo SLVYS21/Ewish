@@ -120,6 +120,14 @@ router.patch('/:id', requireAdmin, async (req, res) => {
     const user = await AdminUser.findByIdAndUpdate(req.params.id, update, { new: true })
       .select('-password -kycMobileToken -kycMobileTokenExpiry');
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    // Notif user (fire-and-forget)
+    (async () => {
+      const { notify } = require('../services/notifications');
+      if (kycStatus === 'approved') notify.kycApproved(user._id);
+      else if (kycStatus === 'rejected') notify.kycRejected(user._id, { reason: kycRejectionReason });
+    })().catch(() => {});
+
     res.json({ success: true, kycStatus: user.kycStatus, user });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

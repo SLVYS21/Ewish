@@ -2,8 +2,10 @@ const router = require('express').Router();
 const Publication = require('../models/Publication');
 const AdminUser = require('../models/AdminUser');
 const Template = require('../models/Template');
+const Wish = require('../models/Wish');
 const slugify = require('slugify');
 const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
+const { slugify: mkSlugify, isValidSlug, generateUniqueSlug } = require('../utils/slug');
 
 // GET all
 router.get('/', requireAdmin, async (req, res) => {
@@ -72,7 +74,48 @@ router.get('/id/:id', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET by templateName + customName
+// POST check slug availability — pour l'écran "Personnaliser le lien"
+router.post('/slug-check', requireOptionalAdmin, async (req, res) => {
+  try {
+    const { slug, publicationId } = req.body || {};
+    if (!slug) return res.status(400).json({ valid: false, reason: 'empty' });
+    const normalized = mkSlugify(slug);
+    if (!isValidSlug(normalized)) {
+      return res.json({ valid: false, reason: 'format', suggestion: normalized });
+    }
+    const filter = { slug: normalized };
+    if (publicationId) filter._id = { $ne: publicationId };
+    const taken = await Publication.findOne(filter).select('_id').lean();
+    if (taken) return res.json({ valid: false, reason: 'taken', suggestion: normalized });
+    res.json({ valid: true, slug: normalized });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// PATCH update slug (personnaliser le lien)
+router.patch('/:id/slug', requireOptionalAdmin, async (req, res) => {
+  try {
+    const { slug } = req.body || {};
+    if (!slug) return res.status(400).json({ error: 'slug requis' });
+    const normalized = mkSlugify(slug);
+    if (!isValidSlug(normalized)) return res.status(400).json({ error: 'Format invalide (3–40 caractères, lettres et chiffres)' });
+    const taken = await Publication.findOne({ slug: normalized, _id: { $ne: req.params.id } }).select('_id').lean();
+    if (taken) return res.status(409).json({ error: 'Ce lien est déjà pris' });
+    const pub = await Publication.findByIdAndUpdate(req.params.id, { slug: normalized }, { new: true }).lean();
+    if (!pub) return res.status(404).json({ error: 'Not found' });
+    res.json({ slug: pub.slug, brique: pub.brique });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET by slug (canonical URL /c|/m|/g/:slug)
+router.get('/by-slug/:slug', async (req, res) => {
+  try {
+    const pub = await Publication.findOne({ slug: req.params.slug }).lean();
+    if (!pub) return res.status(404).json({ error: 'Not found' });
+    res.json(pub);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET by templateName + customName (legacy)
 router.get('/:templateName/:customName', async (req, res) => {
   try {
     const pub = await Publication.findOne({
@@ -117,7 +160,7 @@ router.post('/', requireOptionalAdmin, async (req, res) => {
 // - jarConfig : replaced entirely when present (it's a self-contained object)
 router.patch('/:id', requireOptionalAdmin, async (req, res) => {
   try {
-    const { data, style, jarConfig, decorations, widgets, photoTransforms, showBranding, brandingUrl, brandingText,...rest } = req.body;
+    const { data, style, jarConfig, decorations, widgets, photoTransforms, showBranding, brandingUrl, brandingText, invitationConfig, ...rest } = req.body;
 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
@@ -165,6 +208,11 @@ router.patch('/:id', requireOptionalAdmin, async (req, res) => {
       update.photoTransforms = photoTransforms;
     }
 
+    // invitationConfig: shallow-merge so we can patch one field without wiping the rest
+    if (invitationConfig !== undefined) {
+      update.invitationConfig = { ...(existing.invitationConfig || {}), ...invitationConfig };
+    }
+
     const pub = await Publication.findByIdAndUpdate(req.params.id, update, { new: true });
     res.json(pub);
   } catch (e) { res.status(400).json({ error: e.message }); }
@@ -201,6 +249,18 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       { new: true }
     );
     if (!pub) return res.status(404).json({ error: 'Not found' });
+
+    // Release any pendingPayment wishes for wall templates
+    if (pub.templateName?.startsWith('wall-of-wishes')) {
+      const autoApprove = !pub.cagnotteConfig?.requireModeration;
+      const update = autoApprove
+        ? { $set: { pendingPayment: false, approved: true } }
+        : { $set: { pendingPayment: false } };
+      await Wish.updateMany(
+        { publicationId: pub._id, pendingPayment: true },
+        update
+      );
+    }
 
     // Auto-generate shortCode on first publish
     if (!pub.shortCode) {

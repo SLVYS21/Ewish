@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import GoogleBtn from '../components/GoogleBtn';
+import PasswordInput from '../components/PasswordInput';
+import Kado from '../../components/Kado';
 import s from './AdminLogin.module.css';
 
 export default function AdminLogin() {
-  const [email, setEmail]     = useState('');
-  const [pass, setPass]       = useState('');
+  const [email, setEmail]       = useState('');
+  const [pass, setPass]         = useState('');
   const [remember, setRemember] = useState(true);
-  const [error, setError]     = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login }   = useAuth();
-  const navigate    = useNavigate();
-  const location    = useLocation();
-  const resetDone   = new URLSearchParams(location.search).get('reset') === '1';
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const { login }  = useAuth();
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const resetDone  = new URLSearchParams(location.search).get('reset') === '1';
 
   const submit = async () => {
     setError('');
@@ -21,7 +24,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await login(email, pass);
-      navigate('/ewish-admin/ewish');
+      navigate('/ewish-admin');
     } catch (e) {
       setError(e.response?.data?.error || 'Identifiants invalides');
     } finally { setLoading(false); }
@@ -29,92 +32,106 @@ export default function AdminLogin() {
 
   return (
     <div className={s.root}>
+      <div className={s.card}>
 
-      {/* ── Left: brand panel ── */}
-      <div className={s.valueSide}>
-        <div className={s.valueLogo}>
-          <span className={s.logoBox}>🎁</span>
-          my<span>Kado</span>
-        </div>
-
-        <div>
-          <div className={s.valueTagline}>CRÉER · PUBLIER · PARTAGER</div>
-          <h1 className={s.valueHeadline}>
-            Les plus belles cartes pour vos plus beaux moments.
-          </h1>
-          <p className={s.valueDesc}>
-            Anniversaires, mariages, événements pro  créez une page personnalisée
-            en quelques minutes. Partagez par un simple lien.
-          </p>
-        </div>
-
-        {/* Floating preview card */}
-        <div className={s.floatingCard}>
-          <div className={s.floatingAvatar}>L</div>
-          <div className={s.floatingCardTitle}>Joyeux Anniversaire</div>
-          <div className={s.floatingCardName}>Lydia</div>
-          <div className={s.floatingCardMsg}>On t'aime très fort ! Une belle année commence pour toi.</div>
-        </div>
-
-        <div className={s.valueFooter}>
-          <span>✨ 5 templates</span>
-          <span>💳 KKiapay & MoMo</span>
-          <span>📱 PWA</span>
-        </div>
-      </div>
-
-      {/* ── Right: form ── */}
-      <div className={s.formSide}>
-        <h2 className={s.formTitle}>Bon retour 👋</h2>
-        <p className={s.formSub}>Connectez-vous pour gérer vos créations.</p>
-        {resetDone && (
-          <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,.1)', border: '1px solid rgba(34,197,94,.25)', color: '#166534', fontSize: '0.82rem', marginBottom: 8 }}>
-            ✅ Mot de passe mis à jour. Connectez-vous avec votre nouveau mot de passe.
+        {/* ── Left: brand panel with Kado mascot ── */}
+        <aside className={s.brandPanel} aria-hidden>
+          <div className={s.brandMascot}>
+            <Kado
+              size={220}
+              cycle={['jump', 'levitate', 'wink']}
+              cycleInterval={4200}
+              ambient
+            />
           </div>
-        )}
+          <h2 className={s.brandTitle}>Let's get the party started!</h2>
+          <p className={s.brandDesc}>
+            Create beautiful digital wishes and share them with your loved ones.
+          </p>
+        </aside>
 
-        <div className={s.field}>
-          <label>Email</label>
-          <input
-            type="email" value={email} autoComplete="username"
-            placeholder="vous@mykado.com"
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('login-pass')?.focus()}
-          />
-        </div>
+        {/* ── Right: form ── */}
+        <section className={s.formPanel}>
+          <div className={s.formHeader}>
+            <h1 className={s.formTitle}>Welcome to myKado</h1>
+            <p className={s.formSub}>Sign in to your account to continue</p>
+          </div>
 
-        <div className={s.field}>
-          <label>Mot de passe</label>
-          <input
-            id="login-pass" type="password" value={pass} autoComplete="current-password"
-            placeholder="••••••••"
-            onChange={e => setPass(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && submit()}
-          />
-        </div>
+          <div className={s.tabs} role="tablist">
+            <button className={`${s.tab} ${s.tabActive}`} role="tab" aria-selected="true">
+              Login
+            </button>
+            <Link
+              to="/ewish-admin/register"
+              className={s.tab}
+              role="tab"
+              aria-selected="false"
+            >
+              Register
+            </Link>
+          </div>
 
-        <div className={s.fieldRow}>
-          <label>
-            <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
-            Se souvenir de moi
-          </label>
-          <Link to="/ewish-admin/forgot-password" style={{ color: '#E11D48', fontWeight: 600, textDecoration: 'none', fontSize: '0.8rem' }}>Oublié ?</Link>
-        </div>
+          <GoogleBtn label="Continue with Google" />
 
-        {error && <div className={s.error}>{error}</div>}
+          <div className={s.orDivider}><span>Or continue with</span></div>
 
-        <button className={s.btn} onClick={submit} disabled={loading}>
-          {loading ? 'Connexion…' : 'Se connecter →'}
-        </button>
+          {resetDone && (
+            <div className={s.success}>
+              <CheckCircle2 size={16} />
+              Password updated. Sign in with your new password.
+            </div>
+          )}
 
-        <div className={s.orDivider}><span>OU</span></div>
+          <div className={s.field}>
+            <label htmlFor="login-email">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              value={email}
+              autoComplete="username"
+              placeholder="your.email@example.com"
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && document.getElementById('login-pass')?.focus()}
+            />
+          </div>
 
-        <GoogleBtn />
+          <div className={s.field}>
+            <label htmlFor="login-pass">Password</label>
+            <PasswordInput
+              id="login-pass"
+              value={pass}
+              autoComplete="current-password"
+              placeholder="secret-you-wont-forget"
+              onChange={e => setPass(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+            />
+          </div>
 
-        <div className={s.formFooter}>
-          Pas encore de compte ?{' '}
-          <Link to="/ewish-admin/register">Créer un compte gratuit →</Link>
-        </div>
+          <div className={s.fieldRow}>
+            <label>
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={e => setRemember(e.target.checked)}
+              />
+              Remember me
+            </label>
+            <Link to="/ewish-admin/forgot-password">Forgot password?</Link>
+          </div>
+
+          {error && <div className={s.error}>{error}</div>}
+
+          <button className={s.btn} onClick={submit} disabled={loading}>
+            {loading ? 'Signing in…' : 'Log in'}
+          </button>
+
+          <div className={s.formFooter}>
+            By clicking continue, you agree to our{' '}
+            <Link to="/terms" target="_blank">Terms of Service</Link>
+            {' '}and{' '}
+            <Link to="/privacy" target="_blank">Privacy Policy</Link>
+          </div>
+        </section>
       </div>
     </div>
   );

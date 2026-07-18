@@ -7,6 +7,7 @@ router.get('/', async (req, res) => {
     const templates = await Template.find({ active: { $ne: false } }, '-__v')
       .sort({ sortOrder: 1, createdAt: 1 })
       .lean();
+    res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
     res.json(templates);
   } catch (e) {
     res.status(500).json({ error: e.message });

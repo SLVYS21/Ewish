@@ -1,77 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import s from './Navbar.module.css';
 
-export default function Navbar({ onOrder }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const close = () => setMenuOpen(false);
+export default function Navbar({ onCreate, onLogin }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <>
-      <div className="announce">
-        <div className="wrap announce-inner">
-          <span className="announce-badge">Bientôt</span>
-          <span className="announce-text">
-            Les <em>cagnottes cadeaux collectives</em> arrivent sur myKado  vœu + cadeau commun, dans la même page.
-          </span>
-          <a href="#cagnotte" className="announce-link">Lire le teaser <span>→</span></a>
-        </div>
-      </div>
-
-      <nav className={`nav ${scrolled ? 'nav-scrolled' : ''}`}>
-        <div className="wrap nav-inner">
-          <a href="#" className="logo">
-            <span>my</span><em className="serif italic">Kado</em>
+    <nav className={s.nav}>
+      <div className="mk-container">
+        <div className={s.in}>
+          <a href="#" className={s.brand} aria-label="myKado accueil">
+            myKado <span className={s.dot} />
           </a>
-
-          <div className="nav-links">
-            <a href="#comparatif">Pourquoi</a>
-            <a href="#occasions">Occasions</a>
-            <a href="#templates">Templates</a>
-            <a href="#how">Comment ça marche</a>
-            <a href="#pricing">Tarifs</a>
-            <a href="#faq">FAQ</a>
+          <div className={s.links}>
+            <a href="#briques">Ce qu'on fait</a>
+            <a href="#comment">Comment ça marche</a>
+            <a href="#tarifs">Tarifs</a>
+            <a href="#business">Entreprise</a>
           </div>
-
-          <div className="nav-actions">
-            <a href="#" className="nav-login">Se connecter</a>
-            <button className="btn btn-primary" onClick={onOrder}>
-              Créer mon vœu <span className="arr">→</span>
-            </button>
+          <div className={s.actions}>
+            <button className="mk-btn mk-btn-ghost" onClick={onLogin}>Se connecter</button>
+            <button className="mk-btn mk-btn-primary" onClick={onCreate}>Créer</button>
           </div>
-
           <button
-            className={`burger ${menuOpen ? 'burger-open' : ''}`}
-            onClick={() => setMenuOpen(o => !o)}
+            className={s.burger}
             aria-label="Menu"
+            aria-expanded={open}
+            onClick={() => setOpen(v => !v)}
           >
-            <span/><span/><span/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              {open
+                ? <><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>
+                : <><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></>}
+            </svg>
           </button>
         </div>
-      </nav>
-
-      {menuOpen && (
-        <div className="drawer" onClick={close}>
-          <div className="drawer-card" onClick={(e) => e.stopPropagation()}>
-            <a href="#comparatif" onClick={close}>Pourquoi</a>
-            <a href="#occasions"  onClick={close}>Occasions</a>
-            <a href="#templates"  onClick={close}>Templates</a>
-            <a href="#how"        onClick={close}>Comment ça marche</a>
-            <a href="#pricing"    onClick={close}>Tarifs</a>
-            <a href="#faq"        onClick={close}>FAQ</a>
-            <button className="btn btn-primary" onClick={() => { close(); onOrder(); }}>
-              Créer mon vœu <span className="arr">→</span>
-            </button>
+        {open && (
+          <div className={s.mobileMenu}>
+            <a href="#briques" onClick={() => setOpen(false)}>Ce qu'on fait</a>
+            <a href="#comment" onClick={() => setOpen(false)}>Comment ça marche</a>
+            <a href="#tarifs" onClick={() => setOpen(false)}>Tarifs</a>
+            <a href="#business" onClick={() => setOpen(false)}>Entreprise</a>
+            <button className="mk-btn mk-btn-ghost" onClick={onLogin} style={{ justifyContent: 'flex-start' }}>Se connecter</button>
+            <button className="mk-btn mk-btn-primary" onClick={onCreate}>Créer</button>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </nav>
   );
 }

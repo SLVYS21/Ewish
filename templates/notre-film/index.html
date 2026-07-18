@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Notre Film d'Amour</title>
+  <title>Cinéma — myKado</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;0,700;1,300&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;0,700;1,300&display=swap"
     rel="stylesheet">
   <style>
     *,
@@ -26,15 +26,16 @@
     }
 
     :root {
-      --primary: #e8637a;
-      --accent: #f4a0b0;
-      --soft: #fce8ed;
-      --bg: #fef5f7;
-      --bg2: #eef4fb;
-      --text-color: #2d1a22;
-      --text-muted: #888888;
-      --font-s: 'Dancing Script', cursive;
-      --font-b: 'Lato', sans-serif;
+      /* myKado Hybride C+A defaults — notre-film = intime/romantique → clay + gold */
+      --primary: #C13B3B;
+      --accent: #E8A33D;
+      --soft: #FBEEEE;
+      --bg: #FAF7F0;
+      --bg2: #F3EEE1;
+      --text-color: #161311;
+      --text-muted: #7D7156;
+      --font-s: 'Fraunces', 'Dancing Script', cursive;
+      --font-b: 'Inter', 'Lato', sans-serif;
       --fs-scale: 1;
     }
 
@@ -1110,7 +1111,7 @@
     <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="20"/>
   </svg>
   <div id="ib-text">
-    <p id="ib-label">Notre Film d'Amour</p>
+    <p id="ib-label">Notre Cinéma</p>
     <svg id="ib-line-svg" viewBox="0 0 240 18">
       <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11"/>
     </svg>
@@ -1156,7 +1157,7 @@
     </div>
 
     <div class="s1-subtext" data-node-name="greetingText">
-      J'ai quelque chose de spécial pour toi.<br>Clique sur mon cœur.
+      J'ai quelque chose de spécial pour toi.<br>Clique pour découvrir.
     </div>
   </div>
 
@@ -1178,7 +1179,7 @@
       "<span data-node-name="trackTitle">Notre chanson</span>"
     </div>
     <div class="s2-text" data-node-name="musicText">
-      Tu sais, quand j'écoute cette chanson,<br>je ne peux pas m'empêcher de sourire.
+      Tu sais, quand j'écoute cette chanson,<br>je ne peux pas m'empêcher de penser à toi.
     </div>
 
 
@@ -1192,7 +1193,7 @@
 ═══════════════════════════ -->
   <div class="scene" id="s3" data-section="celebration">
     <div id="s3-area"></div>
-    <div class="s3-sub" data-node-name="photoCaption">(Oui, tu es toujours le plus beau sur les photos !)</div>
+    <div class="s3-sub" data-node-name="photoCaption">(Quelques instants à revoir ensemble.)</div>
     <button class="s3-letter-btn" onclick="nextScene()" data-node-name="letterBtn">
       Mes mots pour toi..
     </button>
@@ -1204,14 +1205,14 @@
   <div class="scene" id="s4" data-section="message">
     <div class="s4-inner">
       <div class="s4-quote">"</div>
-      <div class="s4-title"><span data-node-name="letterTitle">Sarah d'amour...</span></div>
+      <div class="s4-title"><span data-node-name="letterTitle">pour toi...</span></div>
       <div class="s4-divider"></div>
       <div class="s4-scroll" id="s4-scroll">
-        <div class="s4-salut" data-node-name="letterSalut">Mon cœur,</div>
+        <div class="s4-salut" data-node-name="letterSalut">Salut,</div>
         <div class="s4-body" id="s4-body"></div>
       </div>
       <div class="s4-sig" id="s4-sig" style="opacity:0">
-        <span data-node-name="senderName">Ton amour Marc</span> <svg width="100" height="100" viewBox="0 0 24 24"
+        <span data-node-name="senderName">Avec affection</span> <svg width="100" height="100" viewBox="0 0 24 24"
           fill="red" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -1229,7 +1230,7 @@
      S5  VIDÉO
 ═══════════════════════════ -->
   <div class="scene" id="s5">
-    <div class="s5-title" data-node-name="videoLabel">Notre film d'amour</div>
+    <div class="s5-title" data-node-name="videoLabel">Notre film</div>
     <div class="s5-video-container">
       <div class="s5-overlay"></div>
       <div class="s5-no-video" id="s5-empty">

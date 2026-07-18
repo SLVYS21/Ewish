@@ -11,7 +11,41 @@ const api = axios.create({
 });
 
 
-export const getTemplates = () => api.get('/templates');
+/* ── Templates cache ──
+   TTL 5 min + dédup des requêtes concurrentes.
+   Invalidé automatiquement dès qu'un template est modifié via updateTemplate(). */
+const TEMPLATES_TTL_MS = 5 * 60 * 1000;
+const templatesCache = { data: null, expiresAt: 0, inflight: null };
+
+export const invalidateTemplatesCache = () => {
+  templatesCache.data = null;
+  templatesCache.expiresAt = 0;
+  templatesCache.inflight = null;
+};
+
+export const getTemplates = ({ force = false } = {}) => {
+  const now = Date.now();
+  if (!force && templatesCache.data && now < templatesCache.expiresAt) {
+    return Promise.resolve({ data: templatesCache.data, cached: true });
+  }
+  if (!force && templatesCache.inflight) return templatesCache.inflight;
+
+  const promise = api.get('/templates')
+    .then(res => {
+      templatesCache.data = res.data;
+      templatesCache.expiresAt = Date.now() + TEMPLATES_TTL_MS;
+      templatesCache.inflight = null;
+      return res;
+    })
+    .catch(err => {
+      templatesCache.inflight = null;
+      throw err;
+    });
+
+  templatesCache.inflight = promise;
+  return promise;
+};
+
 export const getTemplate = (name) => api.get(`/templates/${name}`);
 
 export const getPublications = (params) => api.get('/publications', { params });
@@ -137,10 +171,19 @@ export const deleteWish = (id) => api.delete(`/wishes/${id}`, { withCredentials:
 export const getApprovedWishes = (pubId) => api.get(`/wishes/${pubId}/approved`, { withCredentials: true });
 
 // ── Templates (admin update) ──
-export const updateTemplate = (name, data) => api.patch(`/templates/${name}`, data, { withCredentials: true });
+export const updateTemplate = (name, data) =>
+  api.patch(`/templates/${name}`, data, { withCredentials: true })
+    .then(res => { invalidateTemplatesCache(); return res; });
 
 export const getShortLink = (id) => api.post(`/shortlinks/${id}`, {}, { withCredentials: true });
 export const setCustomSlug = (id, slug) => api.patch(`/shortlinks/${id}`, { slug }, { withCredentials: true });
+
+/* myKado canonical URLs — /c/:slug /m/:slug /g/:slug */
+export const getPublicationBySlug = (slug) => api.get(`/publications/by-slug/${slug}`);
+export const checkSlugAvailability = (slug, publicationId) =>
+  api.post('/publications/slug-check', { slug, publicationId }, { withCredentials: true });
+export const updatePublicationSlug = (id, slug) =>
+  api.patch(`/publications/${id}/slug`, { slug }, { withCredentials: true });
 
 export const getFonts = () => api.get('/fonts');
 export const uploadFont = (formData) => api.post('/fonts', formData, {
@@ -203,3 +246,25 @@ export const deleteProspect  = (id)        => api.delete(`/prospects/${id}`, { w
 // ── Settings ──
 export const getSettings     = ()           => api.get('/settings');
 export const updateSettings  = (data)       => api.put('/settings', data, { withCredentials: true });
+
+// ── Invitations ──
+export const getInvitationContext = (pubId, token) =>
+  api.get(`/invitations/${pubId}/context`, { params: token ? { token } : {} });
+export const submitRsvp = (pubId, data) =>
+  api.post(`/invitations/${pubId}/rsvp`, data);
+export const getRsvps = (pubId, params) =>
+  api.get(`/invitations/${pubId}/rsvps`, { params, withCredentials: true });
+export const getRsvpStats = (pubId) =>
+  api.get(`/invitations/${pubId}/stats`, { withCredentials: true });
+export const exportRsvpsUrl = (pubId) =>
+  `${BASE}/invitations/${pubId}/export.csv`;
+export const getGuests = (pubId) =>
+  api.get(`/invitations/${pubId}/guests`, { withCredentials: true });
+export const createGuest = (pubId, data) =>
+  api.post(`/invitations/${pubId}/guests`, data, { withCredentials: true });
+export const updateGuest = (pubId, guestId, data) =>
+  api.patch(`/invitations/${pubId}/guests/${guestId}`, data, { withCredentials: true });
+export const deleteGuest = (pubId, guestId) =>
+  api.delete(`/invitations/${pubId}/guests/${guestId}`, { withCredentials: true });
+export const importGuests = (pubId, guests) =>
+  api.post(`/invitations/${pubId}/guests/import`, { guests }, { withCredentials: true });

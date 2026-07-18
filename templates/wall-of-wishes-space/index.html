@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Mur de mots</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -407,7 +408,6 @@
 
 <!-- Header -->
 <div id="wall-header" aria-hidden="true">
-  <!-- <p class="eyebrow" data-node="eyebrow">✦ Mur de mots</p> -->
   <h1 class="wall-title">Pour <em data-node="titleName">Prénom</em></h1>
 </div>
 
@@ -647,6 +647,11 @@ var SAMPLE_WISHES = [
 
 function apiFetch(path, opts) { return fetch(API_BASE + path, opts||{}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
 function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cldThumb(url, tx) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.indexOf('/upload/') === -1) return url;
+  return url.replace('/upload/', '/upload/' + tx + '/');
+}
 function fmtNum(n) { return Number(n).toLocaleString('fr-FR'); }
 function uploadMedia(file) { var f=new FormData(); f.append('file',file); return apiFetch('/api/upload',{method:'POST',body:f}).then(function(d){return d.url;}); }
 
@@ -705,7 +710,7 @@ function createCardEl(w, pos, idx) {
   var bg = TEXT_BG_GRADS[(w.color||0) % TEXT_BG_GRADS.length];
 
   var photoHtml = hasPhoto
-    ? '<div class="polar-photo"><img src="'+escapeHtml(w.photoUrl)+'" alt="" loading="lazy" draggable="false"></div>'
+    ? '<div class="polar-photo"><img src="'+escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_400,h_400,c_fill,g_auto'))+'" alt="" loading="lazy" decoding="async" draggable="false"></div>'
     : (hasAudio ? '' : '<div class="polar-photo" style="background:'+bg+'"><span class="photo-initial">'+escapeHtml(initial)+'</span></div>');
   var audioHtml = hasAudio
     ? '<audio class="polar-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none" onclick="event.stopPropagation()"></audio>'
@@ -748,7 +753,7 @@ function openDetail(idx) {
   var aw = document.getElementById('detail-audio-wrap');
   pw.style.display = hasPhoto ? '' : 'none';
   aw.style.display = hasAudio ? '' : 'none';
-  if (hasPhoto) document.getElementById('detail-photo').src = w.photoUrl;
+  if (hasPhoto) document.getElementById('detail-photo').src = cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200,c_limit');
   if (hasAudio) document.getElementById('detail-audio').src = w.audioUrl;
   document.getElementById('detail-text').textContent = w.text || '';
   document.getElementById('detail-name').textContent = ' ' + (w.name || 'Anonyme');
