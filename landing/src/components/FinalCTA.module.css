@@ -1,172 +1,223 @@
 /* ─────────────────────────────────────────────────────────────
-   FinalCTA — mirror of hero CTA at end of page
+   FinalCTA — dernière question, alignée sur les tokens myKado
+   (--mk-*, --serif, --sans). Palette indigo + gold + crème.
    ───────────────────────────────────────────────────────────── */
 
 .section {
-  padding: 110px var(--pad-x);
-  background: #ffffff;
-  border-top: 1px solid rgba(28,22,17,.06);
+  padding: 120px 20px;
+  background: var(--mk-stone-50);
   position: relative;
   overflow: hidden;
 }
+@media (min-width: 768px) { .section { padding: 140px 32px; } }
+
 .wrap {
   position: relative;
   max-width: 880px;
   margin: 0 auto;
 }
 
+/* Orbs pastel très discrets pour animer le fond crème. */
 .bgOrbs { position: absolute; inset: 0; pointer-events: none; }
 .orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: .55;
+  opacity: .5;
 }
-.o1 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(255,210,222,.55), transparent 65%); top: -140px; left: -80px; }
-.o2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(233,217,255,.45), transparent 65%); bottom: -120px; right: -60px; }
+.o1 {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(232,163,61,.35), transparent 65%);
+  top: -140px; left: -80px;
+}
+.o2 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(193,59,59,.20), transparent 65%);
+  bottom: -120px; right: -60px;
+}
 
 .card {
   position: relative;
   background: #fff;
-  border: 1px solid rgba(43,26,45,.08);
+  border: 1px solid var(--mk-stone-100);
   border-radius: 28px;
-  padding: 56px 48px 44px;
+  padding: 96px 48px 44px;
   text-align: center;
-  box-shadow:
-    0 30px 80px -30px rgba(43,26,45,.30),
-    0 12px 30px -10px rgba(225,29,72,.18);
+  box-shadow: var(--sh-xl);
   z-index: 1;
 }
 
+/* Mascotte Kado — perchée au centre-haut de la carte, déborde vers l'extérieur
+   pour attirer l'œil sur la dernière CTA de la page. */
+.cardKado {
+  position: absolute;
+  top: -62px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  filter: drop-shadow(0 10px 22px rgba(30, 41, 82, .22));
+}
+
+/* Eyebrow — pill discret sur fond crème gold */
 .eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 7px 14px;
-  background: #FFF7FA;
-  border: 1px solid var(--rose-pale);
+  background: var(--mk-gold-50);
+  border: 1px solid var(--mk-gold-100);
   border-radius: 999px;
-  font-size: 12.5px; font-weight: 600;
-  color: var(--rose-d);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mk-gold-600);
   letter-spacing: 0;
   text-transform: none;
 }
 .dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--rose);
-  box-shadow: 0 0 0 4px rgba(225,29,72,.18);
+  background: var(--mk-gold-400);
+  box-shadow: 0 0 0 4px rgba(232, 163, 61, .22);
 }
 
 .title {
-  font-family: var(--font-sans);
-  font-size: clamp(2.4rem, 5.4vw, 4.2rem);
-  line-height: 1.02;
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 144;
+  font-size: clamp(2.4rem, 5.4vw, 3.6rem);
+  line-height: 1.05;
   letter-spacing: -.025em;
   margin: 22px 0 14px;
-  color: #2B1A2D;
-  font-weight: 700;
+  color: var(--mk-stone-900);
+  font-weight: 500;
+}
+.title .rose,
+.title em.rose {
+  color: var(--mk-clay-500);
+  font-style: italic;
+  font-family: var(--serif);
 }
 
 .sub {
+  font-family: var(--sans);
   font-size: 17px;
-  color: #5A4458;
+  color: var(--mk-stone-700);
   line-height: 1.6;
   max-width: 520px;
   margin: 0 auto 32px;
 }
 
-/* ─── interactive CTA (mirrors hero) ─── */
+/* ─── interactive CTA (input + submit) ─── */
 .ctaWrap {
   position: relative;
   background: #fff;
-  border: 1.5px solid rgba(43,26,45,.10);
+  border: 1.5px solid var(--mk-stone-200);
   border-radius: 18px;
   padding: 8px 8px 8px 22px;
-  display: flex; align-items: center; gap: 10px;
-  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--sh-md);
   max-width: 520px;
   margin: 0 auto;
   transition: border-color .25s, box-shadow .25s, transform .25s;
 }
-.ctaWrap::before {
-  content: ''; position: absolute; inset: -2px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, var(--rose-soft), var(--rose), #9B7EE2);
-  z-index: -1; opacity: 0;
-  transition: opacity .35s;
-  filter: blur(8px);
+.ctaWrap:focus-within {
+  border-color: var(--mk-indigo-700);
+  box-shadow: var(--sh-brand);
+  transform: translateY(-2px);
 }
-.ctaWrap:focus-within { border-color: transparent; transform: translateY(-2px); }
-.ctaWrap:focus-within::before { opacity: .55; }
 
 .ctaLabel {
-  font-family: var(--font-display);
+  font-family: var(--serif);
   font-style: italic;
-  color: #2B1A2D;
+  color: var(--mk-stone-900);
   font-size: 18px;
   white-space: nowrap;
 }
 .ctaInput {
-  flex: 1; border: none; background: transparent; outline: none;
-  font-family: var(--font-sans);
-  font-size: 17px; color: #2B1A2D;
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--sans);
+  font-size: 17px;
+  color: var(--mk-stone-900);
   padding: 14px 0;
   min-width: 0;
 }
-.ctaInput::placeholder { color: #8E7B8C; font-style: italic; }
+.ctaInput::placeholder { color: var(--mk-stone-500); font-style: italic; }
 
 .ctaBtn {
-  background: linear-gradient(135deg, var(--rose-soft), var(--rose));
-  color: #fff; border: none;
-  padding: 13px 18px; border-radius: 13px;
-  font-family: var(--font-sans);
-  font-weight: 700; font-size: 15px;
-  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--mk-indigo-700);
+  color: #fff;
+  border: none;
+  padding: 13px 20px;
+  border-radius: 13px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
-  transition: filter .2s, transform .15s, box-shadow .25s;
+  transition: background .2s, transform .15s, box-shadow .25s;
   white-space: nowrap;
-  box-shadow: 0 6px 18px -6px rgba(225,29,72,.5);
+  box-shadow: var(--sh-brand);
 }
-.ctaBtn:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 10px 24px -8px rgba(225,29,72,.55); }
-.ctaBtn svg { width: 16px; height: 16px; }
+.ctaBtn:hover {
+  background: var(--mk-indigo-500);
+  transform: translateY(-1px);
+}
+.ctaBtn svg {
+  width: 16px; height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
 
-/* ─── fine print ─── */
-.fine {
-  margin-top: 22px;
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  font-size: 13.5px; color: #5A4458;
-}
-.coin {
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #FFE8A3, #C99A3A 70%);
-  box-shadow: inset 0 -2px 4px rgba(0,0,0,.15);
-  flex: none;
-}
-.fine b { color: #2B1A2D; font-weight: 700; }
-
+/* ─── assurances ─── */
 .assurances {
-  margin-top: 28px;
+  margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid rgba(43,26,45,.08);
-  display: flex; justify-content: center; flex-wrap: wrap;
+  border-top: 1px solid var(--mk-stone-100);
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 18px 28px;
 }
 .assure {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13.5px; color: #2B1A2D; font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--mk-stone-900);
+  font-weight: 600;
 }
-.assure svg { width: 16px; height: 16px; color: var(--rose); flex: none; }
+.assure svg {
+  width: 16px; height: 16px;
+  color: var(--mk-forest-700);
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
 
 /* ─── responsive ─── */
 @media (max-width: 760px) {
-  .section { padding: 80px var(--pad-x); }
-  .card { padding: 40px 28px 32px; border-radius: 24px; }
+  .section { padding: 96px 20px; }
+  .card { padding: 80px 28px 32px; border-radius: 24px; }
 }
 
 @media (max-width: 600px) {
-  .section { padding: 64px var(--pad-x); }
-  .card { padding: 32px 22px 28px; }
-  .ctaWrap { flex-wrap: wrap; padding: 10px 10px 10px 16px; gap: 6px; }
+  .section { padding: 72px 16px; }
+  .card { padding: 68px 22px 28px; }
+  .cardKado { top: -48px; width: 88px !important; height: 88px !important; }
+  .ctaWrap {
+    flex-wrap: wrap;
+    padding: 10px 10px 10px 16px;
+    gap: 6px;
+  }
   .ctaLabel { width: 100%; font-size: 16px; padding-top: 2px; }
   .ctaInput { flex: 1 1 0; font-size: 16px; padding: 10px 0; }
   .ctaBtn { flex: 0 0 auto; padding: 12px 14px; font-size: 14px; }

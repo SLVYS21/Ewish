@@ -22,14 +22,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  color: #fff;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--mk-stone-50, #f6f4ee);
+  transition: transform .4s ease;
 }
-.carte  .icon { background: var(--mk-indigo-700); }
-.mur    .icon { background: var(--mk-clay-500); }
-.cadeau .icon { background: var(--mk-gold-400); color: var(--mk-stone-900); }
+.card:hover .icon { transform: scale(1.08) rotate(-4deg); }
+.carte  .icon { background: rgba(30, 41, 82, 0.06); }
+.mur    .icon { background: rgba(214, 138, 108, 0.14); }
+.cadeau .icon { background: rgba(232, 163, 61, 0.18); }
 
 .title {
   font-family: var(--serif);

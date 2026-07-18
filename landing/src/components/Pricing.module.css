@@ -72,6 +72,9 @@
   font-family: var(--serif);
   font-size: 24px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .price {

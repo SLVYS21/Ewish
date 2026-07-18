@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import s from './Navbar.module.css';
+import Kado from './Kado/Kado';
 
 export default function Navbar({ onCreate, onLogin }) {
   const [open, setOpen] = useState(false);
@@ -9,7 +10,14 @@ export default function Navbar({ onCreate, onLogin }) {
       <div className="mk-container">
         <div className={s.in}>
           <a href="#" className={s.brand} aria-label="myKado accueil">
-            myKado <span className={s.dot} />
+            <Kado
+              mode="logo"
+              size={40}
+              cycle={['jump', 'wink', 'confetti', 'love', 'drop']}
+              cycleInterval={4200}
+              className={s.brandKado}
+            />
+            <span>myKado</span>
           </a>
           <div className={s.links}>
             <a href="#briques">Ce qu'on fait</a>

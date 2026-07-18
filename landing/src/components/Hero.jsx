@@ -1,4 +1,6 @@
 import s from './Hero.module.css';
+import NotoEmoji from './NotoEmoji';
+import Kado from './Kado/Kado';
 
 export default function Hero({ onCreate }) {
   return (
@@ -6,9 +8,20 @@ export default function Hero({ onCreate }) {
       <div className="mk-container">
         <div className={s.grid}>
           <div>
-            <span className="eyebrow">Cartes · Murs · Cadeaux</span>
+            <span className={`eyebrow ${s.eyebrow}`}>
+              <NotoEmoji name="love-letter"  size={18} />
+              <span>Cartes</span>
+              <span className={s.eyebrowDot}>·</span>
+              <NotoEmoji name="party-popper" size={18} />
+              <span>Murs</span>
+              <span className={s.eyebrowDot}>·</span>
+              <NotoEmoji name="wrapped-gift" size={18} />
+              <span>Cadeaux</span>
+            </span>
             <h1 className={s.h1}>
-              Vous voulez faire <em className={`serif ${s.gold}`}>mieux</em><br />
+              Vous voulez faire <em className={`serif ${s.gold}`}>mieux</em>
+              <NotoEmoji name="sparkles" size={44} className={s.h1Sparkle} />
+              <br />
               qu'un <span className={s.strike}>"Joyeux anniv"</span><br />
               sur WhatsApp&nbsp;?
             </h1>
@@ -34,6 +47,17 @@ export default function Hero({ onCreate }) {
           </div>
 
           <div className={s.cluster}>
+            <Kado
+              size={140}
+              className={s.heroKado}
+              cycle={['jump', 'wink', 'confetti', 'love', 'drop']}
+              cycleInterval={4200}
+              ambient
+            />
+            <NotoEmoji name="party-popper"    size={56} className={`${s.floatEmoji} ${s.floatEmoji1}`} />
+            <NotoEmoji name="sparkling-heart" size={44} className={`${s.floatEmoji} ${s.floatEmoji2}`} />
+            <NotoEmoji name="balloon"         size={48} className={`${s.floatEmoji} ${s.floatEmoji3}`} />
+            <NotoEmoji name="confetti-ball"   size={40} className={`${s.floatEmoji} ${s.floatEmoji4}`} />
             <div className={`${s.card} ${s.card1}`}>
               <div className={s.cPhoto} />
               <div className={s.cTitle}>Bon anniv Amina&nbsp;!</div>

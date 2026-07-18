@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import s from './FinalCTA.module.css';
+import Kado from './Kado/Kado';
 
 const PLACEHOLDERS = ['Maman', 'Marie', "l'équipe RH", 'Aminata', 'tes mariés'];
 
@@ -31,13 +32,20 @@ export default function FinalCTA({ onOrder }) {
         </div>
 
         <div className={s.card}>
+          <Kado
+            size={110}
+            className={s.cardKado}
+            cycle={['jump', 'love', 'wink', 'confetti', 'drop']}
+            cycleInterval={4200}
+            ambient
+          />
           <span className={s.eyebrow}>
             <span className={s.dot} /> Dernière question
           </span>
 
           <h2 className={s.title}>
             Alors,<br/>
-            <em className="it rose">pour qui</em> c'est ?
+            <em className={s.rose}>pour qui</em> c'est ?
           </h2>
 
           <p className={s.sub}>
@@ -63,11 +71,6 @@ export default function FinalCTA({ onOrder }) {
               </svg>
             </button>
           </form>
-
-          <div className={s.fine}>
-            <span className={s.coin} />
-            <span><b>1 crédit = 500 FCFA</b> · sans abonnement · crédits sans expiration</span>
-          </div>
 
           <div className={s.assurances}>
             <div className={s.assure}>

@@ -4,6 +4,7 @@ import Briques    from './components/Briques';
 import HowItWorks from './components/HowItWorks';
 import Pricing    from './components/Pricing';
 import Business   from './components/Business';
+import FinalCTA   from './components/FinalCTA';
 import Footer     from './components/Footer';
 
 const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
@@ -26,6 +27,7 @@ export default function App() {
         <HowItWorks />
         <Pricing    onCreate={handleRegister} />
         <Business   onCreate={handleRegister} />
+        <FinalCTA   onOrder={handleRegister} />
       </main>
       <Footer />
     </>

@@ -34,6 +34,23 @@
   text-decoration-color: var(--mk-clay-500);
   color: var(--mk-stone-500);
 }
+.h1Sparkle {
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: -0.15em;
+  animation: h1SparkleWiggle 3.2s ease-in-out infinite;
+}
+@keyframes h1SparkleWiggle {
+  0%, 100% { transform: rotate(-6deg) scale(1); }
+  50%      { transform: rotate(10deg) scale(1.08); }
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.eyebrowDot { opacity: .55; font-weight: 400; }
 
 .sub {
   font-family: var(--sans);
@@ -84,6 +101,54 @@
   background: var(--mk-clay-500);
   border-radius: 4px;
   transform: rotate(20deg);
+}
+
+/* Emojis animés flottant autour du cluster de cartes.
+   Positions volontairement décalées vers l'extérieur pour ne pas cacher
+   le contenu des cartes. animation-delay désynchronisé pour un rendu vivant. */
+.floatEmoji {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(30, 41, 82, .18));
+  animation: floatBob 4.4s ease-in-out infinite;
+}
+.floatEmoji1 { top: -18px;  right: -6px;  animation-delay: 0s;   }
+.floatEmoji2 { top: 36%;    left: -22px;  animation-delay: .9s;  }
+.floatEmoji3 { bottom: -12px; right: 18%; animation-delay: 1.6s; }
+.floatEmoji4 { bottom: 22%; right: -18px; animation-delay: 2.3s; }
+
+/* Mascotte Kado dans le hero — perchée en haut du cluster, très visible sur
+   desktop comme sur mobile, jamais clip par overflow:hidden du parent. */
+.heroKado {
+  position: absolute;
+  top: -40px;
+  left: 20%;
+  z-index: 20;
+  filter: drop-shadow(0 12px 22px rgba(30, 41, 82, .22));
+}
+@media (max-width: 900px) {
+  .heroKado {
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px !important;
+    height: 110px !important;
+  }
+}
+@media (max-width: 480px) {
+  .heroKado {
+    top: -24px;
+    width: 88px !important;
+    height: 88px !important;
+  }
+}
+@keyframes floatBob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-14px) rotate(6deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floatEmoji, .h1Sparkle { animation: none; }
 }
 
 .card {

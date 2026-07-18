@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import s from './Pricing.module.css';
+import NotoEmoji from './NotoEmoji';
 
 const Check = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -35,6 +36,7 @@ const PLANS = [
   {
     id: 'carte',
     name: 'Carte',
+    emoji: 'love-letter',
     desc: 'Une carte animée pour un destinataire. Musique, photos, texte, décorations.',
     features: ['Musique intégrée', 'Jusqu\'à 3 photos', 'Export QR, lien, partage'],
     ctaLabel: 'Créer une carte',
@@ -43,6 +45,7 @@ const PLANS = [
   {
     id: 'mur',
     name: 'Mur',
+    emoji: 'party-popper',
     desc: 'Un mur collaboratif illimité pour toute une famille ou une équipe.',
     features: [
       'Contributeurs illimités',
@@ -56,6 +59,7 @@ const PLANS = [
   {
     id: 'cadeau',
     name: 'Cadeau',
+    emoji: 'wrapped-gift',
     desc: 'Le montant de ton choix + une commission fixe très basse. Attaché à une carte ou un mur.',
     features: ['Mobile Money local', 'Cartes cadeaux partenaires', 'Retrait cash ou utilisation'],
     ctaLabel: 'Envoyer un cadeau',
@@ -96,7 +100,10 @@ export default function Pricing({ onCreate }) {
             const p = PRICES[currency][plan.id];
             return (
               <div key={plan.id} className={`${s.plan} ${plan.featured ? s.featured : ''}`}>
-                <div className={s.name}>{plan.name}</div>
+                <div className={s.name}>
+                  <NotoEmoji name={plan.emoji} size={28} />
+                  <span>{plan.name}</span>
+                </div>
                 <div className={s.price}>
                   {p.price} <small>{p.unit}</small>
                 </div>
