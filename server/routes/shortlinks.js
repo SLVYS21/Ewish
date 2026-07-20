@@ -44,6 +44,11 @@ router.get('/:code', async (req, res) => {
       return res.redirect(301, `/${prefix}/${pub.slug}`);
     }
 
+    // Si c'est un mur mais qu'il n'a pas de slug/brique (legacy)
+    if (pub.templateName && pub.templateName.startsWith('wall-of-wishes')) {
+      return res.redirect(301, `/m/${pub.shortCode}`);
+    }
+
     // Fallback legacy — cartes historiques sans slug
     res.redirect(301, `/site/${pub.templateName}/${pub.customName}`);
   } catch (e) {

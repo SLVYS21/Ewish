@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Publication = require('../models/Publication');
 const Contribution = require('../models/Contribution');
+const wallEvents = require('../services/wallEvents');
 const { kkiapay } = require('@kkiapay-org/nodejs-sdk');
 
 const k = kkiapay({
@@ -56,6 +57,25 @@ router.post('/verify', async (req, res) => {
       wishId: wishId || null,
       status: 'confirmed',
     });
+
+    // Live push (SSE) : contribution + stats agrégées à jour.
+    // Fait avant la notif propriétaire pour que la projection réagisse ASAP.
+    try {
+      const [aggr, pub] = await Promise.all([
+        Contribution.aggregate([
+          { $match: { publicationId: contribution.publicationId, status: 'confirmed' } },
+          { $group: { _id: null, sum: { $sum: '$amount' }, count: { $sum: 1 } } },
+        ]),
+        Publication.findById(publicationId).select('cagnotteConfig.goal').lean(),
+      ]);
+      const total = aggr?.[0]?.sum || 0;
+      const count = aggr?.[0]?.count || 0;
+      const goal  = pub?.cagnotteConfig?.goal || 0;
+      const stats = { total, count, goal, pct: goal > 0 ? Math.round((total / goal) * 100) : 0 };
+      wallEvents.emitContribution(publicationId, contribution, stats);
+    } catch (err) {
+      console.warn('[contributions] SSE emit failed', err.message);
+    }
 
     // Notif propriétaire du mur (fire-and-forget)
     (async () => {

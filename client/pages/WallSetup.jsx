@@ -12,6 +12,9 @@ import {
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import NotoEmoji from '../components/NotoEmoji';
+import WallStyle from '../components/WallStyle';
+import WallPublishModal from '../components/WallPublishModal';
+import { getEvent } from '../wall-wizard/constants';
 
 const TEMPLATE_LABELS = {
   'wall-of-wishes':        'Mur Classique',
@@ -77,7 +80,7 @@ function WallSettings({ pub, id, onSave }) {
   const cc  = pub.cagnotteConfig || {};
   const d   = pub.data || {};
 
-  const [wallTitle, setWallTitle]     = useState(pub.title || '');
+  const [wallTitle, setWallTitle]     = useState(d.recipient || d.titleName || pub.title || '');
   const [phrase, setPhrase]           = useState(d.subtitle || d.phrase || '');
   const [bannerImage, setBannerImage] = useState(d.bannerImage || '');
   const [uploadingBanner, setUploadingBanner] = useState(false);
@@ -98,7 +101,8 @@ function WallSettings({ pub, id, onSave }) {
 
   const inited = useRef(false);
 
-  /* Auto-save info */
+  /* Auto-save info — wallTitle = destinataire ; on rebâtit pub.title depuis l'événement,
+     et on propage aux champs consommés par le template (data.titleName, data.recipient). */
   const infoTimer = useRef(null);
   useEffect(() => {
     if (!inited.current) return;
@@ -107,9 +111,20 @@ function WallSettings({ pub, id, onSave }) {
     infoTimer.current = setTimeout(async () => {
       onSave('saving');
       try {
+        const recipient = (wallTitle || '').trim();
+        const ev = getEvent(d.occasion);
+        const rebuiltTitle = recipient ? ev.title(recipient) : (pub.title || '');
         await updatePublication(id, {
-          title: wallTitle,
-          data: { subtitle: phrase, bannerImage },
+          title: rebuiltTitle,
+          data: {
+            titleName: recipient,
+            recipient,
+            subtitle: phrase,
+            phrase,
+            bannerImage,
+            coverImage: bannerImage,   // legacy alias attendu par applyCover
+            wallCover: bannerImage,    // idem
+          },
         });
         onSave('saved');
       } catch { onSave('unsaved'); }
@@ -404,7 +419,7 @@ function WallWords({ id, moderation: moderationEnabled, isPaid, onRequestPay }) 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--d-gap) + 6px)' }}>
       {toast && <div className="mk-toast">{toast}</div>}
 
-      {/* Verrouillés  au-delà des 5 mots gratuits, ou avec média sur mur non-payé */}
+      {/* Verrouillés  au-delà des 10 mots gratuits, ou avec média sur mur non-payé */}
       {locked.length > 0 && (
         <div>
           <div className="section-label" style={{ color: 'var(--mk-accent)', marginBottom: 10 }}>
@@ -668,6 +683,7 @@ export default function WallSetup() {
   const [loading, setLoading]   = useState(true);
   const [saveStatus, setSaveStatus] = useState('saved');
   const [publishing, setPublishing] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [pubError, setPubError] = useState('');
   const [toast, setToast]       = useState('');
   const [tab, setTab]           = useState('settings');
@@ -682,8 +698,22 @@ export default function WallSetup() {
       setLoading(true);
       try {
         const res = await getPublicationById(id);
-        pubRef.current = res.data;
-        setPub(res.data);
+        let data = res.data;
+        /* Backfill : anciens murs créés avant bannerTint — hydrate depuis l'occasion. */
+        const dd = data?.data || {};
+        if (!dd.bannerTint && dd.occasion) {
+          const ev = getEvent(dd.occasion);
+          if (ev?.tint) {
+            try {
+              await updatePublication(id, {
+                data: { bannerTint: ev.tint, bannerInk: ev.bannerInk || '#2B2440' },
+              });
+              data = { ...data, data: { ...dd, bannerTint: ev.tint, bannerInk: ev.bannerInk || '#2B2440' } };
+            } catch { /* silent */ }
+          }
+        }
+        pubRef.current = data;
+        setPub(data);
       } catch {
         navigate('/ewish-admin/ewish');
       } finally {
@@ -705,20 +735,19 @@ export default function WallSetup() {
     }).catch(() => {});
   }, [id]);
 
-  const handlePublish = async () => {
-    setPublishing(true); setPubError('');
+  const handlePublishClick = () => {
+    setShowPublishModal(true);
+  };
+
+  const handlePublishConfirm = async (planType) => {
+    setPublishing(true);
+    setPubError('');
     try {
-      await publishPublication(id);
-      const updated = await getPublicationById(id);
-      pubRef.current = updated.data;
-      setPub(updated.data);
-      showToast(
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <NotoEmoji name="partying-face" size={22} />
-          Le mur est en ligne !
-          <NotoEmoji name="party-popper" size={22} />
-        </span>
-      );
+      const res = await publishPublication(id, { planType });
+      setPub(res.data);
+      setToast('Mur publié avec succès !');
+      setTimeout(() => setToast(''), 3000);
+      setShowPublishModal(false);
     } catch (err) {
       setPubError(err.response?.data?.error || 'Erreur lors de la publication');
     } finally { setPublishing(false); }
@@ -739,60 +768,51 @@ export default function WallSetup() {
   const siteUrl      = isPublished ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}` : null;
 
   const tabs = [
-    { id: 'settings', label: 'Réglages',  icon: '⚙' },
-    { id: 'words',    label: 'Mots',       icon: '💬', count: wordCounts.pending + wordCounts.locked },
-    { id: 'cagnotte', label: 'Cagnotte',   icon: '🎁' },
+    { id: 'settings', label: 'Réglages' },
+    { id: 'style',    label: 'Style' },
+    { id: 'words',    label: 'Mots', count: wordCounts.pending + wordCounts.locked },
+    { id: 'cagnotte', label: 'Cagnotte' },
   ];
 
-  return (
-    <div className="page">
+  const styleTouched = !!(
+    pub?.style?.styleBgPreset ||
+    pub?.style?.stylePalettePreset ||
+    pub?.style?.styleConfettiPreset ||
+    pub?.style?.styleCustomBgUrl
+  );
 
-      {/* Page header */}
-      <div className="ph">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <button className="btn btn-ghost btn-sm" style={{ padding: '3px 10px' }} onClick={() => navigate(-1)}>
-              <ArrowLeft size={13} /> Retour
-            </button>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mk-ink-3)' }}>
-              {TEMPLATE_LABELS[pub?.templateName] || pub?.templateName}
-            </span>
-          </div>
-          <h1 className="ph-title">{pub?.title || 'Mur sans titre'}</h1>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {isPublished
-            ? <span className="badge badge-live"><Check size={11} /> En ligne</span>
-            : <span className="badge badge-draft">
-                {Math.min(wordCounts.ok, 5)} / 5 mots gratuits
-                {wordCounts.locked > 0 && (
-                  <span style={{ marginLeft: 6, color: 'var(--mk-accent)', fontWeight: 700 }}>
-                     · <LockKeyhole size={10} style={{ display: 'inline', verticalAlign: -1 }} /> {wordCounts.locked} verrouillé{wordCounts.locked > 1 ? 's' : ''}
-                  </span>
-                )}
-              </span>
-          }
-          <span style={{ fontSize: 12, color: 'var(--mk-ink-3)', display: 'flex', alignItems: 'center', gap: 5 }}>
-            {saveStatus === 'saving'  && <><Loader2 size={12} style={{ animation: 'mk-spin .75s linear infinite' }} /> Sauvegarde…</>}
-            {saveStatus === 'saved'   && <><Check size={12} color="var(--mk-mint)" /> Sauvegardé</>}
-            {saveStatus === 'unsaved' && <span style={{ color: 'var(--mk-accent)' }}>Non sauvegardé</span>}
-          </span>
-          {isPublished && siteUrl && (
-            <a href={siteUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
-              <Eye size={13} /> Voir le mur
-            </a>
-          )}
-          {isPublished && (
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-              <Share2 size={13} /> Partager
-            </button>
-          )}
-          <button className="btn btn-primary btn-sm" onClick={handlePublish} disabled={publishing}>
-            {publishing
-              ? <><Loader2 size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
-              : isPublished ? <><Check size={13} /> Mettre à jour</> : 'Publier le mur'
-            }
+  return (
+    <div className="page wall-setup">
+
+      {/* Compact page header — 1-line title + progress */}
+      <div className="wall-head">
+        <div className="wall-head-row">
+          <button className="wall-head-back" onClick={() => navigate(-1)} aria-label="Retour">
+            <ArrowLeft size={16} />
           </button>
+          <div className="wall-head-title-wrap">
+            <div className="wall-head-eyebrow">
+              {TEMPLATE_LABELS[pub?.templateName] || 'Mur'}
+            </div>
+            <h1 className="wall-head-title">{pub?.title || 'Mur sans titre'}</h1>
+          </div>
+          <div className="wall-head-actions">
+            <span className="wall-head-save" aria-live="polite">
+              {saveStatus === 'saving'  && <><Loader2 size={12} style={{ animation: 'mk-spin .75s linear infinite' }} /> Sauvegarde…</>}
+              {saveStatus === 'saved'   && <><Check size={12} color="var(--mk-mint)" /> Sauvegardé</>}
+              {saveStatus === 'unsaved' && <span style={{ color: 'var(--mk-accent)' }}>Non sauvegardé</span>}
+            </span>
+            {isPublished && siteUrl && (
+              <button className="btn btn-primary btn-sm" onClick={() => navigate(`/ewish-admin/share/${id}`)}>
+                <Share2 size={13} /> Partager
+              </button>
+            )}
+            {!isPublished && (
+              <button className="btn btn-primary btn-sm" onClick={handlePublishClick} disabled={publishing}>
+                {publishing ? <><Loader2 size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> …</> : 'Publier'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -812,6 +832,16 @@ export default function WallSetup() {
 
       {/* Tab content — key={tab} déclenche l'animation à chaque switch */}
       <div key={tab} className="mk-anim-fade-in">
+        {tab === 'style' && (
+          <WallStyle
+            pub={pub}
+            id={id}
+            onSave={setSaveStatus}
+            onPubUpdated={(next) => {
+              if (next) { pubRef.current = next; setPub(next); }
+            }}
+          />
+        )}
         {tab === 'settings' && (
           <>
             <WallSettings pub={pub} id={id} onSave={setSaveStatus} />
@@ -821,20 +851,19 @@ export default function WallSetup() {
               </div>
             )}
             <div style={{ display: 'flex', gap: 10, marginTop: 'var(--d-gap)', flexWrap: 'wrap' }}>
-              {isPublished && siteUrl && (
-                <a href={siteUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
-                  <ExternalLink size={14} /> Voir le mur
-                </a>
+              {!isPublished && (
+                <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handlePublishClick} disabled={publishing}>
+                  {publishing ? <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</> : 'Publier le mur'}
+                </button>
               )}
-              <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handlePublish} disabled={publishing}>
-                {publishing
-                  ? <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
-                  : isPublished ? <><Check size={16} /> Mettre à jour</> : 'Publier le mur'
-                }
-              </button>
               {isPublished && (
-                <button className="btn btn-ghost" onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-                  <Share2 size={14} /> QR Code & Partage
+                <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => navigate(`/ewish-admin/share/${id}`)}>
+                  <Share2 size={16} /> QR Code & Partage
+                </button>
+              )}
+              {isPublished && (
+                <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setTab('style')}>
+                  <Eye size={14} /> Aperçu du mur
                 </button>
               )}
             </div>
@@ -846,7 +875,7 @@ export default function WallSetup() {
             id={id}
             moderation={moderation}
             isPaid={pub?.isPaid}
-            onRequestPay={handlePublish}
+            onRequestPay={handlePublishClick}
           />
         )}
         {tab === 'cagnotte' && <WallCagnotte pub={pub} id={id} />}
@@ -854,6 +883,15 @@ export default function WallSetup() {
 
       {/* Toast */}
       {toast && <div className="mk-toast">{toast}</div>}
+
+      {/* Pricing Modal */}
+      {showPublishModal && (
+        <WallPublishModal 
+          onClose={() => setShowPublishModal(false)}
+          onConfirm={handlePublishConfirm}
+          loading={publishing}
+        />
+      )}
     </div>
   );
 }

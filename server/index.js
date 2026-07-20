@@ -85,6 +85,11 @@ app.use('/api/settings',     require('./routes/settings'));
 app.use('/api/kyc',          require('./routes/kyc'));
 app.use('/api/contributions', require('./routes/contributions'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/walls',         require('./routes/wallStream'));
+app.use('/api/walls',         require('./routes/wallExport'));
+app.use('/api/walls',         require('./routes/wallVideo'));
+app.use('/api/walls',         require('./routes/wallClaim'));
+app.use('/api/walls',         require('./routes/wallWithdrawal'));
 
 
 app.use('/collect', require('./routes/collect'));

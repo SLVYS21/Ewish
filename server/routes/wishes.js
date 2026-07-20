@@ -3,6 +3,7 @@ const Wish = require('../models/Wish');
 const Publication = require('../models/Publication');
 const { requireAdmin } = require('../middleware/auth');
 const { notify, ownerUserIdForPublication } = require('../services/notifications');
+const wallEvents = require('../services/wallEvents');
 
 // POST /api/wishes/:publicationId  submit a wish (public)
 router.post('/:publicationId', async (req, res) => {
@@ -32,15 +33,25 @@ router.post('/:publicationId', async (req, res) => {
     const hasMedia = !!(photoUrl || audioUrl || videoUrl || (mediaType && mediaType !== 'none'));
 
     let pendingPayment = false;
-    if (isWallTemplate && !pub.isPaid) {
-      if (hasMedia) {
+    if (isWallTemplate) {
+      const planType = pub.planType || 'free';
+      let limit = 10;
+      if (planType === 'premium') limit = 100;
+      if (planType === 'infinite') limit = Infinity;
+
+      // Un mot est en attente de paiement si :
+      // - Il contient un média et le plan est 'free'
+      // - Ou si le nombre de mots dépasse la limite du plan
+      if (planType === 'free' && hasMedia) {
         pendingPayment = true;
       } else {
-        const freeCount = await Wish.countDocuments({
+        const visibleCount = await Wish.countDocuments({
           publicationId: req.params.publicationId,
           pendingPayment: { $ne: true },
         });
-        if (freeCount >= 5) pendingPayment = true;
+        if (visibleCount >= limit) {
+          pendingPayment = true;
+        }
       }
     }
 
@@ -62,6 +73,11 @@ router.post('/:publicationId', async (req, res) => {
       approved:      autoApprove,
       pendingPayment,
     });
+
+    // Live push aux murs branchés en SSE — uniquement si visible tout de suite.
+    if (autoApprove && !pendingPayment) {
+      wallEvents.emitWish(pub._id, wish);
+    }
 
     // Notif au propriétaire du mur (fire-and-forget)
     (async () => {
@@ -116,12 +132,13 @@ router.patch('/:id', async (req, res) => {
     const existing = await Wish.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
 
-    // Block approval of a pendingPayment wish until the wall is paid
+    // Block approval of a pendingPayment wish until the wall is upgraded
     if (existing.pendingPayment && req.body.approved === true) {
       const pub = await Publication.findById(existing.publicationId).lean();
-      if (!pub?.isPaid) {
+      const planType = pub?.planType || 'free';
+      if (planType === 'free') {
         return res.status(402).json({
-          error: 'Ce mot est verrouillé. Publie le mur pour le débloquer.',
+          error: 'Ce mot est verrouillé. Upgradez vers Premium ou Illimité pour le débloquer.',
           code: 'WISH_LOCKED_PAYMENT',
         });
       }
@@ -132,31 +149,89 @@ router.patch('/:id', async (req, res) => {
     allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
 
     const wish = await Wish.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
+
+    // Si un modérateur vient d'approuver + démasquer, push live sur le mur.
+    const becameVisible =
+      wish &&
+      wish.approved === true &&
+      wish.hidden === false &&
+      !wish.pendingPayment &&
+      (existing.approved !== true || existing.hidden === true);
+    if (becameVisible) {
+      wallEvents.emitWish(wish.publicationId, wish);
+    }
+
     res.json(wish);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-// POST /api/wishes/:publicationId/release-pending
-// Called after the wall is paid: flip pendingPayment off on every wish, and
-// auto-approve them when moderation is off.
+// Called after the wall is upgraded: flip pendingPayment off on every wish
+// up to the new limit, and auto-approve them when moderation is off.
 router.post('/:publicationId/release-pending', async (req, res) => {
   try {
     const pub = await Publication.findById(req.params.publicationId).lean();
     if (!pub) return res.status(404).json({ error: 'Publication not found' });
-    if (!pub.isPaid) {
-      return res.status(402).json({ error: 'Le mur n\'est pas encore payé.' });
+    
+    const planType = pub.planType || 'free';
+    if (planType === 'free') {
+      return res.status(402).json({ error: 'Le mur nécessite un plan payant.' });
     }
+
+    // Calcul de la limite
+    let limit = 100; // premium
+    if (planType === 'infinite') limit = Infinity;
+
+    // Combien de mots visibles actuels ?
+    const visibleCount = await Wish.countDocuments({
+      publicationId: req.params.publicationId,
+      pendingPayment: { $ne: true },
+    });
+
     const autoApprove = !pub.cagnotteConfig?.requireModeration;
     const update = autoApprove
       ? { $set: { pendingPayment: false, approved: true } }
       : { $set: { pendingPayment: false } };
-    const result = await Wish.updateMany(
-      { publicationId: req.params.publicationId, pendingPayment: true },
-      update
-    );
-    res.json({ released: result.modifiedCount, autoApproved: autoApprove });
+
+    // Si on est premium, on débloque jusqu'à 100
+    let releasedCount = 0;
+    if (limit === Infinity) {
+      const result = await Wish.updateMany(
+        { publicationId: req.params.publicationId, pendingPayment: true },
+        update
+      );
+      releasedCount = result.modifiedCount;
+    } else {
+      // Premium : on libère (limit - visibleCount) mots
+      const slotsLeft = limit - visibleCount;
+      if (slotsLeft > 0) {
+        const toRelease = await Wish.find({ publicationId: req.params.publicationId, pendingPayment: true })
+          .sort('createdAt')
+          .limit(slotsLeft)
+          .select('_id');
+        const ids = toRelease.map(w => w._id);
+        const result = await Wish.updateMany(
+          { _id: { $in: ids } },
+          update
+        );
+        releasedCount = result.modifiedCount;
+      }
+    }
+
+    // Après release, on push tous les vœux nouvellement visibles pour que
+    // les murs projetés se mettent à jour sans reload.
+    if (autoApprove && releasedCount > 0) {
+      const released = await Wish.find({
+        publicationId: req.params.publicationId,
+        pendingPayment: false,
+        approved: true,
+        hidden: false,
+      }).sort('-updatedAt').limit(releasedCount).lean();
+      released.forEach(w => wallEvents.emitWish(req.params.publicationId, w));
+    }
+
+    res.json({ released: releasedCount, autoApproved: autoApprove });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

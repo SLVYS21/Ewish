@@ -729,7 +729,7 @@ export default function Editor() {
                   </div>
                   <div className={styles.wallCapRow}>
                     <span className={styles.wallCapCheck}>✓</span>
-                    <span className={styles.wallCapLabel}>5 premiers vœux texte</span>
+                    <span className={styles.wallCapLabel}>10 premiers vœux texte</span>
                     <span className={styles.wallCapFree}>Gratuit</span>
                   </div>
                   <div className={styles.wallCapRow} style={{ opacity: pub?.isPaid ? 1 : 0.55 }}>

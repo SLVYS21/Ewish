@@ -67,3 +67,21 @@
   -webkit-overflow-scrolling: touch;
   padding-bottom: max(20px, env(safe-area-inset-bottom));
 }
+
+/* Desktop → devient une modal centrée compacte */
+@media (min-width: 768px) {
+  .overlay {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .sheet {
+    max-width: 520px;
+    max-height: min(88vh, 720px);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px -20px rgba(43,26,45,.35);
+  }
+
+  .handle { display: none; }
+}

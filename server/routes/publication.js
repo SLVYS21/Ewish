@@ -10,10 +10,15 @@ const { slugify: mkSlugify, isValidSlug, generateUniqueSlug } = require('../util
 // GET all
 router.get('/', requireAdmin, async (req, res) => {
   try {
-    const { limit = 20, page = 1, search, premade, mine } = req.query;
+    const { limit = 20, page = 1, search, premade, mine, received } = req.query;
     const query = {};
-    
-    if (premade === 'true') {
+
+    /* Étape 8 flow murs — "Créations reçues" = publications où l'utilisateur
+       courant est le destinataire enregistré (après claim). Prioritaire sur
+       les autres filtres pour éviter les intersections vides. */
+    if (received === 'true') {
+      query.recipientUserId = String(req.admin.id);
+    } else if (premade === 'true') {
       query.isPremade = true;
     } else if (mine === 'true') {
       query.merchantId = req.admin.merchantId;
@@ -71,6 +76,34 @@ router.get('/id/:id', requireAdmin, async (req, res) => {
       return res.status(403).json({ error: 'Accès refusé' });
     }
     res.json(pub);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET public publication data by slug (for recipient reveal animation)
+router.get('/public/slug/:slug', async (req, res) => {
+  try {
+    const pub = await Publication.findOne({ 
+      $or: [{ slug: req.params.slug }, { shortCode: req.params.slug }],
+      published: true 
+    }).lean();
+    if (!pub) return res.status(404).json({ error: 'Not found' });
+    
+    // Only return safe public data needed for reveal UI
+    res.json({
+      _id: pub._id,
+      slug: pub.slug,
+      templateName: pub.templateName,
+      customName: pub.customName,
+      brique: pub.brique,
+      title: pub.title,
+      occasion: pub.data?.occasion || 'other',
+      recipient: pub.data?.recipient || pub.data?.recipientName || pub.data?.name || '',
+      coverImage: pub.data?.coverImage || '',
+      confettiType: pub.style?.confettiType || 'default',
+      revealIcon: pub.style?.revealIcon || 'gift',
+      wallBackground: pub.style?.wallBackground || '',
+      fontFamily: pub.style?.fontFamily || 'Playfair Display'
+    });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -227,39 +260,71 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       return res.status(403).json({ error: 'Accès refusé' });
     }
 
-    // Credit deduction for merchants
-    if (req.admin?.role === 'merchant' && !existing.isPaid) {
-      const template = await Template.findOne({ name: existing.templateName }).lean();
-      const creditsReq = template?.creditsRequired || 1;
-      const user = await AdminUser.findById(req.admin.id);
-      
-      if (user.credits < creditsReq) {
-        return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits pour publier cette création.`, creditsRequired: creditsReq });
+    const { planType } = req.body; // optionnel: 'free', 'premium', 'infinite'
+    const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
+    let finalPlanType = isWallTemplate ? (planType || 'free') : undefined;
+    let creditsReq = 0;
+
+    // Credit deduction logic
+    if (req.admin?.role === 'merchant') {
+      if (isWallTemplate) {
+        if (finalPlanType === 'premium') creditsReq = 5; // 2500 FCFA
+        else if (finalPlanType === 'infinite') creditsReq = 20; // 10000 FCFA
+        else creditsReq = 0;
+      } else if (!existing.isPaid) {
+        const template = await Template.findOne({ name: existing.templateName }).lean();
+        creditsReq = template?.creditsRequired || 1;
       }
-      
-      user.credits -= creditsReq;
-      await user.save();
-      // Mark as paid so we don't deduct again
-      await Publication.findByIdAndUpdate(req.params.id, { isPaid: true });
+
+      if (creditsReq > 0) {
+        const user = await AdminUser.findById(req.admin.id);
+        if (user.credits < creditsReq) {
+          return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits.`, creditsRequired: creditsReq });
+        }
+        user.credits -= creditsReq;
+        await user.save();
+      }
+    }
+
+    const updateFields = { published: true, publishedAt: Date.now() };
+    if (creditsReq > 0 || finalPlanType !== 'free') {
+      updateFields.isPaid = true;
+    }
+    if (isWallTemplate) {
+      updateFields.planType = finalPlanType;
     }
 
     const pub = await Publication.findByIdAndUpdate(
       req.params.id,
-      { published: true, publishedAt: Date.now() },
+      updateFields,
       { new: true }
     );
     if (!pub) return res.status(404).json({ error: 'Not found' });
 
-    // Release any pendingPayment wishes for wall templates
+    // Release any pendingPayment wishes for wall templates up to the new limit
     if (pub.templateName?.startsWith('wall-of-wishes')) {
-      const autoApprove = !pub.cagnotteConfig?.requireModeration;
-      const update = autoApprove
-        ? { $set: { pendingPayment: false, approved: true } }
-        : { $set: { pendingPayment: false } };
-      await Wish.updateMany(
-        { publicationId: pub._id, pendingPayment: true },
-        update
-      );
+      const limit = pub.planType === 'infinite' ? Infinity : (pub.planType === 'premium' ? 100 : 10);
+      const visibleCount = await Wish.countDocuments({
+        publicationId: pub._id,
+        pendingPayment: { $ne: true },
+      });
+      const slotsLeft = limit - visibleCount;
+
+      if (slotsLeft > 0 || limit === Infinity) {
+        const autoApprove = !pub.cagnotteConfig?.requireModeration;
+        const update = autoApprove
+          ? { $set: { pendingPayment: false, approved: true } }
+          : { $set: { pendingPayment: false } };
+          
+        if (limit === Infinity) {
+          await Wish.updateMany({ publicationId: pub._id, pendingPayment: true }, update);
+        } else {
+          const toRelease = await Wish.find({ publicationId: pub._id, pendingPayment: true })
+            .sort('createdAt').limit(slotsLeft).select('_id');
+          const ids = toRelease.map(w => w._id);
+          await Wish.updateMany({ _id: { $in: ids } }, update);
+        }
+      }
     }
 
     // Auto-generate shortCode on first publish

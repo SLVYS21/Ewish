@@ -80,6 +80,18 @@ const publicationSchema = new mongoose.Schema({
     paletteId:     { type: String, default: 'mk-signature' },
     typographyId:  { type: String, default: 'mk-editorial' },
 
+    // Nouveaux champs Wall Wizard
+    styleBgPreset: { type: String },
+    stylePalettePreset: { type: String },
+    styleConfettiPreset: { type: String },
+    styleCustomBgUrl: { type: String },
+    wallBackgroundId: { type: String },
+    wallBackground: { type: String },
+    wallBackgroundInk: { type: String },
+    wallBackgroundSize: { type: String },
+    wallAccent: { type: String },
+    paletteAccentText: { type: String },
+
     // Background per section  key = section slug
     // Special key "global" = fallback for all sections with no specific bg
     backgrounds: {
@@ -117,7 +129,40 @@ const publicationSchema = new mongoose.Schema({
   brandingText: { type: String,  default: '' },      // texte custom (WhatsApp ou landing)
 
   isPaid:      { type: Boolean, default: false },
+  planType:    { type: String, enum: ['free', 'premium', 'infinite'], default: 'free' },
   shortCode:   { type: String, unique: true, sparse: true },
+
+  /* Mot de merci du destinataire — ajouté après réception du mur, apparaît
+     comme page finale du livre PDF et comme dernière scène de la vidéo.
+     Étape 7 du flow murs (voir memory/project_walls_flow.md). */
+  thankYouMessage: { type: String, default: '', trim: true, maxlength: 600 },
+
+  /* ── Étape 8 flow murs — destinataire & cagnotte ────────────────────
+     Le créateur (merchantId) offre le mur à un destinataire qui doit :
+       1. Cliquer sur un lien claim personnalisé (recipientClaimToken)
+       2. Se connecter/inscrire, ce qui associe recipientUserId
+       3. Passer le KYC via AdminUser.kycStatus === 'approved'
+       4. Retirer la cagnotte (withdraw*)
+     Ownership du "message de merci" et retrait cagnotte sont gated par
+     recipientUserId. Enjeu financier/légal — pas de raccourci ici. */
+  recipientEmail:      { type: String, default: '', trim: true, lowercase: true },
+  recipientClaimToken: { type: String, index: true, sparse: true },
+  recipientClaimExpiry:{ type: Date },
+  recipientUserId:     { type: String, index: true, sparse: true },
+  recipientClaimedAt:  { type: Date },
+
+  cagnotteWithdrawal: {
+    /* pending  = destinataire a demandé le retrait (KYC OK) mais pas encore payé
+       paid     = payé à la personne
+       none     = rien demandé (défaut) */
+    status:    { type: String, enum: ['none', 'pending', 'paid'], default: 'none' },
+    method:    { type: String, default: '' },   // 'mobile-money' | 'bank' | 'orange' | 'mtn' | ...
+    account:   { type: String, default: '' },   // masqué en lecture, numéro ou IBAN
+    requestedAt:{ type: Date },
+    paidAt:    { type: Date },
+    paidAmount:{ type: Number, default: 0 },
+    reference: { type: String, default: '' },
+  },
 
   // URL canonique myKado — slug obligatoire visible dans /c/:slug /m/:slug /g/:slug
   // Auto-généré à la sauvegarde si absent, via pre-save hook (voir bas du fichier)

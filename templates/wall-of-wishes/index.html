@@ -10,8 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       myKado Â· Mur 2 â€” Tableau d'Ã©pingles (pixel-perfect)
-       Fond blanc, banniÃ¨re gradient bronze, polaroids inclinÃ©s,
+       myKado Â· Mur 2    Tableau d'épingles (pixel-perfect)
+       Fond blanc, bannière gradient bronze, polaroids inclinés,
        sticky notes avec ruban de tape, typo Caveat & Instrument Serif.
        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
@@ -24,7 +24,9 @@
       --mk-lilac-bg: #F6F1FB;
       --mk-paper:    #FFFFFF;
 
-      --mk-rose:      #E11D48;
+      /* Étape 2 flow murs — --wall-accent (injecté par serve.js) prend le pas
+         quand le wizard a défini un accent, sinon fallback rose Kado. */
+      --mk-rose:      var(--wall-accent, #E11D48);
       --mk-rose-2:    #F35C7A;
       --mk-rose-soft: #FFB3C1;
       --mk-rose-pale: #FFE3E8;
@@ -39,7 +41,7 @@
       --mk-butter-soft: #FBE8C6;
       --mk-peach:       #FF9F7A;
 
-      /* Pin board (Mur 2) â€” palette bronze/gold */
+      /* Pin board (Mur 2)    palette bronze/gold */
       --pin-cover-a:  #E7C9A0;
       --pin-cover-b:  #D2A878;
       --pin-cover-ink:#3A2814;
@@ -98,8 +100,14 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: var(--body);
-      background: #FFFFFF;
-      color: var(--mk-ink);
+      /* Fond du mur — pilotable par le wizard (étape 2 flow murs).
+         --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
+      background: var(--wall-bg, #FFFFFF);
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-attachment: fixed;
+      background-position: center;
+      color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
@@ -124,31 +132,20 @@
     @keyframes mk-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     @keyframes mk-note-in { from { transform: scale(.85) rotate(var(--rot,0deg)); opacity: 0; } to { transform: scale(1) rotate(var(--rot,0deg)); opacity: 1; } }
     @keyframes mk-live { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-    @keyframes mk-rec { 0%,100% { box-shadow: 0 0 0 0 rgba(225,29,72,.4); } 50% { box-shadow: 0 0 0 13px rgba(225,29,72,0); } }
+    #admin-banner {
+      display: none; position: fixed; bottom: 24px; left: 24px; z-index: 9000;
+      background: rgba(43,26,45,.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      color: #fff; padding: 10px 16px; border-radius: 99px; align-items: center;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.2s;
+    }
+    #admin-banner:hover { transform: translateY(-2px); }
+    #admin-banner.show { display: inline-flex; }
+    #admin-banner a { color: #fff; text-decoration: none; display: flex; align-items: center; gap: 6px; }
     @keyframes mk-fall { to { transform: translateY(115vh) rotate(var(--r,360deg)); } }
     @keyframes mk-fall2 { to { transform: translateY(120vh) rotate(720deg); } }
     @keyframes mk-introbar { from { width: 0; } to { width: 100%; } }
     @keyframes mk-sbar { to { width: 100%; } }
-
-    /* â”€â”€ ADMIN BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-    #admin-banner {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
-      background: #1F1420; color: #fff;
-      padding: 8px 18px; font-size: 12px;
-      align-items: center; justify-content: space-between; gap: 14px;
-    }
-    #admin-banner.show { display: flex; }
-    #admin-banner .admin-pub-label { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-    #admin-banner .admin-live { display: inline-flex; align-items: center; gap: 6px; opacity: .8; }
-    #admin-banner .admin-live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; animation: mk-live 1.4s ease-in-out infinite; }
-    #admin-back {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 5px 12px; border-radius: 99px;
-      background: rgba(255,255,255,.12); color: #fff;
-      font-weight: 600;
-    }
-    body.has-admin-banner { padding-top: 40px; }
 
     /* â”€â”€ ACCESS GATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #access-gate {
@@ -180,14 +177,14 @@
     #access-gate .gate-btn {
       width: 100%; margin-top: 12px;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      background: var(--pin-btn); color: #fff;
+      background: var(--pin-btn); color: var(--pin-btn-ink, #fff);
       padding: 12px 18px; border-radius: var(--r-sm);
       font-family: var(--body); font-size: 14px; font-weight: 800;
       transition: transform .15s, filter .15s;
     }
     #access-gate .gate-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
 
-    /* â”€â”€ WALL HEADER â€” banniÃ¨re bronze arrondie â”€â”€ */
+    /* â”€â”€ WALL HEADER    bannière bronze arrondie â”€â”€ */
     #wall-header {
       position: relative; z-index: 10;
       background: transparent; padding: 0;
@@ -267,7 +264,7 @@
     #wall-header.reveal .wall-title    { animation: mk-up .65s .20s cubic-bezier(.16,1,.3,1) both; }
     #wall-header.reveal .wall-subtitle { animation: mk-up .55s .40s ease-out both; }
 
-    /* â”€â”€ CAGNOTTE STRIP â€” carte blanche flottante â”€â”€ */
+    /* â”€â”€ CAGNOTTE STRIP    carte blanche flottante â”€â”€ */
     #cagnotte-strip {
       position: relative; z-index: 6;
       margin: -16px 16px 4px;
@@ -357,7 +354,7 @@
       }
     }
 
-    /* â”€â”€ NOTES CONTAINER â€” masonry columns â”€â”€â”€â”€â”€â”€â”€ */
+    /* â”€â”€ NOTES CONTAINER    masonry columns â”€â”€â”€â”€â”€â”€â”€ */
     #notes-container {
       position: relative; z-index: 5;
       max-width: 1500px; margin: 0 auto;
@@ -375,7 +372,7 @@
     @media (min-width: 960px) { #notes-container { columns: 4; column-gap: 30px; padding: 32px 32px 160px; max-width: 1240px; } }
     @media (min-width: 1500px) { #notes-container { columns: 5; max-width: 1500px; } }
 
-    /* â”€â”€ PIN CARD (post-it Ã©pinglÃ©) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* â”€â”€ PIN CARD (post-it épinglé) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .pin {
       position: relative;
       padding: 11px 11px 13px;
@@ -408,7 +405,7 @@
     }
     .pin.tape-l::before { transform: translateX(-50%) rotate(4deg); }
 
-    /* Sticky notes â€” variations de couleur */
+    /* Sticky notes    variations de couleur */
     .sticky    { --pin-bg: #FFF7B8; }
     .sticky.s2 { --pin-bg: #C6F0C2; }
     .sticky.s3 { --pin-bg: #BFE3FF; }
@@ -416,6 +413,27 @@
     .sticky.s5 { --pin-bg: #E7D5F0; }
     .sticky.s6 { --pin-bg: #F6E3C8; }
     .sticky.s7 { --pin-bg: #F9F5EA; }
+
+    /* Étape 2 flow murs — chaque post-it laisse transparaître le fond du mur
+       via un overlay pastel semi-opaque. Cohérence visuelle + palette lisible. */
+    .pin.sticky {
+      background: var(--wall-bg, var(--pin-bg));
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-attachment: fixed;
+      background-position: center;
+      position: relative;
+    }
+    .pin.sticky::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--pin-bg);
+      opacity: 0.86;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .pin.sticky > * { position: relative; z-index: 1; }
 
     /* Contenu texte (Caveat handwriting) */
     .pin .nm {
@@ -452,7 +470,7 @@
       accent-color: var(--pin-btn);
     }
 
-    /* Polaroid variant â€” carte blanche avec zone photo */
+    /* Polaroid variant    carte blanche avec zone photo */
     .pin.polaroid {
       background: #fff;
       padding: 11px 11px 8px;
@@ -492,14 +510,14 @@
       padding-bottom: 0;
     }
 
-    /* â”€â”€ FAB â€” Laisser un mot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* â”€â”€ FAB    Laisser un mot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .wall-actions { position: static; padding: 0; margin: 0; }
     #add-btn {
       position: fixed;
       bottom: 24px; left: 50%; transform: translateX(-50%);
       z-index: 400;
       display: inline-flex; align-items: center; gap: 9px;
-      background: var(--pin-btn); color: #fff;
+      background: var(--pin-btn); color: var(--pin-btn-ink, #fff);
       padding: 15px 24px; border-radius: 99px;
       font-family: var(--body); font-size: 15px; font-weight: 800; letter-spacing: .002em;
       box-shadow: 0 14px 34px rgba(0,0,0,.26);
@@ -544,9 +562,9 @@
       font-size: 13.5px; color: var(--mk-ink-3); margin-top: 10px; line-height: 1.5;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       BOTTOM SHEET â€” composer
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+       BOTTOM SHEET    composer
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #add-overlay {
       position: fixed; inset: 0; z-index: 500;
       background: rgba(39,24,38,0);
@@ -850,7 +868,7 @@
     #submit-btn {
       display: flex; align-items: center; justify-content: center; gap: 9px;
       width: 100%;
-      background: var(--pin-btn); color: #fff;
+      background: var(--pin-btn); color: var(--pin-btn-ink, #fff);
       font-family: var(--body); font-size: 15.5px; font-weight: 800;
       padding: 15px; border-radius: 16px;
       margin-top: 18px;
@@ -862,9 +880,9 @@
     #submit-btn:disabled { opacity: .45; box-shadow: none; cursor: not-allowed; }
     #submit-btn svg { width: 18px; height: 18px; }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        TOAST
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #toast {
       position: fixed; bottom: 96px; left: 50%;
       transform: translateX(-50%) translateY(20px);
@@ -878,9 +896,9 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       ADDED OVERLAY (share) â€” thank-you screen style
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+       ADDED OVERLAY (share)    thank-you screen style
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #added-overlay {
       position: fixed; inset: 0; z-index: 700;
       display: none;
@@ -924,7 +942,7 @@
     .added-cag-btn {
       width: 100%;
       display: flex; align-items: center; justify-content: center; gap: 9px;
-      background: var(--pin-btn); color: #fff;
+      background: var(--pin-btn); color: var(--pin-btn-ink, #fff);
       padding: 14px; border-radius: 16px;
       font-family: var(--body); font-size: 14.5px; font-weight: 800;
       box-shadow: 0 10px 28px rgba(58,40,20,.28);
@@ -990,9 +1008,9 @@
     .ac-text span { font-size: 12.5px; color: var(--mk-ink-3); }
     .ac-chev { flex-shrink: 0; color: var(--mk-ink-4); }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        GIFT SHEET
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #gift-overlay {
       position: fixed; inset: 0; z-index: 550;
       background: rgba(39,24,38,0);
@@ -1099,7 +1117,7 @@
     #gift-pay-btn {
       width: 100%;
       display: flex; align-items: center; justify-content: center; gap: 9px;
-      background: var(--pin-btn); color: #fff;
+      background: var(--pin-btn); color: var(--pin-btn-ink, #fff);
       font-family: var(--body); font-size: 15.5px; font-weight: 800;
       padding: 15px; border-radius: 16px; margin-top: 14px;
       box-shadow: 0 10px 28px rgba(58,40,20,.28);
@@ -1120,9 +1138,9 @@
     }
     .gift-secure svg { width: 12px; height: 12px; }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        THANKS OVERLAY
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #thanks-overlay {
       position: fixed; inset: 0; z-index: 620;
       display: none;
@@ -1155,15 +1173,15 @@
     .thanks-btn {
       display: inline-flex; align-items: center; justify-content: center;
       width: 100%; margin-top: 16px; padding: 13px;
-      background: var(--pin-btn); color: #fff;
+      background: var(--pin-btn); color: var(--pin-btn-ink, #fff);
       border-radius: 14px; font-family: var(--body);
       font-size: 14.5px; font-weight: 800;
     }
     .thanks-btn:hover { filter: brightness(1.08); }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        INTRO OVERLAY (recipient reveal)
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #intro-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 900;
@@ -1228,9 +1246,9 @@
       animation: mk-introbar 4s linear forwards;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        ENVELOPE OVERLAY
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     /* Gift Unwrap — dark scene with animated gift box (Mur 2 mockup .gift-scene) */
     #env-overlay {
       display: none;
@@ -1346,9 +1364,9 @@
       #env-overlay h3.gift-title { font-size: 40px; max-width: 520px; }
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       CASCADE â€” falling emojis + confetti
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+       CASCADE    falling emojis + confetti
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #cascade {
       position: fixed; inset: 0; z-index: 45; pointer-events: none;
       overflow: hidden;
@@ -1363,9 +1381,9 @@
       opacity: .95;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        STORY VIEWER (tap a wish)
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+       â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
     #story-viewer {
       display: none;
       position: fixed; inset: 0; z-index: 870;
@@ -1485,18 +1503,18 @@
       .story-card .big-tx { font-size: 32px; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.0.0-beta.16/tsparticles.confetti.bundle.min.js"></script>
 </head>
 <body data-variant="pin">
 
 <div id="admin-banner">
   <span class="admin-pub-label">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.2-7 10-7 10 7 10 7-3.2 7-10 7-10-7-10-7Z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
-    AperÃ§u public â€” c'est ce que voient tes invitÃ©s.
   </span>
-  <span class="admin-live"><span class="admin-live-dot"></span>Mise Ã  jour en direct</span>
+  <span class="admin-live"><span class="admin-live-dot"></span>Mise à  jour en direct</span>
   <a id="admin-back" href="#">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-    Retour Ã  la gestion
+    Retour à  la gestion
   </a>
 </div>
 
@@ -1505,14 +1523,14 @@
     <div class="gate-ic">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
-    <h2 style="font-family:var(--display);font-size:22px;color:var(--mk-ink);margin-bottom:8px;font-weight:400;">Mur privÃ©</h2>
-    <p style="font-size:13.5px;color:var(--mk-ink-3);line-height:1.55;margin-bottom:18px;">Ce mur est protÃ©gÃ©.<br>Entrez le code d'accÃ¨s pour continuer.</p>
-    <input id="gate-input" class="gate-input" type="text" placeholder="Code d'accÃ¨s" maxlength="50" autocomplete="off" onkeydown="if(event.key==='Enter')checkGate()">
+    <h2 style="font-family:var(--display);font-size:22px;color:var(--mk-ink);margin-bottom:8px;font-weight:400;">Mur privé</h2>
+    <p style="font-size:13.5px;color:var(--mk-ink-3);line-height:1.55;margin-bottom:18px;">Ce mur est protégé.<br>Entrez le code d'accès pour continuer.</p>
+    <input id="gate-input" class="gate-input" type="text" placeholder="Code d'accès" maxlength="50" autocomplete="off" onkeydown="if(event.key==='Enter')checkGate()">
     <button class="gate-btn" onclick="checkGate()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-      AccÃ©der
+      Accéder
     </button>
-    <div id="gate-err" style="display:none;font-size:12.5px;color:var(--mk-rose);margin-top:10px;font-weight:600;">Code incorrect â€” rÃ©essayez.</div>
+    <div id="gate-err" style="display:none;font-size:12.5px;color:var(--mk-rose);margin-top:10px;font-weight:600;">Code incorrect    réessayez.</div>
   </div>
 </div>
 
@@ -1528,7 +1546,7 @@
        src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.webp"
        alt=""
        onerror="this.onerror=null;this.src='https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.gif'">
-  <div class="intro-big" id="intro-title">Quelqu'un a prÃ©parÃ©<br>quelque chose <em>rien que pour toi</em></div>
+  <div class="intro-big" id="intro-title">Quelqu'un a préparé<br>quelque chose <em>rien que pour toi</em></div>
   <div class="intro-from">Un mur de mots t'attendâ€¦</div>
   <div class="intro-prog"><i></i></div>
 </div>
@@ -1566,10 +1584,10 @@
         Mur de mots
       </div>
       <h1 class="wall-title">
-        <span class="title-prefix" data-node="titlePrefix">Joyeux anniversaire</span>
+        <span class="title-prefix" data-node="titlePrefix"></span>
         <em data-node="titleName">Prénom</em>
       </h1>
-      <p class="wall-subtitle" data-node="subtitle">Partagez ce lien â€” chacun peut laisser son mot sur ce mur.</p>
+      <p class="wall-subtitle" data-node="subtitle">Partagez ce lien    chacun peut laisser son mot sur ce mur.</p>
     </div>
   </div>
 
@@ -1622,7 +1640,7 @@
        loading="lazy" decoding="async" draggable="false"
        onerror="this.onerror=null;this.src='https://fonts.gstatic.com/s/e/notoemoji/latest/270d_fe0f/512.gif'">
   <p class="empty-title">Le mur attend son <em>premier mot</em></p>
-  <p class="empty-sub">Sois la premiÃ¨re voix â€” Ã©cris ce qui te vient, sincÃ¨rement.</p>
+  <p class="empty-sub">Sois la première voix    écris ce qui te vient, sincèrement.</p>
 </div>
 
 <div id="add-overlay" role="dialog" aria-modal="true" aria-label="Ajouter un mot" onclick="handleBgClick(event)">
@@ -1636,10 +1654,10 @@
     </div>
     <div class="sheet-body">
       <span class="field-lbl">Ton message</span>
-      <textarea id="wish-input" oninput="updateComposerPreview()" placeholder="Ã‰cris ce qui te vientâ€¦" maxlength="400" rows="4"></textarea>
+      <textarea id="wish-input" oninput="updateComposerPreview()" placeholder="à‰cris ce qui te vientâ€¦" maxlength="400" rows="4"></textarea>
 
       <span class="field-lbl">Ton Prénom</span>
-      <input id="wish-author" type="text" oninput="updateComposerPreview()" placeholder="Ex. AÃ¯cha" maxlength="40" autocomplete="given-name">
+      <input id="wish-author" type="text" oninput="updateComposerPreview()" placeholder="Ex. Aà¯cha" maxlength="40" autocomplete="given-name">
 
       <span class="field-lbl">Couleur de ta carte</span>
       <div class="color-row">
@@ -1653,7 +1671,7 @@
         <span class="color-swatch swatch-6" onclick="pickColor(6,this)"></span>
       </div>
 
-      <span class="field-lbl media-label">Ajoute un mÃ©dia</span>
+      <span class="field-lbl media-label">Ajoute un média</span>
       <div class="media-tabs">
         <button class="media-tab" id="tab-photo" onclick="switchTab(activeTab==='photo'?'none':'photo')" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
@@ -1680,7 +1698,7 @@
           <div class="upload-zone-inner">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <p>Clique ou glisse une photo / GIF ici</p>
-            <small>JPG, PNG, GIF, WebP â€” max 10 Mo</small>
+            <small>JPG, PNG, GIF, WebP    max 10 Mo</small>
           </div>
         </div>
         <div class="media-loading" id="photo-loading">
@@ -1705,7 +1723,7 @@
           Rechercheâ€¦
         </div>
         <div class="giphy-grid" id="giphy-grid"></div>
-        <div class="giphy-credit">PropulsÃ© par GIPHY</div>
+        <div class="giphy-credit">Propulsé par GIPHY</div>
         <div class="media-preview" id="gif-preview">
           <img id="gif-img" src="" alt="">
           <button class="media-clear" onclick="clearMedia()" aria-label="Supprimer">
@@ -1755,7 +1773,7 @@
   </div>
 </div>
 
-<div id="toast">Mot ajoutÃ©</div>
+<div id="toast">Mot ajouté</div>
 
 <div id="added-overlay" onclick="if(event.target===this)closeAddedOverlay()">
   <div id="added-card">
@@ -1841,7 +1859,7 @@
     <button onclick="skipGift()" class="gift-skip-btn">Une autre fois, merci</button>
     <div class="gift-secure">
       <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
-      Paiement sÃ©curisÃ© Â· MTN, Moov, Orange Money
+      Paiement sécurisé Â· MTN, Moov, Orange Money
     </div>
   </div>
 </div>
@@ -1869,7 +1887,7 @@
   <button id="story-close" onclick="closeStory()" aria-label="Fermer">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
-  <button class="story-arrow left" onclick="storyPrev()" aria-label="PrÃ©cÃ©dent">
+  <button class="story-arrow left" onclick="storyPrev()" aria-label="Précédent">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
   <button class="story-arrow right" onclick="storyNext()" aria-label="Suivant">
@@ -1878,7 +1896,7 @@
   <div class="story-track" id="story-track"></div>
   <div class="story-tap-l" onclick="storyPrev()"></div>
   <div class="story-tap-r" onclick="storyNext()"></div>
-  <div class="story-hint">Touche Ã  droite pour le mot suivant Â· âœ• pour revenir au mur</div>
+  <div class="story-hint">Touche à  droite pour le mot suivant Â· âœ• pour revenir au mur</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
@@ -1988,7 +2006,7 @@ function loadWishes() {
     });
     buildWall(true);
     afterWishesLoaded();
-    setInterval(pollNewWishes, 30000);
+    startLiveUpdates();
   }).catch(function() {
     wishes = SAMPLE_WISHES.map(function(w) { return Object.assign({}, w, { ts: Date.now() - Math.random() * 86400000 * 5 }); });
     buildWall(true);
@@ -2001,40 +2019,110 @@ function afterWishesLoaded() {
   var envCount = document.getElementById('env-count');
   if (envCount) {
     envCount.textContent = count > 0
-      ? count + ' proche' + (count > 1 ? 's t\'ont laissÃ© un mot d\'amour.' : ' t\'a laissÃ© un mot d\'amour.')
-      : 'DÃ©couvre la surprise prÃ©parÃ©e pour toi.';
+      ? count + ' proche' + (count > 1 ? 's t\'ont laissé un mot d\'amour.' : ' t\'a laissé un mot d\'amour.')
+      : 'Découvre la surprise préparée pour toi.';
   }
 }
 
+/* Insère un vœu inconnu dans le mur avec l'animation d'arrivée.
+   Utilisé à la fois par le polling de secours et par le stream SSE. */
+function applyLiveWish(w) {
+  if (!w || !w._id) return;
+  for (var i = 0; i < wishes.length; i++) {
+    if (wishes[i]._id === w._id) return; // déjà vu
+  }
+  var wish = {
+    text: w.message, name: w.firstName || 'Anonyme',
+    color: w.color != null ? w.color : Math.floor(Math.random() * 4),
+    rot:   w.rot   != null ? w.rot   : (Math.random() * 7 - 3.5),
+    ts: new Date(w.createdAt).getTime(),
+    photoUrl: w.photoUrl || '', audioUrl: w.audioUrl || '',
+    mediaType: w.mediaType || 'none',
+    gifCode: w.gifCode || '', gifChar: w.gifChar || '',
+    photoGrad: w.photoGrad, audioDur: w.audioDur || '',
+    _id: w._id,
+  };
+  wishes.unshift(wish);
+  var container = document.getElementById('notes-container');
+  if (!container) return;
+  var noteEl = createNoteEl(wish, wishes.length - 1, true);
+  noteEl.style.opacity = '0';
+  container.insertBefore(noteEl, container.firstChild);
+  TweenMax.fromTo(noteEl, 0.55,
+    { opacity: 0, y: -30, scale: 0.9 },
+    { opacity: 1, y: 0,   scale: 1, ease: Back.easeOut.config(1.3) }
+  );
+  setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
+  afterWishesLoaded();
+}
+
+/* Applique un snapshot stats {total, count, goal, pct} à la strip cagnotte.
+   Le mode projection (grand écran) doit voir la barre monter en temps réel. */
+function applyLiveStats(stats) {
+  if (!stats) return;
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (typeof stats.total  === 'number') cag.collected    = stats.total;
+  if (typeof stats.count  === 'number') cag.contributors = stats.count;
+  if (typeof stats.goal   === 'number' && stats.goal > 0) cag.goal = stats.goal;
+  _d.cagnotte = cag;
+  var stripEl = document.getElementById('cagnotte-strip');
+  if (stripEl && stripEl.style.display !== 'none') {
+    var pct = cag.goal > 0 ? Math.min(100, Math.round((cag.collected / cag.goal) * 100)) : 0;
+    var statsEl = document.getElementById('cag-stats');
+    var pctEl   = document.getElementById('cag-pct');
+    var fillEl  = document.getElementById('cag-fill');
+    if (statsEl) statsEl.textContent =
+      (cag.goal > 0 ? fmtNum(cag.collected) + ' / ' + fmtNum(cag.goal) + ' FCFA' : fmtNum(cag.collected) + ' FCFA') +
+      (cag.contributors > 0 ? ' · ' + cag.contributors + ' participant' + (cag.contributors !== 1 ? 's' : '') : '');
+    if (pctEl)  pctEl.textContent = pct + '%';
+    if (fillEl) fillEl.style.width = pct + '%';
+  }
+}
+
+/* Polling de secours — appelé uniquement si le stream SSE ne fonctionne pas. */
 function pollNewWishes() {
   if (!PUB_ID) return;
   apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
-    var currentIds = new Set(wishes.map(function(w){ return w._id; }).filter(Boolean));
-    data.forEach(function(w) {
-      if (currentIds.has(w._id)) return;
-      var wish = {
-        text: w.message, name: w.firstName || 'Anonyme',
-        color: w.color != null ? w.color : Math.floor(Math.random() * 4),
-        rot:   w.rot   != null ? w.rot   : (Math.random() * 7 - 3.5),
-        ts: new Date(w.createdAt).getTime(),
-        photoUrl: w.photoUrl || '', audioUrl: w.audioUrl || '',
-        mediaType: w.mediaType || 'none',
-        gifCode: w.gifCode || '', gifChar: w.gifChar || '',
-        photoGrad: w.photoGrad, audioDur: w.audioDur || '',
-        _id: w._id,
-      };
-      wishes.unshift(wish);
-      var container = document.getElementById('notes-container');
-      var noteEl = createNoteEl(wish, wishes.length - 1, true);
-      noteEl.style.opacity = '0';
-      container.insertBefore(noteEl, container.firstChild);
-      TweenMax.fromTo(noteEl, 0.55,
-        { opacity: 0, y: -30, scale: 0.9 },
-        { opacity: 1, y: 0,   scale: 1, ease: Back.easeOut.config(1.3) }
-      );
-      setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
-    });
+    data.forEach(applyLiveWish);
   }).catch(function() {});
+}
+
+/* Démarre la connexion live : SSE prioritaire, polling 30s en fallback. */
+var _wallStream = null, _wallPollTimer = null;
+function startLiveUpdates() {
+  if (!PUB_ID) return;
+  var pollFallback = function() {
+    if (_wallPollTimer) return;
+    _wallPollTimer = setInterval(pollNewWishes, 30000);
+  };
+  if (typeof EventSource === 'undefined') {
+    pollFallback();
+    return;
+  }
+  try {
+    _wallStream = new EventSource((API_BASE || '') + '/api/walls/' + PUB_ID + '/stream');
+    var openedOnce = false;
+    _wallStream.addEventListener('hello', function() {
+      openedOnce = true;
+      if (_wallPollTimer) { clearInterval(_wallPollTimer); _wallPollTimer = null; }
+    });
+    _wallStream.addEventListener('wish', function(e) {
+      try { var evt = JSON.parse(e.data); applyLiveWish(evt.data); } catch (_) {}
+    });
+    _wallStream.addEventListener('contribution', function(e) {
+      try { var evt = JSON.parse(e.data); applyLiveStats(evt.stats); } catch (_) {}
+    });
+    _wallStream.addEventListener('stats', function(e) {
+      try { var evt = JSON.parse(e.data); applyLiveStats(evt.data); } catch (_) {}
+    });
+    _wallStream.onerror = function() {
+      // Le navigateur va tenter de reconnecter tout seul (retry: 3000 côté serveur).
+      // On enclenche le polling en parallèle pour ne rien manquer si la reco tarde.
+      if (!openedOnce) pollFallback();
+    };
+  } catch (_) {
+    pollFallback();
+  }
 }
 
 function uploadMedia(file) {
@@ -2081,7 +2169,7 @@ function createNoteEl(w, i, isNew) {
     ((idx % 2) ? 'tape-l ' : '') +
     (isNew ? 'is-new' : '');
 
-  /* Orientation : angle stable par mot, plus fort qu'un simple alÃ©atoire. */
+  /* Orientation : angle stable par mot, plus fort qu'un simple aléatoire. */
   var rot;
   if (typeof w.rot === 'number' && !isNaN(w.rot)) {
     rot = w.rot;
@@ -2283,7 +2371,7 @@ function renderGiphyGrid(items) {
   var grid = document.getElementById('giphy-grid');
   grid.innerHTML = '';
   if (!items || !items.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;padding:22px;text-align:center;color:var(--mk-ink-3);font-size:12.5px">Aucun GIF trouvÃ©</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:22px;text-align:center;color:var(--mk-ink-3);font-size:12.5px">Aucun GIF trouvé</div>';
     return;
   }
   items.forEach(function(g) {
@@ -2311,7 +2399,7 @@ function fetchGiphy(url) {
   return fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(json){ renderGiphyGrid(json.data || []); })
-    .catch(function(){ showToast('Erreur Giphy â€” rÃ©essaie'); })
+    .catch(function(){ showToast('Erreur Giphy    réessaie'); })
     .then(function(){ document.getElementById('giphy-loading').classList.remove('show'); });
 }
 
@@ -2373,7 +2461,7 @@ function processPhotoFile(file) {
     document.getElementById('photo-img').src = url;
     document.getElementById('photo-preview').classList.add('show');
   }).catch(function() {
-    showToast("Ã‰chec de l'envoi â€” rÃ©essayez");
+    showToast("à‰chec de l'envoi    réessayez");
     document.getElementById('photo-zone').style.display = '';
   }).finally(function() {
     document.getElementById('photo-loading').classList.remove('show');
@@ -2441,7 +2529,7 @@ function stopRecording(upload) {
     updateComposerPreview();
       document.getElementById('audio-player').src = url;
     }).catch(function() {
-      showToast("Ã‰chec de l'envoi audio");
+      showToast("à‰chec de l'envoi audio");
     }).finally(function() {
       document.getElementById('audio-loading').classList.remove('show');
     });
@@ -2581,13 +2669,13 @@ function submitWish() {
       document.getElementById('submit-btn').disabled = false;
       if (err && err.status === 402) {
         showToast(err.code === 'FREE_LIMIT_REACHED'
-          ? '5 mots gratuits atteints â€” le crÃ©ateur doit activer le mur complet.'
-          : 'Photos & mÃ©dias disponibles sur les murs activÃ©s.');
+          ? '5 mots gratuits atteints    le créateur doit activer le mur complet.'
+          : 'Photos & médias disponibles sur les murs activés.');
       } else if (err && err.status === 403) {
-        showToast(err.message || 'Les mots sont temporairement fermÃ©s.');
+        showToast(err.message || 'Les mots sont temporairement fermés.');
         setWishesEnabled(false);
       } else {
-        showToast((err && err.message) || "Ã‰chec de l'envoi â€” rÃ©essayez");
+        showToast((err && err.message) || "à‰chec de l'envoi    réessayez");
       }
     });
   } else {
@@ -2600,7 +2688,7 @@ function submitWish() {
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 function showToast(msg) {
   var t = document.getElementById('toast');
-  t.textContent = msg || 'Mot ajoutÃ©';
+  t.textContent = msg || 'Mot ajouté';
   t.classList.add('show');
   setTimeout(function(){ t.classList.remove('show'); }, 2800);
 }
@@ -2634,7 +2722,7 @@ function initGiftSheet() {
   var name = (cag.name || 'Cadeau commun');
   document.getElementById('gift-sheet-name').textContent = name;
   document.getElementById('gift-sheet-desc').textContent =
-    'Les proches se rÃ©unissent pour offrir ce beau cadeau. Tu veux participer ?';
+    'Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';
 
   var collected = cag.collected || 0;
   var goal      = cag.goal || 0;
@@ -2727,7 +2815,7 @@ function giftPay() {
   var cag = _d.cagnotte || _d.jarConfig || {};
   var key = cag.kkiapayKey || _d.kkiapayKey || '';
   if (!key) {
-    errEl.textContent = 'Paiement non configurÃ©. Contacte l\'organisateur.';
+    errEl.textContent = 'Paiement non configuré. Contacte l\'organisateur.';
     errEl.style.display = 'block';
     return;
   }
@@ -2782,7 +2870,7 @@ function giftPay() {
   }
 }
 
-/* Noto emojis animÃ©s pour les moments d'Ã©motion (Google Fonts). */
+/* Noto emojis animés pour les moments d'émotion (Google Fonts). */
 var NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest';
 function setThanksEmoji(codepoint) {
   var img = document.getElementById('thanks-icon-img');
@@ -2796,7 +2884,7 @@ function showThanksOverlay(gave) {
   if (gave) {
     setThanksEmoji('1f381');
     document.getElementById('thanks-title').textContent    = 'Merci pour ta participation';
-    document.getElementById('thanks-msg').textContent      = 'GrÃ¢ce Ã  toi le cadeau se rapproche. On garde Ã§a secret jusqu\'au grand jour !';
+    document.getElementById('thanks-msg').textContent      = 'Grà¢ce à  toi le cadeau se rapproche. On garde ça secret jusqu\'au grand jour !';
     document.getElementById('thanks-receipt').style.display = 'block';
     document.getElementById('thanks-amt').innerHTML =
       fmtNum(giftState.paid || giftState.amt || 0) + ' <span style="font-size:14px;font-family:var(--body);">FCFA</span>';
@@ -2804,8 +2892,8 @@ function showThanksOverlay(gave) {
     setThanksEmoji('1f496');
     document.getElementById('thanks-title').textContent    = 'Merci pour ton joli mot';
     document.getElementById('thanks-msg').textContent      = _d.requireModeration
-      ? 'Ton mot sera visible aprÃ¨s validation par l\'organisateur.'
-      : 'Ton mot a bien Ã©tÃ© reÃ§u. Reviens le jour J pour voir le mur complet !';
+      ? 'Ton mot sera visible après validation par l\'organisateur.'
+      : 'Ton mot a bien été reçu. Reviens le jour J pour voir le mur complet !';
     document.getElementById('thanks-receipt').style.display = 'none';
   }
   overlay.classList.add('open');
@@ -2878,7 +2966,7 @@ function closeAddedOverlay() {
 
 function copyWallLink(net) {
   var url = window.location.href.split('?')[0];
-  var msg = net ? 'Lien copiÃ© â€” colle-le dans ' + net : 'Lien copiÃ©';
+  var msg = net ? 'Lien copié    colle-le dans ' + net : 'Lien copié';
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url)
       .then(function() { showToast(msg); })
@@ -2916,7 +3004,7 @@ function showIntroSequence() {
   var nameEl = document.querySelector('[data-node="titleName"]');
   var name = nameEl ? nameEl.textContent.trim() : '';
   if (name && name !== 'Prénom') {
-    titleEl.innerHTML = 'Quelqu\'un a prÃ©parÃ©<br>quelque chose <em>rien que pour toi, ' + escapeHtml(name) + '</em>';
+    titleEl.innerHTML = 'Quelqu\'un a préparé<br>quelque chose <em>rien que pour toi, ' + escapeHtml(name) + '</em>';
   }
   setTimeout(function() {
     intro.classList.remove('show');
@@ -2964,8 +3052,9 @@ function openWallFromEnvelope() {
 var CASCADE_EMOJIS = [ ['1f388','ðŸŽˆ'], ['1f389','ðŸŽ‰'], ['1f38a','ðŸŽŠ'], ['1f381','ðŸŽ'], ['2728','âœ¨'] ];
 var CASCADE_COLORS = ['#E11D48','#8A63D2','#3FA98A','#E5A93B','#FF9F7A','#5B95E0'];
 
-function runCascade(dur) {
+function domCascade(dur) {
   var el = document.getElementById('cascade');
+  if (!el) return;
   el.innerHTML = '';
   for (var i = 0; i < 22; i++) {
     var pair = CASCADE_EMOJIS[i % CASCADE_EMOJIS.length];
@@ -2995,6 +3084,91 @@ function runCascade(dur) {
   }
   el.classList.add('on');
   setTimeout(function() { el.classList.remove('on'); el.innerHTML = ''; }, dur || 7500);
+}
+
+/* Confetti tsparticles — miroir de client/utils/confettiFx.js.
+   Retourne true si l'effet a été déclenché, false si window.confetti absent. */
+function fireTsConfetti(type) {
+  var confetti = window.confetti;
+  if (typeof confetti !== 'function') return false;
+  var origin = { x: 0.5, y: 0.4 };
+  var safe = function(o) { try { confetti(o); } catch (e) {} };
+  var later = function(fn, ms) { setTimeout(fn, ms); };
+  switch (type) {
+    case 'fireworks':
+      safe({ spread: 360, startVelocity: 55, particleCount: 40, origin: { x: Math.random(), y: Math.random() * 0.6 } });
+      safe({ spread: 360, startVelocity: 35, decay: 0.91, scalar: 0.8, particleCount: 25, origin: { x: Math.random(), y: Math.random() * 0.6 } });
+      safe({ spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2, particleCount: 20, origin: { x: Math.random(), y: Math.random() * 0.6 } });
+      later(function() { safe({ spread: 360, startVelocity: 45, particleCount: 35, origin: { x: Math.random(), y: Math.random() * 0.6 } }); }, 800);
+      return true;
+    case 'snow':
+      window.__snowEnd = Date.now() + 5000;
+      (function frame() {
+        safe({ particleCount: 4, angle: 270, spread: 180, startVelocity: 18, gravity: 0.45, decay: 0.97, scalar: 0.9, shapes: ['circle'], colors: ['#fff','#d0eaff','#b0d4ff'], ticks: 700, origin: { x: Math.random(), y: -0.05 } });
+        if (Date.now() < window.__snowEnd) requestAnimationFrame(frame);
+      })();
+      return true;
+    case 'stars':
+      safe({ particleCount: 100, spread: 360, startVelocity: 30, decay: 0.95, gravity: 0.5, shapes: ['star'], colors: ['#FFE400','#FFBD00','#E89400','#FFCA6C','#FDFFB8'], origin: origin });
+      return true;
+    case 'hearts':
+      safe({ particleCount: 80, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4','#ff1493','#ff6eb4','#ffb6c1','#ff0066'], origin: origin });
+      later(function() { safe({ particleCount: 70, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4','#ff1493','#ff6eb4','#ffb6c1','#ff0066'], origin: { x: 0.2, y: 0.5 } }); }, 500);
+      later(function() { safe({ particleCount: 70, spread: 120, startVelocity: 40, shapes: ['heart'], colors: ['#ff69b4','#ff1493','#ff6eb4','#ffb6c1','#ff0066'], origin: { x: 0.8, y: 0.5 } }); }, 900);
+      return true;
+    case 'emoji_party':
+      safe({ particleCount: 50, spread: 120, startVelocity: 35, shapes: ['emoji'], shapeOptions: { emoji: { value: ['🎉','🎊','✨','🎈','🥳'] } }, origin: origin });
+      return true;
+    case 'side_cannons':
+      safe({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0, y: 0.65 } });
+      safe({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1, y: 0.65 } });
+      later(function() {
+        safe({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.65 } });
+        safe({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.65 } });
+      }, 700);
+      return true;
+    case 'school_pride':
+      window.__prideEnd = Date.now() + 3000;
+      (function frame() {
+        safe({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FF5470','#FFFFFF'] });
+        safe({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FFC145','#FFFFFF'] });
+        if (Date.now() < window.__prideEnd) requestAnimationFrame(frame);
+      })();
+      return true;
+    case 'realistic':
+      safe({ particleCount: 100, spread: 70, origin: origin, ticks: 300, gravity: 1.2, scalar: 1 });
+      later(function() { safe({ particleCount: 50, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }); }, 400);
+      later(function() { safe({ particleCount: 50, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }); }, 700);
+      return true;
+    case 'gold_rain':
+      window.__goldEnd = Date.now() + 4000;
+      (function frame() {
+        safe({ particleCount: 6, angle: 270, spread: 120, startVelocity: 22, gravity: 0.9, decay: 0.96, scalar: 1.1, shapes: ['square','circle'], colors: ['#c9a84c','#e8c86a','#f5e07a','#d4af37','#fff8dc'], ticks: 600, origin: { x: Math.random(), y: -0.02 } });
+        if (Date.now() < window.__goldEnd) requestAnimationFrame(frame);
+      })();
+      return true;
+    default:
+      return false;
+  }
+}
+
+function runCascade(dur) {
+  var type = (window.__WW_CONFETTI_TYPE__ || 'default');
+  if (type === 'default') {
+    domCascade(dur);
+    return;
+  }
+
+  var attempts = 0;
+  var check = setInterval(function() {
+    if (typeof window.confetti === 'function') {
+      clearInterval(check);
+      fireTsConfetti(type);
+    } else if (++attempts >= 40) {
+      clearInterval(check);
+      domCascade(dur); // fallback
+    }
+  }, 50);
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -3115,12 +3289,12 @@ function getInitial(name) {
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TITRE Ã‰VÃ‰NEMENTIEL â€” prÃ©fixe dÃ©rivÃ© de l'occasion
+   TITRE à‰Và‰NEMENTIEL    préfixe dérivé de l'occasion
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 var TITLE_PREFIXES = {
-  anniversary: 'Joyeux anniversaire,',
-  birthday:    'Joyeux anniversaire,',
-  wedding:     'Mariage Â·',
+  anniversary: '',
+  birthday:    '',
+  wedding:     'Mariage',
   birth:       'Bienvenue,',
   farewell:    'Bon vent,',
   welcome:     'Bienvenue,',
@@ -3192,17 +3366,23 @@ function applyCover(d) {
   initCagnotteStrip();
   initGiftSheet();
 
-  if (d.isAdmin) {
+  if (d.isAdmin && !d.previewMode) {
     var banner = document.getElementById('admin-banner');
     banner.classList.add('show');
     document.getElementById('admin-back').href = d.adminReturnUrl || '#';
-    document.body.classList.add('has-admin-banner');
   }
 
   loadWishes();
 
-  /* Intro sequence â€” only on first visit and only for public visitors (not admin) */
-  if (shouldShowIntro()) {
+  /* Preview mode : skip intro, révèle direct + démo confetti immédiate. */
+  if (d.previewMode) {
+    markIntroSeen();
+    var header = document.getElementById('wall-header');
+    if (header) header.classList.add('reveal');
+    setTimeout(function() { runCascade(4500); }, 350);
+  }
+  /* Intro sequence    only on first visit and only for public visitors (not admin) */
+  else if (shouldShowIntro()) {
     setTimeout(showIntroSequence, 100);
   } else {
     var header = document.getElementById('wall-header');
@@ -3239,6 +3419,28 @@ window.addEventListener('message', function(e) {
 
   if (e.data.type === 'WW_UPDATE') {
     var data = e.data.data;
+    var style = e.data.style;
+    if (style) {
+      var r = document.documentElement;
+      if (style.wallBackground) {
+         r.style.setProperty('--wall-bg', style.wallBackground);
+         r.style.setProperty('--wall-bg-size', style.wallBackgroundSize || 'cover');
+         r.style.setProperty('--wall-bg-repeat', style.wallBackgroundSize === 'tile' ? 'repeat' : 'no-repeat');
+      }
+      if (style.wallAccent) {
+         r.style.setProperty('--wall-accent', style.wallAccent);
+         r.style.setProperty('--pin-btn', style.wallAccent);
+         r.style.setProperty('--pin-cag-fill', style.wallAccent);
+         r.style.setProperty('--primary', style.wallAccent);
+         r.style.setProperty('--accent', style.wallAccent);
+      }
+      if (style.wallBackgroundInk) {
+         r.style.setProperty('--wall-ink', style.wallBackgroundInk);
+      }
+      if (style.paletteAccentText) {
+         r.style.setProperty('--pin-btn-ink', style.paletteAccentText);
+      }
+    }
     if (!data) return;
     if (data.eyebrow !== undefined) {
       var eb = document.querySelector('[data-node="eyebrow"]');
@@ -3277,6 +3479,17 @@ window.addEventListener('message', function(e) {
     if (e.data.wishesEnabled !== undefined) setWishesEnabled(e.data.wishesEnabled);
     return;
   }
+
+  if (e.data.type === 'WW_CONFETTI') {
+    var type = e.data.effectType || 'default';
+    window.__WW_CONFETTI_TYPE__ = type;
+    if (type === 'default' || type === 'none') {
+      if (typeof domCascade === 'function') domCascade(4000);
+    } else {
+      if (typeof fireTsConfetti === 'function') fireTsConfetti(type);
+    }
+    return;
+  }
 });
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -3296,7 +3509,7 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-/* Giphy: cÃ¢bler la recherche Ã  l'input */
+/* Giphy: cà¢bler la recherche à  l'input */
 (function() {
   var input = document.getElementById('giphy-input');
   if (input) input.addEventListener('input', onGiphyInput);

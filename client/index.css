@@ -322,6 +322,60 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .ph-title { font-family: var(--mk-display); font-size: 34px; line-height: 1.1; letter-spacing: -.01em; }
 .ph-sub { font-size: 13.5px; color: var(--mk-ink-2); margin-top: 7px; max-width: 56ch; line-height: 1.55; }
 
+/* ── Compact wall-setup header (titre 1 ligne + progress) ── */
+.wall-head { margin-bottom: calc(var(--d-gap) + 4px); }
+.wall-head-row {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+}
+.wall-head-back {
+  flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--mk-blush, #FFF3F4);
+  color: var(--mk-ink-2);
+  border: 1px solid var(--mk-line, #EEEBF3);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0;
+  transition: background .15s, color .15s;
+}
+.wall-head-back:hover { background: var(--mk-line-2); color: var(--mk-ink); }
+.wall-head-title-wrap { flex: 1; min-width: 0; }
+.wall-head-eyebrow {
+  font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--mk-ink-3, #A29CB4);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.wall-head-title {
+  font-family: var(--mk-display, 'Fraunces', Georgia, serif);
+  font-size: 22px; line-height: 1.15; letter-spacing: -.01em;
+  color: var(--mk-ink);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+.wall-head-actions {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px;
+}
+.wall-head-save {
+  font-size: 11.5px; color: var(--mk-ink-3);
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .wall-head-title { font-size: 18px; }
+  .wall-head-eyebrow { font-size: 10.5px; }
+  .wall-head-save { display: none; }
+  .wall-head-actions .btn.btn-ghost { display: none; }
+}
+
+@media (min-width: 900px) {
+  .wall-head-title { font-size: 24px; }
+}
+
 /* ── Buttons ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;

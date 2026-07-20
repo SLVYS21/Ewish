@@ -4,7 +4,7 @@
    ================================================================ */
 
 const ASCII_MAP = {
-  à: 'a', â: 'a', ä: 'a', á: 'a', ã: 'a', å: 'a',
+  à: 'a', â: 'a', ä: 'a', á: 'a', à: 'a', å: 'a',
   ç: 'c',
   è: 'e', é: 'e', ê: 'e', ë: 'e',
   ì: 'i', í: 'i', î: 'i', ï: 'i',
@@ -23,7 +23,7 @@ function slugify(input) {
   if (!input || typeof input !== 'string') return '';
   const lower = input.toLowerCase().trim();
   // Remplace accents
-  const stripped = lower.replace(/[àâäáãåçèéêëìíîïñòóôõöùúûüýÿæœß]/g, (m) => ASCII_MAP[m] || m);
+  const stripped = lower.replace(/[àâäáàåçèéêëìíîïñòóôõöùúûüýÿæœß]/g, (m) => ASCII_MAP[m] || m);
   // Normalise NFD pour retirer les diacritiques restants
   const nfd = stripped.normalize('NFD').replace(/[̀-ͯ]/g, '');
   // Remplace tout ce qui n'est pas alphanumérique/underscore par un tiret

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "canvas-confetti": "^1.9.4",
     "dembrandt": "^0.22.0",
     "html2canvas": "^1.4.1",
     "kkiapay-react": "^0.0.7",

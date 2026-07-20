@@ -20,19 +20,19 @@ export default function AdminRegister() {
   const submit = async () => {
     setError('');
     if (!name || !email || !pass || !confirmPass) {
-      setError('All fields are required.');
+      setError('Tous les champs sont requis.');
       return;
     }
     if (pass !== confirmPass) {
-      setError("Passwords don't match.");
+      setError('Les mots de passe ne correspondent pas.');
       return;
     }
     if (pass.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
     if (!agree) {
-      setError('Please accept the terms to continue.');
+      setError("Merci d'accepter les conditions pour continuer.");
       return;
     }
     setLoading(true);
@@ -40,7 +40,7 @@ export default function AdminRegister() {
       await register(email, pass, name);
       navigate('/ewish-admin');
     } catch (e) {
-      setError(e.response?.data?.error || 'Account creation failed.');
+      setError(e.response?.data?.error || "La création du compte a échoué.");
     } finally { setLoading(false); }
   };
 
@@ -58,17 +58,17 @@ export default function AdminRegister() {
               ambient
             />
           </div>
-          <h2 className={s.brandTitle}>Let's get the party started!</h2>
+          <h2 className={s.brandTitle}>La fête commence ici !</h2>
           <p className={s.brandDesc}>
-            Create beautiful digital wishes and share them with your loved ones.
+            Crée de belles cartes, murs et cadeaux, et partage-les avec ceux que tu aimes.
           </p>
         </aside>
 
         {/* ── Right: form ── */}
         <section className={s.formPanel}>
           <div className={s.formHeader}>
-            <h1 className={s.formTitle}>Welcome to myKado</h1>
-            <p className={s.formSub}>Create your account to continue</p>
+            <h1 className={s.formTitle}>Bienvenue sur myKado</h1>
+            <p className={s.formSub}>Crée ton compte pour continuer</p>
           </div>
 
           <div className={s.tabs} role="tablist">
@@ -78,25 +78,25 @@ export default function AdminRegister() {
               role="tab"
               aria-selected="false"
             >
-              Login
+              Connexion
             </Link>
             <button className={`${s.tab} ${s.tabActive}`} role="tab" aria-selected="true">
-              Register
+              Inscription
             </button>
           </div>
 
-          <GoogleBtn label="Continue with Google" />
+          <GoogleBtn label="Continuer avec Google" />
 
-          <div className={s.orDivider}><span>Or continue with</span></div>
+          <div className={s.orDivider}><span>Ou continue avec</span></div>
 
           <div className={s.field}>
-            <label htmlFor="reg-name">Full name</label>
+            <label htmlFor="reg-name">Nom complet</label>
             <input
               id="reg-name"
               type="text"
               value={name}
               autoComplete="name"
-              placeholder="Your first and last name"
+              placeholder="Ton prénom et ton nom"
               onChange={e => setName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-email')?.focus()}
             />
@@ -109,31 +109,31 @@ export default function AdminRegister() {
               type="email"
               value={email}
               autoComplete="username"
-              placeholder="your.email@example.com"
+              placeholder="ton.email@exemple.com"
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-pass')?.focus()}
             />
           </div>
 
           <div className={s.field}>
-            <label htmlFor="reg-pass">Password</label>
+            <label htmlFor="reg-pass">Mot de passe</label>
             <PasswordInput
               id="reg-pass"
               value={pass}
               autoComplete="new-password"
-              placeholder="secret-you-wont-forget"
+              placeholder="un-secret-inoubliable"
               onChange={e => setPass(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && document.getElementById('reg-confirm')?.focus()}
             />
           </div>
 
           <div className={s.field}>
-            <label htmlFor="reg-confirm">Confirm password</label>
+            <label htmlFor="reg-confirm">Confirme le mot de passe</label>
             <PasswordInput
               id="reg-confirm"
               value={confirmPass}
               autoComplete="new-password"
-              placeholder="Repeat your password"
+              placeholder="Répète ton mot de passe"
               onChange={e => setConfirmPass(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && submit()}
             />
@@ -166,21 +166,21 @@ export default function AdminRegister() {
                 }}
               />
               <span>
-                I accept the{' '}
+                J'accepte les{' '}
                 <Link
                   to="/terms"
                   target="_blank"
                   style={{ color: '#FF5470', fontWeight: 700, textDecoration: 'none' }}
                 >
-                  Terms of Service
+                  Conditions d'utilisation
                 </Link>
-                {' '}and{' '}
+                {' '}et la{' '}
                 <Link
                   to="/privacy"
                   target="_blank"
                   style={{ color: '#FF5470', fontWeight: 700, textDecoration: 'none' }}
                 >
-                  Privacy Policy
+                  Politique de confidentialité
                 </Link>.
               </span>
             </label>
@@ -189,14 +189,14 @@ export default function AdminRegister() {
           {error && <div className={s.error}>{error}</div>}
 
           <button className={s.btn} onClick={submit} disabled={loading || !agree}>
-            {loading ? 'Creating account…' : 'Create Account'}
+            {loading ? 'Création du compte…' : 'Créer un compte'}
           </button>
 
           <div className={s.formFooter}>
-            By clicking continue, you agree to our{' '}
-            <Link to="/terms" target="_blank">Terms of Service</Link>
-            {' '}and{' '}
-            <Link to="/privacy" target="_blank">Privacy Policy</Link>
+            En continuant, tu acceptes nos{' '}
+            <Link to="/terms" target="_blank">Conditions d'utilisation</Link>
+            {' '}et notre{' '}
+            <Link to="/privacy" target="_blank">Politique de confidentialité</Link>
           </div>
         </section>
       </div>

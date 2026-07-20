@@ -50,12 +50,19 @@ export const getTemplate = (name) => api.get(`/templates/${name}`);
 
 export const getPublications = (params) => api.get('/publications', { params });
 export const getPublicationById = (id) => api.get(`/publications/id/${id}`, { withCredentials: true });
+export const getPublicPublicationBySlug = (slug) => api.get(`/publications/public/slug/${slug}`).then(res => res.data);
 export const getPremadePublications = () => api.get('/publications', { params: { premade: 'true' } });
 export const getPublication = (templateName, customName) => api.get(`/publications/${templateName}/${customName}`);
 export const createPublication = (data) => api.post('/publications', data);
 export const updatePublication = (id, data) => api.patch(`/publications/${id}`, data);
-export const publishPublication = (id) => api.post(`/publications/${id}/publish`);
+export const publishPublication = (id, data) => api.post(`/publications/${id}/publish`, data);
 //export const unpublishPublication = (id) => api.post(`/publications/${id}/unpublish`);
+
+/* ── Étape 8 flow murs — claim par le destinataire ──────────────── */
+export const inviteRecipient = (pubId, email) =>
+  api.post(`/walls/${pubId}/invite-recipient`, { email });
+export const getWallClaim  = (token) => api.get(`/walls/claim/${token}`);
+export const claimWall     = (token) => api.post(`/walls/claim/${token}`);
 export const deletePublication = (id) => api.delete(`/publications/${id}`);
 
 // export const uploadFile = (file) => {

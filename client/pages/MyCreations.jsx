@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Edit2, Copy, Trash2, Share2, MoreHorizontal, X } from 'lucide-react';
+import { Search, Plus, Edit2, Copy, Trash2, Share2, MoreHorizontal, X, Gift, Inbox } from 'lucide-react';
 import {
   getPublications, deletePublication, duplicatePublication, unpublishPublication,
   getTemplates,
@@ -21,8 +21,10 @@ const TEMPLATE_COLORS = {
   'wall-of-wishes-space': 'linear-gradient(135deg,#ff8060,#d83070)',
 };
 
+/* Deux murs actifs seulement — les variantes 3d/space ont été retirées.
+   Voir memory/project_walls_flow.md */
 const WALL_TEMPLATES = new Set([
-  'wall-of-wishes', 'wall-of-wishes-3d', 'wall-of-wishes-modern', 'wall-of-wishes-space',
+  'wall-of-wishes', 'wall-of-wishes-modern',
 ]);
 
 const DISPLAY_DOMAIN = (import.meta.env.VITE_API_URL || 'mykado.store')
@@ -43,7 +45,7 @@ function timeAgo(dateStr) {
   return `il y a ${Math.floor(days / 365)} an${Math.floor(days / 365) > 1 ? 's' : ''}`;
 }
 
-function CreationRow({ pub, tplLabel, onDelete, onDup }) {
+function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
   const navigate  = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef   = useRef(null);
@@ -54,6 +56,7 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
 
   const isWall  = WALL_TEMPLATES.has(pub.templateName);
   const isDraft = !pub.published;
+  const isReceived = mode === 'received';
   const editPath = isWall
     ? `/ewish-admin/wall/${pub._id}`
     : `/ewish-admin/ewish/edit/${pub._id}`;
@@ -85,9 +88,13 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
         <div className="crea-r1">
           <span className="crea-title">{pub.title || 'Sans titre'}</span>
           <div className="crea-badges">
-            {isDraft
-              ? <span className="badge badge-draft">Brouillon</span>
-              : <span className="badge badge-live">✓ En ligne</span>}
+            {isReceived
+              ? <span className="badge badge-wall" style={{ background: '#F1EAFB', color: '#5B3FAA' }}>
+                  <Gift size={11} style={{ marginRight: 4 }} /> Reçu
+                </span>
+              : (isDraft
+                  ? <span className="badge badge-draft">Brouillon</span>
+                  : <span className="badge badge-live">✓ En ligne</span>)}
             {isWall && <span className="badge badge-wall">Mur</span>}
           </div>
         </div>
@@ -109,51 +116,64 @@ function CreationRow({ pub, tplLabel, onDelete, onDup }) {
           </div>
         )}
 
-        {/* Row 4  action buttons */}
+        {/* Row 4  action buttons — les créations reçues n'ont que "Ouvrir".
+            Delete/Dup/Dépublier appartiennent au créateur, pas au destinataire. */}
         <div className="crea-r4" onClick={e => e.stopPropagation()}>
-          {pub.published && (
+          {isReceived ? (
             <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => navigate(`/ewish-admin/share/${pub._id}`)}
+              className="btn btn-primary btn-sm"
+              onClick={() => navigate(editPath)}
+              style={{ background: '#7C5CC9' }}
             >
-              <Share2 size={13} /> Partager
+              <Gift size={13} /> Ouvrir mon mur
             </button>
-          )}
-          <button className="btn-icon" title="Modifier" onClick={() => navigate(editPath)}>
-            <Edit2 size={15} />
-          </button>
-          <div style={{ position: 'relative' }} ref={menuRef}>
-            <button className="btn-icon" title="Plus" onClick={() => setMenuOpen(o => !o)}>
-              <MoreHorizontal size={16} />
-            </button>
-            {menuOpen && (
-              <div className="crea-menu">
-                <button className="sb-item" onClick={() => { setMenuOpen(false); onDup(pub); }}>
-                  <Copy size={14} /> Dupliquer
-                </button>
-                {pub.published && (
-                  <button
-                    className="sb-item"
-                    style={{ color: 'var(--mk-butter)' }}
-                    onClick={async () => {
-                      setMenuOpen(false);
-                      if (!confirm('Dépublier cette création ?')) return;
-                      await unpublishPublication(pub._id);
-                    }}
-                  >
-                    <X size={14} /> Dépublier
-                  </button>
-                )}
+          ) : (
+            <>
+              {pub.published && (
                 <button
-                  className="sb-item"
-                  style={{ color: 'var(--mk-accent)' }}
-                  onClick={() => { setMenuOpen(false); onDelete(pub._id); }}
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => navigate(`/ewish-admin/share/${pub._id}`)}
                 >
-                  <Trash2 size={14} /> Supprimer
+                  <Share2 size={13} /> Partager
                 </button>
+              )}
+              <button className="btn-icon" title="Modifier" onClick={() => navigate(editPath)}>
+                <Edit2 size={15} />
+              </button>
+              <div style={{ position: 'relative' }} ref={menuRef}>
+                <button className="btn-icon" title="Plus" onClick={() => setMenuOpen(o => !o)}>
+                  <MoreHorizontal size={16} />
+                </button>
+                {menuOpen && (
+                  <div className="crea-menu">
+                    <button className="sb-item" onClick={() => { setMenuOpen(false); onDup(pub); }}>
+                      <Copy size={14} /> Dupliquer
+                    </button>
+                    {pub.published && (
+                      <button
+                        className="sb-item"
+                        style={{ color: 'var(--mk-butter)' }}
+                        onClick={async () => {
+                          setMenuOpen(false);
+                          if (!confirm('Dépublier cette création ?')) return;
+                          await unpublishPublication(pub._id);
+                        }}
+                      >
+                        <X size={14} /> Dépublier
+                      </button>
+                    )}
+                    <button
+                      className="sb-item"
+                      style={{ color: 'var(--mk-accent)' }}
+                      onClick={() => { setMenuOpen(false); onDelete(pub._id); }}
+                    >
+                      <Trash2 size={14} /> Supprimer
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -170,6 +190,9 @@ export default function MyCreations() {
   const [search,    setSearch]    = useState('');
   const [type,      setType]      = useState('all');
   const [tplFilter, setTplFilter] = useState('all');
+  /* Étape 8 flow murs — tab "reçues" pour voir les murs offerts. */
+  const [tab,       setTab]       = useState('mine'); // 'mine' | 'received'
+  const [receivedCount, setReceivedCount] = useState(0);
 
   const [dupModal,   setDupModal]   = useState(null);
   const [dupTitle,   setDupTitle]   = useState('');
@@ -179,16 +202,27 @@ export default function MyCreations() {
   const fetchPubs = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getPublications({ mine: 'true', limit: 80 });
+      const params = tab === 'received'
+        ? { received: 'true', limit: 80 }
+        : { mine: 'true', limit: 80 };
+      const res = await getPublications(params);
       setPubs(res.data || []);
     } catch (_) {}
     setLoading(false);
-  }, []);
+  }, [tab]);
 
   useEffect(() => { fetchPubs(); }, [fetchPubs]);
   useEffect(() => {
     getTemplates().then(r => setTemplates(r.data || [])).catch(() => {});
   }, []);
+
+  /* Compteur des créations reçues — affiché sur l'onglet même quand
+     l'utilisateur est sur "Mes créations". Refresh à chaque activation. */
+  useEffect(() => {
+    getPublications({ received: 'true', limit: 1 })
+      .then(r => setReceivedCount((r.data || []).length))
+      .catch(() => {});
+  }, [tab]);
 
   // Build name → label map for human-readable template names in cards
   const tplMap = useMemo(() => {
@@ -279,11 +313,68 @@ export default function MyCreations() {
       {/* Page header */}
       <div className="ph">
         <div>
-          <h1 className="ph-title">Mes créations</h1>
-          <p className="ph-sub">Retrouve, partage ou duplique tout ce que tu as créé.</p>
+          <h1 className="ph-title">
+            {tab === 'received' ? 'Créations reçues' : 'Mes créations'}
+          </h1>
+          <p className="ph-sub">
+            {tab === 'received'
+              ? 'Les murs et cadeaux que tes proches ont préparés pour toi.'
+              : 'Retrouve, partage ou duplique tout ce que tu as créé.'}
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/ewish-admin/templates')}>
-          <Plus size={15} /> Nouvelle
+        {tab === 'mine' && (
+          <button className="btn btn-primary" onClick={() => navigate('/ewish-admin/templates')}>
+            <Plus size={15} /> Nouvelle
+          </button>
+        )}
+      </div>
+
+      {/* Tabs Mine / Received — étape 8 flow murs */}
+      <div style={{
+        display: 'inline-flex', gap: 4,
+        background: '#F4F1F9', padding: 4, borderRadius: 12,
+        marginBottom: 18,
+      }}>
+        <button
+          type="button"
+          onClick={() => setTab('mine')}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            padding: '9px 16px', borderRadius: 9, border: 'none',
+            background: tab === 'mine' ? '#fff' : 'transparent',
+            color: tab === 'mine' ? '#2B1A2D' : '#7A748F',
+            fontFamily: 'inherit', fontWeight: 700, fontSize: 13,
+            cursor: 'pointer',
+            boxShadow: tab === 'mine' ? '0 2px 6px -2px rgba(43,26,45,.12)' : 'none',
+          }}
+        >
+          Mes créations
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('received')}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            padding: '9px 16px', borderRadius: 9, border: 'none',
+            background: tab === 'received' ? '#fff' : 'transparent',
+            color: tab === 'received' ? '#2B1A2D' : '#7A748F',
+            fontFamily: 'inherit', fontWeight: 700, fontSize: 13,
+            cursor: 'pointer',
+            boxShadow: tab === 'received' ? '0 2px 6px -2px rgba(43,26,45,.12)' : 'none',
+          }}
+        >
+          <Inbox size={13} />
+          Reçues
+          {receivedCount > 0 && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              minWidth: 20, height: 20, padding: '0 6px',
+              borderRadius: 999, background: '#7C5CC9', color: '#fff',
+              fontSize: 11, fontWeight: 700, marginLeft: 2,
+            }}>
+              {receivedCount}
+            </span>
+          )}
         </button>
       </div>
 
@@ -342,11 +433,15 @@ export default function MyCreations() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="empty-state">
-          <div className="e-title">Rien par ici</div>
+          <div className="e-title">
+            {tab === 'received' ? 'Aucun cadeau pour le moment' : 'Rien par ici'}
+          </div>
           <p style={{ fontSize: 13 }}>
-            {search
-              ? `Aucune création ne correspond à « ${search} ».`
-              : "Crée ton premier vœu ou ton premier mur depuis l'accueil."}
+            {tab === 'received'
+              ? 'Quand tes proches créeront un mur pour toi et t\'enverront le lien personnalisé, il apparaîtra ici.'
+              : (search
+                  ? `Aucune création ne correspond à « ${search} ».`
+                  : "Crée ton premier vœu ou ton premier mur depuis l'accueil.")}
           </p>
         </div>
       ) : (
@@ -358,6 +453,7 @@ export default function MyCreations() {
               tplLabel={tplMap[pub.templateName] || pub.templateName}
               onDelete={handleDelete}
               onDup={openDup}
+              mode={tab}
             />
           ))}
         </div>

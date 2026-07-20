@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livre vidéo du mur — myKado</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #1E2952;
+    --ink-2:  #4a4f66;
+    --muted:  #7D7156;
+    --paper:  #F9F5EA;
+    --gold:   #E8A33D;
+    --accent: #E05574;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f2ecd8; color: var(--ink); font-family: 'Inter', system-ui, sans-serif; min-height: 100%; }
+  .shell {
+    max-width: 720px; margin: 0 auto; padding: 32px 20px 60px;
+    display: flex; flex-direction: column; gap: 24px; align-items: stretch;
+  }
+  header h1 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 28px; line-height: 1.15;
+  }
+  header p { margin-top: 6px; color: var(--ink-2); font-size: 14px; }
+
+  .canvas-wrap {
+    background: #000; border-radius: 18px; overflow: hidden;
+    aspect-ratio: 9 / 16; width: 100%; max-width: 360px; align-self: center;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+  }
+  canvas#stage { width: 100%; height: 100%; display: block; }
+
+  .status {
+    text-align: center; font-size: 13px; color: var(--ink-2); min-height: 20px;
+  }
+  .status.err { color: #c1354c; }
+
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  button {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    padding: 14px 22px; border-radius: 12px; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button:not(:disabled):hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:not(:disabled):hover { box-shadow: 0 8px 20px rgba(30,41,82,0.24); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid rgba(30,41,82,0.18); }
+
+  .icon { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .rec-dot { width: 10px; height: 10px; border-radius: 50%; background: #e11d48; box-shadow: 0 0 0 0 rgba(225,29,72,0.6); animation: pulse 1.2s infinite; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(225,29,72,0.55); }
+    70%  { box-shadow: 0 0 0 10px rgba(225,29,72,0); }
+    100% { box-shadow: 0 0 0 0 rgba(225,29,72,0); }
+  }
+
+  .hint {
+    font-size: 12px; color: var(--muted); text-align: center; line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <h1>Livre vidéo</h1>
+    <p>On rejoue chaque mot du mur en animation, on capture, et tu télécharges. Idéal pour partager sur les réseaux.</p>
+  </header>
+
+  <div class="canvas-wrap">
+    <canvas id="stage" width="1080" height="1920"></canvas>
+  </div>
+
+  <div id="status" class="status">Chargement des mots…</div>
+
+  <div class="controls">
+    <button id="btn-preview" class="btn-ghost" disabled>
+      <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      Prévisualiser
+    </button>
+    <button id="btn-record" class="btn-primary" disabled>
+      <span class="rec-dot" style="display:none" id="rec-dot"></span>
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle></svg>
+      <span id="record-label">Enregistrer</span>
+    </button>
+  </div>
+
+  <p class="hint">
+    Format : 1080×1920 (portrait), 30 fps, WebM.
+    Le rendu se fait dans ton navigateur — ne ferme pas cet onglet pendant l'enregistrement.
+  </p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var PUB_ID    = '{{PUB_ID}}';
+  /* Injectés par server/routes/wallVideo.js — échappés JS-safe côté serveur.
+     Vides si la publication n'a pas été trouvée ou le champ non-renseigné. */
+  var RECIPIENT = '{{RECIPIENT}}';
+  var THANK_YOU = '{{THANK_YOU}}';
+  var STICKY  = ['#FFF7B8','#C6F0C2','#BFE3FF','#FFD3C2','#E7D5F0','#F6E3C8','#F9F5EA'];
+  var canvas  = document.getElementById('stage');
+  var ctx     = canvas.getContext('2d');
+  var W       = canvas.width;
+  var H       = canvas.height;
+
+  var statusEl     = document.getElementById('status');
+  var btnPreview   = document.getElementById('btn-preview');
+  var btnRecord    = document.getElementById('btn-record');
+  var recDot       = document.getElementById('rec-dot');
+  var recordLabel  = document.getElementById('record-label');
+
+  var wishes    = [];
+  var pubTitle  = RECIPIENT ? ('Pour ' + RECIPIENT) : 'Ton mur';
+  var busy      = false;
+
+  function setStatus(msg, isErr) {
+    statusEl.textContent = msg || '';
+    statusEl.classList.toggle('err', !!isErr);
+  }
+
+  function loadWishes() {
+    console.log('[VideoExport] Loading wishes for PUB_ID:', PUB_ID);
+    if (!PUB_ID || /^\{\{/.test(PUB_ID)) {
+      setStatus('Aucun publicationId — impossible de charger les mots.', true);
+      return;
+    }
+    fetch('/api/wishes/' + PUB_ID + '/approved')
+      .then(function (r) { 
+        console.log('[VideoExport] Fetch status:', r.status);
+        return r.json(); 
+      })
+      .then(function (data) {
+        console.log('[VideoExport] Data received, wishes count:', data ? data.length : 0);
+        wishes = (data || []).map(function (w) {
+          return {
+            text:      w.message || '',
+            name:      w.firstName || 'Anonyme',
+            role:      w.role || '',
+            color:     STICKY[(w.color || 0) % STICKY.length],
+            rot:       Math.max(-0.06, Math.min(0.06, (w.rot || 0) * Math.PI / 180)),
+            photoUrl:  w.photoUrl || '',
+            mediaType: w.mediaType || 'none',
+          };
+        });
+        if (!wishes.length) {
+          setStatus('Ce mur ne contient encore aucun mot.', true);
+          drawPoster('', 'Aucun mot pour le moment.');
+          return;
+        }
+        setStatus(wishes.length + ' mot' + (wishes.length > 1 ? 's' : '') + ' prêt' + (wishes.length > 1 ? 's' : '') + ' à animer.');
+        btnPreview.disabled = false;
+        btnRecord.disabled  = false;
+        drawPoster('Livre vidéo', pubTitle);
+      })
+      .catch(function (err) {
+        console.error(err);
+        setStatus('Erreur de chargement des mots.', true);
+      });
+  }
+
+  /* ── Drawing helpers ─────────────────────────────────────────── */
+  function fillPaper() {
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#FBE7A2');
+    g.addColorStop(0.55, '#F6CFC3');
+    g.addColorStop(1, '#E7D5F0');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawPoster(kicker, title) {
+    fillPaper();
+    ctx.save();
+    ctx.textAlign = 'center';
+    if (kicker) {
+      ctx.font = '600 34px "Inter", sans-serif';
+      ctx.fillStyle = 'rgba(30,41,82,0.72)';
+      ctx.fillText(kicker.toUpperCase(), W / 2, 340);
+    }
+    ctx.font = '700 132px "Fraunces", Georgia, serif';
+    ctx.fillStyle = '#1E2952';
+    wrapText(ctx, title || '', W / 2, 540, W - 200, 148);
+    ctx.font = '400 32px "Inter", sans-serif';
+    ctx.fillStyle = 'rgba(30,41,82,0.7)';
+    ctx.fillText('Généré avec myKado', W / 2, H - 160);
+    ctx.restore();
+  }
+
+  function drawEndCard() {
+    fillPaper();
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.font = '700 96px "Fraunces", Georgia, serif';
+    ctx.fillStyle = '#1E2952';
+    ctx.fillText('Merci', W / 2, H / 2 - 40);
+    ctx.font = '400 40px "Caveat", cursive';
+    ctx.fillStyle = '#E05574';
+    ctx.fillText('à tous ceux qui ont laissé un mot.', W / 2, H / 2 + 60);
+    ctx.font = '600 30px "Inter", sans-serif';
+    ctx.fillStyle = 'rgba(30,41,82,0.7)';
+    ctx.fillText('myKado', W / 2, H - 180);
+    ctx.restore();
+  }
+
+  /* Scène "mot de merci du destinataire" — jouée entre la dernière carte
+     et l'end card, uniquement si THANK_YOU non vide. Étape 7 du flow murs. */
+  function drawThankYou(progress) {
+    fillPaper();
+    var t = 1 - Math.pow(1 - Math.min(1, Math.max(0, progress)), 3);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = t;
+
+    // Kicker
+    ctx.font = '600 34px "Inter", sans-serif';
+    ctx.fillStyle = 'rgba(30,41,82,0.72)';
+    ctx.fillText('UN MOT POUR VOUS TOUS', W / 2, 340);
+
+    // Corps du mot de merci (Caveat, gros)
+    ctx.font = '600 66px "Caveat", cursive';
+    ctx.fillStyle = '#2a2540';
+    ctx.textBaseline = 'middle';
+    wrapText(ctx, THANK_YOU, W / 2, H / 2, W - 240, 92);
+
+    // Signature du destinataire
+    if (RECIPIENT) {
+      ctx.font = '700 44px "Fraunces", Georgia, serif';
+      ctx.fillStyle = '#1E2952';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('— ' + RECIPIENT, W / 2, H - 260);
+    }
+
+    ctx.restore();
+  }
+
+  function wrapText(c, text, x, y, maxWidth, lineHeight) {
+    var words = String(text || '').split(/\s+/);
+    var line = '';
+    var lines = [];
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (c.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    // Vertical centering around y
+    var totalH = lines.length * lineHeight;
+    var startY = y - totalH / 2 + lineHeight / 2;
+    for (var j = 0; j < lines.length; j++) {
+      c.fillText(lines[j], x, startY + j * lineHeight);
+    }
+    return lines.length * lineHeight;
+  }
+
+  function drawNote(wish, progress) {
+    fillPaper();
+
+    // Ease-out cubic
+    var t = 1 - Math.pow(1 - Math.min(1, Math.max(0, progress)), 3);
+
+    var cardW = 820;
+    var cardH = 1020;
+    var cx = W / 2;
+    var cy = H / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy + (1 - t) * 200);
+    ctx.rotate(wish.rot);
+    ctx.globalAlpha = t;
+
+    // Shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.22)';
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 22;
+
+    // Card
+    ctx.fillStyle = wish.color;
+    roundRect(ctx, -cardW / 2, -cardH / 2, cardW, cardH, 32);
+    ctx.fill();
+
+    ctx.shadowColor = 'transparent';
+
+    // Wish text
+    ctx.fillStyle = '#2a2540';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '600 62px "Caveat", cursive';
+    wrapText(ctx, wish.text, 0, -60, cardW - 180, 78);
+
+    // Signature
+    ctx.font = '700 44px "Fraunces", Georgia, serif';
+    ctx.fillStyle = '#1E2952';
+    ctx.fillText('— ' + wish.name, 0, cardH / 2 - 130);
+    if (wish.role) {
+      ctx.font = '400 26px "Inter", sans-serif';
+      ctx.fillStyle = 'rgba(30,41,82,0.65)';
+      ctx.fillText(wish.role, 0, cardH / 2 - 80);
+    }
+
+    ctx.restore();
+  }
+
+  function roundRect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h);
+    c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+  }
+
+  /* ── Sequence player ─────────────────────────────────────────── */
+  // Timings (ms)
+  var INTRO_MS      = 1600;
+  var NOTE_IN_MS    = 550;   // ease-in animation duration
+  var NOTE_HOLD_MS  = 2200;  // static hold on note
+  var THANKYOU_IN_MS   = 800;
+  var THANKYOU_HOLD_MS = 3400;
+  var OUTRO_MS      = 1800;
+
+  function hasThankYou() {
+    return !!(THANK_YOU && THANK_YOU.trim().length);
+  }
+  function thankYouDuration() {
+    return hasThankYou() ? THANKYOU_IN_MS + THANKYOU_HOLD_MS : 0;
+  }
+  function totalDuration() {
+    return INTRO_MS
+      + wishes.length * (NOTE_IN_MS + NOTE_HOLD_MS)
+      + thankYouDuration()
+      + OUTRO_MS;
+  }
+
+  function playSequence(onFrame, onDone) {
+    var start = performance.now();
+    var total = totalDuration();
+    var wishesEnd    = INTRO_MS + wishes.length * (NOTE_IN_MS + NOTE_HOLD_MS);
+    var thankYouEnd  = wishesEnd + thankYouDuration();
+    function frame(now) {
+      var t = now - start;
+      if (t >= total) {
+        drawEndCard();
+        if (onFrame) onFrame(t, total);
+        if (onDone) onDone();
+        return;
+      }
+      if (t < INTRO_MS) {
+        drawPoster('Livre vidéo', pubTitle);
+      } else if (t < wishesEnd) {
+        var afterIntro = t - INTRO_MS;
+        var perNote = NOTE_IN_MS + NOTE_HOLD_MS;
+        var idx = Math.floor(afterIntro / perNote);
+        var localT = afterIntro - idx * perNote;
+        var progress = Math.min(1, localT / NOTE_IN_MS);
+        drawNote(wishes[idx], progress);
+      } else if (hasThankYou() && t < thankYouEnd) {
+        var afterWishes = t - wishesEnd;
+        var progress = Math.min(1, afterWishes / THANKYOU_IN_MS);
+        drawThankYou(progress);
+      } else {
+        drawEndCard();
+      }
+      if (onFrame) onFrame(t, total);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  btnPreview.addEventListener('click', function () {
+    if (busy) return;
+    busy = true;
+    btnPreview.disabled = true;
+    btnRecord.disabled  = true;
+    setStatus('Prévisualisation…');
+    playSequence(
+      function (t, total) {
+        var pct = Math.min(100, Math.round((t / total) * 100));
+        setStatus('Prévisualisation… ' + pct + '%');
+      },
+      function () {
+        busy = false;
+        btnPreview.disabled = false;
+        btnRecord.disabled  = false;
+        setStatus('Prévisualisation terminée.');
+      }
+    );
+  });
+
+  btnRecord.addEventListener('click', function () {
+    console.log('[VideoExport] btnRecord clicked. Busy?', busy);
+    if (busy) return;
+    if (typeof MediaRecorder === 'undefined' || !canvas.captureStream) {
+      console.error('[VideoExport] MediaRecorder or canvas.captureStream not supported');
+      setStatus('Ton navigateur ne supporte pas l\'enregistrement. Essaie Chrome, Edge ou Firefox.', true);
+      return;
+    }
+    busy = true;
+    btnPreview.disabled = true;
+    btnRecord.disabled  = true;
+    recDot.style.display = 'inline-block';
+    recordLabel.textContent = 'Enregistrement…';
+
+    var stream = canvas.captureStream(30);
+    var mimeType = pickMimeType();
+    var chunks = [];
+    var recorder;
+    console.log('[VideoExport] Initializing MediaRecorder with mimeType:', mimeType);
+    try {
+      recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 6_000_000 });
+    } catch (err) {
+      console.error('[VideoExport] Error initializing MediaRecorder:', err);
+      setStatus('Impossible d\'initialiser l\'enregistreur : ' + err.message, true);
+      cleanupRec();
+      return;
+    }
+    recorder.ondataavailable = function (e) { 
+      if (e.data && e.data.size > 0) chunks.push(e.data); 
+    };
+    recorder.onstop = function () {
+      console.log('[VideoExport] recorder.onstop triggered. Total chunks:', chunks.length);
+      var blob = new Blob(chunks, { type: mimeType });
+      console.log('[VideoExport] Blob created, size:', blob.size);
+      var url  = URL.createObjectURL(blob);
+      cleanupRec();
+      statusEl.innerHTML = '<a href="' + url + '" download="livre-video-' + PUB_ID + (mimeType.indexOf('mp4') !== -1 ? '.mp4' : '.webm') + '" class="btn-primary" style="text-decoration:none; display:inline-block; padding:8px 16px; border-radius:8px;">Télécharger la vidéo</a>';
+      console.log('[VideoExport] Download button injected.');
+    };
+    try {
+      console.log('[VideoExport] Starting recorder...');
+      recorder.start();
+    } catch (err) {
+      console.error('[VideoExport] Error starting recorder:', err);
+      setStatus('Erreur au démarrage de l\'enregistrement : ' + err.message, true);
+      cleanupRec();
+      return;
+    }
+
+    playSequence(
+      function (t, total) {
+        var pct = Math.min(100, Math.round((t / total) * 100));
+        setStatus('Enregistrement… ' + pct + '%');
+      },
+      function () {
+        console.log('[VideoExport] Sequence finished, scheduling recorder.stop() in 300ms');
+        setTimeout(function () { 
+          try { 
+            console.log('[VideoExport] Calling recorder.stop(). Current state:', recorder.state);
+            if (recorder.state !== 'inactive') recorder.stop(); 
+          } catch (err) {
+            console.error('[VideoExport] Error stopping recorder:', err);
+            setStatus('Erreur à la fin de l\'enregistrement : ' + err.message, true);
+          } 
+        }, 300);
+      }
+    );
+
+    function cleanupRec() {
+      busy = false;
+      btnPreview.disabled = false;
+      btnRecord.disabled  = false;
+      recDot.style.display = 'none';
+      recordLabel.textContent = 'Enregistrer';
+      try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (_) {}
+    }
+  });
+
+  function pickMimeType() {
+    var candidates = [
+      'video/mp4',
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm',
+    ];
+    for (var i = 0; i < candidates.length; i++) {
+      if (MediaRecorder.isTypeSupported(candidates[i])) return candidates[i];
+    }
+    return 'video/mp4';
+  }
+
+  /* ── Boot ────────────────────────────────────────────────────── */
+  // Attendre que les polices soient prêtes pour un premier rendu propre.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(loadWishes);
+  } else {
+    loadWishes();
+  }
+})();
+</script>
+</body>
+</html>

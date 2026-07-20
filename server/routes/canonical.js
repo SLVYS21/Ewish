@@ -46,7 +46,7 @@ async function handleCanonical(prefix, slug, res) {
 }
 
 router.get('/c/:slug', (req, res) => handleCanonical('c', req.params.slug, res));
-router.get('/m/:slug', (req, res) => handleCanonical('m', req.params.slug, res));
+// /m/:slug is now handled by the React Frontend (catch-all in server/index.js)
 router.get('/g/:slug', (req, res) => handleCanonical('g', req.params.slug, res));
 
 module.exports = router;

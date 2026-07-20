@@ -70,7 +70,9 @@ const WALL_DESCS = {
   'wall-of-wishes-space':  "Chaque mot est une étoile dans une galaxie que l'on explore.",
 };
 
-const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
+/* Deux murs actifs : classique + moderne. Les variantes 3d/space ont été
+   supprimées de la DB (voir memory/project_walls_flow.md). */
+const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-modern']);
 
 const WISH_CATS = [
   { id: 'all',      label: 'Tous' },
@@ -341,7 +343,7 @@ export default function TemplatesGallery() {
             {mode === 'wish'
               ? "Chaque template est une petite expérience animée et musicale. Clique pour voir l'aperçu avant de te lancer."
               : mode === 'wall'
-                ? 'Une page où chacun laisse un mot. Les 5 premiers mots sont gratuits  tu débloqueras ensuite pour aller plus loin.'
+                ? 'Une page où chacun laisse un mot. Les 10 premiers mots sont gratuits  tu débloqueras ensuite pour aller plus loin.'
                 : 'Tes invités répondent en un clic, leurs mots se posent sur un mur intégré, et tu suis tout en temps réel.'}
           </p>
         </div>

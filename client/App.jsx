@@ -33,7 +33,7 @@ import TemplatesGallery    from "./pages/TemplatesGallery";
 import TemplateDetailPage  from "./pages/TemplateDetailPage";
 import WallSetup           from "./pages/WallSetup";
 import WallShareHub        from "./pages/WallShareHub";
-import WizardWall          from "./wall-wizard/WizardWall";
+import WallClaim           from "./pages/WallClaim";
 import CagnottePage        from "./pages/CagnottePage";
 import CreditsPage         from "./pages/CreditsPage";
 import SharePage           from "./pages/SharePage";
@@ -42,6 +42,7 @@ import PrivacyPage         from "./pages/PrivacyPage";
 import ProfilePage         from "./pages/ProfilePage";
 import DesignSystem        from "./pages/DesignSystem";
 import CreerBrique         from "./pages/CreerBrique";
+import RecipientReveal     from "./pages/RecipientReveal";
 import { ToastProvider }   from "./design-system";
 
 function RequireAuth({ children }) {
@@ -110,6 +111,8 @@ export default function App() {
           <Route path="/ewish-admin/register" element={<AdminRegisterGate />} />
           <Route path="/ewish-admin/forgot-password"      element={<ForgotPassword />} />
           <Route path="/ewish-admin/reset-password/:token" element={<ResetPassword />} />
+          {/* Étape 8 flow murs — réception publique d'un mur offert */}
+          <Route path="/ewish-admin/claim/:token"          element={<WallClaim />} />
 
           {/* Protected Admin  with sidebar layout */}
           <Route path="/ewish-admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
@@ -144,13 +147,15 @@ export default function App() {
           {/* Full-screen routes  no sidebar */}
           <Route path="/ewish-admin/ewish/new"       element={<RequireAuth><QuickCreate /></RequireAuth>} />
           <Route path="/ewish-admin/ewish/edit/:id"  element={<RequireAuth><Editor /></RequireAuth>} />
-          <Route path="/ewish-admin/wall/new"        element={<RequireAuth><WizardWall /></RequireAuth>} />
 
           <Route path="/kyc/mobile/:token" element={<KycMobilePage />} />
           <Route path="/terms"   element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/design-system" element={<DesignSystem />} />
           <Route path="/app/creer"     element={<CreerBrique />} />
+
+          {/* Recipient Reveal UI for Walls */}
+          <Route path="/m/:slug"       element={<RecipientReveal />} />
 
           <Route path="/" element={<Navigate to="/ewish-admin" replace />} />
           <Route path="*" element={<Navigate to="/ewish-admin" replace />} />

@@ -44,22 +44,22 @@ export default function AdminLogin() {
               ambient
             />
           </div>
-          <h2 className={s.brandTitle}>Let's get the party started!</h2>
+          <h2 className={s.brandTitle}>La fête commence ici !</h2>
           <p className={s.brandDesc}>
-            Create beautiful digital wishes and share them with your loved ones.
+            Crée de belles cartes, murs et cadeaux, et partage-les avec ceux que tu aimes.
           </p>
         </aside>
 
         {/* ── Right: form ── */}
         <section className={s.formPanel}>
           <div className={s.formHeader}>
-            <h1 className={s.formTitle}>Welcome to myKado</h1>
-            <p className={s.formSub}>Sign in to your account to continue</p>
+            <h1 className={s.formTitle}>Bienvenue sur myKado</h1>
+            <p className={s.formSub}>Connecte-toi à ton compte pour continuer</p>
           </div>
 
           <div className={s.tabs} role="tablist">
             <button className={`${s.tab} ${s.tabActive}`} role="tab" aria-selected="true">
-              Login
+              Connexion
             </button>
             <Link
               to="/ewish-admin/register"
@@ -67,18 +67,18 @@ export default function AdminLogin() {
               role="tab"
               aria-selected="false"
             >
-              Register
+              Inscription
             </Link>
           </div>
 
-          <GoogleBtn label="Continue with Google" />
+          <GoogleBtn label="Continuer avec Google" />
 
-          <div className={s.orDivider}><span>Or continue with</span></div>
+          <div className={s.orDivider}><span>Ou continue avec</span></div>
 
           {resetDone && (
             <div className={s.success}>
               <CheckCircle2 size={16} />
-              Password updated. Sign in with your new password.
+              Mot de passe mis à jour. Connecte-toi avec ton nouveau mot de passe.
             </div>
           )}
 
@@ -89,19 +89,19 @@ export default function AdminLogin() {
               type="email"
               value={email}
               autoComplete="username"
-              placeholder="your.email@example.com"
+              placeholder="ton.email@exemple.com"
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && document.getElementById('login-pass')?.focus()}
             />
           </div>
 
           <div className={s.field}>
-            <label htmlFor="login-pass">Password</label>
+            <label htmlFor="login-pass">Mot de passe</label>
             <PasswordInput
               id="login-pass"
               value={pass}
               autoComplete="current-password"
-              placeholder="secret-you-wont-forget"
+              placeholder="un-secret-inoubliable"
               onChange={e => setPass(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && submit()}
             />
@@ -114,22 +114,22 @@ export default function AdminLogin() {
                 checked={remember}
                 onChange={e => setRemember(e.target.checked)}
               />
-              Remember me
+              Se souvenir de moi
             </label>
-            <Link to="/ewish-admin/forgot-password">Forgot password?</Link>
+            <Link to="/ewish-admin/forgot-password">Mot de passe oublié ?</Link>
           </div>
 
           {error && <div className={s.error}>{error}</div>}
 
           <button className={s.btn} onClick={submit} disabled={loading}>
-            {loading ? 'Signing in…' : 'Log in'}
+            {loading ? 'Connexion…' : 'Se connecter'}
           </button>
 
           <div className={s.formFooter}>
-            By clicking continue, you agree to our{' '}
-            <Link to="/terms" target="_blank">Terms of Service</Link>
-            {' '}and{' '}
-            <Link to="/privacy" target="_blank">Privacy Policy</Link>
+            En continuant, tu acceptes nos{' '}
+            <Link to="/terms" target="_blank">Conditions d'utilisation</Link>
+            {' '}et notre{' '}
+            <Link to="/privacy" target="_blank">Politique de confidentialité</Link>
           </div>
         </section>
       </div>

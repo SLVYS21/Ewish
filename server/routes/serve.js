@@ -179,6 +179,56 @@ router.get('/:templateName/:customName', async (req, res) => {
     const scale = s.fontSize === 'small' ? '0.85' : s.fontSize === 'large' ? '1.15' : '1';
     const bgs   = s.backgrounds || {};
 
+    /* ── CSS: wall background + palette (étape 2 flow murs) ─────
+       Consomme style.wallBackground / wallBackgroundInk / wallAccent /
+       wallBackgroundSize. Whitelist stricte pour éviter toute injection CSS.
+       - 'cover' : le bg couvre le viewport et reste en place au scroll
+       - 'tile'  : le bg se répète (background-repeat: repeat) */
+    const wallBgLines = [];
+    if (isWallTemplate) {
+      const rawBg = String(s.wallBackground || '').trim();
+      const rawInk = safeColor(s.wallBackgroundInk, '');
+      const rawAccent = safeColor(s.wallAccent, '');
+      const rawSize = (s.wallBackgroundSize === 'tile') ? 'tile' : 'cover';
+
+      let safeBg = '';
+      if (!/[;<>}]/.test(rawBg) && (/^(?:linear|radial|conic)-gradient/i.test(rawBg) || /^#[0-9a-f]{3,8}$/i.test(rawBg) || /^url\(/i.test(rawBg))) {
+        safeBg = rawBg;
+      }
+
+      if (safeBg) {
+        wallBgLines.push(`  --wall-bg: ${safeBg};`);
+        if (rawSize === 'tile') {
+          wallBgLines.push(`  --wall-bg-size: auto;`);
+          wallBgLines.push(`  --wall-bg-repeat: repeat;`);
+        } else {
+          wallBgLines.push(`  --wall-bg-size: cover;`);
+          wallBgLines.push(`  --wall-bg-repeat: no-repeat;`);
+        }
+      }
+      if (rawInk)    wallBgLines.push(`  --wall-ink: ${rawInk};`);
+      if (rawAccent) {
+        wallBgLines.push(`  --wall-accent: ${rawAccent};`);
+        /* Les templates hardcodent --pin-btn (boutons primaires) et
+           --pin-cag-fill (accents/gold). On les fait suivre l'accent utilisateur
+           pour que la palette choisie s'applique vraiment aux CTA. */
+        wallBgLines.push(`  --pin-btn: ${rawAccent};`);
+        wallBgLines.push(`  --pin-cag-fill: ${rawAccent};`);
+      }
+      const rawAccentInk = safeColor(s.paletteAccentText || '', '');
+      if (rawAccentInk) wallBgLines.push(`  --pin-btn-ink: ${rawAccentInk};`);
+      /* Bannière (#wall-cover) : lit --cover-image (gradient) et --cover-ink (couleur texte).
+         Sources : data.bannerTint (gradient de l'occasion) + data.bannerInk (contraste). */
+      const rawBanner = String((pub.data && pub.data.bannerTint) || '').trim();
+      let safeBanner = '';
+      if (!/[;<>}]/.test(rawBanner) && (/^(?:linear|radial|conic)-gradient/i.test(rawBanner) || /^#[0-9a-f]{3,8}$/i.test(rawBanner) || /^url\(/i.test(rawBanner))) {
+        safeBanner = rawBanner;
+      }
+      if (safeBanner) wallBgLines.push(`  --cover-image: ${safeBanner};`);
+      const rawBannerInk = safeColor((pub.data && pub.data.bannerInk) || '', '');
+      if (rawBannerInk) wallBgLines.push(`  --cover-ink: ${rawBannerInk};`);
+    }
+
     /* ── CSS: section background variables (whitelisted) ─── */
     const bgCssLines = [];
     Object.entries(bgs).forEach(([rawKey, bg]) => {
@@ -191,8 +241,8 @@ router.get('/:templateName/:customName', async (req, res) => {
       else if (bg.type === 'gradient') {
         // Gradients: must start with linear-gradient/radial-gradient/conic-gradient
         // and contain no `;`, `}`, `<`, `>`
-        const g = String(bg.value);
-        if (/^(linear|radial|conic)-gradient\([^;<>}]+\)$/i.test(g)) bgValue = g;
+        const g = String(bg.value).trim();
+        if (!/[;<>}]/.test(g) && /^(?:linear|radial|conic)-gradient/i.test(g)) bgValue = g;
       }
       else if (bg.type === 'image')    {
         const url = safeCssUrl(optimizeCloudinaryUrl(bg.value));
@@ -228,10 +278,11 @@ router.get('/:templateName/:customName', async (req, res) => {
     let wallPrimary, wallAccent;
     if (isWallTemplate) {
       const tplDef = WALL_DEFAULTS[pub.templateName] || WALL_DEFAULTS['wall-of-wishes'];
+      const rawAcc = safeColor(s.wallAccent, '');
       const userPrimary = (s.primaryColor && s.primaryColor !== LEGACY_SCHEMA_DEFAULTS.primaryColor) ? s.primaryColor : null;
       const userAccent  = (s.accentColor  && s.accentColor  !== LEGACY_SCHEMA_DEFAULTS.accentColor)  ? s.accentColor  : null;
-      wallPrimary = safeColor(userPrimary, tplDef.primaryColor);
-      wallAccent  = safeColor(userAccent,  tplDef.accentColor);
+      wallPrimary = rawAcc || safeColor(userPrimary, tplDef.primaryColor);
+      wallAccent  = rawAcc || safeColor(userAccent,  tplDef.accentColor);
     } else {
       wallPrimary = safeColor(s.primaryColor, '#ff69b4');
       wallAccent  = safeColor(s.accentColor,  '#ffb347');
@@ -271,6 +322,8 @@ router.get('/:templateName/:customName', async (req, res) => {
     publicData.maxContribution = pub.cagnotteConfig?.maxContribution || 0;
     publicData.isAdmin = isAdmin;
     publicData.adminReturnUrl = adminReturnUrl;
+    publicData.previewMode = isPreview;
+    publicData.skipIntro = req.query.noanim === '1';
     publicData.cagnotte = pub.cagnotteConfig?.enabled ? {
       enabled: true,
       name: pub.cagnotteConfig.description || '',
@@ -310,6 +363,7 @@ ${bubbleFontFaces ? bubbleFontFaces + '\n' : ''}${fontFaceCSS ? fontFaceCSS + '\
     --text-color: ${textColor};
     --text-muted: ${textMuted};
 ${bgCssLines.join('\n')}
+${wallBgLines.join('\n')}
   }
   body { font-family: var(--font) !important; }
 </style>

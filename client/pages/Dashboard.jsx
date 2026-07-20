@@ -9,6 +9,7 @@ import Kado from '../components/Kado';
 import ConfettiBurst from '../components/ConfettiBurst';
 import TileSparkles from '../components/TileSparkles';
 import NotoEmoji from '../components/NotoEmoji';
+import WallCreateSheet from '../components/WallCreateSheet';
 import s from './Dashboard.module.css';
 
 /* Template thumbnails — reused across recent + featured */
@@ -127,6 +128,9 @@ export default function Dashboard() {
   const [nameLoading, setNameLoading] = useState(false);
   const nameRef = useRef(null);
 
+  /* Wall create sheet */
+  const [wallSheetOpen, setWallSheetOpen] = useState(false);
+
   const firstName = (user?.name || '').split(' ')[0] || 'ami';
 
   useEffect(() => {
@@ -228,7 +232,7 @@ export default function Dashboard() {
             <div className={s.quickLabel}>Créer une carte</div>
           </button>
 
-          <button className={s.quickTile} onClick={() => navigate('/ewish-admin/wall/new')}>
+          <button className={s.quickTile} onClick={() => setWallSheetOpen(true)}>
             <div className={`${s.quickThumb} ${s.quickThumbWall}`}>
               <TileSparkles className={s.tileSparkles} variant={1} />
               <div className={s.sceneWall}>
@@ -355,6 +359,16 @@ export default function Dashboard() {
           Simplifie tes cadeaux pro : catalogue mondial, options personnalisées, et une reconnaissance qui marque tes équipes.
         </div>
       </div>
+
+      {/* ══ Wall create sheet ═════════════════════════════════════ */}
+      <WallCreateSheet
+        open={wallSheetOpen}
+        onClose={() => setWallSheetOpen(false)}
+        onCreated={(pub) => {
+          setWallSheetOpen(false);
+          navigate(`/ewish-admin/wall/${pub._id}`);
+        }}
+      />
 
       {/* ══ Name modal ════════════════════════════════════════════ */}
       {nameModal && (

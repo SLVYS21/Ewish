@@ -215,7 +215,7 @@ export default function TemplateDetailPage() {
                   Configurer ce mur <ArrowRight size={16} />
                 </button>
                 <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center', lineHeight: 1.5 }}>
-                  Les 5 premiers mots sont gratuits. Tu débloqueras ensuite pour aller plus loin.
+                  Les 10 premiers mots sont gratuits. Tu débloqueras ensuite pour aller plus loin.
                 </p>
               </div>
             </div>
