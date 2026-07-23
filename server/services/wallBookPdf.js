@@ -20,10 +20,17 @@ let _browserPromise = null;
 async function getBrowser() {
   if (_browserPromise) return _browserPromise;
   const puppeteer = require('puppeteer');
-  _browserPromise = puppeteer.launch({
+  /* Prod déploiement (Coolify/Nixpacks/Docker) : si Chrome n'a pas été
+     téléchargé par le postinstall, on autorise un chemin système via
+     PUPPETEER_EXECUTABLE_PATH (ex: /usr/bin/google-chrome-stable). */
+  const launchOptions = {
     headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-  }).catch(err => {
+  };
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  _browserPromise = puppeteer.launch(launchOptions).catch(err => {
     _browserPromise = null;
     throw err;
   });

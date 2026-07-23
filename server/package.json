@@ -6,6 +6,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "build": "cp -rf ../templates/* ./templates/",
+    "postinstall": "npx puppeteer browsers install chrome",
     "seed:ww": "node seeds/wallOfWishes.js",
     "seed:templates": "node seeds/seedTemplates.js",
     "seed:walls": "node seeds/seedWalls.js",
