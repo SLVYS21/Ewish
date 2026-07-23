@@ -10,20 +10,20 @@
 }
 
 .sectionTitle {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
-  font-family: 'Inter', var(--mk-body, sans-serif);
-  color: #161311;
-  margin-bottom: 3px;
+  font-family: var(--mk-body);
+  color: var(--mk-ink, #161311);
+  margin-bottom: 4px;
 }
 
 .sectionHint {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 400;
-  font-family: 'Inter', var(--mk-body, sans-serif);
-  color: #7D7156;
-  margin: 0 0 11px 0;
-  line-height: 1.4;
+  font-family: var(--mk-body);
+  color: var(--mk-ink-2, #7D7156);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
 }
 
 /* ── New Component Styles (Mobile Mockup Match) ───────────────── */
@@ -58,17 +58,18 @@
   padding: 0 4px 6px;
 }
 .tplLabel {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
-  font-family: 'Inter', var(--mk-body, sans-serif);
-  color: #161311;
-  margin-bottom: 2px;
+  font-family: var(--mk-body);
+  color: var(--mk-ink, #161311);
+  margin-bottom: 3px;
   display: block;
 }
 .tplHint {
-  font-size: 10.5px;
-  font-family: 'Inter', var(--mk-body, sans-serif);
-  color: #7D7156;
+  font-size: 11.5px;
+  font-family: var(--mk-body);
+  color: var(--mk-ink-2, #7D7156);
+  line-height: 1.4;
 }
 
 /* 2. Arrière-plan (BgCard) */
@@ -110,13 +111,13 @@
   color: var(--mk-line-strong);
 }
 .bgLabel {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
-  font-family: 'Inter', var(--mk-body, sans-serif);
-  color: #7D7156;
+  font-family: var(--mk-body);
+  color: var(--mk-ink-2, #7D7156);
 }
 .bgItemActive .bgLabel {
-  color: #161311;
+  color: var(--mk-ink, #161311);
   font-weight: 700;
 }
 
@@ -145,13 +146,13 @@
   height: 36px;
 }
 .iconLabel {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
-  font-family: 'Inter', var(--mk-body, sans-serif);
-  color: #7D7156;
+  font-family: var(--mk-body);
+  color: var(--mk-ink-2, #7D7156);
 }
 .iconCardActive .iconLabel {
-  color: #161311;
+  color: var(--mk-ink, #161311);
   font-weight: 700;
 }
 
@@ -183,14 +184,15 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 9px 14px;
   background: #fff;
   border: 2px solid var(--mk-line-2);
   border-radius: 99px;
   cursor: pointer;
-  font-size: 14px;
+  font-family: var(--mk-body);
+  font-size: 13px;
   font-weight: 600;
-  color: #1E1A2D;
+  color: var(--mk-ink, #1E1A2D);
   transition: all 0.2s ease;
 }
 .confettiPill:hover:not(.confettiPillActive) { border-color: var(--mk-line-strong); }
@@ -224,8 +226,9 @@
 }
 
 .cardLabel {
-  font-size: 12.5px;
-  font-weight: 800;
+  font-family: var(--mk-body);
+  font-size: 13px;
+  font-weight: 700;
   color: var(--mk-ink);
   letter-spacing: -.005em;
   white-space: nowrap;
@@ -371,9 +374,9 @@
   color: #fff;
   border: none;
   cursor: pointer;
-  font-size: 13.5px;
-  font-weight: 800;
-  font-family: inherit;
+  font-family: var(--mk-body);
+  font-size: 13px;
+  font-weight: 700;
   box-shadow: 0 10px 30px -8px rgba(43,26,45,.5);
   transition: transform .15s ease;
 }
@@ -404,13 +407,14 @@
 }
 
 .previewLabel {
-  font-size: 12px;
+  font-family: var(--mk-body);
+  font-size: 11px;
   font-weight: 800;
-  color: var(--mk-ink-2);
+  color: var(--mk-ink-3);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  letter-spacing: .04em;
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 
@@ -452,7 +456,7 @@
 /* Desktop ≥1024px media query removed as layout is now handled by WallSetup */
 @media (max-width: 520px) {
   .wrap { gap: 22px; }
-  .sectionTitle { font-size: 16.5px; }
-  .cardLabel { font-size: 11.5px; }
+  .sectionTitle { font-size: 14px; }
+  .cardLabel { font-size: 12px; }
   .tplRow { grid-template-columns: 1fr; }
 }

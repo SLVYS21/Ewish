@@ -11,6 +11,7 @@ export default function RecipientReveal() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isGuest = searchParams.get('collect') === '1';
+  const isPreview = searchParams.get('preview') === '1';
 
   const [pub, setPub] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,7 +20,7 @@ export default function RecipientReveal() {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
-    getPublicPublicationBySlug(slug)
+    getPublicPublicationBySlug(slug, { preview: isPreview })
       .then(data => {
         setPub(data);
         setLoading(false);
@@ -34,7 +35,7 @@ export default function RecipientReveal() {
         setError(true);
         setLoading(false);
       });
-  }, [slug, isGuest]);
+  }, [slug, isGuest, isPreview]);
 
   const handleOpen = () => {
     setOpened(true);

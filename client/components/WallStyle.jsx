@@ -563,31 +563,31 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
         </div>
       </StyleSection>
       {/* ── Toggles ── */}
-      <div style={{ borderTop: '1px solid var(--mk-line-1)', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 15, margin: '24px 20px 0' }}>
+      <div style={{ borderTop: '1px solid var(--mk-line)', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 15, margin: '24px 20px 0', fontFamily: 'var(--mk-body)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: '#161311' }}>Emojis animés</div>
-            <div style={{ fontWeight: 400, fontSize: 11, color: 'var(--mk-ink-3)', marginTop: 2 }}>Noto Emoji en mouvement</div>
+            <div style={{ fontFamily: 'var(--mk-body)', fontWeight: 700, fontSize: 13.5, color: 'var(--mk-ink, #161311)' }}>Emojis animés</div>
+            <div style={{ fontFamily: 'var(--mk-body)', fontWeight: 400, fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2, lineHeight: 1.5 }}>Noto Emoji en mouvement</div>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setRevealEmojis(!revealEmojis)}
-            style={{ width: 42, height: 25, borderRadius: 999, background: revealEmojis ? 'var(--mk-ink-1)' : 'var(--mk-line-2)', position: 'relative', flex: '0 0 auto', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
+            style={{ width: 44, height: 26, borderRadius: 999, background: revealEmojis ? '#1E1A2D' : '#E5E0E8', position: 'relative', flex: '0 0 auto', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
           >
-            <span style={{ position: 'absolute', top: 3, left: revealEmojis ? 20 : 3, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }}></span>
+            <span style={{ position: 'absolute', top: 3, left: revealEmojis ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,.18)' }}></span>
           </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: '#161311' }}>Ouverture « Kado apporte le cadeau »</div>
-            <div style={{ fontWeight: 400, fontSize: 11, color: 'var(--mk-ink-3)', marginTop: 2 }}>La mascotte accueille le destinataire</div>
+            <div style={{ fontFamily: 'var(--mk-body)', fontWeight: 700, fontSize: 13.5, color: 'var(--mk-ink, #161311)' }}>Ouverture « Kado apporte le cadeau »</div>
+            <div style={{ fontFamily: 'var(--mk-body)', fontWeight: 400, fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2, lineHeight: 1.5 }}>La mascotte accueille le destinataire</div>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setRevealMascot(!revealMascot)}
-            style={{ width: 42, height: 25, borderRadius: 999, background: revealMascot ? 'var(--mk-ink-1)' : 'var(--mk-line-2)', position: 'relative', flex: '0 0 auto', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
+            style={{ width: 44, height: 26, borderRadius: 999, background: revealMascot ? '#1E1A2D' : '#E5E0E8', position: 'relative', flex: '0 0 auto', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
           >
-            <span style={{ position: 'absolute', top: 3, left: revealMascot ? 20 : 3, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }}></span>
+            <span style={{ position: 'absolute', top: 3, left: revealMascot ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,.18)' }}></span>
           </button>
         </div>
       </div>

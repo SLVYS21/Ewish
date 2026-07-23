@@ -804,7 +804,23 @@ export default function WallSetup() {
   const cc           = pub?.cagnotteConfig || {};
   const moderation   = cc.requireModeration || false;
   const VITE_SITE    = import.meta.env.VITE_API_URL || '';
+  /* /site/* est servi par Express (VITE_SITE), mais /m/:slug est une route
+     du SPA React (App.jsx) — en dev Express n'a pas cette route et renvoie
+     la landing. On utilise donc l'origine courante pour l'aperçu destinataire. */
+  const SPA_ORIGIN   = typeof window !== 'undefined' ? window.location.origin : '';
   const siteUrl      = isPublished ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}` : null;
+
+  const buildPreviewSrc = () => {
+    if (!pub?.customName) return '';
+    if (previewRole === 'recipient') {
+      /* /m/:slug utilise le champ `slug` (ou `shortCode` en fallback) —
+         pas `customName`. Voir server/routes/publication.js:83. */
+      const recipientSlug = pub.slug || pub.shortCode;
+      if (!recipientSlug) return '';
+      return `${SPA_ORIGIN}/m/${recipientSlug}?preview=1`;
+    }
+    return `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1`;
+  };
 
   const tabs = [
     { id: 'settings', label: 'Réglages' },
@@ -877,14 +893,14 @@ export default function WallSetup() {
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#453E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
               </button>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ font: '600 10px Inter', letterSpacing: '.14em', textTransform: 'uppercase', color: '#9F6D22' }}>
+                <div style={{ font: '800 10px var(--mk-body)', letterSpacing: '.14em', textTransform: 'uppercase', color: '#9F6D22' }}>
                   {pub?.templateName === 'wall-of-wishes' ? 'Mur Classique' : 'Mur'}
                 </div>
-                <div style={{ fontFamily: 'Fraunces', fontSize: '19px', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#161311' }}>
+                <div style={{ fontFamily: 'var(--mk-display)', fontSize: '19px', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#161311' }}>
                   {pub?.title || 'Mur sans titre'}
                 </div>
               </div>
-              <button onClick={() => setMobilePreviewOpen(true)} style={{ font: '600 11px Inter', color: '#1E2952', display: 'inline-flex', alignItems: 'center', gap: '4px', flex: '0 0 auto', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button onClick={() => setMobilePreviewOpen(true)} style={{ font: '700 12px var(--mk-body)', color: '#1E2952', display: 'inline-flex', alignItems: 'center', gap: '4px', flex: '0 0 auto', background: 'none', border: 'none', cursor: 'pointer' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2952" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                 Aperçu
               </button>
@@ -899,7 +915,7 @@ export default function WallSetup() {
                     onClick={() => setTab(t.id)} 
                     style={{ 
                       padding: '11px 14px', 
-                      font: active ? '700 13px Inter' : '600 13px Inter', 
+                      font: active ? '700 13px var(--mk-body)' : '600 13px var(--mk-body)', 
                       color: active ? '#1E2952' : '#8C8570', 
                       borderBottom: active ? '2px solid #1E2952' : '2px solid transparent',
                       cursor: 'pointer',
@@ -930,11 +946,11 @@ export default function WallSetup() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#161311', color: '#fff' }}>
                 
                 <div style={{ display: 'inline-flex', gap: 0, border: '1px solid rgba(255,255,255,0.2)', borderRadius: '11px', overflow: 'hidden' }}>
-                  <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#161311' : '#fff', padding: '7px 12px', font: '700 11px Inter', borderRight: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', border: 'none' }}>
+                  <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#161311' : '#fff', padding: '7px 12px', font: '700 12px var(--mk-body)', borderRight: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', border: 'none' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     Invités
                   </button>
-                  <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#fff', padding: '7px 12px', font: '700 11px Inter', cursor: 'pointer', border: 'none' }}>
+                  <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#fff', padding: '7px 12px', font: '700 12px var(--mk-body)', cursor: 'pointer', border: 'none' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
                     Destinataire
                   </button>
@@ -947,7 +963,7 @@ export default function WallSetup() {
               <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
                 <iframe 
                   id="wall-preview-iframe"
-                  src={previewRole === 'recipient' && pub?.customName ? `${VITE_SITE}/m/${pub.customName}?preview=1` : pub?.customName ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1` : ''} 
+                  src={buildPreviewSrc()}
                   style={{ width: '100%', height: '100%', border: 'none' }}
                   title="Aperçu du mur"
                 />
@@ -966,8 +982,8 @@ export default function WallSetup() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
               <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.gif" alt="" style={{ width: '26px', height: '26px' }} />
               <div>
-                <div style={{ fontFamily: 'var(--display)', fontSize: '19px', lineHeight: 1, color: '#161311' }}>{pub?.title || 'Mur sans titre'}</div>
-                <div style={{ font: '500 11px var(--body)', color: '#8C8570', marginTop: '3px' }}>
+                <div style={{ fontFamily: 'var(--mk-display)', fontSize: '19px', lineHeight: 1, color: '#161311' }}>{pub?.title || 'Mur sans titre'}</div>
+                <div style={{ font: '500 11px var(--mk-body)', color: '#8C8570', marginTop: '3px' }}>
                   Mur collectif · {wordCounts.ok} mot{wordCounts.ok > 1 ? 's' : ''}
                 </div>
               </div>
@@ -975,19 +991,19 @@ export default function WallSetup() {
             </div>
             <div style={{ flex: 1 }}></div>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', font: '700 12px Inter', color: '#7D7156', marginRight: '6px' }}>Aperçu :</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', font: '700 12px var(--mk-body)', color: '#7D7156', marginRight: '6px' }}>Aperçu :</div>
             <div style={{ display: 'inline-flex', gap: 0, border: '1.5px solid #E5DDC9', borderRadius: '11px', overflow: 'hidden', marginRight: '16px' }}>
-              <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#453E2E' : '#8C8570', padding: '9px 14px', font: '700 12.5px Inter', borderRight: '1.5px solid #E5DDC9', cursor: 'pointer', border: 'none' }}>
+              <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#453E2E' : '#8C8570', padding: '9px 14px', font: '700 12.5px var(--mk-body)', borderRight: '1.5px solid #E5DDC9', cursor: 'pointer', border: 'none' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                 Vu par les invités
               </button>
-              <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#8C8570', padding: '9px 14px', font: '700 12.5px Inter', cursor: 'pointer', border: 'none' }}>
+              <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#8C8570', padding: '9px 14px', font: '700 12.5px var(--mk-body)', cursor: 'pointer', border: 'none' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
                 Déballage destinataire
               </button>
             </div>
 
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', font: '600 12.5px var(--body)', color: saveStatus === 'saved' ? '#3FA98A' : '#E8B84B' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', font: '600 12.5px var(--mk-body)', color: saveStatus === 'saved' ? '#3FA98A' : '#E8B84B' }}>
               {saveStatus === 'saved' ? (
                 <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3FA98A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Enregistré</>
               ) : saveStatus === 'saving' ? (
@@ -998,12 +1014,12 @@ export default function WallSetup() {
             </span>
 
             {isPublished && siteUrl && (
-              <button onClick={() => navigate(`/ewish-admin/share/${id}`)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #E5DDC9', color: '#453E2E', borderRadius: '11px', padding: '9px 15px', font: '700 13px var(--body)', cursor: 'pointer' }}>
+              <button onClick={() => navigate(`/ewish-admin/share/${id}`)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #E5DDC9', color: '#453E2E', borderRadius: '11px', padding: '9px 15px', font: '700 13px var(--mk-body)', cursor: 'pointer' }}>
                 <Share2 size={15} /> Partager
               </button>
             )}
             {!isPublished && (
-              <button onClick={handlePublishClick} disabled={publishing} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#1E2952', color: '#fff', borderRadius: '11px', padding: '9px 17px', font: '700 13px var(--body)', boxShadow: '0 10px 22px -10px rgba(30,41,82,.55)', cursor: 'pointer', border: 'none' }}>
+              <button onClick={handlePublishClick} disabled={publishing} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#1E2952', color: '#fff', borderRadius: '11px', padding: '9px 17px', font: '700 13px var(--mk-body)', boxShadow: '0 10px 22px -10px rgba(30,41,82,.55)', cursor: 'pointer', border: 'none' }}>
                 {publishing ? <Loader2 size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>}
                 Publier
               </button>
@@ -1014,16 +1030,16 @@ export default function WallSetup() {
             
             {/* Left Sidebar */}
             <aside style={{ borderRight: '1px solid #F0EBDE', background: '#fff', display: 'flex', flexDirection: 'column', padding: '20px 14px 14px' }}>
-              <div style={{ font: '700 10.5px var(--body)', letterSpacing: '.12em', textTransform: 'uppercase', color: '#B0A88E', padding: '0 10px 12px' }}>Sections</div>
+              <div style={{ font: '700 10.5px var(--mk-body)', letterSpacing: '.12em', textTransform: 'uppercase', color: '#B0A88E', padding: '0 10px 12px' }}>Sections</div>
               <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 {tabs.map(t => {
                   const active = tab === t.id;
                   return (
-                    <div key={t.id} onClick={() => setTab(t.id)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 12px', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', background: active ? '#FDF7EA' : 'transparent', color: active ? '#9F6D22' : '#453E2E', font: active ? '700 13.5px var(--body)' : '600 13.5px var(--body)' }}>
+                    <div key={t.id} onClick={() => setTab(t.id)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 12px', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', background: active ? '#FDF7EA' : 'transparent', color: active ? '#9F6D22' : '#453E2E', font: active ? '700 13.5px var(--mk-body)' : '600 13.5px var(--mk-body)' }}>
                       {getIconForTab(t.id)}
                       {t.label}
                       <span style={{ flex: 1 }}></span>
-                      {t.count > 0 && <span style={{ font: '800 9px var(--body)', background: '#C13B3B', color: '#fff', padding: '2px 7px', borderRadius: '999px' }}>{t.count}</span>}
+                      {t.count > 0 && <span style={{ font: '800 9px var(--mk-body)', background: '#C13B3B', color: '#fff', padding: '2px 7px', borderRadius: '999px' }}>{t.count}</span>}
                       {active && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C6A15A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>}
                     </div>
                   );
@@ -1033,8 +1049,8 @@ export default function WallSetup() {
               <div style={{ background: '#F6F1E6', borderRadius: '14px', padding: '14px', display: 'flex', gap: '11px', alignItems: 'flex-start' }}>
                 <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a1/512.gif" alt="" style={{ width: '26px', height: '26px', flex: '0 0 auto' }} />
                 <div>
-                  <div style={{ font: '700 12px var(--body)', color: '#161311' }}>Astuce</div>
-                  <div style={{ font: '400 11.5px var(--body)', color: '#7D7156', lineHeight: 1.5, marginTop: '2px' }}>
+                  <div style={{ font: '700 12px var(--mk-body)', color: '#161311' }}>Astuce</div>
+                  <div style={{ font: '400 11.5px var(--mk-body)', color: '#7D7156', lineHeight: 1.5, marginTop: '2px' }}>
                     Tu peux modifier tous ces paramètres même après la publication.
                   </div>
                 </div>
@@ -1051,14 +1067,14 @@ export default function WallSetup() {
                 <div style={{ position: 'relative', background: '#EDE7DA', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ height: '48px', flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', borderBottom: '1px solid rgba(0,0,0,.05)' }}>
                     <div style={{ display: 'inline-flex', gap: '3px', background: '#fff', border: '1px solid #E5DDC9', borderRadius: '999px', padding: '3px' }}>
-                      <button onClick={() => setPreviewMode('desktop')} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 13px', borderRadius: '999px', background: previewMode === 'desktop' ? '#1E2952' : 'transparent', color: previewMode === 'desktop' ? '#fff' : '#7D7156', font: previewMode === 'desktop' ? '700 12px var(--body)' : '600 12px var(--body)' }}>
+                      <button onClick={() => setPreviewMode('desktop')} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 13px', borderRadius: '999px', background: previewMode === 'desktop' ? '#1E2952' : 'transparent', color: previewMode === 'desktop' ? '#fff' : '#7D7156', font: previewMode === 'desktop' ? '700 12px var(--mk-body)' : '600 12px var(--mk-body)' }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Bureau
                       </button>
-                      <button onClick={() => setPreviewMode('mobile')} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 13px', borderRadius: '999px', background: previewMode === 'mobile' ? '#1E2952' : 'transparent', color: previewMode === 'mobile' ? '#fff' : '#7D7156', font: previewMode === 'mobile' ? '700 12px var(--body)' : '600 12px var(--body)' }}>
+                      <button onClick={() => setPreviewMode('mobile')} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 13px', borderRadius: '999px', background: previewMode === 'mobile' ? '#1E2952' : 'transparent', color: previewMode === 'mobile' ? '#fff' : '#7D7156', font: previewMode === 'mobile' ? '700 12px var(--mk-body)' : '600 12px var(--mk-body)' }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Mobile
                       </button>
                     </div>
-                    <span style={{ font: '600 12px var(--body)', color: '#8C8570' }}>Aperçu en direct</span>
+                    <span style={{ font: '600 12px var(--mk-body)', color: '#8C8570' }}>Aperçu en direct</span>
                   </div>
                   
                   <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', padding: previewMode === 'desktop' ? '26px 30px 32px' : '26px 0', display: 'flex', justifyContent: 'center' }}>
@@ -1075,7 +1091,7 @@ export default function WallSetup() {
                     }}>
                       <iframe 
                         id="wall-preview-iframe"
-                        src={previewRole === 'recipient' && pub?.customName ? `${VITE_SITE}/m/${pub.customName}?preview=1` : pub?.customName ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1` : ''} 
+                        src={buildPreviewSrc()}
                         style={{ width: '100%', height: '100%', border: 'none' }}
                         title="Aperçu du mur"
                       />
@@ -1085,10 +1101,10 @@ export default function WallSetup() {
 
                 {/* Right Inspector */}
                 <aside className="mk-scroll" style={{ borderLeft: '1px solid #F0EBDE', background: '#fff', overflowY: 'auto', padding: '22px 20px 26px', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontFamily: 'var(--display)', fontSize: '20px', color: '#161311', marginBottom: '4px' }}>
+                  <div style={{ fontFamily: 'var(--mk-display)', fontSize: '20px', color: '#161311', marginBottom: '4px' }}>
                     {tabs.find(t => t.id === tab)?.label}
                   </div>
-                  <div style={{ font: '400 12.5px var(--body)', color: '#8C8570', marginBottom: '20px', lineHeight: 1.5 }}>
+                  <div style={{ font: '400 12.5px var(--mk-body)', color: '#8C8570', marginBottom: '20px', lineHeight: 1.5 }}>
                     {tab === 'style' && "L'aspect du mur et de son ouverture."}
                     {tab === 'settings' && "Les paramètres de base de ton mur."}
                     {tab === 'words' && "Gère les mots laissés par tes proches."}
