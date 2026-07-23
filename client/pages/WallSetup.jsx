@@ -259,7 +259,6 @@ function WallSettings({ pub, id, onSave }) {
             <Toggle on={isPrivate} onChange={setIsPrivate} />
           </div>
         </div>
-      </div>
     </div>
   );
 }
