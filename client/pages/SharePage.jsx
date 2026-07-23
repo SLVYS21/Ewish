@@ -213,7 +213,7 @@ function Toast({ message }) {
 }
 
 /* ─── Unlock view ─── */
-function UnlockView({ pub, onUnlocked }) {
+export function UnlockView({ pub, onUnlocked }) {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [unlocking, setUnlocking] = useState(false);

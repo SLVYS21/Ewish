@@ -1127,6 +1127,14 @@
       animation: mk-pop .4s both;
       text-align: left;
     }
+    .story-emoji {
+      position: absolute; width: 80px; height: 80px; z-index: 10;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); pointer-events: none;
+    }
+    .story-emoji.top-left { top: 24px; left: 24px; animation: mkFloat 6s ease-in-out infinite; }
+    .story-emoji.top-right { top: 24px; right: 24px; animation: mkFloat2 7s ease-in-out infinite; }
+    .story-emoji.bottom-left { bottom: 24px; left: 24px; animation: mkFloat2 6.5s ease-in-out infinite; }
+    .story-emoji.bottom-right { bottom: 24px; right: 24px; animation: mkFloat 7.5s ease-in-out infinite; }
     .story-card .who { display: flex; align-items: center; gap: 11px; }
     .story-card .who .av {
       width: 44px; height: 44px; border-radius: 50%;
@@ -1152,11 +1160,32 @@
       border-radius: 16px;
     }
     .story-card .s-gif img { width: 120px; height: 120px; }
-    .story-card .s-audio {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(255,255,255,.5); border-radius: 14px; padding: 12px;
+
+    .story-card .custom-audio {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,.6); padding: 8px 16px 8px 8px;
+      border-radius: 99px; cursor: pointer; margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-    .story-card .s-audio audio { width: 100%; }
+    .story-card .custom-audio .play-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--mk-rose); color: #fff; border: none;
+      display: grid; place-items: center; flex-shrink: 0; pointer-events: none;
+    }
+    .story-card .custom-audio .play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .story-card .custom-audio .ic-pause { display: none; }
+    .story-card .custom-audio.playing .ic-play { display: none; }
+    .story-card .custom-audio.playing .ic-pause { display: block; }
+    .story-card .custom-audio .waves { display: flex; align-items: center; gap: 3px; height: 24px; }
+    .story-card .custom-audio .waves span {
+      width: 3px; height: 4px; background: var(--mk-rose); border-radius: 3px; transition: height 0.1s;
+    }
+    .story-card .custom-audio.playing .waves span { animation: mkWave 0.8s ease-in-out infinite alternate; }
+    .story-card .custom-audio.playing .waves span:nth-child(2) { animation-delay: -0.2s; }
+    .story-card .custom-audio.playing .waves span:nth-child(3) { animation-delay: -0.4s; }
+    .story-card .custom-audio.playing .waves span:nth-child(4) { animation-delay: -0.6s; }
+    .story-card .custom-audio.playing .waves span:nth-child(5) { animation-delay: -0.8s; }
+    @keyframes mkWave { 0% { height: 4px; } 100% { height: 20px; } }
     .story-bars {
       position: absolute; top: 48px; left: 16px; right: 16px; z-index: 6;
       display: flex; gap: 5px;
@@ -1523,11 +1552,12 @@
 <script>
 /* ── CONFIG from server-injected window.__WW_DATA__ ── */
 var _d       = window.__WW_DATA__ || {};
-var PUB_ID   = _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
-var API_BASE = _d.apiBase || (PUB_ID ? location.origin : '');
+var _p       = window.__WW_PUBLIC__ || {};
+var PUB_ID   = _p.publicationId || _d.publicationId || new URLSearchParams(location.search).get('pub') || '';
+var API_BASE = _d.apiBase || _p.apiBase || (PUB_ID ? location.origin : '');
 
 /* ── STATE ── */
-var wishes        = [];
+var wishes        = window.__WW_WISHES__ || [];
 var myWishIds     = JSON.parse(localStorage.getItem('ww_my_ids') || '[]');
 var selectedColor = 0;
 var activeTab     = 'none';
@@ -1583,7 +1613,9 @@ function loadWishes() {
     });
     buildWall(true);
     startLiveUpdates();
-  }).catch(function() {});
+  }).catch(function() {
+    buildWall(true);
+  });
 }
 
 function uploadMedia(file) {
@@ -1652,6 +1684,12 @@ function createNoteEl(w, i, isNew) {
     '<div class="tx">' + escapeHtml(w.text) + '</div>' +
     mediaHtml;
 
+  note.addEventListener('click', function(e) {
+    if (e.target && e.target.tagName === 'AUDIO') return;
+    var storyIndex = parseInt(note.dataset.storyIndex, 10);
+    openStory(isNaN(storyIndex) ? 0 : storyIndex);
+  });
+
   return note;
 }
 
@@ -1673,6 +1711,98 @@ function initAdmin() {
     banner.classList.add('show');
     document.getElementById('admin-back').href = _d.adminReturnUrl || '#';
   }
+}
+
+var giftState = { amt: null, gave: false, paid: 0, wishId: null, guestName: '' };
+var GIFT_DEFAULT_AMTS = [2000, 5000, 10000, 20000];
+
+function fmtNum(n) { return Number(n).toLocaleString('fr-FR'); }
+
+function initCagnotteStrip() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || !cag.enabled) return;
+  var strip = document.getElementById('cagnotte-strip');
+  if (strip) strip.style.display = '';
+  var nameEl = document.getElementById('cag-name');
+  if (nameEl) nameEl.textContent = cag.name || 'Cadeau commun';
+  var col = cag.collected || 0, goal = cag.goal || 0, cnt = cag.contributors || 0;
+  var pct = goal > 0 ? Math.min(100, Math.round((col / goal) * 100)) : 0;
+  var statsEl = document.getElementById('cag-stats');
+  if (statsEl) {
+    statsEl.textContent =
+      (goal > 0 ? fmtNum(col) + ' / ' + fmtNum(goal) + ' FCFA' : fmtNum(col) + ' FCFA') +
+      (cnt > 0 ? ' · ' + cnt + ' participant' + (cnt !== 1 ? 's' : '') : '');
+  }
+  var pctEl = document.getElementById('cag-pct');
+  if (pctEl) pctEl.textContent = pct + '%';
+  var fillEl = document.getElementById('cag-fill');
+  if (fillEl) fillEl.style.width = pct + '%';
+}
+
+function initGiftSheet() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || (!cag.name && !cag.goal)) return;
+
+  var name = (cag.name || 'Cadeau commun');
+  var nameEl = document.getElementById('gift-sheet-name');
+  if (nameEl) nameEl.textContent = name;
+  
+  var descEl = document.getElementById('gift-sheet-desc');
+  if (descEl) {
+    descEl.textContent = 'Les proches se réunissent pour offrir ce beau cadeau. Tu veux participer ?';
+  }
+
+  var collected = cag.collected || 0;
+  var goal      = cag.goal || 0;
+  
+  var colEl = document.getElementById('gift-collected');
+  if (colEl) colEl.textContent = fmtNum(collected);
+  
+  var goalEl = document.getElementById('gift-goal-lbl');
+  if (goalEl) goalEl.textContent  = goal > 0 ? 'sur ' + fmtNum(goal) : '';
+  
+  var pct = goal > 0 ? Math.min(100, Math.round((collected / goal) * 100)) : 0;
+  
+  var fillEl = document.getElementById('gift-bar-fill');
+  if (fillEl) fillEl.style.width = pct + '%';
+  
+  var pctEl = document.getElementById('gift-pct');
+  if (pctEl) pctEl.textContent = pct + '%';
+  
+  var cntEl = document.getElementById('gift-contributors');
+  if (cntEl) {
+    cntEl.textContent = (cag.contributors || 0) + ' participant' + ((cag.contributors || 0) !== 1 ? 's' : '');
+  }
+
+  var grid = document.getElementById('gift-amt-grid');
+  if (grid) {
+    grid.innerHTML = '';
+    var amts = (cag.amountChoices && cag.amountChoices.length) ? cag.amountChoices : GIFT_DEFAULT_AMTS;
+    amts.forEach(function(a) {
+      var chip = document.createElement('button');
+      chip.className = 'gamt-chip';
+      chip.dataset.a = a;
+      chip.innerHTML = '<div class="gav">' + (a >= 1000 ? (a / 1000) + 'k' : a) + '</div><div class="gac">FCFA</div>';
+      chip.onclick = function() { giftPickAmt(a, chip); };
+      grid.appendChild(chip);
+    });
+  }
+}
+
+function setWishesEnabled(enabled) {
+  var addBtn = document.getElementById('add-btn');
+  var closedBanner = document.getElementById('wishes-closed');
+  if (enabled) {
+    if (addBtn) addBtn.classList.remove('hidden');
+    if (closedBanner) closedBanner.style.display = 'none';
+  } else {
+    if (addBtn) addBtn.classList.add('hidden');
+    if (closedBanner) closedBanner.style.display = 'inline-flex';
+  }
+}
+
+function startLiveUpdates() {
+  /* Stub to prevent ReferenceError on modern template. Live updates are handled via postMessage in preview. */
 }
 
 function initWall() {
@@ -1916,57 +2046,15 @@ function markIntroSeen() {
 }
 
 function showIntroSequence() {
-  var intro = document.getElementById('intro-overlay');
-  intro.classList.add('show');
-  var titleEl = document.getElementById('intro-title');
-  var nameEl = document.querySelector('[data-node="titleName"]');
-  var name = nameEl ? nameEl.textContent.trim() : '';
-  if (name && name !== 'Prénom') {
-    titleEl.innerHTML = 'Quelqu\'un a préparé<br>quelque chose <em>rien que pour toi, ' + escapeHtml(name) + '</em>';
-  }
-  setTimeout(function() {
-    intro.classList.remove('show');
-    showEnvelope();
-  }, 4200);
-}
-
-function skipIntro() {
-  document.getElementById('intro-overlay').classList.remove('show');
   markIntroSeen();
-  showEnvelope();
-}
-
-function showEnvelope() {
-  var env = document.getElementById('env-overlay');
-  env.classList.add('show');
-  env.classList.remove('pop');
-  var nameEl = document.querySelector('[data-node="titleName"]');
-  var name = nameEl ? nameEl.textContent.trim() : '';
-  var titleEl = document.getElementById('env-title');
-  var count = (window.wishes && window.wishes.length) || (typeof wishes !== 'undefined' && wishes.length) || 0;
-  var placeholder = name === 'Prénom';
-  var who = (name && !placeholder) ? name : 'toi';
-  if (count > 0) {
-    titleEl.innerHTML = escapeHtml(who) + ', ' + count + ' proche' + (count > 1 ? 's ont' : ' a') + '<br>préparé quelque chose pour toi';
-  } else if (name && !placeholder) {
-    titleEl.innerHTML = escapeHtml(name) + ', ton mur<br>de mots est prêt';
-  }
-}
-
-function openWallFromEnvelope() {
-  var env = document.getElementById('env-overlay');
-  if (env && !env.classList.contains('pop')) {
-    /* Tap-to-open: pop the gift, flash white, then unmount. */
-    env.classList.add('pop');
-    setTimeout(function() { env.classList.remove('show'); env.classList.remove('pop'); }, 700);
-  } else if (env) {
-    env.classList.remove('show');
-  }
-  markIntroSeen();
-  runCascade(7500);
   var header = document.getElementById('wall-header');
-  if (header) { header.classList.remove('reveal'); void header.offsetWidth; header.classList.add('reveal'); }
+  if (header) header.classList.add('reveal');
+  setTimeout(function() { runCascade(4500); }, 350);
 }
+
+function skipIntro() { showIntroSequence(); }
+function showEnvelope() { showIntroSequence(); }
+function openWallFromEnvelope() { showIntroSequence(); }
 
 var CASCADE_EMOJIS = [ ['1f388','ðŸŽˆ'], ['1f389','ðŸŽ‰'], ['1f38a','ðŸŽŠ'], ['1f381','ðŸŽ'], ['2728','âœ¨'] ];
 var CASCADE_COLORS = ['#E11D48','#8A63D2','#3FA98A','#E5A93B','#FF9F7A','#5B95E0'];
@@ -2090,9 +2178,19 @@ function runCascade(dur) {
   }, 50);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+window.toggleCustomAudio = function(el) {
+  var audio = el.querySelector('audio');
+  if (audio.paused) {
+    document.querySelectorAll('.custom-audio audio').forEach(function(a) { if (a !== audio) a.pause(); });
+    audio.play();
+  } else {
+    audio.pause();
+  }
+};
+
+/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
    STORY VIEWER
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
 function openStory(idx) {
   if (!wishes.length) return;
   storyIdx = Math.max(0, Math.min(wishes.length - 1, idx || 0));
@@ -2123,6 +2221,9 @@ function buildStory() {
   var bars = document.getElementById('story-bars');
   track.innerHTML = ''; bars.innerHTML = '';
 
+  var EMOJIS = ['1f389', '2728', '1f388', '1f973', '1f381', '1f382', '1f496', '1f4ab', '1f320'];
+  var bgKeys = window.__WW_ANIMATED_BGS__ ? Object.keys(window.__WW_ANIMATED_BGS__) : [];
+
   wishes.forEach(function(w, i) {
     var seed = hashStr(w._id || (w.name + '|' + w.text + '|' + w.ts));
     var colorIdx = (w.color != null ? w.color : (seed % 6)) % 6;
@@ -2130,10 +2231,19 @@ function buildStory() {
     var ink = TONE_INK[colorIdx];
     var avBg = AVATAR_BG[colorIdx];
 
+    var bgKey = bgKeys.length ? bgKeys[seed % bgKeys.length] : null;
+    var animBg = bgKey ? window.__WW_ANIMATED_BGS__[bgKey] : '<div class="bgblur" style="background:' + avBg + '"></div>';
+    animBg = animBg.replace('position: fixed;', 'position: absolute;');
+
+    var e1 = EMOJIS[seed % EMOJIS.length];
+    var POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    var pos = POSITIONS[seed % POSITIONS.length];
+    var emojisHtml = '<img class="story-emoji ' + pos + '" src="https://fonts.gstatic.com/s/e/notoemoji/latest/' + e1 + '/512.gif" alt="">';
+
     var slide = document.createElement('div');
     slide.className = 'story-slide';
     slide.innerHTML =
-      '<div class="bgblur" style="background:' + avBg + '"></div>' +
+      animBg + emojisHtml +
       '<div class="story-card" style="background:' + bg + '">' +
         '<div class="who">' +
           '<span class="av" style="background:' + avBg + '">' + escapeHtml(getInitial(w.name)) + '</span>' +
@@ -2172,7 +2282,11 @@ function buildStoryMedia(w) {
   }
   if (w.mediaType === 'audio') {
     if (w.audioUrl) {
-      return '<div class="s-media"><div class="s-audio"><audio src="' + escapeHtml(w.audioUrl) + '" controls preload="none"></audio></div></div>';
+      return '<div class="custom-audio" onclick="toggleCustomAudio(this)">' +
+             '<audio src="' + escapeHtml(w.audioUrl) + '" preload="none" onplay="this.parentElement.classList.add(\'playing\')" onpause="this.parentElement.classList.remove(\'playing\')" onended="this.parentElement.classList.remove(\'playing\')"></audio>' +
+             '<button class="play-btn"><svg class="ic-play" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg><svg class="ic-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>' +
+             '<div class="waves"><span></span><span></span><span></span><span></span><span></span></div>' +
+             '</div>';
     }
     return '<div class="s-media"><div class="s-audio s-audio-chip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></svg><span>Vocal · ' + escapeHtml(w.audioDur || '0:00') + '</span></div></div>';
   }
@@ -2209,7 +2323,9 @@ var TITLE_PREFIXES = {
 function applyTitle(d) {
   var prefixEl = document.querySelector('[data-node="titlePrefix"]');
   var nameEl   = document.querySelector('[data-node="titleName"]');
-  if (nameEl && d.titleName) nameEl.textContent = d.titleName;
+  var m = window.__WW_META__ || {};
+  var title = d.titleName || m.title;
+  if (nameEl && title) nameEl.textContent = title;
 
   var explicit = (d.titlePrefix || '').trim();
   if (prefixEl) {

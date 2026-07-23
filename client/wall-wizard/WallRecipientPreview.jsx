@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Gift, ArrowRight, Heart, MessageCircle } from 'lucide-react';
 import Kado from '../components/Kado/Kado';
 import { getEvent, getBackground } from './constants';
+import AnimatedBackground from '../wall/AnimatedBackground';
 
 const DEMO_WORDS = [
   { name: 'Aïcha',    message: "Que cette nouvelle année t'apporte tout ce que tu mérites. Je pense fort à toi." },
@@ -55,6 +56,7 @@ export default function WallRecipientPreview({
         overflow: 'hidden',
       }}
     >
+      <AnimatedBackground backgroundId={backgroundId} />
       {/* ── Intro ── */}
       {phase === 'intro' && (
         <div style={{

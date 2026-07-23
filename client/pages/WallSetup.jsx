@@ -15,6 +15,7 @@ import NotoEmoji from '../components/NotoEmoji';
 import WallStyle from '../components/WallStyle';
 import WallPublishModal from '../components/WallPublishModal';
 import { getEvent } from '../wall-wizard/constants';
+import WallShareTab from './WallShareTab';
 
 const TEMPLATE_LABELS = {
   'wall-of-wishes':        'Mur Classique',
@@ -30,7 +31,7 @@ function Toggle({ on, onChange, disabled }) {
       onClick={() => onChange(!on)}
       style={{
         width: 44, height: 26, borderRadius: 99, flexShrink: 0,
-        background: on ? 'var(--mk-accent)' : 'var(--mk-line-strong)',
+        background: on ? '#1E1A2D' : '#E5E0E8',
         border: 'none', cursor: disabled ? 'not-allowed' : 'pointer',
         position: 'relative', transition: 'background .2s', padding: 0,
       }}
@@ -48,7 +49,7 @@ function IconBubble({ children, bg, color }) {
   return (
     <div style={{
       width: 36, height: 36, borderRadius: 'var(--mk-r-xs)', flexShrink: 0,
-      background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'transparent', color: '#1E1A2D', display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       {children}
     </div>
@@ -91,14 +92,6 @@ function WallSettings({ pub, id, onSave }) {
   const [isPrivate, setIsPrivate]           = useState(cc.isPrivate || d.isPrivate || false);
   const [accessCode, setAccessCode]         = useState(cc.accessCode || d.accessCode || '');
 
-  const [cagnotteEnabled, setCagnotteEnabled]         = useState(cc.enabled || false);
-  const [collectTitle, setCollectTitle]               = useState(cc.collectTitle || '');
-  const [cagnotteDescription, setCagnotteDescription] = useState(cc.description || '');
-  const [cagnotteGoal, setCagnotteGoal]               = useState(cc.goal || 250000);
-  const [cagnotteDeadline, setCagnotteDeadline]       = useState(cc.deadline ? cc.deadline.slice(0, 10) : '');
-  const [minContrib, setMinContrib]                   = useState(cc.minContribution || 0);
-  const [maxContrib, setMaxContrib]                   = useState(cc.maxContribution || 0);
-
   const inited = useRef(false);
 
   /* Auto-save info — wallTitle = destinataire ; on rebâtit pub.title depuis l'événement,
@@ -131,7 +124,7 @@ function WallSettings({ pub, id, onSave }) {
     }, 800);
   }, [wallTitle, phrase, bannerImage]);
 
-  /* Auto-save cagnotte config */
+  /* Auto-save basic config */
   const ccTimer = useRef(null);
   useEffect(() => {
     if (!inited.current) return;
@@ -142,18 +135,15 @@ function WallSettings({ pub, id, onSave }) {
       try {
         await updatePublication(id, {
           cagnotteConfig: {
-            enabled: cagnotteEnabled, description: cagnotteDescription,
-            goal: cagnotteGoal, deadline: cagnotteDeadline || null,
-            collectTitle, wishesEnabled: reception, requireModeration: moderation,
-            isPrivate, accessCode, minContribution: minContrib, maxContribution: maxContrib,
+            ...pub.cagnotteConfig,
+            wishesEnabled: reception, requireModeration: moderation,
+            isPrivate, accessCode,
           },
         });
         onSave('saved');
       } catch { onSave('unsaved'); }
     }, 800);
-  }, [reception, moderation, isPrivate, accessCode, cagnotteEnabled,
-      cagnotteGoal, cagnotteDescription, cagnotteDeadline,
-      minContrib, maxContrib, collectTitle]);
+  }, [reception, moderation, isPrivate, accessCode]);
 
   useEffect(() => { inited.current = true; }, []);
 
@@ -168,12 +158,8 @@ function WallSettings({ pub, id, onSave }) {
   };
 
   return (
-    <div className="wall-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--d-gap)', alignItems: 'start' }}>
-
-      {/* Left column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
-
-        {/* Infos card */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
+      {/* Infos card */}
         <div className="card" style={{ padding: '20px 22px' }}>
           <div className="section-label" style={{ marginBottom: 14 }}>Les infos du mur</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
@@ -273,63 +259,6 @@ function WallSettings({ pub, id, onSave }) {
             <Toggle on={isPrivate} onChange={setIsPrivate} />
           </div>
         </div>
-      </div>
-
-      {/* Right column: cagnotte */}
-      <div className="card" style={{ padding: '20px 22px' }}>
-        <div className="section-label" style={{ marginBottom: 4 }}>La cagnotte</div>
-
-        <div className="setting-row" style={{ paddingTop: 8 }}>
-          <IconBubble bg="var(--mk-accent-pale)" color="var(--mk-accent)"><Gift size={16} /></IconBubble>
-          <div className="body">
-            <div className="t">Activer la cagnotte</div>
-            <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible  jamais les montants individuels.</div>
-          </div>
-          <Toggle on={cagnotteEnabled} onChange={setCagnotteEnabled} />
-        </div>
-
-        {cagnotteEnabled && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--mk-line)' }}>
-            <div className="field">
-              <label className="field-label">Titre de la collecte</label>
-              <input className="mk-input" value={collectTitle} placeholder="Le vélo de Marc"
-                onChange={e => setCollectTitle(e.target.value)} />
-            </div>
-            <div className="field">
-              <label className="field-label">Pour quoi ?</label>
-              <textarea className="mk-textarea" rows={2} value={cagnotteDescription}
-                placeholder="Explique l'objectif en une phrase."
-                onChange={e => setCagnotteDescription(e.target.value)} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
-              <div className="field">
-                <label className="field-label">Objectif (FCFA)</label>
-                <input className="mk-input" type="number" value={cagnotteGoal} placeholder="250 000"
-                  onChange={e => setCagnotteGoal(Number(e.target.value))} min={0} step={1000} />
-              </div>
-              <div className="field">
-                <label className="field-label">Date limite</label>
-                <input className="mk-input" type="date" value={cagnotteDeadline}
-                  onChange={e => setCagnotteDeadline(e.target.value)} />
-              </div>
-              <div className="field">
-                <label className="field-label">Participation min.</label>
-                <input className="mk-input" type="number" value={minContrib} placeholder="500"
-                  onChange={e => setMinContrib(Number(e.target.value))} min={0} step={500} />
-              </div>
-              <div className="field">
-                <label className="field-label">Participation max.</label>
-                <div className="field-hint" style={{ marginBottom: 4 }}>0 = illimité</div>
-                <input className="mk-input" type="number" value={maxContrib} placeholder="0"
-                  onChange={e => setMaxContrib(Number(e.target.value))} min={0} step={1000} />
-              </div>
-            </div>
-            <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', display: 'flex', gap: 7, alignItems: 'flex-start', lineHeight: 1.5 }}>
-              <Shield size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-              Encaissement sécurisé par Kkiapay. Retrait des fonds après vérification d'identité (KYC).
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -548,7 +477,7 @@ function WallWords({ id, moderation: moderationEnabled, isPaid, onRequestPay }) 
 /* ─────────────────────────────────────────────────────────── */
 /* Cagnotte tab                                                */
 /* ─────────────────────────────────────────────────────────── */
-function WallCagnotte({ pub, id }) {
+function WallCagnotte({ pub, id, onSave }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [contributions, setContributions] = useState([]);
@@ -557,8 +486,41 @@ function WallCagnotte({ pub, id }) {
 
   const cc = pub.cagnotteConfig || {};
 
+  const [cagnotteEnabled, setCagnotteEnabled]         = useState(cc.enabled || false);
+  const [collectTitle, setCollectTitle]               = useState(cc.collectTitle || '');
+  const [cagnotteDescription, setCagnotteDescription] = useState(cc.description || '');
+  const [cagnotteGoal, setCagnotteGoal]               = useState(cc.goal || 250000);
+  const [cagnotteDeadline, setCagnotteDeadline]       = useState(cc.deadline ? cc.deadline.slice(0, 10) : '');
+  const [minContrib, setMinContrib]                   = useState(cc.minContribution || 0);
+  const [maxContrib, setMaxContrib]                   = useState(cc.maxContribution || 0);
+
+  const inited = useRef(false);
+  const ccTimer = useRef(null);
+
   useEffect(() => {
-    if (!cc.enabled) { setLoading(false); return; }
+    if (!inited.current) return;
+    if (onSave) onSave('unsaved');
+    clearTimeout(ccTimer.current);
+    ccTimer.current = setTimeout(async () => {
+      if (onSave) onSave('saving');
+      try {
+        await updatePublication(id, {
+          cagnotteConfig: {
+            ...pub.cagnotteConfig,
+            enabled: cagnotteEnabled, description: cagnotteDescription,
+            goal: cagnotteGoal, deadline: cagnotteDeadline || null,
+            collectTitle, minContribution: minContrib, maxContribution: maxContrib,
+          },
+        });
+        if (onSave) onSave('saved');
+      } catch { if (onSave) onSave('unsaved'); }
+    }, 800);
+  }, [cagnotteEnabled, cagnotteGoal, cagnotteDescription, cagnotteDeadline, minContrib, maxContrib, collectTitle]);
+
+  useEffect(() => { inited.current = true; }, []);
+
+  useEffect(() => {
+    if (!cagnotteEnabled) { setLoading(false); return; }
     Promise.all([getContributions(id), getContributionStats(id)])
       .then(([cRes, sRes]) => {
         setContributions(cRes.data || []);
@@ -566,13 +528,26 @@ function WallCagnotte({ pub, id }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, cc.enabled]);
+  }, [id, cagnotteEnabled]);
 
-  if (!cc.enabled) {
+  if (!cagnotteEnabled) {
     return (
-      <div className="empty-state card" style={{ padding: '40px 20px' }}>
-        <div className="e-title">La cagnotte est désactivée</div>
-        <p style={{ fontSize: 13 }}>Active-la dans l'onglet Réglages pour collecter des fonds avec Kkiapay.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
+        <div className="card" style={{ padding: '20px 22px' }}>
+          <div className="section-label" style={{ marginBottom: 4 }}>La cagnotte</div>
+          <div className="setting-row" style={{ paddingTop: 8 }}>
+            <IconBubble bg="var(--mk-accent-pale)" color="var(--mk-accent)"><Gift size={16} /></IconBubble>
+            <div className="body">
+              <div className="t">Activer la cagnotte</div>
+              <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible  jamais les montants individuels.</div>
+            </div>
+            <Toggle on={cagnotteEnabled} onChange={setCagnotteEnabled} />
+          </div>
+        </div>
+        <div className="empty-state card" style={{ padding: '40px 20px' }}>
+          <div className="e-title">La cagnotte est désactivée</div>
+          <p style={{ fontSize: 13 }}>Active-la ci-dessus pour collecter des fonds avec Kkiapay.</p>
+        </div>
       </div>
     );
   }
@@ -589,7 +564,62 @@ function WallCagnotte({ pub, id }) {
   const isKycVerified = user?.kyc === 'verified';
 
   return (
-    <div className="wall-2col" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 'var(--d-gap)', alignItems: 'start' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
+
+      <div className="card" style={{ padding: '20px 22px' }}>
+        <div className="section-label" style={{ marginBottom: 4 }}>La cagnotte</div>
+        <div className="setting-row" style={{ paddingTop: 8 }}>
+          <IconBubble bg="var(--mk-accent-pale)" color="var(--mk-accent)"><Gift size={16} /></IconBubble>
+          <div className="body">
+            <div className="t">Activer la cagnotte</div>
+            <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible  jamais les montants individuels.</div>
+          </div>
+          <Toggle on={cagnotteEnabled} onChange={setCagnotteEnabled} />
+        </div>
+
+        {cagnotteEnabled && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--mk-line)' }}>
+            <div className="field">
+              <label className="field-label">Titre de la collecte</label>
+              <input className="mk-input" value={collectTitle} placeholder="Le vélo de Marc"
+                onChange={e => setCollectTitle(e.target.value)} />
+            </div>
+            <div className="field">
+              <label className="field-label">Pour quoi ?</label>
+              <textarea className="mk-textarea" rows={2} value={cagnotteDescription}
+                placeholder="Explique l'objectif en une phrase."
+                onChange={e => setCagnotteDescription(e.target.value)} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
+              <div className="field">
+                <label className="field-label">Objectif (FCFA)</label>
+                <input className="mk-input" type="number" value={cagnotteGoal} placeholder="250 000"
+                  onChange={e => setCagnotteGoal(Number(e.target.value))} min={0} step={1000} />
+              </div>
+              <div className="field">
+                <label className="field-label">Date limite</label>
+                <input className="mk-input" type="date" value={cagnotteDeadline}
+                  onChange={e => setCagnotteDeadline(e.target.value)} />
+              </div>
+              <div className="field">
+                <label className="field-label">Participation min.</label>
+                <input className="mk-input" type="number" value={minContrib} placeholder="500"
+                  onChange={e => setMinContrib(Number(e.target.value))} min={0} step={500} />
+              </div>
+              <div className="field">
+                <label className="field-label">Participation max.</label>
+                <div className="field-hint" style={{ marginBottom: 4 }}>0 = illimité</div>
+                <input className="mk-input" type="number" value={maxContrib} placeholder="0"
+                  onChange={e => setMaxContrib(Number(e.target.value))} min={0} step={1000} />
+              </div>
+            </div>
+            <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', display: 'flex', gap: 7, alignItems: 'flex-start', lineHeight: 1.5 }}>
+              <Shield size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+              Encaissement sécurisé par Kkiapay. Retrait des fonds après vérification d'identité (KYC).
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Progress + transactions */}
       <div className="card" style={{ padding: '20px 22px' }}>
@@ -651,7 +681,7 @@ function WallCagnotte({ pub, id }) {
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
             <button
-              className="btn btn-primary"
+              className="btn btn-ink"
               onClick={() => isKycVerified ? null : navigate('/ewish-admin/profile')}
             >
               <Gift size={15} /> Récupérer les fonds
@@ -688,6 +718,10 @@ export default function WallSetup() {
   const [toast, setToast]       = useState('');
   const [tab, setTab]           = useState('settings');
   const [wordCounts, setWordCounts] = useState({ pending: 0, ok: 0, locked: 0 });
+  const [previewMode, setPreviewMode] = useState('desktop');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  const [previewRole, setPreviewRole] = useState('guest');
 
   const pubRef = useRef(null);
 
@@ -735,6 +769,12 @@ export default function WallSetup() {
     }).catch(() => {});
   }, [id]);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handlePublishClick = () => {
     setShowPublishModal(true);
   };
@@ -772,6 +812,7 @@ export default function WallSetup() {
     { id: 'style',    label: 'Style' },
     { id: 'words',    label: 'Mots', count: wordCounts.pending + wordCounts.locked },
     { id: 'cagnotte', label: 'Cagnotte' },
+    { id: 'share',    label: 'Partager' },
   ];
 
   const styleTouched = !!(
@@ -781,105 +822,287 @@ export default function WallSetup() {
     pub?.style?.styleCustomBgUrl
   );
 
-  return (
-    <div className="page wall-setup">
+  const getIconForTab = (tid) => {
+    if (tid === 'style') return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="14" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="14.5" r="2.5"/><path d="M12 22a10 10 0 1 1 0-20"/></svg>;
+    if (tid === 'settings') return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>;
+    if (tid === 'words') return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>;
+    if (tid === 'cagnotte') return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>;
+    if (tid === 'share') return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>;
+    return null;
+  };
 
-      {/* Compact page header — 1-line title + progress */}
-      <div className="wall-head">
-        <div className="wall-head-row">
-          <button className="wall-head-back" onClick={() => navigate(-1)} aria-label="Retour">
-            <ArrowLeft size={16} />
-          </button>
-          <div className="wall-head-title-wrap">
-            <div className="wall-head-eyebrow">
-              {TEMPLATE_LABELS[pub?.templateName] || 'Mur'}
+  const renderActiveTabContent = () => (
+    <div className="mk-anim-fade-in" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+      {tab === 'style' && (
+        <WallStyle
+          pub={pub}
+          id={id}
+          onSave={setSaveStatus}
+          onPubUpdated={(next) => {
+            if (next) { pubRef.current = next; setPub(next); }
+          }}
+        />
+      )}
+      {tab === 'settings' && (
+        <>
+          <WallSettings pub={pub} id={id} onSave={setSaveStatus} />
+          {pubError && (
+            <div style={{ marginTop: 12, color: 'var(--mk-accent)', fontSize: 13, fontWeight: 600, padding: '10px 14px', background: 'var(--mk-accent-pale)', borderRadius: 'var(--mk-r-xs)' }}>
+              {pubError}
             </div>
-            <h1 className="wall-head-title">{pub?.title || 'Mur sans titre'}</h1>
+          )}
+        </>
+      )}
+      {tab === 'words' && (
+        <WallWords
+          id={id}
+          moderation={moderation}
+          isPaid={pub?.isPaid}
+          onRequestPay={handlePublishClick}
+        />
+      )}
+      {tab === 'cagnotte' && <WallCagnotte pub={pub} id={id} onSave={setSaveStatus} />}
+    </div>
+  );
+
+  return (
+    <div className="wall-editor-root" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', background: isMobile ? '#FAF7F0' : '#fff', overflow: 'hidden' }}>
+
+      {/* Mobile Layout */}
+      {isMobile ? (
+        <>
+          {/* Mobile Header */}
+          <div style={{ flex: '0 0 auto', background: '#fff', borderBottom: '1px solid #F0EBDE', padding: '16px 18px 0', paddingTop: 'env(safe-area-inset-top, 16px)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button onClick={() => navigate('/ewish-admin/ewish')} style={{ width: '36px', height: '36px', borderRadius: '11px', background: '#FAF7F0', border: '1px solid #ECE6D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', cursor: 'pointer' }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#453E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+              </button>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ font: '600 10px Inter', letterSpacing: '.14em', textTransform: 'uppercase', color: '#9F6D22' }}>
+                  {pub?.templateName === 'wall-of-wishes' ? 'Mur Classique' : 'Mur'}
+                </div>
+                <div style={{ fontFamily: 'Fraunces', fontSize: '19px', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#161311' }}>
+                  {pub?.title || 'Mur sans titre'}
+                </div>
+              </div>
+              <button onClick={() => setMobilePreviewOpen(true)} style={{ font: '600 11px Inter', color: '#1E2952', display: 'inline-flex', alignItems: 'center', gap: '4px', flex: '0 0 auto', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2952" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                Aperçu
+              </button>
+            </div>
+            
+            <div className="mk-scroll" style={{ display: 'flex', gap: '4px', marginTop: '14px', overflowX: 'auto', paddingBottom: '2px', scrollbarWidth: 'none' }}>
+              {tabs.map(t => {
+                const active = tab === t.id;
+                return (
+                  <span 
+                    key={t.id} 
+                    onClick={() => setTab(t.id)} 
+                    style={{ 
+                      padding: '11px 14px', 
+                      font: active ? '700 13px Inter' : '600 13px Inter', 
+                      color: active ? '#1E2952' : '#8C8570', 
+                      borderBottom: active ? '2px solid #1E2952' : '2px solid transparent',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {t.label}
+                  </span>
+                );
+              })}
+            </div>
           </div>
-          <div className="wall-head-actions">
-            <span className="wall-head-save" aria-live="polite">
-              {saveStatus === 'saving'  && <><Loader2 size={12} style={{ animation: 'mk-spin .75s linear infinite' }} /> Sauvegarde…</>}
-              {saveStatus === 'saved'   && <><Check size={12} color="var(--mk-mint)" /> Sauvegardé</>}
-              {saveStatus === 'unsaved' && <span style={{ color: 'var(--mk-accent)' }}>Non sauvegardé</span>}
+
+          {/* Mobile Content */}
+          {tab === 'share' ? (
+            <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', background: '#fff' }}>
+              <WallShareTab pub={pub} setPub={(fn) => { const next = fn(pub); setPub(next); pubRef.current = next; }} />
+            </div>
+          ) : (
+            <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', padding: '18px', display: 'flex', flexDirection: 'column', gap: '20px', background: '#FAF7F0' }}>
+              {renderActiveTabContent()}
+            </div>
+          )}
+
+          {/* Mobile Preview Modal */}
+          {mobilePreviewOpen && (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#161311', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#161311', color: '#fff' }}>
+                
+                <div style={{ display: 'inline-flex', gap: 0, border: '1px solid rgba(255,255,255,0.2)', borderRadius: '11px', overflow: 'hidden' }}>
+                  <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#161311' : '#fff', padding: '7px 12px', font: '700 11px Inter', borderRight: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', border: 'none' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    Invités
+                  </button>
+                  <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#fff', padding: '7px 12px', font: '700 11px Inter', cursor: 'pointer', border: 'none' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                    Destinataire
+                  </button>
+                </div>
+
+                <button onClick={() => setMobilePreviewOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '4px' }}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                <iframe 
+                  id="wall-preview-iframe"
+                  src={previewRole === 'recipient' && pub?.customName ? `${VITE_SITE}/m/${pub.customName}?preview=1` : pub?.customName ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1` : ''} 
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  title="Aperçu du mur"
+                />
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        /* Desktop Layout */
+        <>
+          {/* Header */}
+          <div style={{ height: '64px', borderBottom: '1px solid #F0EBDE', background: '#fff', display: 'flex', alignItems: 'center', gap: '16px', padding: '0 22px', flexShrink: 0 }}>
+            <button onClick={() => navigate('/ewish-admin/ewish')} style={{ width: '34px', height: '34px', borderRadius: '10px', border: '1px solid #E5DDC9', display: 'grid', placeItems: 'center', flex: '0 0 auto', background: '#fff', cursor: 'pointer' }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#453E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+              <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.gif" alt="" style={{ width: '26px', height: '26px' }} />
+              <div>
+                <div style={{ fontFamily: 'var(--display)', fontSize: '19px', lineHeight: 1, color: '#161311' }}>{pub?.title || 'Mur sans titre'}</div>
+                <div style={{ font: '500 11px var(--body)', color: '#8C8570', marginTop: '3px' }}>
+                  Mur collectif · {wordCounts.ok} mot{wordCounts.ok > 1 ? 's' : ''}
+                </div>
+              </div>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B0A88E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '2px' }}><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </div>
+            <div style={{ flex: 1 }}></div>
+
+            <div style={{ display: 'inline-flex', alignItems: 'center', font: '700 12px Inter', color: '#7D7156', marginRight: '6px' }}>Aperçu :</div>
+            <div style={{ display: 'inline-flex', gap: 0, border: '1.5px solid #E5DDC9', borderRadius: '11px', overflow: 'hidden', marginRight: '16px' }}>
+              <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#453E2E' : '#8C8570', padding: '9px 14px', font: '700 12.5px Inter', borderRight: '1.5px solid #E5DDC9', cursor: 'pointer', border: 'none' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Vu par les invités
+              </button>
+              <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#8C8570', padding: '9px 14px', font: '700 12.5px Inter', cursor: 'pointer', border: 'none' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                Déballage destinataire
+              </button>
+            </div>
+
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', font: '600 12.5px var(--body)', color: saveStatus === 'saved' ? '#3FA98A' : '#E8B84B' }}>
+              {saveStatus === 'saved' ? (
+                <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3FA98A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Enregistré</>
+              ) : saveStatus === 'saving' ? (
+                <><Loader2 size={13} style={{ animation: 'mk-spin .75s linear infinite' }} />Sauvegarde…</>
+              ) : (
+                'Non sauvegardé'
+              )}
             </span>
+
             {isPublished && siteUrl && (
-              <button className="btn btn-primary btn-sm" onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-                <Share2 size={13} /> Partager
+              <button onClick={() => navigate(`/ewish-admin/share/${id}`)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #E5DDC9', color: '#453E2E', borderRadius: '11px', padding: '9px 15px', font: '700 13px var(--body)', cursor: 'pointer' }}>
+                <Share2 size={15} /> Partager
               </button>
             )}
             {!isPublished && (
-              <button className="btn btn-primary btn-sm" onClick={handlePublishClick} disabled={publishing}>
-                {publishing ? <><Loader2 size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> …</> : 'Publier'}
+              <button onClick={handlePublishClick} disabled={publishing} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#1E2952', color: '#fff', borderRadius: '11px', padding: '9px 17px', font: '700 13px var(--body)', boxShadow: '0 10px 22px -10px rgba(30,41,82,.55)', cursor: 'pointer', border: 'none' }}>
+                {publishing ? <Loader2 size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>}
+                Publier
               </button>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="wall-tabs">
-        {tabs.map(t => (
-          <button
-            key={t.id}
-            className={`wall-tab${tab === t.id ? ' on' : ''}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-            {t.count > 0 && <span className="count">{t.count}</span>}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab content — key={tab} déclenche l'animation à chaque switch */}
-      <div key={tab} className="mk-anim-fade-in">
-        {tab === 'style' && (
-          <WallStyle
-            pub={pub}
-            id={id}
-            onSave={setSaveStatus}
-            onPubUpdated={(next) => {
-              if (next) { pubRef.current = next; setPub(next); }
-            }}
-          />
-        )}
-        {tab === 'settings' && (
-          <>
-            <WallSettings pub={pub} id={id} onSave={setSaveStatus} />
-            {pubError && (
-              <div style={{ marginTop: 12, color: 'var(--mk-accent)', fontSize: 13, fontWeight: 600, padding: '10px 14px', background: 'var(--mk-accent-pale)', borderRadius: 'var(--mk-r-xs)' }}>
-                {pubError}
+          <div style={{ display: 'grid', gridTemplateColumns: '236px 1fr 340px', flex: 1, overflow: 'hidden' }}>
+            
+            {/* Left Sidebar */}
+            <aside style={{ borderRight: '1px solid #F0EBDE', background: '#fff', display: 'flex', flexDirection: 'column', padding: '20px 14px 14px' }}>
+              <div style={{ font: '700 10.5px var(--body)', letterSpacing: '.12em', textTransform: 'uppercase', color: '#B0A88E', padding: '0 10px 12px' }}>Sections</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                {tabs.map(t => {
+                  const active = tab === t.id;
+                  return (
+                    <div key={t.id} onClick={() => setTab(t.id)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 12px', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', background: active ? '#FDF7EA' : 'transparent', color: active ? '#9F6D22' : '#453E2E', font: active ? '700 13.5px var(--body)' : '600 13.5px var(--body)' }}>
+                      {getIconForTab(t.id)}
+                      {t.label}
+                      <span style={{ flex: 1 }}></span>
+                      {t.count > 0 && <span style={{ font: '800 9px var(--body)', background: '#C13B3B', color: '#fff', padding: '2px 7px', borderRadius: '999px' }}>{t.count}</span>}
+                      {active && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C6A15A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>}
+                    </div>
+                  );
+                })}
+              </nav>
+              <div style={{ flex: 1 }}></div>
+              <div style={{ background: '#F6F1E6', borderRadius: '14px', padding: '14px', display: 'flex', gap: '11px', alignItems: 'flex-start' }}>
+                <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a1/512.gif" alt="" style={{ width: '26px', height: '26px', flex: '0 0 auto' }} />
+                <div>
+                  <div style={{ font: '700 12px var(--body)', color: '#161311' }}>Astuce</div>
+                  <div style={{ font: '400 11.5px var(--body)', color: '#7D7156', lineHeight: 1.5, marginTop: '2px' }}>
+                    Tu peux modifier tous ces paramètres même après la publication.
+                  </div>
+                </div>
               </div>
-            )}
-            <div style={{ display: 'flex', gap: 10, marginTop: 'var(--d-gap)', flexWrap: 'wrap' }}>
-              {!isPublished && (
-                <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handlePublishClick} disabled={publishing}>
-                  {publishing ? <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</> : 'Publier le mur'}
-                </button>
-              )}
-              {isPublished && (
-                <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => navigate(`/ewish-admin/share/${id}`)}>
-                  <Share2 size={16} /> QR Code & Partage
-                </button>
-              )}
-              {isPublished && (
-                <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setTab('style')}>
-                  <Eye size={14} /> Aperçu du mur
-                </button>
-              )}
-            </div>
-          </>
-        )}
+            </aside>
 
-        {tab === 'words' && (
-          <WallWords
-            id={id}
-            moderation={moderation}
-            isPaid={pub?.isPaid}
-            onRequestPay={handlePublishClick}
-          />
-        )}
-        {tab === 'cagnotte' && <WallCagnotte pub={pub} id={id} />}
-      </div>
+            {tab === 'share' ? (
+              <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', background: '#fff' }}>
+                <WallShareTab pub={pub} setPub={(fn) => { const next = fn(pub); setPub(next); pubRef.current = next; }} />
+              </div>
+            ) : (
+              <>
+                {/* Center Preview */}
+                <div style={{ position: 'relative', background: '#EDE7DA', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ height: '48px', flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', borderBottom: '1px solid rgba(0,0,0,.05)' }}>
+                    <div style={{ display: 'inline-flex', gap: '3px', background: '#fff', border: '1px solid #E5DDC9', borderRadius: '999px', padding: '3px' }}>
+                      <button onClick={() => setPreviewMode('desktop')} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 13px', borderRadius: '999px', background: previewMode === 'desktop' ? '#1E2952' : 'transparent', color: previewMode === 'desktop' ? '#fff' : '#7D7156', font: previewMode === 'desktop' ? '700 12px var(--body)' : '600 12px var(--body)' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Bureau
+                      </button>
+                      <button onClick={() => setPreviewMode('mobile')} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 13px', borderRadius: '999px', background: previewMode === 'mobile' ? '#1E2952' : 'transparent', color: previewMode === 'mobile' ? '#fff' : '#7D7156', font: previewMode === 'mobile' ? '700 12px var(--body)' : '600 12px var(--body)' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Mobile
+                      </button>
+                    </div>
+                    <span style={{ font: '600 12px var(--body)', color: '#8C8570' }}>Aperçu en direct</span>
+                  </div>
+                  
+                  <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', padding: previewMode === 'desktop' ? '26px 30px 32px' : '26px 0', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{
+                      width: '100%',
+                      maxWidth: previewMode === 'desktop' ? '1200px' : '390px',
+                      height: previewMode === 'desktop' ? '800px' : '844px',
+                      borderRadius: previewMode === 'desktop' ? '20px' : '40px',
+                      overflow: 'hidden',
+                      boxShadow: '0 24px 50px -24px rgba(22,19,17,.4)',
+                      border: previewMode === 'mobile' ? '12px solid #161311' : 'none',
+                      background: '#fff',
+                      transition: 'all .3s ease'
+                    }}>
+                      <iframe 
+                        id="wall-preview-iframe"
+                        src={previewRole === 'recipient' && pub?.customName ? `${VITE_SITE}/m/${pub.customName}?preview=1` : pub?.customName ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1` : ''} 
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                        title="Aperçu du mur"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Inspector */}
+                <aside className="mk-scroll" style={{ borderLeft: '1px solid #F0EBDE', background: '#fff', overflowY: 'auto', padding: '22px 20px 26px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontFamily: 'var(--display)', fontSize: '20px', color: '#161311', marginBottom: '4px' }}>
+                    {tabs.find(t => t.id === tab)?.label}
+                  </div>
+                  <div style={{ font: '400 12.5px var(--body)', color: '#8C8570', marginBottom: '20px', lineHeight: 1.5 }}>
+                    {tab === 'style' && "L'aspect du mur et de son ouverture."}
+                    {tab === 'settings' && "Les paramètres de base de ton mur."}
+                    {tab === 'words' && "Gère les mots laissés par tes proches."}
+                    {tab === 'cagnotte' && "Suis la collecte de fonds en direct."}
+                  </div>
+
+                  {renderActiveTabContent()}
+                </aside>
+              </>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Toast */}
       {toast && <div className="mk-toast">{toast}</div>}

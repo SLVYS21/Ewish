@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Edit2, Copy, Trash2, Share2, MoreHorizontal, X, Gift, Inbox } from 'lucide-react';
+import { WallActivityPreview } from '../components/WallPreviews';
 import {
   getPublications, deletePublication, duplicatePublication, unpublishPublication,
   getTemplates,
@@ -50,11 +51,12 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef   = useRef(null);
 
+  const isWall  = WALL_TEMPLATES.has(pub.templateName);
+  const fallbackBg = TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#FFB3C1,#E11D48)';
   const thumbBg = pub.thumbnail
     ? `url(${pub.thumbnail}) center/cover no-repeat`
-    : (TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#FFB3C1,#E11D48)');
+    : fallbackBg;
 
-  const isWall  = WALL_TEMPLATES.has(pub.templateName);
   const isDraft = !pub.published;
   const isReceived = mode === 'received';
   const editPath = isWall
@@ -75,11 +77,19 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
     return () => document.removeEventListener('mousedown', handle);
   }, [menuOpen]);
 
+  const recipientName = pub.data?.titleName || pub.data?.recipient || pub.title?.split(' ')[0] || pub.title || 'Mur';
+
   return (
     <div className="crea-row" onClick={() => navigate(editPath)}>
 
       {/* Thumbnail */}
-      <div className="crea-thumb" style={{ background: thumbBg }} />
+      {isWall ? (
+        <div className="crea-thumb">
+          <WallActivityPreview pub={pub} style={{ width: '100%', height: '100%' }} />
+        </div>
+      ) : (
+        <div className="crea-thumb" style={{ background: thumbBg }} />
+      )}
 
       {/* Main: 4 stacked rows */}
       <div className="crea-main">

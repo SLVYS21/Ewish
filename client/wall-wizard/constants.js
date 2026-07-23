@@ -94,78 +94,35 @@ export const WALL_EVENTS = [
      size   = mode CSS background-size ('cover' | 'tile')
    Consommé par server/routes/serve.js qui émet --wall-bg, --wall-ink, --wall-accent. */
 export const BACKGROUNDS_CATALOG = [
-  /* Dégradés — Aurore Kado (rose→or) est le Smart Default */
   {
-    id: 'aurore-kado', label: 'Aurore Kado', tab: 'gradient',
-    css: 'linear-gradient(135deg, #FF5470 0%, #FF8DAA 55%, #FFC145 100%)',
-    ink: '#FFFFFF', accent: '#FF5470', size: 'cover',
-    preview: 'linear-gradient(135deg, #FF5470 0%, #FF8DAA 55%, #FFC145 100%)',
+    id: 'bg-blob', label: 'Blob fluide', tab: 'gradient',
+    css: 'transparent', ink: '#FFFFFF', accent: '#FF5470', size: 'cover',
+    preview: 'linear-gradient(155deg,#243157 0%,#1A234A 45%,#141B3B 100%)',
   },
   {
-    id: 'rose-blush', label: 'Rose blush', tab: 'gradient',
-    css: 'linear-gradient(135deg, #FFFAFB 0%, #FFE9EE 55%, #FFB3C0 100%)',
-    ink: '#2B2440', accent: '#FF5470', size: 'cover',
-    preview: 'linear-gradient(135deg, #FFFAFB 0%, #FFE9EE 55%, #FFB3C0 100%)',
+    id: 'bg-polka', label: 'Vague de pois', tab: 'pattern',
+    css: 'transparent', ink: '#453E2E', accent: '#E4922B', size: 'cover',
+    preview: 'linear-gradient(160deg,#F0B24C,#E4922B)',
   },
   {
-    id: 'gold-cream', label: 'Or crème', tab: 'gradient',
-    css: 'linear-gradient(135deg, #FFFCF3 0%, #FFE9AD 60%, #FFC145 100%)',
-    ink: '#2B2440', accent: '#C88B2D', size: 'cover',
-    preview: 'linear-gradient(135deg, #FFFCF3 0%, #FFE9AD 60%, #FFC145 100%)',
+    id: 'bg-bokeh', label: 'Bokeh', tab: 'photo',
+    css: 'transparent', ink: '#FFFFFF', accent: '#D6A4DC', size: 'cover',
+    preview: 'radial-gradient(120% 90% at 50% 15%,#3A2450 0%,#241634 55%,#160D22 100%)',
   },
   {
-    id: 'ink-night', label: 'Nuit myKado', tab: 'gradient',
-    css: 'linear-gradient(160deg, #2B2440 0%, #4A3F6F 55%, #7C5CC9 100%)',
-    ink: '#FFFFFF', accent: '#FFC145', size: 'cover',
-    preview: 'linear-gradient(160deg, #2B2440 0%, #4A3F6F 55%, #7C5CC9 100%)',
+    id: 'bg-comic', label: 'Comic burst', tab: 'pattern',
+    css: 'transparent', ink: '#161311', accent: '#FF5470', size: 'cover',
+    preview: '#F2D24C',
   },
   {
-    id: 'mint-fresh', label: 'Menthe fraîche', tab: 'gradient',
-    css: 'linear-gradient(135deg, #E4FBF3 0%, #7CE0C1 60%, #4FAB86 100%)',
-    ink: '#FFFFFF', accent: '#2E7256', size: 'cover',
-    preview: 'linear-gradient(135deg, #E4FBF3 0%, #7CE0C1 60%, #4FAB86 100%)',
-  },
-
-  /* Motifs — se répètent à l'infini quand on scroll (background-repeat: repeat) */
-  {
-    id: 'confetti-rain', label: 'Pluie de confettis', tab: 'pattern',
-    css: 'radial-gradient(circle at 20% 30%, rgba(255,84,112,0.35) 0 4px, transparent 5px), radial-gradient(circle at 60% 70%, rgba(255,193,69,0.35) 0 4px, transparent 5px), radial-gradient(circle at 80% 20%, rgba(124,224,193,0.32) 0 4px, transparent 5px), radial-gradient(circle at 30% 80%, rgba(181,156,240,0.32) 0 4px, transparent 5px), #FFFFFF',
-    ink: '#2B2440', accent: '#FF5470', size: 'tile',
-    preview: 'radial-gradient(circle at 20% 30%, rgba(255,84,112,0.35) 2px, transparent 3px), radial-gradient(circle at 60% 70%, rgba(255,193,69,0.35) 2px, transparent 3px), radial-gradient(circle at 80% 20%, rgba(124,224,193,0.32) 2px, transparent 3px), radial-gradient(circle at 30% 80%, rgba(181,156,240,0.32) 2px, transparent 3px), #FFFFFF',
+    id: 'bg-synthwave', label: 'Grille synthwave', tab: 'gradient',
+    css: 'transparent', ink: '#FFFFFF', accent: '#E8A33D', size: 'cover',
+    preview: 'linear-gradient(180deg,#1A1140 0%,#2A1550 46%,#3E1C5E 58%,#160D22 100%)',
   },
   {
-    id: 'ballon-dots', label: 'Petits ballons', tab: 'pattern',
-    css: 'radial-gradient(circle at 25% 25%, rgba(255,84,112,0.14) 0 26px, transparent 27px), radial-gradient(circle at 75% 65%, rgba(255,193,69,0.14) 0 22px, transparent 23px), #FFFFFF',
-    ink: '#2B2440', accent: '#FF5470', size: 'tile',
-    preview: 'radial-gradient(circle at 25% 25%, rgba(255,84,112,0.32) 12px, transparent 13px), radial-gradient(circle at 75% 65%, rgba(255,193,69,0.32) 10px, transparent 11px), #FFFFFF',
-  },
-
-  /* Ambiances — dégradés photo-like */
-  {
-    id: 'photo-sunset', label: 'Coucher de soleil', tab: 'photo',
-    css: 'linear-gradient(180deg, #FFC145 0%, #FF5470 60%, #7C5CC9 100%)',
-    ink: '#FFFFFF', accent: '#FFC145', size: 'cover',
-    preview: 'linear-gradient(180deg, #FFC145 0%, #FF5470 60%, #7C5CC9 100%)',
-  },
-  {
-    id: 'photo-tropical', label: 'Tropical', tab: 'photo',
-    css: 'linear-gradient(180deg, #A9D6FF 0%, #7CE0C1 55%, #FFC145 100%)',
-    ink: '#2B2440', accent: '#2E7256', size: 'cover',
-    preview: 'linear-gradient(180deg, #A9D6FF 0%, #7CE0C1 55%, #FFC145 100%)',
-  },
-
-  /* Unis — pour l'élégance minimale */
-  {
-    id: 'plain-white', label: 'Blanc pur', tab: 'plain', css: '#FFFFFF',
-    ink: '#2B2440', accent: '#FF5470', size: 'cover', preview: '#FFFFFF',
-  },
-  {
-    id: 'plain-rose', label: 'Rose Kado', tab: 'plain', css: '#FF5470',
-    ink: '#FFFFFF', accent: '#FFC145', size: 'cover', preview: '#FF5470',
-  },
-  {
-    id: 'plain-ink', label: 'Ink myKado', tab: 'plain', css: '#2B2440',
-    ink: '#FFFFFF', accent: '#FFC145', size: 'cover', preview: '#2B2440',
+    id: 'bg-sunburst', label: 'Sunburst', tab: 'gradient',
+    css: 'transparent', ink: '#FFFFFF', accent: '#FFC145', size: 'cover',
+    preview: '#1B2450',
   },
 ];
 
@@ -176,7 +133,7 @@ export const BACKGROUND_TABS = [
   { id: 'plain',    label: 'Unis' },
 ];
 
-export const DEFAULT_BACKGROUND_ID = 'aurore-kado';
+export const DEFAULT_BACKGROUND_ID = 'bg-blob';
 
 /* ─── Cagnotte presets — Contrast Effect ──────────────────── */
 export const CAGNOTTE_PRESETS = [

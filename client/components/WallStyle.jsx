@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Ban, Check, Plus, Loader2, Eye, X, ExternalLink } from 'lucide-react';
 import { updatePublication, uploadFile } from '../utils/api';
 import { fireConfetti, stopConfetti } from '../utils/confettiFx';
+import AnimatedBackground from '../wall/AnimatedBackground';
 import s from './WallStyle.module.css';
 
 /* Templates de mur disponibles. Le switch reporte tout le style existant. */
@@ -21,63 +22,50 @@ export const WALL_TEMPLATE_OPTIONS = [
 ];
 
 /* ─── Backgrounds ────────────────────────────────────────────────
-   Emojis floutés en preview + gradient CSS côté récepteur.
-   L'utilisateur pourra remplacer par images via la card "+".
+   Animated backgrounds based on the mockup.
    ────────────────────────────────────────────────────────────── */
 export const STYLE_BACKGROUNDS = [
   {
-    id: 'bg-normal',
-    label: 'Normal',
-    emojis: ['✦', '❋', '✿'],
-    emojiColor: '#FF5470',
-    previewBg: 'linear-gradient(135deg, #FFFAFB 0%, #FFE9EE 55%, #FFB3C0 100%)',
-    css: 'linear-gradient(135deg, #FFFAFB 0%, #FFE9EE 55%, #FFB3C0 100%)',
-    ink: '#2B2440', accent: '#FF5470', size: 'cover',
+    id: 'bg-blob',
+    label: 'Blob fluide',
+    previewBg: 'linear-gradient(155deg,#243157 0%,#1A234A 45%,#141B3B 100%)',
+    css: 'transparent',
+    ink: '#FFFFFF',
   },
   {
-    id: 'bg-fun',
-    label: 'Fun',
-    emojis: ['🎂', '🎉', '🎁', '🎈', '⭐', '💫'],
-    emojiColor: '#2B2440',
-    previewBg: 'linear-gradient(135deg, #FFC145 0%, #FF8DAA 50%, #7C5CC9 100%)',
-    css: 'radial-gradient(circle at 15% 25%, rgba(255,84,112,0.45) 0 6px, transparent 7px), radial-gradient(circle at 65% 70%, rgba(255,193,69,0.55) 0 5px, transparent 6px), radial-gradient(circle at 85% 20%, rgba(124,224,193,0.5) 0 5px, transparent 6px), radial-gradient(circle at 30% 80%, rgba(181,156,240,0.5) 0 6px, transparent 7px), linear-gradient(135deg, #FFF7E0 0%, #FFE9EE 100%)',
-    ink: '#2B2440', accent: '#FF7A45', size: 'tile',
+    id: 'bg-polka',
+    label: 'Vague de pois',
+    previewBg: 'linear-gradient(160deg,#F0B24C,#E4922B)',
+    css: 'transparent',
+    ink: '#453E2E',
   },
   {
-    id: 'bg-chic',
-    label: 'Chic',
-    emojis: ['✨', '⭐', '🌙'],
-    emojiColor: '#FFC145',
-    previewBg: 'linear-gradient(160deg, #2B2440 0%, #4A3F6F 55%, #7C5CC9 100%)',
-    css: 'linear-gradient(160deg, #2B2440 0%, #4A3F6F 55%, #7C5CC9 100%)',
-    ink: '#FFFFFF', accent: '#FFC145', size: 'cover',
+    id: 'bg-bokeh',
+    label: 'Bokeh',
+    previewBg: 'radial-gradient(120% 90% at 50% 15%,#3A2450 0%,#241634 55%,#160D22 100%)',
+    css: 'transparent',
+    ink: '#FFFFFF',
   },
   {
-    id: 'bg-mint',
-    label: 'Menthe',
-    emojis: ['🌿', '🍃', '🌱'],
-    emojiColor: '#2E7256',
-    previewBg: 'linear-gradient(135deg, #E4FBF3 0%, #7CE0C1 60%, #4FAB86 100%)',
-    css: 'linear-gradient(135deg, #E4FBF3 0%, #7CE0C1 60%, #4FAB86 100%)',
-    ink: '#FFFFFF', accent: '#2E7256', size: 'cover',
+    id: 'bg-comic',
+    label: 'Comic burst',
+    previewBg: '#F2D24C',
+    css: 'transparent',
+    ink: '#161311',
   },
   {
-    id: 'bg-sunset',
-    label: 'Coucher',
-    emojis: ['🌅', '☀️', '🔥'],
-    emojiColor: '#FFFFFF',
-    previewBg: 'linear-gradient(180deg, #FFC145 0%, #FF5470 60%, #7C5CC9 100%)',
-    css: 'linear-gradient(180deg, #FFC145 0%, #FF5470 60%, #7C5CC9 100%)',
-    ink: '#FFFFFF', accent: '#FFC145', size: 'cover',
+    id: 'bg-synthwave',
+    label: 'Grille synthwave',
+    previewBg: 'linear-gradient(180deg,#1A1140 0%,#2A1550 46%,#3E1C5E 58%,#160D22 100%)',
+    css: 'transparent',
+    ink: '#FFFFFF',
   },
   {
-    id: 'bg-tropical',
-    label: 'Tropical',
-    emojis: ['🌴', '🐚', '🌊'],
-    emojiColor: '#2B2440',
-    previewBg: 'linear-gradient(180deg, #A9D6FF 0%, #7CE0C1 55%, #FFC145 100%)',
-    css: 'linear-gradient(180deg, #A9D6FF 0%, #7CE0C1 55%, #FFC145 100%)',
-    ink: '#2B2440', accent: '#2E7256', size: 'cover',
+    id: 'bg-sunburst',
+    label: 'Sunburst',
+    previewBg: '#1B2450',
+    css: 'transparent',
+    ink: '#FFFFFF',
   },
 ];
 
@@ -95,15 +83,10 @@ export const STYLE_PALETTES = [
 /* ─── Confettis ── ids alignés sur templates/birthday & fx engine */
 export const STYLE_CONFETTI = [
   { id: 'default',      label: 'Classique', emoji: '🎉' },
-  { id: 'emoji_party',  label: 'Fête',      emoji: '🥳' },
   { id: 'hearts',       label: 'Cœurs',     emoji: '💖' },
-  { id: 'stars',        label: 'Étoiles',   emoji: '⭐' },
-  { id: 'fireworks',    label: 'Feux',      emoji: '🎇' },
-  { id: 'gold_rain',    label: 'Pluie d\'or', emoji: '✨' },
-  { id: 'snow',         label: 'Neige',     emoji: '❄️' },
   { id: 'side_cannons', label: 'Canons',    emoji: '💥' },
   { id: 'school_pride', label: 'Équipe',    emoji: '🏁' },
-  { id: 'realistic',    label: 'Réaliste',  emoji: '🎊' },
+  { id: 'gold_rain',    label: 'Pluie d\'or', emoji: '✨' },
 ];
 
 /* ─── Icônes de Révélation (Noto Emoji) ─── */
@@ -112,35 +95,6 @@ export const STYLE_REVEAL_ICONS = [
   { id: 'cake',  label: 'Gâteau', emojiCode: '1f382' },
   { id: 'heart', label: 'Cœur',   emojiCode: '1f49d' },
   { id: 'party', label: 'Canon',  emojiCode: '1f389' },
-];
-
-/* ─── Arrière-plans Premium (Images) ─── */
-export const STYLE_IMAGES = [
-  {
-    id: 'img-aura',
-    label: 'Aura Magique',
-    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
-  },
-  {
-    id: 'img-dark',
-    label: 'Élégance Sombre',
-    url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop',
-  },
-  {
-    id: 'img-crystal',
-    label: 'Cristal 3D',
-    url: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2670&auto=format&fit=crop',
-  },
-  {
-    id: 'img-gold',
-    label: 'Sable d\'Or',
-    url: 'https://images.unsplash.com/photo-1579546929662-711aa81148cf?q=80&w=2670&auto=format&fit=crop',
-  },
-  {
-    id: 'img-pastel',
-    label: 'Rêve Pastel',
-    url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=2574&auto=format&fit=crop',
-  },
 ];
 
 /* ────────────────────────────────────────────────────────────── */
@@ -353,7 +307,7 @@ function StyleSection({ title, hint, size, children }) {
 /* Template picker — swatchs cliquables en haut du panneau. */
 function TemplatePicker({ current, onPick, published, isPublished }) {
   return (
-    <div className={s.tplRow} role="radiogroup" aria-label="Type de mur">
+    <div className={s.tplGrid} role="radiogroup" aria-label="Type de mur">
       {WALL_TEMPLATE_OPTIONS.map(opt => {
         const active = current === opt.id;
         return (
@@ -365,12 +319,11 @@ function TemplatePicker({ current, onPick, published, isPublished }) {
             className={`${s.tplCard} ${active ? s.tplCardActive : ''}`}
             onClick={() => !active && onPick(opt.id)}
           >
-            <span className={s.tplSwatch} style={{ background: opt.swatch }} aria-hidden />
-            <span className={s.tplMeta}>
+            <div className={s.tplColorBlock} style={{ background: opt.swatch }} aria-hidden />
+            <div className={s.tplCardText}>
               <span className={s.tplLabel}>{opt.label}</span>
               <span className={s.tplHint}>{opt.hint}</span>
-            </span>
-            {active && <span className={s.tplCheck}><Check size={13} strokeWidth={3} /></span>}
+            </div>
           </button>
         );
       })}
@@ -389,6 +342,8 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
   const [paletteId, setPaletteId] = useState(style.stylePalettePreset || null);
   const [confettiId, setConfettiId] = useState(style.styleConfettiPreset || null);
   const [revealIconId, setRevealIconId] = useState(style.revealIcon || null);
+  const [revealMascot, setRevealMascot] = useState(style.revealMascot ?? false);
+  const [revealEmojis, setRevealEmojis] = useState(style.revealEmojis ?? true);
   const [customBgUrl, setCustomBgUrl] = useState(style.styleCustomBgUrl || '');
   const [uploading, setUploading] = useState(false);
   const [templateName, setTemplateName] = useState(pub?.templateName || 'wall-of-wishes');
@@ -403,12 +358,9 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
 
   const activeBg = useMemo(
     () => {
-      if (bgId === 'bg-custom' && customBgUrl) return { id: 'bg-custom', css: `url("${customBgUrl}") center/cover no-repeat`, ink: '#FFFFFF', accent: '#FF5470', size: 'cover' };
-      const imgBg = STYLE_IMAGES.find(b => b.id === bgId);
-      if (imgBg) return { id: imgBg.id, css: `url("${imgBg.url}") center/cover no-repeat`, ink: '#FFFFFF', accent: '#FF5470', size: 'cover' };
       return STYLE_BACKGROUNDS.find(b => b.id === bgId) || null;
     },
-    [bgId, customBgUrl]
+    [bgId]
   );
   const activePalette = useMemo(
     () => STYLE_PALETTES.find(p => p.id === paletteId) || null,
@@ -431,6 +383,8 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
             styleConfettiPreset: confettiId,
             styleCustomBgUrl: customBgUrl,
             revealIcon: revealIconId,
+            revealMascot,
+            revealEmojis,
           },
         };
         /* Si un preset est choisi, on hydrate les champs récepteur ; sinon on n'écrase pas. */
@@ -457,7 +411,7 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
     }, 700);
     return () => clearTimeout(saveTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bgId, paletteId, confettiId, revealIconId, customBgUrl]);
+  }, [bgId, paletteId, confettiId, revealIconId, revealMascot, revealEmojis, customBgUrl]);
 
   /* Switch de template : carry-over du style + info d'URL modifiée si publié */
   const handleTemplateSwitch = async (nextTpl) => {
@@ -534,155 +488,111 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
 
       {/* ── Background ── */}
       <StyleSection
-        title="Choisis un arrière-plan"
-        hint="S'affiche derrière tous les mots du mur. « Aucun » garde le fond auto de l'occasion."
-        size="lg"
+        title="Arrière-plan"
+        hint="Derrière tous les mots du mur."
       >
-        <StyleCard active={bgId === null} onClick={() => setBgId(null)} size="lg" kind="none" label="Aucun">
-          <NoneThumb />
-        </StyleCard>
-        {STYLE_BACKGROUNDS.map(bg => (
-          <StyleCard key={bg.id} active={bgId === bg.id} onClick={() => setBgId(bg.id)} size="lg" label={bg.label}>
-            <BackgroundPreview item={bg} />
-          </StyleCard>
-        ))}
-        {STYLE_IMAGES.map(img => (
-          <StyleCard key={img.id} active={bgId === img.id} onClick={() => setBgId(img.id)} size="lg" label={img.label}>
-            <CustomBgPreview url={img.url} />
-          </StyleCard>
-        ))}
-        <StyleCard
-          active={bgId === 'bg-custom'}
-          onClick={() => {
-            if (customBgUrl) setBgId('bg-custom');
-            else fileRef.current?.click();
-          }}
-          size="lg"
-          kind="upload"
-          label={customBgUrl ? 'Mon image' : 'Ajouter'}
-          disabled={uploading}
-        >
-          {uploading
-            ? (<div className={`${s.thumb} ${s.uploadingThumb}`}><Loader2 size={22} style={{ animation: 'mk-spin .75s linear infinite' }} /></div>)
-            : <CustomBgPreview url={customBgUrl} />
-          }
-        </StyleCard>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) handleUpload(f);
-            e.target.value = '';
-          }}
-        />
+        <div className={s.bgList}>
+          <div className={`${s.bgItem} ${bgId === null ? s.bgItemActive : ''}`} onClick={() => setBgId(null)}>
+            <div className={`${s.bgSquare} ${s.bgNoneSquare}`}>
+              <Ban size={22} strokeWidth={1.5} />
+            </div>
+            <span className={s.bgLabel}>Aucun</span>
+          </div>
+          {STYLE_BACKGROUNDS.map(bg => (
+            <div key={bg.id} className={`${s.bgItem} ${bgId === bg.id ? s.bgItemActive : ''}`} onClick={() => setBgId(bg.id)}>
+              <div className={s.bgSquare} style={{ background: bg.previewBg, position: 'relative', overflow: 'hidden' }}>
+                <AnimatedBackground backgroundId={bg.id} previewMode={true} />
+              </div>
+              <span className={s.bgLabel}>{bg.label}</span>
+            </div>
+          ))}
+          {/* Custom Image Upload could go here as well if needed */}
+        </div>
       </StyleSection>
 
       {/* ── Icône de Révélation ── */}
       <StyleSection
         title="Icône de déballage"
-        hint="Ce que le destinataire touche pour ouvrir son mur (animé)."
-        size="md"
+        hint="Ce que le destinataire touche pour ouvrir (animé)."
       >
-        <StyleCard active={revealIconId === null} onClick={() => setRevealIconId(null)} size="md" kind="none" label="Aucun">
-          <NoneThumb />
-        </StyleCard>
-        {STYLE_REVEAL_ICONS.map(icon => (
-          <StyleCard key={icon.id} active={revealIconId === icon.id} onClick={() => setRevealIconId(icon.id)} size="md" label={icon.label}>
-            <RevealIconPreview item={icon} />
-          </StyleCard>
-        ))}
+        <div className={s.bgList}>
+          {STYLE_REVEAL_ICONS.map(icon => (
+            <div key={icon.id} className={`${s.iconCard} ${revealIconId === icon.id ? s.iconCardActive : ''}`} onClick={() => setRevealIconId(icon.id)}>
+              <img src={`https://fonts.gstatic.com/s/e/notoemoji/latest/${icon.emojiCode}/512.gif`} alt={icon.label} className={s.iconImg} />
+              <span className={s.iconLabel}>{icon.label}</span>
+            </div>
+          ))}
+        </div>
       </StyleSection>
 
       {/* ── Palette ── */}
       <StyleSection
-        title="Choisis une palette"
-        hint="Couleur des boutons et du texte à l'intérieur des boutons."
-        size="sm"
+        title="Palette des boutons"
+        hint=""
       >
-        <StyleCard active={paletteId === null} onClick={() => setPaletteId(null)} size="sm" kind="none" label="Aucun">
-          <NoneThumb size="sm" />
-        </StyleCard>
-        {STYLE_PALETTES.map(p => (
-          <StyleCard key={p.id} active={paletteId === p.id} onClick={() => setPaletteId(p.id)} size="sm" label={p.label}>
-            <PalettePreview item={p} />
-          </StyleCard>
-        ))}
+        <div className={s.paletteList}>
+          {STYLE_PALETTES.map(p => (
+            <div
+              key={p.id}
+              className={`${s.paletteCircle} ${paletteId === p.id ? s.paletteCircleActive : ''}`}
+              style={{ background: p.accent }}
+              onClick={() => setPaletteId(p.id)}
+              title={p.label}
+            />
+          ))}
+        </div>
       </StyleSection>
 
       {/* ── Confetti ── */}
       <StyleSection
-        title="Quels confettis à l'ouverture"
-        hint="Ils apparaissent quand le destinataire découvre le mur. Clique pour voir l'effet."
-        size="md"
+        title="Confettis à l'ouverture"
+        hint=""
       >
-        <StyleCard active={confettiId === null} onClick={() => pickConfetti(null)} size="md" kind="none" label="Aucun">
-          <NoneThumb />
-        </StyleCard>
-        {STYLE_CONFETTI.map(c => (
-          <StyleCard key={c.id} active={confettiId === c.id} onClick={() => pickConfetti(c.id)} size="md" label={c.label}>
-            <ConfettiPreview item={c} />
-          </StyleCard>
-        ))}
+        <div className={s.confettiList}>
+          {STYLE_CONFETTI.map(c => (
+            <button
+              key={c.id}
+              type="button"
+              className={`${s.confettiPill} ${confettiId === c.id ? s.confettiPillActive : ''}`}
+              onClick={() => pickConfetti(c.id)}
+            >
+              <span>{c.emoji}</span>
+              <span>{c.label}</span>
+            </button>
+          ))}
+        </div>
       </StyleSection>
+      {/* ── Toggles ── */}
+      <div style={{ borderTop: '1px solid var(--mk-line-1)', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 15, margin: '24px 20px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: '#161311' }}>Emojis animés</div>
+            <div style={{ fontWeight: 400, fontSize: 11, color: 'var(--mk-ink-3)', marginTop: 2 }}>Noto Emoji en mouvement</div>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setRevealEmojis(!revealEmojis)}
+            style={{ width: 42, height: 25, borderRadius: 999, background: revealEmojis ? 'var(--mk-ink-1)' : 'var(--mk-line-2)', position: 'relative', flex: '0 0 auto', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
+          >
+            <span style={{ position: 'absolute', top: 3, left: revealEmojis ? 20 : 3, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }}></span>
+          </button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: '#161311' }}>Ouverture « Kado apporte le cadeau »</div>
+            <div style={{ fontWeight: 400, fontSize: 11, color: 'var(--mk-ink-3)', marginTop: 2 }}>La mascotte accueille le destinataire</div>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setRevealMascot(!revealMascot)}
+            style={{ width: 42, height: 25, borderRadius: 999, background: revealMascot ? 'var(--mk-ink-1)' : 'var(--mk-line-2)', position: 'relative', flex: '0 0 auto', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
+          >
+            <span style={{ position: 'absolute', top: 3, left: revealMascot ? 20 : 3, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }}></span>
+          </button>
+        </div>
       </div>
 
-      {/* ── Preview iframe ── desktop sticky right / mobile drawer ── */}
-      {previewSrc && (
-        <aside className={`${s.previewCol} ${previewOpen ? s.previewOpen : ''}`}>
-          <div className={s.previewHead}>
-            <div className={s.previewLabel}>
-              <Eye size={13} /> Aperçu en direct
-            </div>
-            <div className={s.previewActions}>
-              <a
-                href={previewSrc}
-                target="_blank"
-                rel="noreferrer"
-                className={s.previewIcon}
-                aria-label="Ouvrir dans un onglet"
-                title="Ouvrir dans un onglet"
-              >
-                <ExternalLink size={14} />
-              </a>
-              <button
-                type="button"
-                className={s.previewIcon}
-                onClick={() => setPreviewOpen(false)}
-                aria-label="Fermer l'aperçu"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-          <div className={s.previewFrame}>
-            <iframe
-              id="wall-preview-iframe"
-              key={previewNonce}
-              src={previewSrc}
-              title="Aperçu du mur"
-              className={s.iframe}
-              allow="autoplay; clipboard-write"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-            />
-          </div>
-        </aside>
-      )}
-
-      {/* Mobile floating button */}
-      {previewSrc && !previewOpen && (
-        <button
-          type="button"
-          className={s.previewFab}
-          onClick={() => setPreviewOpen(true)}
-          aria-label="Voir l'aperçu"
-        >
-          <Eye size={16} />
-          <span>Aperçu</span>
-        </button>
-      )}
+      </div>
     </div>
   );
 }

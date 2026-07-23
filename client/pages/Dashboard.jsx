@@ -10,6 +10,7 @@ import ConfettiBurst from '../components/ConfettiBurst';
 import TileSparkles from '../components/TileSparkles';
 import NotoEmoji from '../components/NotoEmoji';
 import WallCreateSheet from '../components/WallCreateSheet';
+import { WallActivityPreview, WallThemePreview } from '../components/WallPreviews';
 import s from './Dashboard.module.css';
 
 /* Template thumbnails — reused across recent + featured */
@@ -79,13 +80,22 @@ function RecentTile({ pub }) {
   const fallbackGradient = TEMPLATE_GRADIENTS[pub.templateName]
     || 'linear-gradient(135deg,#FFB3C1,#E11D48)';
 
+  // Pour les murs : on affiche le nom du destinataire centré
+  const recipientName = pub.data?.titleName || pub.data?.recipient || pub.title?.split(' ')[0] || pub.title || 'Sans titre';
+
   return (
     <button className={s.recentCard} onClick={() => navigate(editPath)}>
       <div className={s.recentThumb} style={{ background: fallbackGradient }}>
-        {thumbBg && <div className={s.recentThumbImg} style={thumbBg} />}
-        <span className={`${s.recentBadge} ${pub.published ? s.recentBadgeLive : ''}`}>
-          {pub.published ? 'En ligne' : 'Brouillon'}
-        </span>
+        {isWall ? (
+          <WallActivityPreview pub={pub} style={{ width: '100%', height: '100%' }} />
+        ) : (
+          <>
+            {thumbBg && <div className={s.recentThumbImg} style={thumbBg} />}
+            <span className={`${s.recentBadge} ${pub.published ? s.recentBadgeLive : ''}`}>
+              {pub.published ? 'En ligne' : 'Brouillon'}
+            </span>
+          </>
+        )}
       </div>
       <div className={s.recentTitle}>{pub.title || 'Sans titre'}</div>
       <div className={s.recentFor}>
@@ -97,8 +107,27 @@ function RecentTile({ pub }) {
 
 /* ── Featured theme card ── */
 function ThemeTile({ tpl, onSelect }) {
+  const isWall = WALL_TEMPLATES.has(tpl.name);
   const gradient = TEMPLATE_GRADIENTS[tpl.name] || 'linear-gradient(135deg,#FFB3C1,#E11D48)';
   const thumb = tpl.thumbnail ? { backgroundImage: `url(${tpl.thumbnail})` } : null;
+  
+  if (isWall) {
+    return (
+      <button className={s.themeCardWall} onClick={() => onSelect(tpl)}>
+        <WallThemePreview templateName={tpl.name} />
+        <div style={{ padding: '11px 12px' }}>
+          <div style={{ fontWeight: 700, fontSize: '13px' }}>{tpl.label || tpl.name}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+            <span style={{ font: '800 10px Inter, sans-serif', background: '#EDE7FF', color: '#5B6994', padding: '3px 8px', borderRadius: '999px' }}>
+              {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
+            </span>
+            <span style={{ font: '700 11px Inter, sans-serif', color: '#9F6D22' }}>Aperçu ›</span>
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   return (
     <button className={s.themeCard} style={{ background: gradient }} onClick={() => onSelect(tpl)}>
       {thumb && <div className={s.themeThumbImg} style={thumb} />}
@@ -214,50 +243,44 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ══ Quick actions ═════════════════════════════════════════ */}
+      {/* ══ What are we creating? ════════════════════════════════ */}
       <div className={s.section}>
-        <div className={s.sectionTitle}>Actions rapides</div>
-        <div className={s.quickGrid}>
-          <button className={s.quickTile} onClick={openNameModal}>
-            <div className={`${s.quickThumb} ${s.quickThumbCard}`}>
-              <TileSparkles className={s.tileSparkles} variant={0} />
-              <div className={s.sceneCard}>
-                <div className={s.sceneCardMsg}>
-                  <div className={s.sceneCardLine} />
-                  <div className={s.sceneCardLine} />
-                  <div className={s.sceneCardLine} />
-                </div>
-              </div>
+        <div className={s.sectionTitle} style={{ fontSize: '28px', marginBottom: '4px' }}>Qu'est-ce qu'on crée ?</div>
+        <div className={s.creationActions}>
+          <button className={s.actionMain} onClick={openNameModal}>
+            <div className={s.actionMainIcon}>
+              <NotoEmoji name="love-letter" size={64} />
             </div>
-            <div className={s.quickLabel}>Créer une carte</div>
+            <div className={s.actionMainText}>
+              <div className={s.actionMainTitle}>Créer une carte</div>
+              <div className={s.actionMainSub}>Une expérience animée, en solo</div>
+            </div>
+            <div className={s.actionMainArrow}>
+              <ArrowRight size={20} />
+            </div>
           </button>
 
-          <button className={s.quickTile} onClick={() => setWallSheetOpen(true)}>
-            <div className={`${s.quickThumb} ${s.quickThumbWall}`}>
-              <TileSparkles className={s.tileSparkles} variant={1} />
-              <div className={s.sceneWall}>
-                <div className={s.sceneWallChip} />
-                <div className={s.sceneWallChip} />
-                <div className={s.sceneWallChip} />
-                <div className={s.sceneWallChip} />
-                <div className={s.sceneWallChip} />
-                <div className={s.sceneWallChip} />
+          <div className={s.actionSecondaryRow}>
+            <button className={`${s.actionSecondary} ${s.actionWall}`} onClick={() => setWallSheetOpen(true)}>
+              <div className={s.actionSecondaryIcon}>
+                <NotoEmoji name="speech-balloon" size={48} />
               </div>
-            </div>
-            <div className={s.quickLabel}>Créer un mur</div>
-          </button>
+              <div className={s.actionSecondaryText}>
+                <div className={s.actionSecondaryTitle}>Un mur</div>
+                <div className={s.actionSecondarySub}>À plusieurs mains</div>
+              </div>
+            </button>
 
-          <button className={s.quickTile} onClick={() => navigate('/ewish-admin/templates')}>
-            <div className={`${s.quickThumb} ${s.quickThumbGift}`}>
-              <TileSparkles className={s.tileSparkles} variant={2} />
-              <div className={s.sceneGift}>
-                <div className={s.sceneGiftCard} />
-                <div className={s.sceneGiftCard} />
-                <div className={s.sceneGiftCard} />
+            <button className={`${s.actionSecondary} ${s.actionGift}`} onClick={() => navigate('/ewish-admin/templates')}>
+              <div className={s.actionSecondaryIcon}>
+                <NotoEmoji name="gift" size={48} />
               </div>
-            </div>
-            <div className={s.quickLabel}>Envoyer un cadeau</div>
-          </button>
+              <div className={s.actionSecondaryText}>
+                <div className={s.actionSecondaryTitle}>Un cadeau</div>
+                <div className={s.actionSecondarySub}>Offrir un présent</div>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 

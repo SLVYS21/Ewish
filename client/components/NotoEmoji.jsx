@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 /* ══════════════════════════════════════════════════════════════════
    NotoEmoji — animated emojis from Google's Noto Emoji Animation
@@ -54,6 +54,8 @@ const CODEPOINTS = {
   'check':              '2705',
   'money-bag':          '1f4b0',
   'money-face':         '1f911',
+  'speech-balloon':     '1f4ac',
+  'thought-balloon':    '1f4ad',
 };
 
 const CDN_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest';
@@ -122,5 +124,3 @@ export default function NotoEmoji({
   );
 }
 
-/* Named export of the map so callers can iterate or validate */
-export { CODEPOINTS as NOTO_CODEPOINTS };

@@ -90,6 +90,9 @@ const publicationSchema = new mongoose.Schema({
     wallBackgroundInk: { type: String },
     wallBackgroundSize: { type: String },
     wallAccent: { type: String },
+    revealIcon: { type: String },
+    revealMascot: { type: Boolean, default: false },
+    revealEmojis: { type: Boolean, default: true },
     paletteAccentText: { type: String },
 
     // Background per section  key = section slug

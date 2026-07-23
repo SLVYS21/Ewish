@@ -32,7 +32,7 @@ import KycMobilePage          from "./pages/KycMobilePage";
 import TemplatesGallery    from "./pages/TemplatesGallery";
 import TemplateDetailPage  from "./pages/TemplateDetailPage";
 import WallSetup           from "./pages/WallSetup";
-import WallShareHub        from "./pages/WallShareHub";
+
 import WallClaim           from "./pages/WallClaim";
 import CagnottePage        from "./pages/CagnottePage";
 import CreditsPage         from "./pages/CreditsPage";
@@ -139,14 +139,14 @@ export default function App() {
             <Route path="super/settings"     element={<RequireSuperAdmin><SuperAdminSettings /></RequireSuperAdmin>} />
             <Route path="super/kyc"          element={<RequireSuperAdmin><SuperAdminKyc /></RequireSuperAdmin>} />
             <Route path="profile"            element={<ProfilePage />} />
-            <Route path="wall/:id"           element={<WallSetup />} />
-            <Route path="wall/:id/share"     element={<WallShareHub />} />
+
             <Route path="share/:id"          element={<SharePage />} />
           </Route>
 
           {/* Full-screen routes  no sidebar */}
           <Route path="/ewish-admin/ewish/new"       element={<RequireAuth><QuickCreate /></RequireAuth>} />
           <Route path="/ewish-admin/ewish/edit/:id"  element={<RequireAuth><Editor /></RequireAuth>} />
+          <Route path="/ewish-admin/wall/:id"        element={<RequireAuth><WallSetup /></RequireAuth>} />
 
           <Route path="/kyc/mobile/:token" element={<KycMobilePage />} />
           <Route path="/terms"   element={<TermsPage />} />

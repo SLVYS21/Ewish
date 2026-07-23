@@ -13,6 +13,7 @@ const {
   safeCssUrl,
   safeHttpUrl,
 } = require('../utils/htmlSafe');
+const { getReactWallShell } = require('../utils/reactWallShell');
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -51,6 +52,15 @@ const GOOGLE_FONTS_MAP = {
   'Nunito':           'Nunito:wght@300;400;500;600;700',
 };
 
+const ANIMATED_BGS = {
+  'bg-blob': '<div class="ab-container" style="background: linear-gradient(155deg,#243157 0%,#1A234A 45%,#141B3B 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: -60px; left: -40px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle,#3A4C8A,transparent 70%); filter: blur(38px); animation: mkBlobA 12s ease-in-out infinite;"></div><div style="position: absolute; bottom: 20px; right: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle,rgba(232,163,61,.55),transparent 70%); filter: blur(42px); animation: mkBlobB 14s ease-in-out infinite;"></div><div style="position: absolute; bottom: -70px; left: 30px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle,rgba(138,99,210,.5),transparent 70%); filter: blur(40px); animation: mkBlobA 16s ease-in-out infinite 2s;"></div></div>',
+  'bg-polka': '<div class="ab-container" style="background: linear-gradient(160deg,#F0B24C,#E4922B); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; inset: -20px; background-image: radial-gradient(rgba(255,255,255,.42) 3.4px,transparent 4px),radial-gradient(rgba(58,36,16,.14) 3.4px,transparent 4px); background-size: 26px 26px,26px 26px; background-position: 0 0,13px 13px; animation: mkDots 5.5s linear infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 48%,rgba(255,251,242,.55),transparent 52%);"></div></div>',
+  'bg-bokeh': '<div class="ab-container" style="background: radial-gradient(120% 90% at 50% 15%,#3A2450 0%,#241634 55%,#160D22 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 120px; left: 40px; width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(circle,rgba(242,214,138,.55),transparent 70%); filter: blur(6px); animation: mkFloat 7s ease-in-out infinite;"></div><div style="position: absolute; top: 240px; right: 36px; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle,rgba(214,164,220,.4),transparent 70%); filter: blur(8px); animation: mkFloat2 9s ease-in-out infinite 1s;"></div><div style="position: absolute; bottom: 180px; left: 24px; width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.35),transparent 70%); filter: blur(5px); animation: mkDrift 8s ease-in-out infinite .5s;"></div><div style="position: absolute; bottom: 120px; right: 60px; width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle,rgba(242,214,138,.5),transparent 70%); filter: blur(4px); animation: mkFloat 6s ease-in-out infinite 1.5s;"></div><div style="position: absolute; top: 340px; left: 120px; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.4),transparent 70%); filter: blur(3px); animation: mkFloat2 7.5s ease-in-out infinite;"></div></div>',
+  'bg-comic': '<div class="ab-container" style="background: #F2D24C; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 50%; left: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; background: repeating-conic-gradient(from 0deg,#161311 0 2.2deg,transparent 2.2deg 8deg); opacity: .9; animation: mkZoom 3.6s ease-in-out infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 48%,#F2D24C 0%,#F2D24C 24%,transparent 42%);"></div></div>',
+  'bg-synthwave': '<div class="ab-container" style="background: linear-gradient(180deg,#1A1140 0%,#2A1550 46%,#3E1C5E 58%,#160D22 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle,#F2D68A 0%,#E8A33D 45%,rgba(232,163,61,0) 72%); filter: blur(2px);"></div><div style="position: absolute; left: 0; right: 0; bottom: 0; height: 340px; overflow: hidden; perspective: 280px;"><div style="position: absolute; left: -50%; right: -50%; bottom: -40px; height: 520px; background-image: linear-gradient(rgba(232,163,61,.55) 2px,transparent 2px),linear-gradient(90deg,rgba(232,163,61,.55) 2px,transparent 2px); background-size: 52px 52px; transform: rotateX(66deg); transform-origin: bottom center; animation: mkGrid 2.4s linear infinite;"></div><div style="position: absolute; inset: 0; background: linear-gradient(180deg,#160D22 0%,transparent 34%,transparent 78%,rgba(22,13,34,.7));"></div></div></div>',
+  'bg-sunburst': '<div class="ab-container" style="background: #1B2450; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 50%; left: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; background: repeating-conic-gradient(from 0deg,#2C3A6E 0 10deg,#1C264F 10deg 20deg); animation: mkSunA 78s linear infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%,rgba(232,163,61,.18) 0%,transparent 46%),radial-gradient(circle at 50% 48%,rgba(15,18,40,.5) 0%,transparent 62%),radial-gradient(circle at 50% 120%,transparent 55%,rgba(11,14,32,.72));"></div></div>'
+};
+
 function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_limit') {
   if (!url || !url.includes('res.cloudinary.com')) return url;
   if (url.includes('/upload/f_') || url.includes('/upload/q_') || url.includes('/upload/w_')) return url;
@@ -63,12 +73,12 @@ function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_li
    ──────────────────────────────────────────────────────────── */
 const CSP = [
   "default-src 'self' https: data: blob:",
-  "script-src 'self' 'unsafe-inline' https:",
+  "script-src 'self' 'unsafe-inline' https: http://localhost:3000 http://localhost:5173",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
-  "connect-src 'self' https:",
+  "connect-src 'self' https: http://localhost:3000 http://localhost:5173 ws://localhost:3000 ws://localhost:5173",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store",
@@ -133,9 +143,6 @@ router.get('/:templateName/:customName', async (req, res) => {
       `);
     }
 
-    let html = await getTemplateHtml(pub.templateName);
-    if (!html) return sendError(res, 404, 'Template introuvable.');
-
     /* ── Custom fonts from DB (rare, cached in-memory) ─── */
     let fontFaceCSS = '';
     try {
@@ -192,8 +199,41 @@ router.get('/:templateName/:customName', async (req, res) => {
       const rawSize = (s.wallBackgroundSize === 'tile') ? 'tile' : 'cover';
 
       let safeBg = '';
-      if (!/[;<>}]/.test(rawBg) && (/^(?:linear|radial|conic)-gradient/i.test(rawBg) || /^#[0-9a-f]{3,8}$/i.test(rawBg) || /^url\(/i.test(rawBg))) {
+      if (!/[;<>}]/.test(rawBg) && (/^(?:linear|radial|conic)-gradient/i.test(rawBg) || /^#[0-9a-f]{3,8}$/i.test(rawBg) || /^url\(/i.test(rawBg) || rawBg === 'transparent')) {
         safeBg = rawBg;
+      }
+      
+      const bgId = s.wallBackgroundId || '';
+      
+      if (safeBg === 'transparent') {
+        const fallbacks = {
+          'bg-blob': 'linear-gradient(155deg,#243157 0%,#1A234A 45%,#141B3B 100%)',
+          'bg-polka': 'linear-gradient(160deg,#F0B24C,#E4922B)',
+          'bg-bokeh': 'radial-gradient(120% 90% at 50% 15%,#3A2450 0%,#241634 55%,#160D22 100%)',
+          'bg-comic': '#F2D24C',
+          'bg-synthwave': 'linear-gradient(180deg,#1A1140 0%,#2A1550 46%,#3E1C5E 58%,#160D22 100%)',
+          'bg-sunburst': '#1B2450',
+        };
+        safeBg = fallbacks[bgId] || safeBg;
+      }
+
+      // Generate HTML for animated backgrounds
+      let bgHtml = '';
+      if (bgId === 'bg-blob') {
+        bgHtml = '<div class="ab-container" style="background: linear-gradient(155deg,#243157 0%,#1A234A 45%,#141B3B 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: -60px; left: -40px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle,#3A4C8A,transparent 70%); filter: blur(38px); animation: mkBlobA 12s ease-in-out infinite;"></div><div style="position: absolute; bottom: 20px; right: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle,rgba(232,163,61,.55),transparent 70%); filter: blur(42px); animation: mkBlobB 14s ease-in-out infinite;"></div><div style="position: absolute; bottom: -70px; left: 30px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle,rgba(138,99,210,.5),transparent 70%); filter: blur(40px); animation: mkBlobA 16s ease-in-out infinite 2s;"></div></div>';
+      } else if (bgId === 'bg-polka') {
+        bgHtml = '<div class="ab-container" style="background: linear-gradient(160deg,#F0B24C,#E4922B); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; inset: -20px; background-image: radial-gradient(rgba(255,255,255,.42) 3.4px,transparent 4px),radial-gradient(rgba(58,36,16,.14) 3.4px,transparent 4px); background-size: 26px 26px,26px 26px; background-position: 0 0,13px 13px; animation: mkDots 5.5s linear infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 48%,rgba(255,251,242,.55),transparent 52%);"></div></div>';
+      } else if (bgId === 'bg-bokeh') {
+        bgHtml = '<div class="ab-container" style="background: radial-gradient(120% 90% at 50% 15%,#3A2450 0%,#241634 55%,#160D22 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 120px; left: 40px; width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(circle,rgba(242,214,138,.55),transparent 70%); filter: blur(6px); animation: mkFloat 7s ease-in-out infinite;"></div><div style="position: absolute; top: 240px; right: 36px; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle,rgba(214,164,220,.4),transparent 70%); filter: blur(8px); animation: mkFloat2 9s ease-in-out infinite 1s;"></div><div style="position: absolute; bottom: 180px; left: 24px; width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.35),transparent 70%); filter: blur(5px); animation: mkDrift 8s ease-in-out infinite .5s;"></div><div style="position: absolute; bottom: 120px; right: 60px; width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle,rgba(242,214,138,.5),transparent 70%); filter: blur(4px); animation: mkFloat 6s ease-in-out infinite 1.5s;"></div><div style="position: absolute; top: 340px; left: 120px; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.4),transparent 70%); filter: blur(3px); animation: mkFloat2 7.5s ease-in-out infinite;"></div></div>';
+      } else if (bgId === 'bg-comic') {
+        bgHtml = '<div class="ab-container" style="background: #F2D24C; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 50%; left: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; background: repeating-conic-gradient(from 0deg,#161311 0 2.2deg,transparent 2.2deg 8deg); opacity: .9; animation: mkZoom 3.6s ease-in-out infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 48%,#F2D24C 0%,#F2D24C 24%,transparent 42%);"></div></div>';
+      } else if (bgId === 'bg-synthwave') {
+        bgHtml = '<div class="ab-container" style="background: linear-gradient(180deg,#1A1140 0%,#2A1550 46%,#3E1C5E 58%,#160D22 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle,#F2D68A 0%,#E8A33D 45%,rgba(232,163,61,0) 72%); filter: blur(2px);"></div><div style="position: absolute; left: 0; right: 0; bottom: 0; height: 340px; overflow: hidden; perspective: 280px;"><div style="position: absolute; left: -50%; right: -50%; bottom: -40px; height: 520px; background-image: linear-gradient(rgba(232,163,61,.55) 2px,transparent 2px),linear-gradient(90deg,rgba(232,163,61,.55) 2px,transparent 2px); background-size: 52px 52px; transform: rotateX(66deg); transform-origin: bottom center; animation: mkGrid 2.4s linear infinite;"></div><div style="position: absolute; inset: 0; background: linear-gradient(180deg,#160D22 0%,transparent 34%,transparent 78%,rgba(22,13,34,.7));"></div></div></div>';
+      } else if (bgId === 'bg-sunburst') {
+        bgHtml = '<div class="ab-container" style="background: #1B2450; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 50%; left: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; background: repeating-conic-gradient(from 0deg,#2C3A6E 0 10deg,#1C264F 10deg 20deg); animation: mkSunA 78s linear infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%,rgba(232,163,61,.18) 0%,transparent 46%),radial-gradient(circle at 50% 48%,rgba(15,18,40,.5) 0%,transparent 62%),radial-gradient(circle at 50% 120%,transparent 55%,rgba(11,14,32,.72));"></div></div>';
+      }
+      if (bgHtml) {
+        req.__bgHtml = bgHtml;
       }
 
       if (safeBg) {
@@ -350,6 +390,10 @@ router.get('/:templateName/:customName', async (req, res) => {
     const confettiType = (typeof s.confettiType === 'string' && /^[a-zA-Z0-9-]{1,30}$/.test(s.confettiType))
       ? s.confettiType : 'default';
 
+    let html;
+    html = await getTemplateHtml(pub.templateName);
+    if (!html) return sendError(res, 404, 'Template introuvable.');
+
     const injection = `
 <style>
 ${bubbleFontFaces ? bubbleFontFaces + '\n' : ''}${fontFaceCSS ? fontFaceCSS + '\n' : ''}  :root {
@@ -366,6 +410,19 @@ ${bgCssLines.join('\n')}
 ${wallBgLines.join('\n')}
   }
   body { font-family: var(--font) !important; }
+  
+  /* AnimatedBackgrounds CSS */
+  @keyframes mkFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(3deg); } }
+  @keyframes mkFloat2 { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-14px) rotate(-4deg); } }
+  @keyframes mkDrift { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(8px, -10px) scale(1.06); } }
+  @keyframes mkPulse { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.12); opacity: 1; } }
+  @keyframes mkBlobA { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(46px, -34px) scale(1.18); } }
+  @keyframes mkBlobB { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-40px, 30px) scale(1.22); } }
+  @keyframes mkDots { 0% { background-position: 0 0, 13px 13px; } 100% { background-position: 0 52px, 13px 65px; } }
+  @keyframes mkGrid { 0% { background-position: 0 0; } 100% { background-position: 0 60px; } }
+  @keyframes mkZoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+  @keyframes mkSunA { to { transform: rotate(360deg); } }
+  @keyframes mkSunB { to { transform: rotate(-360deg); } }
 </style>
 <script>
   window.__WW_DATA__  = ${safeJsonForScript(publicData)};
@@ -377,13 +434,17 @@ ${wallBgLines.join('\n')}
   window.__WW_WIDGETS__  = ${safeJsonForScript(pub.widgets || [])};
   window.__WW_PHOTO_TRANSFORMS__ = ${safeJsonForScript(pub.photoTransforms || {})};
   window.__WW_CONFETTI_TYPE__    = ${safeJsonForScript(confettiType)};
-<\/script>`;
+  window.__WW_ANIMATED_BGS__     = ${safeJsonForScript(ANIMATED_BGS)};
+</script>`;
 
     /* Inject engine + payload avant </head>. Ordre : engine d'abord (dispo pour tout) */
-    if (!html.includes('ww-engine.js')) {
+    if (!isWallTemplate && !html.includes('ww-engine.js')) {
       html = html.replace('</head>', '<script src="/templates/shared/ww-engine.js"><\/script>\n</head>');
     }
     html = html.replace('</head>', injection + '\n</head>');
+    if (req.__bgHtml) {
+      html = html.replace(/<body([^>]*)>/i, '<body$1>\n' + req.__bgHtml);
+    }
 
     /* ── Compteur de vues (single $inc) ─────────────── */
     if (!isPreview) {

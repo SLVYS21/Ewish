@@ -7,6 +7,7 @@ const {
   safeFontFamily,
   isSafeTemplateName,
 } = require('../utils/htmlSafe');
+const { getReactWallShell } = require('../utils/reactWallShell');
 
 const DEMO_DATA = {};
 
@@ -65,12 +66,12 @@ const GFONTS_MAP = {
 
 const CSP = [
   "default-src 'self' https: data: blob:",
-  "script-src 'self' 'unsafe-inline' https:",
+  "script-src 'self' 'unsafe-inline' https: http://localhost:3000 http://localhost:5173",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
-  "connect-src 'self' https:",
+  "connect-src 'self' https: http://localhost:3000 http://localhost:5173 ws://localhost:3000 ws://localhost:5173",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store",
@@ -92,8 +93,14 @@ router.get('/:templateName', async (req, res) => {
     const template = await Template.findOne({ name: templateName }).lean();
     if (!template) return res.status(404).send('<h1>Template not found</h1>');
 
-    let html = await getTemplateHtml(templateName);
-    if (!html) return res.status(404).send('<h1>Not found</h1>');
+    let html;
+    if (templateName.startsWith('wall-of-wishes')) {
+      html = getReactWallShell();
+      if (!html) return res.status(503).send('<h1>Mur React indisponible</h1>');
+    } else {
+      html = await getTemplateHtml(templateName);
+      if (!html) return res.status(404).send('<h1>Not found</h1>');
+    }
 
     const demoData  = DEMO_DATA[templateName] || {};
     const demoStyle = template.defaultStyle || {};

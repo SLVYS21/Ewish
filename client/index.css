@@ -399,7 +399,7 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .btn-icon:hover { background: var(--mk-blush); color: var(--mk-ink); }
 
 /* ── Cards ── */
-.card { background: var(--mk-paper); border: 1px solid var(--mk-line); border-radius: var(--mk-r-md); box-shadow: var(--mk-sh-1); }
+.card { background: var(--mk-paper); border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
 .card-pad { padding: var(--d-card); }
 .card-hover { transition: transform .18s, box-shadow .18s, border-color .18s; cursor: pointer; }
 .card-hover:hover { transform: translateY(-2px); box-shadow: var(--mk-sh-2); border-color: var(--mk-line-2); }
@@ -412,8 +412,8 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .field-hint { font-size: 11.5px; color: var(--mk-ink-3); line-height: 1.5; }
 .field-error { font-size: 11.5px; color: var(--mk-accent); font-weight: 600; }
 .mk-input, .mk-textarea, .mk-select {
-  width: 100%; background: var(--mk-paper); border: 1.5px solid var(--mk-line-2); border-radius: var(--mk-r-xs);
-  padding: 10px 13px; font-size: 13.5px; font-family: inherit; outline: none;
+  width: 100%; background: #FBF9F6; border: 1px solid rgba(0,0,0,0.05); border-radius: 14px;
+  padding: 12px 14px; font-size: 14px; font-family: inherit; outline: none;
   transition: border-color .15s, box-shadow .15s; color: var(--mk-ink);
 }
 .mk-input:focus, .mk-textarea:focus, .mk-select:focus { border-color: var(--mk-accent); box-shadow: 0 0 0 4px var(--mk-accent-pale); }
@@ -423,9 +423,9 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .mk-input-wrap .lead { position: absolute; left: 12px; color: var(--mk-ink-3); display: flex; pointer-events: none; }
 
 /* Toggle */
-.mk-toggle { width: 42px; height: 24px; border-radius: 99px; background: var(--mk-line-strong); position: relative; transition: background .2s; flex-shrink: 0; border: none; cursor: pointer; }
-.mk-toggle.on { background: var(--mk-accent); }
-.mk-toggle .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.mk-toggle { width: 44px; height: 26px; border-radius: 99px; background: #E5E0E8; position: relative; transition: background .2s; flex-shrink: 0; border: none; cursor: pointer; }
+.mk-toggle.on { background: #1E1A2D; /* Dark Navy for active toggle */ }
+.mk-toggle .knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .mk-toggle.on .knob { left: 21px; }
 
 /* Setting row */
@@ -568,10 +568,11 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .unlock-hero { max-width: 560px; margin: 4vh auto 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0; }
 
 /* ── Wall management ── */
-.wall-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--mk-line); margin-bottom: calc(var(--d-gap) + 6px); }
-.wall-tab { padding: 11px 16px; font-size: 13.5px; font-weight: 700; color: var(--mk-ink-3); border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 8px; transition: color .18s ease, border-bottom-color .22s cubic-bezier(.16,1,.3,1); background: none; border-top: none; border-left: none; border-right: none; cursor: pointer; }
+.wall-tabs { display: flex; gap: 4px; margin-bottom: calc(var(--d-gap) + 6px); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.wall-tabs::-webkit-scrollbar { display: none; }
+.wall-tab { padding: 12px 16px; font-size: 14px; font-weight: 700; color: var(--mk-ink-3); border-bottom: 3px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 8px; transition: color .18s ease, border-bottom-color .22s cubic-bezier(.16,1,.3,1); background: none; border-top: none; border-left: none; border-right: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 .wall-tab:hover { color: var(--mk-ink); }
-.wall-tab.on { color: var(--mk-accent); border-bottom-color: var(--mk-accent); }
+.wall-tab.on { color: #1E1A2D; border-bottom-color: #1E1A2D; }
 .wall-tab .count { font-size: 10.5px; background: var(--mk-accent); color: #fff; border-radius: 99px; padding: 1px 7px; font-weight: 800; }
 .word-card { padding: 14px 16px; display: flex; gap: 13px; align-items: flex-start; }
 .word-msg { font-size: 13px; line-height: 1.55; }

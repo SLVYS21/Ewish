@@ -5,6 +5,7 @@ import {
   Cake, Heart, Baby, Waves, Hand, Feather,
 } from 'lucide-react';
 import { getTemplates, createPublication } from '../utils/api';
+import { WallThemePreview } from '../components/WallPreviews';
 
 /* ─────────────────────────────────────────────────────────── */
 /* Wall event catalog                                          */
@@ -486,25 +487,21 @@ export default function TemplatesGallery() {
               const bg = tpl.thumbnail
                 ? `url(${tpl.thumbnail}) center/cover no-repeat`
                 : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
-              const desc = WALL_DESCS[tpl.name] || tpl.description || '';
               return (
                 <div
                   key={tpl._id}
-                  className="card card-hover tpl-card"
+                  className="card card-hover"
                   onClick={() => setWallSheet(tpl)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', border: '1px solid var(--mk-line-2)', borderRadius: '18px', overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}
                 >
-                  <div className="tpl-thumb" style={{ height: 158, background: bg }} />
-                  <div className="tpl-body">
-                    <div className="tpl-name">{tpl.label || tpl.name}</div>
-                    <div className="tpl-desc">{desc}</div>
-                    <div className="tpl-meta">
-                      <span className="badge badge-cost">
+                  <WallThemePreview templateName={tpl.name} />
+                  <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--mk-ink)' }}>{tpl.label || tpl.name}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                      <span style={{ font: '800 11px Inter, sans-serif', background: 'var(--mk-line)', color: 'var(--mk-ink-2)', padding: '4px 10px', borderRadius: '999px' }}>
                         {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
                       </span>
-                      <button className="btn btn-soft btn-sm" onClick={e => { e.stopPropagation(); openWallModal(tpl); }}>
-                        Choisir <ArrowRight size={13} />
-                      </button>
+                      <span style={{ font: '700 13px Inter, sans-serif', color: 'var(--mk-accent)' }}>Aperçu ›</span>
                     </div>
                   </div>
                 </div>
