@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Ban, Check, Plus, Loader2, Eye, X, ExternalLink } from 'lucide-react';
 import { updatePublication, uploadFile } from '../utils/api';
 import { fireConfetti, stopConfetti } from '../utils/confettiFx';
-import AnimatedBackground from '../wall/AnimatedBackground';
 import s from './WallStyle.module.css';
 
 /* Templates de mur disponibles. Le switch reporte tout le style existant. */
@@ -21,9 +20,10 @@ export const WALL_TEMPLATE_OPTIONS = [
   },
 ];
 
-/* ─── Backgrounds ────────────────────────────────────────────────
-   Animated backgrounds based on the mockup.
-   ────────────────────────────────────────────────────────────── */
+/* ─── Backgrounds animés ──────────────────────────────────────
+   Utilisés UNIQUEMENT pour les statuts (rotation random par slide).
+   Ne sont plus proposés pour le mur lui-même (voir WALL_IMAGE_BACKGROUNDS).
+   Restent exportés pour compat backward + rotation dans StoryViewer. */
 export const STYLE_BACKGROUNDS = [
   {
     id: 'bg-blob',
@@ -68,6 +68,77 @@ export const STYLE_BACKGROUNDS = [
     ink: '#FFFFFF',
   },
 ];
+
+/* ─── Fonds image du mur ───────────────────────────────────────
+   Auto-discovery des images déposées dans client/Backgrounds/. Le
+   serveur les sert via /backgrounds/<filename> (route Express).
+   On stocke une URL RELATIVE : elle se résout au host qui rend la page
+   (wall SSR sur :5000 → :5000/backgrounds/…, éditeur sur :3000 →
+   proxy Vite → :5000, prod même-origine → même serveur). Évite les
+   problèmes de VITE_API_URL mal configuré qui pointerait ailleurs. */
+const _bgFiles = import.meta.glob('../Backgrounds/*.{png,jpg,jpeg,webp,gif}', {
+  eager: true,
+  as: 'url',
+});
+function _labelFromFilename(fn) {
+  const base = fn.replace(/\.(png|jpg|jpeg|webp|gif)$/i, '');
+  return base.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+export const WALL_IMAGE_BACKGROUNDS = Object.keys(_bgFiles)
+  .sort()
+  .map((p) => {
+    const filename = p.split('/').pop();
+    const publicUrl = `/backgrounds/${filename}`;
+    return {
+      id: `wall-img-${filename.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      label: _labelFromFilename(filename),
+      previewUrl: publicUrl,
+      /* Juste l'url — position/taille/attachment viennent du CSS du
+         template. Éviter le shorthand ici évite les surprises quand
+         var() est injecté dans le raccourci background:. */
+      css: `url("${publicUrl}")`,
+      ink: '#FFFFFF',
+      isImage: true,
+    };
+  });
+
+/* ─── Helpers palette → bannière ────────────────────────────────
+   Dérive un gradient + une couleur d'ink lisible depuis l'accent
+   choisi, pour que la bannière du mur suive la palette. */
+function hexToRgb(hex) {
+  const c = String(hex || '').replace('#', '').padStart(6, '0');
+  return {
+    r: parseInt(c.substr(0, 2), 16),
+    g: parseInt(c.substr(2, 2), 16),
+    b: parseInt(c.substr(4, 2), 16),
+  };
+}
+function rgbToHex(r, g, b) {
+  const to = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+  return `#${to(r)}${to(g)}${to(b)}`;
+}
+function lightenHex(hex, whiteRatio) {
+  /* Mélange linéaire vers le blanc — équivalent visuel à
+     color-mix(in srgb, hex X%, white Y%). Précalculé côté client
+     pour un support browser universel (pas de dépendance color-mix). */
+  const { r, g, b } = hexToRgb(hex);
+  const t = Math.max(0, Math.min(1, whiteRatio));
+  return rgbToHex(r + (255 - r) * t, g + (255 - g) * t, b + (255 - b) * t);
+}
+function luminance(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+export function paletteToBannerTint(accent) {
+  /* Gradient à 2 stops hex — évite le retard/fallback bronze quand
+     color-mix n'est pas encore évalué par le renderer. */
+  const light = lightenHex(accent, 0.45);
+  return `linear-gradient(160deg, ${light} 0%, ${accent} 100%)`;
+}
+export function paletteToBannerInk(accent) {
+  /* Bande d'accent claire (or, ciel) → texte foncé. Sinon → blanc. */
+  return luminance(accent) > 0.65 ? '#2B2440' : '#FFFFFF';
+}
 
 /* ─── Palettes ── couleur boutons + texte des boutons ─────────── */
 export const STYLE_PALETTES = [
@@ -337,8 +408,10 @@ function TemplatePicker({ current, onPick, published, isPublished }) {
 export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
   const style = pub?.style || {};
 
-  /* "Aucun" = valeur null. Chaque preset sinon est stocké par id. */
-  const [bgId, setBgId] = useState(style.styleBgPreset || null);
+  /* "Aucun" = valeur null. Chaque preset sinon est stocké par id.
+     Fallback sur wallBackgroundId (source de vérité serveur) pour que
+     l'éditeur reflète le fond réel du mur au premier chargement. */
+  const [bgId, setBgId] = useState(style.styleBgPreset || style.wallBackgroundId || null);
   const [paletteId, setPaletteId] = useState(style.stylePalettePreset || null);
   const [confettiId, setConfettiId] = useState(style.styleConfettiPreset || null);
   const [revealIconId, setRevealIconId] = useState(style.revealIcon || null);
@@ -358,7 +431,11 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
 
   const activeBg = useMemo(
     () => {
-      return STYLE_BACKGROUNDS.find(b => b.id === bgId) || null;
+      /* Cherche dans les images d'abord (nouveau système), puis dans
+         les anciens bgs animés pour compat backward (walls existants). */
+      return WALL_IMAGE_BACKGROUNDS.find(b => b.id === bgId)
+          || STYLE_BACKGROUNDS.find(b => b.id === bgId)
+          || null;
     },
     [bgId]
   );
@@ -367,44 +444,61 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
     [paletteId]
   );
 
-  /* Autosave */
+  /* Autosave — On construit le patch.style IMMÉDIATEMENT et on l'envoie
+     à la preview via postMessage. La sauvegarde serveur suit avec un
+     debounce de 700 ms. Sans ça, la preview attendait ~1,5s (debounce
+     + round-trip DB) avant de refléter le choix — perçu comme "cassé". */
   useEffect(() => {
     if (!inited.current) { inited.current = true; return; }
+    const nextStyle = {
+      ...style,
+      styleBgPreset: bgId,
+      stylePalettePreset: paletteId,
+      styleConfettiPreset: confettiId,
+      styleCustomBgUrl: customBgUrl,
+      revealIcon: revealIconId,
+      revealMascot,
+      revealEmojis,
+    };
+    if (activeBg) {
+      nextStyle.wallBackgroundId = activeBg.id;
+      nextStyle.wallBackground = activeBg.css;
+      nextStyle.wallBackgroundInk = activeBg.ink;
+      nextStyle.wallBackgroundSize = activeBg.size || 'cover';
+    } else {
+      /* "Aucun" — clear les champs pour que le serveur laisse tomber
+         l'ancien fond (sinon le spread conserve les valeurs précédentes). */
+      nextStyle.wallBackgroundId = null;
+      nextStyle.wallBackground = null;
+      nextStyle.wallBackgroundInk = null;
+      nextStyle.wallBackgroundSize = null;
+    }
+    if (activePalette) {
+      nextStyle.wallAccent = activePalette.accent;
+      nextStyle.paletteAccentText = activePalette.accentText;
+      nextStyle.bannerTintFromPalette = paletteToBannerTint(activePalette.accent);
+      nextStyle.bannerInkFromPalette = paletteToBannerInk(activePalette.accent);
+    } else {
+      nextStyle.bannerTintFromPalette = null;
+      nextStyle.bannerInkFromPalette = null;
+    }
+    if (confettiId) nextStyle.confettiType = confettiId;
+
+    /* Live preview : immédiat, pas d'attente. */
+    try {
+      const iframe = document.getElementById('wall-preview-iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'WW_UPDATE', style: nextStyle }, '*');
+      }
+    } catch { /* ignore */ }
+
     onSave?.('unsaved');
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       onSave?.('saving');
       try {
-        const patch = {
-          style: {
-            ...style,
-            styleBgPreset: bgId,
-            stylePalettePreset: paletteId,
-            styleConfettiPreset: confettiId,
-            styleCustomBgUrl: customBgUrl,
-            revealIcon: revealIconId,
-            revealMascot,
-            revealEmojis,
-          },
-        };
-        /* Si un preset est choisi, on hydrate les champs récepteur ; sinon on n'écrase pas. */
-        if (activeBg) {
-          patch.style.wallBackgroundId = activeBg.id;
-          patch.style.wallBackground = activeBg.css;
-          patch.style.wallBackgroundInk = activeBg.ink;
-          patch.style.wallBackgroundSize = activeBg.size || 'cover';
-        }
-        if (activePalette) {
-          patch.style.wallAccent = activePalette.accent;
-          patch.style.paletteAccentText = activePalette.accentText;
-        }
-        if (confettiId) patch.style.confettiType = confettiId;
-        await updatePublication(id, patch);
+        await updatePublication(id, { style: nextStyle });
         onSave?.('saved');
-        const iframe = document.getElementById('wall-preview-iframe');
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ type: 'WW_UPDATE', style: patch.style }, '*');
-        }
       } catch {
         onSave?.('unsaved');
       }
@@ -486,10 +580,10 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
         {tplWarn && <div className={s.tplError}>{tplWarn}</div>}
       </section>
 
-      {/* ── Background ── */}
+      {/* ── Fond du mur ── */}
       <StyleSection
-        title="Arrière-plan"
-        hint="Derrière tous les mots du mur."
+        title="Fond du mur"
+        hint="Motif figé qui reste en place quand on scrolle."
       >
         <div className={s.bgList}>
           <div className={`${s.bgItem} ${bgId === null ? s.bgItemActive : ''}`} onClick={() => setBgId(null)}>
@@ -498,15 +592,19 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
             </div>
             <span className={s.bgLabel}>Aucun</span>
           </div>
-          {STYLE_BACKGROUNDS.map(bg => (
+          {WALL_IMAGE_BACKGROUNDS.map(bg => (
             <div key={bg.id} className={`${s.bgItem} ${bgId === bg.id ? s.bgItemActive : ''}`} onClick={() => setBgId(bg.id)}>
-              <div className={s.bgSquare} style={{ background: bg.previewBg, position: 'relative', overflow: 'hidden' }}>
-                <AnimatedBackground backgroundId={bg.id} previewMode={true} />
-              </div>
+              <div
+                className={s.bgSquare}
+                style={{
+                  backgroundImage: `url("${bg.previewUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
               <span className={s.bgLabel}>{bg.label}</span>
             </div>
           ))}
-          {/* Custom Image Upload could go here as well if needed */}
         </div>
       </StyleSection>
 

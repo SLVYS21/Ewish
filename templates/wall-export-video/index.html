@@ -105,11 +105,252 @@
      Vides si la publication n'a pas été trouvée ou le champ non-renseigné. */
   var RECIPIENT = '{{RECIPIENT}}';
   var THANK_YOU = '{{THANK_YOU}}';
+  /* Titre complet du mur ("Joyeux anniversaire, Marie", "Le mariage de …")
+     — utilisé tel quel en intro sans préfixe "Pour". */
+  var TITLE     = '{{TITLE}}';
+  /* Fond du mur — utilisé pour la 1ère et la dernière page de la vidéo.
+     WALL_BG_ID : 'bg-blob' | 'bg-polka' | … | ''  (bg animé)
+     WALL_BG    : url("…") | linear-gradient(…) | #hex | 'transparent' | ''
+     WALL_INK   : couleur hex du texte lisible sur ce fond            */
+  var WALL_BG_ID = '{{WALL_BG_ID}}';
+  var WALL_BG    = '{{WALL_BG}}';
+  var WALL_INK   = '{{WALL_INK}}';
   var STICKY  = ['#FFF7B8','#C6F0C2','#BFE3FF','#FFD3C2','#E7D5F0','#F6E3C8','#F9F5EA'];
   var canvas  = document.getElementById('stage');
   var ctx     = canvas.getContext('2d');
   var W       = canvas.width;
   var H       = canvas.height;
+
+  /* ─── Palettes de fonds animés (miroir Canvas 2D des motifs live) ──
+     6 types × 5 variantes de couleur = 30 combinaisons possibles.
+     Doit rester sync avec server/utils/animatedBgs.js et
+     client/wall/AnimatedBackground.jsx. */
+  var BG_VARIANTS = {
+    'bg-blob': [
+      { id: 'nocturne', mid:'#243157', dark:'#1A234A', bg:'#141B3B', blob1:'#3A4C8A',                blob2:'rgba(232,163,61,.55)',  blob3:'rgba(138,99,210,.5)' },
+      { id: 'sunset',   mid:'#8F2E3D', dark:'#5C1B2E', bg:'#3A0F1E', blob1:'rgba(242,126,95,.65)',  blob2:'rgba(255,201,122,.55)', blob3:'rgba(184,76,110,.55)' },
+      { id: 'ocean',    mid:'#175A7A', dark:'#0F3959', bg:'#0A2540', blob1:'rgba(79,193,233,.6)',   blob2:'rgba(184,236,236,.5)',  blob3:'rgba(90,123,184,.55)' },
+      { id: 'prairie',  mid:'#2E7256', dark:'#1B4033', bg:'#0D2A1F', blob1:'rgba(136,193,112,.6)',  blob2:'rgba(214,245,143,.5)',  blob3:'rgba(107,175,159,.55)' },
+      { id: 'cerise',   mid:'#8B1E5A', dark:'#4A0F35', bg:'#2D0A20', blob1:'rgba(247,107,159,.6)',  blob2:'rgba(255,181,208,.55)', blob3:'rgba(200,71,142,.55)' },
+    ],
+    'bg-polka': [
+      { id: 'sunlit', top:'#F0B24C', bottom:'#E4922B', dotDark:'rgba(58,36,16,.14)',  center:'rgba(255,251,242,.55)' },
+      { id: 'rose',   top:'#F8A5C2', bottom:'#E85A8F', dotDark:'rgba(120,20,60,.16)', center:'rgba(255,245,250,.55)' },
+      { id: 'sky',    top:'#8ECBFF', bottom:'#4F9FEC', dotDark:'rgba(20,50,110,.16)', center:'rgba(240,250,255,.55)' },
+      { id: 'mint',   top:'#A9E3C4', bottom:'#5FBE8C', dotDark:'rgba(20,80,50,.16)',  center:'rgba(245,255,250,.55)' },
+      { id: 'lilac',  top:'#CBB5F0', bottom:'#9A7DD8', dotDark:'rgba(50,30,110,.16)', center:'rgba(250,247,255,.55)' },
+    ],
+    'bg-bokeh': [
+      { id: 'nocturne', mid:'#3A2450', dark:'#241634', bg:'#160D22', dot1:'rgba(242,214,138,.55)', dot2:'rgba(214,164,220,.4)',  dot3:'rgba(255,255,255,.35)' },
+      { id: 'ocean',    mid:'#0F3959', dark:'#0A2540', bg:'#061424', dot1:'rgba(184,236,236,.5)',  dot2:'rgba(79,193,233,.4)',   dot3:'rgba(255,255,255,.3)' },
+      { id: 'cerise',   mid:'#4A0F35', dark:'#2D0A20', bg:'#1A0512', dot1:'rgba(255,181,208,.5)',  dot2:'rgba(247,107,159,.4)',  dot3:'rgba(255,255,255,.32)' },
+      { id: 'prairie',  mid:'#1B4033', dark:'#0D2A1F', bg:'#061511', dot1:'rgba(214,245,143,.5)',  dot2:'rgba(136,193,112,.4)',  dot3:'rgba(255,255,255,.32)' },
+      { id: 'ember',    mid:'#4E1810', dark:'#2B0C08', bg:'#180504', dot1:'rgba(255,163,110,.5)',  dot2:'rgba(255,215,110,.42)', dot3:'rgba(255,255,255,.3)' },
+    ],
+    'bg-comic': [
+      { id: 'sunlit', bg:'#F2D24C', stripe:'#161311' },
+      { id: 'rose',   bg:'#F7B0CB', stripe:'#2D0A20' },
+      { id: 'sky',    bg:'#A8D8F5', stripe:'#0A2540' },
+      { id: 'mint',   bg:'#B4E5C9', stripe:'#0D2A1F' },
+      { id: 'coral',  bg:'#F8B598', stripe:'#3A0F1E' },
+    ],
+    'bg-synthwave': [
+      { id: 'retrowave', top:'#1A1140', mid1:'#2A1550', mid2:'#3E1C5E', bottom:'#160D22', sunCore:'#F2D68A', sunEdge:'#E8A33D', grid:'rgba(232,163,61,.55)' },
+      { id: 'vapor',     top:'#2D0A50', mid1:'#4A1570', mid2:'#5E1C8A', bottom:'#180530', sunCore:'#FFC3E8', sunEdge:'#F76BC0', grid:'rgba(247,107,192,.55)' },
+      { id: 'cyber',     top:'#0A2038', mid1:'#0F3959', mid2:'#175A7A', bottom:'#061224', sunCore:'#B8ECEC', sunEdge:'#4FC1E9', grid:'rgba(79,193,233,.55)' },
+      { id: 'sunwave',   top:'#3A0F1E', mid1:'#5C1B2E', mid2:'#8F2E3D', bottom:'#1F0812', sunCore:'#FFC97A', sunEdge:'#F27E5F', grid:'rgba(255,201,122,.55)' },
+      { id: 'mintwave',  top:'#0D2A20', mid1:'#1B4033', mid2:'#2E7256', bottom:'#061511', sunCore:'#D6F58F', sunEdge:'#88C170', grid:'rgba(214,245,143,.55)' },
+    ],
+    'bg-sunburst': [
+      { id: 'twilight', bg:'#1B2450', ray1:'#2C3A6E', ray2:'#1C264F', centerGlow:'rgba(232,163,61,.18)', vignette:'rgba(15,18,40,.5)' },
+      { id: 'rose',     bg:'#3A0F1E', ray1:'#5C1B2E', ray2:'#2C0913', centerGlow:'rgba(255,201,122,.22)', vignette:'rgba(31,8,18,.5)' },
+      { id: 'ocean',    bg:'#0A2540', ray1:'#0F3959', ray2:'#061A2E', centerGlow:'rgba(184,236,236,.2)',  vignette:'rgba(6,18,36,.5)' },
+      { id: 'ember',    bg:'#2B0C08', ray1:'#4E1810', ray2:'#1A0603', centerGlow:'rgba(255,163,110,.24)', vignette:'rgba(24,5,4,.5)' },
+      { id: 'cerise',   bg:'#2D0A20', ray1:'#4A0F35', ray2:'#1E0716', centerGlow:'rgba(255,181,208,.2)',  vignette:'rgba(26,8,20,.5)' },
+    ],
+  };
+  var BG_VARIANT_KEYS = [];
+  Object.keys(BG_VARIANTS).forEach(function(type){
+    BG_VARIANTS[type].forEach(function(v){ BG_VARIANT_KEYS.push(type + ':' + v.id); });
+  });
+
+  function pickBgSequence(count) {
+    if (!count) return [];
+    var out = []; var last = null;
+    for (var i = 0; i < count; i++) {
+      var pool = last ? BG_VARIANT_KEYS.filter(function(k){ return k !== last; }) : BG_VARIANT_KEYS;
+      var pick = pool[Math.floor(Math.random() * pool.length)];
+      out.push(pick);
+      last = pick;
+    }
+    return out;
+  }
+
+  function parseBgKey(key) {
+    if (!key) return null;
+    var parts = String(key).split(':');
+    var variants = BG_VARIANTS[parts[0]];
+    if (!variants) return null;
+    var v = parts[1] ? (variants.filter(function(x){ return x.id === parts[1]; })[0] || variants[0]) : variants[0];
+    return { type: parts[0], variant: v };
+  }
+
+  /* ─── Draw motifs Canvas 2D — reproduit chaque type de fond animé.
+     Les animations CSS (mouvement, rotation) sont figées ici — on
+     capture la pose la plus représentative pour la vidéo. */
+  function drawBlobBg(p) {
+    var g = ctx.createLinearGradient(W * 0.15, 0, W * 0.85, H);
+    g.addColorStop(0, p.mid); g.addColorStop(0.45, p.dark); g.addColorStop(1, p.bg);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.filter = 'blur(120px)';
+    drawSoftBlob(-40, 60, 900, p.blob1);
+    drawSoftBlob(W + 120, H - 200, 950, p.blob2);
+    drawSoftBlob(220, H + 100, 800, p.blob3);
+    ctx.restore();
+  }
+  function drawSoftBlob(cx, cy, size, color) {
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+    g.addColorStop(0, color); g.addColorStop(0.7, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, size / 2, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawPolkaBg(p) {
+    var g = ctx.createLinearGradient(0, 0, W * 0.4, H);
+    g.addColorStop(0, p.top); g.addColorStop(1, p.bottom);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var step = 80, r = 10;
+    for (var y = 0; y < H + step; y += step) {
+      for (var x = 0; x < W + step; x += step) {
+        ctx.fillStyle = 'rgba(255,255,255,.42)';
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = p.dotDark;
+        ctx.beginPath(); ctx.arc(x + step / 2, y + step / 2, r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    var cg = ctx.createRadialGradient(W / 2, H * 0.48, 0, W / 2, H * 0.48, W * 0.55);
+    cg.addColorStop(0, p.center); cg.addColorStop(0.52, 'transparent');
+    ctx.fillStyle = cg; ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawBokehBg(p) {
+    var g = ctx.createRadialGradient(W / 2, H * 0.15, 0, W / 2, H * 0.15, Math.max(W, H) * 1.2);
+    g.addColorStop(0, p.mid); g.addColorStop(0.55, p.dark); g.addColorStop(1, p.bg);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.filter = 'blur(30px)';
+    drawSoftBlob(W * 0.12, H * 0.15, 380, p.dot1);
+    drawSoftBlob(W * 0.85, H * 0.28, 520, p.dot2);
+    drawSoftBlob(W * 0.15, H * 0.75, 320, p.dot3);
+    drawSoftBlob(W * 0.82, H * 0.62, 260, p.dot1);
+    drawSoftBlob(W * 0.42, H * 0.42, 200, p.dot3);
+    ctx.restore();
+  }
+
+  function drawComicBg(p) {
+    ctx.fillStyle = p.bg; ctx.fillRect(0, 0, W, H);
+    var cx = W / 2, cy = H / 2, R = Math.max(W, H) * 1.4;
+    var steps = 90; // 360° / (2.2+5.8) ≈ 45 pairs — on double pour visuel
+    ctx.fillStyle = p.stripe;
+    for (var i = 0; i < steps; i++) {
+      var a0 = (i * 8 - 90) * Math.PI / 180;
+      var a1 = a0 + 2.2 * Math.PI / 180;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, R, a0, a1);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // Radial fade au centre
+    var g = ctx.createRadialGradient(cx, cy * 0.96, 0, cx, cy * 0.96, W * 0.42);
+    g.addColorStop(0, p.bg); g.addColorStop(0.24, p.bg); g.addColorStop(0.42, 'transparent');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawSynthwaveBg(p) {
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, p.top); g.addColorStop(0.46, p.mid1); g.addColorStop(0.58, p.mid2); g.addColorStop(1, p.bottom);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // Sun
+    var sunY = H * 0.32, sunR = W * 0.22;
+    var sg = ctx.createRadialGradient(W / 2, sunY, 0, W / 2, sunY, sunR);
+    sg.addColorStop(0, p.sunCore); sg.addColorStop(0.45, p.sunEdge); sg.addColorStop(0.72, 'transparent');
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.arc(W / 2, sunY, sunR, 0, Math.PI * 2); ctx.fill();
+    // Perspective grid — lignes qui convergent vers le milieu à l'horizon
+    var horizonY = H * 0.62;
+    ctx.strokeStyle = p.grid; ctx.lineWidth = 3;
+    for (var lx = -8; lx <= 8; lx++) {
+      ctx.beginPath();
+      ctx.moveTo(W / 2 + lx * 90, horizonY);
+      ctx.lineTo(W / 2 + lx * 900, H + 100);
+      ctx.stroke();
+    }
+    for (var ly = 0; ly < 10; ly++) {
+      var y = horizonY + Math.pow(ly / 10, 1.8) * (H - horizonY + 200);
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    // Fade bas
+    var fg = ctx.createLinearGradient(0, H * 0.6, 0, H);
+    fg.addColorStop(0, 'transparent'); fg.addColorStop(1, p.bottom);
+    ctx.fillStyle = fg; ctx.fillRect(0, H * 0.6, W, H * 0.4);
+  }
+
+  function drawSunburstBg(p) {
+    ctx.fillStyle = p.bg; ctx.fillRect(0, 0, W, H);
+    var cx = W / 2, cy = H * 0.48, R = Math.max(W, H) * 1.5;
+    // Rayons alternés
+    for (var i = 0; i < 36; i++) {
+      var a0 = (i * 20 - 90) * Math.PI / 180;
+      var a1 = a0 + 10 * Math.PI / 180;
+      ctx.fillStyle = p.ray1;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a0, a1); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = p.ray2;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a1, a1 + 10 * Math.PI / 180); ctx.closePath(); ctx.fill();
+    }
+    // Center glow + vignette
+    var g1 = ctx.createRadialGradient(cx, cy - H * 0.02, 0, cx, cy - H * 0.02, W * 0.46);
+    g1.addColorStop(0, p.centerGlow); g1.addColorStop(1, 'transparent');
+    ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+    var g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.62);
+    g2.addColorStop(0, p.vignette); g2.addColorStop(1, 'transparent');
+    ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+  }
+
+  var BG_DRAWERS = {
+    'bg-blob': drawBlobBg,
+    'bg-polka': drawPolkaBg,
+    'bg-bokeh': drawBokehBg,
+    'bg-comic': drawComicBg,
+    'bg-synthwave': drawSynthwaveBg,
+    'bg-sunburst': drawSunburstBg,
+  };
+
+  /* Cache offscreen par bgKey — le draw est cher (blur, gradients,
+     rays), inutile de le refaire à 30 fps sur ~80 frames par note.
+     On génère l'image une fois, puis on la blit à chaque frame. */
+  var _bgCache = {};
+  function getCachedBg(key) {
+    if (_bgCache[key]) return _bgCache[key];
+    var parsed = parseBgKey(key);
+    if (!parsed || !BG_DRAWERS[parsed.type]) return null;
+    var off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    var origCtx = ctx;
+    ctx = off.getContext('2d');
+    try { BG_DRAWERS[parsed.type](parsed.variant); }
+    finally { ctx = origCtx; }
+    _bgCache[key] = off;
+    return off;
+  }
+
+  function drawBg(key) {
+    var cached = getCachedBg(key);
+    if (!cached) return false;
+    ctx.drawImage(cached, 0, 0);
+    return true;
+  }
 
   var statusEl     = document.getElementById('status');
   var btnPreview   = document.getElementById('btn-preview');
@@ -118,8 +359,160 @@
   var recordLabel  = document.getElementById('record-label');
 
   var wishes    = [];
-  var pubTitle  = RECIPIENT ? ('Pour ' + RECIPIENT) : 'Ton mur';
+  /* Titre affiché au tout début — priorité au titre complet du mur
+     (déjà formaté par occasion), sinon RECIPIENT tel quel, sans "Pour". */
+  var pubTitle  = TITLE || RECIPIENT || 'Ton mur';
   var busy      = false;
+
+  /* Résout la clé de fond animé (bg-blob→bg-blob:nocturne, etc.) pour
+     réutiliser BG_DRAWERS. On mappe toujours vers la 1ère variante,
+     comme le fait le rendu SSR du mur (serve.js:220-231). */
+  function wallBgKey() {
+    if (!WALL_BG_ID) return null;
+    var variants = BG_VARIANTS[WALL_BG_ID];
+    if (!variants || !variants.length) return null;
+    return WALL_BG_ID + ':' + variants[0].id;
+  }
+
+  /* Cache d'image de fond (url) pour éviter de la recharger à chaque frame.
+     ensureWallImage() retourne un Promise résolu à null quand pas d'image,
+     ou à l'Image chargée. Le play/record l'attend avant de démarrer pour
+     éviter une 1ère frame sans fond. */
+  var _wallImg = null;
+  var _wallImgPromise = null;
+  function ensureWallImage() {
+    if (_wallImgPromise) return _wallImgPromise;
+    var m = /^url\(\s*['"]?([^'")]+)['"]?\s*\)$/i.exec(WALL_BG || '');
+    if (!m) { _wallImgPromise = Promise.resolve(null); return _wallImgPromise; }
+    var url = m[1];
+    _wallImgPromise = loadImage(url).then(function (img) {
+      if (img) _wallImg = img;
+      return img;
+    });
+    return _wallImgPromise;
+  }
+
+  /* Peint le fond du mur sur toute la scène (intro + outro).
+     Retourne true si peint, false sinon (→ fallback fillPaper()). */
+  function drawWallBackground() {
+    /* 1) Image → dessine puis assombrit légèrement pour lisibilité. */
+    if (_wallImg) {
+      var iw = _wallImg.width, ih = _wallImg.height;
+      var scale = Math.max(W / iw, H / ih);
+      var dw = iw * scale, dh = ih * scale;
+      ctx.drawImage(_wallImg, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      var vg = ctx.createLinearGradient(0, 0, 0, H);
+      vg.addColorStop(0, 'rgba(0,0,0,0.20)');
+      vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+      return true;
+    }
+    /* 2) Fond animé — réutilise BG_DRAWERS. */
+    var key = wallBgKey();
+    if (key && drawBg(key)) {
+      var vg2 = ctx.createLinearGradient(0, 0, 0, H);
+      vg2.addColorStop(0, 'rgba(0,0,0,0.10)');
+      vg2.addColorStop(1, 'rgba(0,0,0,0.35)');
+      ctx.fillStyle = vg2; ctx.fillRect(0, 0, W, H);
+      return true;
+    }
+    /* 3) Couleur/gradient CSS direct (hex, linear-gradient) — on parse
+       les cas simples pour Canvas 2D. */
+    if (WALL_BG && WALL_BG !== 'transparent') {
+      if (/^#[0-9a-f]{3,8}$/i.test(WALL_BG)) {
+        ctx.fillStyle = WALL_BG; ctx.fillRect(0, 0, W, H);
+        return true;
+      }
+      /* linear-gradient(...,#hex,#hex) → dégradé vertical entre les
+         deux 1res couleurs trouvées. Approximation suffisante pour la
+         cover, qui restera lisible avec le voile. */
+      if (/^linear-gradient/i.test(WALL_BG)) {
+        var colors = WALL_BG.match(/#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)/g) || [];
+        if (colors.length >= 2) {
+          var g = ctx.createLinearGradient(0, 0, 0, H);
+          g.addColorStop(0, colors[0]);
+          g.addColorStop(1, colors[colors.length - 1]);
+          ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /* Couleur de texte lisible sur le fond du mur. Défaut : blanc. */
+  var WALL_TEXT = /^#[0-9a-f]{3,8}$/i.test(WALL_INK || '') ? WALL_INK : '#FFFFFF';
+
+  /* ─── Wish media (photos / GIFs / posters vidéo) ────────────────
+     On préload TOUT avant de lancer playSequence. Le MediaRecorder
+     capture pixel par pixel ce qui est déjà peint : une image chargée
+     à la frame 30 mais peinte à la frame 5 sera manquée par ces 25
+     premières frames et flickerait dans la vidéo finale. */
+  function cldTransform(url, tx) {
+    if (!url || url.indexOf('/upload/') === -1) return url;
+    return url.replace('/upload/', '/upload/' + tx + '/');
+  }
+
+  /* Extrait une frame poster depuis une URL vidéo Cloudinary. */
+  function videoPosterUrl(url) {
+    if (!url) return '';
+    if (url.indexOf('/video/upload/') === -1) return url;
+    return url
+      .replace('/video/upload/', '/video/upload/so_0,f_jpg,c_fill,g_auto,w_820,h_620,q_auto/')
+      .replace(/\.(mp4|webm|mov|avi|mkv)(\?.*)?$/i, '.jpg$2');
+  }
+
+  /* URL d'aperçu adaptée à la carte du mot (820px × 620px cible). */
+  function wishMediaUrl(w) {
+    if ((w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl) {
+      return cldTransform(w.photoUrl, 'c_fill,g_auto,w_820,h_620,q_auto,f_auto');
+    }
+    if (w.mediaType === 'video' && w.videoUrl) {
+      return videoPosterUrl(w.videoUrl);
+    }
+    return '';
+  }
+
+  function loadImage(url) {
+    return new Promise(function (resolve) {
+      if (!url) return resolve(null);
+      var img = new Image();
+      var isAbsolute = /^https?:\/\//i.test(url);
+      var isSameOrigin = isAbsolute && url.indexOf(location.origin) === 0;
+      if (isAbsolute && !isSameOrigin) img.crossOrigin = 'anonymous';
+      var settled = false;
+      var done = function (val) { if (settled) return; settled = true; resolve(val); };
+      img.onload = function () { done(img); };
+      img.onerror = function () {
+        /* Retry sans crossOrigin — utile si le CDN ne renvoie pas
+           Access-Control-Allow-Origin (canvas taintra, mais l'image
+           s'affichera au moins en preview local). */
+        if (img.crossOrigin) {
+          var img2 = new Image();
+          img2.onload = function () { done(img2); };
+          img2.onerror = function () { done(null); };
+          img2.src = url;
+        } else {
+          done(null);
+        }
+      };
+      /* Filet 8s pour éviter qu'une image morte bloque l'export. */
+      setTimeout(function () { done(null); }, 8000);
+      img.src = url;
+    });
+  }
+
+  function preloadWishMedia(wishList) {
+    var jobs = wishList.map(function (w) {
+      var url = wishMediaUrl(w);
+      if (!url) return Promise.resolve();
+      return loadImage(url).then(function (img) { w._img = img; });
+    });
+    /* Charge aussi le fond du mur (si image) — la 1ère frame de la
+       vidéo doit avoir le bon fond, pas la pastel de fallback. */
+    jobs.push(ensureWallImage());
+    return Promise.all(jobs);
+  }
 
   function setStatus(msg, isErr) {
     statusEl.textContent = msg || '';
@@ -139,7 +532,11 @@
       })
       .then(function (data) {
         console.log('[VideoExport] Data received, wishes count:', data ? data.length : 0);
-        wishes = (data || []).map(function (w) {
+        var raw = data || [];
+        /* Séquence de fonds : une palette par mot, sans deux adjacents
+           identiques. Attachée à chaque wish pour que drawNote la relise. */
+        var seq = pickBgSequence(raw.length);
+        wishes = raw.map(function (w, i) {
           return {
             text:      w.message || '',
             name:      w.firstName || 'Anonyme',
@@ -147,7 +544,10 @@
             color:     STICKY[(w.color || 0) % STICKY.length],
             rot:       Math.max(-0.06, Math.min(0.06, (w.rot || 0) * Math.PI / 180)),
             photoUrl:  w.photoUrl || '',
+            videoUrl:  w.videoUrl || '',
             mediaType: w.mediaType || 'none',
+            bgKey:     seq[i],
+            _img:      null,  // rempli par preloadWishMedia
           };
         });
         if (!wishes.length) {
@@ -155,10 +555,17 @@
           drawPoster('', 'Aucun mot pour le moment.');
           return;
         }
-        setStatus(wishes.length + ' mot' + (wishes.length > 1 ? 's' : '') + ' prêt' + (wishes.length > 1 ? 's' : '') + ' à animer.');
-        btnPreview.disabled = false;
-        btnRecord.disabled  = false;
-        drawPoster('Livre vidéo', pubTitle);
+        /* Précharge photos/GIFs/posters vidéo AVANT d'activer les boutons.
+           MediaRecorder capture ce qui est peint à l'instant — si les
+           images ne sont pas prêtes au moment du draw, elles n'apparaîtront
+           pas dans la vidéo finale (bug reporté par user). */
+        setStatus('Chargement des images…');
+        preloadWishMedia(wishes).then(function () {
+          setStatus(wishes.length + ' mot' + (wishes.length > 1 ? 's' : '') + ' prêt' + (wishes.length > 1 ? 's' : '') + ' à animer.');
+          btnPreview.disabled = false;
+          btnRecord.disabled  = false;
+          drawPoster('Livre vidéo', pubTitle);
+        });
       })
       .catch(function (err) {
         console.error(err);
@@ -177,35 +584,49 @@
   }
 
   function drawPoster(kicker, title) {
-    fillPaper();
+    /* Fond du mur en priorité (intro = 1re page vidéo). */
+    var onWallBg = drawWallBackground();
+    if (!onWallBg) fillPaper();
+
+    /* Palette texte : blanc/ink sur bg mur, indigo original sur pastel. */
+    var textMain = onWallBg ? WALL_TEXT : '#1E2952';
+    var textSoft = onWallBg ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,82,0.72)';
+
     ctx.save();
     ctx.textAlign = 'center';
     if (kicker) {
       ctx.font = '600 34px "Inter", sans-serif';
-      ctx.fillStyle = 'rgba(30,41,82,0.72)';
+      ctx.fillStyle = textSoft;
       ctx.fillText(kicker.toUpperCase(), W / 2, 340);
     }
     ctx.font = '700 132px "Fraunces", Georgia, serif';
-    ctx.fillStyle = '#1E2952';
+    ctx.fillStyle = textMain;
     wrapText(ctx, title || '', W / 2, 540, W - 200, 148);
     ctx.font = '400 32px "Inter", sans-serif';
-    ctx.fillStyle = 'rgba(30,41,82,0.7)';
+    ctx.fillStyle = textSoft;
     ctx.fillText('Généré avec myKado', W / 2, H - 160);
     ctx.restore();
   }
 
   function drawEndCard() {
-    fillPaper();
+    /* Fond du mur en priorité (outro = dernière page vidéo). */
+    var onWallBg = drawWallBackground();
+    if (!onWallBg) fillPaper();
+
+    var textMain = onWallBg ? WALL_TEXT : '#1E2952';
+    var textAccent = onWallBg ? WALL_TEXT : '#E05574';
+    var textSoft = onWallBg ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,82,0.7)';
+
     ctx.save();
     ctx.textAlign = 'center';
     ctx.font = '700 96px "Fraunces", Georgia, serif';
-    ctx.fillStyle = '#1E2952';
+    ctx.fillStyle = textMain;
     ctx.fillText('Merci', W / 2, H / 2 - 40);
     ctx.font = '400 40px "Caveat", cursive';
-    ctx.fillStyle = '#E05574';
+    ctx.fillStyle = textAccent;
     ctx.fillText('à tous ceux qui ont laissé un mot.', W / 2, H / 2 + 60);
     ctx.font = '600 30px "Inter", sans-serif';
-    ctx.fillStyle = 'rgba(30,41,82,0.7)';
+    ctx.fillStyle = textSoft;
     ctx.fillText('myKado', W / 2, H - 180);
     ctx.restore();
   }
@@ -242,20 +663,91 @@
     ctx.restore();
   }
 
-  function wrapText(c, text, x, y, maxWidth, lineHeight) {
-    var words = String(text || '').split(/\s+/);
-    var line = '';
-    var lines = [];
-    for (var i = 0; i < words.length; i++) {
-      var test = line ? line + ' ' + words[i] : words[i];
-      if (c.measureText(test).width > maxWidth && line) {
-        lines.push(line);
-        line = words[i];
+  /* Coupe un mot trop long (API key, URL, jeton) au niveau du caractère
+     pour qu'il tienne dans maxWidth. Sans ça, le mot déborde silencieusement
+     à droite du canvas et n'apparaît que partiellement — cf. plaintes user
+     sur les messages avec clés/tokens. */
+  function breakLongWord(c, word, maxWidth) {
+    if (c.measureText(word).width <= maxWidth) return [word];
+    var parts = [];
+    var cur = '';
+    for (var i = 0; i < word.length; i++) {
+      var next = cur + word[i];
+      if (c.measureText(next).width > maxWidth && cur) {
+        parts.push(cur);
+        cur = word[i];
       } else {
-        line = test;
+        cur = next;
       }
     }
-    if (line) lines.push(line);
+    if (cur) parts.push(cur);
+    return parts;
+  }
+
+  /* Mesure la hauteur totale que prendra wrapText sans rien dessiner.
+     Utilisé pour ajuster la police (auto-fit) avant le draw final. */
+  function measureWrapHeight(c, text, maxWidth, lineHeight) {
+    var raw = String(text || '');
+    var count = 0;
+    raw.split(/\r?\n/).forEach(function(paragraph) {
+      var words = paragraph.split(/\s+/).filter(Boolean);
+      if (!words.length) { count += 1; return; }
+      var line = '';
+      for (var i = 0; i < words.length; i++) {
+        var w = words[i];
+        if (c.measureText(w).width > maxWidth) {
+          if (line) { count += 1; line = ''; }
+          var pieces = breakLongWord(c, w, maxWidth);
+          count += pieces.length - 1;
+          line = pieces[pieces.length - 1];
+          continue;
+        }
+        var test = line ? line + ' ' + w : w;
+        if (c.measureText(test).width > maxWidth && line) {
+          count += 1; line = w;
+        } else {
+          line = test;
+        }
+      }
+      if (line) count += 1;
+    });
+    return count * lineHeight;
+  }
+
+  function wrapText(c, text, x, y, maxWidth, lineHeight) {
+    /* Split sur whitespace ET \n (le message peut contenir des retours à
+       la ligne, ex. bloc de config d'env). */
+    var raw = String(text || '');
+    var lines = [];
+
+    /* Traite ligne par ligne (préserve les \n voulus par l'auteur). */
+    raw.split(/\r?\n/).forEach(function(paragraph) {
+      var words = paragraph.split(/\s+/).filter(Boolean);
+      if (!words.length) { lines.push(''); return; }
+      var line = '';
+      for (var i = 0; i < words.length; i++) {
+        var w = words[i];
+        /* Si le mot seul dépasse maxWidth, on le casse en morceaux
+           qui rentrent, puis on émet chaque morceau comme sa propre
+           ligne (sauf le dernier qui reprend la logique normale). */
+        if (c.measureText(w).width > maxWidth) {
+          if (line) { lines.push(line); line = ''; }
+          var pieces = breakLongWord(c, w, maxWidth);
+          for (var p = 0; p < pieces.length - 1; p++) lines.push(pieces[p]);
+          line = pieces[pieces.length - 1];
+          continue;
+        }
+        var test = line ? line + ' ' + w : w;
+        if (c.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = w;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+    });
+
     // Vertical centering around y
     var totalH = lines.length * lineHeight;
     var startY = y - totalH / 2 + lineHeight / 2;
@@ -266,7 +758,9 @@
   }
 
   function drawNote(wish, progress) {
-    fillPaper();
+    /* Fond palette pour ce mot — fallback sur fillPaper si la clé
+       est manquante/invalide (backward compat + robustesse). */
+    if (!drawBg(wish.bgKey)) fillPaper();
 
     // Ease-out cubic
     var t = 1 - Math.pow(1 - Math.min(1, Math.max(0, progress)), 3);
@@ -293,12 +787,59 @@
 
     ctx.shadowColor = 'transparent';
 
-    // Wish text
+    /* ── Media (photo/GIF/poster vidéo) en haut du sticky ─────────
+       Sans ça, les cartes avec image étaient rendues comme du texte
+       nu — l'image du contributeur n'apparaissait ni en preview ni
+       dans la vidéo exportée. */
+    var hasMedia = !!(wish._img);
+    var mediaBottom = -cardH / 2;  // y du bas de la zone image
+    if (hasMedia) {
+      var mediaW = cardW - 100;
+      var mediaH = 460;
+      var mediaX = -mediaW / 2;
+      var mediaY = -cardH / 2 + 50;
+      /* Clip arrondi pour matcher le style polaroid du mur. */
+      ctx.save();
+      roundRect(ctx, mediaX, mediaY, mediaW, mediaH, 20);
+      ctx.clip();
+      /* object-fit: cover — scale l'image pour remplir sans déformer. */
+      var iw = wish._img.width, ih = wish._img.height;
+      var scale = Math.max(mediaW / iw, mediaH / ih);
+      var dw = iw * scale, dh = ih * scale;
+      ctx.drawImage(
+        wish._img,
+        mediaX + (mediaW - dw) / 2,
+        mediaY + (mediaH - dh) / 2,
+        dw, dh
+      );
+      ctx.restore();
+      mediaBottom = mediaY + mediaH;
+    }
+
+    // Wish text — auto-shrink si le texte est trop long pour tenir dans
+    // la zone dispo (cardH moins l'espace pour la signature). Sans ça,
+    // les messages avec API keys / paragraphes longs débordent le sticky.
     ctx.fillStyle = '#2a2540';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '600 62px "Caveat", cursive';
-    wrapText(ctx, wish.text, 0, -60, cardW - 180, 78);
+    var textAreaMaxW = cardW - 180;
+    /* Réduit la zone texte si une image occupe le haut du sticky. */
+    var textAreaMaxH = hasMedia ? (cardH - 320 - 480) : (cardH - 320);
+    var textCenterY = hasMedia ? (mediaBottom + (cardH / 2 - 130 - mediaBottom) / 2) : -60;
+    var fontPx = hasMedia ? 48 : 62;
+    var lineHeight = hasMedia ? 60 : 78;
+    /* Réduit la police tant que le texte dépasse la hauteur autorisée.
+       Plancher à 28px pour rester lisible. Chaque itération est cheap
+       (mesure sans dessin, wrapText retourne la hauteur totale). */
+    for (var attempt = 0; attempt < 10; attempt++) {
+      ctx.font = '600 ' + fontPx + 'px "Caveat", cursive';
+      var probeH = measureWrapHeight(ctx, wish.text, textAreaMaxW, lineHeight);
+      if (probeH <= textAreaMaxH || fontPx <= 28) break;
+      fontPx = Math.max(28, Math.round(fontPx * 0.88));
+      lineHeight = Math.round(fontPx * 1.26);
+    }
+    ctx.font = '600 ' + fontPx + 'px "Caveat", cursive';
+    wrapText(ctx, wish.text, 0, textCenterY, textAreaMaxW, lineHeight);
 
     // Signature
     ctx.font = '700 44px "Fraunces", Georgia, serif';

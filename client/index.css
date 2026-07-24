@@ -575,7 +575,9 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .wall-tab.on { color: #1E1A2D; border-bottom-color: #1E1A2D; }
 .wall-tab .count { font-size: 10.5px; background: var(--mk-accent); color: #fff; border-radius: 99px; padding: 1px 7px; font-weight: 800; }
 .word-card { padding: 14px 16px; display: flex; gap: 13px; align-items: flex-start; }
-.word-msg { font-size: 13px; line-height: 1.55; }
+/* overflow-wrap: anywhere pour couper les chaînes ultra-longues sans
+   espace (clés API, URLs, base64) qui débordaient de la card. */
+.word-msg { font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; word-break: break-word; }
 .word-by { font-size: 11.5px; color: var(--mk-ink-3); font-weight: 700; margin-top: 6px; }
 .progress-track { height: 10px; background: var(--mk-blush); border-radius: 99px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--mk-accent); border-radius: 99px; transition: width .6s; }

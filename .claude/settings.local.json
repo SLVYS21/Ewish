@@ -21,7 +21,10 @@
       "Bash(npm run *)",
       "Bash(npx vite *)",
       "Bash(dir *)",
-      "PowerShell(npm run *)"
+      "PowerShell(npm run *)",
+      "Bash(npx puppeteer *)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)"
     ]
   }
 }

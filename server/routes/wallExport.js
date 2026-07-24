@@ -39,8 +39,16 @@ router.get('/:pubId/export/pdf', async (req, res) => {
       return res.status(422).json({ error: 'Ce mur ne contient encore aucun mot à imprimer.' });
     }
 
-    const pdf = await renderWallBookPdf({ publication, wishes });
-    const recipient = publication.data?.titleName || publication.title || 'mur';
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const pdf = await renderWallBookPdf({ publication, wishes, baseUrl });
+    /* Filename basé sur le prénom du destinataire seul (Sarah) plutôt que
+       le titre complet ("Joyeux anniversaire, Sarah") — plus lisible dans
+       l'explorateur de fichiers. Fallback legacy sur titleName/title pour
+       les murs pré-migration où data.recipient contenait le titre. */
+    const recipient = publication.data?.recipient
+      || publication.data?.titleName
+      || publication.title
+      || 'mur';
     const filename = `livre-des-mots-${safeSlug(recipient)}.pdf`;
     res.writeHead(200, {
       'Content-Type': 'application/pdf',
@@ -59,7 +67,8 @@ router.get('/:pubId/export/preview', async (req, res) => {
   try {
     const { publication, wishes } = await loadWallData(req.params.pubId);
     if (!publication) return res.status(404).send('Publication not found');
-    const html = buildBookHtml({ publication, wishes });
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const html = buildBookHtml({ publication, wishes, baseUrl });
     res.set('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {

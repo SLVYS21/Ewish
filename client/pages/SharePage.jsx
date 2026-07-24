@@ -794,16 +794,16 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
                 {copied ? <><Check size={12} /> Copié</> : <><Copy size={12} /> Copier</>}
               </button>
             </div>
-            {isWall && shareTab === 'guests' && (
+            {/* Copier {isWall && shareTab === 'guests' && (
               <a href={activeShareUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ marginTop: 8 }}>
                 <PenLine size={13} /> Prévisualiser l'écriture d'un mot
               </a>
-            )}
-            {isWall && shareTab === 'recipient' && (
+            )} */}
+            {/* {isWall && shareTab === 'recipient' && (
               <a href={activeShareUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ marginTop: 8 }}>
                 <Sparkles size={13} /> Prévisualiser le déballage
               </a>
-            )}
+            )} */}
           </div>
 
           {/* Le code court */}

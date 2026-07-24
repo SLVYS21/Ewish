@@ -52,14 +52,11 @@ const GOOGLE_FONTS_MAP = {
   'Nunito':           'Nunito:wght@300;400;500;600;700',
 };
 
-const ANIMATED_BGS = {
-  'bg-blob': '<div class="ab-container" style="background: linear-gradient(155deg,#243157 0%,#1A234A 45%,#141B3B 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: -60px; left: -40px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle,#3A4C8A,transparent 70%); filter: blur(38px); animation: mkBlobA 12s ease-in-out infinite;"></div><div style="position: absolute; bottom: 20px; right: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle,rgba(232,163,61,.55),transparent 70%); filter: blur(42px); animation: mkBlobB 14s ease-in-out infinite;"></div><div style="position: absolute; bottom: -70px; left: 30px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle,rgba(138,99,210,.5),transparent 70%); filter: blur(40px); animation: mkBlobA 16s ease-in-out infinite 2s;"></div></div>',
-  'bg-polka': '<div class="ab-container" style="background: linear-gradient(160deg,#F0B24C,#E4922B); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; inset: -20px; background-image: radial-gradient(rgba(255,255,255,.42) 3.4px,transparent 4px),radial-gradient(rgba(58,36,16,.14) 3.4px,transparent 4px); background-size: 26px 26px,26px 26px; background-position: 0 0,13px 13px; animation: mkDots 5.5s linear infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 48%,rgba(255,251,242,.55),transparent 52%);"></div></div>',
-  'bg-bokeh': '<div class="ab-container" style="background: radial-gradient(120% 90% at 50% 15%,#3A2450 0%,#241634 55%,#160D22 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 120px; left: 40px; width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(circle,rgba(242,214,138,.55),transparent 70%); filter: blur(6px); animation: mkFloat 7s ease-in-out infinite;"></div><div style="position: absolute; top: 240px; right: 36px; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle,rgba(214,164,220,.4),transparent 70%); filter: blur(8px); animation: mkFloat2 9s ease-in-out infinite 1s;"></div><div style="position: absolute; bottom: 180px; left: 24px; width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.35),transparent 70%); filter: blur(5px); animation: mkDrift 8s ease-in-out infinite .5s;"></div><div style="position: absolute; bottom: 120px; right: 60px; width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle,rgba(242,214,138,.5),transparent 70%); filter: blur(4px); animation: mkFloat 6s ease-in-out infinite 1.5s;"></div><div style="position: absolute; top: 340px; left: 120px; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.4),transparent 70%); filter: blur(3px); animation: mkFloat2 7.5s ease-in-out infinite;"></div></div>',
-  'bg-comic': '<div class="ab-container" style="background: #F2D24C; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 50%; left: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; background: repeating-conic-gradient(from 0deg,#161311 0 2.2deg,transparent 2.2deg 8deg); opacity: .9; animation: mkZoom 3.6s ease-in-out infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 48%,#F2D24C 0%,#F2D24C 24%,transparent 42%);"></div></div>',
-  'bg-synthwave': '<div class="ab-container" style="background: linear-gradient(180deg,#1A1140 0%,#2A1550 46%,#3E1C5E 58%,#160D22 100%); position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle,#F2D68A 0%,#E8A33D 45%,rgba(232,163,61,0) 72%); filter: blur(2px);"></div><div style="position: absolute; left: 0; right: 0; bottom: 0; height: 340px; overflow: hidden; perspective: 280px;"><div style="position: absolute; left: -50%; right: -50%; bottom: -40px; height: 520px; background-image: linear-gradient(rgba(232,163,61,.55) 2px,transparent 2px),linear-gradient(90deg,rgba(232,163,61,.55) 2px,transparent 2px); background-size: 52px 52px; transform: rotateX(66deg); transform-origin: bottom center; animation: mkGrid 2.4s linear infinite;"></div><div style="position: absolute; inset: 0; background: linear-gradient(180deg,#160D22 0%,transparent 34%,transparent 78%,rgba(22,13,34,.7));"></div></div></div>',
-  'bg-sunburst': '<div class="ab-container" style="background: #1B2450; position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;"><div style="position: absolute; top: 50%; left: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; background: repeating-conic-gradient(from 0deg,#2C3A6E 0 10deg,#1C264F 10deg 20deg); animation: mkSunA 78s linear infinite;"></div><div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%,rgba(232,163,61,.18) 0%,transparent 46%),radial-gradient(circle at 50% 48%,rgba(15,18,40,.5) 0%,transparent 62%),radial-gradient(circle at 50% 120%,transparent 55%,rgba(11,14,32,.72));"></div></div>'
-};
+/* ─── Fonds animés (statuts) ─────────────────────────────────
+   Palettes + factories dans server/utils/animatedBgs.js — partagé
+   avec wallBookPdf.js pour le livre PDF. Rendu HTML statique, animé
+   côté CSS via les keyframes injectées plus bas. */
+const { ANIMATED_BGS } = require('../utils/animatedBgs');
 
 function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_limit') {
   if (!url || !url.includes('res.cloudinary.com')) return url;
@@ -258,15 +255,21 @@ router.get('/:templateName/:customName', async (req, res) => {
       const rawAccentInk = safeColor(s.paletteAccentText || '', '');
       if (rawAccentInk) wallBgLines.push(`  --pin-btn-ink: ${rawAccentInk};`);
       /* Bannière (#wall-cover) : lit --cover-image (gradient) et --cover-ink (couleur texte).
-         Sources : data.bannerTint (gradient de l'occasion) + data.bannerInk (contraste). */
-      const rawBanner = String((pub.data && pub.data.bannerTint) || '').trim();
+         Priorité 1 : palette utilisateur (style.bannerTintFromPalette / bannerInkFromPalette).
+         Priorité 2 : occasion (data.bannerTint / data.bannerInk).
+         La palette override aussi --pin-cover-ink pour que le texte "de base" du
+         header reste lisible sur le gradient palette (par défaut #3A2814 bronze). */
+      const paletteBanner = String(s.bannerTintFromPalette || '').trim();
+      const rawBanner = paletteBanner || String((pub.data && pub.data.bannerTint) || '').trim();
       let safeBanner = '';
       if (!/[;<>}]/.test(rawBanner) && (/^(?:linear|radial|conic)-gradient/i.test(rawBanner) || /^#[0-9a-f]{3,8}$/i.test(rawBanner) || /^url\(/i.test(rawBanner))) {
         safeBanner = rawBanner;
       }
       if (safeBanner) wallBgLines.push(`  --cover-image: ${safeBanner};`);
-      const rawBannerInk = safeColor((pub.data && pub.data.bannerInk) || '', '');
+      const paletteBannerInk = safeColor(s.bannerInkFromPalette || '', '');
+      const rawBannerInk = paletteBannerInk || safeColor((pub.data && pub.data.bannerInk) || '', '');
       if (rawBannerInk) wallBgLines.push(`  --cover-ink: ${rawBannerInk};`);
+      if (paletteBannerInk) wallBgLines.push(`  --pin-cover-ink: ${paletteBannerInk};`);
     }
 
     /* ── CSS: section background variables (whitelisted) ─── */

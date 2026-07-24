@@ -327,7 +327,7 @@ export default function Dashboard() {
       )}
 
       {/* ══ Promo card ════════════════════════════════════════════ */}
-      {promoOpen && (
+      {/* {promoOpen && (
         <div className={s.promo} onClick={() => navigate('/ewish-admin/templates')}>
           <button
             className={s.promoClose}
@@ -339,7 +339,7 @@ export default function Dashboard() {
           <div className={s.promoEyebrow}>Nouveau</div>
           <div className={s.promoTitle}>Ton flux d'activité est en ligne</div>
         </div>
-      )}
+      )} */}
 
       {/* ══ Featured themes ═══════════════════════════════════════ */}
       {templates.length > 0 && (

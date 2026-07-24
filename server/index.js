@@ -40,6 +40,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+/* Fonds de mur (images fixes) — le dossier client/Backgrounds/ est aussi
+   servi côté serveur pour que les URLs stockées (/backgrounds/xxx.png)
+   résolvent depuis n'importe où (wall SSR, éditeur, previews). */
+app.use('/backgrounds', express.static(path.join(__dirname, '../client/Backgrounds'), {
+  maxAge: '30d',
+  immutable: false,
+}));
+
 const TEMPLATES_DIR = process.env.TEMPLATES_DIR ||
   (fs.existsSync(path.join(__dirname, 'templates')) 
     ? path.join(__dirname, 'templates')

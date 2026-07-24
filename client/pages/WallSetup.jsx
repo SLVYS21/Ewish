@@ -81,7 +81,13 @@ function WallSettings({ pub, id, onSave }) {
   const cc  = pub.cagnotteConfig || {};
   const d   = pub.data || {};
 
-  const [wallTitle, setWallTitle]     = useState(d.recipient || d.titleName || pub.title || '');
+  /* wallTitle = titre COMPLET du mur, éditable librement.
+     À la création, le wizard a déjà pré-rempli pub.title depuis l'événement
+     (ex: "Joyeux anniversaire, Sarah"). L'admin peut ensuite tout changer. */
+  const [wallTitle, setWallTitle]     = useState(pub.title || d.titleName || d.recipient || '');
+  /* recipientName = prénom seul du destinataire (ex: "Sarah"), distinct du
+     titre. Utilisé pour reveal, thank-you PDF, filename export, crédits vidéo. */
+  const [recipientName, setRecipientName] = useState(d.recipient || '');
   const [phrase, setPhrase]           = useState(d.subtitle || d.phrase || '');
   const [bannerImage, setBannerImage] = useState(d.bannerImage || '');
   const [uploadingBanner, setUploadingBanner] = useState(false);
@@ -94,24 +100,51 @@ function WallSettings({ pub, id, onSave }) {
 
   const inited = useRef(false);
 
-  /* Auto-save info — wallTitle = destinataire ; on rebâtit pub.title depuis l'événement,
-     et on propage aux champs consommés par le template (data.titleName, data.recipient). */
+  /* Petit helper — pousse un patch au preview iframe pour un rendu live
+     (le template écoute WW_UPDATE et WW_CONFIG). */
+  const notifyPreview = (payload) => {
+    try {
+      const iframe = document.getElementById('wall-preview-iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(payload, '*');
+      }
+    } catch { /* ignore */ }
+  };
+
+  /* Auto-save info — le titre est stocké tel quel dans pub.title.
+     On le propage aussi à data.titleName (consommé par le template pour
+     le rendu du <em>) et on force data.titlePrefix='' pour désactiver le
+     préfixe auto TITLE_PREFIXES qui doublerait le titre.
+     data.recipient est stocké séparément (prénom seul) : c'est ce qu'on
+     lit pour tous les endroits "personnels" (reveal, thank-you, filename). */
   const infoTimer = useRef(null);
   useEffect(() => {
     if (!inited.current) return;
     onSave('unsaved');
+    /* Live preview immédiat : pas d'attente du debounce serveur. */
+    notifyPreview({
+      type: 'WW_UPDATE',
+      data: {
+        titleName: (wallTitle || '').trim(),
+        titlePrefix: '',
+        recipient: (recipientName || '').trim(),
+        subtitle: phrase,
+        coverImage: bannerImage,
+        wallCover: bannerImage,
+      },
+    });
     clearTimeout(infoTimer.current);
     infoTimer.current = setTimeout(async () => {
       onSave('saving');
       try {
-        const recipient = (wallTitle || '').trim();
-        const ev = getEvent(d.occasion);
-        const rebuiltTitle = recipient ? ev.title(recipient) : (pub.title || '');
+        const title = (wallTitle || '').trim();
+        const recip = (recipientName || '').trim();
         await updatePublication(id, {
-          title: rebuiltTitle,
+          title: title || (pub.title || ''),
           data: {
-            titleName: recipient,
-            recipient,
+            titleName: title,
+            titlePrefix: '',
+            recipient: recip,
             subtitle: phrase,
             phrase,
             bannerImage,
@@ -122,13 +155,15 @@ function WallSettings({ pub, id, onSave }) {
         onSave('saved');
       } catch { onSave('unsaved'); }
     }, 800);
-  }, [wallTitle, phrase, bannerImage]);
+  }, [wallTitle, recipientName, phrase, bannerImage]);
 
   /* Auto-save basic config */
   const ccTimer = useRef(null);
   useEffect(() => {
     if (!inited.current) return;
     onSave('unsaved');
+    /* Live preview : reception (wishesEnabled) est écouté par WW_CONFIG. */
+    notifyPreview({ type: 'WW_CONFIG', wishesEnabled: reception });
     clearTimeout(ccTimer.current);
     ccTimer.current = setTimeout(async () => {
       onSave('saving');
@@ -164,9 +199,16 @@ function WallSettings({ pub, id, onSave }) {
           <div className="section-label" style={{ marginBottom: 14 }}>Les infos du mur</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
             <div className="field">
-              <label className="field-label">Pour qui est ce mur ?</label>
+              <label className="field-label">Titre du mur</label>
+              <div className="field-hint" style={{ marginBottom: 4 }}>Affiché en grand sur la bannière. On l'a pré-rempli à partir de l'occasion — libre à toi de le modifier.</div>
               <input className="mk-input" value={wallTitle} onChange={e => setWallTitle(e.target.value)}
-                placeholder="ex : Sarah, l'équipe RH, Léa & Karim…" />
+                placeholder="ex : Joyeux anniversaire, Sarah" />
+            </div>
+            <div className="field">
+              <label className="field-label">Prénom du destinataire</label>
+              <div className="field-hint" style={{ marginBottom: 4 }}>Utilisé pour les messages personnalisés (déballage, mot de merci, nom du livre PDF…).</div>
+              <input className="mk-input" value={recipientName} onChange={e => setRecipientName(e.target.value)}
+                placeholder="ex : Sarah" maxLength={80} />
             </div>
             <div className="field">
               <label className="field-label">La phrase d'accueil</label>

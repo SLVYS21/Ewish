@@ -1412,7 +1412,15 @@
     .story-card .big-tx {
       font-family: var(--display); font-size: 27px; line-height: 1.25;
       margin-top: 18px; color: var(--mk-ink);
+      /* Coupe les chaînes ultra-longues (clés API, URLs) qui poussaient
+         la story-card au-delà de max-width et décalaient les autres. */
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      min-width: 0;
     }
+    /* Auto-shrink font pour messages longs — meilleur rendu global. */
+    .story-card .big-tx.is-lg { font-size: 22px; line-height: 1.3; }
+    .story-card .big-tx.is-xl { font-size: 17px; line-height: 1.4; }
     .story-card .s-media {
       margin-top: 18px; border-radius: 16px; overflow: hidden;
     }
@@ -2626,7 +2634,15 @@
     .story-card .big-tx {
       font-family: var(--display); font-size: 27px; line-height: 1.25;
       margin-top: 18px; color: var(--mk-ink);
+      /* Coupe les chaînes ultra-longues (clés API, URLs) qui poussaient
+         la story-card au-delà de max-width et décalaient les autres. */
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      min-width: 0;
     }
+    /* Auto-shrink font pour messages longs — meilleur rendu global. */
+    .story-card .big-tx.is-lg { font-size: 22px; line-height: 1.3; }
+    .story-card .big-tx.is-xl { font-size: 17px; line-height: 1.4; }
     .story-card .s-media {
       margin-top: 18px; border-radius: 16px; overflow: hidden;
     }

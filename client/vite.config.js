@@ -110,6 +110,8 @@ export default defineConfig({
       '/api': 'http://localhost:5000',
       '/site': 'http://localhost:5000',
       '/uploads': 'http://localhost:5000',
+      '/backgrounds': 'http://localhost:5000',
+      '/s': 'http://localhost:5000',
     },
   },
 });

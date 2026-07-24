@@ -82,10 +82,13 @@ router.get('/id/:id', requireAdmin, async (req, res) => {
 // GET public publication data by slug (for recipient reveal animation)
 router.get('/public/slug/:slug', async (req, res) => {
   try {
-    const pub = await Publication.findOne({ 
-      $or: [{ slug: req.params.slug }, { shortCode: req.params.slug }],
-      published: true 
-    }).lean();
+    /* ?preview=1 permet à l'éditeur admin d'afficher le déballage destinataire
+       sur un mur pas encore publié. Aligné sur le comportement de /site/*
+       (voir server/routes/serve.js:111). */
+    const isPreview = req.query.preview === '1';
+    const query = { $or: [{ slug: req.params.slug }, { shortCode: req.params.slug }] };
+    if (!isPreview) query.published = true;
+    const pub = await Publication.findOne(query).lean();
     if (!pub) return res.status(404).json({ error: 'Not found' });
     
     // Only return safe public data needed for reveal UI

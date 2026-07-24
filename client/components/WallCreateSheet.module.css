@@ -31,6 +31,31 @@
   line-height: 1.4;
 }
 
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--mk-rose, #E11D48);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background .15s;
+}
+
+.linkBtn:hover { background: var(--mk-rose-pale, #FFE0E6); }
+
 /* Mobile : scroll horizontal + snap pour éviter le wrap sur plusieurs lignes */
 .pillsWrap {
   position: relative;

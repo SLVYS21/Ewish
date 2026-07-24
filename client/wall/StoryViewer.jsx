@@ -1,12 +1,38 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import AnimatedBackground from './AnimatedBackground';
+import AnimatedBackground, { BG_VARIANT_KEYS } from './AnimatedBackground';
 import AudioWavePlayer from './AudioWavePlayer';
+
+/* Séquence aléatoire de fonds — recalculée à chaque ouverture pour
+   éviter la même suite à chaque visite. Contrainte : pas deux fonds
+   identiques consécutifs. Si le nombre de wishes dépasse les 30
+   variantes, on répète mais toujours en évitant l'adjacent. */
+function pickBgSequence(count, allKeys) {
+  if (!count || !allKeys.length) return [];
+  const out = [];
+  let last = null;
+  for (let i = 0; i < count; i++) {
+    const pool = last ? allKeys.filter(k => k !== last) : allKeys;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    out.push(pick);
+    last = pick;
+  }
+  return out;
+}
 
 function StoryViewer({ wishes, initialIndex, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef(null);
+
+  /* Séquence de fonds figée pour cette instance du viewer — évite que
+     le bg change à chaque re-render pendant la navigation entre slides
+     (utilisation de useMemo avec wishes.length comme dep, plus stable
+     que Math.random appelé dans le map). */
+  const bgSequence = useMemo(
+    () => pickBgSequence(wishes.length, BG_VARIANT_KEYS),
+    [wishes.length]
+  );
 
   const currentWish = wishes[currentIndex];
 
@@ -75,8 +101,7 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
 
       <div className="story-track" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
         {wishes.map((wish, idx) => {
-          const bgs = ['bg-blob', 'bg-polka', 'bg-bokeh', 'bg-comic', 'bg-synthwave', 'bg-sunburst'];
-          const bgId = bgs[idx % bgs.length];
+          const bgId = bgSequence[idx];
           const emojiCodes = ['1f381', '1f382', '1f49d', '1f389', '1f4ab', '1f942', '1f60d'];
           const emojiCode = emojiCodes[(idx * 3) % emojiCodes.length];
           const corners = [
@@ -110,7 +135,7 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
                     {wish.role && <div className="rel">{wish.role}</div>}
                   </div>
                 </div>
-                <div className="big-tx">{wish.message}</div>
+                <div className={`big-tx${(wish.message || '').length > 300 ? ' is-xl' : (wish.message || '').length > 120 ? ' is-lg' : ''}`}>{wish.message}</div>
                 {wish.photoUrl && (
                   <div className="s-media s-photo" style={{ backgroundImage: `url(${wish.photoUrl})` }} />
                 )}

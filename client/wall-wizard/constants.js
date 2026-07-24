@@ -81,6 +81,17 @@ export const WALL_EVENTS = [
     eyebrow:  'Hommage',
     confettiSuggestion: 'default',
   },
+  /* "Autre" — filet de sécurité pour toutes les occasions non listées.
+     Titre volontairement générique, éditable ensuite dans l'onglet Réglages. */
+  {
+    id: 'other', label: 'Autre', Icon: Sparkles, festive: true,
+    accent: '#B59CF0', tint: 'linear-gradient(135deg,#F1EAFB 0%,#B59CF0 100%)',
+    bannerInk: '#FFFFFF',
+    title:    (n) => `Un mot pour ${n || '…'}`,
+    subtitle: (n) => `Laisse un petit mot doux à ${n || 'cette personne'}.`,
+    eyebrow:  '',
+    confettiSuggestion: 'default',
+  },
 ];
 
 /* ─── BACKGROUNDS_CATALOG ─────────────────────────────────────
@@ -133,7 +144,11 @@ export const BACKGROUND_TABS = [
   { id: 'plain',    label: 'Unis' },
 ];
 
-export const DEFAULT_BACKGROUND_ID = 'bg-blob';
+/* null = pas de fond au moment de la création. Les fonds animés du
+   catalogue ne sont plus proposés pour le mur lui-même (ils servent
+   maintenant en rotation sur les statuts). L'utilisateur choisit un
+   fond image dans l'éditeur (Fond du mur) si il le souhaite. */
+export const DEFAULT_BACKGROUND_ID = null;
 
 /* ─── Cagnotte presets — Contrast Effect ──────────────────── */
 export const CAGNOTTE_PRESETS = [

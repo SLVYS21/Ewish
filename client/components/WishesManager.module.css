@@ -91,6 +91,10 @@
   font-size: 0.8rem; color: var(--text-2); line-height: 1.55;
   font-style: italic; margin-bottom: 10px;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  /* overflow-wrap: anywhere pour couper les chaînes ultra-longues sans
+     espace (clés API, URLs, base64) qui débordaient de la card. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .wishActions { display: flex; gap: 6px; }

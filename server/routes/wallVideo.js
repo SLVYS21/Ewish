@@ -43,26 +43,42 @@ router.get('/:pubId/export/video', async (req, res) => {
     return res.status(500).send('Recorder template not found');
   }
 
-  /* On lit la publication pour injecter titre + mot de merci dans le recorder,
-     évitant un round-trip API côté client. */
+  /* On lit la publication pour injecter titre + mot de merci + fond du mur
+     dans le recorder, évitant un round-trip API côté client. */
   let recipient = '';
   let thankYou  = '';
+  let title     = '';
+  let wallBgId  = '';
+  let wallBg    = '';
+  let wallInk   = '';
   try {
     const pub = await Publication.findById(req.params.pubId)
-      .select('title data.titleName thankYouMessage')
+      .select('title data.recipient data.titleName thankYouMessage style.wallBackgroundId style.wallBackground style.wallBackgroundInk')
       .lean();
     if (pub) {
-      recipient = pub.data?.titleName || pub.title || '';
+      /* RECIPIENT = prénom seul (Sarah) pour le générique "— Sarah" de fin.
+         Fallback legacy sur titleName/title pour les murs pré-migration. */
+      recipient = pub.data?.recipient || pub.data?.titleName || pub.title || '';
       thankYou  = pub.thankYouMessage || '';
+      /* Titre affiché au tout début de la vidéo : on utilise le titre
+         complet du mur (déjà formaté par occasion) sans préfixer "Pour". */
+      title     = pub.title || recipient || '';
+      wallBgId  = pub.style?.wallBackgroundId || '';
+      wallBg    = pub.style?.wallBackground || '';
+      wallInk   = pub.style?.wallBackgroundInk || '';
     }
   } catch (err) {
     console.warn('[wallVideo] publication lookup failed', err.message);
   }
 
   let html = fs.readFileSync(filePath, 'utf8');
-  html = html.replace(/\{\{PUB_ID\}\}/g,    req.params.pubId);
-  html = html.replace(/\{\{RECIPIENT\}\}/g, escapeJsString(recipient));
-  html = html.replace(/\{\{THANK_YOU\}\}/g, escapeJsString(thankYou));
+  html = html.replace(/\{\{PUB_ID\}\}/g,      req.params.pubId);
+  html = html.replace(/\{\{RECIPIENT\}\}/g,   escapeJsString(recipient));
+  html = html.replace(/\{\{THANK_YOU\}\}/g,   escapeJsString(thankYou));
+  html = html.replace(/\{\{TITLE\}\}/g,       escapeJsString(title));
+  html = html.replace(/\{\{WALL_BG_ID\}\}/g,  escapeJsString(wallBgId));
+  html = html.replace(/\{\{WALL_BG\}\}/g,     escapeJsString(wallBg));
+  html = html.replace(/\{\{WALL_INK\}\}/g,    escapeJsString(wallInk));
 
   res.set('Content-Type', 'text/html; charset=utf-8');
   res.set('Cache-Control', 'no-store');
