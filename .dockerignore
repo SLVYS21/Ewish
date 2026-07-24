@@ -1,0 +1,37 @@
+# ================================================================
+# Réduit le context Docker envoyé au builder — build 3x plus rapide.
+# ================================================================
+
+# node_modules — reinstallés dans le container
+**/node_modules
+
+# Caches Puppeteer (Chrome retéléchargé dans le container)
+**/.cache
+server/.cache
+
+# Client + landing (build indépendant, pas dans l'image server)
+client
+landing
+
+# Git, éditeurs
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Env local, jamais dans une image
+**/.env
+**/.env.local
+
+# Docs
+*.md
+notes
+
+# Dev artifacts
+**/dev-dist
+**/dist
+
+# Nixpacks (non utilisé, gardé au cas où)
+nixpacks.toml
+server/nixpacks.toml
