@@ -1,0 +1,67 @@
+# ================================================================
+# DigitalOcean App Platform — spec du service `server`
+# ---------------------------------------------------------------
+# Objectif : forcer le build en mode Dockerfile (au lieu du
+# buildpack Heroku qui n'installe pas les libs Chromium).
+#
+# Application :
+#   1. Copie ce fichier tel quel (chemin : .do/app.yaml)
+#   2. Adapte `envs` : les valeurs sensibles doivent rester dans
+#      l'UI DO comme SECRET (voir bloc envs plus bas)
+#   3. Applique le spec :
+#      Option A (UI) : DO Dashboard → App → Settings →
+#        "App Spec" → Edit → colle ce YAML → Save
+#      Option B (CLI) : `doctl apps update <APP_ID> --spec .do/app.yaml`
+#
+# Après application, aucun redéploiement automatique : lance-le
+# manuellement depuis DO Dashboard → Actions → Deploy.
+# ================================================================
+
+# ⚠️ REMPLACE ces 2 champs par les valeurs de ta config actuelle.
+name: ewish
+region: fra   # ou 'nyc', 'ams', … selon ta région DO actuelle
+
+services:
+  - name: server
+    # ─── SOURCE ─────────────────────────────────────────────────
+    github:
+      repo: SLVYS21/Ewish
+      branch: main
+      deploy_on_push: true
+
+    # ─── BUILD METHOD ── Dockerfile à la racine du repo ─────────
+    # ⚠️ C'est CE bloc qui change tout : source_dir + dockerfile_path
+    # remplacent l'ancien "buildpack Node.js + Source Dir=/server".
+    source_dir: /
+    dockerfile_path: Dockerfile
+
+    # ─── INSTANCE ── adapte au plan que tu payes déjà ───────────
+    instance_size_slug: basic-xxs   # ou basic-xs / professional-xs …
+    instance_count: 1
+
+    # ─── HTTP ── doit matcher EXPOSE 5000 du Dockerfile ─────────
+    http_port: 5000
+
+    # ─── HEALTH CHECK (optionnel mais recommandé) ───────────────
+    # health_check:
+    #   http_path: /api/health
+
+    # ─── ENV VARS ───────────────────────────────────────────────
+    # Les vraies valeurs restent injectées par DO (elles sont déjà
+    # là dans l'app existante). On liste juste les noms — DO garde
+    # les valeurs SECRET existantes tant que tu ne les écrases pas.
+    #
+    # Pour ajouter/modifier une valeur : mets `value: "..."` +
+    # `type: SECRET` (ou GENERAL pour les non-sensibles).
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_AND_BUILD_TIME
+      - key: PORT
+        value: "5000"
+        scope: RUN_TIME
+      # Les autres (MONGO_URI, JWT_SECRET, CLOUDINARY_*, KKIAPAY_*,
+      # ADMIN_*, FB_*, GOOGLE_CLIENT_ID, EXTRAS_ORIGINS, CLIENT_URL,
+      # TEMPLATES_DIR, JWT_EXPIRES_IN, NPM_CONFIG_LEGACY_PEER_DEPS)
+      # sont conservées telles quelles côté DO. Si tu veux les
+      # figer ici en clair, ajoute-les au format ci-dessus.
