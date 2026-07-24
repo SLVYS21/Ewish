@@ -70,32 +70,31 @@ export const STYLE_BACKGROUNDS = [
 ];
 
 /* ─── Fonds image du mur ───────────────────────────────────────
-   Auto-discovery des images déposées dans client/Backgrounds/. Le
-   serveur les sert via /backgrounds/<filename> (route Express).
-   On stocke une URL RELATIVE : elle se résout au host qui rend la page
-   (wall SSR sur :5000 → :5000/backgrounds/…, éditeur sur :3000 →
-   proxy Vite → :5000, prod même-origine → même serveur). Évite les
-   problèmes de VITE_API_URL mal configuré qui pointerait ailleurs. */
-const _bgFiles = import.meta.glob('../Backgrounds/*.{png,jpg,jpeg,webp,gif}', {
-  eager: true,
-  as: 'url',
-});
+   Fichiers dans client/public/backgrounds/ — copiés verbatim par Vite
+   dans dist/backgrounds/, et servis par Express via /backgrounds/*
+   (voir server/index.js). Liste hardcodée car public/ n'est pas dans
+   le graphe modules Vite : quand tu ajoutes un fichier dans
+   client/public/backgrounds/, ajoute son nom ici. */
+const _BG_FILENAMES = [
+  'Festi.jpg',
+  'Fun-hearts.png',
+  'Paper.jpg',
+  'Valentine.jpg',
+  'hearts.png',
+];
 function _labelFromFilename(fn) {
   const base = fn.replace(/\.(png|jpg|jpeg|webp|gif)$/i, '');
   return base.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
-export const WALL_IMAGE_BACKGROUNDS = Object.keys(_bgFiles)
+export const WALL_IMAGE_BACKGROUNDS = _BG_FILENAMES
+  .slice()
   .sort()
-  .map((p) => {
-    const filename = p.split('/').pop();
+  .map((filename) => {
     const publicUrl = `/backgrounds/${filename}`;
     return {
       id: `wall-img-${filename.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       label: _labelFromFilename(filename),
       previewUrl: publicUrl,
-      /* Juste l'url — position/taille/attachment viennent du CSS du
-         template. Éviter le shorthand ici évite les surprises quand
-         var() est injecté dans le raccourci background:. */
       css: `url("${publicUrl}")`,
       ink: '#FFFFFF',
       isImage: true,

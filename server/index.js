@@ -40,10 +40,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-/* Fonds de mur (images fixes) — le dossier client/Backgrounds/ est aussi
-   servi côté serveur pour que les URLs stockées (/backgrounds/xxx.png)
-   résolvent depuis n'importe où (wall SSR, éditeur, previews). */
-app.use('/backgrounds', express.static(path.join(__dirname, '../client/Backgrounds'), {
+/* Fonds de mur (images fixes) — dossier client/public/backgrounds/ servi
+   aussi côté serveur pour que les URLs stockées (/backgrounds/xxx.png)
+   résolvent depuis n'importe où (wall SSR, éditeur, previews).
+   En prod le Dockerfile copie ce dossier dans l'image (voir Dockerfile). */
+app.use('/backgrounds', express.static(path.join(__dirname, '../client/public/backgrounds'), {
   maxAge: '30d',
   immutable: false,
 }));

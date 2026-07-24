@@ -47,6 +47,11 @@ RUN cd server && npm ci --legacy-peer-deps
 COPY templates ./templates
 COPY server ./server
 
+# ─── Assets client servis par Express ───────────────────────────
+# Les fonds de mur sont référencés via /backgrounds/<file>. Express
+# les sert depuis ../client/public/backgrounds (voir server/index.js).
+COPY client/public/backgrounds ./client/public/backgrounds
+
 # Réplique le build script de package.json : templates dans server/
 # pour que TEMPLATES_DIR = server/templates soit résolu tel quel.
 RUN cd server && npm run build

@@ -200,18 +200,18 @@ function WallSettings({ pub, id, onSave }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
             <div className="field">
               <label className="field-label">Titre du mur</label>
-              <div className="field-hint" style={{ marginBottom: 4 }}>Affiché en grand sur la bannière. On l'a pré-rempli à partir de l'occasion — libre à toi de le modifier.</div>
+              <div className="field-hint" style={{ marginBottom: 4 }}>Affiché en grand sur la bannière.</div>
               <input className="mk-input" value={wallTitle} onChange={e => setWallTitle(e.target.value)}
                 placeholder="ex : Joyeux anniversaire, Sarah" />
             </div>
             <div className="field">
-              <label className="field-label">Prénom du destinataire</label>
-              <div className="field-hint" style={{ marginBottom: 4 }}>Utilisé pour les messages personnalisés (déballage, mot de merci, nom du livre PDF…).</div>
+              <label className="field-label">Pour qui ?</label>
+              <div className="field-hint" style={{ marginBottom: 4 }}>Qui est l'heureux(se) élu(e) ?</div>
               <input className="mk-input" value={recipientName} onChange={e => setRecipientName(e.target.value)}
                 placeholder="ex : Sarah" maxLength={80} />
             </div>
             <div className="field">
-              <label className="field-label">La phrase d'accueil</label>
+              <label className="field-label">Un petit mot pour les invités ?</label>
               <div className="field-hint" style={{ marginBottom: 4 }}>Affichée en grand, elle donne envie de laisser un mot.</div>
               <textarea className="mk-textarea" rows={2} value={phrase} maxLength={140}
                 placeholder="Laisse un mot doux pour Maman…"
