@@ -1,0 +1,14 @@
+[
+  {
+    "version": "1.1.0",
+    "date": "2026-07-24",
+    "title": "Titre et prénom du destinataire séparés",
+    "summary": "À la création d'un mur, tu saisis maintenant le prénom du destinataire, et tu peux personnaliser le titre indépendamment. Le message de déballage affiche le bon prénom.",
+    "highlights": [
+      { "type": "feature", "text": "Nouveau champ 'Prénom du destinataire' à la création et dans les réglages du mur." },
+      { "type": "feature", "text": "Titre du mur éditable librement via 'Personnaliser le titre'." },
+      { "type": "fix", "text": "Le message d'accueil affiche maintenant juste le prénom (avant : 'rien que pour toi, Joyeux anniversaire, Sarah')." },
+      { "type": "improve", "text": "Nom de fichier du livre PDF plus lisible : 'livre-des-mots-Sarah.pdf' au lieu du titre entier." }
+    ]
+  }
+]

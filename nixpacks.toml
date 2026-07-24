@@ -1,0 +1,48 @@
+# ================================================================
+# Nixpacks — racine du repo (Coolify build context = repo entier).
+# Doit être à cet emplacement car Nixpacks ne lit PAS
+# `server/nixpacks.toml` quand la Base Directory Coolify est `.`.
+# Ces libs sont requises par Chromium téléchargé par puppeteer
+# (postinstall de server/package.json). Sans elles :
+#   error while loading shared libraries: libnss3.so
+# Liste officielle : https://pptr.dev/troubleshooting
+# ================================================================
+
+[phases.setup]
+aptPkgs = [
+  "ca-certificates",
+  "fonts-liberation",
+  "wget",
+  "xdg-utils",
+
+  # ── Deps Chromium ─────────────────────────────────────────
+  "libnss3",
+  "libnspr4",
+  "libatk1.0-0",
+  "libatk-bridge2.0-0",
+  "libcups2",
+  "libdbus-1-3",
+  "libdrm2",
+  "libxkbcommon0",
+  "libxcomposite1",
+  "libxdamage1",
+  "libxfixes3",
+  "libxrandr2",
+  "libgbm1",
+  "libpango-1.0-0",
+  "libpangocairo-1.0-0",
+  "libcairo2",
+  "libasound2",
+  "libatspi2.0-0",
+  "libx11-6",
+  "libx11-xcb1",
+  "libxcb1",
+  "libxext6",
+  "libxi6",
+  "libxrender1",
+  "libxtst6",
+  "libglib2.0-0",
+  "libgtk-3-0",
+  "libexpat1",
+  "libfontconfig1",
+]

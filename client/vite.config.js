@@ -15,7 +15,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      /* 'prompt' au lieu de 'autoUpdate' : le SW installe la nouvelle version
+         en tâche de fond mais n'active pas tant que le client n'appelle pas
+         updateServiceWorker(). Ça nous laisse afficher un toast "Mettre à
+         jour" non-bloquant (voir client/hooks/usePwaUpdate.js). */
+      registerType: 'prompt',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'],
 
       /* ── Web App Manifest ── */

@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import InstallPWA from "./components/InstallPWA";
+import UpdateToast from "./components/UpdateToast";
+import WhatsNewModal from "./components/WhatsNewModal";
 
 import Dashboard from "./pages/Dashboard";
 import MyCreations from "./pages/MyCreations";
@@ -18,6 +20,7 @@ import AdminOrders from "./admin/pages/AdminOrders";
 import AdminPublications from "./admin/pages/AdminPublications";
 import AdminTemplates from "./admin/pages/AdminTemplates";
 import AdminWishes from "./admin/pages/AdminWishes";
+import AdminReleaseNotes from "./admin/pages/AdminReleaseNotes";
 
 import SuperAdminStats        from "./admin/pages/SuperAdminStats";
 import SuperAdminUsers        from "./admin/pages/SuperAdminUsers";
@@ -105,6 +108,8 @@ export default function App() {
       <ToastProvider>
       <BrowserRouter>
         <InstallPWA />
+        <UpdateToast />
+        <WhatsNewModal />
         <RouteTransition>
         <Routes>
           <Route path="/ewish-admin/login"    element={<AdminLoginGate />} />
@@ -139,6 +144,7 @@ export default function App() {
             <Route path="super/settings"     element={<RequireSuperAdmin><SuperAdminSettings /></RequireSuperAdmin>} />
             <Route path="super/kyc"          element={<RequireSuperAdmin><SuperAdminKyc /></RequireSuperAdmin>} />
             <Route path="profile"            element={<ProfilePage />} />
+            <Route path="releases"           element={<AdminReleaseNotes />} />
 
             <Route path="share/:id"          element={<SharePage />} />
           </Route>

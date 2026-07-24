@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import {
   Home, Layers, Wallet, Plus, Sparkles,
   ShieldAlert, BarChart2, Users, Ticket, Images, Cog,
-  User, BadgeCheck, ShieldCheck, LayoutTemplate,
+  User, BadgeCheck, ShieldCheck, LayoutTemplate, Package,
 } from 'lucide-react';
+import versions from '../../changelog/versions.json';
 import WhatsAppFAB from '../../components/WhatsAppFAB';
 import NotificationBell from '../../components/NotificationBell';
 import Kado from '../../components/Kado';
@@ -48,6 +49,15 @@ export default function AdminLayout() {
     p.startsWith('/ewish-admin/wall') || p.startsWith('/ewish-admin/share') || p.startsWith('/ewish-admin/cagnotte');
   const isTemplates = p.startsWith('/ewish-admin/templates');
   const isProfile = p.startsWith('/ewish-admin/profile');
+  const isReleases = p.startsWith('/ewish-admin/releases');
+
+  /* Badge "nouveau" sur l'onglet Nouveautés : ON si l'utilisateur n'a pas
+     encore vu la version courante. Clé alignée avec WhatsNewModal. */
+  const currentVersion = versions[0]?.version;
+  const seenVersion = (() => {
+    try { return localStorage.getItem('mk_whats_new_seen'); } catch { return null; }
+  })();
+  const hasNewRelease = currentVersion && seenVersion !== null && seenVersion !== currentVersion;
 
   const handleLogout = async () => {
     await logout();
@@ -106,6 +116,14 @@ export default function AdminLayout() {
             <LayoutTemplate size={16} />
             <span>Templates</span>
             <span style={{ flex: 1 }} />
+          </button>
+          <button className={`sb-item${isReleases ? ' active' : ''}`} onClick={() => navigate('/ewish-admin/releases')}>
+            <Package size={16} />
+            <span>Nouveautés</span>
+            <span style={{ flex: 1 }} />
+            {hasNewRelease && (
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF5470', boxShadow: '0 0 0 3px rgba(255,84,112,.22)' }} aria-label="Nouvelle version" />
+            )}
           </button>
         </nav>
 
