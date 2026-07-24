@@ -1,3 +1,6 @@
 node_modules
 vite.config.js
 .env
+# Ignore Puppeteer & build caches
+server/.cache/
+.cache/

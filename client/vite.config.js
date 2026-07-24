@@ -58,6 +58,11 @@ export default defineConfig({
         // Précache tous les assets de l'app shell
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
 
+        // Limite par asset précaché — bumpée à 5 Mo pour laisser passer
+        // les textures de fond (ex: client/Backgrounds/Paper.png ~2.3 Mo).
+        // Sans ça, le build casse dès qu'un asset dépasse les 2 Mo par défaut.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+
         // Stratégie réseau : Network First pour l'API, Cache First pour les assets statiques
         runtimeCaching: [
           {

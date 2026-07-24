@@ -1,3 +1,7 @@
 node_modules
 
 .env
+
+# Ignore Puppeteer & build caches
+server/.cache/
+.cache/
