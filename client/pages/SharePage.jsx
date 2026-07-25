@@ -844,9 +844,9 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
                     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, letterSpacing: '.14em' }}>
                       {shortCode || ''}
                     </div>
-                    <div style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', marginTop: 3 }}>
+                    {/* <div style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', marginTop: 3 }}>
                       À saisir sur mykado.store pour retrouver la page.
-                    </div>
+                    </div> */}
                     {slugStatus === 'saved' && (
                       <div style={{ fontSize: 11, color: 'var(--mk-mint)', marginTop: 4, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
                         <Check size={11} /> Sauvegardé

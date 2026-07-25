@@ -8,15 +8,18 @@ const slugify = require('slugify');
    1. Requête sur localhost (dev) → :3000, peu importe NODE_ENV/APP_URL.
       Évite qu'un .env local avec APP_URL=prod ne casse le test local.
    2. Sinon, si APP_URL explicite dans l'env → l'utiliser.
-   3. Sinon, dériver de req.protocol + APP_HOST (prod).
-   4. Fallback : mêmes host que la requête (single-origin). */
+   3. Sinon, dériver de req.protocol + APP_HOST (env ou défaut prod).
+
+   Le fallback prod est hardcodé sur app.mykado.store (aligné sur
+   server/index.js:16) — sinon on retombe sur go.mykado.store qui ne
+   sert PAS /m/:slug et redirige vers la landing (bug prod 07-25). */
 function resolveAppUrl(req) {
   const host = String(req.hostname || '').toLowerCase();
   const isLocal = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
   if (isLocal) return 'http://localhost:3000';
   if (process.env.APP_URL) return process.env.APP_URL.replace(/\/+$/, '');
-  if (process.env.APP_HOST) return `${req.protocol}://${process.env.APP_HOST}`;
-  return `${req.protocol}://${req.get('host')}`;
+  const appHost = process.env.APP_HOST || 'app.mykado.store';
+  return `${req.protocol}://${appHost}`;
 }
 
 function preserveQuery(req, path) {

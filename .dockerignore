@@ -9,8 +9,10 @@
 **/.cache
 server/.cache
 
-# Client + landing (build indépendant, pas dans l'image server)
-client
+# Landing (build indépendant, pas dans l'image server)
+# NB: on n'ignore PAS client/ ici — le serveur a besoin de
+# client/public/backgrounds/ (voir Dockerfile + server/index.js:47).
+# Les gros dossiers (node_modules, dist, dev-dist) sont exclus plus bas.
 landing
 
 # Git, éditeurs

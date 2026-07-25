@@ -24,7 +24,9 @@
       "PowerShell(npm run *)",
       "Bash(npx puppeteer *)",
       "Read(//c/Program Files/Google/Chrome/Application/**)",
-      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)"
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "WebFetch(domain:app.mykado.store)",
+      "WebFetch(domain:ewish-nxe6b.ondigitalocean.app)"
     ]
   }
 }
