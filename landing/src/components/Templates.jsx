@@ -44,7 +44,7 @@ function PrevWall() {
           </div>
         ))}
       </div>
-      <div className="tpl-title serif italic">Mur de vœux</div>
+      <div className="tpl-title serif italic">Mur classique</div>
     </div>
   );
 }

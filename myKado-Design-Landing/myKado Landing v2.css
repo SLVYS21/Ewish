@@ -915,7 +915,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; color: var(--
 .v-birthday .dot.d3 { top: 60%; left: 12%; background: #fff; }
 .v-birthday .dot.d4 { top: 20%; right: 26%; background: #fff; }
 
-/* T2  Mur de vœux */
+/* T2  Mur classique */
 .tpl-thumb.v-wall {
   background:
     linear-gradient(135deg, #fdf6c3 0%, #fce4ec 60%, #ede7f6 100%);

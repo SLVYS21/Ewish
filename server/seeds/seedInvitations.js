@@ -111,7 +111,7 @@ const TEMPLATES = [
     name: 'baby-shower-invitation',
     kind: 'invitation',
     label: 'Invitation Baby Shower',
-    description: "Une invitation douce pour annoncer la fête prénatale, avec RSVP et mur de vœux.",
+    description: "Une invitation douce pour annoncer la fête prénatale, avec RSVP et Mur classique.",
     price: 4000,
     creditsRequired: 6,
     emoji: '👶',

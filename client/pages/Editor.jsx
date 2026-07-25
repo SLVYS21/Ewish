@@ -941,7 +941,7 @@ export default function Editor() {
                 </div>
                 <div className={styles.cagnotteHowTo}>
                   <strong>Comment ça marche ?</strong><br />
-                  Tes invités voient le mur de vœux + un objectif cadeau. Chacun peut contribuer librement. Une barre de progression collective s'affiche en direct.
+                  Tes invités voient le Mur classique + un objectif cadeau. Chacun peut contribuer librement. Une barre de progression collective s'affiche en direct.
                 </div>
               </>
             ) : (

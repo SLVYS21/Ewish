@@ -33,7 +33,7 @@ async function seed() {
     { name: 'wall-of-wishes' },
     {
       name:            'wall-of-wishes',
-      label:           'Mur de vœux',
+      label:           'Mur classique',
       description:     'Un mur interactif où chacun colle son message  comme des post-its numériques.',
       price:           4000,
       creditsRequired: 1,
@@ -70,7 +70,7 @@ async function seed() {
     pub = await Publication.create({
       templateName: 'wall-of-wishes',
       customName:   'demo',
-      title:        'Mur de vœux  Démo',
+      title:        'Mur classique  Démo',
       data: {
         titleName: 'Sarah',
         subtitle:  'Partagez ce lien  chacun peut laisser son mot sur ce mur.',

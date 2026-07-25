@@ -19,7 +19,7 @@ const WALL_TEMPLATES = [
   /* ── wall-of-wishes (classique) ───────────────────────────── */
   {
     name: 'wall-of-wishes',
-    label: 'Mur de vœux',
+    label: 'Mur classique',
     description: "Un mur interactif où chacun colle son message — comme des post-its numériques.",
     price: 5000,
     creditsRequired: 10,

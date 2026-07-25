@@ -63,7 +63,7 @@ function Intro({ onDone }) {
         <div className="brand">myKado</div>
         <Anim className="intro-anim" code={EVT.hero[0]} char={EVT.hero[1]} size={110} />
         <div className="big">Quelqu’un a préparé<br/>quelque chose <em>rien que pour toi</em></div>
-        <div className="from">Un mur de vœux t’attend, {EVT.who}…</div>
+        <div className="from">Un Mur classique t’attend, {EVT.who}…</div>
       </div>
       <div className="prog"><i/></div>
     </div>
@@ -241,7 +241,7 @@ function ClaimFlow({ cag, onClose, onClaimed }) {
           <Cascade run={true} />
           <Anim className="claim-hero-anim" code={EVT.cheer[0]} char={EVT.cheer[1]} size={104} />
           <h3 className="claim-done-h">Cadeau débloqué !</h3>
-          <p className="claim-p" style={{ maxWidth:340 }}>Bienvenue sur myKado, {name || EVT.who}. Tes <b>{fcfa(cag.collected)}</b> arrivent sur ton {MOMO.find(m=>m.id===op).label}. Ton mur de vœux est désormais à toi, pour toujours 💜</p>
+          <p className="claim-p" style={{ maxWidth:340 }}>Bienvenue sur myKado, {name || EVT.who}. Tes <b>{fcfa(cag.collected)}</b> arrivent sur ton {MOMO.find(m=>m.id===op).label}. Ton Mur classique est désormais à toi, pour toujours 💜</p>
           <div className="claim-done-card">
             <div className="cd-row"><span>{SEED.length} messages sauvegardés</span>{Icon.check({ size:16, stroke:'var(--mk-mint)' })}</div>
             <div className="cd-row"><span>{fcfa(cag.collected)} en route</span>{Icon.check({ size:16, stroke:'var(--mk-mint)' })}</div>

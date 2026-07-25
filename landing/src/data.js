@@ -16,7 +16,7 @@ export const TEMPLATES = [
   },
   {
     id: 'wall-of-wishes',
-    name: 'Mur de vœux',
+    name: 'Mur classique',
     sub: "Collectif · jusqu'à 30",
     cat: 'Collectif',
     credits: 10,

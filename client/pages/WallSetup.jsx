@@ -620,16 +620,16 @@ function WallCagnotte({ pub, id, onSave }) {
 
         {cagnotteEnabled && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--mk-line)' }}>
-            <div className="field">
+            {/* <div className="field">
               <label className="field-label">Titre de la collecte</label>
               <input className="mk-input" value={collectTitle} placeholder="Le vélo de Marc"
                 onChange={e => setCollectTitle(e.target.value)} />
-            </div>
+            </div> */}
             <div className="field">
-              <label className="field-label">Pour quoi ?</label>
-              <textarea className="mk-textarea" rows={2} value={cagnotteDescription}
-                placeholder="Explique l'objectif en une phrase."
-                onChange={e => setCagnotteDescription(e.target.value)} />
+              <label className="field-label">C'est quoi le kado ?</label>
+              <textarea className="mk-input" value={cagnotteDescription}
+                placeholder="Ex: Un nouveau PC."
+                onChange={e => setCollectTitle(e.target.value)} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
               <div className="field">

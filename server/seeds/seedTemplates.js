@@ -106,7 +106,7 @@ const TEMPLATES = [
   /* ── wall-of-wishes ─────────────────────────────────────── */
   {
     name: 'wall-of-wishes',
-    label: 'Mur de vœux',
+    label: 'Mur classique',
     description: "Un mur interactif où chacun colle son message  comme des post-its numériques.",
     price: 5000,
     creditsRequired: 10,
@@ -132,7 +132,7 @@ const TEMPLATES = [
   {
     name: 'wall-of-wishes-modern',
     label: 'Mur Moderne',
-    description: "Mur de vœux glassmorphisme sur fond dégradé lavande-rose. Cards sociales élégantes avec avatar et rôle.",
+    description: "Mur classique glassmorphisme sur fond dégradé lavande-rose. Cards sociales élégantes avec avatar et rôle.",
     price: 5000,
     creditsRequired: 10,
     emoji: '💬',
@@ -144,12 +144,12 @@ const TEMPLATES = [
     featured: false,
     fields: [
       { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
-      { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: '✦ Mur de vœux' },
+      { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: '✦ Mur classique' },
       { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien  laissez votre message ici.' },
     ],
     defaultData: {
       titleName: 'Prénom',
-      eyebrow: '✦ Mur de vœux',
+      eyebrow: '✦ Mur classique',
       subtitle: 'Partagez ce lien  chacun peut laisser son mot sur ce mur.',
     },
     defaultStyle: { primaryColor: '#7C5CC9', accentColor: '#7C5CC9', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
@@ -171,12 +171,12 @@ const TEMPLATES = [
     featured: false,
     fields: [
       { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
-      { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: '✦ Mur de vœux' },
+      { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: '✦ Mur classique' },
       { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Glisse pour explorer · Clique pour lire.' },
     ],
     defaultData: {
       titleName: 'Prénom',
-      eyebrow: '✦ Mur de vœux',
+      eyebrow: '✦ Mur classique',
       subtitle: 'Glisse pour explorer · Clique sur une carte pour lire le vœu.',
     },
     defaultStyle: { primaryColor: '#ff4878', accentColor: '#ff8060', fontFamily: 'Inter', fontSize: 'medium', theme: 'light' },
