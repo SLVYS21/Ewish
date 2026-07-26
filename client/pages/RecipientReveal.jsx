@@ -69,7 +69,11 @@ export default function RecipientReveal() {
   }
 
   // URL du mur rendu par le serveur. ?noanim=1 (pour que le mur sache de ne pas doubler les animations)
-  const iframeUrl = `/site/${pub.templateName}/${pub.customName}${isGuest ? '?collect=1' : '?previewMode=false&noanim=1'}`;
+  // URL ABSOLUE vers l'origine serveur (VITE_API_URL) : sinon en prod, /site/... résout contre
+  // app.mykado.store (static site) qui n'a pas /site/ et retombe sur l'index.html SPA → user
+  // voit l'accueil dans l'iframe au lieu du mur.
+  const VITE_SITE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+  const iframeUrl = `${VITE_SITE}/site/${pub.templateName}/${pub.customName}${isGuest ? '?collect=1' : '?previewMode=false&noanim=1'}`;
 
   // Icône animée Noto Emoji
   const revealIconCode = pub?.style?.revealIcon || '1f381';

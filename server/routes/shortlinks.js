@@ -89,10 +89,12 @@ router.get('/:code', async (req, res) => {
       return res.redirect(302, preserveQuery(req, `/${prefix}/${pub.slug}`));
     }
 
-    // Mur legacy sans slug/brique → shortCode via React
+    // Mur avec templateName wall-of-wishes* mais brique absente (legacy).
+    // Préfère le slug si présent (URL propre), sinon shortCode. L'API
+    // /publications/public/slug/:slug matche les deux (voir publication.js:89).
     if (pub.templateName && pub.templateName.startsWith('wall-of-wishes')) {
       const appUrl = resolveAppUrl(req);
-      return res.redirect(302, preserveQuery(req, `${appUrl}/m/${pub.shortCode}`));
+      return res.redirect(302, preserveQuery(req, `${appUrl}/m/${pub.slug || pub.shortCode}`));
     }
 
     // Cartes/cadeaux legacy sans slug (URLs déjà livrées aux clients).
