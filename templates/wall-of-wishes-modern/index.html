@@ -1268,6 +1268,15 @@
       border-radius: 16px;
     }
     .story-card .s-gif img { width: 120px; height: 120px; }
+    .story-card .s-sticker {
+      height: 210px; display: grid; place-items: center;
+      background: transparent; overflow: visible;
+      border-radius: 0; margin-top: 18px;
+    }
+    .story-card .s-sticker img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.18));
+    }
 
     .story-card .custom-audio {
       display: inline-flex; align-items: center; gap: 12px;
@@ -2699,6 +2708,11 @@ function bigTxSizeClass(text) {
 
 function buildStoryMedia(w) {
   if (!w) return '';
+  if (w.mediaType === 'sticker' && w.photoUrl) {
+    /* Sticker : contain + fond transparent, pas de crop. Le sticker est
+       une image découpée (webp/png), on la centre telle quelle. */
+    return '<div class="s-media s-sticker"><img src="' + escapeHtml(w.photoUrl) + '" alt="" loading="lazy" decoding="async"></div>';
+  }
   if (w.mediaType === 'photo') {
     if (w.photoUrl) {
       return '<div class="s-media s-photo" style="background-image:url(' + JSON.stringify(cldThumb(w.photoUrl, 'f_auto,q_auto,w_600')).replace(/^"|"$/g,'') + ')"></div>';
