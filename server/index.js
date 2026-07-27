@@ -157,13 +157,12 @@ function serveReact(req, res) {
 }
 
 /* /m/:slug avec injection OG server-side pour les preview WhatsApp/FB.
-   DOIT être enregistré avant le host-based routing ci-dessous, sinon
-   le middleware host-based sert client/dist/index.html directement pour
-   app.mykado.store/m/CODE et court-circuite wallShell → preview vide.
-   Voir server/routes/wallShell.js. */
-if (PROD && fs.existsSync(REACT_DIST)) {
-  app.use('/', require('./routes/wallShell'));
-}
+   Express (go.mykado.store) sert ces liens avec meta OG + redirect JS vers
+   app.mykado.store. Le crawler WhatsApp lit les meta, le vrai utilisateur
+   est redirigé vers la SPA. Voir server/routes/wallShell.js.
+   Placé avant le host-based routing pour rester atteignable quel que soit
+   le Host header. */
+app.use('/', require('./routes/wallShell'));
 
 // ── Host-based routing ────────────────────────────────────────
 // Runs AFTER all shared API/static routes above.

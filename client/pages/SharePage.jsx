@@ -45,15 +45,18 @@ function getAppOrigin() {
 }
 
 /* Construit l'URL à partager pour une publication.
-   - Murs : lien frontend direct (APP_URL/m/CODE) pour que l'OG preview
-     charge la bannière du mur. Le shortCode fait office de slug si aucun
-     slug custom n'existe (backend gère les deux via $or dans wallShell.js).
+   - Murs : lien Express (VITE_API_URL/m/CODE). Express injecte les meta OG
+     (bannière du mur) avant </head>, puis redirige les vrais navigateurs
+     vers app.mykado.store/m/CODE côté client. Le static site app.* ne peut
+     pas injecter d'OG dynamique, donc on passe par Express pour le crawler
+     WhatsApp/FB. Le shortCode fait office de slug si aucun slug custom
+     n'existe (backend gère les deux via $or dans wallShell.js).
    - Autres briques : garde l'ancien lien /s/CODE (SSR /site → OG déjà OK). */
 export function buildShareUrl({ pub, shortCode, isWall }) {
   const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
   if (!pub) return '';
   if (isWall && shortCode) {
-    return `${getAppOrigin()}/m/${shortCode}`;
+    return `${apiBase}/m/${shortCode}`;
   }
   if (shortCode) return `${apiBase}/s/${shortCode}`;
   return `${apiBase}/site/${pub.templateName}/${pub.customName}`;

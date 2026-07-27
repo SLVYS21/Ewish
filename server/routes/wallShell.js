@@ -1,44 +1,61 @@
-/* ── SPA shell handler for /m/:slug avec preview OG server-side ────
-   Sert client/dist/index.html en injectant les meta OG (og:image =
-   bannière du mur) avant </head> pour que WhatsApp/Facebook/iMessage
-   affichent une vraie preview.
-
-   Sans ce handler, /m/:slug tombe sur le catch-all SPA qui renvoie un
-   HTML statique sans meta → preview vide.
-
-   L'hydratation React continue de fonctionner normalement : on n'injecte
-   qu'un bloc de <meta> avant </head>, tout le reste du shell est intact. */
+/* ── OG landing page handler for shared walls (/m/:slug) ──────────
+   Contexte : la vraie SPA React est servie par un DO Static Site à
+   app.mykado.store, qui ne peut pas injecter d'OG dynamique. Express
+   (go.mykado.store) sert donc les liens de partage /m/:slug avec :
+     1. Les meta OG/Twitter (bannière, titre, description du mur) →
+        WhatsApp/Facebook/iMessage/Telegram fabriquent la preview.
+     2. Un redirect côté client vers app.mykado.store/m/:slug pour que
+        les vrais utilisateurs atterrissent sur la SPA React et voient
+        le mur.
+   Les crawlers OG lisent la première réponse HTML et n'exécutent pas
+   le JS → ils voient les meta et affichent la preview. Les navigateurs
+   exécutent la redirect immédiatement. */
 
 const router = require('express').Router();
-const fs = require('fs');
-const path = require('path');
 const Publication = require('../models/Publication');
 const { buildWallOgTags } = require('../utils/wallOgTags');
 
-const PROD = process.env.NODE_ENV === 'production';
-const REACT_DIST = path.join(__dirname, '../../client/dist');
-const INDEX_PATH = path.join(REACT_DIST, 'index.html');
+const APP_URL = (process.env.APP_URL || 'https://app.mykado.store').replace(/\/+$/, '');
 
-/* Cache du shell HTML en mémoire (rebuild ⇒ redémarrage serveur, donc OK). */
-let _shellCache = null;
-function readShell() {
-  if (!PROD) {
-    /* En dev le shell vit dans Vite (localhost:3000) — on ne peut pas
-       injecter côté Express. On laisse la route pass-through. */
-    return null;
-  }
-  if (_shellCache) return _shellCache;
-  if (!fs.existsSync(INDEX_PATH)) return null;
-  _shellCache = fs.readFileSync(INDEX_PATH, 'utf8');
-  return _shellCache;
+function escAttr(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+function buildShellHtml({ ogTags, redirectUrl, title }) {
+  const safeTitle = escAttr(title);
+  const safeRedirect = escAttr(redirectUrl);
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${safeTitle}</title>
+${ogTags}
+<link rel="canonical" href="${safeRedirect}">
+<style>
+  html,body{margin:0;padding:0;background:#FFFAF6;color:#161311;font-family:-apple-system,BlinkMacSystemFont,'Inter','Plus Jakarta Sans',sans-serif}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+  .card{max-width:420px}
+  h1{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:24px;margin:0 0 8px}
+  p{margin:0 0 16px;color:#4a4a55;font-size:15px;line-height:1.5}
+  a{color:#FF5470;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>${safeTitle}</h1>
+<p>Chargement de votre mur…</p>
+<p><a href="${safeRedirect}">Ouvrir le mur</a></p>
+</div></div>
+<script>window.location.replace(${JSON.stringify(redirectUrl)});</script>
+</body>
+</html>`;
 }
 
 router.get('/m/:slug', async (req, res, next) => {
   try {
-    /* En dev : pass-through vers le catch-all SPA (Vite gère). */
-    const shell = readShell();
-    if (!shell) return next();
-
     const slug = String(req.params.slug || '').trim();
     if (!slug) return next();
 
@@ -48,12 +65,17 @@ router.get('/m/:slug', async (req, res, next) => {
       $or: [{ slug }, { shortCode: slug }],
     }).lean();
 
-    /* Pas trouvé ou non publié (hors freemium wall) : on laisse la SPA gérer
-       le rendu / le 404 côté client, sans meta OG. */
+    /* Redirect brut si pas trouvé — la SPA affichera son 404. */
+    const redirectUrl = `${APP_URL}/m/${encodeURIComponent(slug)}`;
+
     if (!pub) {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
-      return res.send(shell);
+      return res.send(buildShellHtml({
+        ogTags: '',
+        redirectUrl,
+        title: 'Mur myKado',
+      }));
     }
 
     const isWall = pub.templateName && pub.templateName.startsWith('wall-of-wishes');
@@ -61,38 +83,35 @@ router.get('/m/:slug', async (req, res, next) => {
     if (!pub.published && !isWallFreemium) {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
-      return res.send(shell);
+      return res.send(buildShellHtml({
+        ogTags: '',
+        redirectUrl,
+        title: 'Mur myKado',
+      }));
     }
 
-    /* Injection OG. currentUrl = origine app + /m/:slug (sans query string). */
-    const host = req.get('host') || process.env.APP_HOST || 'app.mykado.store';
+    /* Injection OG. currentUrl = URL Express (celle que le crawler lit). */
+    const host = req.get('host') || 'go.mykado.store';
     const proto = req.protocol || 'https';
     const currentUrl = `${proto}://${host}/m/${slug}`;
     const ogTags = buildWallOgTags(pub, currentUrl);
 
-    /* Strip la description + le title génériques du shell — ils ne
-       correspondent pas à ce mur précis et peuvent primer sur nos meta
-       si le crawler lit la première occurrence trouvée. */
-    let html = shell
-      .replace(/<meta\s+name=["']description["'][^>]*>\s*/i, '')
-      .replace(/<title>[\s\S]*?<\/title>/i, '');
-
-    /* On remet un <title> propre au mur avant l'injection OG. */
     const wallTitle = (pub.data && (pub.data.name || pub.data.wallTitle))
       || pub.title || 'Mur myKado';
-    const safeTitle = String(wallTitle).replace(/[<>&"']/g, c => ({
-      '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;',
-    }[c])).slice(0, 120);
 
-    html = html.replace('</head>', `<title>${safeTitle}</title>\n${ogTags}\n</head>`);
+    const html = buildShellHtml({
+      ogTags,
+      redirectUrl,
+      title: String(wallTitle).slice(0, 120),
+    });
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     return res.send(html);
   } catch (e) {
-    /* En cas d'erreur (DB down…) on laisse quand même le shell partir pour ne
-       pas casser la page pour l'utilisateur — juste sans OG. */
-    return next();
+    /* Fallback : simple redirect si la DB est down. */
+    const slug = String(req.params.slug || '').trim();
+    return res.redirect(302, `${APP_URL}/m/${encodeURIComponent(slug)}`);
   }
 });
 
