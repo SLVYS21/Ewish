@@ -1256,7 +1256,11 @@
     #intro-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 900;
-      background: radial-gradient(120% 90% at 50% 20%, #3A2440, #160E1A 75%);
+      background: var(--wall-bg, #FFFFFF);
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-attachment: fixed;
+      background-position: center;
       color: #fff;
       flex-direction: column; align-items: center; justify-content: center;
       overflow: hidden; padding: 30px;
@@ -1324,11 +1328,30 @@
     #env-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 880;
-      background: radial-gradient(120% 90% at 50% 22%, #3A2440, #160E1A 75%);
+      background: var(--wall-bg, #FFFFFF);
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-attachment: fixed;
+      background-position: center;
       color: #fff;
       flex-direction: column; align-items: center; justify-content: center;
       padding: 30px; overflow: hidden; text-align: center;
     }
+    
+    /* React Reveal Animations */
+    @keyframes mkRevGift{0%{transform:scale(.55) rotate(-9deg);opacity:0}10%{transform:scale(1.06) rotate(0);opacity:1}20%{transform:scale(1) rotate(-4deg)}30%{transform:scale(1.04) rotate(4deg)}44%{transform:scale(1) rotate(0);opacity:1}52%{transform:scale(0) rotate(0);opacity:0}100%{transform:scale(0);opacity:0}}
+    @keyframes mkRevPop{0%,50%{transform:scale(0);opacity:0}62%{transform:scale(1.18);opacity:1}84%{transform:scale(1);opacity:1}95%,100%{transform:scale(1);opacity:0}}
+    @keyframes mkRevTitle{0%,56%{opacity:0;transform:translateY(26px)}72%{opacity:1;transform:translateY(0)}90%{opacity:1;transform:translateY(0)}99%,100%{opacity:0;transform:translateY(-8px)}}
+    @keyframes mkRevFlash{0%,50%{opacity:0}55%{opacity:.85}68%{opacity:0}100%{opacity:0}}
+    @keyframes mkRevRing{0%,50%{transform:scale(.3);opacity:0}58%{opacity:.55}80%{transform:scale(1.7);opacity:0}100%{opacity:0}}
+    @keyframes mk-zoom-in {0% { opacity: 0; transform: scale(0.6); }100% { opacity: 1; transform: scale(1); }}
+    @keyframes mkMascotRun {0% { transform: translate(-330px,0) scale(.4); opacity: 0; }10% { opacity: 1; }40% { transform: translate(0,0) scale(1); }47% { transform: translate(0,-26px) scale(1.03); }55% { transform: translate(0,0) scale(1); }90% { transform: translate(0,0) scale(1); opacity: 1; }98% { transform: translate(0,-8px) scale(.98); opacity: 0; }100% { opacity: 0; }}
+    @keyframes mkLegSwing {0%, 100% { transform: rotate(22deg); }50% { transform: rotate(-22deg); }}
+    @keyframes mkLegSwingB {0%, 100% { transform: rotate(-22deg); }50% { transform: rotate(22deg); }}
+    @keyframes mkSpeedShow {0% { opacity: 0; }10% { opacity: .9; }34% { opacity: .9; }44% { opacity: 0; }100% { opacity: 0; }}
+    @keyframes mkStreak {0% { transform: translateX(34px); }100% { transform: translateX(-34px); }}
+    @keyframes mkGroundPulse {0%, 100% { transform: translateX(-50%) scale(1); }47% { transform: translateX(-50%) scale(.82); }55% { transform: translateX(-50%) scale(1); }}
+
     #env-overlay.show { display: flex; }
     #env-overlay .env-glow {
       position: absolute; border-radius: 50%; filter: blur(55px); opacity: .5;
@@ -3173,26 +3196,12 @@ function skipIntro() {
 }
 
 function showEnvelope() {
-  var env = document.getElementById('env-overlay');
-  env.classList.add('show');
-  env.classList.remove('pop');
-  var name = getRecipientName();
-  var titleEl = document.getElementById('env-title');
-  var count = (window.wishes && window.wishes.length) || (typeof wishes !== 'undefined' && wishes.length) || 0;
-  var who = name || 'toi';
-  if (count > 0) {
-    titleEl.innerHTML = escapeHtml(who) + ', ' + count + ' proche' + (count > 1 ? 's ont' : ' a') + '<br>préparé quelque chose pour toi';
-  } else if (name) {
-    titleEl.innerHTML = escapeHtml(name) + ', ton mur<br>de mots est prêt';
-  }
+  openWallFromEnvelope();
 }
 
 function openWallFromEnvelope() {
   var env = document.getElementById('env-overlay');
-  if (env && !env.classList.contains('pop')) {
-    env.classList.add('pop');
-    setTimeout(function() { env.classList.remove('show'); env.classList.remove('pop'); }, 700);
-  } else if (env) {
+  if (env) {
     env.classList.remove('show');
   }
   markIntroSeen();
@@ -3305,17 +3314,20 @@ function fireTsConfetti(type) {
 }
 
 function runCascade(dur) {
-  var type = (window.__WW_CONFETTI_TYPE__ || 'default');
-  if (type === 'default') {
+  var p = window.__WW_PUBLIC__ || {};
+  var s = p.style || {};
+  var preset = s.styleConfettiPreset || s.confettiId || p.confettiType || 'default';
+  
+  if (preset === 'default') {
     domCascade(dur);
     return;
   }
-
+  
   var attempts = 0;
   var check = setInterval(function() {
     if (typeof window.confetti === 'function') {
       clearInterval(check);
-      fireTsConfetti(type);
+      fireTsConfetti(preset);
     } else if (++attempts >= 40) {
       clearInterval(check);
       domCascade(dur); // fallback

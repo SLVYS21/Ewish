@@ -1367,9 +1367,40 @@
     }
     .story-tap-l { left: 0; }
     .story-tap-r { right: 0; }
+    #env-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 880;
+      background: var(--wall-bg, #FFFFFF);
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-attachment: fixed;
+      background-position: center;
+      color: #fff;
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 30px; overflow: hidden; text-align: center;
+    }
+    
+    #env-overlay.show { display: flex; }
+    
+    /* React Reveal Animations */
+    @keyframes mkRevGift{0%{transform:scale(.55) rotate(-9deg);opacity:0}10%{transform:scale(1.06) rotate(0);opacity:1}20%{transform:scale(1) rotate(-4deg)}30%{transform:scale(1.04) rotate(4deg)}44%{transform:scale(1) rotate(0);opacity:1}52%{transform:scale(0) rotate(0);opacity:0}100%{transform:scale(0);opacity:0}}
+    @keyframes mkRevPop{0%,50%{transform:scale(0);opacity:0}62%{transform:scale(1.18);opacity:1}84%{transform:scale(1);opacity:1}95%,100%{transform:scale(1);opacity:0}}
+    @keyframes mkRevTitle{0%,56%{opacity:0;transform:translateY(26px)}72%{opacity:1;transform:translateY(0)}90%{opacity:1;transform:translateY(0)}99%,100%{opacity:0;transform:translateY(-8px)}}
+    @keyframes mkRevFlash{0%,50%{opacity:0}55%{opacity:.85}68%{opacity:0}100%{opacity:0}}
+    @keyframes mkRevRing{0%,50%{transform:scale(.3);opacity:0}58%{opacity:.55}80%{transform:scale(1.7);opacity:0}100%{opacity:0}}
+    @keyframes mk-zoom-in {0% { opacity: 0; transform: scale(0.6); }100% { opacity: 1; transform: scale(1); }}
+    @keyframes mkMascotRun {0% { transform: translate(-330px,0) scale(.4); opacity: 0; }10% { opacity: 1; }40% { transform: translate(0,0) scale(1); }47% { transform: translate(0,-26px) scale(1.03); }55% { transform: translate(0,0) scale(1); }90% { transform: translate(0,0) scale(1); opacity: 1; }98% { transform: translate(0,-8px) scale(.98); opacity: 0; }100% { opacity: 0; }}
+    @keyframes mkLegSwing {0%, 100% { transform: rotate(22deg); }50% { transform: rotate(-22deg); }}
+    @keyframes mkLegSwingB {0%, 100% { transform: rotate(-22deg); }50% { transform: rotate(22deg); }}
+    @keyframes mkSpeedShow {0% { opacity: 0; }10% { opacity: .9; }34% { opacity: .9; }44% { opacity: 0; }100% { opacity: 0; }}
+    @keyframes mkStreak {0% { transform: translateX(34px); }100% { transform: translateX(-34px); }}
+    @keyframes mkGroundPulse {0%, 100% { transform: translateX(-50%) scale(1); }47% { transform: translateX(-50%) scale(.82); }55% { transform: translateX(-50%) scale(1); }}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.0.0-beta.16/tsparticles.confetti.bundle.min.js"></script>
 </head>
 <body>
+
+<div id="env-overlay"></div>
 
 <div id="admin-banner">
   <span class="admin-pub-label">
@@ -2610,8 +2641,18 @@ function showIntroSequence() {
 }
 
 function skipIntro() { showIntroSequence(); }
-function showEnvelope() { showIntroSequence(); }
-function openWallFromEnvelope() { showIntroSequence(); }
+
+function showEnvelope() {
+  openWallFromEnvelope();
+}
+
+function openWallFromEnvelope() {
+  var env = document.getElementById('env-overlay');
+  if (env) {
+    env.classList.remove('show');
+  }
+  showIntroSequence();
+}
 
 var CASCADE_EMOJIS = [ ['1f388','ðŸŽˆ'], ['1f389','ðŸŽ‰'], ['1f38a','ðŸŽŠ'], ['1f381','ðŸŽ'], ['2728','âœ¨'] ];
 var CASCADE_COLORS = ['#E11D48','#8A63D2','#3FA98A','#E5A93B','#FF9F7A','#5B95E0'];
@@ -2717,8 +2758,11 @@ function fireTsConfetti(type) {
 }
 
 function runCascade(dur) {
-  var type = (window.__WW_CONFETTI_TYPE__ || 'default');
-  if (type === 'default') {
+  var p = window.__WW_PUBLIC__ || {};
+  var s = p.style || {};
+  var preset = s.styleConfettiPreset || s.confettiId || p.confettiType || 'default';
+  
+  if (preset === 'default') {
     domCascade(dur);
     return;
   }
@@ -2727,7 +2771,7 @@ function runCascade(dur) {
   var check = setInterval(function() {
     if (typeof window.confetti === 'function') {
       clearInterval(check);
-      fireTsConfetti(type);
+      fireTsConfetti(preset);
     } else if (++attempts >= 40) {
       clearInterval(check);
       domCascade(dur); // fallback
