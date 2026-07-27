@@ -65,8 +65,15 @@ router.get('/m/:slug', async (req, res, next) => {
       $or: [{ slug }, { shortCode: slug }],
     }).lean();
 
+    /* Préserve la query string d'origine (?collect=1, ?preview=1, ?utm_*, etc.)
+       pour que la SPA reçoive le même contexte que le lien partagé. Sans ça,
+       ?collect=1 est perdu et l'animation d'ouverture destinataire se joue à
+       tort pour les invités contributeurs. Voir RecipientReveal.jsx:13. */
+    const qIdx = req.originalUrl.indexOf('?');
+    const search = qIdx >= 0 ? req.originalUrl.slice(qIdx) : '';
+
     /* Redirect brut si pas trouvé — la SPA affichera son 404. */
-    const redirectUrl = `${APP_URL}/m/${encodeURIComponent(slug)}`;
+    const redirectUrl = `${APP_URL}/m/${encodeURIComponent(slug)}${search}`;
 
     if (!pub) {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -109,9 +116,11 @@ router.get('/m/:slug', async (req, res, next) => {
     res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     return res.send(html);
   } catch (e) {
-    /* Fallback : simple redirect si la DB est down. */
+    /* Fallback : simple redirect si la DB est down. Préserve la query. */
     const slug = String(req.params.slug || '').trim();
-    return res.redirect(302, `${APP_URL}/m/${encodeURIComponent(slug)}`);
+    const qIdx = req.originalUrl.indexOf('?');
+    const search = qIdx >= 0 ? req.originalUrl.slice(qIdx) : '';
+    return res.redirect(302, `${APP_URL}/m/${encodeURIComponent(slug)}${search}`);
   }
 });
 

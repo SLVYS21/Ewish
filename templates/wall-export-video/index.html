@@ -467,6 +467,10 @@
     if ((w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl) {
       return cldTransform(w.photoUrl, 'c_fill,g_auto,w_820,h_620,q_auto,f_auto');
     }
+    if (w.mediaType === 'sticker' && w.photoUrl) {
+      /* Sticker : pas de crop, on garde l'image d'origine (déjà transparente). */
+      return w.photoUrl;
+    }
     if (w.mediaType === 'video' && w.videoUrl) {
       return videoPosterUrl(w.videoUrl);
     }
@@ -787,32 +791,51 @@
 
     ctx.shadowColor = 'transparent';
 
-    /* ── Media (photo/GIF/poster vidéo) en haut du sticky ─────────
+    /* ── Media (photo/GIF/poster vidéo/sticker) en haut du sticky ──
        Sans ça, les cartes avec image étaient rendues comme du texte
        nu — l'image du contributeur n'apparaissait ni en preview ni
        dans la vidéo exportée. */
     var hasMedia = !!(wish._img);
+    var isSticker = wish.mediaType === 'sticker';
     var mediaBottom = -cardH / 2;  // y du bas de la zone image
     if (hasMedia) {
       var mediaW = cardW - 100;
       var mediaH = 460;
       var mediaX = -mediaW / 2;
       var mediaY = -cardH / 2 + 50;
-      /* Clip arrondi pour matcher le style polaroid du mur. */
-      ctx.save();
-      roundRect(ctx, mediaX, mediaY, mediaW, mediaH, 20);
-      ctx.clip();
-      /* object-fit: cover — scale l'image pour remplir sans déformer. */
       var iw = wish._img.width, ih = wish._img.height;
-      var scale = Math.max(mediaW / iw, mediaH / ih);
-      var dw = iw * scale, dh = ih * scale;
-      ctx.drawImage(
-        wish._img,
-        mediaX + (mediaW - dw) / 2,
-        mediaY + (mediaH - dh) / 2,
-        dw, dh
-      );
-      ctx.restore();
+      if (isSticker) {
+        /* Sticker : contain (l'image entière visible), pas de clip
+           (fond transparent, pas de crop rectangulaire). Drop-shadow
+           légère pour donner du corps au sticker sur le fond papier. */
+        var sScale = Math.min(mediaW / iw, mediaH / ih);
+        var sDw = iw * sScale, sDh = ih * sScale;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.18)';
+        ctx.shadowBlur = 24;
+        ctx.shadowOffsetY = 10;
+        ctx.drawImage(
+          wish._img,
+          mediaX + (mediaW - sDw) / 2,
+          mediaY + (mediaH - sDh) / 2,
+          sDw, sDh
+        );
+        ctx.restore();
+      } else {
+        /* Photo/GIF/vidéo poster : clip arrondi + object-fit cover. */
+        ctx.save();
+        roundRect(ctx, mediaX, mediaY, mediaW, mediaH, 20);
+        ctx.clip();
+        var scale = Math.max(mediaW / iw, mediaH / ih);
+        var dw = iw * scale, dh = ih * scale;
+        ctx.drawImage(
+          wish._img,
+          mediaX + (mediaW - dw) / 2,
+          mediaY + (mediaH - dh) / 2,
+          dw, dh
+        );
+        ctx.restore();
+      }
       mediaBottom = mediaY + mediaH;
     }
 

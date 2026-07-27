@@ -136,8 +136,18 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
                   </div>
                 </div>
                 <div className={`big-tx${(wish.message || '').length > 300 ? ' is-xl' : (wish.message || '').length > 120 ? ' is-lg' : ''}`}>{wish.message}</div>
-                {wish.photoUrl && (
+                {wish.mediaType === 'sticker' && wish.photoUrl && (
+                  <div className="s-media" style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', overflow: 'visible' }}>
+                    <img src={wish.photoUrl} alt="Sticker" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.18))' }} />
+                  </div>
+                )}
+                {wish.mediaType !== 'sticker' && wish.photoUrl && (
                   <div className="s-media s-photo" style={{ backgroundImage: `url(${wish.photoUrl})` }} />
+                )}
+                {wish.videoUrl && (
+                  <div className="s-media" style={{ background: '#000' }}>
+                    <video src={wish.videoUrl} controls playsInline style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                  </div>
                 )}
                 {wish.audioUrl && (
                   <div className="s-media" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>

@@ -188,8 +188,14 @@ function buildBookHtml({ publication, wishes, baseUrl }) {
        delivery type "video" — on affiche une vignette (poster) dans le
        livre puisqu'un PDF ne joue pas la vidéo. */
     const hasVideoPoster = w.mediaType === 'video' && w.videoUrl;
+    /* Sticker : contain + fond transparent, pas de crop, pas de background. */
+    const hasSticker = w.mediaType === 'sticker' && w.photoUrl;
     let photoTag = '';
-    if (hasImage) {
+    if (hasSticker) {
+      /* Pas de crop Cloudinary — un sticker est déjà sur fond transparent
+         (webp/png), on veut le rendu tel quel, centré, contain. */
+      photoTag = `<div class="wish-sticker"><img src="${escapeHtml(w.photoUrl)}" alt="" crossorigin="anonymous"></div>`;
+    } else if (hasImage) {
       /* f_auto → Cloudinary sert le meilleur format pour Chrome (WebP/JPG).
          Pour un GIF animé, seule la 1re frame apparaîtra dans le PDF,
          c'est le comportement attendu (un PDF est statique). */
@@ -432,6 +438,23 @@ ${baseTag}
     background: rgba(0,0,0,0.05);
   }
   .wish-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Sticker : contain + fond transparent, on veut voir le sticker en entier
+     et non croppé. Pas de border-radius (le sticker a déjà sa forme). */
+  .wish-sticker {
+    width: 100%;
+    height: 55mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  .wish-sticker img {
+    max-width: 80%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 2mm 3mm rgba(0,0,0,0.18));
+  }
   .wish-body { display: flex; flex-direction: column; gap: 6mm; flex: 1; }
   .wish-text {
     font-family: 'Caveat', cursive, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji';

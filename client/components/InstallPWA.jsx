@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './InstallPWA.module.css';
 import { Download, X, Share } from 'lucide-react';
+
+/* Routes publiques (destinataire / visiteur d'un mur, carte ou cadeau) sur
+   lesquelles le prompt "Installer l'application" ne doit PAS s'afficher — le
+   visiteur n'est pas là pour installer notre PWA. Même liste que
+   UpdateToast.jsx. Match par préfixe. */
+const PUBLIC_ROUTE_PREFIXES = ['/m/', '/g/', '/c/', '/s/', '/site/', '/collect/', '/wall/'];
 
 /* ── Detect iOS ─────────────────────────────────────────────── */
 function isIOS() {
@@ -18,12 +25,18 @@ function isInStandaloneMode() {
 }
 
 export default function InstallPWA() {
+  const { pathname } = useLocation();
+  const onPublicRoute = PUBLIC_ROUTE_PREFIXES.some(p => pathname.startsWith(p));
+
   const [show, setShow]               = useState(false);
   const [mode, setMode]               = useState('android'); // 'android' | 'ios'
   const [deferredPrompt, setDeferred] = useState(null);
   const [iosStep, setIosStep]         = useState(0); // 0=intro, 1=step1, 2=step2
 
   useEffect(() => {
+    // Public route (mur/carte/cadeau partagé) → jamais de prompt PWA
+    if (onPublicRoute) return;
+
     // Already installed → don't show
     if (isInStandaloneMode()) return;
 
@@ -46,7 +59,7 @@ export default function InstallPWA() {
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+  }, [onPublicRoute]);
 
   const dismiss = () => {
     setShow(false);
@@ -61,7 +74,7 @@ export default function InstallPWA() {
     setDeferred(null);
   };
 
-  if (!show) return null;
+  if (!show || onPublicRoute) return null;
 
   /* ── iOS banner ── */
   if (mode === 'ios') {
