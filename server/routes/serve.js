@@ -14,6 +14,7 @@ const {
   safeHttpUrl,
 } = require('../utils/htmlSafe');
 const { getReactWallShell } = require('../utils/reactWallShell');
+const { buildWallOgTags } = require('../utils/wallOgTags');
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -399,47 +400,11 @@ router.get('/:templateName/:customName', async (req, res) => {
     if (!html) return sendError(res, 404, 'Template introuvable.');
 
     /* ── Open Graph / Twitter (preview WhatsApp, Facebook, iMessage…) ──
-       - og:image : la "bannière" uploadée dans WallSetup (data.bannerImage,
-         alias coverImage/wallCover). Doit être absolute et publiquement
-         accessible pour que les crawlers puissent la fetcher.
-       - og:title : titre du mur (nom du destinataire ou pub.title).
-       - og:description : sous-titre (data.subtitle) qui devient le texte du
-         partage sur WhatsApp/FB. */
+       Helper partagé avec /m/:slug (React SPA shell) — voir wallOgTags.js. */
     const publicOrigin = process.env.APP_URL
       || `${req.protocol}://${req.get('host') || ''}`;
     const currentUrl = publicOrigin.replace(/\/+$/, '') + req.originalUrl.split('?')[0];
-    const rawOgTitle = String(
-      pub.data?.name || pub.data?.wallTitle || pub.title || 'Mur myKado'
-    ).trim().slice(0, 120);
-    const rawOgDesc = String(
-      pub.data?.subtitle || pub.data?.phrase || pub.data?.description ||
-      'Un espace vivant pour déposer des mots, des souvenirs et des gestes d\'amour.'
-    ).trim().slice(0, 300);
-    const rawOgImage = safeHttpUrl(
-      pub.data?.bannerImage || pub.data?.coverImage || pub.data?.wallCover || ''
-    );
-    const ogImage = rawOgImage
-      ? (rawOgImage.includes('res.cloudinary.com')
-          ? optimizeCloudinaryUrl(rawOgImage, 'f_auto,q_auto:good,w_1200,h_630,c_fill,g_auto')
-          : rawOgImage)
-      : '';
-    const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-    const ogTitle = escHtml(rawOgTitle);
-    const ogDesc  = escHtml(rawOgDesc);
-    const ogUrl   = escHtml(currentUrl);
-    const ogTags = `
-<meta property="og:type" content="website">
-<meta property="og:title" content="${ogTitle}">
-<meta property="og:description" content="${ogDesc}">
-<meta property="og:url" content="${ogUrl}">
-${ogImage ? `<meta property="og:image" content="${escHtml(ogImage)}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">` : ''}
-<meta name="twitter:card" content="${ogImage ? 'summary_large_image' : 'summary'}">
-<meta name="twitter:title" content="${ogTitle}">
-<meta name="twitter:description" content="${ogDesc}">
-${ogImage ? `<meta name="twitter:image" content="${escHtml(ogImage)}">` : ''}
-<meta name="description" content="${ogDesc}">`;
+    const ogTags = buildWallOgTags(pub, currentUrl);
 
     const injection = `${ogTags}
 <style>

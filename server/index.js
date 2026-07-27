@@ -187,6 +187,12 @@ app.use((req, res, next) => {
 // SPA catch-all for React routes in prod (e.g. /admin, /edit/:id)
 if (PROD && fs.existsSync(REACT_DIST)) {
   app.use('/app', express.static(REACT_DIST, { maxAge: '1y', immutable: true }));
+
+  /* /m/:slug avec injection OG server-side pour les preview WhatsApp/FB.
+     Doit passer AVANT le catch-all SPA pour intercepter et injecter les meta.
+     Voir server/routes/wallShell.js. */
+  app.use('/', require('./routes/wallShell'));
+
   app.get('*', (req, res, next) => {
     const host = req.hostname;
     if (host === APP_HOST) {

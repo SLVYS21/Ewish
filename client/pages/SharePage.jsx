@@ -17,6 +17,48 @@ import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
 const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
 const FREE_WORDS = 10;
 
+/* Origine app (React SPA) — sert à construire les liens de partage /m/:code
+   directement vers le frontend, pour que la preview OG (banner) fonctionne
+   sur WhatsApp/FB sans hop de redirection.
+   Priorité :
+   1. VITE_APP_URL explicite (recommandé)
+   2. Dev (localhost) : window.location.origin (SPA sert elle-même /m/:code)
+   3. VITE_API_URL avec sous-domaine `api.` remplacé par `app.` (prod)
+   4. window.location.origin en fallback ultime */
+function getAppOrigin() {
+  const explicit = import.meta.env.VITE_APP_URL;
+  if (explicit) return explicit.replace(/\/+$/, '');
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) {
+      return window.location.origin;
+    }
+  }
+  const api = import.meta.env.VITE_API_URL;
+  if (api) {
+    const cleaned = api.replace(/\/+$/, '');
+    if (/^https?:\/\/api\./i.test(cleaned)) return cleaned.replace(/^(https?:\/\/)api\./i, '$1app.');
+    return cleaned;
+  }
+  if (typeof window !== 'undefined') return window.location.origin;
+  return '';
+}
+
+/* Construit l'URL à partager pour une publication.
+   - Murs : lien frontend direct (APP_URL/m/CODE) pour que l'OG preview
+     charge la bannière du mur. Le shortCode fait office de slug si aucun
+     slug custom n'existe (backend gère les deux via $or dans wallShell.js).
+   - Autres briques : garde l'ancien lien /s/CODE (SSR /site → OG déjà OK). */
+export function buildShareUrl({ pub, shortCode, isWall }) {
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+  if (!pub) return '';
+  if (isWall && shortCode) {
+    return `${getAppOrigin()}/m/${shortCode}`;
+  }
+  if (shortCode) return `${apiBase}/s/${shortCode}`;
+  return `${apiBase}/site/${pub.templateName}/${pub.customName}`;
+}
+
 const QR_SHAPES = [
   { id: 'rounded',  label: 'Doux'     },
   { id: 'classic',  label: 'Classique'},
@@ -158,7 +200,11 @@ function QrSvg({ url, shape, color }) {
 
 /* ─── Branded QR card ─── */
 function QrCard({ pub, shortCode, shareUrl, shape, color, branded }) {
-  const shortDomain = (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
+  /* Affiche l'URL réelle (celle du QR) plutôt qu'un domaine hardcodé, pour
+     que la carte imprimée soit cohérente avec le lien scanné. */
+  const displayUrl = shareUrl
+    ? shareUrl.replace(/^https?:\/\//, '')
+    : (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
   return (
     <div className="card qr-card" id="mk-qr-card" style={{ background: color.bg, border: '1px solid rgba(0,0,0,.06)', padding: '20px 18px', gap: 14, alignItems: 'center', textAlign: 'center' }}>
       <div>
@@ -169,7 +215,7 @@ function QrCard({ pub, shortCode, shareUrl, shape, color, branded }) {
         <QrSvg url={shareUrl || 'https://mykado.store'} shape={shape} color={color} />
       </div>
       <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 700, color: color.fg, opacity: .85, letterSpacing: '.04em' }}>
-        {shortCode ? `${shortDomain}/s/${shortCode}` : shortDomain}
+        {displayUrl}
       </div>
       {branded && (
         <div style={{ fontSize: 10, fontWeight: 700, color: color.fg, opacity: .55, letterSpacing: '.08em', textTransform: 'uppercase' }}>
@@ -617,7 +663,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
   }, [pub._id, slugDraft, shortCode, setShortCode]);
 
   const handleDownload = useCallback(async () => {
-    if (!primaryShareUrl) return;
+    if (!activeShareUrl) return;
     setDownloading(true);
     try {
       const node = document.getElementById('mk-qr-card');
@@ -639,10 +685,12 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
       ctx.globalAlpha = 1;
       ctx.font = "52px 'Instrument Serif', Georgia, serif";
       ctx.fillText(pub?.title || 'myKado', W / 2, 162);
-      const shortDomain = (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
+      const displayUrl = activeShareUrl
+        ? activeShareUrl.replace(/^https?:\/\//, '')
+        : (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
       ctx.font = '600 26px ui-monospace, monospace';
       ctx.globalAlpha = .85;
-      ctx.fillText(shortCode ? `${shortDomain}/s/${shortCode}` : shortDomain, W / 2, H - (branded ? 96 : 56));
+      ctx.fillText(displayUrl, W / 2, H - (branded ? 96 : 56));
       if (branded) {
         ctx.globalAlpha = .55;
         ctx.font = "700 22px 'Plus Jakarta Sans', sans-serif";
@@ -815,7 +863,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
                 {slugEditing ? (
                   <div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, color: 'var(--mk-ink-3)' }}>/s/</span>
+                      <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, color: 'var(--mk-ink-3)' }}>{isWall ? '/m/' : '/s/'}</span>
                       <input
                         className="mk-input"
                         style={{ fontFamily: 'ui-monospace, monospace', letterSpacing: '.1em', textTransform: 'uppercase', fontSize: 13, flex: 1 }}
@@ -999,9 +1047,7 @@ export default function SharePage() {
   const isWall   = WALL_NAMES.has(pub.templateName);
   const editPath = isWall ? `/ewish-admin/wall/${pub._id}` : `/ewish-admin/ewish/edit/${pub._id}`;
 
-  const shareUrl = shortCode
-    ? `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/s/${shortCode}`
-    : `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/site/${pub.templateName}/${pub.customName}`;
+  const shareUrl = buildShareUrl({ pub, shortCode, isWall });
 
   return (
     <div className="page">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShareView, UnlockView } from './SharePage';
+import { ShareView, UnlockView, buildShareUrl } from './SharePage';
 import { getShortLink } from '../utils/api';
 import { Loader2 } from 'lucide-react';
 
@@ -26,9 +26,7 @@ export default function WallShareTab({ pub, setPub }) {
   }
 
   const isWall = WALL_NAMES.has(pub.templateName);
-  const shareUrl = shortCode
-    ? `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/s/${shortCode}`
-    : `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/site/${pub.templateName}/${pub.customName}`;
+  const shareUrl = buildShareUrl({ pub, shortCode, isWall });
 
   return (
     <div style={{ padding: '32px 24px', maxWidth: 860, margin: '0 auto' }}>

@@ -442,6 +442,36 @@
     .pin:active { transform: scale(.97); }
     .pin.is-new { outline: 2.5px solid var(--accent-soft); outline-offset: 0; }
 
+    /* Mot en attente de modération ou de paiement (freemium) — visible
+       pour le contributeur seulement, avec une pastille "En relecture"
+       pour qu'il comprenne pourquoi les autres ne le voient pas encore. */
+    .pin.pin-pending { opacity: .78; }
+    .pin.pin-pending .pin-hatch {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent 0 10px, rgba(43,36,64,.06) 10px 20px);
+      pointer-events: none;
+      border-radius: inherit;
+      z-index: 1;
+    }
+    .pin-pending-badge {
+      position: absolute !important;
+      top: 8px; right: 8px;
+      z-index: 3 !important;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 9px 4px 7px;
+      background: #FFF4B8;
+      color: #7A5A00;
+      border: 1.5px solid #E6C86B;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      box-shadow: 0 2px 6px rgba(0,0,0,.14);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .pin-pending-badge svg { width: 11px; height: 11px; flex: 0 0 auto; }
+
     /* Tone palette (from Mur 1 design) */
     .tone-rose   { --pin-bg: #FFEDF1; }
     .tone-rose   .nm-text { color: var(--mk-rose); }
@@ -1779,6 +1809,18 @@ function createNoteEl(w, i, isNew) {
     '<div class="tx">' + escapeHtml(w.text) + '</div>' +
     mediaHtml;
 
+  if (w.pending) {
+    note.classList.add('pin-pending');
+    var hatch = document.createElement('span');
+    hatch.className = 'pin-hatch';
+    note.appendChild(hatch);
+    var badge = document.createElement('span');
+    badge.className = 'pin-pending-badge';
+    badge.setAttribute('title', 'En attente de validation par le créateur du mur');
+    badge.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>En relecture</span>';
+    note.appendChild(badge);
+  }
+
   note.addEventListener('click', function(e) {
     if (e.target && e.target.tagName === 'AUDIO') return;
     var storyIndex = parseInt(note.dataset.storyIndex, 10);
@@ -2120,18 +2162,42 @@ function submitWish() {
   };
   isSubmitting = true;
   var sb = document.getElementById('submit-btn'); if (sb) sb.disabled = true;
-  var afterSubmit = function() {
+  var afterSubmit = function(apiResult) {
     isSubmitting = false; if (sb) sb.disabled = false;
+
+    /* Le mot est "en attente" si le mur exige une modération OU si le
+       serveur a marqué le mot pendingPayment (freemium : plafond atteint
+       ou média sur mur gratuit). On l'insère quand même sur le mur du
+       contributeur avec une pastille "En relecture" pour qu'il sache
+       pourquoi les autres ne le voient pas encore. */
+    var isPending = !!_d.requireModeration || !!(apiResult && apiResult.pendingPayment);
+    w.pending = isPending;
+
+    wishes.unshift(w);
     closeSheet();
     if (textEl) textEl.value = ''; if (authorEl) authorEl.value = '';
     clearMedia(); switchTab('none');
+
+    var container = document.getElementById('notes-container');
+    if (container) {
+      var emptyEl = document.getElementById('empty-state');
+      if (emptyEl) emptyEl.style.display = 'none';
+      updateWallCols();
+      /* Reindex existing pins so les stories restent alignées après l'unshift. */
+      container.querySelectorAll('.pin').forEach(function(n, i) { n.dataset.storyIndex = i + 1; });
+      var noteEl = createNoteEl(w, 0, true);
+      container.insertBefore(noteEl, container.firstChild);
+      setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     var cag = _d.cagnotte || _d.jarConfig || {};
     if (cag && cag.enabled) {
       giftState.wishId    = w._id || null;
       giftState.guestName = (w.name && w.name !== 'Anonyme') ? w.name : '';
       giftState.gave = false; giftState.paid = 0; giftState.amt = null;
     }
-    setTimeout(function() { showAddedOverlay(!!_d.requireModeration); }, 300);
+    setTimeout(function() { showAddedOverlay(isPending); }, 400);
   };
   if (PUB_ID && API_BASE) {
     apiFetch('/api/wishes/' + PUB_ID, {
@@ -2143,7 +2209,7 @@ function submitWish() {
     }).then(function(r) {
       w._id = r.id;
       if (w._id) { myWishIds.push(w._id); localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds)); }
-      afterSubmit();
+      afterSubmit(r);
     }).catch(function(err) {
       isSubmitting = false; if (sb) sb.disabled = false;
       if (err && err.status === 402) {
@@ -2157,7 +2223,7 @@ function submitWish() {
       }
     });
   } else {
-    afterSubmit();
+    afterSubmit(null);
   }
 }
 
@@ -2292,7 +2358,7 @@ function showAddedOverlay(moderation) {
     : ('Merci' + (name ? ' ' + name : '') + ' !');
   var msg;
   if (moderation) {
-    msg = 'On te préviendra dès qu’il apparaît sur le mur.';
+    msg = 'Il apparaît déjà sur le mur avec une pastille « En relecture ». Les autres le verront dès que le créateur du mur l’aura validé.';
   } else if (recipient) {
     msg = 'Ton mot est maintenant sur le mur de ' + recipient + '. Ça va lui faire chaud au cœur.';
   } else {
