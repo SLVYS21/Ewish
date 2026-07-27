@@ -156,6 +156,15 @@ function serveReact(req, res) {
   res.sendFile(path.join(REACT_DIST, 'index.html'));
 }
 
+/* /m/:slug avec injection OG server-side pour les preview WhatsApp/FB.
+   DOIT être enregistré avant le host-based routing ci-dessous, sinon
+   le middleware host-based sert client/dist/index.html directement pour
+   app.mykado.store/m/CODE et court-circuite wallShell → preview vide.
+   Voir server/routes/wallShell.js. */
+if (PROD && fs.existsSync(REACT_DIST)) {
+  app.use('/', require('./routes/wallShell'));
+}
+
 // ── Host-based routing ────────────────────────────────────────
 // Runs AFTER all shared API/static routes above.
 // In prod: routes by Host header.
@@ -187,11 +196,6 @@ app.use((req, res, next) => {
 // SPA catch-all for React routes in prod (e.g. /admin, /edit/:id)
 if (PROD && fs.existsSync(REACT_DIST)) {
   app.use('/app', express.static(REACT_DIST, { maxAge: '1y', immutable: true }));
-
-  /* /m/:slug avec injection OG server-side pour les preview WhatsApp/FB.
-     Doit passer AVANT le catch-all SPA pour intercepter et injecter les meta.
-     Voir server/routes/wallShell.js. */
-  app.use('/', require('./routes/wallShell'));
 
   app.get('*', (req, res, next) => {
     const host = req.hostname;
