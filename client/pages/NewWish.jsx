@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getTemplates, createPublication } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
-import PaymentModal from '../admin/components/PaymentModal';
 import WhatsAppFAB from '../components/WhatsAppFAB';
 import { ArrowLeft, Check, ChevronRight } from 'lucide-react';
 import styles from './NewWish.module.css';
@@ -29,7 +28,6 @@ export default function NewWish() {
   const [recipientName, setRecipientName] = useState('');
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState('');
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -68,9 +66,9 @@ export default function NewWish() {
       }
       navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
     } catch (e) {
-      const msg = e.response?.data?.error || 'Erreur';
-      if (e.response?.status === 402) setPaymentModalOpen(true);
-      else setError(msg);
+      /* La création de publication (POST /publications) ne fait plus de
+         check crédits — le paiement se joue au moment du publish dans Editor. */
+      setError(e.response?.data?.error || 'Erreur');
       setLoading(false);
     }
   };
@@ -189,9 +187,6 @@ export default function NewWish() {
         </div>
       </div>
 
-      {paymentModalOpen && (
-        <PaymentModal onClose={() => setPaymentModalOpen(false)} onSuccess={handleSubmit} />
-      )}
       <WhatsAppFAB />
     </div>
   );

@@ -49,6 +49,14 @@ app.use('/backgrounds', express.static(path.join(__dirname, '../client/public/ba
   immutable: false,
 }));
 
+/* Sticker bank — servie depuis server/public/stickers/ (bundlée dans l'image
+   Docker via COPY server/public → /app/server/public). L'endpoint
+   /api/stickers plus bas renvoie la liste JSON pour les composers. */
+app.use('/stickers', express.static(path.join(__dirname, 'public/stickers'), {
+  maxAge: '30d',
+  immutable: false,
+}));
+
 const TEMPLATES_DIR = process.env.TEMPLATES_DIR ||
   (fs.existsSync(path.join(__dirname, 'templates')) 
     ? path.join(__dirname, 'templates')
@@ -86,6 +94,8 @@ app.use('/api/analytics',    require('./routes/analytics'));
 app.use('/api/shortlinks',   require('./routes/shortlinks'));
 app.use('/api/fonts',        require('./routes/fonts.js'));
 app.use('/api/billing',      require('./routes/billing.js'));
+app.use('/api/feexpay',      require('./routes/feexpay'));
+app.use('/api/stickers',     require('./routes/stickers'));
 app.use('/api/superadmin',   require('./routes/superadmin'));
 app.use('/api/assets',       require('./routes/assetbank'));
 app.use('/api/suggestions',  require('./routes/suggestions'));

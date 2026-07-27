@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       myKado Â· Mur 1    Mosaà¯que (pixel-perfect)
+       myKado Â· Mur 1    Mosaïque (pixel-perfect)
        Fond dégradé pastel, bannière roseâ†’lilas, cartes pastel,
        typo Instrument Serif italic + Plus Jakarta Sans, accent violet.
        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -807,6 +807,29 @@
     .media-loading.show { display: flex; }
     .media-loading svg { animation: mk-spin .9s linear infinite; width: 16px; height: 16px; }
 
+    /* Sticker picker (banque interne, WebP transparents) */
+    .sticker-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      max-height: 280px; overflow-y: auto;
+      border: 1px solid #F2E4EA; border-radius: 14px;
+      padding: 8px; background: #FFF1F4;
+    }
+    .sticker-grid:empty { display: none; }
+    .sticker-cell {
+      position: relative; padding-top: 100%;
+      background: #fff; border: 1px solid transparent; border-radius: 12px; overflow: hidden;
+      cursor: pointer; transition: transform .15s, border-color .15s, box-shadow .15s;
+    }
+    .sticker-cell:hover { transform: scale(1.05); border-color: #FFB3C1; box-shadow: 0 4px 12px rgba(225,29,72,.14); }
+    .sticker-cell.on { border-color: #E11D48; box-shadow: 0 0 0 2px #FFE0E6; }
+    .sticker-cell img {
+      position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px);
+      object-fit: contain; display: block;
+    }
+    .sticker-loading { text-align: center; font-size: 12.5px; color: #A496A5; padding: 24px 0; display: none; }
+    .sticker-loading.show { display: block; }
+    #sticker-preview img { max-height: 170px; object-fit: contain; background: #FFF1F4; }
+
     .media-preview { display: none; position: relative; margin-top: 8px; }
     .media-preview.show { display: block; }
     .media-preview img { width: 100%; max-height: 170px; object-fit: cover; border-radius: 14px; border: 1px solid var(--mk-line); display: block; }
@@ -1389,10 +1412,10 @@
     </div>
     <div class="sheet-body">
       <span class="field-lbl">Ton message</span>
-      <textarea id="wish-input" oninput="updateComposerPreview()" placeholder="à‰cris ce qui te vientâ€¦" maxlength="400" rows="4"></textarea>
+      <textarea id="wish-input" oninput="updateComposerPreview()" placeholder="Écris ce qui te vient" maxlength="400" rows="4"></textarea>
 
       <span class="field-lbl">Ton Prénom</span>
-      <input id="wish-author" type="text" oninput="updateComposerPreview()" placeholder="Ex. Aà¯cha" maxlength="40" autocomplete="given-name">
+      <input id="wish-author" type="text" oninput="updateComposerPreview()" placeholder="Ex. Aïcha" maxlength="40" autocomplete="given-name">
 
       <span class="field-lbl">Couleur de ta carte</span>
       <div class="color-row">
@@ -1414,6 +1437,10 @@
         <button class="media-tab" id="tab-audio" onclick="switchTab(activeTab==='audio'?'none':'audio')" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></svg>
           Vocal
+        </button>
+        <button class="media-tab" id="tab-sticker" onclick="switchTab(activeTab==='sticker'?'none':'sticker')" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 2H8.5A2.5 2.5 0 0 0 6 4.5v15A2.5 2.5 0 0 0 8.5 22h7l6.5-6.5v-11A2.5 2.5 0 0 0 19.5 2Z"/><path d="M15 22v-4.5a2.5 2.5 0 0 1 2.5-2.5H22"/></svg>
+          Sticker
         </button>
         <button class="media-tab" id="tab-none" onclick="switchTab('none')" type="button" style="display:none">Texte</button>
       </div>
@@ -1456,6 +1483,17 @@
         </div>
         <div class="media-preview" id="audio-preview">
           <audio id="audio-player" controls preload="none"></audio>
+          <button class="media-clear" onclick="clearMedia()" aria-label="Supprimer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="media-panel" id="panel-sticker">
+        <div class="sticker-loading" id="sticker-loading">Chargement des stickers…</div>
+        <div class="sticker-grid" id="sticker-grid"></div>
+        <div class="media-preview" id="sticker-preview">
+          <img id="sticker-img" src="" alt="Sticker sélectionné">
           <button class="media-clear" onclick="clearMedia()" aria-label="Supprimer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
           </button>
@@ -1723,6 +1761,8 @@ function createNoteEl(w, i, isNew) {
     if (w.gifCode) {
       mediaHtml = '<div class="pin-gifwrap"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/' + escapeHtml(w.gifCode) + '/512.gif" alt="" loading="lazy" decoding="async"></div>';
     }
+  } else if (w.mediaType === 'sticker' && w.photoUrl) {
+    mediaHtml = '<div class="pin-gifwrap" style="background:transparent;padding:2px;"><img src="' + escapeHtml(w.photoUrl) + '" alt="" loading="lazy" decoding="async" style="width:110px;height:110px;object-fit:contain;"></div>';
   } else if (w.mediaType === 'audio') {
     if (w.audioUrl) {
       mediaHtml = '<audio class="pin-audio" src="' + escapeHtml(w.audioUrl) + '" controls preload="none"></audio>';
@@ -1785,7 +1825,10 @@ function buildWall(animate) {
 }
 
 function initAdmin() {
-  if (_d.isAdmin && !_d.previewMode) {
+  /* La bannière "Retour à la gestion" n'est utile que lorsque le mur est
+     ouvert en preview depuis l'éditeur (?preview=1). Sur un lien partagé,
+     elle n'a plus de sens même pour l'admin. */
+  if (_d.isAdmin && _d.previewMode) {
     var banner = document.getElementById('admin-banner');
     banner.classList.add('show');
     document.getElementById('admin-back').href = _d.adminReturnUrl || '#';
@@ -1884,6 +1927,257 @@ function startLiveUpdates() {
   /* Stub to prevent ReferenceError on modern template. Live updates are handled via postMessage in preview. */
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Composer + Gift + Media handlers (portés du template space —
+   nécessaires aux boutons "Laisser un mot" et "Participer au kado")
+══════════════════════════════════════════════════════════════════ */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) { console.log('[toast]', msg); return; }
+  t.textContent = msg || 'Mot ajouté ✦';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+function updateComposerPreview() { /* stub — pas d'aperçu dans le modern */ }
+
+function checkGate() {
+  var input = document.getElementById('access-code-input');
+  var val = input ? input.value.trim() : '';
+  if (val && val === (_d.accessCode || '').trim()) {
+    document.getElementById('access-gate').style.display = 'none';
+  } else {
+    var err = document.getElementById('access-code-err');
+    if (err) { err.style.display = 'block'; setTimeout(function(){ err.style.display = 'none'; }, 2500); }
+  }
+}
+
+function openSheet() {
+  document.getElementById('add-overlay').classList.add('open');
+  setTimeout(function() { var i = document.getElementById('wish-input'); if (i) i.focus(); }, 350);
+}
+function closeSheet() {
+  document.getElementById('add-overlay').classList.remove('open');
+  if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording(false);
+}
+function handleBgClick(e) {
+  if (e.target === document.getElementById('add-overlay')) closeSheet();
+}
+
+function pickColor(n, el) {
+  selectedColor = n;
+  document.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('active'); });
+  if (el) el.classList.add('active');
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.media-tab').forEach(function(t) { t.classList.remove('active'); });
+  var tabEl = document.getElementById('tab-' + tab);
+  if (tabEl) tabEl.classList.add('active');
+  document.querySelectorAll('.media-panel').forEach(function(p) { p.classList.remove('active'); });
+  if (tab !== 'none') {
+    var pan = document.getElementById('panel-' + tab);
+    if (pan) pan.classList.add('active');
+  }
+  if (tab !== 'audio' && mediaRecorder && mediaRecorder.state === 'recording') stopRecording(false);
+  if (tab === 'sticker' && !stickersLoadedOnce) {
+    stickersLoadedOnce = true;
+    loadStickers();
+  }
+}
+
+/* ── STICKERS (banque interne, WebP transparents) ─────────────────── */
+var stickersLoadedOnce = false;
+var stickersCache = null;
+function renderStickerGrid(items) {
+  var grid = document.getElementById('sticker-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  if (!items || !items.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:22px;text-align:center;color:#A496A5;font-size:12.5px">Aucun sticker disponible</div>';
+    return;
+  }
+  items.forEach(function(st) {
+    var cell = document.createElement('div');
+    cell.className = 'sticker-cell';
+    cell.innerHTML = '<img src="' + st.url + '" alt="" loading="lazy">';
+    cell.addEventListener('click', function() {
+      document.querySelectorAll('.sticker-cell').forEach(function(c){ c.classList.remove('on'); });
+      cell.classList.add('on');
+      activeMedia = { type: 'sticker', url: st.url };
+      var img = document.getElementById('sticker-img'); if (img) img.src = st.url;
+      var prev = document.getElementById('sticker-preview'); if (prev) prev.classList.add('show');
+    });
+    grid.appendChild(cell);
+  });
+}
+function loadStickers() {
+  var loadingEl = document.getElementById('sticker-loading');
+  if (stickersCache) { renderStickerGrid(stickersCache); return; }
+  if (loadingEl) loadingEl.classList.add('show');
+  fetch((typeof API_BASE !== 'undefined' && API_BASE ? API_BASE : '') + '/api/stickers')
+    .then(function(r){ return r.json(); })
+    .then(function(j){ stickersCache = (j && j.stickers) || []; renderStickerGrid(stickersCache); })
+    .catch(function(){ renderStickerGrid([]); })
+    .then(function(){ if (loadingEl) loadingEl.classList.remove('show'); });
+}
+
+function handleDragOver(e) { e.preventDefault(); var z = document.getElementById('photo-zone'); if (z) z.classList.add('drag-over'); }
+function handleDragLeave() { var z = document.getElementById('photo-zone'); if (z) z.classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  var z = document.getElementById('photo-zone'); if (z) z.classList.remove('drag-over');
+  var f = e.dataTransfer.files[0]; if (f && /^image\//.test(f.type)) processPhotoFile(f);
+}
+function handlePhotoSelect(e) { if (e.target.files[0]) processPhotoFile(e.target.files[0]); }
+
+function processPhotoFile(file) {
+  if (file.size > 10 * 1024 * 1024) { showToast('Fichier trop grand (max 10 Mo)'); return; }
+  var isGif = file.type === 'image/gif';
+  var reader = new FileReader();
+  reader.onload = function(ev) { var img = document.getElementById('photo-img'); if (img) img.src = ev.target.result; };
+  reader.readAsDataURL(file);
+  if (!API_BASE) {
+    activeMedia = { type: isGif ? 'gif' : 'photo', url: URL.createObjectURL(file) };
+    document.getElementById('photo-preview').classList.add('show');
+    document.getElementById('photo-zone').style.display = 'none';
+    return;
+  }
+  document.getElementById('photo-zone').style.display = 'none';
+  var loading = document.getElementById('photo-loading'); if (loading) loading.classList.add('show');
+  uploadMedia(file).then(function(url) {
+    activeMedia = { type: isGif ? 'gif' : 'photo', url: url };
+    document.getElementById('photo-img').src = url;
+    document.getElementById('photo-preview').classList.add('show');
+  }).catch(function() { showToast("Échec de l'envoi"); document.getElementById('photo-zone').style.display = ''; })
+    .finally(function() { if (loading) loading.classList.remove('show'); });
+}
+
+function toggleRecording() { if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording(true); else startRecording(); }
+function startRecording() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('Microphone indisponible sur ce navigateur.'); return; }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+    audioChunks = []; mediaRecorder = new MediaRecorder(stream); mediaRecorder._stream = stream;
+    mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.start(100); recSecs = 0;
+    var st = document.getElementById('rec-status'); if (st) { st.textContent = 'Enregistrement… 00:00'; st.classList.add('active'); }
+    var btn = document.getElementById('rec-btn'); if (btn) btn.classList.add('recording');
+    recTimerInt = setInterval(function() {
+      recSecs++; var m = String(Math.floor(recSecs / 60)).padStart(2, '0'), s = String(recSecs % 60).padStart(2, '0');
+      if (st) st.textContent = 'Enregistrement… ' + m + ':' + s;
+    }, 1000);
+  }).catch(function() { showToast('Microphone inaccessible'); });
+}
+function stopRecording(upload) {
+  clearInterval(recTimerInt);
+  var btn = document.getElementById('rec-btn'); if (btn) btn.classList.remove('recording');
+  var st = document.getElementById('rec-status'); if (st) { st.classList.remove('active'); st.textContent = 'Appuyez pour enregistrer'; }
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+  mediaRecorder.onstop = function() {
+    if (mediaRecorder._stream) mediaRecorder._stream.getTracks().forEach(function(t) { t.stop(); });
+    if (!upload || !audioChunks.length) return;
+    var blob = new Blob(audioChunks, { type: 'audio/webm' });
+    var localUrl = URL.createObjectURL(blob);
+    var pl = document.getElementById('audio-player'); if (pl) pl.src = localUrl;
+    var prev = document.getElementById('audio-preview'); if (prev) prev.classList.add('show');
+    activeMedia = { type: 'audio', url: localUrl };
+    if (!API_BASE) return;
+    var ld = document.getElementById('audio-loading'); if (ld) ld.classList.add('show');
+    uploadMedia(new File([blob], 'audio.webm', { type: 'audio/webm' }))
+      .then(function(url) { activeMedia = { type: 'audio', url: url }; if (pl) pl.src = url; })
+      .catch(function() { showToast("Échec de l'envoi audio"); })
+      .finally(function() { if (ld) ld.classList.remove('show'); });
+  };
+  mediaRecorder.stop();
+}
+function clearMedia() {
+  activeMedia = { type: 'none', url: '' };
+  ['photo-preview', 'audio-preview', 'sticker-preview'].forEach(function(id) { var e = document.getElementById(id); if (e) e.classList.remove('show'); });
+  document.querySelectorAll('.sticker-cell').forEach(function(c){ c.classList.remove('on'); });
+  var zone = document.getElementById('photo-zone'); if (zone) zone.style.display = '';
+  var f = document.getElementById('photo-file'); if (f) f.value = '';
+  var st = document.getElementById('rec-status'); if (st) st.textContent = 'Appuyez pour enregistrer';
+  var btn = document.getElementById('rec-btn'); if (btn) btn.classList.remove('recording');
+  clearInterval(recTimerInt);
+}
+
+function submitWish() {
+  if (isSubmitting) return;
+  var textEl = document.getElementById('wish-input');
+  var authorEl = document.getElementById('wish-author');
+  var text = textEl ? textEl.value.trim() : '';
+  var author = authorEl ? authorEl.value.trim() : '';
+  if (!text) {
+    if (textEl) { textEl.style.borderColor = 'var(--accent)'; textEl.focus(); setTimeout(function() { textEl.style.borderColor = ''; }, 1800); }
+    return;
+  }
+  var w = {
+    text: text, name: author || 'Anonyme', color: Number(selectedColor) || 0, ts: Date.now(),
+    photoUrl: activeMedia.type !== 'audio' ? (activeMedia.url || '') : '',
+    audioUrl: activeMedia.type === 'audio' ? (activeMedia.url || '') : '',
+    mediaType: activeMedia.type || 'none',
+  };
+  isSubmitting = true;
+  var sb = document.getElementById('submit-btn'); if (sb) sb.disabled = true;
+  var afterSubmit = function() {
+    isSubmitting = false; if (sb) sb.disabled = false;
+    closeSheet();
+    if (textEl) textEl.value = ''; if (authorEl) authorEl.value = '';
+    clearMedia(); switchTab('none');
+    var cag = _d.cagnotte || _d.jarConfig || {};
+    if (cag && cag.enabled) {
+      giftState.wishId    = w._id || null;
+      giftState.guestName = (w.name && w.name !== 'Anonyme') ? w.name : '';
+      giftState.gave = false; giftState.paid = 0; giftState.amt = null;
+    }
+    setTimeout(function() { showAddedOverlay(!!_d.requireModeration); }, 300);
+  };
+  if (PUB_ID && API_BASE) {
+    apiFetch('/api/wishes/' + PUB_ID, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName: w.name, message: w.text, color: w.color,
+        mediaType: w.mediaType, photoUrl: w.photoUrl, audioUrl: w.audioUrl,
+      }),
+    }).then(function(r) {
+      w._id = r.id;
+      if (w._id) { myWishIds.push(w._id); localStorage.setItem('ww_my_ids', JSON.stringify(myWishIds)); }
+      afterSubmit();
+    }).catch(function(err) {
+      isSubmitting = false; if (sb) sb.disabled = false;
+      if (err && err.status === 402) {
+        showToast(err.code === 'FREE_LIMIT_REACHED'
+          ? '5 mots gratuits atteints — le créateur doit activer le mur complet.'
+          : 'Photos & médias disponibles sur les murs activés.');
+      } else if (err && err.status === 403) {
+        showToast(err.message || 'Les mots sont temporairement fermés.');
+      } else {
+        showToast((err && err.message) || "Échec de l'envoi — réessayez");
+      }
+    });
+  } else {
+    afterSubmit();
+  }
+}
+
+function showGiftSheet() {
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (!cag || !cag.enabled) return;
+  var el = document.getElementById('gift-overlay');
+  if (!el) return;
+  el.style.display = 'flex';
+  setTimeout(function() { el.classList.add('open'); }, 10);
+}
+function hideGiftSheet() {
+  var el = document.getElementById('gift-overlay');
+  if (!el) return;
+  el.classList.remove('open');
+  setTimeout(function() { el.style.display = 'none'; }, 400);
+}
+function handleGiftBgClick(e) { if (e.target === document.getElementById('gift-overlay')) skipGift(); }
+function skipGift() { hideGiftSheet(); showThanksOverlay(false); }
+
 function initWall() {
   initCagnotteStrip();
   initGiftSheet();
@@ -1936,64 +2230,19 @@ function giftCustomAmt() {
 
 function giftPay() {
   if (!giftState.amt) return;
-  var errEl = document.getElementById('gift-err');
-  errEl.style.display = 'none';
-  var cag = _d.cagnotte || _d.jarConfig || {};
-  var key = cag.kkiapayKey || _d.kkiapayKey || '';
-  if (!key) {
-    errEl.textContent = 'Paiement non configuré. Contacte l\'organisateur.';
-    errEl.style.display = 'block';
-    return;
-  }
-  var launch = function() {
-    openKkiapayWidget({
-      amount:  giftState.amt,
-      api_key: key,
-      sandbox: (_d.kkiapaySandbox !== false),
-      name:    giftState.guestName || 'Anonyme',
-      callback: window.location.href,
-    });
-    addSuccessListener(function(resp) {
-      var txId = resp.transactionId || resp.transaction_id;
-      var afterPay = function() {
-        giftState.gave = true;
-        hideGiftSheet();
-        showThanksOverlay(true);
-      };
-      if (txId) {
-        fetch('/api/contributions/verify', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            transactionId:   txId,
-            publicationId:   PUB_ID,
-            contributorName: giftState.guestName || '',
-            isAnonymous:     !giftState.guestName,
-            wishId:          giftState.wishId,
-          }),
-        }).then(function(r) { return r.json(); }).then(function(d) {
-          giftState.paid = (d.contribution && d.contribution.amount) ? d.contribution.amount : giftState.amt;
-        }).catch(function() {
-          giftState.paid = giftState.amt;
-        }).finally(afterPay);
-      } else {
-        giftState.paid = giftState.amt;
-        afterPay();
-      }
-    });
-  };
-  if (typeof openKkiapayWidget === 'undefined') {
-    var sc = document.createElement('script');
-    sc.src = 'https://cdn.kkiapay.me/k.js';
-    sc.onload = launch;
-    sc.onerror = function() {
-      errEl.textContent = 'Impossible de charger le module de paiement.';
-      errEl.style.display = 'block';
-    };
-    document.head.appendChild(sc);
-  } else {
-    launch();
-  }
+  window.myKadoFP.open({
+    amount:          giftState.amt,
+    publicationId:   PUB_ID,
+    contributorName: giftState.guestName || '',
+    isAnonymous:     !giftState.guestName,
+    wishId:          giftState.wishId,
+    onSuccess: function(res) {
+      giftState.paid = (res && res.amount) || giftState.amt;
+      giftState.gave = true;
+      hideGiftSheet();
+      showThanksOverlay(true);
+    },
+  });
 }
 
 /* Noto emojis animés. */
@@ -2062,29 +2311,46 @@ function showAddedOverlay(moderation) {
   overlay.classList.add('open');
 }
 
-/* Share the wall — native share sheet if available, else copy link + toast. */
+/* Share the wall — ouvre une modale "merci" avec les options de partage.
+   L'action share native (ou copie du lien) est déclenchée depuis la modale. */
 function shareWallLink() {
+  var url = window.location.href.split('?')[0];
+  var linkEl = document.getElementById('thanks-share-link');
+  if (linkEl) linkEl.value = url;
+  var ov = document.getElementById('thanks-share-overlay');
+  if (ov) { ov.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeThanksShare() {
+  var ov = document.getElementById('thanks-share-overlay');
+  if (ov) { ov.classList.remove('open'); document.body.style.overflow = ''; }
+}
+function thanksShareNative() {
   var url = window.location.href.split('?')[0];
   var title = document.title || 'Un mur pour toi';
   var text = 'Laisse ton mot sur ce mur';
   if (navigator.share) {
     navigator.share({ title: title, text: text, url: url }).catch(function(){});
-    return;
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url)
-      .then(function() { showToast('Lien du mur copié'); })
-      .catch(function() { showToast('Lien : ' + url); });
   } else {
-    showToast('Lien : ' + url);
+    thanksShareCopy();
   }
 }
+function thanksShareCopy() {
+  var url = window.location.href.split('?')[0];
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(function(){ showToast('Lien copié !'); })
+      .catch(function(){ showToast('Lien : ' + url); });
+  } else { showToast('Lien : ' + url); }
+}
+function thanksShareWA() {
+  var url = window.location.href.split('?')[0];
+  window.open('https://wa.me/?text=' + encodeURIComponent('Laisse ton mot sur ce mur : ' + url), '_blank', 'noopener');
+}
 
-/* Open the "create your own wall" flow. Default: go to the app landing. */
+/* Open the "create your own wall" flow. Redirection directe vers la landing. */
 function openCreateOwnWall() {
-  var origin = window.location.origin || '';
-  var target = (_d.createWallUrl) ? _d.createWallUrl : (origin + '/');
-  window.open(target, '_blank', 'noopener');
+  var target = _d.landingUrl || 'https://www.mykado.store';
+  window.location.href = target;
 }
 
 function closeAddedOverlay() {
@@ -2442,13 +2708,10 @@ function applyTitle(d) {
 }
 
 function applyCover(d) {
-  var cover = document.getElementById('wall-cover');
-  if (!cover) return;
-  var img = (d.coverImage || d.wallCover || '').trim();
-  if (img) {
-    cover.style.setProperty('--cover-image', 'url("' + img.replace(/"/g, '\\"') + '")');
-    cover.classList.add('has-image');
-  }
+  /* La bannière (data.bannerImage / coverImage / wallCover) n'est plus
+     affichée dans le mur — elle sert uniquement de preview og:image
+     pour le partage sur WhatsApp / réseaux sociaux. On garde la fonction
+     pour la compat mais elle ne fait plus qu'un no-op. */
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -2486,7 +2749,7 @@ function applyCover(d) {
   initCagnotteStrip();
   initGiftSheet();
 
-  if (d.isAdmin && !d.previewMode) {
+  if (d.isAdmin && d.previewMode) {
     var banner = document.getElementById('admin-banner');
     banner.classList.add('show');
     document.getElementById('admin-back').href = d.adminReturnUrl || '#';
@@ -2601,17 +2864,7 @@ window.addEventListener('message', function(e) {
       });
     }
     if (data.subtitle  !== undefined) document.querySelector('[data-node="subtitle"]').textContent  = data.subtitle  || '';
-    if (data.coverImage !== undefined || data.wallCover !== undefined) {
-      var cover = document.getElementById('wall-cover');
-      var img = (data.coverImage || data.wallCover || '').trim();
-      if (img) {
-        cover.style.setProperty('--cover-image', 'url("' + img.replace(/"/g, '\\"') + '")');
-        cover.classList.add('has-image');
-      } else {
-        cover.style.removeProperty('--cover-image');
-        cover.classList.remove('has-image');
-      }
-    }
+    /* La bannière n'est plus rendue dans le mur — voir applyCover pour la raison. */
     return;
   }
 
@@ -2648,6 +2901,172 @@ document.addEventListener('keydown', function(e) {
     if (document.getElementById('add-overlay').classList.contains('open')) submitWish();
   }
 });
+</script>
+
+<!-- ═══════════ Thanks-share modale (déclenchée par shareWallLink) ═══════════ -->
+<style>
+  #thanks-share-overlay{position:fixed;inset:0;background:rgba(43,26,45,.55);backdrop-filter:blur(4px);z-index:9998;display:none;align-items:flex-end;justify-content:center;padding:0;}
+  #thanks-share-overlay.open{display:flex;}
+  #thanks-share-sheet{background:#fff;width:100%;max-width:440px;border-radius:22px 22px 0 0;padding:26px 24px 28px;box-shadow:0 -12px 40px rgba(43,26,45,.28);animation:tsSlide .28s cubic-bezier(.22,.9,.28,1.2);position:relative;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#2B1A2D;}
+  @keyframes tsSlide{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  #thanks-share-sheet .ts-x{position:absolute;top:14px;right:14px;background:none;border:none;color:#A496A5;cursor:pointer;padding:6px;line-height:1;}
+  #thanks-share-sheet .ts-emoji{font-size:44px;text-align:center;margin-bottom:12px;line-height:1;}
+  #thanks-share-sheet h3{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:26px;text-align:center;margin:0 0 8px;font-weight:400;color:#2B1A2D;}
+  #thanks-share-sheet p.ts-sub{text-align:center;color:#6D5C70;font-size:14px;line-height:1.5;margin:0 0 20px;}
+  .ts-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .ts-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border-radius:12px;border:1.5px solid #EAE0E5;background:#fff;color:#2B1A2D;font:700 14px inherit;cursor:pointer;transition:all .15s;font-family:inherit;}
+  .ts-btn:hover{border-color:#DCC4CE;transform:translateY(-1px);}
+  .ts-btn.ts-wa{background:#25D366;color:#fff;border-color:#25D366;}
+  .ts-btn.ts-wa:hover{background:#1EBE58;border-color:#1EBE58;}
+  .ts-btn.ts-native{background:#7C5CC9;color:#fff;border-color:#7C5CC9;grid-column:1/-1;}
+  .ts-btn.ts-native:hover{background:#6A48B8;border-color:#6A48B8;}
+  .ts-link-row{display:flex;gap:8px;margin-top:12px;}
+  .ts-link-row input{flex:1;padding:11px 12px;border:1.5px solid #EAE0E5;border-radius:10px;font-size:12.5px;color:#6D5C70;background:#F9F5F6;font-family:ui-monospace,'SF Mono',monospace;outline:none;overflow:hidden;text-overflow:ellipsis;}
+</style>
+<div id="thanks-share-overlay" onclick="if(event.target===this)closeThanksShare()">
+  <div id="thanks-share-sheet">
+    <button class="ts-x" onclick="closeThanksShare()" aria-label="Fermer">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="ts-emoji">💜</div>
+    <h3>Merci de partager !</h3>
+    <p class="ts-sub">Chaque partage aide le mur à se remplir de beaux mots. Choisis comment tu préfères le diffuser.</p>
+    <div class="ts-row">
+      <button class="ts-btn ts-wa" onclick="thanksShareWA()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9s-.4-.1-.6.1-.7.9-.9 1.1-.3.2-.6.1c-.3-.1-1.2-.5-2.3-1.4-.9-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5s0-.4 0-.5c-.1-.1-.6-1.4-.8-2-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.2-1 .9-1 2.3 0 1.3.9 2.6 1.1 2.8.1.2 1.9 3 4.7 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.5-.3zM12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/></svg>
+        WhatsApp
+      </button>
+      <button class="ts-btn" onclick="thanksShareCopy()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copier le lien
+      </button>
+    </div>
+    <button class="ts-btn ts-native" onclick="thanksShareNative()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5 8.6 10.5"/></svg>
+      Autres options
+    </button>
+    <div class="ts-link-row">
+      <input type="text" id="thanks-share-link" readonly onclick="this.select()" />
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ FeexPay pay-sheet (partagée entre les 3 templates murs) ═══════════ -->
+<style>
+  #fp-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:9999;display:none;align-items:flex-end;justify-content:center;}
+  #fp-ov.on{display:flex;}
+  #fp-sheet{background:#fff;width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:22px;box-shadow:0 -12px 40px rgba(0,0,0,.18);animation:fpSlide .28s cubic-bezier(.22,.9,.28,1.2);max-height:92vh;overflow-y:auto;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#2B1A2D;position:relative;}
+  @keyframes fpSlide{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  #fp-sheet h3{font-size:20px;margin:0 0 14px;font-weight:700;}
+  .fp-amt{background:#FFF1F4;border:1px solid #FCE0E6;border-radius:12px;padding:12px;text-align:center;margin-bottom:14px;}
+  .fp-amt .l{font-size:11px;font-weight:700;color:#6D5C70;letter-spacing:.08em;}
+  .fp-amt .v{font-size:24px;font-weight:800;margin-top:2px;}
+  .fp-lbl{font-size:12px;font-weight:700;color:#6D5C70;margin-bottom:8px;}
+  .fp-ops{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .fp-op{border:2px solid #EAE0E5;border-radius:12px;padding:10px 4px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font:700 12px inherit;color:#2B1A2D;transition:all .15s;font-family:inherit;}
+  .fp-op.on{border-color:#E11D48;background:#FFF1F4;}
+  .fp-op .d{width:24px;height:24px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+  .fp-inp{width:100%;padding:12px 14px;border:1.5px solid #EAE0E5;border-radius:10px;font:15px inherit;color:#2B1A2D;outline:none;font-family:inherit;}
+  .fp-inp:focus{border-color:#E11D48;}
+  .fp-hint{font-size:11px;color:#A496A5;margin:6px 0 14px;}
+  .fp-err{background:#FEF2F2;border:1px solid #FCA5A5;color:#B91C1C;padding:10px;border-radius:8px;font-size:12px;margin-top:10px;}
+  .fp-btn{width:100%;background:#E11D48;color:#fff;border:none;padding:14px;border-radius:10px;font:700 15px inherit;cursor:pointer;margin-top:16px;font-family:inherit;}
+  .fp-btn:disabled{opacity:.6;cursor:not-allowed;}
+  .fp-x{position:absolute;top:14px;right:14px;background:none;border:none;color:#A496A5;cursor:pointer;padding:6px;font-size:16px;line-height:1;}
+  .fp-wait{padding:32px 8px;text-align:center;}
+  .fp-spin{width:40px;height:40px;border:3px solid #FFE0E6;border-top-color:#E11D48;border-radius:50%;animation:fpspin .9s linear infinite;margin:0 auto;}
+  @keyframes fpspin{to{transform:rotate(360deg);}}
+</style>
+<div id="fp-ov" onclick="if(event.target===this)window.myKadoFP&&window.myKadoFP.close()">
+  <div id="fp-sheet">
+    <button class="fp-x" onclick="window.myKadoFP&&window.myKadoFP.close()">&#10005;</button>
+    <h3>Paiement sécurisé</h3>
+    <div class="fp-amt"><div class="l">MONTANT</div><div class="v" id="fp-amt-v">0 FCFA</div></div>
+    <div id="fp-form">
+      <div class="fp-lbl">Moyen de paiement</div>
+      <div class="fp-ops" id="fp-ops"></div>
+      <div id="fp-phone-wrap">
+        <div class="fp-lbl">Numéro</div>
+        <input class="fp-inp" type="tel" id="fp-phone" placeholder="+229 90 00 00 00" autocomplete="tel"/>
+        <div class="fp-hint">Tu recevras une demande de confirmation.</div>
+      </div>
+      <div class="fp-err" id="fp-err" style="display:none;"></div>
+      <button class="fp-btn" id="fp-submit">Confirmer</button>
+    </div>
+    <div id="fp-wait" style="display:none;">
+      <div class="fp-wait">
+        <div class="fp-spin"></div>
+        <div style="margin-top:16px;font-size:18px;font-weight:700;">Confirme sur ton téléphone</div>
+        <div style="margin-top:8px;font-size:13px;color:#6D5C70;" id="fp-wait-msg">Valide la demande dans ton appli.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var OPS=[{id:'mtn-benin',label:'MTN',color:'#FFC800',fg:'#2B1A2D',s:'MTN'},{id:'moov-benin',label:'Moov',color:'#00A3E0',fg:'#fff',s:'MV'},{id:'orange-ci',label:'Orange',color:'#FF7900',fg:'#fff',s:'OR'},{id:'wave',label:'Wave',color:'#1EC8F8',fg:'#fff',s:'WV'},{id:'card',label:'Carte',color:'#2B1A2D',fg:'#fff',s:'CB'}];
+  var state={op:'mtn-benin',timer:null,start:0,ref:null,opts:null};
+  function $id(id){return document.getElementById(id);}
+  function renderOps(){
+    var g=$id('fp-ops');g.innerHTML='';
+    OPS.forEach(function(o){
+      var b=document.createElement('button');b.type='button';b.className='fp-op'+(state.op===o.id?' on':'');
+      b.innerHTML='<span class="d" style="background:'+o.color+';color:'+o.fg+'">'+o.s+'</span>'+o.label;
+      b.onclick=function(){state.op=o.id;renderOps();};
+      g.appendChild(b);
+    });
+    $id('fp-phone-wrap').style.display=(state.op==='card')?'none':'';
+  }
+  function open(opts){
+    state.opts=opts;state.op='mtn-benin';state.ref=null;
+    $id('fp-amt-v').textContent=(opts.amount||0).toLocaleString('fr-FR')+' FCFA';
+    $id('fp-form').style.display='';$id('fp-wait').style.display='none';$id('fp-err').style.display='none';
+    $id('fp-submit').disabled=false;$id('fp-submit').textContent='Confirmer';
+    renderOps();$id('fp-ov').classList.add('on');
+  }
+  function close(){if(state.timer){clearInterval(state.timer);state.timer=null;}$id('fp-ov').classList.remove('on');}
+  function submit(){
+    var errEl=$id('fp-err');errEl.style.display='none';
+    var isCard=state.op==='card';
+    var phone=isCard?'':(($id('fp-phone').value||'').trim());
+    if(!isCard&&!phone){errEl.textContent='Numéro requis.';errEl.style.display='block';return;}
+    var btn=$id('fp-submit');btn.disabled=true;btn.textContent='Initialisation…';
+    var body={publicationId:state.opts.publicationId,amount:state.opts.amount,operator:state.op,phone:isCard?undefined:phone,contributorName:state.opts.contributorName||'',isAnonymous:!!state.opts.isAnonymous,wishId:state.opts.wishId||null};
+    fetch('/api/contributions/feexpay-init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Erreur au démarrage.');return d;});}).then(function(d){
+      state.ref=d.reference;
+      if(d.redirectUrl)window.open(d.redirectUrl,'_blank','noopener');
+      $id('fp-form').style.display='none';$id('fp-wait').style.display='';
+      $id('fp-wait-msg').textContent=isCard?'Termine le paiement dans l\'onglet ouvert.':'Ouvre ton appli et valide la demande.';
+      state.start=Date.now();state.timer=setInterval(poll,3000);poll();
+    }).catch(function(e){errEl.textContent=e.message||'Erreur';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmer';});
+  }
+  function poll(){
+    if(!state.ref)return;
+    fetch('/api/contributions/status/'+encodeURIComponent(state.ref)).then(function(r){return r.json();}).then(function(d){
+      if(d.status==='SUCCESSFUL'){
+        clearInterval(state.timer);state.timer=null;
+        var body={reference:state.ref,publicationId:state.opts.publicationId,contributorName:state.opts.contributorName||'',isAnonymous:!!state.opts.isAnonymous,wishId:state.opts.wishId||null};
+        fetch('/api/contributions/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(vd){
+          var amt=(vd.contribution&&vd.contribution.amount)||d.amount||state.opts.amount;
+          close();if(state.opts.onSuccess)state.opts.onSuccess({reference:state.ref,amount:amt});
+        }).catch(function(){close();if(state.opts.onSuccess)state.opts.onSuccess({reference:state.ref,amount:state.opts.amount});});
+        return;
+      }
+      if(d.status==='FAILED'){
+        clearInterval(state.timer);state.timer=null;$id('fp-form').style.display='';$id('fp-wait').style.display='none';
+        var errEl=$id('fp-err');errEl.textContent='Paiement échoué ou annulé.';errEl.style.display='block';
+        $id('fp-submit').disabled=false;$id('fp-submit').textContent='Confirmer';return;
+      }
+      if(Date.now()-state.start>120000){
+        clearInterval(state.timer);state.timer=null;$id('fp-form').style.display='';$id('fp-wait').style.display='none';
+        var errEl=$id('fp-err');errEl.textContent='Délai dépassé. Réessaie.';errEl.style.display='block';
+        $id('fp-submit').disabled=false;$id('fp-submit').textContent='Confirmer';
+      }
+    }).catch(function(){});
+  }
+  $id('fp-submit').addEventListener('click',submit);
+  window.myKadoFP={open:open,close:close};
+})();
 </script>
 
 </body>

@@ -29,7 +29,7 @@ router.post('/:publicationId', async (req, res) => {
     // text wishes go through as usual; any additional wish, or any wish with
     // media, is stored as pendingPayment=true and only appears on the wall
     // once the creator publishes (pays) the wall.
-    const VALID_MEDIA = ['none', 'photo', 'gif', 'audio', 'video'];
+    const VALID_MEDIA = ['none', 'photo', 'gif', 'audio', 'video', 'sticker'];
     const hasMedia = !!(photoUrl || audioUrl || videoUrl || (mediaType && mediaType !== 'none'));
 
     let pendingPayment = false;

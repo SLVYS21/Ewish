@@ -79,8 +79,9 @@ router.get('/:pubId', async (req, res) => {
       collectSubtitle:    pub.cagnotteConfig?.collectSubtitle || '',
       collectCover:       pub.cagnotteConfig?.collectCover    || '',
       collectAccentColor: pub.cagnotteConfig?.collectAccentColor || '',
-      kkiapayKey:     process.env.KKIAPAY_PUBLIC_KEY || '',
-      kkiapaySandbox: process.env.KKIAPAY_SANDBOX === 'true',
+      feexpayShopId:  process.env.FEEXPAY_SHOP_ID || '',
+      feexpayToken:   process.env.FEEXPAY_TOKEN_PUBLIC || '',
+      feexpayMode:    process.env.FEEXPAY_MODE || 'LIVE',
     };
 
     const htmlPath = path.join(TEMPLATES_DIR, 'collect', 'index.html');

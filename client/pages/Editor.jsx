@@ -15,7 +15,7 @@ import InvitationTab from '../components/InvitationTab';
 import RsvpManager from '../components/RsvpManager';
 import ClientTab from '../components/ClientTab';
 import QRCodeModal from '../components/QRCodeModal';
-import PaymentModal from '../admin/components/PaymentModal';
+import useFeexPay from '../utils/useFeexPay';
 import { Joyride, STATUS } from 'react-joyride';
 import {
   QrCode, Sparkles, Coffee, Blocks, MailOpen, ClipboardList,
@@ -233,7 +233,7 @@ export default function Editor() {
   const [isPanelOpen, setIsPanelOpen]           = useState(true);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [showQrModal, setShowQrModal]           = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const { openCheckout, feexpayModal } = useFeexPay();
   const [runTour, setRunTour]                   = useState(false);
   const [cagnotte, setCagnotte]               = useState(false);
   const [cagnotteGoal, setCagnotteGoal]       = useState(250000);
@@ -509,38 +509,63 @@ export default function Editor() {
     } catch (e) { alert('Upload failed: ' + (e.response?.data?.error || e.message)); }
   };
 
-  /* publish */
+  /* publish : deux étapes séparées pour permettre la re-entrée avec
+     un feexpayReference après paiement, sans re-sauvegarder les data. */
+  const savePublicationDraft = () => updatePublication(id, {
+    data, style: { ...style, backgrounds }, decorations, jarConfig, widgets,
+    cagnotteConfig: {
+      enabled: cagnotte,
+      description: cagnotteName,
+      goal: cagnotteGoal,
+      image: cagnotteImage,
+      deadline: cagnotteDeadline || null,
+      wishesEnabled,
+      minContribution,
+      maxContribution,
+      collectTitle,
+      collectSubtitle,
+      collectCover,
+      collectAccentColor,
+      isPrivate,
+      accessCode,
+      requireModeration,
+    },
+  });
+
+  const doPublishRequest = async (feexpayReference) => {
+    const r = await publishPublication(id, feexpayReference ? { feexpayReference } : {});
+    setPublishedUrl(r.data.url);
+    setPub(p => ({ ...p, published: true, isPaid: true }));
+    try { const sl = await getShortLink(id); setShortCode(sl.data.shortCode); } catch {}
+  };
+
   const handlePublish = async () => {
     setPublishing(true);
     try {
-      await updatePublication(id, {
-        data, style: { ...style, backgrounds }, decorations, jarConfig, widgets,
-        cagnotteConfig: {
-          enabled: cagnotte,
-          description: cagnotteName,
-          goal: cagnotteGoal,
-          image: cagnotteImage,
-          deadline: cagnotteDeadline || null,
-          wishesEnabled,
-          minContribution,
-          maxContribution,
-          collectTitle,
-          collectSubtitle,
-          collectCover,
-          collectAccentColor,
-          isPrivate,
-          accessCode,
-          requireModeration,
-        },
-      });
-      const r = await publishPublication(id);
-      setPublishedUrl(r.data.url);
-      setPub(p => ({ ...p, published: true, isPaid: true }));
-      try { const sl = await getShortLink(id); setShortCode(sl.data.shortCode); } catch {}
+      await savePublicationDraft();
+      await doPublishRequest();
+      setPublishing(false);
     } catch (e) {
-      if (e.response?.status === 402) setPaymentModalOpen(true);
-      else alert(e.response?.data?.error || 'Publish failed');
-    } finally { setPublishing(false); }
+      /* 402 avec priceFCFA → checkout FeexPay puis retry publish avec la ref.
+         On garde publishing:true tant que le checkout est ouvert. */
+      if (e.response?.status === 402 && e.response.data?.priceFCFA) {
+        const { priceFCFA } = e.response.data;
+        openCheckout({
+          amount:      priceFCFA,
+          description: `myKado — ${pub?.title || 'Publication'}`,
+          customId:    `pub:${id}`,
+          onSuccess: async ({ reference }) => {
+            try { await doPublishRequest(reference); }
+            catch (err) { alert(err.response?.data?.error || 'Publish failed après paiement'); }
+            finally { setPublishing(false); }
+          },
+          onFailure: () => setPublishing(false),
+        });
+        return;
+      }
+      alert(e.response?.data?.error || 'Publish failed');
+      setPublishing(false);
+    }
   };
 
   /* visibility helpers */
@@ -1465,9 +1490,7 @@ export default function Editor() {
         <QRCodeModal url={`${import.meta.env.VITE_API_URL}/collect/${id}`} onClose={() => setShowQrCollect(false)} />
       )}
 
-      {paymentModalOpen && (
-        <PaymentModal onClose={() => setPaymentModalOpen(false)} onSuccess={handlePublish} />
-      )}
+      {feexpayModal}
 
       {showKyc && (
         <KycModal

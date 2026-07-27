@@ -57,10 +57,10 @@ export default function PrivacyPage() {
           </p>
 
           <SubTitle>2.4 Données de paiement</SubTitle>
-          <p>myKado <strong>ne stocke aucune donnée bancaire ou de Mobile Money</strong>. Les paiements sont intégralement traités par <strong>KKiaPay</strong>. Nous conservons uniquement :</p>
+          <p>myKado <strong>ne stocke aucune donnée bancaire ou de Mobile Money</strong>. Les paiements sont intégralement traités par <strong>FeexPay</strong>. Nous conservons uniquement :</p>
           <DataTable rows={[
-            ['ID de transaction KKiaPay', 'Paiement',    'Réconciliation comptable / preuve de paiement', '5 ans'],
-            ['Montant et nombre de crédits achetés', 'Paiement', 'Historique des achats',                '5 ans'],
+            ['ID de transaction FeexPay', 'Paiement',    'Réconciliation comptable / preuve de paiement', '5 ans'],
+            ['Montant payé', 'Paiement', 'Historique des paiements',                '5 ans'],
           ]} />
 
           <SubTitle>2.5 Données techniques</SubTitle>
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
         <Section title="4. Partage des données">
           <p>Vos données ne sont jamais vendues à des tiers. Elles peuvent être partagées uniquement avec :</p>
           <ul>
-            <li><strong>KKiaPay</strong>  traitement des paiements (email, montant). <a href="https://kkiapay.me/privacy" target="_blank" rel="noopener noreferrer" style={styles.extLink}>Politique KKiaPay ↗</a></li>
+            <li><strong>FeexPay</strong>  traitement des paiements (email, numéro, montant). <a href="https://feexpay.me" target="_blank" rel="noopener noreferrer" style={styles.extLink}>Politique FeexPay ↗</a></li>
             <li><strong>Cloudinary</strong>  hébergement des médias (photos, audio, documents KYC). Les fichiers sont stockés dans des espaces sécurisés et accessibles uniquement via URL signée. <a href="https://cloudinary.com/privacy" target="_blank" rel="noopener noreferrer" style={styles.extLink}>Politique Cloudinary ↗</a></li>
             <li><strong>Google</strong>  si vous utilisez la connexion Google (votre adresse email et votre identifiant Google nous sont transmis). <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={styles.extLink}>Politique Google ↗</a></li>
             <li><strong>Autorités légales</strong>  si requis par une décision de justice ou obligation réglementaire.</li>

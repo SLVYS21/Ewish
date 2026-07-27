@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { getAnalytics } from '../../utils/api';
 import { useAuth } from '../context/AuthContext';
 import PageShell from '../components/PageShell';
-import PaymentModal from '../components/PaymentModal';
 import WhatsAppFAB from '../../components/WhatsAppFAB';
 import { Plus, ChevronRight } from 'lucide-react';
 import s from './AdminDashboard.module.css';
@@ -34,7 +33,6 @@ export default function AdminDashboard() {
   const [data, setData]       = useState(null);
   const [period, setPeriod]   = useState('7d');
   const [loading, setLoading] = useState(true);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -81,10 +79,6 @@ export default function AdminDashboard() {
           </div>
         }
       >
-        {paymentModalOpen && (
-          <PaymentModal onClose={() => setPaymentModalOpen(false)} onSuccess={() => load(period)} />
-        )}
-
         {loading && (
           <div className={s.loadingWrap}><div className={s.spinner} /></div>
         )}
@@ -118,7 +112,7 @@ export default function AdminDashboard() {
               <StatCard
                 label="Crédits" emoji="💎"
                 value={user?.credits ?? 0}
-                sub={<span><a className={s.linkBrand} onClick={() => setPaymentModalOpen(true)}>Recharger →</a></span>}
+                sub={<span style={{ opacity: .7 }}>Utilisables jusqu'à épuisement</span>}
                 color="#f59e0b"
               />
               <StatCard

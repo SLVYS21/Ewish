@@ -460,6 +460,9 @@
       <button class="media-tab" id="tab-audio" onclick="switchTab('audio')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>Message vocal
       </button>
+      <button class="media-tab" id="tab-sticker" onclick="switchTab('sticker')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 2H8.5A2.5 2.5 0 0 0 6 4.5v15A2.5 2.5 0 0 0 8.5 22h7l6.5-6.5v-11A2.5 2.5 0 0 0 19.5 2Z"/><path d="M15 22v-4.5a2.5 2.5 0 0 1 2.5-2.5H22"/></svg>Sticker
+      </button>
     </div>
     <div class="media-panel" id="panel-photo">
       <div class="upload-zone" id="photo-zone" onclick="document.getElementById('photo-file').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
@@ -479,6 +482,22 @@
       </div>
       <div class="media-loading" id="audio-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6-8.5"/></svg>Envoi en cours…</div>
       <div class="media-preview" id="audio-preview"><audio id="audio-player" controls preload="none"></audio><button class="media-clear" onclick="clearMedia()">✕</button></div>
+    </div>
+    <div class="media-panel" id="panel-sticker">
+      <style>
+        .sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:280px;overflow-y:auto;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:8px;background:rgba(255,255,255,.04);}
+        .sticker-grid:empty{display:none;}
+        .sticker-cell{position:relative;padding-top:100%;background:rgba(255,255,255,.08);border:1px solid transparent;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;}
+        .sticker-cell:hover{transform:scale(1.05);border-color:var(--accent);}
+        .sticker-cell.on{border-color:var(--primary);box-shadow:0 0 0 2px rgba(255,255,255,.14);}
+        .sticker-cell img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:contain;display:block;}
+        .sticker-loading{text-align:center;font-size:12.5px;color:var(--ink-3);padding:24px 0;display:none;}
+        .sticker-loading.show{display:block;}
+        #sticker-preview img{max-height:170px!important;object-fit:contain!important;background:rgba(255,255,255,.04);}
+      </style>
+      <div class="sticker-loading" id="sticker-loading">Chargement des stickers…</div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+      <div class="media-preview" id="sticker-preview"><img id="sticker-img" src="" alt=""><button class="media-clear" onclick="clearMedia()">✕</button></div>
     </div>
     <button id="submit-btn" onclick="submitWish()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4Z"/></svg>
@@ -702,14 +721,15 @@ function createCardEl(w, pos, idx) {
   el.className = 'polar-card';
   el.style.cssText = 'left:'+Math.round(pos.x)+'px;top:'+Math.round(pos.y)+'px;transform:rotate('+pos.rot.toFixed(1)+'deg);z-index:'+pos.z+';';
 
-  var hasPhoto = (w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl;
+  var hasPhoto = (w.mediaType==='photo'||w.mediaType==='gif'||w.mediaType==='sticker') && w.photoUrl;
   var hasAudio = w.mediaType==='audio' && w.audioUrl;
 
   var initial = (w.name||'A').trim().charAt(0).toUpperCase();
   var bg = TEXT_BG_GRADS[(w.color||0) % TEXT_BG_GRADS.length];
 
+  var isStickerPhoto = w.mediaType === 'sticker';
   var photoHtml = hasPhoto
-    ? '<div class="polar-photo"><img src="'+escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_400,h_400,c_fill,g_auto'))+'" alt="" loading="lazy" decoding="async" draggable="false"></div>'
+    ? '<div class="polar-photo"' + (isStickerPhoto ? ' style="background:'+bg+';"' : '') + '><img src="'+escapeHtml(isStickerPhoto ? w.photoUrl : cldThumb(w.photoUrl, 'f_auto,q_auto,w_400,h_400,c_fill,g_auto'))+'" alt="" loading="lazy" decoding="async" draggable="false"' + (isStickerPhoto ? ' style="object-fit:contain;padding:14px;"' : '') + '></div>'
     : (hasAudio ? '' : '<div class="polar-photo" style="background:'+bg+'"><span class="photo-initial">'+escapeHtml(initial)+'</span></div>');
   var audioHtml = hasAudio
     ? '<audio class="polar-audio" src="'+escapeHtml(w.audioUrl)+'" controls preload="none" onclick="event.stopPropagation()"></audio>'
@@ -745,14 +765,19 @@ function openDetail(idx) {
   if (!w) return;
   detailOpen = true;
 
-  var hasPhoto = (w.mediaType==='photo'||w.mediaType==='gif') && w.photoUrl;
+  var hasPhoto = (w.mediaType==='photo'||w.mediaType==='gif'||w.mediaType==='sticker') && w.photoUrl;
   var hasAudio = w.mediaType==='audio' && w.audioUrl;
 
   var pw = document.getElementById('detail-photo-wrap');
   var aw = document.getElementById('detail-audio-wrap');
   pw.style.display = hasPhoto ? '' : 'none';
   aw.style.display = hasAudio ? '' : 'none';
-  if (hasPhoto) document.getElementById('detail-photo').src = cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200,c_limit');
+  if (hasPhoto) {
+    var isStk = w.mediaType === 'sticker';
+    var dp = document.getElementById('detail-photo');
+    dp.src = isStk ? w.photoUrl : cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200,c_limit');
+    dp.style.objectFit = isStk ? 'contain' : '';
+  }
   if (hasAudio) document.getElementById('detail-audio').src = w.audioUrl;
   document.getElementById('detail-text').textContent = w.text || '';
   document.getElementById('detail-name').textContent = ' ' + (w.name || 'Anonyme');
@@ -891,7 +916,12 @@ function switchTab(tab) {
   activeTab=tab; document.querySelectorAll('.media-tab').forEach(function(t){t.classList.remove('active');}); document.getElementById('tab-'+tab).classList.add('active');
   document.querySelectorAll('.media-panel').forEach(function(p){p.classList.remove('active');}); if(tab!=='none') document.getElementById('panel-'+tab).classList.add('active');
   if(tab!=='audio'&&mediaRecorder&&mediaRecorder.state==='recording') stopRecording(false);
+  if(tab==='sticker'&&!stickersLoadedOnce){stickersLoadedOnce=true;loadStickers();}
 }
+/* Stickers : bank interne WebP */
+var stickersLoadedOnce=false, stickersCache=null;
+function renderStickerGrid(items){var g=document.getElementById('sticker-grid');if(!g)return;g.innerHTML='';if(!items||!items.length){g.innerHTML='<div style="grid-column:1/-1;padding:22px;text-align:center;color:var(--ink-3);font-size:12.5px">Aucun sticker disponible</div>';return;}items.forEach(function(st){var c=document.createElement('div');c.className='sticker-cell';c.innerHTML='<img src="'+st.url+'" alt="" loading="lazy">';c.addEventListener('click',function(){document.querySelectorAll('.sticker-cell').forEach(function(x){x.classList.remove('on');});c.classList.add('on');activeMedia={type:'sticker',url:st.url};var i=document.getElementById('sticker-img');if(i)i.src=st.url;var p=document.getElementById('sticker-preview');if(p)p.classList.add('show');});g.appendChild(c);});}
+function loadStickers(){var l=document.getElementById('sticker-loading');if(stickersCache){renderStickerGrid(stickersCache);return;}if(l)l.classList.add('show');fetch((typeof API_BASE!=='undefined'&&API_BASE?API_BASE:'')+'/api/stickers').then(function(r){return r.json();}).then(function(j){stickersCache=(j&&j.stickers)||[];renderStickerGrid(stickersCache);}).catch(function(){renderStickerGrid([]);}).then(function(){if(l)l.classList.remove('show');});}
 function handleDragOver(e){e.preventDefault();document.getElementById('photo-zone').classList.add('drag-over');}
 function handleDragLeave(){document.getElementById('photo-zone').classList.remove('drag-over');}
 function handleDrop(e){e.preventDefault();document.getElementById('photo-zone').classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f&&/^image\//.test(f.type))processPhotoFile(f);}
@@ -924,7 +954,7 @@ function stopRecording(upload){
     uploadMedia(new File([blob],'audio.webm',{type:'audio/webm'})).then(function(url){activeMedia={type:'audio',url:url};document.getElementById('audio-player').src=url;}).catch(function(){showToast("Échec de l'envoi audio");}).finally(function(){document.getElementById('audio-loading').classList.remove('show');});
   }; mediaRecorder.stop();
 }
-function clearMedia(){activeMedia={type:'none',url:''};document.getElementById('photo-preview').classList.remove('show');document.getElementById('audio-preview').classList.remove('show');document.getElementById('photo-zone').style.display='';document.getElementById('photo-file').value='';document.getElementById('rec-status').textContent='Appuyez pour enregistrer';document.getElementById('rec-btn').classList.remove('recording');clearInterval(recTimerInt);}
+function clearMedia(){activeMedia={type:'none',url:''};document.getElementById('photo-preview').classList.remove('show');document.getElementById('audio-preview').classList.remove('show');var sp=document.getElementById('sticker-preview');if(sp)sp.classList.remove('show');document.querySelectorAll('.sticker-cell').forEach(function(c){c.classList.remove('on');});document.getElementById('photo-zone').style.display='';document.getElementById('photo-file').value='';document.getElementById('rec-status').textContent='Appuyez pour enregistrer';document.getElementById('rec-btn').classList.remove('recording');clearInterval(recTimerInt);}
 
 function submitWish() {
   if(isSubmitting) return;
@@ -969,7 +999,7 @@ function handleGiftBgClick(e){if(e.target===document.getElementById('gift-overla
 function skipGift(){hideGiftSheet();showThanksOverlay(false);}
 function giftPickAmt(a,chip){giftState.amt=(giftState.amt===a)?null:a;document.querySelectorAll('.gamt-chip').forEach(function(c){c.classList.remove('active');});var btn=document.getElementById('gift-pay-btn'),pre=document.getElementById('gift-bar-pre'),cag=_d.cagnotte||_d.jarConfig||{};if(giftState.amt!==null){chip.classList.add('active');btn.textContent='Participer · '+fmtNum(giftState.amt)+' FCFA';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0,p1=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)+giftState.amt)/cag.goal*100)):0;pre.style.display='block';pre.style.left=p0+'%';pre.style.width=(p1-p0)+'%';document.getElementById('gift-pct').textContent=p1+'%';}else{var p0=cag.goal>0?Math.min(100,Math.round(((cag.collected||0)/cag.goal)*100)):0;btn.textContent='Choisir un montant';btn.disabled=true;btn.style.opacity='.5';btn.style.cursor='not-allowed';pre.style.display='none';document.getElementById('gift-pct').textContent=p0+'%';}}
 function giftCustomAmt(){var v=prompt('Montant en FCFA (ex : 7500) :'),n=parseInt(v,10);if(isNaN(n)||n<=0)return;document.querySelectorAll('.gamt-chip[data-custom]').forEach(function(c){c.remove();});var chip=document.createElement('button');chip.className='gamt-chip';chip.dataset.a=n;chip.dataset.custom='1';chip.innerHTML='<div class="gav">'+(n>=1000?(n/1000)+'k':n)+'</div><div class="gac">FCFA</div>';chip.onclick=function(){giftPickAmt(n,chip);};document.getElementById('gift-amt-grid').appendChild(chip);giftPickAmt(n,chip);}
-function giftPay(){if(!giftState.amt)return;var errEl=document.getElementById('gift-err');errEl.style.display='none';var cag=_d.cagnotte||_d.jarConfig||{},key=(cag&&cag.kkiapayKey)||_d.kkiapayKey||'';if(!key){errEl.textContent='Paiement non configuré.';errEl.style.display='block';return;}var launch=function(){openKkiapayWidget({amount:giftState.amt,api_key:key,sandbox:(_d.kkiapaySandbox!==false),name:giftState.guestName||'Anonyme',callback:window.location.href});addSuccessListener(function(resp){var txId=resp.transactionId||resp.transaction_id,afterPay=function(){giftState.gave=true;hideGiftSheet();showThanksOverlay(true);};if(txId){fetch('/api/contributions/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:txId,publicationId:PUB_ID,contributorName:giftState.guestName||'',isAnonymous:!giftState.guestName,wishId:giftState.wishId})}).then(function(r){return r.json();}).then(function(d){giftState.paid=(d.contribution&&d.contribution.amount)?d.contribution.amount:giftState.amt;}).catch(function(){giftState.paid=giftState.amt;}).finally(afterPay);}else{giftState.paid=giftState.amt;afterPay();}});};if(typeof openKkiapayWidget==='undefined'){var sc=document.createElement('script');sc.src='https://cdn.kkiapay.me/k.js';sc.onload=launch;sc.onerror=function(){errEl.textContent='Impossible de charger le module de paiement.';errEl.style.display='block';};document.head.appendChild(sc);}else{launch();}}
+function giftPay(){if(!giftState.amt)return;window.myKadoFP.open({amount:giftState.amt,publicationId:PUB_ID,contributorName:giftState.guestName||'',isAnonymous:!giftState.guestName,wishId:giftState.wishId,onSuccess:function(res){giftState.paid=(res&&res.amount)||giftState.amt;giftState.gave=true;hideGiftSheet();showThanksOverlay(true);}});}
 function showThanksOverlay(gave){var o=document.getElementById('thanks-overlay');if(gave){document.getElementById('thanks-icon').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';document.getElementById('thanks-title').textContent='Merci pour ta participation';document.getElementById('thanks-msg').textContent="Grâce à toi le cadeau se rapproche. On garde ça secret jusqu'au grand jour !";document.getElementById('thanks-receipt').style.display='block';document.getElementById('thanks-amt').innerHTML=fmtNum(giftState.paid||giftState.amt||0)+' <span style="font-size:14px;font-family:\'Plus Jakarta Sans\',sans-serif;">FCFA</span>';}else{document.getElementById('thanks-icon').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';document.getElementById('thanks-title').textContent='Merci pour ton joli mot';document.getElementById('thanks-msg').textContent='Ton mot a bien été reçu. Reviens le jour J pour voir le mur complet !';document.getElementById('thanks-receipt').style.display='none';}o.classList.add('open');setTimeout(closeThanks,5000);}
 function closeThanks(){var o=document.getElementById('thanks-overlay');o.classList.remove('open');}
 
@@ -982,7 +1012,8 @@ function closeThanks(){var o=document.getElementById('thanks-overlay');o.classLi
   if(d.titleName) document.querySelector('[data-node="titleName"]').textContent = d.titleName;
   setWishesEnabled(d.wishesEnabled !== false);
   initGiftSheet();
-  if(d.isAdmin && !d.previewMode){var b=document.getElementById('admin-banner');b.classList.add('show');document.getElementById('admin-back').href=d.adminReturnUrl||'#';}
+  /* Bannière "Retour à la gestion" : uniquement en preview (pas sur lien partagé). */
+  if(d.isAdmin && d.previewMode){var b=document.getElementById('admin-banner');b.classList.add('show');document.getElementById('admin-back').href=d.adminReturnUrl||'#';}
   if(d.cagnotte&&d.cagnotte.enabled)document.getElementById('cagnotte-btn').classList.add('show');
   loadWishes();
   setTimeout(hideHint, 6000);
@@ -997,5 +1028,124 @@ window.addEventListener('message', function(e){
 
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){closeSheet();closeDetail();}});
 </script>
+
+<!-- ═══════════ FeexPay pay-sheet (partagée entre les 3 templates murs) ═══════════ -->
+<style>
+  #fp-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:9999;display:none;align-items:flex-end;justify-content:center;}
+  #fp-ov.on{display:flex;}
+  #fp-sheet{background:#fff;width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:22px;box-shadow:0 -12px 40px rgba(0,0,0,.18);animation:fpSlide .28s cubic-bezier(.22,.9,.28,1.2);max-height:92vh;overflow-y:auto;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#2B1A2D;position:relative;}
+  @keyframes fpSlide{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  #fp-sheet h3{font-size:20px;margin:0 0 14px;font-weight:700;}
+  .fp-amt{background:#FFF1F4;border:1px solid #FCE0E6;border-radius:12px;padding:12px;text-align:center;margin-bottom:14px;}
+  .fp-amt .l{font-size:11px;font-weight:700;color:#6D5C70;letter-spacing:.08em;}
+  .fp-amt .v{font-size:24px;font-weight:800;margin-top:2px;}
+  .fp-lbl{font-size:12px;font-weight:700;color:#6D5C70;margin-bottom:8px;}
+  .fp-ops{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .fp-op{border:2px solid #EAE0E5;border-radius:12px;padding:10px 4px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font:700 12px inherit;color:#2B1A2D;transition:all .15s;font-family:inherit;}
+  .fp-op.on{border-color:#E11D48;background:#FFF1F4;}
+  .fp-op .d{width:24px;height:24px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+  .fp-inp{width:100%;padding:12px 14px;border:1.5px solid #EAE0E5;border-radius:10px;font:15px inherit;color:#2B1A2D;outline:none;font-family:inherit;}
+  .fp-inp:focus{border-color:#E11D48;}
+  .fp-hint{font-size:11px;color:#A496A5;margin:6px 0 14px;}
+  .fp-err{background:#FEF2F2;border:1px solid #FCA5A5;color:#B91C1C;padding:10px;border-radius:8px;font-size:12px;margin-top:10px;}
+  .fp-btn{width:100%;background:#E11D48;color:#fff;border:none;padding:14px;border-radius:10px;font:700 15px inherit;cursor:pointer;margin-top:16px;font-family:inherit;}
+  .fp-btn:disabled{opacity:.6;cursor:not-allowed;}
+  .fp-x{position:absolute;top:14px;right:14px;background:none;border:none;color:#A496A5;cursor:pointer;padding:6px;font-size:16px;line-height:1;}
+  .fp-wait{padding:32px 8px;text-align:center;}
+  .fp-spin{width:40px;height:40px;border:3px solid #FFE0E6;border-top-color:#E11D48;border-radius:50%;animation:fpspin .9s linear infinite;margin:0 auto;}
+  @keyframes fpspin{to{transform:rotate(360deg);}}
+</style>
+<div id="fp-ov" onclick="if(event.target===this)window.myKadoFP&&window.myKadoFP.close()">
+  <div id="fp-sheet">
+    <button class="fp-x" onclick="window.myKadoFP&&window.myKadoFP.close()">&#10005;</button>
+    <h3>Paiement sécurisé</h3>
+    <div class="fp-amt"><div class="l">MONTANT</div><div class="v" id="fp-amt-v">0 FCFA</div></div>
+    <div id="fp-form">
+      <div class="fp-lbl">Moyen de paiement</div>
+      <div class="fp-ops" id="fp-ops"></div>
+      <div id="fp-phone-wrap">
+        <div class="fp-lbl">Numéro</div>
+        <input class="fp-inp" type="tel" id="fp-phone" placeholder="+229 90 00 00 00" autocomplete="tel"/>
+        <div class="fp-hint">Tu recevras une demande de confirmation.</div>
+      </div>
+      <div class="fp-err" id="fp-err" style="display:none;"></div>
+      <button class="fp-btn" id="fp-submit">Confirmer</button>
+    </div>
+    <div id="fp-wait" style="display:none;">
+      <div class="fp-wait">
+        <div class="fp-spin"></div>
+        <div style="margin-top:16px;font-size:18px;font-weight:700;">Confirme sur ton téléphone</div>
+        <div style="margin-top:8px;font-size:13px;color:#6D5C70;" id="fp-wait-msg">Valide la demande dans ton appli.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var OPS=[{id:'mtn-benin',label:'MTN',color:'#FFC800',fg:'#2B1A2D',s:'MTN'},{id:'moov-benin',label:'Moov',color:'#00A3E0',fg:'#fff',s:'MV'},{id:'orange-ci',label:'Orange',color:'#FF7900',fg:'#fff',s:'OR'},{id:'wave',label:'Wave',color:'#1EC8F8',fg:'#fff',s:'WV'},{id:'card',label:'Carte',color:'#2B1A2D',fg:'#fff',s:'CB'}];
+  var state={op:'mtn-benin',timer:null,start:0,ref:null,opts:null};
+  function $id(id){return document.getElementById(id);}
+  function renderOps(){
+    var g=$id('fp-ops');g.innerHTML='';
+    OPS.forEach(function(o){
+      var b=document.createElement('button');b.type='button';b.className='fp-op'+(state.op===o.id?' on':'');
+      b.innerHTML='<span class="d" style="background:'+o.color+';color:'+o.fg+'">'+o.s+'</span>'+o.label;
+      b.onclick=function(){state.op=o.id;renderOps();};
+      g.appendChild(b);
+    });
+    $id('fp-phone-wrap').style.display=(state.op==='card')?'none':'';
+  }
+  function open(opts){
+    state.opts=opts;state.op='mtn-benin';state.ref=null;
+    $id('fp-amt-v').textContent=(opts.amount||0).toLocaleString('fr-FR')+' FCFA';
+    $id('fp-form').style.display='';$id('fp-wait').style.display='none';$id('fp-err').style.display='none';
+    $id('fp-submit').disabled=false;$id('fp-submit').textContent='Confirmer';
+    renderOps();$id('fp-ov').classList.add('on');
+  }
+  function close(){if(state.timer){clearInterval(state.timer);state.timer=null;}$id('fp-ov').classList.remove('on');}
+  function submit(){
+    var errEl=$id('fp-err');errEl.style.display='none';
+    var isCard=state.op==='card';
+    var phone=isCard?'':(($id('fp-phone').value||'').trim());
+    if(!isCard&&!phone){errEl.textContent='Numéro requis.';errEl.style.display='block';return;}
+    var btn=$id('fp-submit');btn.disabled=true;btn.textContent='Initialisation…';
+    var body={publicationId:state.opts.publicationId,amount:state.opts.amount,operator:state.op,phone:isCard?undefined:phone,contributorName:state.opts.contributorName||'',isAnonymous:!!state.opts.isAnonymous,wishId:state.opts.wishId||null};
+    fetch('/api/contributions/feexpay-init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Erreur au démarrage.');return d;});}).then(function(d){
+      state.ref=d.reference;
+      if(d.redirectUrl)window.open(d.redirectUrl,'_blank','noopener');
+      $id('fp-form').style.display='none';$id('fp-wait').style.display='';
+      $id('fp-wait-msg').textContent=isCard?'Termine le paiement dans l\'onglet ouvert.':'Ouvre ton appli et valide la demande.';
+      state.start=Date.now();state.timer=setInterval(poll,3000);poll();
+    }).catch(function(e){errEl.textContent=e.message||'Erreur';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmer';});
+  }
+  function poll(){
+    if(!state.ref)return;
+    fetch('/api/contributions/status/'+encodeURIComponent(state.ref)).then(function(r){return r.json();}).then(function(d){
+      if(d.status==='SUCCESSFUL'){
+        clearInterval(state.timer);state.timer=null;
+        var body={reference:state.ref,publicationId:state.opts.publicationId,contributorName:state.opts.contributorName||'',isAnonymous:!!state.opts.isAnonymous,wishId:state.opts.wishId||null};
+        fetch('/api/contributions/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(vd){
+          var amt=(vd.contribution&&vd.contribution.amount)||d.amount||state.opts.amount;
+          close();if(state.opts.onSuccess)state.opts.onSuccess({reference:state.ref,amount:amt});
+        }).catch(function(){close();if(state.opts.onSuccess)state.opts.onSuccess({reference:state.ref,amount:state.opts.amount});});
+        return;
+      }
+      if(d.status==='FAILED'){
+        clearInterval(state.timer);state.timer=null;$id('fp-form').style.display='';$id('fp-wait').style.display='none';
+        var errEl=$id('fp-err');errEl.textContent='Paiement échoué ou annulé.';errEl.style.display='block';
+        $id('fp-submit').disabled=false;$id('fp-submit').textContent='Confirmer';return;
+      }
+      if(Date.now()-state.start>120000){
+        clearInterval(state.timer);state.timer=null;$id('fp-form').style.display='';$id('fp-wait').style.display='none';
+        var errEl=$id('fp-err');errEl.textContent='Délai dépassé. Réessaie.';errEl.style.display='block';
+        $id('fp-submit').disabled=false;$id('fp-submit').textContent='Confirmer';
+      }
+    }).catch(function(){});
+  }
+  $id('fp-submit').addEventListener('click',submit);
+  window.myKadoFP={open:open,close:close};
+})();
+</script>
+
 </body>
 </html>

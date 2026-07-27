@@ -2,10 +2,21 @@ const router = require('express').Router();
 const Publication = require('../models/Publication');
 const AdminUser = require('../models/AdminUser');
 const Template = require('../models/Template');
+const Transaction = require('../models/Transaction');
 const Wish = require('../models/Wish');
 const slugify = require('slugify');
 const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 const { slugify: mkSlugify, isValidSlug, generateUniqueSlug } = require('../utils/slug');
+const feexpay = require('../services/feexpay');
+
+/* Prix des plans mur en FCFA (source de vérité serveur, à ne pas dupliquer côté client) */
+const WALL_PLAN_PRICES = {
+  free:     { credits: 0,  fcfa: 0 },
+  premium:  { credits: 5,  fcfa: 2500 },
+  infinite: { credits: 20, fcfa: 10000 },
+};
+/* Cartes non-mur : 1 crédit = 500 FCFA (même ratio qu'historiquement). */
+const CREDIT_TO_FCFA = 500;
 
 // GET all
 router.get('/', requireAdmin, async (req, res) => {
@@ -263,29 +274,92 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       return res.status(403).json({ error: 'Accès refusé' });
     }
 
-    const { planType } = req.body; // optionnel: 'free', 'premium', 'infinite'
+    const { planType, feexpayReference } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
     const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
     let finalPlanType = isWallTemplate ? (planType || 'free') : undefined;
     let creditsReq = 0;
+    let priceFCFA = 0;
 
-    // Credit deduction logic
+    /* -------------------------------------------------------------------
+       Calcul du coût (crédits ET FCFA équivalent).
+       - Mur : dépend du plan choisi (0 / 5 / 20 crédits).
+       - Carte (non-mur, pas encore payée) : template.creditsRequired × 500 FCFA.
+       - Free / carte déjà payée : 0.
+       ------------------------------------------------------------------- */
     if (req.admin?.role === 'merchant') {
       if (isWallTemplate) {
-        if (finalPlanType === 'premium') creditsReq = 5; // 2500 FCFA
-        else if (finalPlanType === 'infinite') creditsReq = 20; // 10000 FCFA
-        else creditsReq = 0;
+        const plan = WALL_PLAN_PRICES[finalPlanType] || WALL_PLAN_PRICES.free;
+        creditsReq = plan.credits;
+        priceFCFA  = plan.fcfa;
       } else if (!existing.isPaid) {
         const template = await Template.findOne({ name: existing.templateName }).lean();
         creditsReq = template?.creditsRequired || 1;
+        priceFCFA  = creditsReq * CREDIT_TO_FCFA;
       }
 
+      /* Deux chemins de paiement en cascade :
+         1. Crédits legacy : si solde suffisant on déduit sans appeler FeexPay.
+         2. FeexPay : si le front a fourni une référence, on vérifie et on log.
+         Si aucun ne s'applique : 402 avec le prix (le front sait alors ouvrir FeexPay). */
       if (creditsReq > 0) {
         const user = await AdminUser.findById(req.admin.id);
-        if (user.credits < creditsReq) {
-          return res.status(402).json({ error: `Crédits insuffisants. Il vous faut ${creditsReq} crédits.`, creditsRequired: creditsReq });
+        if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+        const canPayWithCredits = user.credits >= creditsReq;
+
+        if (canPayWithCredits && !feexpayReference) {
+          user.credits -= creditsReq;
+          await user.save();
+        } else if (feexpayReference) {
+          /* Idempotence : si une Transaction SUCCESS existe déjà pour cette ref,
+             on ne re-vérifie pas — on la considère comme paiement valide. */
+          const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
+          if (existingTx && existingTx.status === 'SUCCESS') {
+            /* déjà payé, on continue */
+          } else {
+            let verifyRes;
+            try {
+              verifyRes = await feexpay.verify(feexpayReference);
+            } catch (err) {
+              console.error('[publish] FeexPay verify failed', err.message);
+              return res.status(502).json({
+                error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
+                code:  'FEEXPAY_UNAVAILABLE',
+              });
+            }
+            if (verifyRes.status !== 'SUCCESSFUL') {
+              return res.status(402).json({
+                error: 'Paiement FeexPay non confirmé.',
+                code:  'FEEXPAY_NOT_SUCCESSFUL',
+                status: verifyRes.status,
+              });
+            }
+            if (verifyRes.amount < priceFCFA) {
+              return res.status(402).json({
+                error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${priceFCFA} FCFA).`,
+                code:  'FEEXPAY_UNDERPAID',
+              });
+            }
+            /* Log Transaction (source: feexpay). credits=0 car pas un achat de crédits. */
+            const tx = existingTx || new Transaction({
+              adminId:       req.admin.id,
+              transactionId: feexpayReference,
+              amount:        verifyRes.amount,
+              credits:       0,
+              source:        'feexpay',
+              paymentData:   verifyRes.raw,
+            });
+            tx.status = 'SUCCESS';
+            await tx.save();
+          }
+        } else {
+          return res.status(402).json({
+            error: `Paiement requis. ${creditsReq} crédits ou ${priceFCFA} FCFA.`,
+            code:  'PAYMENT_REQUIRED',
+            creditsRequired: creditsReq,
+            priceFCFA,
+          });
         }
-        user.credits -= creditsReq;
-        await user.save();
       }
     }
 

@@ -203,9 +203,7 @@ export const duplicatePublication = (id, data) => api.post(`/publications/${id}/
 
 export const unpublishPublication = (id) => api.post(`/publications/${id}/unpublish`, {}, { withCredentials: true });
 
-// ── Billing ──
-export const buyCredits = (amount) => api.post('/billing/buy-credits', { amount }, { withCredentials: true });
-export const verifyKkiapayTransaction = (transactionId) => api.post('/billing/kkiapay-verify', { transactionId }, { withCredentials: true });
+// ── Billing / Promos ──
 export const applyPromoCode = (code) => api.post('/billing/apply-promo', { code }, { withCredentials: true });
 
 // ── KYC ──

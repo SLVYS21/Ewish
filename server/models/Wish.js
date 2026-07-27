@@ -10,7 +10,7 @@ const wishSchema = new mongoose.Schema({
   videoUrl:   { type: String, default: '' },
   color:      { type: Number, default: 0, min: 0, max: 6 },
   rot:        { type: Number, default: 0 },
-  mediaType:  { type: String, enum: ['none', 'photo', 'gif', 'audio', 'video'], default: 'none' },
+  mediaType:  { type: String, enum: ['none', 'photo', 'gif', 'audio', 'video', 'sticker'], default: 'none' },
   approved:   { type: Boolean, default: false },
   hidden:     { type: Boolean, default: false },
   pendingPayment: { type: Boolean, default: false, index: true },

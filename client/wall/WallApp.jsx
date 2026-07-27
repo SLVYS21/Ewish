@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useKKiaPay } from 'kkiapay-react';
 import { Copy, Gift, Lock, Send, Share2, Sparkles, X, Heart, Image as ImageIcon, Music, ImagePlay } from 'lucide-react';
 import api, {
   getApprovedWishes,
@@ -7,6 +6,7 @@ import api, {
   uploadFile,
   verifyContribution,
 } from '../utils/api';
+import useFeexPay from '../utils/useFeexPay';
 import { fireConfetti } from '../utils/confettiFx';
 import AnimatedBackground from './AnimatedBackground';
 import StoryViewer from './StoryViewer';
@@ -47,6 +47,7 @@ function formatDate(value) {
 }
 
 function mediaKind(wish) {
+  if (wish.mediaType === 'sticker' && wish.photoUrl) return 'sticker';
   if (wish.photoUrl) return 'photo';
   if (wish.videoUrl) return 'video';
   if (wish.audioUrl) return 'audio';
@@ -54,6 +55,9 @@ function mediaKind(wish) {
 }
 
 function buildMedia(wish) {
+  if (wish.mediaType === 'sticker' && wish.photoUrl) {
+    return <img src={wish.photoUrl} alt="" loading="lazy" style={{ objectFit: 'contain', background: 'transparent' }} />;
+  }
   if (wish.photoUrl) return <img src={wish.photoUrl} alt="" loading="lazy" />;
   if (wish.videoUrl) return <video src={wish.videoUrl} controls playsInline />;
   if (wish.audioUrl) return <AudioWavePlayer src={wish.audioUrl} />;
@@ -162,7 +166,9 @@ export default function WallApp() {
     isAnonymous: false,
   });
   const [uploading, setUploading] = useState(false);
-  const kkiapay = useKKiaPay();
+  const [stickers, setStickers] = useState([]);
+  const [showStickers, setShowStickers] = useState(false);
+  const { openCheckout, feexpayModal } = useFeexPay();
 
   const streamEnabled = !isPrivate || gateOpen;
   const goal = stats?.goal || data?.cagnotte?.goal || 0;
@@ -242,29 +248,19 @@ export default function WallApp() {
     fireConfetti(confettiType);
   }, [showIntro]);
 
-  useEffect(() => {
-    const onSuccess = async (response) => {
-      try {
-        const payload = {
-          transactionId: response.transactionId,
-          publicationId: publicId,
-          contributorName: giftForm.contributorName,
-          isAnonymous: giftForm.isAnonymous,
-        };
-        await verifyContribution(payload);
-        setToast('Merci ! Ta contribution a été enregistrée.');
-        fireConfetti('gold_rain');
-        setGiftOpen(false);
-        setGiftForm((prev) => ({ ...prev, amount: data.minContribution || 500 }));
-      } catch (error) {
-        setToast(error?.response?.data?.error || 'Paiement confirmé, mais la vérification a échoué.');
-      }
-    };
+  /* Historiquement on branchait un listener KKiaPay ici. FeexPay est
+     désormais géré par le hook useFeexPay via un modal dédié — la
+     vérification serveur se fait dans le onSuccess du openCheckout
+     (voir handleGiftPay ci-dessous). */
 
-    if (kkiapay?.addSuccessListener) {
-      kkiapay.addSuccessListener(onSuccess);
-    }
-  }, [kkiapay, giftForm]);
+  /* Charge la banque de stickers dès que le composer s'ouvre. */
+  useEffect(() => {
+    if (!composerOpen || stickers.length) return;
+    fetch(`${apiBase || ''}/api/stickers`)
+      .then(r => r.json())
+      .then(j => setStickers(Array.isArray(j?.stickers) ? j.stickers : []))
+      .catch(() => setStickers([]));
+  }, [composerOpen]);
 
   const handleWishSubmit = async (event) => {
     event.preventDefault();
@@ -328,28 +324,37 @@ export default function WallApp() {
   };
 
   const handleGiftPay = () => {
-    if (!kkiapay?.openKkiapayWidget) {
-      setToast('Le module de paiement est indisponible.');
-      return;
-    }
-
     const amount = Number(giftForm.amount || 0);
     if (!amount) {
       setToast('Choisis un montant.');
       return;
     }
-
-    kkiapay.openKkiapayWidget({
+    openCheckout({
       amount,
-      key: import.meta.env.VITE_KKIAPAY_PUBLIC_KEY || '',
-      sandbox: import.meta.env.VITE_KKIAPAY_SANDBOX === 'true',
-      name: giftForm.isAnonymous ? 'Anonyme' : (giftForm.contributorName || ''),
-      email: '',
-      data: JSON.stringify({
-        publicationId: publicId,
+      description:   `Contribution ${wallTitle}`,
+      customId:      `pub:${publicId}`,
+      initEndpoint:  '/contributions/feexpay-init',
+      initExtraBody: {
+        publicationId:   publicId,
         contributorName: giftForm.contributorName || '',
-        isAnonymous: giftForm.isAnonymous,
-      }),
+        isAnonymous:     giftForm.isAnonymous,
+      },
+      onSuccess: async ({ reference }) => {
+        try {
+          await verifyContribution({
+            reference,
+            publicationId:   publicId,
+            contributorName: giftForm.contributorName,
+            isAnonymous:     giftForm.isAnonymous,
+          });
+          setToast('Merci ! Ta contribution a été enregistrée.');
+          fireConfetti('gold_rain');
+          setGiftOpen(false);
+          setGiftForm((prev) => ({ ...prev, amount: data.minContribution || 500 }));
+        } catch (error) {
+          setToast(error?.response?.data?.error || 'Paiement confirmé, mais la vérification a échoué.');
+        }
+      },
     });
   };
 
@@ -454,6 +459,10 @@ export default function WallApp() {
                 {kind === 'photo' && (
                   <img className="pin-photo" src={wish.photoUrl} alt="Photo" />
                 )}
+                {kind === 'sticker' && (
+                  <img className="pin-photo" src={wish.photoUrl} alt="Sticker"
+                       style={{ objectFit: 'contain', background: 'transparent' }} />
+                )}
                 {kind === 'audio' && (
                   <AudioWavePlayer src={wish.audioUrl} />
                 )}
@@ -523,6 +532,59 @@ export default function WallApp() {
               />
               {uploading && <div style={{ fontSize: 13, marginBottom: 12 }}>Téléchargement en cours...</div>}
 
+              {/* Sticker picker (banque interne) */}
+              <button
+                type="button"
+                onClick={() => setShowStickers(v => !v)}
+                style={{
+                  width: '100%', padding: '10px 14px', marginBottom: 10,
+                  background: showStickers ? '#FFE0E6' : '#FFF1F4',
+                  border: '1.5px solid ' + (showStickers ? '#E11D48' : '#F2E4EA'),
+                  borderRadius: 12, color: '#2B1A2D', fontWeight: 700, fontSize: 13.5,
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}
+              >
+                <span>… ou choisis un sticker</span>
+                <span style={{ fontSize: 12, opacity: .7 }}>{stickers.length} dispo</span>
+              </button>
+              {showStickers && (
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
+                  maxHeight: 240, overflowY: 'auto',
+                  border: '1px solid #F2E4EA', borderRadius: 12,
+                  padding: 8, background: '#FFF1F4', marginBottom: 12,
+                }}>
+                  {stickers.length === 0 && (
+                    <div style={{ gridColumn: '1/-1', padding: 20, textAlign: 'center', color: '#A496A5', fontSize: 12.5 }}>
+                      Chargement…
+                    </div>
+                  )}
+                  {stickers.map(st => {
+                    const active = wishForm.mediaType === 'sticker' && wishForm.photoUrl === st.url;
+                    return (
+                      <div
+                        key={st.id}
+                        onClick={() => setWishForm(prev => ({
+                          ...prev, photoUrl: st.url, mediaType: 'sticker', audioUrl: '', videoUrl: '',
+                        }))}
+                        style={{
+                          position: 'relative', paddingTop: '100%',
+                          background: '#fff', borderRadius: 10,
+                          border: '2px solid ' + (active ? '#E11D48' : 'transparent'),
+                          cursor: 'pointer', overflow: 'hidden',
+                          transition: 'transform .15s, border-color .15s',
+                        }}
+                      >
+                        <img src={st.url} alt="" loading="lazy" style={{
+                          position: 'absolute', inset: 6, width: 'calc(100% - 12px)', height: 'calc(100% - 12px)',
+                          objectFit: 'contain', display: 'block',
+                        }} />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <button id="submit-btn" onClick={handleWishSubmit}>
                 Publier mon mot
               </button>
@@ -584,6 +646,8 @@ export default function WallApp() {
       {toast ? (
         <div id="toast" className="show">{toast}</div>
       ) : null}
+
+      {feexpayModal}
     </div>
   );
 }

@@ -30,13 +30,13 @@ export default function TermsPage() {
           <p>Vous êtes responsable de la confidentialité de vos identifiants et de toutes les activités réalisées depuis votre compte. En cas d'utilisation non autorisée, contactez-nous immédiatement à <strong>support@mykado.app</strong>.</p>
         </Section>
 
-        <Section title="3. Crédits et paiements">
-          <p>L'utilisation de certaines fonctionnalités (publication de pages, templates premium) requiert l'utilisation de <strong>crédits myKado</strong>.</p>
+        <Section title="3. Paiements">
+          <p>La publication de certaines fonctionnalités (murs Premium/Illimité, cartes payantes) requiert un paiement direct via la plateforme <strong>FeexPay</strong>.</p>
           <ul>
-            <li>Les crédits s'achètent via la plateforme de paiement <strong>KKiaPay</strong>, qui accepte Mobile Money (MTN, Moov, Wave) et cartes bancaires.</li>
-            <li>Les crédits ne sont pas remboursables sauf en cas d'erreur technique de notre part.</li>
-            <li>myKado ne stocke aucune information bancaire ou de Mobile Money. Les transactions sont entièrement gérées par KKiaPay.</li>
-            <li>Les codes promotionnels sont à usage unique et soumis à leurs propres conditions.</li>
+            <li>FeexPay accepte Mobile Money (MTN, Moov, Orange, Wave) et cartes bancaires.</li>
+            <li>Les paiements ne sont pas remboursables sauf en cas d'erreur technique de notre part.</li>
+            <li>myKado ne stocke aucune information bancaire ou de Mobile Money. Les transactions sont entièrement gérées par FeexPay.</li>
+            <li>Les codes promotionnels et cartes cadeaux (crédits offerts) sont à usage unique et soumis à leurs propres conditions.</li>
           </ul>
         </Section>
 
@@ -70,7 +70,7 @@ export default function TermsPage() {
           <p>myKado ne saurait être tenu responsable :</p>
           <ul>
             <li>Des pertes de données résultant d'un usage inapproprié du service</li>
-            <li>Des problèmes techniques liés aux services tiers (KKiaPay, Cloudinary, Google)</li>
+            <li>Des problèmes techniques liés aux services tiers (FeexPay, Cloudinary, Google)</li>
             <li>Du contenu publié par les utilisateurs</li>
             <li>Des dommages indirects résultant de l'utilisation ou de l'impossibilité d'utiliser le service</li>
           </ul>

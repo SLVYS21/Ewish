@@ -820,11 +820,11 @@ export default function WallSetup() {
     setShowPublishModal(true);
   };
 
-  const handlePublishConfirm = async (planType) => {
+  const handlePublishConfirm = async (planType, feexpayReference) => {
     setPublishing(true);
     setPubError('');
     try {
-      const res = await publishPublication(id, { planType });
+      const res = await publishPublication(id, { planType, feexpayReference });
       setPub(res.data);
       setToast('Mur publié avec succès !');
       setTimeout(() => setToast(''), 3000);
@@ -1166,7 +1166,8 @@ export default function WallSetup() {
 
       {/* Pricing Modal */}
       {showPublishModal && (
-        <WallPublishModal 
+        <WallPublishModal
+          pubId={id}
           onClose={() => setShowPublishModal(false)}
           onConfirm={handlePublishConfirm}
           loading={publishing}
