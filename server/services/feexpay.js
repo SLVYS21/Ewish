@@ -17,7 +17,7 @@
 
 const fetch = require('node-fetch');
 
-const BASE_URL = process.env.FEEXPAY_BASE_URL || 'https://api.feexpay.me';
+const BASE_URL = process.env.FEEXPAY_BASE_URL || 'https://api-v2.feexpay.me';
 const TOKEN    = process.env.FEEXPAY_TOKEN || '';
 const SHOP_ID  = process.env.FEEXPAY_SHOP_ID || '';
 
@@ -33,7 +33,7 @@ function authHeaders() {
    throw sur HTTP >= 400. */
 async function request(method, path, body) {
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 15000);
+  const t = setTimeout(() => controller.abort(), 60000);
   let res;
   try {
     res = await fetch(BASE_URL + path, {
@@ -65,8 +65,8 @@ const OPERATOR_PATHS = {
   moov:       'moov_ci',
   orange:     'orange_ci',
   wave:       'wave_ci',
-  'mtn-benin':    'mtn_benin',
-  'moov-benin':   'moov_benin',
+  'mtn-benin':    'mtn',
+  'moov-benin':   'moov',
   'mtn-ci':       'mtn_ci',
   'moov-ci':      'moov_ci',
   'orange-ci':    'orange_ci',
@@ -128,13 +128,12 @@ async function initMobileMoney({
     shop:        SHOP_ID,
     amount:      Number(amount),
     phoneNumber: String(phone).replace(/\s+/g, ''),
-    reason:      description || 'Contribution myKado',
-    custom_id:   customId || '',
-    callback_url: callbackUrl || '',
-    email:       email || '',
+    description: description || 'Contribution myKado',
+    callback_info: callbackUrl || '',
     first_name:  firstName || '',
     last_name:   lastName || '',
   };
+  console.log(url);
   const data = await request('POST', url, body);
   const reference = data?.reference || data?.transaction?.reference || data?.transaction_id;
   if (!reference) throw new Error('FeexPay: aucune référence retournée');

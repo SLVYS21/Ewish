@@ -20,7 +20,7 @@ router.post('/:publicationId', async (req, res) => {
       return res.status(403).json({ error: 'Les vœux sont désactivés pour cette publication.' });
     }
 
-    const { firstName, role, message, photoUrl, audioUrl, videoUrl, color, rot, mediaType } = req.body;
+    const { firstName, role, message, photoUrl, audioUrl, videoUrl, color, rot, mediaType, isThankYou } = req.body;
     if (!firstName?.trim() || !message?.trim()) {
       return res.status(400).json({ error: 'firstName and message are required' });
     }
@@ -72,6 +72,7 @@ router.post('/:publicationId', async (req, res) => {
       mediaType:     VALID_MEDIA.includes(mediaType) ? mediaType : 'none',
       approved:      autoApprove,
       pendingPayment,
+      isThankYou:    !!isThankYou,
     });
 
     // Live push aux murs branchés en SSE — uniquement si visible tout de suite.
@@ -119,7 +120,7 @@ router.get('/:publicationId/approved', async (req, res) => {
       approved: true,
       hidden: false,
       pendingPayment: { $ne: true },
-    }).sort('createdAt').lean();
+    }).sort({ isThankYou: -1, createdAt: 1 }).lean();
     res.json(wishes);
   } catch (e) {
     res.status(500).json({ error: e.message });

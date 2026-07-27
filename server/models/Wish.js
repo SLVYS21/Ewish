@@ -14,6 +14,7 @@ const wishSchema = new mongoose.Schema({
   approved:   { type: Boolean, default: false },
   hidden:     { type: Boolean, default: false },
   pendingPayment: { type: Boolean, default: false, index: true },
+  isThankYou: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Wish', wishSchema);
