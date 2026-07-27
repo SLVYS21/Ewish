@@ -95,6 +95,14 @@ const publicationSchema = new mongoose.Schema({
     revealEmojis: { type: Boolean, default: true },
     paletteAccentText: { type: String },
 
+    /* Bannière du mur pilotée par la palette. Persistés en clair (string CSS)
+       pour que serve.js les injecte dans :root { --cover-image / --cover-ink }
+       à chaque rendu. Sans ces champs déclarés, Mongoose stripe silencieusement
+       la valeur envoyée par WallStyle.jsx → au reload, le banner revient au
+       fallback (color-mix sur --wall-accent ou bronze par défaut). */
+    bannerTintFromPalette: { type: String, default: null },
+    bannerInkFromPalette:  { type: String, default: null },
+
     // Background per section  key = section slug
     // Special key "global" = fallback for all sections with no specific bg
     backgrounds: {

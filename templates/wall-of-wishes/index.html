@@ -1513,8 +1513,33 @@
       margin-top: 18px; border-radius: 16px; overflow: hidden;
     }
     .story-card .s-photo {
-      height: 200px; display: grid; place-items: center;
-      background-size: cover; background-position: center;
+      position: relative;
+      min-height: 220px; max-height: 60vh;
+      display: grid; place-items: center;
+      background: rgba(15, 12, 20, 0.88);
+      overflow: hidden;
+    }
+    .story-card .s-photo .s-photo-bg {
+      position: absolute; inset: -30px;
+      width: calc(100% + 60px); height: calc(100% + 60px);
+      object-fit: cover;
+      filter: blur(32px) saturate(1.4);
+      opacity: 0.55;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .story-card .s-photo .s-photo-fg {
+      position: relative;
+      z-index: 1;
+      display: block;
+      max-width: 100%;
+      max-height: 60vh;
+      width: auto; height: auto;
+      object-fit: contain;
+    }
+    .story-card .s-photo.s-photo-placeholder {
+      min-height: 200px; max-height: 260px;
+      background: initial;
     }
     .story-card .s-gif {
       display: grid; place-items: center;
@@ -2730,7 +2755,18 @@ function submitWish() {
       return;
     }
 
-    wishes.unshift(w);
+    /* Dedup : si le SSE (ou une insertion précédente) a déjà poussé ce
+       même wish dans le mur, on n'ajoute pas un doublon. Sans ce garde,
+       après le passage par la page de merci le mot pouvait apparaître
+       deux fois (une par l'insert optimistique + une par le stream). */
+    var _existingIdx = -1;
+    if (w._id) {
+      for (var _i = 0; _i < wishes.length; _i++) {
+        if (wishes[_i] && wishes[_i]._id === w._id) { _existingIdx = _i; break; }
+      }
+    }
+
+    if (_existingIdx < 0) wishes.unshift(w);
     closeSheet();
 
     document.getElementById('wish-input').value  = '';
@@ -2745,19 +2781,23 @@ function submitWish() {
     /* Rebuild indices since we prepended */
     container.querySelectorAll('.pin').forEach(function(n, i) { n.dataset.storyIndex = i + 1; });
 
-    var noteEl = createNoteEl(w, 0, true);
-    noteEl.style.opacity = '0';
-    container.insertBefore(noteEl, container.firstChild);
-    if (typeof TweenMax !== 'undefined') {
-      TweenMax.fromTo(noteEl, 0.65,
-        { opacity: 0, y: -50, scale: 0.75 },
-        { opacity: 1, y: 0,   scale: 1, ease: Back.easeOut.config(1.6) }
-      );
-    } else {
-      noteEl.style.opacity = '1';
+    if (_existingIdx < 0) {
+      /* Insert le noteEl uniquement si aucun doublon (sinon le SSE a déjà
+         inséré le noteEl dans le mur — on continue avec le state reset). */
+      var noteEl = createNoteEl(w, 0, true);
+      noteEl.style.opacity = '0';
+      container.insertBefore(noteEl, container.firstChild);
+      if (typeof TweenMax !== 'undefined') {
+        TweenMax.fromTo(noteEl, 0.65,
+          { opacity: 0, y: -50, scale: 0.75 },
+          { opacity: 1, y: 0,   scale: 1, ease: Back.easeOut.config(1.6) }
+        );
+      } else {
+        noteEl.style.opacity = '1';
+      }
+      setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
 
     try { window.parent.postMessage({ type: 'WW_WISH_ADDED', wish: w }, '*'); } catch(e) {}
 
@@ -3399,7 +3439,12 @@ function buildStoryMedia(w) {
   }
   if (w.mediaType === 'photo') {
     if (w.photoUrl) {
-      return '<div class="s-media s-photo" style="background-image:url(' + JSON.stringify(cldThumb(w.photoUrl, 'f_auto,q_auto,w_600')).replace(/^"|"$/g,'') + ')"></div>';
+      var _photoSrc = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200'));
+      var _photoBg  = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_120,e_blur:800'));
+      return '<div class="s-media s-photo">' +
+             '<img class="s-photo-bg" src="' + _photoBg + '" alt="" aria-hidden="true" loading="lazy" decoding="async">' +
+             '<img class="s-photo-fg" src="' + _photoSrc + '" alt="" loading="lazy" decoding="async">' +
+             '</div>';
     }
     var seed = hashStr(w._id || (w.name + '|' + w.text + '|' + w.ts));
     var gi = (typeof w.photoGrad === 'number' ? w.photoGrad : (seed % PHOTOS.length)) % PHOTOS.length;
@@ -3410,7 +3455,12 @@ function buildStoryMedia(w) {
       return '<div class="s-media s-gif"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/' + escapeHtml(w.gifCode) + '/512.gif" alt="" width="120" height="120"></div>';
     }
     if (w.photoUrl) {
-      return '<div class="s-media s-photo" style="background-image:url(' + JSON.stringify(cldThumb(w.photoUrl, 'f_auto,q_auto,w_600')).replace(/^"|"$/g,'') + ')"></div>';
+      var _gifSrc = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200'));
+      var _gifBg  = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_120,e_blur:800'));
+      return '<div class="s-media s-photo">' +
+             '<img class="s-photo-bg" src="' + _gifBg + '" alt="" aria-hidden="true" loading="lazy" decoding="async">' +
+             '<img class="s-photo-fg" src="' + _gifSrc + '" alt="" loading="lazy" decoding="async">' +
+             '</div>';
     }
   }
   if (w.mediaType === 'audio') {

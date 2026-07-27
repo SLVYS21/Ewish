@@ -1259,8 +1259,33 @@
       margin-top: 18px; border-radius: 16px; overflow: hidden;
     }
     .story-card .s-photo {
-      height: 200px; display: grid; place-items: center;
-      background-size: cover; background-position: center;
+      position: relative;
+      min-height: 220px; max-height: 60vh;
+      display: grid; place-items: center;
+      background: rgba(15, 12, 20, 0.88);
+      overflow: hidden;
+    }
+    .story-card .s-photo .s-photo-bg {
+      position: absolute; inset: -30px;
+      width: calc(100% + 60px); height: calc(100% + 60px);
+      object-fit: cover;
+      filter: blur(32px) saturate(1.4);
+      opacity: 0.55;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .story-card .s-photo .s-photo-fg {
+      position: relative;
+      z-index: 1;
+      display: block;
+      max-width: 100%;
+      max-height: 60vh;
+      width: auto; height: auto;
+      object-fit: contain;
+    }
+    .story-card .s-photo.s-photo-placeholder {
+      min-height: 200px; max-height: 260px;
+      background: initial;
     }
     .story-card .s-gif {
       display: grid; place-items: center;
@@ -1974,8 +1999,109 @@ function setWishesEnabled(enabled) {
   }
 }
 
+/* Insère un vœu inconnu dans le mur avec l'animation d'arrivée.
+   Utilisé à la fois par le polling de secours et par le stream SSE.
+   Miroir du wall-of-wishes classique (applyLiveWish). */
+function applyLiveWish(w) {
+  if (!w || !w._id) return;
+  for (var i = 0; i < wishes.length; i++) {
+    if (wishes[i]._id === w._id) return; // déjà vu
+  }
+  var wish = {
+    text:      w.message,
+    name:      w.firstName || 'Anonyme',
+    color:     w.color != null ? w.color : Math.floor(Math.random() * 6),
+    ts:        new Date(w.createdAt).getTime(),
+    photoUrl:  w.photoUrl  || '',
+    audioUrl:  w.audioUrl  || '',
+    mediaType: w.mediaType || 'none',
+    gifCode:   w.gifCode   || '',
+    gifChar:   w.gifChar   || '',
+    photoGrad: w.photoGrad,
+    audioDur:  w.audioDur  || '',
+    _id:       w._id,
+  };
+  wishes.unshift(wish);
+  var container = document.getElementById('notes-container');
+  if (!container) return;
+  var emptyEl = document.getElementById('empty-state');
+  if (emptyEl) emptyEl.style.display = 'none';
+  updateWallCols();
+  /* Reindex existing pins so les stories restent alignées après l'unshift. */
+  container.querySelectorAll('.pin').forEach(function(n, i) { n.dataset.storyIndex = i + 1; });
+  var noteEl = createNoteEl(wish, 0, true);
+  container.insertBefore(noteEl, container.firstChild);
+  setTimeout(function(){ noteEl.classList.remove('is-new'); }, 3000);
+}
+
+/* Applique un snapshot stats {total, count, goal, pct} à la strip cagnotte.
+   Le mode projection (grand écran) doit voir la barre monter en temps réel. */
+function applyLiveStats(stats) {
+  if (!stats) return;
+  var cag = _d.cagnotte || _d.jarConfig || {};
+  if (typeof stats.total  === 'number') cag.collected    = stats.total;
+  if (typeof stats.count  === 'number') cag.contributors = stats.count;
+  if (typeof stats.goal   === 'number' && stats.goal > 0) cag.goal = stats.goal;
+  _d.cagnotte = cag;
+  var stripEl = document.getElementById('cagnotte-strip');
+  if (stripEl && stripEl.style.display !== 'none') {
+    var pct = cag.goal > 0 ? Math.min(100, Math.round((cag.collected / cag.goal) * 100)) : 0;
+    var statsEl = document.getElementById('cag-stats');
+    var pctEl   = document.getElementById('cag-pct');
+    var fillEl  = document.getElementById('cag-fill');
+    if (statsEl) statsEl.textContent =
+      (cag.goal > 0 ? fmtNum(cag.collected) + ' / ' + fmtNum(cag.goal) + ' FCFA' : fmtNum(cag.collected) + ' FCFA') +
+      (cag.contributors > 0 ? ' · ' + cag.contributors + ' participant' + (cag.contributors !== 1 ? 's' : '') : '');
+    if (pctEl)  pctEl.textContent = pct + '%';
+    if (fillEl) fillEl.style.width = pct + '%';
+  }
+}
+
+/* Polling de secours — appelé uniquement si le stream SSE ne fonctionne pas. */
+function pollNewWishes() {
+  if (!PUB_ID) return;
+  apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
+    data.forEach(applyLiveWish);
+  }).catch(function() {});
+}
+
+/* Démarre la connexion live : SSE prioritaire, polling 30s en fallback.
+   Miroir du wall-of-wishes classique (startLiveUpdates). */
+var _wallStream = null, _wallPollTimer = null;
 function startLiveUpdates() {
-  /* Stub to prevent ReferenceError on modern template. Live updates are handled via postMessage in preview. */
+  if (!PUB_ID) return;
+  var pollFallback = function() {
+    if (_wallPollTimer) return;
+    _wallPollTimer = setInterval(pollNewWishes, 30000);
+  };
+  if (typeof EventSource === 'undefined') {
+    pollFallback();
+    return;
+  }
+  try {
+    _wallStream = new EventSource((API_BASE || '') + '/api/walls/' + PUB_ID + '/stream');
+    var openedOnce = false;
+    _wallStream.addEventListener('hello', function() {
+      openedOnce = true;
+      if (_wallPollTimer) { clearInterval(_wallPollTimer); _wallPollTimer = null; }
+    });
+    _wallStream.addEventListener('wish', function(e) {
+      try { var evt = JSON.parse(e.data); applyLiveWish(evt.data); } catch (_) {}
+    });
+    _wallStream.addEventListener('contribution', function(e) {
+      try { var evt = JSON.parse(e.data); applyLiveStats(evt.stats); } catch (_) {}
+    });
+    _wallStream.addEventListener('stats', function(e) {
+      try { var evt = JSON.parse(e.data); applyLiveStats(evt.data); } catch (_) {}
+    });
+    _wallStream.onerror = function() {
+      /* Le navigateur va tenter de reconnecter tout seul (retry: 3000 côté serveur).
+         On enclenche le polling en parallèle pour ne rien manquer si la reco tarde. */
+      if (!openedOnce) pollFallback();
+    };
+  } catch (_) {
+    pollFallback();
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -2182,13 +2308,24 @@ function submitWish() {
     var isPending = !!_d.requireModeration || !!(apiResult && apiResult.pendingPayment);
     w.pending = isPending;
 
-    wishes.unshift(w);
+    /* Dedup : si le SSE (ou une insertion précédente) a déjà poussé ce
+       même wish dans le mur, on n'ajoute pas un doublon. Sans ce garde,
+       après le passage par la page de merci le mot pouvait apparaître
+       deux fois (une par l'insert optimistique + une par le stream). */
+    var alreadyInWall = false;
+    if (w._id) {
+      for (var i = 0; i < wishes.length; i++) {
+        if (wishes[i] && wishes[i]._id === w._id) { alreadyInWall = true; break; }
+      }
+    }
+
+    if (!alreadyInWall) wishes.unshift(w);
     closeSheet();
     if (textEl) textEl.value = ''; if (authorEl) authorEl.value = '';
     clearMedia(); switchTab('none');
 
     var container = document.getElementById('notes-container');
-    if (container) {
+    if (container && !alreadyInWall) {
       var emptyEl = document.getElementById('empty-state');
       if (emptyEl) emptyEl.style.display = 'none';
       updateWallCols();
@@ -2715,7 +2852,12 @@ function buildStoryMedia(w) {
   }
   if (w.mediaType === 'photo') {
     if (w.photoUrl) {
-      return '<div class="s-media s-photo" style="background-image:url(' + JSON.stringify(cldThumb(w.photoUrl, 'f_auto,q_auto,w_600')).replace(/^"|"$/g,'') + ')"></div>';
+      var _photoSrc = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200'));
+      var _photoBg  = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_120,e_blur:800'));
+      return '<div class="s-media s-photo">' +
+             '<img class="s-photo-bg" src="' + _photoBg + '" alt="" aria-hidden="true" loading="lazy" decoding="async">' +
+             '<img class="s-photo-fg" src="' + _photoSrc + '" alt="" loading="lazy" decoding="async">' +
+             '</div>';
     }
     var seed = hashStr(w._id || (w.name + '|' + w.text + '|' + w.ts));
     var gi = (typeof w.photoGrad === 'number' ? w.photoGrad : (seed % PHOTOS.length)) % PHOTOS.length;
@@ -2726,7 +2868,12 @@ function buildStoryMedia(w) {
       return '<div class="s-media s-gif"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/' + escapeHtml(w.gifCode) + '/512.gif" alt="" width="120" height="120"></div>';
     }
     if (w.photoUrl) {
-      return '<div class="s-media s-photo" style="background-image:url(' + JSON.stringify(cldThumb(w.photoUrl, 'f_auto,q_auto,w_600')).replace(/^"|"$/g,'') + ')"></div>';
+      var _gifSrc = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_1200'));
+      var _gifBg  = escapeHtml(cldThumb(w.photoUrl, 'f_auto,q_auto,w_120,e_blur:800'));
+      return '<div class="s-media s-photo">' +
+             '<img class="s-photo-bg" src="' + _gifBg + '" alt="" aria-hidden="true" loading="lazy" decoding="async">' +
+             '<img class="s-photo-fg" src="' + _gifSrc + '" alt="" loading="lazy" decoding="async">' +
+             '</div>';
     }
   }
   if (w.mediaType === 'audio') {

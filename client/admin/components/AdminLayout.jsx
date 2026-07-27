@@ -117,14 +117,14 @@ export default function AdminLayout() {
             <span>Templates</span>
             <span style={{ flex: 1 }} />
           </button>
-          <button className={`sb-item${isReleases ? ' active' : ''}`} onClick={() => navigate('/ewish-admin/releases')}>
+          {/* <button className={`sb-item${isReleases ? ' active' : ''}`} onClick={() => navigate('/ewish-admin/releases')}>
             <Package size={16} />
             <span>Nouveautés</span>
             <span style={{ flex: 1 }} />
             {hasNewRelease && (
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF5470', boxShadow: '0 0 0 3px rgba(255,84,112,.22)' }} aria-label="Nouvelle version" />
             )}
-          </button>
+          </button> */}
         </nav>
 
         {/* Super admin section */}

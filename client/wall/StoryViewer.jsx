@@ -142,7 +142,10 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
                   </div>
                 )}
                 {wish.mediaType !== 'sticker' && wish.photoUrl && (
-                  <div className="s-media s-photo" style={{ backgroundImage: `url(${wish.photoUrl})` }} />
+                  <div className="s-media s-photo">
+                    <img className="s-photo-bg" src={wish.photoUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                    <img className="s-photo-fg" src={wish.photoUrl} alt="" loading="lazy" decoding="async" />
+                  </div>
                 )}
                 {wish.videoUrl && (
                   <div className="s-media" style={{ background: '#000' }}>
