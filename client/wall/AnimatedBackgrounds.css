@@ -13,14 +13,14 @@
 @keyframes mkSunB { to { transform: rotate(-360deg); } }
 
 .ab-container {
-  position: fixed;
+  position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
 .ab-corners {
-  position: fixed;
+  position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;

@@ -7,5 +7,5 @@ const { join } = require('path');
  * wiped between phases.
  */
 module.exports = {
-  cacheDirectory: join(__dirname, '.cache', 'puppeteer'),
+  cacheDirectory: join(__dirname, '.puppeteer-cache'),
 };

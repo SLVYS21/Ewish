@@ -112,6 +112,12 @@
       background-position: center;
       pointer-events: none;
     }
+
+    /* Force background animations to be fixed so they don't stretch with scroll height on mobile */
+    .ww-shell--classic > .ab-container,
+    .ww-shell--classic > .ab-corners {
+      position: fixed !important;
+    }
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; color: inherit; }
     a { color: inherit; text-decoration: none; }
@@ -1642,6 +1648,12 @@
       background-repeat: var(--wall-bg-repeat, no-repeat);
       background-position: center;
       pointer-events: none;
+    }
+
+    /* Force background animations to be fixed so they don't stretch with scroll height on mobile */
+    .ww-shell--modern > .ab-container,
+    .ww-shell--modern > .ab-corners {
+      position: fixed !important;
     }
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; color: inherit; }
