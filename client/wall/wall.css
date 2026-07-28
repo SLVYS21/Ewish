@@ -93,16 +93,24 @@
       font-family: var(--body);
       /* Fond du mur — pilotable par le wizard (étape 2 flow murs).
          --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
-      background: var(--wall-bg, #FFFFFF);
-      background-size: var(--wall-bg-size, cover);
-      background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
-      background-position: center;
       color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      position: relative;
+      z-index: 0;
+    }
+    .ww-shell--classic::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: var(--wall-bg, #FFFFFF);
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-position: center;
+      pointer-events: none;
     }
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; color: inherit; }
@@ -411,7 +419,6 @@
       background: var(--wall-bg, var(--pin-bg));
       background-size: var(--wall-bg-size, cover);
       background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
       background-position: center;
       position: relative;
     }
@@ -1617,16 +1624,24 @@
       font-family: var(--body);
       /* Fond du mur — pilotable par le wizard (étape 2 flow murs).
          --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
-      background: var(--wall-bg, linear-gradient(180deg, #FBF1F4, #F6EEF8));
-      background-size: var(--wall-bg-size, cover);
-      background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
-      background-position: center;
       color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      position: relative;
+      z-index: 0;
+    }
+    .ww-shell--modern::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: var(--wall-bg, linear-gradient(180deg, #FBF1F4, #F6EEF8));
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-position: center;
+      pointer-events: none;
     }
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; color: inherit; }
@@ -1893,7 +1908,6 @@
       background: var(--wall-bg, var(--pin-bg, #FFEDF1));
       background-size: var(--wall-bg-size, cover);
       background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
       background-position: center;
       color: var(--mk-ink);
       min-width: 0;

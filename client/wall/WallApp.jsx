@@ -12,27 +12,10 @@ import AnimatedBackground from './AnimatedBackground';
 import StoryViewer from './StoryViewer';
 import AudioWavePlayer from './AudioWavePlayer';
 
-const data = typeof window !== 'undefined' ? (window.__WW_DATA__ || {}) : {};
-const meta = typeof window !== 'undefined' ? (window.__WW_META__ || {}) : {};
-const style = typeof window !== 'undefined' ? (window.__WW_STYLE__ || {}) : {};
-const branding = typeof window !== 'undefined' ? (window.__WW_BRANDING__ || {}) : {};
-const deco = typeof window !== 'undefined' ? (window.__WW_DECO__ || []) : [];
-const widgets = typeof window !== 'undefined' ? (window.__WW_WIDGETS__ || []) : [];
-const confettiType = typeof window !== 'undefined' ? (window.__WW_CONFETTI_TYPE__ || 'default') : 'default';
-
-const isModern = String(meta.templateName || data.templateName || '').includes('modern');
-const publicId = String(meta.id || data.publicationId || '');
-const apiBase = String(data.apiBase || '').trim();
-const streamBase = apiBase.replace(/\/api$/, '');
-const streamUrl = `${streamBase || ''}/api/walls/${publicId}/stream`;
-const wallTitle = data.title || meta.title || 'Mur myKado';
-const wallName = data.name || data.recipientName || data.customName || '';
-const wallMessage = data.subtitle || data.tagline || data.description || 'Un espace vivant pour déposer des mots, des souvenirs et des gestes d’amour.';
-const wishesEnabled = data.wishesEnabled !== false;
-const isPrivate = !!data.isPrivate && !!data.accessCode;
-const isPreview = !!data.previewMode;
-const isAdmin = !!data.isAdmin;
-const previewBanner = isPreview ? 'Aperçu' : '';
+const INITIAL_DATA = typeof window !== 'undefined' ? (window.__WW_DATA__ || {}) : {};
+const INITIAL_META = typeof window !== 'undefined' ? (window.__WW_META__ || {}) : {};
+const INITIAL_STYLE = typeof window !== 'undefined' ? (window.__WW_STYLE__ || {}) : {};
+const INITIAL_CONFETTI = typeof window !== 'undefined' ? (window.__WW_CONFETTI_TYPE__ || 'default') : 'default';
 const maxWishes = 80;
 
 function formatMoney(value) {
@@ -64,7 +47,7 @@ function buildMedia(wish) {
   return null;
 }
 
-function PrivateGate({ onUnlock }) {
+function PrivateGate({ data, publicId, onUnlock }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
@@ -141,8 +124,25 @@ function ModernIntro({ onReveal }) {
 }
 
 export default function WallApp() {
+  const [data, setData] = useState(INITIAL_DATA);
+  const [style, setStyle] = useState(INITIAL_STYLE);
+  const [confettiType, setConfettiType] = useState(INITIAL_CONFETTI);
+  const meta = INITIAL_META;
+
+  const isModern = String(meta.templateName || data.templateName || '').includes('modern');
+  const publicId = String(meta.id || data.publicationId || '');
+  const apiBase = String(data.apiBase || '').trim();
+  const streamBase = apiBase.replace(/\/api$/, '');
+  const streamUrl = `${streamBase || ''}/api/walls/${publicId}/stream`;
+  const wallTitle = data.title || meta.title || 'Mur myKado';
+  const wallName = data.name || data.recipientName || data.customName || '';
+  const wallMessage = data.subtitle || data.tagline || data.description || 'Un espace vivant pour déposer des mots, des souvenirs et des gestes d’amour.';
+  const wishesEnabled = data.wishesEnabled !== false;
+  const isPrivate = !!data.isPrivate && !!data.accessCode;
+  const isPreview = !!data.previewMode;
+
   const [wishes, setWishes] = useState([]);
-  const [stats, setStats] = useState(data.cagnotte || null);
+  const [stats, setStats] = useState(INITIAL_DATA.cagnotte || null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
   const [storyIndex, setStoryIndex] = useState(-1);
@@ -178,6 +178,34 @@ export default function WallApp() {
 
   useEffect(() => {
     document.title = wallName ? `${wallTitle} · ${wallName}` : wallTitle;
+  }, [wallTitle, wallName]);
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      const msg = event.data;
+      if (!msg) return;
+      if (msg.type === 'WW_UPDATE') {
+        if (msg.data) setData(prev => ({ ...prev, ...msg.data }));
+        if (msg.style) setStyle(prev => ({ ...prev, ...msg.style }));
+      } else if (msg.type === 'WW_CONFETTI') {
+        if (msg.effectType) {
+          setConfettiType(msg.effectType);
+          fireConfetti(msg.effectType);
+        }
+      } else if (msg.type === 'WW_CONFIG') {
+        if (msg.wishesEnabled !== undefined) {
+          setData(prev => ({ ...prev, wishesEnabled: msg.wishesEnabled }));
+        }
+      } else if (msg.type === 'WW_CAGNOTTE_UPDATE') {
+        const cc = msg.cagnotteConfig;
+        if (cc) {
+          setData(prev => ({ ...prev, cagnotte: { ...(prev.cagnotte || {}), ...cc } }));
+          setStats(prev => ({ ...(prev || {}), ...cc }));
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   useEffect(() => {
@@ -370,7 +398,7 @@ export default function WallApp() {
     <div className={wrapperClass}>
       <AnimatedBackground backgroundId={style.wallBackgroundId || data.wallBackgroundId} />
 
-      {isPrivate && !gateOpen ? <PrivateGate onUnlock={() => setGateOpen(true)} /> : null}
+      {isPrivate && !gateOpen ? <PrivateGate data={data} publicId={publicId} onUnlock={() => setGateOpen(true)} /> : null}
       
       {storyIndex >= 0 ? (
         <StoryViewer 

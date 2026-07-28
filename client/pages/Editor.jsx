@@ -387,6 +387,28 @@ export default function Editor() {
     }, 800);
   }, [id, cagnotte, cagnotteName, cagnotteGoal, cagnotteImage, cagnotteDeadline, wishesEnabled, minContribution, maxContribution, collectTitle, collectSubtitle, collectCover, collectAccentColor, isPrivate, accessCode, requireModeration]);
 
+  /* real-time cagnotte preview */
+  useEffect(() => {
+    try {
+      iframeRef.current?.contentWindow?.postMessage({
+        type: 'WW_CAGNOTTE_UPDATE',
+        cagnotteConfig: {
+          enabled: cagnotte,
+          description: cagnotteName,
+          goal: cagnotteGoal,
+          image: cagnotteImage,
+          deadline: cagnotteDeadline || null,
+          minContribution,
+          maxContribution,
+          collectTitle,
+          collectSubtitle,
+          collectCover,
+          collectAccentColor,
+        }
+      }, '*');
+    } catch {}
+  }, [cagnotte, cagnotteName, cagnotteGoal, cagnotteImage, cagnotteDeadline, minContribution, maxContribution, collectTitle, collectSubtitle, collectCover, collectAccentColor]);
+
   /* invitation config autosave */
   const invitationTimer = useRef(null);
   const handleInvitationChange = useCallback((next) => {

@@ -282,7 +282,7 @@ function WallSettings({ pub, id, onSave }) {
             <Toggle on={moderation} onChange={setModeration} />
           </div>
 
-          <div className="setting-row">
+          {/* <div className="setting-row">
             <IconBubble bg="var(--mk-lilac-soft)" color="var(--mk-lilac)"><Lock size={16} /></IconBubble>
             <div className="body">
               <div className="t">Mur privé</div>
@@ -299,7 +299,7 @@ function WallSettings({ pub, id, onSave }) {
               )}
             </div>
             <Toggle on={isPrivate} onChange={setIsPrivate} />
-          </div>
+          </div> */}
         </div>
     </div>
   );
