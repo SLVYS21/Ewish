@@ -39,8 +39,9 @@ router.get('/:pubId/export/pdf', async (req, res) => {
       return res.status(422).json({ error: 'Ce mur ne contient encore aucun mot à imprimer.' });
     }
 
+    const { layout = 'book', bg = 'wall' } = req.query;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const pdf = await renderWallBookPdf({ publication, wishes, baseUrl });
+    const pdf = await renderWallBookPdf({ publication, wishes, baseUrl, layout, bgMode: bg });
     /* Filename basé sur le prénom du destinataire seul (Sarah) plutôt que
        le titre complet ("Joyeux anniversaire, Sarah") — plus lisible dans
        l'explorateur de fichiers. Fallback legacy sur titleName/title pour

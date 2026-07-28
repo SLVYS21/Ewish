@@ -500,8 +500,8 @@
           done(null);
         }
       };
-      /* Filet 8s pour éviter qu'une image morte bloque l'export. */
-      setTimeout(function () { done(null); }, 8000);
+      /* Filet 30s augmenté pour laisser le temps à Cloudinary de générer l'image. */
+      setTimeout(function () { done(null); }, 30000);
       img.src = url;
     });
   }

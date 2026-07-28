@@ -580,6 +580,63 @@ function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, on
   );
 }
 
+/* ─── Pdf Export modal ─── */
+function PdfExportModal({ open, onClose, onConfirm }) {
+  const [layout, setLayout] = useState('mosaic'); // 'mosaic' or 'book'
+  const [bgMode, setBgMode] = useState('wall');   // 'wall' or 'clean' (for mosaic)
+
+  if (!open) return null;
+
+  return (
+    <div className="modal-veil" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="mk-modal" style={{ maxWidth: 520 }}>
+        <div className="mk-modal-head">
+          <div>
+            <div className="mk-modal-title">Livre PDF</div>
+            <div className="mk-modal-sub">Choisis le format d'export de ton mur.</div>
+          </div>
+          <button className="btn-icon" onClick={onClose}><X size={18} /></button>
+        </div>
+        <div className="mk-modal-body">
+          <div className="section-label" style={{ marginBottom: 8 }}>Format de page</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+            <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'mosaic' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'mosaic' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
+              <input type="radio" name="layout" value="mosaic" checked={layout === 'mosaic'} onChange={() => setLayout('mosaic')} style={{ marginTop: 4 }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Mosaïque A4 (Recommandé)</div>
+                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Plusieurs mots par page, façon tableau d'affichage. Idéal pour avoir une vue d'ensemble.</div>
+              </div>
+            </label>
+            <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'book' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'book' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
+              <input type="radio" name="layout" value="book" checked={layout === 'book'} onChange={() => setLayout('book')} style={{ marginTop: 4 }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Livre A5 classique</div>
+                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Un seul mot par page, format petit livre. Idéal pour de longs mots intimes.</div>
+              </div>
+            </label>
+          </div>
+
+          <div className="section-label" style={{ marginBottom: 8 }}>Arrière-plan</div>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+            <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 12, border: bgMode === 'wall' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', textAlign: 'center', background: bgMode === 'wall' ? 'var(--mk-blush)' : 'transparent' }}>
+              <input type="radio" name="bgMode" value="wall" checked={bgMode === 'wall'} onChange={() => setBgMode('wall')} style={{ alignSelf: 'center' }} />
+              <div style={{ fontWeight: 600, fontSize: 13 }}>Fond du mur</div>
+            </label>
+            <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 12, border: bgMode === 'clean' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', textAlign: 'center', background: bgMode === 'clean' ? 'var(--mk-blush)' : 'transparent' }}>
+              <input type="radio" name="bgMode" value="clean" checked={bgMode === 'clean'} onChange={() => setBgMode('clean')} style={{ alignSelf: 'center' }} />
+              <div style={{ fontWeight: 600, fontSize: 13 }}>Fond uni clair</div>
+            </label>
+          </div>
+
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => onConfirm(layout, bgMode)}>
+            <Download size={16} /> Générer le PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Share view (published) ─── */
 export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSlugUpdated }) {
   const navigate = useNavigate();
@@ -594,6 +651,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
   const [shareTab,   setShareTab]   = useState('guests'); // 'guests' or 'recipient'
   const [exportingPdf, setExportingPdf] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
   /* API base */
   const API_BASE = import.meta.env.VITE_API_URL
@@ -602,8 +660,12 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
 
   /* Export PDF */
   const handleExportPdf = () => {
-    console.log('[SharePage] Export PDF clicked! Opening:', `${API_BASE}/walls/${pub._id}/export/pdf`);
-    window.open(`${API_BASE}/walls/${pub._id}/export/pdf`, '_blank');
+    setPdfModalOpen(true);
+  };
+  const confirmExportPdf = (layout, bgMode) => {
+    setPdfModalOpen(false);
+    console.log('[SharePage] Export PDF clicked! Opening:', `${API_BASE}/walls/${pub._id}/export/pdf?layout=${layout}&bg=${bgMode}`);
+    window.open(`${API_BASE}/walls/${pub._id}/export/pdf?layout=${layout}&bg=${bgMode}`, '_blank');
   };
 
   /* Export Video */
@@ -986,6 +1048,13 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
           onUpdated={(newSlug) => onSlugUpdated?.(newSlug)}
         />
       )}
+
+      {/* PDF Export Modal */}
+      <PdfExportModal
+        open={pdfModalOpen}
+        onClose={() => setPdfModalOpen(false)}
+        onConfirm={confirmExportPdf}
+      />
 
       {/* Video Export Modal */}
       {videoModalOpen && (

@@ -125,7 +125,9 @@ function formatFrenchDate(d) {
 }
 
 /* ---------- HTML builder ---------- */
-function buildBookHtml({ publication, wishes, baseUrl }) {
+function buildBookHtml({ publication, wishes, baseUrl, layout = 'book', bgMode = 'wall' }) {
+  const isMosaic = layout === 'mosaic';
+  const isClean = bgMode === 'clean';
   const d = publication.data || {};
   /* recipient = prénom seul du destinataire (Sarah). Utilisé pour :
      - signature du mot de merci ("— Sarah")
@@ -176,47 +178,33 @@ function buildBookHtml({ publication, wishes, baseUrl }) {
      identiques) — mêmes 30 variantes que les statuts en live. */
   const bgSequence = pickBgSequence(wishes.length);
 
-  const wishPages = wishes.map((w, i) => {
-    const bg = STICKY_BG[(w.color ?? 0) % STICKY_BG.length];
-    const rot = (typeof w.rot === 'number' ? w.rot : 0);
-    const clampedRot = Math.max(-4, Math.min(4, rot));
-    /* GIFs et photos vivent tous les deux dans w.photoUrl — la seule
-       distinction est w.mediaType. Sans inclure 'gif' ici, on perdait
-       silencieusement toutes les cartes avec GIF dans le PDF. */
+  function renderWishPhoto(w) {
     const hasImage = (w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl;
-    /* Pour les vidéos, Cloudinary sait extraire une frame en .jpg via la
-       delivery type "video" — on affiche une vignette (poster) dans le
-       livre puisqu'un PDF ne joue pas la vidéo. */
     const hasVideoPoster = w.mediaType === 'video' && w.videoUrl;
-    /* Sticker : contain + fond transparent, pas de crop, pas de background. */
     const hasSticker = w.mediaType === 'sticker' && w.photoUrl;
-    let photoTag = '';
     if (hasSticker) {
-      /* Pas de crop Cloudinary — un sticker est déjà sur fond transparent
-         (webp/png), on veut le rendu tel quel, centré, contain. */
-      photoTag = `<div class="wish-sticker"><img src="${escapeHtml(w.photoUrl)}" alt="" crossorigin="anonymous"></div>`;
+      return `<div class="wish-sticker"><img src="${escapeHtml(w.photoUrl)}" alt="" crossorigin="anonymous"></div>`;
     } else if (hasImage) {
-      /* f_auto → Cloudinary sert le meilleur format pour Chrome (WebP/JPG).
-         Pour un GIF animé, seule la 1re frame apparaîtra dans le PDF,
-         c'est le comportement attendu (un PDF est statique). */
       const src = cldThumb(w.photoUrl, 'c_fill,g_auto,w_900,h_680,q_auto,f_auto');
-      photoTag = `<div class="wish-photo"><img src="${escapeHtml(src)}" alt="" crossorigin="anonymous"></div>`;
+      return `<div class="wish-photo"><img src="${escapeHtml(src)}" alt="" crossorigin="anonymous"></div>`;
     } else if (hasVideoPoster) {
-      /* Extraction d'une frame de la vidéo Cloudinary : on remplace
-         /video/upload/ par /video/upload/so_0,f_jpg,... et on force
-         l'extension .jpg pour obtenir une image statique. */
       let poster = w.videoUrl;
       if (poster.indexOf('/video/upload/') !== -1) {
         poster = poster
           .replace('/video/upload/', '/video/upload/so_0,f_jpg,c_fill,g_auto,w_900,h_680,q_auto/')
           .replace(/\.(mp4|webm|mov|avi|mkv)(\?.*)?$/i, '.jpg$2');
       }
-      photoTag = `<div class="wish-photo"><img src="${escapeHtml(poster)}" alt="" crossorigin="anonymous"></div>`;
+      return `<div class="wish-photo"><img src="${escapeHtml(poster)}" alt="" crossorigin="anonymous"></div>`;
     }
-    const pageBg = bgHtmlForPage(bgSequence[i]);
-    return `
-      <section class="page wish-page">
-        ${pageBg}
+    return '';
+  }
+
+  let wishPages = '';
+  if (isMosaic) {
+    const notesHtml = wishes.map((w) => {
+      const bg = STICKY_BG[(w.color ?? 0) % STICKY_BG.length];
+      const photoTag = renderWishPhoto(w);
+      return `
         <div class="wish-note" style="background:${bg};">
           ${photoTag}
           <div class="wish-body">
@@ -227,10 +215,40 @@ function buildBookHtml({ publication, wishes, baseUrl }) {
             </div>
           </div>
         </div>
-        <div class="page-num">${i + 1} / ${wishCount}</div>
+      `;
+    }).join('');
+
+    wishPages = `
+      <section class="page mosaic-page">
+        ${!isClean && hasWallBg ? '<div class="print-fixed-bg"></div><div class="mosaic-veil"></div>' : ''}
+        <div class="mosaic-container">
+          ${notesHtml}
+        </div>
       </section>
     `;
-  }).join('');
+  } else {
+    wishPages = wishes.map((w, i) => {
+      const bg = STICKY_BG[(w.color ?? 0) % STICKY_BG.length];
+      const photoTag = renderWishPhoto(w);
+      const pageBg = bgHtmlForPage(bgSequence[i]);
+      return `
+        <section class="page wish-page">
+          ${pageBg}
+          <div class="wish-note" style="background:${bg};">
+            ${photoTag}
+            <div class="wish-body">
+              <p class="wish-text">${escapeHtml(w.message)}</p>
+              <div class="wish-signature">
+                <span class="wish-name">${escapeHtml(w.firstName || 'Anonyme')}</span>
+                ${w.role ? `<span class="wish-role">${escapeHtml(w.role)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="page-num">${i + 1} / ${wishCount}</div>
+        </section>
+      `;
+    }).join('');
+  }
 
   /* Mot de merci du destinataire — étape 7 du flow murs.
      Injecté juste avant l'outro, seulement s'il est non-vide. */
@@ -258,7 +276,8 @@ function buildBookHtml({ publication, wishes, baseUrl }) {
 
   const baseTag = baseUrl ? `<base href="${escapeHtml(baseUrl)}/">` : '';
   const wallBgCss = hasWallBg
-    ? `.cover.has-wall-bg, .outro.has-wall-bg { background: ${wallBg.css}; }`
+    ? `.cover.has-wall-bg, .outro.has-wall-bg { background: ${wallBg.css}; }
+       .print-fixed-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -2; background: ${wallBg.css}; background-size: cover; background-position: center; background-repeat: no-repeat; }`
     : '';
 
   return `<!doctype html>
@@ -280,17 +299,22 @@ ${baseTag}
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--paper); color: var(--ink); font-family: 'Fraunces', Georgia, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; }
-  @page { size: A5 portrait; margin: 0; }
+  @page { size: ${isMosaic ? 'A4' : 'A5'} portrait; margin: 0; }
   .page {
-    width: 148mm;
-    height: 210mm;
+    width: ${isMosaic ? '210mm' : '148mm'};
+    min-height: ${isMosaic ? '297mm' : '210mm'};
     page-break-after: always;
     position: relative;
     overflow: hidden;
     background: var(--paper);
-    padding: 22mm 20mm;
+    padding: ${isMosaic ? '20mm 15mm' : '22mm 20mm'};
   }
   .page:last-child { page-break-after: auto; }
+  
+  /* Fix height for fixed pages to perfectly center content */
+  .page.cover, .page.preface, .page.thankyou, .page.outro, .page.wish-page {
+    height: ${isMosaic ? '297mm' : '210mm'};
+  }
 
   /* ── COVER ── */
   .cover {
@@ -429,6 +453,35 @@ ${baseTag}
     display: flex;
     flex-direction: column;
     gap: 6mm;
+  }
+  
+  /* ── MOSAIC PAGES (A4) ── */
+  .page.mosaic-page {
+    height: auto;
+    overflow: visible; /* Allow content to dictate height */
+  }
+  .mosaic-veil {
+    position: fixed; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.85) 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .mosaic-container {
+    column-count: 2;
+    column-gap: 15mm;
+    position: relative;
+    z-index: 1;
+  }
+  .mosaic-page .wish-note {
+    width: 100%;
+    max-height: none;
+    margin-bottom: 15mm;
+    break-inside: avoid-column;
+    page-break-inside: avoid;
+    box-shadow: 0 2mm 6mm rgba(0,0,0,0.15);
+  }
+  .mosaic-page .wish-text {
+    font-size: 14pt; /* Slightly smaller for A4 */
   }
   .wish-photo {
     width: 100%;
@@ -587,8 +640,8 @@ ${outro}
 }
 
 /* ---------- Public API ---------- */
-async function renderWallBookPdf({ publication, wishes, baseUrl }) {
-  const html = buildBookHtml({ publication, wishes, baseUrl });
+async function renderWallBookPdf({ publication, wishes, baseUrl, layout = 'book', bgMode = 'wall' }) {
+  const html = buildBookHtml({ publication, wishes, baseUrl, layout, bgMode });
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
@@ -609,15 +662,15 @@ async function renderWallBookPdf({ publication, wishes, baseUrl }) {
           const done = () => resolve();
           img.addEventListener('load', done, { once: true });
           img.addEventListener('error', done, { once: true });
-          /* Filet de sécu : ne bloque pas le rendu à cause d'une image morte. */
-          setTimeout(done, 8000);
+          /* Filet de sécu augmenté (30s) pour laisser le temps à Cloudinary de générer l'image. */
+          setTimeout(done, 30000);
         }).then(() => img.decode().catch(() => {}));
       }));
     });
     /* Petit délai post-décodage pour laisser les fonds animés se poser. */
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 800)));
     const pdf = await page.pdf({
-      format: 'A5',
+      format: layout === 'mosaic' ? 'A4' : 'A5',
       printBackground: true,
       preferCSSPageSize: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },

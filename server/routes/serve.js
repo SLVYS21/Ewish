@@ -368,7 +368,7 @@ router.get('/:templateName/:customName', async (req, res) => {
     publicData.adminReturnUrl = adminReturnUrl;
     publicData.previewMode = isPreview;
     publicData.landingUrl = process.env.LANDING_URL || 'https://www.mykado.store';
-    publicData.skipIntro = req.query.noanim === '1';
+    publicData.skipIntro = req.query.noanim === '1' || req.query.collect !== undefined;
     publicData.cagnotte = pub.cagnotteConfig?.enabled ? {
       enabled: true,
       name: pub.cagnotteConfig.description || '',
