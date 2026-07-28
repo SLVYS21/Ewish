@@ -13,6 +13,7 @@ aptPkgs = [
   "fonts-liberation",
   "wget",
   "xdg-utils",
+  "chromium",
 
   # ── Deps Chromium ─────────────────────────────────────────
   "libnss3",
@@ -45,3 +46,7 @@ aptPkgs = [
   "libexpat1",
   "libfontconfig1",
 ]
+
+[variables]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium"
