@@ -929,7 +929,7 @@ export default function WallSetup() {
       {isMobile ? (
         <>
           {/* Mobile Header */}
-          <div style={{ flex: '0 0 auto', background: '#fff', borderBottom: '1px solid #F0EBDE', padding: '16px 18px 0', paddingTop: 'env(safe-area-inset-top, 16px)' }}>
+          <div style={{ flex: '0 0 auto', background: '#fff', borderBottom: '1px solid #F0EBDE', padding: '16px 18px 0', paddingTop: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button onClick={() => navigate('/ewish-admin/ewish')} style={{ width: '36px', height: '36px', borderRadius: '11px', background: '#FAF7F0', border: '1px solid #ECE6D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', cursor: 'pointer' }}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#453E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
@@ -942,9 +942,48 @@ export default function WallSetup() {
                   {pub?.title || 'Mur sans titre'}
                 </div>
               </div>
-              <button onClick={() => setMobilePreviewOpen(true)} style={{ font: '700 12px var(--mk-body)', color: '#1E2952', display: 'inline-flex', alignItems: 'center', gap: '4px', flex: '0 0 auto', background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2952" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                Aperçu
+              <button 
+                onClick={() => setMobilePreviewOpen(true)} 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#E91E63',
+                  color: '#FFFFFF',
+                  fontFamily: 'var(--mk-body, sans-serif)',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(233, 30, 99, 0.2)',
+                  transition: 'all 0.2s ease-in-out',
+                  outline: 'none',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#D81B60';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#E91E63';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <svg 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#FFFFFF" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Aperçu</span>
               </button>
             </div>
             
