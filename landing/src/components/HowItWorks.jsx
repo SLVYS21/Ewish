@@ -1,38 +1,73 @@
+import { motion } from 'framer-motion';
 import s from './HowItWorks.module.css';
 import NotoEmoji from './NotoEmoji';
 
 const STEPS = [
-  { n: 1, emoji: 'sparkles',     title: "Choisis l'occasion",  desc: "Anniversaire, mariage, naissance, retraite, fin d'année… Ou une occasion à toi." },
-  { n: 2, emoji: 'writing-hand', title: 'Choisis la brique',   desc: 'Carte animée, mur collaboratif, ou cadeau direct. Les trois peuvent se combiner.' },
-  { n: 3, emoji: 'star-struck',  title: 'Personnalise',        desc: 'Musique, photos, texte, thème, invités, cagnotte. Tu vois le rendu en temps réel.' },
-  { n: 4, emoji: 'rocket',       title: 'Envoie',              desc: "Par lien, QR code, e-mail ou réseaux sociaux. Ton destinataire ouvre — explosion de confettis." },
+  { 
+    n: 1, 
+    emoji: 'artist-palette', 
+    title: "Personnalisez",  
+    desc: "Choisissez le format (carte, vidéo, cagnotte)." 
+  },
+  { 
+    n: 2, 
+    emoji: 'handshake', 
+    title: 'Invitez',   
+    desc: "Partagez le lien pour que d'autres contribuent." 
+  },
+  { 
+    n: 3, 
+    emoji: 'rocket',  
+    title: 'Surprenez',        
+    desc: "Le destinataire reçoit son expérience instantanément." 
+  }
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
 
 export default function HowItWorks() {
   return (
     <section id="comment" className="mk-section">
       <div className="mk-container">
         <div className="mk-sec-head">
-          <span className="eyebrow">En 4 étapes</span>
-          <h2 className="mk-sec-h2">Comment ça marche.</h2>
+          <span className="eyebrow">En toute simplicité</span>
+          <h2 className="mk-sec-h2">Comment ça marche ?</h2>
           <p className="mk-sec-sub">
-            Deux minutes pour créer, gratuitement. Tu paies uniquement au moment de partager,
-            quand tout est prêt.
+            Créez des émotions en quelques minutes. La création est gratuite, vous ne payez qu'au moment de l'envoi final.
           </p>
         </div>
 
-        <div className={s.grid}>
+        <motion.div 
+          className={s.grid}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           {STEPS.map((step) => (
-            <div key={step.n} className={s.step}>
+            <motion.div key={step.n} className={s.step} variants={itemVariants}>
               <div className={s.head}>
                 <div className={s.num}>{step.n}</div>
-                <NotoEmoji name={step.emoji} size={36} className={s.stepEmoji} />
+                <motion.div whileHover={{ scale: 1.1, rotate: 10 }}>
+                  <NotoEmoji name={step.emoji} size={48} className={s.stepEmoji} />
+                </motion.div>
               </div>
-              <div className={s.title}>{step.title}</div>
-              <div className={s.desc}>{step.desc}</div>
-            </div>
+              <h3 className={s.title}>{step.title}</h3>
+              <p className={s.desc}>{step.desc}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

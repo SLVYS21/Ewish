@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleBtn from '../components/GoogleBtn';
 import PasswordInput from '../components/PasswordInput';
@@ -16,6 +16,8 @@ export default function AdminRegister() {
   const [loading, setLoading]         = useState(false);
   const { register } = useAuth();
   const navigate     = useNavigate();
+  const location     = useLocation();
+  const next         = new URLSearchParams(location.search).get('next') || '/ewish-admin';
 
   const submit = async () => {
     setError('');
@@ -38,7 +40,7 @@ export default function AdminRegister() {
     setLoading(true);
     try {
       await register(email, pass, name);
-      navigate('/ewish-admin');
+      navigate(next);
     } catch (e) {
       setError(e.response?.data?.error || "La création du compte a échoué.");
     } finally { setLoading(false); }
@@ -73,7 +75,7 @@ export default function AdminRegister() {
 
           <div className={s.tabs} role="tablist">
             <Link
-              to="/ewish-admin/login"
+              to={`/ewish-admin/login${location.search}`}
               className={s.tab}
               role="tab"
               aria-selected="false"
@@ -85,7 +87,7 @@ export default function AdminRegister() {
             </button>
           </div>
 
-          <GoogleBtn label="Continuer avec Google" />
+          <GoogleBtn label="Continuer avec Google" redirectTo={next} />
 
           <div className={s.orDivider}><span>Ou continue avec</span></div>
 

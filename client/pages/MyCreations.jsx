@@ -403,7 +403,7 @@ export default function MyCreations() {
         <div className="mk-seg">
           {[
             { value: 'all',  label: 'Tout' },
-            { value: 'wish', label: 'Vœux' },
+            { value: 'wish', label: 'Cartes' },
             { value: 'wall', label: 'Murs' },
           ].map(o => (
             <button key={o.value} className={type === o.value ? 'on' : ''} onClick={() => setType(o.value)}>

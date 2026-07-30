@@ -8,13 +8,13 @@ import s from './WallStyle.module.css';
 export const WALL_TEMPLATE_OPTIONS = [
   {
     id: 'wall-of-wishes',
-    label: 'Classique',
+    label: 'Post-its',
     hint: 'Petites cartes chaleureuses',
     swatch: 'linear-gradient(135deg,#FFB3C1,#E11D48)',
   },
   {
     id: 'wall-of-wishes-modern',
-    label: 'Moderne',
+    label: 'Bento Box',
     hint: 'Glassmorphisme épuré',
     swatch: 'linear-gradient(135deg,#ccc0f5,#e8b0d8,#f5a8be)',
   },

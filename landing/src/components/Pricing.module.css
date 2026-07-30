@@ -1,31 +1,44 @@
 .tabs {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--mk-stone-100);
-  border-radius: 999px;
-  margin: 0 auto 40px;
-  width: fit-content;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
+  background: #FFF;
+  padding: 6px;
+  border-radius: 999px;
+  margin: 0 auto 60px;
+  width: fit-content;
+  box-shadow: var(--sh-sm);
+  border: 1px solid var(--mk-stone-100);
+  flex-wrap: wrap;
 }
 
 .tab {
-  padding: 8px 18px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--mk-stone-700);
+  position: relative;
   border: none;
   background: transparent;
+  padding: 10px 20px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--mk-stone-700);
+  border-radius: 999px;
   cursor: pointer;
-  transition: all .2s;
-  white-space: nowrap;
+  transition: color .2s;
+  z-index: 1;
 }
-.tabActive {
-  background: #fff;
-  color: var(--mk-stone-900);
-  box-shadow: var(--sh-sm);
+.tab:hover { color: var(--mk-stone-900); }
+.tabActive { color: var(--mk-indigo-700); }
+
+.activeTabIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--mk-indigo-100);
+  border-radius: 999px;
+  z-index: 0;
 }
 
 .grid {

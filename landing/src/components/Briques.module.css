@@ -1,37 +1,28 @@
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 28px;
+  gap: 40px;
 }
-@media (min-width: 768px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 32px; } }
 
 .card {
-  padding: 40px 32px;
   background: #fff;
   border: 1px solid var(--mk-stone-100);
   border-radius: 24px;
   box-shadow: var(--sh-sm);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  transition: box-shadow .25s, transform .25s;
+  overflow: hidden;
+  transition: box-shadow .3s, transform .3s;
 }
 .card:hover { box-shadow: var(--sh-lg); transform: translateY(-4px); }
 
-.icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: var(--mk-stone-50, #f6f4ee);
-  transition: transform .4s ease;
+.content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
-.card:hover .icon { transform: scale(1.08) rotate(-4deg); }
-.carte  .icon { background: rgba(30, 41, 82, 0.06); }
-.mur    .icon { background: rgba(214, 138, 108, 0.14); }
-.cadeau .icon { background: rgba(232, 163, 61, 0.18); }
 
 .title {
   font-family: var(--serif);
@@ -39,25 +30,27 @@
   font-weight: 500;
   color: var(--mk-stone-900);
   letter-spacing: -.005em;
+  margin-bottom: 8px;
 }
 .tag {
   font-size: 15px;
   color: var(--mk-indigo-700);
   font-weight: 600;
-  margin-top: -6px;
+  margin-bottom: 16px;
 }
 .desc {
   font-size: 15px;
   color: var(--mk-stone-700);
   line-height: 1.55;
+  margin-bottom: 24px;
 }
 .list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 12px;
   list-style: none;
   padding: 0;
+  margin-top: auto;
 }
 .list li {
   display: flex;
@@ -65,4 +58,185 @@
   gap: 10px;
   font-size: 14px;
   color: var(--mk-stone-700);
+}
+
+/* --- Interactive Miniatures --- */
+
+/* 1. Card Preview */
+.miniCardPreviewContainer {
+  height: 220px;
+  background-color: var(--mk-indigo-50);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+.hoverCard {
+  width: 160px;
+  height: 200px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--sh-md);
+  padding: 12px;
+  position: relative;
+  z-index: 2;
+}
+.hcImage {
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(135deg, var(--mk-indigo-100), var(--mk-clay-50));
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.hcTitle {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--mk-stone-900);
+  margin-bottom: 8px;
+}
+.hcLines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hcLine {
+  height: 4px;
+  background: var(--mk-stone-100);
+  border-radius: 2px;
+}
+.floatingEmoji {
+  position: absolute;
+  right: 20px;
+  top: 40px;
+  z-index: 3;
+}
+
+/* 2. Mini Board */
+.miniBoardContainer {
+  height: 220px;
+  background-color: var(--mk-stone-100);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.miniBoard {
+  width: 90%;
+  height: 180px;
+  position: relative;
+  z-index: 2;
+}
+.postIt {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: var(--mk-gold-100);
+  box-shadow: var(--sh-sm);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Distribute postits randomly using pseudo classes for the first 4 */
+.postIt:nth-child(1) { top: 20px; left: 10px; }
+.postIt:nth-child(2) { top: 60px; right: 20px; }
+.postIt:nth-child(3) { bottom: 20px; left: 40px; }
+.postIt:nth-child(4) { bottom: 10px; right: 50px; }
+
+.postItLine {
+  height: 3px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 2px;
+}
+.addPostItBtn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mk-indigo-700);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--sh-md);
+  z-index: 10;
+}
+
+/* 3. Mini Pot / Gift */
+.miniPotContainer {
+  height: 220px;
+  background: var(--mk-gold-50);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.potUi {
+  width: 200px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--sh-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.potHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--mk-stone-700);
+  margin-bottom: 12px;
+}
+.potIcon {
+  color: var(--mk-gold-500);
+}
+.potAmount {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--mk-indigo-700);
+  margin-bottom: 16px;
+  height: 28px; /* fixed height so it doesn't jump */
+}
+.progressBarBg {
+  width: 100%;
+  height: 6px;
+  background: var(--mk-stone-100);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.progressBarFill {
+  height: 100%;
+  background: var(--mk-gold-500);
+  border-radius: 3px;
+}
+.momoIntegration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--mk-stone-500);
+  font-weight: 500;
 }

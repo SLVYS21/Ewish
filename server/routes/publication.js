@@ -74,6 +74,21 @@ router.get('/', requireAdmin, async (req, res) => {
     }
 
     const pubs = await Publication.find(query).sort('-updatedAt').skip((page - 1) * limit).limit(Number(limit)).lean();
+    
+    // Enrich with wall data
+    for (const pub of pubs) {
+      if (pub.templateName?.startsWith('wall-of-wishes')) {
+        pub.wishesCount = await Wish.countDocuments({ publicationId: pub._id, approved: true });
+        const lastWish = await Wish.findOne({ publicationId: pub._id, approved: true }).sort('-createdAt').lean();
+        if (lastWish) {
+          pub.lastWish = {
+            author: lastWish.author || lastWish.name || 'Anonyme',
+            text: lastWish.message || ''
+          };
+        }
+      }
+    }
+
     res.json(pubs);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

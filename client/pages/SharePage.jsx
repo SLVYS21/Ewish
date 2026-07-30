@@ -66,9 +66,6 @@ const QR_SHAPES = [
   { id: 'rounded',  label: 'Doux'     },
   { id: 'classic',  label: 'Classique'},
   { id: 'heart',    label: 'Cœur'     },
-  { id: 'mykado',   label: 'myKado'   },
-  { id: 'flower',   label: 'Fleur'    },
-  { id: 'star',     label: 'Étoile'   },
 ];
 
 const QR_COLORS = [
@@ -159,7 +156,7 @@ function QrSvg({ url, shape, color }) {
     const cx = c.x + 0.5, cy = c.y + 0.5;
     if (shape === 'classic') return <rect key={i} x={c.x} y={c.y} width={1} height={1} fill={color.fg} />;
     if (shape === 'star')    return <path key={i} d={`M${cx},${c.y+.1}L${cx+.15},${cy-.1}L${cx+.45},${cy-.1}L${cx+.2},${cy+.1}L${cx+.3},${c.y+.45}L${cx},${cy+.25}L${cx-.3},${c.y+.45}L${cx-.2},${cy+.1}L${cx-.45},${cy-.1}L${cx-.15},${cy-.1}Z`} fill={color.fg} />;
-    if (shape === 'rounded') return <rect key={i} x={c.x + .05} y={c.y + .05} width={.9} height={.9} rx={.35} fill={color.fg} />;
+    if (shape === 'rounded' || shape === 'heart') return <rect key={i} x={c.x + .05} y={c.y + .05} width={.9} height={.9} rx={.35} fill={color.fg} />;
     return <circle key={i} cx={cx} cy={cy} r={.42} fill={color.fg} />;
   };
 
@@ -167,14 +164,43 @@ function QrSvg({ url, shape, color }) {
     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: 12 }}>…</div>
   );
 
+  if (shape === 'heart') {
+    return (
+      <svg viewBox={`0 0 ${N} ${N}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <g id={`qr-cells-${N}`}>
+            {cells.map(renderCell)}
+          </g>
+          <clipPath id={`heart-main-${N}`}>
+            <rect x={0} y={0} width={N} height={N} />
+          </clipPath>
+          <clipPath id={`heart-left-${N}`}>
+            <path d={`M 0,0 A ${N/2},${N/2} 0 0,1 ${N},0 Z`} />
+          </clipPath>
+          <clipPath id={`heart-right-${N}`}>
+            <path d={`M ${N},0 A ${N/2},${N/2} 0 0,1 ${N},${N} Z`} />
+          </clipPath>
+        </defs>
+        
+        {/* Scale to fit and rotate to form the heart shape */}
+        <g transform={`translate(${N/2}, ${N/2}) scale(0.55) translate(${-0.707*N}, ${0.073*N}) rotate(-45)`}>
+          <g clipPath={`url(#heart-main-${N})`}>
+            <use href={`#qr-cells-${N}`} transform={`rotate(90 ${N/2} ${N/2})`} />
+          </g>
+          <g clipPath={`url(#heart-left-${N})`}>
+            <use href={`#qr-cells-${N}`} transform={`translate(0, ${-N/2}) rotate(90 ${N/2} ${N/2})`} />
+          </g>
+          <g clipPath={`url(#heart-right-${N})`}>
+            <use href={`#qr-cells-${N}`} transform={`translate(${N/2}, 0) rotate(90 ${N/2} ${N/2})`} />
+          </g>
+        </g>
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox={`0 0 ${N} ${N}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
       <defs>
-        {shape === 'heart' && (
-          <clipPath id="qr-clip" clipPathUnits="userSpaceOnUse">
-            <path d={`M ${N/2},${N*.92} C -${N*.3},${N*.45} ${N*.1},-${N*.15} ${N/2},${N*.28} C ${N*.9},-${N*.15} ${N*1.3},${N*.45} ${N/2},${N*.92} Z`} />
-          </clipPath>
-        )}
         {shape === 'mykado' && (
           <clipPath id="qr-clip" clipPathUnits="userSpaceOnUse">
             <rect x={1} y={3} width={N-2} height={N-4} rx={2} />
@@ -194,7 +220,7 @@ function QrSvg({ url, shape, color }) {
           </clipPath>
         )}
       </defs>
-      <g clipPath={(shape === 'heart' || shape === 'mykado' || shape === 'flower') ? 'url(#qr-clip)' : undefined}>
+      <g clipPath={(shape === 'mykado' || shape === 'flower') ? 'url(#qr-clip)' : undefined}>
         {cells.map(renderCell)}
       </g>
     </svg>

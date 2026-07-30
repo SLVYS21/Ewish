@@ -49,17 +49,23 @@ function WallActivityPreviewA({ isOnline, recipientInitial, bgId, wallBg, style 
   );
 }
 
-function WallActivityPreviewB({ isOnline, bgId, wallBg, style = {} }) {
+function WallActivityPreviewB({ isOnline, bgId, wallBg, style = {}, pub }) {
+  const authorName = pub?.lastWish?.author || 'MARINE';
+  const wishText = pub?.lastWish?.text || "Le meilleur chef qu'on ait eu…";
+  const wordsCount = wishText.split(' ').length;
+  const extraWords = wordsCount > 10 ? `+${wordsCount - 10} mots` : null;
+  const shortText = wishText.length > 60 ? wishText.substring(0, 57) + '...' : wishText;
+
   return (
     <div style={{ position: 'relative', aspectRatio: '1', ...getPreviewBgStyle(wallBg, 'linear-gradient(155deg,#F4E7CE,#E9D3A8)'), overflow: 'hidden', ...style }}>
       <AnimatedBackground backgroundId={bgId} previewMode={true} hideEmojis={true} />
       <div style={{ position: 'absolute', top: '24px', left: '50%', width: '120px', height: '96px', borderRadius: '10px', background: '#fff', boxShadow: '0 6px 14px rgba(0,0,0,.16)', transform: 'translateX(-50%) rotate(-9deg)' }} />
       <div style={{ position: 'absolute', top: '20px', left: '50%', width: '120px', height: '96px', borderRadius: '10px', background: '#fff', boxShadow: '0 6px 14px rgba(0,0,0,.16)', transform: 'translateX(-50%) rotate(5deg)' }} />
       <div style={{ position: 'absolute', top: '16px', left: '50%', width: '120px', height: '104px', borderRadius: '10px', background: '#fff', boxShadow: '0 10px 20px rgba(0,0,0,.2)', transform: 'translateX(-50%) rotate(-2deg)', padding: '12px' }}>
-        <div style={{ fontFamily: 'var(--display)', fontStyle: 'italic', fontSize: '12px', lineHeight: 1.3, color: '#2A2A2A' }}>« Le meilleur chef qu'on ait eu… »</div>
-        <div style={{ font: '800 9px "Plus Jakarta Sans", sans-serif', letterSpacing: '.05em', color: '#9F6D22', marginTop: '8px' }}>— MARINE</div>
+        <div style={{ fontFamily: 'var(--display)', fontStyle: 'italic', fontSize: '12px', lineHeight: 1.3, color: '#2A2A2A', wordBreak: 'break-word' }}>« {shortText} »</div>
+        <div style={{ font: '800 9px "Plus Jakarta Sans", sans-serif', letterSpacing: '.05em', color: '#9F6D22', marginTop: '8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>— {authorName.toUpperCase()}</div>
       </div>
-      <span style={{ position: 'absolute', bottom: '10px', right: '10px', font: '800 10px "Plus Jakarta Sans", sans-serif', background: '#161311', color: '#fff', padding: '4px 10px', borderRadius: '999px' }}>+11 mots</span>
+      {extraWords && <span style={{ position: 'absolute', bottom: '10px', right: '10px', font: '800 10px "Plus Jakarta Sans", sans-serif', background: '#161311', color: '#fff', padding: '4px 10px', borderRadius: '999px' }}>{extraWords}</span>}
       
       <span style={{ position: 'absolute', top: '10px', left: '10px', font: '800 9px "Plus Jakarta Sans", sans-serif', letterSpacing: '.05em', background: isOnline ? '#3FA98A' : 'rgba(255,255,255,0.95)', color: isOnline ? '#fff' : '#161311', padding: '4px 9px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
         <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isOnline ? '#fff' : '#161311' }} />
@@ -69,7 +75,9 @@ function WallActivityPreviewB({ isOnline, bgId, wallBg, style = {} }) {
   );
 }
 
-function WallActivityPreviewC({ isOnline, bgId, wallBg, style = {} }) {
+function WallActivityPreviewC({ isOnline, bgId, wallBg, style = {}, pub }) {
+  const count = pub?.wishesCount || 0;
+  
   return (
     <div style={{ position: 'relative', aspectRatio: '1', ...getPreviewBgStyle(wallBg, 'linear-gradient(155deg,#3B2E52,#241A38)'), overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', ...style }}>
       <AnimatedBackground backgroundId={bgId} previewMode={true} hideEmojis={true} />
@@ -79,17 +87,11 @@ function WallActivityPreviewC({ isOnline, bgId, wallBg, style = {} }) {
           <circle cx="48" cy="48" r="42" fill="none" stroke="#E8A33D" strokeWidth="9" strokeLinecap="round" strokeDasharray="264" strokeDashoffset="88"/>
         </svg>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ font: '800 22px "Plus Jakarta Sans", sans-serif', color: '#fff', lineHeight: 1 }}>8</span>
-          <span style={{ font: '700 9px "Plus Jakarta Sans", sans-serif', color: 'rgba(255,255,255,.6)' }}>/ 12</span>
+          <span style={{ font: '800 22px "Plus Jakarta Sans", sans-serif', color: '#fff', lineHeight: 1 }}>{count}</span>
+          <span style={{ font: '700 9px "Plus Jakarta Sans", sans-serif', color: 'rgba(255,255,255,.6)' }}>mots</span>
         </div>
       </div>
-      <span style={{ font: '700 11px "Plus Jakarta Sans", sans-serif', color: '#F2D68A' }}>ont laissé leur mot</span>
-      <div style={{ display: 'flex' }}>
-        <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8A33D', border: '2px solid #241A38', marginLeft: '-6px', font: '800 10px "Plus Jakarta Sans", sans-serif', color: '#161311', display: 'grid', placeItems: 'center', zIndex: 3 }}>A</span>
-        <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3FA98A', border: '2px solid #241A38', marginLeft: '-6px', font: '800 10px "Plus Jakarta Sans", sans-serif', color: '#fff', display: 'grid', placeItems: 'center', zIndex: 2 }}>M</span>
-        <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#F35C7A', border: '2px solid #241A38', marginLeft: '-6px', font: '800 10px "Plus Jakarta Sans", sans-serif', color: '#fff', display: 'grid', placeItems: 'center', zIndex: 1 }}>Y</span>
-        <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,.16)', border: '2px solid #241A38', marginLeft: '-6px', font: '800 9px "Plus Jakarta Sans", sans-serif', color: '#fff', display: 'grid', placeItems: 'center', zIndex: 0 }}>+5</span>
-      </div>
+      <span style={{ font: '700 11px "Plus Jakarta Sans", sans-serif', color: '#F2D68A' }}>{count > 0 ? 'ont laissé leur mot' : 'Laissez le 1er mot'}</span>
       
       <span style={{ position: 'absolute', top: '10px', left: '10px', font: '800 9px "Plus Jakarta Sans", sans-serif', letterSpacing: '.05em', background: isOnline ? '#3FA98A' : 'rgba(255,255,255,0.95)', color: isOnline ? '#fff' : '#161311', padding: '4px 9px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
         <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isOnline ? '#fff' : '#161311' }} />
@@ -143,8 +145,8 @@ export function WallActivityPreview({ pub, style = {} }) {
   const charCode = idStr.charCodeAt(idStr.length - 1) || 0;
   const mod = charCode % 4;
 
-  if (mod === 1) return <WallActivityPreviewB isOnline={isOnline} bgId={bgId} wallBg={wallBg} style={style} />;
-  if (mod === 2) return <WallActivityPreviewC isOnline={isOnline} bgId={bgId} wallBg={wallBg} style={style} />;
+  if (mod === 1) return <WallActivityPreviewB isOnline={isOnline} bgId={bgId} wallBg={wallBg} style={style} pub={pub} />;
+  if (mod === 2) return <WallActivityPreviewC isOnline={isOnline} bgId={bgId} wallBg={wallBg} style={style} pub={pub} />;
   if (mod === 3) return <WallActivityPreviewD isOnline={isOnline} bgId={bgId} wallBg={wallBg} style={style} />;
   
   return <WallActivityPreviewA isOnline={isOnline} recipientInitial={recipientInitial} bgId={bgId} wallBg={wallBg} style={style} />;

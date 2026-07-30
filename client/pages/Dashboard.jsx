@@ -91,11 +91,12 @@ function RecentTile({ pub }) {
         ) : (
           <>
             {thumbBg && <div className={s.recentThumbImg} style={thumbBg} />}
-            <span className={`${s.recentBadge} ${pub.published ? s.recentBadgeLive : ''}`}>
-              {pub.published ? 'En ligne' : 'Brouillon'}
-            </span>
           </>
         )}
+        
+        <span className={`${s.recentBadge} ${pub.published ? s.recentBadgeLive : s.recentBadgeDraft}`}>
+          {pub.published ? 'EN LIGNE' : 'BROUILLON'}
+        </span>
       </div>
       <div className={s.recentTitle}>{pub.title || 'Sans titre'}</div>
       <div className={s.recentFor}>
@@ -114,7 +115,9 @@ function ThemeTile({ tpl, onSelect }) {
   if (isWall) {
     return (
       <button className={s.themeCardWall} onClick={() => onSelect(tpl)}>
-        <WallThemePreview templateName={tpl.name} />
+        <div style={{ position: 'relative', aspectRatio: '1.14', background: gradient, overflow: 'hidden' }}>
+          {thumb && <div className={s.themeThumbImg} style={thumb} />}
+        </div>
         <div style={{ padding: '11px 12px' }}>
           <div style={{ fontWeight: 700, fontSize: '13px' }}>{tpl.label || tpl.name}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
@@ -203,84 +206,56 @@ export default function Dashboard() {
   return (
     <div className={s.wrap}>
 
-      {/* ══ Greeting ══════════════════════════════════════════════ */}
-      <div className={s.greeting}>
-        <div className={s.greetingText}>
-          <span>Hello, {firstName}</span>
-          <WavingHand className={s.greetingWave} />
-        </div>
-        <div className={s.greetingRight}>
-          <button
-            className={s.credits}
-            onClick={() => navigate('/ewish-admin/credits')}
-          >
-            <Wallet size={14} className={s.creditsIcon} />
-            <span>{user?.credits ?? 0}</span>
+      {/* ══ Indigo Hero ════════════════════════════════════════════ */}
+      <div className={s.indigoHero}>
+        <div className={s.heroTop}>
+          <div className={s.heroEyebrow}>
+            {`${new Date().toLocaleDateString('fr-FR', { weekday: 'long' })} ${new Date().getDate()} ${new Date().toLocaleDateString('fr-FR', { month: 'long' })} • RAVI DE TE REVOIR`.toUpperCase()}
+          </div>
+          <button className={s.heroCredits} onClick={() => navigate('/ewish-admin/credits')}>
+            <Wallet size={14} />
+            {user?.credits ?? 0} crédits
           </button>
         </div>
+        
+        <div className={s.heroContent}>
+          <div className={s.heroTitle}>Bonsoir, {firstName}</div>
+          <div className={s.heroSub}>Célèbre les gens qui comptent — une carte animée, un mur collectif, un cadeau.</div>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className={s.heroCircle1}></div>
+        <div className={s.heroDot}></div>
       </div>
 
-      {/* ══ Welcome announce card ════════════════════════════════ */}
-      {announceOpen && (
-        <div className={s.announce}>
-          <button className={s.announceMenu} onClick={() => setAnnounceOpen(false)} aria-label="Fermer">
-            <MoreHorizontal size={18} />
-          </button>
-          <div className={s.announceTitle}>Bienvenue sur myKado !</div>
-          <div className={s.announceBody}>
-            On est là pour t'aider à célébrer les gens qui comptent. Cartes animées, murs collectifs, cadeaux — tout est fait pour créer des moments inoubliables.
-          </div>
-          <a className={s.announceMore} href="#en-savoir-plus">
-            En savoir plus <ChevronDown size={15} />
-          </a>
-          <div className={s.announceHero}>
-            <ConfettiBurst intensity={55} />
-            <div className={s.announceHeroTitle}>Bienvenue sur myKado !</div>
-            <div className={s.mascotWrap}>
-              <Kado size={140} cycle={['jump', 'wink', 'confetti', 'love', 'drop']} cycleInterval={4200} />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ══ What are we creating? ════════════════════════════════ */}
-      <div className={s.section}>
-        <div className={s.sectionTitle} style={{ fontSize: '28px', marginBottom: '4px' }}>Qu'est-ce qu'on crée ?</div>
-        <div className={s.creationActions}>
-          <button className={s.actionMain} onClick={openNameModal}>
-            <div className={s.actionMainIcon}>
-              <NotoEmoji name="love-letter" size={64} />
-            </div>
-            <div className={s.actionMainText}>
-              <div className={s.actionMainTitle}>Créer une carte</div>
-              <div className={s.actionMainSub}>Une expérience animée, en solo</div>
-            </div>
-            <div className={s.actionMainArrow}>
-              <ArrowRight size={20} />
+      <div className={s.section} id="tour-create" style={{ marginTop: '16px' }}>
+        <div className={s.sectionTitle} style={{ fontSize: '20px', fontFamily: '"Fraunces", serif', fontWeight: 400, color: '#161311', marginBottom: '8px' }}>Qu'est-ce qu'on crée ?</div>
+        <div className={s.quickGrid}>
+          <button className={s.cardMain} onClick={openNameModal}>
+            <div className={s.cardMainBg}></div>
+            <NotoEmoji name="love-letter" size={46} className={s.cardIconAnim} />
+            <div className={s.cardMainText}>
+              <div className={s.cardMainTitle}>Créer une carte</div>
+              <div className={s.cardMainSub}>Une expérience animée à envoyer<br/>en solo.</div>
             </div>
           </button>
-
-          <div className={s.actionSecondaryRow}>
-            <button className={`${s.actionSecondary} ${s.actionWall}`} onClick={() => setWallSheetOpen(true)}>
-              <div className={s.actionSecondaryIcon}>
-                <NotoEmoji name="speech-balloon" size={48} />
-              </div>
-              <div className={s.actionSecondaryText}>
-                <div className={s.actionSecondaryTitle}>Un mur</div>
-                <div className={s.actionSecondarySub}>À plusieurs mains</div>
-              </div>
-            </button>
-
-            <button className={`${s.actionSecondary} ${s.actionGift}`} onClick={() => navigate('/ewish-admin/templates')}>
-              <div className={s.actionSecondaryIcon}>
-                <NotoEmoji name="gift" size={48} />
-              </div>
-              <div className={s.actionSecondaryText}>
-                <div className={s.actionSecondaryTitle}>Un cadeau</div>
-                <div className={s.actionSecondarySub}>Offrir un présent</div>
-              </div>
-            </button>
-          </div>
+          
+          <button className={s.cardWall} onClick={() => setWallSheetOpen(true)}>
+            <NotoEmoji name="speech-balloon" size={42} className={s.cardIconAnimAlt} />
+            <div className={s.cardSecondaryText}>
+              <div className={s.cardSecondaryTitle}>Un mur</div>
+              <div className={s.cardSecondarySub}>À plusieurs mains</div>
+            </div>
+          </button>
+          
+          <button className={s.cardGift} onClick={() => navigate('/ewish-admin/templates')}>
+            <NotoEmoji name="gift" size={42} className={s.cardIconAnimAlt2} />
+            <div className={s.cardSecondaryText}>
+              <div className={s.cardSecondaryTitle}>Un cadeau</div>
+              <div className={s.cardSecondarySub}>Offrir un présent</div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -290,16 +265,16 @@ export default function Dashboard() {
       )}
 
       {!loading && pubs.length > 0 && (
-        <div className={s.section}>
+        <div className={s.section} id="tour-recent">
           <div className={s.sectionHead}>
-            <div className={s.sectionTitle}>Récents</div>
+            <div className={s.sectionTitle} style={{ fontSize: '20px', fontFamily: '"Fraunces", serif', fontWeight: 400, color: '#161311' }}>Récents</div>
             <button className={s.seeAll} onClick={() => navigate('/ewish-admin/ewish')}>
               Tout voir
             </button>
           </div>
           <div className={s.recentScroll}>
-            {pubs.slice(0, 6).map(pub => (
-              <RecentTile key={pub._id} pub={pub} />
+            {pubs.slice(0, 6).map((pub, idx) => (
+              <RecentTile key={pub._id} pub={pub} index={idx} />
             ))}
             {pubs.length > 6 && (
               <button
@@ -343,7 +318,7 @@ export default function Dashboard() {
 
       {/* ══ Featured themes ═══════════════════════════════════════ */}
       {templates.length > 0 && (
-        <div className={s.section}>
+        <div className={s.section} id="tour-themes">
           <div className={s.themesHead}>
             <div className={s.sectionTitle}>Thèmes en vedette</div>
             <button className={s.seeAll} onClick={() => navigate('/ewish-admin/templates')}>

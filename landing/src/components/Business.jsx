@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import s from './Business.module.css';
 
 const FEATURES = [
@@ -46,12 +47,27 @@ const FEATURES = [
   },
 ];
 
+const listVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.4 } }
+};
+
 export default function Business({ onCreate }) {
   return (
     <section id="business" className="mk-section mk-section-inverted">
       <div className="mk-container">
         <div className={s.biz}>
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <span className="eyebrow">myKado for Business</span>
             <h2 className="mk-sec-h2">Renforce la culture de ton équipe.</h2>
             <p className="mk-sec-sub">
@@ -59,32 +75,44 @@ export default function Business({ onCreate }) {
               avec ton branding, tes équipes, et une facturation propre pour la compta.
             </p>
 
-            <ul className={s.list}>
+            <motion.ul 
+              className={s.list}
+              variants={listVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               {FEATURES.map((f) => (
-                <li key={f.title} className={s.item}>
+                <motion.li key={f.title} className={s.item} variants={itemVariants}>
                   <div className={s.itemIcon}>{f.icon}</div>
                   <div>
                     <div className={s.itemTitle}>{f.title}</div>
                     <div className={s.itemDesc}>{f.desc}</div>
                   </div>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
 
             <div className={s.actions}>
               <button className="mk-btn mk-btn-gold" onClick={onCreate}>Demander une démo</button>
               <a href="#tarifs" className={`mk-btn ${s.ghostInverted}`}>Voir les tarifs entreprise</a>
             </div>
-          </div>
+          </motion.div>
 
-          <div className={s.visual}>
+          <motion.div 
+            className={s.visual}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <span className={s.badge}>Depuis l'Afrique de l'Ouest, pour le monde</span>
             <div className={s.visualH}>
               De Dakar à Paris,<br />
               de Cotonou à Montréal.
             </div>
             <div className={s.visualSub}>Multi-devises · Multi-langues · Un seul geste.</div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

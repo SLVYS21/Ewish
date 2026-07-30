@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { createPublication } from '../utils/api';
+import { useAuth } from '../admin/context/AuthContext';
 import styles from './QuickCreate.module.css';
 
 const OCCASIONS = [
@@ -31,6 +32,8 @@ export default function QuickCreate() {
   const [when, setWhen]   = useState('');
   const [creating, setCreating] = useState(false);
 
+  const { user } = useAuth();
+
   const canNext = () => {
     if (step === 0) return !!occ;
     if (step === 1) return name.trim().length >= 2;
@@ -40,6 +43,24 @@ export default function QuickCreate() {
 
   const handleDone = async () => {
     setCreating(true);
+    
+    if (!user) {
+      // Offline mode
+      const draft = {
+        templateName: occ.template,
+        customName: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 20)}-${Date.now()}`,
+        title: `${occ.occasion} ${name}`,
+        data: {},
+        style: {},
+        decorations: [],
+        widgets: [],
+        jarConfig: null,
+      };
+      localStorage.setItem('ewish_draft', JSON.stringify(draft));
+      navigate(`/ewish-admin/ewish/edit/draft`);
+      return;
+    }
+
     try {
       const res = await createPublication({
         templateName: occ.template,

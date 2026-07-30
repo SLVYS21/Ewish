@@ -100,7 +100,21 @@ router.get('/:templateName/:customName', async (req, res) => {
   }
 
   try {
-    const pub = await Publication.findOne({ templateName, customName }).lean();
+    let pub;
+    if (customName === 'draft' && req.query.preview === '1') {
+      pub = {
+        _id: 'draft',
+        templateName,
+        customName: 'draft',
+        title: 'Brouillon',
+        data: {},
+        style: {},
+        cagnotteConfig: {},
+        published: false
+      };
+    } else {
+      pub = await Publication.findOne({ templateName, customName }).lean();
+    }
 
     if (!pub) {
       return sendError(res, 404, 'Aucune création trouvée à cette adresse.');
@@ -337,6 +351,7 @@ router.get('/:templateName/:customName', async (req, res) => {
     /* ── Admin banner (wall only) ─── */
     let isAdmin = false;
     let adminReturnUrl = '';
+    const appOrigin = process.env.APP_URL || (PROD ? 'https://app.mykado.store' : 'http://localhost:3000');
     if (isWallTemplate) {
       try {
         const token = req.cookies?.ww_admin_token;
@@ -344,7 +359,6 @@ router.get('/:templateName/:customName', async (req, res) => {
           const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
           if (decoded) {
             isAdmin = true;
-            const appOrigin = process.env.APP_URL || (PROD ? 'https://app.mykado.store' : 'http://localhost:3000');
             adminReturnUrl = `${appOrigin}/ewish-admin/wall/${String(pub._id)}`;
           }
         }
@@ -368,6 +382,7 @@ router.get('/:templateName/:customName', async (req, res) => {
     publicData.adminReturnUrl = adminReturnUrl;
     publicData.previewMode = isPreview;
     publicData.landingUrl = process.env.LANDING_URL || 'https://www.mykado.store';
+    publicData.appUrl = appOrigin;
     publicData.skipIntro = req.query.noanim === '1' || req.query.collect !== undefined;
     publicData.cagnotte = pub.cagnotteConfig?.enabled ? {
       enabled: true,

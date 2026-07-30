@@ -1672,7 +1672,7 @@
 </head>
 <body data-variant="pin">
 
-<div id="admin-banner">
+<!-- <div id="admin-banner">
   <span class="admin-pub-label">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.2-7 10-7 10 7 10 7-3.2 7-10 7-10-7-10-7Z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
   </span>
@@ -1681,7 +1681,7 @@
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
     Retour à  la gestion
   </a>
-</div>
+</div> -->
 
 <div id="access-gate">
   <div class="gate-card">
@@ -3121,10 +3121,10 @@ function thanksShareWA() {
   window.open('https://wa.me/?text=' + encodeURIComponent('Laisse ton mot sur ce mur : ' + url), '_blank', 'noopener');
 }
 
-/* Redirection directe vers la landing (au lieu d'un nouvel onglet). */
+/* Redirection directe vers la création rapide. */
 function openCreateOwnWall() {
-  var target = _d.landingUrl || 'https://www.mykado.store';
-  window.location.href = target;
+  var target = _d.appUrl || _d.landingUrl || 'https://app.mykado.store';
+  window.location.href = target + '/ewish-admin/wall/new';
 }
 
 function closeAddedOverlay() {
@@ -3699,11 +3699,11 @@ function applyCover(d) {
   initGiftSheet();
 
   /* La bannière "Retour à la gestion" n'est utile qu'en preview depuis l'éditeur. */
-  if (d.isAdmin && d.previewMode) {
-    var banner = document.getElementById('admin-banner');
-    banner.classList.add('show');
-    document.getElementById('admin-back').href = d.adminReturnUrl || '#';
-  }
+  // if (d.isAdmin && d.previewMode) {
+  //   var banner = document.getElementById('admin-banner');
+  //   banner.classList.add('show');
+  //   document.getElementById('admin-back').href = d.adminReturnUrl || '#';
+  // }
 
   loadWishes();
 

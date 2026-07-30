@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../admin/context/AuthContext';
-import { getPublications, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug } from '../utils/api';
+import { getPublications, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug, createPublication } from '../utils/api';
 import ContentTab from '../components/ContentTab';
 import StyleTab from '../components/StyleTab';
 import BackgroundTab from '../components/BackgroundTab';
@@ -201,6 +201,7 @@ function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = 
 export default function Editor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const [pub, setPub]                     = useState(null);
@@ -284,6 +285,76 @@ export default function Editor() {
   useEffect(() => {
     const load = async () => {
       try {
+        if (id === 'draft') {
+          const draftJson = localStorage.getItem('ewish_draft');
+          if (!draftJson) { navigate('/'); return; }
+          const found = JSON.parse(draftJson);
+          found._id = 'draft';
+
+          if (user) {
+            // Re-entry: User just logged in, create the publication automatically
+            try {
+              const res = await createPublication({
+                templateName: found.templateName,
+                customName: found.customName,
+                title: found.title,
+                data: found.data,
+                style: found.style,
+                decorations: found.decorations,
+                widgets: found.widgets,
+                photoTransforms: found.photoTransforms,
+                jarConfig: found.jarConfig,
+                cagnotteConfig: found.cagnotteConfig,
+              });
+              localStorage.removeItem('ewish_draft');
+              const intent = localStorage.getItem('ewish_intent');
+              localStorage.removeItem('ewish_intent');
+              navigate(`/ewish-admin/ewish/edit/${res.data._id}${intent === 'publish_draft' ? '?autoPublish=1' : ''}`, { replace: true });
+            } catch (e) {
+              alert('Erreur lors de la sauvegarde du brouillon');
+            }
+            return;
+          }
+
+          setPub(found);
+          setData(found.data || {});
+          const st = found.style || {};
+          setStyle(st);
+          setBackgrounds(st.backgrounds || {});
+          setDecorations(found.decorations || []);
+          setJarConfig(found.jarConfig || null);
+          setWidgets(found.widgets || []);
+          setPhotoTransforms(found.photoTransforms || {});
+          setShowBranding(found.showBranding || false);
+          setBrandingUrl(found.brandingUrl || '');
+          setBrandingText(found.brandingText || '');
+          setConfettiType(st.confettiType || 'default');
+
+          const cc = found.cagnotteConfig || {};
+          setCagnotte(cc.enabled || false);
+          setCagnotteGoal(cc.goal || 250000);
+          setCagnotteName(cc.description || '');
+          setCagnotteImage(cc.image || '');
+          setCagnotteDeadline(cc.deadline ? cc.deadline.slice(0, 10) : '');
+          setWishesEnabled(cc.wishesEnabled !== false);
+          setCollectTitle(cc.collectTitle || '');
+          setCollectSubtitle(cc.collectSubtitle || '');
+          setCollectCover(cc.collectCover || '');
+          setCollectAccentColor(cc.collectAccentColor || '');
+          setMinContribution(cc.minContribution || 0);
+          setMaxContribution(cc.maxContribution || 0);
+          setIsPrivate(cc.isPrivate || false);
+          setAccessCode(cc.accessCode || '');
+          setRequireModeration(cc.requireModeration || false);
+          setInvitationConfig(found.invitationConfig || null);
+          
+          try {
+            const tr = await fetch(`${import.meta.env.VITE_API_URL}/api/templates/${found.templateName}`);
+            if (tr.ok) setTemplate(await tr.json());
+          } catch {}
+          return;
+        }
+
         const r     = await getPublications({ limit: 1000 });
         const found = r.data.find(p => p._id === id);
         if (!found) { navigate('/'); return; }
@@ -347,6 +418,21 @@ export default function Editor() {
     setSaveStatus('unsaved');
     saveTimer.current = setTimeout(async () => {
       setSaveStatus('saving');
+      
+      if (id === 'draft') {
+         const currentDraft = JSON.parse(localStorage.getItem('ewish_draft') || '{}');
+         const updatedDraft = {
+            ...currentDraft,
+            data: newData,
+            style: { ...newStyle, backgrounds: newBgs },
+            decorations: newDecos, jarConfig: newJar,
+            widgets: newWidgets, photoTransforms: newPhotoTransforms,
+         };
+         localStorage.setItem('ewish_draft', JSON.stringify(updatedDraft));
+         setSaveStatus('saved');
+         return;
+      }
+
       try {
         await updatePublication(id, {
           data: newData,
@@ -365,25 +451,32 @@ export default function Editor() {
     if (!id) return;
     clearTimeout(cagnotteTimer.current);
     cagnotteTimer.current = setTimeout(() => {
-      updatePublication(id, {
-        cagnotteConfig: {
-          enabled: cagnotte,
-          description: cagnotteName,
-          goal: cagnotteGoal,
-          image: cagnotteImage,
-          deadline: cagnotteDeadline || null,
-          wishesEnabled,
-          minContribution,
-          maxContribution,
-          collectTitle,
-          collectSubtitle,
-          collectCover,
-          collectAccentColor,
-          isPrivate,
-          accessCode,
-          requireModeration,
-        },
-      }).catch(() => {});
+      const cagnotteConfig = {
+        enabled: cagnotte,
+        description: cagnotteName,
+        goal: cagnotteGoal,
+        image: cagnotteImage,
+        deadline: cagnotteDeadline || null,
+        wishesEnabled,
+        minContribution,
+        maxContribution,
+        collectTitle,
+        collectSubtitle,
+        collectCover,
+        collectAccentColor,
+        isPrivate,
+        accessCode,
+        requireModeration,
+      };
+
+      if (id === 'draft') {
+        const currentDraft = JSON.parse(localStorage.getItem('ewish_draft') || '{}');
+        currentDraft.cagnotteConfig = cagnotteConfig;
+        localStorage.setItem('ewish_draft', JSON.stringify(currentDraft));
+        return;
+      }
+
+      updatePublication(id, { cagnotteConfig }).catch(() => {});
     }, 800);
   }, [id, cagnotte, cagnotteName, cagnotteGoal, cagnotteImage, cagnotteDeadline, wishesEnabled, minContribution, maxContribution, collectTitle, collectSubtitle, collectCover, collectAccentColor, isPrivate, accessCode, requireModeration]);
 
@@ -417,6 +510,15 @@ export default function Editor() {
     clearTimeout(invitationTimer.current);
     invitationTimer.current = setTimeout(async () => {
       setSaveStatus('saving');
+      
+      if (id === 'draft') {
+        const currentDraft = JSON.parse(localStorage.getItem('ewish_draft') || '{}');
+        currentDraft.invitationConfig = next;
+        localStorage.setItem('ewish_draft', JSON.stringify(currentDraft));
+        setSaveStatus('saved');
+        return;
+      }
+
       try {
         await updatePublication(id, { invitationConfig: next });
         setSaveStatus('saved');
@@ -533,35 +635,58 @@ export default function Editor() {
 
   /* publish : deux étapes séparées pour permettre la re-entrée avec
      un feexpayReference après paiement, sans re-sauvegarder les data. */
-  const savePublicationDraft = () => updatePublication(id, {
-    data, style: { ...style, backgrounds }, decorations, jarConfig, widgets,
-    cagnotteConfig: {
-      enabled: cagnotte,
-      description: cagnotteName,
-      goal: cagnotteGoal,
-      image: cagnotteImage,
-      deadline: cagnotteDeadline || null,
-      wishesEnabled,
-      minContribution,
-      maxContribution,
-      collectTitle,
-      collectSubtitle,
-      collectCover,
-      collectAccentColor,
-      isPrivate,
-      accessCode,
-      requireModeration,
-    },
-  });
+  const savePublicationDraft = () => {
+    const draftPayload = {
+      data, style: { ...style, backgrounds }, decorations, jarConfig, widgets,
+      cagnotteConfig: {
+        enabled: cagnotte,
+        description: cagnotteName,
+        goal: cagnotteGoal,
+        image: cagnotteImage,
+        deadline: cagnotteDeadline || null,
+        wishesEnabled,
+        minContribution,
+        maxContribution,
+        collectTitle,
+        collectSubtitle,
+        collectCover,
+        collectAccentColor,
+        isPrivate,
+        accessCode,
+        requireModeration,
+      },
+    };
+    if (id === 'draft') {
+      const currentDraft = JSON.parse(localStorage.getItem('ewish_draft') || '{}');
+      localStorage.setItem('ewish_draft', JSON.stringify({ ...currentDraft, ...draftPayload }));
+      return Promise.resolve();
+    }
+    return updatePublication(id, draftPayload);
+  };
 
   const doPublishRequest = async (feexpayReference) => {
+    if (id === 'draft') return; // Should not happen directly for unauthenticated drafts
     const r = await publishPublication(id, feexpayReference ? { feexpayReference } : {});
     setPublishedUrl(r.data.url);
     setPub(p => ({ ...p, published: true, isPaid: true }));
     try { const sl = await getShortLink(id); setShortCode(sl.data.shortCode); } catch {}
   };
 
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get('autoPublish') === '1' && pub && pub._id !== 'draft' && user) {
+      handlePublish();
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.search, pub, user]);
+
   const handlePublish = async () => {
+    if (!user) {
+      await savePublicationDraft();
+      localStorage.setItem('ewish_intent', 'publish_draft');
+      navigate('/ewish-admin/register?next=/ewish-admin/ewish/edit/draft');
+      return;
+    }
+
     setPublishing(true);
     try {
       await savePublicationDraft();

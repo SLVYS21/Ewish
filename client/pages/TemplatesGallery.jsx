@@ -5,6 +5,7 @@ import {
   Cake, Heart, Baby, Waves, Hand, Feather,
 } from 'lucide-react';
 import { getTemplates, createPublication } from '../utils/api';
+import { useAuth } from '../admin/context/AuthContext';
 import { WallThemePreview } from '../components/WallPreviews';
 
 /* ─────────────────────────────────────────────────────────── */
@@ -98,6 +99,7 @@ export default function TemplatesGallery() {
   const [cat, setCat] = useState('all');
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   /* Wall preview sheet (bottom drawer) */
   const [wallSheet, setWallSheet]   = useState(null); // tpl being previewed
@@ -173,6 +175,24 @@ export default function TemplatesGallery() {
     }
 
     setWallLoading(true); setWallError('');
+
+    if (!user && !isInvitation) {
+      // Offline Wall Draft
+      const draft = {
+        templateName: wallModal.name,
+        customName:   `wall-${Date.now()}`,
+        title,
+        data,
+        style: {},
+        decorations: [],
+        widgets: [],
+        cagnotteConfig: null,
+      };
+      localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
+      navigate(`/ewish-admin/wall/draft`);
+      return;
+    }
+
     try {
       const slugPrefix = isInvitation ? 'invit' : 'wall';
       const res = await createPublication({
@@ -235,7 +255,7 @@ export default function TemplatesGallery() {
             <div className="mk-modal-head">
               <div>
                 <div className="mk-modal-title">
-                  {wallModal.kind === 'invitation' ? 'Nomme ta création' : 'Pour qui et quelle occasion ?'}
+                  {wallModal.kind === 'invitation' ? 'Pour qui ?' : 'Pour qui et quelle occasion ?'}
                 </div>
                 <div className="mk-modal-sub">
                   {wallModal.kind === 'invitation'

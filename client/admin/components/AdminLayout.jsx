@@ -11,6 +11,7 @@ import WhatsAppFAB from '../../components/WhatsAppFAB';
 import NotificationBell from '../../components/NotificationBell';
 import Kado from '../../components/Kado';
 import CreateModal from '../../components/CreateModal';
+import OnboardingTour from '../../components/OnboardingTour';
 
 const SUPER_NAV = [
   { to: '/ewish-admin/admin',             label: 'Tableau de bord',  Icon: BarChart2  },
@@ -215,6 +216,7 @@ export default function AdminLayout() {
         onSelect={goCreate}
       />
 
+      <OnboardingTour />
       <WhatsAppFAB />
     </div>
   );

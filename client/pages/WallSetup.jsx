@@ -6,7 +6,7 @@ import {
   Trash2, RotateCcw, Clock, LockKeyhole, Zap,
 } from 'lucide-react';
 import {
-  updatePublication, publishPublication, uploadFile, getPublicationById,
+  updatePublication, publishPublication, uploadFile, getPublicationById, createPublication,
   getWishes, updateWish, deleteWish,
   getContributions, getContributionStats,
 } from '../utils/api';
@@ -14,6 +14,8 @@ import { useAuth } from '../admin/context/AuthContext';
 import NotoEmoji from '../components/NotoEmoji';
 import WallStyle from '../components/WallStyle';
 import WallPublishModal from '../components/WallPublishModal';
+import AuthBottomSheet from '../components/AuthBottomSheet';
+import WallSuccessScreen from '../components/WallSuccessScreen';
 import { getEvent } from '../wall-wizard/constants';
 import WallShareTab from './WallShareTab';
 
@@ -111,6 +113,8 @@ function WallSettings({ pub, id, onSave }) {
     } catch { /* ignore */ }
   };
 
+
+
   /* Auto-save info — le titre est stocké tel quel dans pub.title.
      On le propage aussi à data.titleName (consommé par le template pour
      le rendu du <em>) et on force data.titlePrefix='' pour désactiver le
@@ -139,7 +143,7 @@ function WallSettings({ pub, id, onSave }) {
       try {
         const title = (wallTitle || '').trim();
         const recip = (recipientName || '').trim();
-        await updatePublication(id, {
+        const updateData = {
           title: title || (pub.title || ''),
           data: {
             titleName: title,
@@ -148,11 +152,23 @@ function WallSettings({ pub, id, onSave }) {
             subtitle: phrase,
             phrase,
             bannerImage,
-            coverImage: bannerImage,   // legacy alias attendu par applyCover
-            wallCover: bannerImage,    // idem
+            coverImage: bannerImage,
+            wallCover: bannerImage,
           },
-        });
-        onSave('saved');
+        };
+        if (id === 'draft') {
+          const raw = localStorage.getItem('ewish_wall_draft');
+          if (raw) {
+            const draft = JSON.parse(raw);
+            Object.assign(draft, updateData);
+            draft.data = { ...(draft.data || {}), ...updateData.data };
+            localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
+          }
+          onSave('saved');
+        } else {
+          await updatePublication(id, updateData);
+          onSave('saved');
+        }
       } catch { onSave('unsaved'); }
     }, 800);
   }, [wallTitle, recipientName, phrase, bannerImage]);
@@ -168,14 +184,25 @@ function WallSettings({ pub, id, onSave }) {
     ccTimer.current = setTimeout(async () => {
       onSave('saving');
       try {
-        await updatePublication(id, {
+        const updateData = {
           cagnotteConfig: {
             ...pub.cagnotteConfig,
             wishesEnabled: reception, requireModeration: moderation,
             isPrivate, accessCode,
           },
-        });
-        onSave('saved');
+        };
+        if (id === 'draft') {
+          const raw = localStorage.getItem('ewish_wall_draft');
+          if (raw) {
+            const draft = JSON.parse(raw);
+            Object.assign(draft, updateData);
+            localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
+          }
+          onSave('saved');
+        } else {
+          await updatePublication(id, updateData);
+          onSave('saved');
+        }
       } catch { onSave('unsaved'); }
     }, 800);
   }, [reception, moderation, isPrivate, accessCode]);
@@ -545,15 +572,26 @@ function WallCagnotte({ pub, id, onSave }) {
     ccTimer.current = setTimeout(async () => {
       if (onSave) onSave('saving');
       try {
-        await updatePublication(id, {
+        const updateData = {
           cagnotteConfig: {
             ...pub.cagnotteConfig,
             enabled: cagnotteEnabled, description: cagnotteDescription,
             goal: cagnotteGoal, deadline: cagnotteDeadline || null,
             collectTitle, minContribution: minContrib, maxContribution: maxContrib,
           },
-        });
-        if (onSave) onSave('saved');
+        };
+        if (id === 'draft') {
+          const raw = localStorage.getItem('ewish_wall_draft');
+          if (raw) {
+            const draft = JSON.parse(raw);
+            Object.assign(draft, updateData);
+            localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
+          }
+          if (onSave) onSave('saved');
+        } else {
+          await updatePublication(id, updateData);
+          if (onSave) onSave('saved');
+        }
       } catch { if (onSave) onSave('unsaved'); }
     }, 800);
   }, [cagnotteEnabled, cagnotteGoal, cagnotteDescription, cagnotteDeadline, minContrib, maxContrib, collectTitle]);
@@ -753,8 +791,24 @@ export default function WallSetup() {
   const [pub, setPub]           = useState(null);
   const [loading, setLoading]   = useState(true);
   const [saveStatus, setSaveStatus] = useState('saved');
-  const [publishing, setPublishing] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [publishing, setPublishing]             = useState(false);
+  const [showAuthSheet, setShowAuthSheet]       = useState(false);
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+
+  const handleIframeLoad = () => {
+    if (!pub) return;
+    const iframe = document.getElementById('wall-preview-iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'WW_UPDATE',
+        data: pub.data || {},
+        style: pub.style || {},
+        decorations: pub.decorations || [],
+        widgets: pub.widgets || []
+      }, '*');
+    }
+  };
   const [pubError, setPubError] = useState('');
   const [toast, setToast]       = useState('');
   const [tab, setTab]           = useState('settings');
@@ -768,9 +822,44 @@ export default function WallSetup() {
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
 
+  const { user } = useAuth();
+  
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      if (id === 'draft') {
+        try {
+          const raw = localStorage.getItem('ewish_wall_draft');
+          if (raw) {
+            const data = JSON.parse(raw);
+            if (user) {
+              try {
+                const res = await createPublication({
+                  templateName: data.templateName,
+                  customName: data.customName,
+                  title: data.title,
+                  data: data.data,
+                  cagnotteConfig: data.cagnotteConfig || {},
+                });
+                localStorage.removeItem('ewish_wall_draft');
+                navigate(`/ewish-admin/wall/${res.data._id}`);
+                return;
+              } catch (e) {
+                navigate('/ewish-admin/templates?mode=wall');
+              }
+            } else {
+              pubRef.current = data;
+              setPub(data);
+            }
+          } else {
+            navigate('/ewish-admin/templates?mode=wall');
+          }
+        } catch {
+          navigate('/ewish-admin/templates?mode=wall');
+        }
+        setLoading(false);
+        return;
+      }
       try {
         const res = await getPublicationById(id);
         let data = res.data;
@@ -796,10 +885,10 @@ export default function WallSetup() {
       }
     };
     load();
-  }, [id, navigate]);
+  }, [id, navigate, user]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || id === 'draft') return;
     getWishes(id).then(r => {
       const ws = r.data || [];
       setWordCounts({
@@ -817,6 +906,10 @@ export default function WallSetup() {
   }, []);
 
   const handlePublishClick = () => {
+    if (id === 'draft' || !user) {
+      setShowAuthSheet(true);
+      return;
+    }
     setShowPublishModal(true);
   };
 
@@ -826,9 +919,8 @@ export default function WallSetup() {
     try {
       const res = await publishPublication(id, { planType, feexpayReference });
       setPub(res.data);
-      setToast('Mur publié avec succès !');
-      setTimeout(() => setToast(''), 3000);
       setShowPublishModal(false);
+      setShowSuccessScreen(true);
     } catch (err) {
       setPubError(err.response?.data?.error || 'Erreur lors de la publication');
     } finally { setPublishing(false); }
@@ -927,131 +1019,80 @@ export default function WallSetup() {
 
       {/* Mobile Layout */}
       {isMobile ? (
-        <>
-          {/* Mobile Header */}
-          <div style={{ flex: '0 0 auto', background: '#fff', borderBottom: '1px solid #F0EBDE', padding: '16px 18px 0', paddingTop: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button onClick={() => navigate('/ewish-admin/ewish')} style={{ width: '36px', height: '36px', borderRadius: '11px', background: '#FAF7F0', border: '1px solid #ECE6D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', cursor: 'pointer' }}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#453E2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-              </button>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ font: '800 10px var(--mk-body)', letterSpacing: '.14em', textTransform: 'uppercase', color: '#9F6D22' }}>
-                  {pub?.templateName === 'wall-of-wishes' ? 'Mur Classique' : 'Mur'}
-                </div>
-                <div style={{ fontFamily: 'var(--mk-display)', fontSize: '19px', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#161311' }}>
-                  {pub?.title || 'Mur sans titre'}
-                </div>
+        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#EDE7DA' }}>
+          {/* Top Bar */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, background: '#fff', borderBottom: '1px solid #EFE9DB', padding: '16px 16px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button onClick={() => navigate('/ewish-admin/ewish')} style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#F6F1E6', display: 'grid', placeItems: 'center', flex: '0 0 auto', border: 'none', cursor: 'pointer' }}>
+              <ArrowLeft size={16} color="#453E2E"/>
+            </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'var(--mk-display)', fontSize: '17px', lineHeight: 1.05, color: '#161311', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pub?.title || 'Mur sans titre'}</div>
+              <div style={{ font: '600 10px var(--mk-body)', color: '#9A8E70', marginTop: '2px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9A8E70" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                {saveStatus === 'saved' ? 'Enregistré' : saveStatus === 'saving' ? 'Sauvegarde...' : 'Non sauvegardé'}
               </div>
-              <button 
-                onClick={() => setMobilePreviewOpen(true)} 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  backgroundColor: '#E91E63',
-                  color: '#FFFFFF',
-                  fontFamily: 'var(--mk-body, sans-serif)',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 4px rgba(233, 30, 99, 0.2)',
-                  transition: 'all 0.2s ease-in-out',
-                  outline: 'none',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#D81B60';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#E91E63';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="#FFFFFF" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <span>Aperçu</span>
+            </div>
+            {isPublished && siteUrl ? (
+              <button onClick={() => navigate(`/ewish-admin/share/${id}`)} style={{ background: '#fff', color: '#453E2E', border: '1.5px solid #E5DDC9', borderRadius: '10px', padding: '8px 13px', font: '800 12px var(--mk-body)', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                <Share2 size={13} color="#453E2E" /> Partager
               </button>
-            </div>
-            
-            <div className="mk-scroll" style={{ display: 'flex', gap: '4px', marginTop: '14px', overflowX: 'auto', paddingBottom: '2px', scrollbarWidth: 'none' }}>
-              {tabs.map(t => {
-                const active = tab === t.id;
-                return (
-                  <span 
-                    key={t.id} 
-                    onClick={() => setTab(t.id)} 
-                    style={{ 
-                      padding: '11px 14px', 
-                      font: active ? '700 13px var(--mk-body)' : '600 13px var(--mk-body)', 
-                      color: active ? '#1E2952' : '#8C8570', 
-                      borderBottom: active ? '2px solid #1E2952' : '2px solid transparent',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {t.label}
-                  </span>
-                );
-              })}
-            </div>
+            ) : (
+              <button onClick={handlePublishClick} disabled={publishing} style={{ background: '#1E2952', color: '#fff', border: 'none', borderRadius: '10px', padding: '8px 13px', font: '800 12px var(--mk-body)', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                {publishing ? <Loader2 size={13} style={{ animation: 'mk-spin .75s linear infinite' }} /> : <Upload size={13} color="#fff" />} Publier
+              </button>
+            )}
           </div>
-
-          {/* Mobile Content */}
-          {tab === 'share' ? (
-            <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', background: '#fff' }}>
-              <WallShareTab pub={pub} setPub={(fn) => { const next = fn(pub); setPub(next); pubRef.current = next; }} />
-            </div>
-          ) : (
-            <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', padding: '18px', display: 'flex', flexDirection: 'column', gap: '20px', background: '#FAF7F0' }}>
-              {renderActiveTabContent()}
-            </div>
-          )}
-
-          {/* Mobile Preview Modal */}
+          
+          {/* Live Preview Iframe */}
+          <div style={{ position: 'absolute', top: '70px', left: 0, right: 0, bottom: '66px', overflowY: 'auto' }}>
+            <iframe 
+              id="wall-preview-iframe"
+              src={buildPreviewSrc()}
+              onLoad={handleIframeLoad}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title="Aperçu du mur"
+            />
+          </div>
+          
+          {/* Bottom Toolbar */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20, background: '#fff', borderTop: '1px solid #EFE9DB', padding: '12px 14px 22px', display: 'flex', justifyContent: 'space-around' }}>
+            {tabs.map(t => {
+              const active = tab === t.id && mobilePreviewOpen;
+              return (
+                <div key={t.id} onClick={() => { setTab(t.id); setMobilePreviewOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: active ? '#9F6D22' : '#8C8570', cursor: 'pointer' }}>
+                  {t.id === 'style' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="14" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="14.5" r="2.5"/><path d="M12 22a10 10 0 1 1 0-20"/></svg>}
+                  {t.id === 'settings' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>}
+                  {t.id === 'words' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>}
+                  {t.id === 'cagnotte' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>}
+                  {t.id === 'share' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>}
+                  <span style={{ font: active ? '700 10px var(--mk-body)' : '600 10px var(--mk-body)' }}>{t.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Bottom Sheet */}
           {mobilePreviewOpen && (
-            <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#161311', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#161311', color: '#fff' }}>
-                
-                <div style={{ display: 'inline-flex', gap: 0, border: '1px solid rgba(255,255,255,0.2)', borderRadius: '11px', overflow: 'hidden' }}>
-                  <button onClick={() => setPreviewRole('guest')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'guest' ? '#fff' : 'transparent', color: previewRole === 'guest' ? '#161311' : '#fff', padding: '7px 12px', font: '700 12px var(--mk-body)', borderRight: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', border: 'none' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                    Invités
-                  </button>
-                  <button onClick={() => setPreviewRole('recipient')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: previewRole === 'recipient' ? '#FBF3E4' : 'transparent', color: previewRole === 'recipient' ? '#9F6D22' : '#fff', padding: '7px 12px', font: '700 12px var(--mk-body)', cursor: 'pointer', border: 'none' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                    Destinataire
+            <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <div style={{ position: 'absolute', inset: 0 }} onClick={() => setMobilePreviewOpen(false)} />
+              <div className="mk-anim-slide-up" style={{ position: 'relative', width: '100%', maxHeight: '85vh', background: '#FAF7F0', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 -10px 40px rgba(0,0,0,0.2)' }}>
+                <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #EFE9DB', background: '#fff' }}>
+                  <div style={{ fontFamily: 'var(--mk-display)', fontSize: '18px', color: '#161311' }}>{tabs.find(t => t.id === tab)?.label}</div>
+                  <button onClick={() => setMobilePreviewOpen(false)} style={{ background: '#F6F1E6', border: 'none', color: '#453E2E', cursor: 'pointer', padding: '6px', borderRadius: '50%', display: 'flex' }}>
+                    <X size={18} />
                   </button>
                 </div>
-
-                <button onClick={() => setMobilePreviewOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '4px' }}>
-                  <X size={20} />
-                </button>
-              </div>
-              <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                <iframe 
-                  id="wall-preview-iframe"
-                  src={buildPreviewSrc()}
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  title="Aperçu du mur"
-                />
+                <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
+                  {tab === 'share' ? (
+                    <WallShareTab pub={pub} setPub={(fn) => { const next = fn(pub); setPub(next); pubRef.current = next; }} />
+                  ) : (
+                    renderActiveTabContent()
+                  )}
+                </div>
               </div>
             </div>
           )}
-        </>
+        </div>
       ) : (
         /* Desktop Layout */
         <>
@@ -1173,6 +1214,7 @@ export default function WallSetup() {
                       <iframe 
                         id="wall-preview-iframe"
                         src={buildPreviewSrc()}
+                        onLoad={handleIframeLoad}
                         style={{ width: '100%', height: '100%', border: 'none' }}
                         title="Aperçu du mur"
                       />
@@ -1210,6 +1252,30 @@ export default function WallSetup() {
           onClose={() => setShowPublishModal(false)}
           onConfirm={handlePublishConfirm}
           loading={publishing}
+        />
+      )}
+
+      {/* Auth Bottom Sheet */}
+      {showAuthSheet && (
+        <AuthBottomSheet 
+          onClose={() => setShowAuthSheet(false)}
+          onAuthSuccess={() => {
+            setShowAuthSheet(false);
+            if (id !== 'draft') {
+              setShowPublishModal(true);
+            }
+            // If id === 'draft', the useEffect will re-run because 'user' changed
+            // and it will create the publication automatically.
+          }}
+        />
+      )}
+
+      {/* Success Screen */}
+      {showSuccessScreen && (
+        <WallSuccessScreen
+          pub={pub}
+          siteUrl={siteUrl}
+          onClose={() => setShowSuccessScreen(false)}
         />
       )}
     </div>

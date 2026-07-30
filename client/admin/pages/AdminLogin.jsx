@@ -16,7 +16,9 @@ export default function AdminLogin() {
   const { login }  = useAuth();
   const navigate   = useNavigate();
   const location   = useLocation();
-  const resetDone  = new URLSearchParams(location.search).get('reset') === '1';
+  const searchParams = new URLSearchParams(location.search);
+  const resetDone  = searchParams.get('reset') === '1';
+  const next       = searchParams.get('next') || '/ewish-admin';
 
   const submit = async () => {
     setError('');
@@ -24,7 +26,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await login(email, pass);
-      navigate('/ewish-admin');
+      navigate(next);
     } catch (e) {
       setError(e.response?.data?.error || 'Identifiants invalides');
     } finally { setLoading(false); }
@@ -62,7 +64,7 @@ export default function AdminLogin() {
               Connexion
             </button>
             <Link
-              to="/ewish-admin/register"
+              to={`/ewish-admin/register${location.search}`}
               className={s.tab}
               role="tab"
               aria-selected="false"
@@ -71,7 +73,7 @@ export default function AdminLogin() {
             </Link>
           </div>
 
-          <GoogleBtn label="Continuer avec Google" />
+          <GoogleBtn label="Continuer avec Google" redirectTo={next} />
 
           <div className={s.orDivider}><span>Ou continue avec</span></div>
 

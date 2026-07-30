@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import MyCreations from "./pages/MyCreations";
 import Editor from "./pages/Editor";
 import QuickCreate from "./pages/QuickCreate";
+import QuickCreateWall from "./pages/QuickCreateWall";
 
 import { AuthProvider, useAuth } from "./admin/context/AuthContext";
 import AdminLayout from "./admin/components/AdminLayout";
@@ -120,16 +121,16 @@ export default function App() {
           <Route path="/ewish-admin/claim/:token"          element={<WallClaim />} />
 
           {/* Protected Admin  with sidebar layout */}
-          <Route path="/ewish-admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
-            <Route index element={<Dashboard />} />
-            <Route path="ewish" element={<MyCreations />} />
+          <Route path="/ewish-admin" element={<AdminLayout />}>
+            <Route index element={<RequireAuth><Dashboard /></RequireAuth>} />
+            <Route path="ewish" element={<RequireAuth><MyCreations /></RequireAuth>} />
             <Route path="templates"        element={<TemplatesGallery />} />
             <Route path="template/:name"   element={<TemplateDetailPage />} />
-            <Route path="cagnotte/:id" element={<CagnottePage />} />
-            <Route path="credits"    element={<CreditsPage />} />
-            <Route path="wishes"     element={<AdminWishes />} />
-            <Route path="publications" element={<AdminPublications />} />
-            <Route path="suggestions"  element={<SuperAdminSuggestions />} />
+            <Route path="cagnotte/:id" element={<RequireAuth><CagnottePage /></RequireAuth>} />
+            <Route path="credits"    element={<RequireAuth><CreditsPage /></RequireAuth>} />
+            <Route path="wishes"     element={<RequireAuth><AdminWishes /></RequireAuth>} />
+            <Route path="publications" element={<RequireAuth><AdminPublications /></RequireAuth>} />
+            <Route path="suggestions"  element={<RequireAuth><SuperAdminSuggestions /></RequireAuth>} />
 
             {/* Super Admin analytics */}
             <Route path="admin" element={<RequireSuperAdmin><AdminDashboard /></RequireSuperAdmin>} />
@@ -143,16 +144,17 @@ export default function App() {
             <Route path="super/prospection"  element={<RequireSuperAdmin><SuperAdminProspection /></RequireSuperAdmin>} />
             <Route path="super/settings"     element={<RequireSuperAdmin><SuperAdminSettings /></RequireSuperAdmin>} />
             <Route path="super/kyc"          element={<RequireSuperAdmin><SuperAdminKyc /></RequireSuperAdmin>} />
-            <Route path="profile"            element={<ProfilePage />} />
-            <Route path="releases"           element={<AdminReleaseNotes />} />
+            <Route path="profile"            element={<RequireAuth><ProfilePage /></RequireAuth>} />
+            <Route path="releases"           element={<RequireAuth><AdminReleaseNotes /></RequireAuth>} />
 
-            <Route path="share/:id"          element={<SharePage />} />
+            <Route path="share/:id"          element={<RequireAuth><SharePage /></RequireAuth>} />
           </Route>
 
           {/* Full-screen routes  no sidebar */}
-          <Route path="/ewish-admin/ewish/new"       element={<RequireAuth><QuickCreate /></RequireAuth>} />
-          <Route path="/ewish-admin/ewish/edit/:id"  element={<RequireAuth><Editor /></RequireAuth>} />
-          <Route path="/ewish-admin/wall/:id"        element={<RequireAuth><WallSetup /></RequireAuth>} />
+          <Route path="/ewish-admin/ewish/new"       element={<QuickCreate />} />
+          <Route path="/ewish-admin/wall/new"        element={<QuickCreateWall />} />
+          <Route path="/ewish-admin/ewish/edit/:id"  element={<Editor />} />
+          <Route path="/ewish-admin/wall/:id"        element={<WallSetup />} />
 
           <Route path="/kyc/mobile/:token" element={<KycMobilePage />} />
           <Route path="/terms"   element={<TermsPage />} />

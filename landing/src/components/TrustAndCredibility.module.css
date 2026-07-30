@@ -1,0 +1,199 @@
+.section {
+  padding: 80px 0;
+  background-color: #fff;
+}
+
+/* Security Banner */
+.securityBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--mk-stone-50);
+  padding: 32px;
+  border-radius: 20px;
+  margin-bottom: 80px;
+}
+@media (min-width: 768px) {
+  .securityBanner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 48px;
+  }
+}
+
+.securityBadge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.shieldIcon {
+  color: var(--mk-forest-700);
+}
+.badgeTitle {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--mk-stone-900);
+  margin-bottom: 4px;
+}
+.badgeDesc {
+  font-size: 14px;
+  color: var(--mk-stone-500);
+}
+
+.partners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+.partnerLogo {
+  padding: 8px 16px;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mk-stone-700);
+  box-shadow: var(--sh-sm);
+  border: 1px solid var(--mk-stone-100);
+}
+
+/* Grid Layout for Testimonials & Use Cases */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 60px;
+}
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+}
+
+.h2 {
+  font-family: var(--serif);
+  font-size: 36px;
+  color: var(--mk-stone-900);
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+/* Stats Counter */
+.statsCounter {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--mk-indigo-50);
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--mk-indigo-100);
+}
+.statsNumber {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--mk-indigo-700);
+}
+.statsText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mk-stone-700);
+}
+
+/* Carousel */
+.carousel {
+  position: relative;
+  background: var(--mk-stone-50);
+  border-radius: 24px;
+  padding: 40px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+.testimonialCard {
+  flex: 1;
+}
+.quoteIcon {
+  color: var(--mk-gold-400);
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.quoteText {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--mk-stone-900);
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+.authorInfo strong {
+  display: block;
+  font-size: 16px;
+  color: var(--mk-stone-900);
+}
+.authorInfo span {
+  font-size: 14px;
+  color: var(--mk-stone-500);
+}
+
+.carouselControls {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+.controlBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--mk-stone-200);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--mk-stone-700);
+}
+.controlBtn:hover {
+  background: var(--mk-stone-100);
+  color: var(--mk-stone-900);
+}
+
+/* Use Cases */
+.useCasesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.useCaseCard {
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.useCaseCard h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.useCaseCard p {
+  font-size: 15px;
+  opacity: 0.9;
+}
+.ucContent {
+  flex: 1;
+}
+.ucImageWrapper {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--sh-sm);
+}
+.ucImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
