@@ -35,11 +35,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ─── Installation deps (couche cache-friendly) ──────────────────
-# On copie package*.json d'abord pour bénéficier du cache Docker
-# quand seul le code source change.
-COPY server/package*.json ./server/
+# On copie package*.json + .puppeteerrc.cjs d'abord pour bénéficier
+# du cache Docker quand seul le code source change.
+# .puppeteerrc.cjs DOIT être présent avant `npm ci` sinon le
+# postinstall télécharge Chrome dans ~/.cache/puppeteer (défaut) au
+# lieu de server/.puppeteer-cache (configuré). Au runtime la config
+# est lue → Puppeteer cherche Chrome dans un dossier vide → crash.
+COPY server/package*.json server/.puppeteerrc.cjs ./server/
 RUN cd server && npm ci --legacy-peer-deps
-# ↑ postinstall télécharge Chrome dans server/.cache/puppeteer/
+# ↑ postinstall télécharge Chrome dans server/.puppeteer-cache/
 
 # ─── Templates + code source ────────────────────────────────────
 # Copie templates avant server/ pour que la build step suivante
