@@ -124,8 +124,15 @@ function formatFrenchDate(d) {
   } catch { return ''; }
 }
 
-/* ---------- HTML builder ---------- */
-function buildBookHtml({ publication, wishes, baseUrl, layout = 'book', bgMode = 'wall' }) {
+/* ---------- HTML builder ----------
+   Options:
+     - layout : 'book' (A5, 1 mot/page) | 'mosaic' (A4, 2 colonnes)
+     - bgMode : 'wall' (fond du mur) | 'clean' (fond papier neutre)
+     - print  : true → injecte un <script> qui déclenche window.print()
+                au chargement. Utilisé par le mode "Impression navigateur"
+                (client → SharePage) pour éviter Puppeteer côté serveur.
+   ------------------------------------------------------------- */
+function buildBookHtml({ publication, wishes, baseUrl, layout = 'book', bgMode = 'wall', print = false }) {
   const isMosaic = layout === 'mosaic';
   const isClean = bgMode === 'clean';
   const d = publication.data || {};
@@ -279,6 +286,40 @@ function buildBookHtml({ publication, wishes, baseUrl, layout = 'book', bgMode =
     ? `.cover.has-wall-bg, .outro.has-wall-bg { background: ${wallBg.css}; }
        .print-fixed-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -2; background: ${wallBg.css}; background-size: cover; background-position: center; background-repeat: no-repeat; }`
     : '';
+
+  /* Mode print : on attend document.fonts.ready + le décodage des <img>
+     puis on ouvre la boîte "Imprimer" native. onafterprint tente de
+     refermer l'onglet (soumis à la policy du navigateur — sur Chrome,
+     ça marche seulement si l'onglet a été ouvert par window.open()). */
+  const printScript = print ? `
+<script>
+(function() {
+  async function waitReady() {
+    if (document.fonts && document.fonts.ready) {
+      try { await document.fonts.ready; } catch (e) {}
+    }
+    const imgs = Array.from(document.images || []);
+    await Promise.all(imgs.map(img => {
+      if (img.complete && img.naturalWidth > 0) return;
+      return new Promise(r => {
+        img.addEventListener('load', r, { once: true });
+        img.addEventListener('error', r, { once: true });
+        setTimeout(r, 8000);
+      });
+    }));
+  }
+  window.addEventListener('load', async () => {
+    await waitReady();
+    /* Léger délai pour laisser les gradients/fonds se poser. */
+    setTimeout(() => {
+      window.print();
+    }, 400);
+  });
+  window.addEventListener('afterprint', () => {
+    setTimeout(() => { try { window.close(); } catch (e) {} }, 200);
+  });
+})();
+</script>` : '';
 
   return `<!doctype html>
 <html lang="fr">
@@ -635,6 +676,7 @@ ${preface}
 ${wishPages}
 ${thankYouPage}
 ${outro}
+${printScript}
 </body>
 </html>`;
 }

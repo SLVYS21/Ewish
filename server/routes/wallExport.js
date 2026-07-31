@@ -63,13 +63,57 @@ router.get('/:pubId/export/pdf', async (req, res) => {
   }
 });
 
-/* Preview HTML — utile pour itérer sur la mise en page sans générer un PDF. */
+/* Data JSON — consommée par @react-pdf/renderer côté client pour générer
+   le PDF sans passer par Puppeteer/serveur. Retourne uniquement ce dont
+   le composant WallBookPdfDoc a besoin (mêmes champs que loadWallData). */
+router.get('/:pubId/export/data', async (req, res) => {
+  try {
+    const { publication, wishes } = await loadWallData(req.params.pubId);
+    if (!publication) return res.status(404).json({ error: 'Publication not found' });
+    res.json({
+      publication: {
+        _id: publication._id,
+        title: publication.title,
+        data: publication.data || {},
+        style: publication.style || {},
+        thankYouMessage: publication.thankYouMessage || '',
+      },
+      wishes: wishes.map(w => ({
+        _id: w._id,
+        firstName: w.firstName,
+        role: w.role,
+        message: w.message,
+        color: w.color ?? 0,
+        mediaType: w.mediaType,
+        photoUrl: w.photoUrl,
+        videoUrl: w.videoUrl,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* Preview HTML — utile pour :
+   1. itérer sur la mise en page sans générer un PDF (mode debug)
+   2. servir la page à imprimer côté client (?print=1) : le navigateur
+      ouvre la boîte "Imprimer" qui propose "Enregistrer en PDF". C'est
+      le remplacement léger de Puppeteer côté serveur.
+   Query : ?layout=book|mosaic  ?bg=wall|clean  ?print=1 */
 router.get('/:pubId/export/preview', async (req, res) => {
   try {
     const { publication, wishes } = await loadWallData(req.params.pubId);
     if (!publication) return res.status(404).send('Publication not found');
+    const { layout = 'book', bg = 'wall', print } = req.query;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const html = buildBookHtml({ publication, wishes, baseUrl });
+    const html = buildBookHtml({
+      publication,
+      wishes,
+      baseUrl,
+      layout,
+      bgMode: bg,
+      print: print === '1' || print === 'true',
+    });
     res.set('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {

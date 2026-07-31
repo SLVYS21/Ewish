@@ -610,6 +610,10 @@ function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, on
 function PdfExportModal({ open, onClose, onConfirm }) {
   const [layout, setLayout] = useState('mosaic'); // 'mosaic' or 'book'
   const [bgMode, setBgMode] = useState('wall');   // 'wall' or 'clean' (for mosaic)
+  /* Méthode :
+     - 'print'    → ouvre la preview HTML avec auto-window.print() (léger, dialog navigateur)
+     - 'download' → génère le PDF côté client via @react-pdf/renderer (téléchargement direct) */
+  const [method, setMethod] = useState('print');
 
   if (!open) return null;
 
@@ -654,7 +658,25 @@ function PdfExportModal({ open, onClose, onConfirm }) {
             </label>
           </div>
 
-          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => onConfirm(layout, bgMode)}>
+          <div className="section-label" style={{ marginBottom: 8 }}>Méthode</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+            <label style={{ display: 'flex', gap: 12, padding: 12, border: method === 'print' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: method === 'print' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
+              <input type="radio" name="method" value="print" checked={method === 'print'} onChange={() => setMethod('print')} style={{ marginTop: 4 }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Impression navigateur (Recommandé)</div>
+                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Rapide, rendu identique au mur. Choisis « Enregistrer en PDF » dans la boîte d'impression.</div>
+              </div>
+            </label>
+            <label style={{ display: 'flex', gap: 12, padding: 12, border: method === 'download' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: method === 'download' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
+              <input type="radio" name="method" value="download" checked={method === 'download'} onChange={() => setMethod('download')} style={{ marginTop: 4 }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Téléchargement direct</div>
+                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Fichier PDF prêt à envoyer par email. Léger décalage visuel avec le mur.</div>
+              </div>
+            </label>
+          </div>
+
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => onConfirm(layout, bgMode, method)}>
             <Download size={16} /> Générer le PDF
           </button>
         </div>
@@ -688,9 +710,50 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
   const handleExportPdf = () => {
     setPdfModalOpen(true);
   };
-  const confirmExportPdf = (layout, bgMode) => {
+  /* 3 méthodes routées ici :
+     - 'print' (défaut, léger) : ouvre la preview HTML avec auto-print.
+       Le user choisit "Enregistrer en PDF" dans la boîte système.
+     - 'download' : fetch la data JSON puis pdf() via @react-pdf/renderer,
+       télécharge le blob. Import dynamique pour ne pas gonfler le bundle
+       initial (~500KB gzip).
+     - fallback Puppeteer : ancienne route /export/pdf, gardée pour QA. */
+  const confirmExportPdf = async (layout, bgMode, method = 'print') => {
     setPdfModalOpen(false);
-    console.log('[SharePage] Export PDF clicked! Opening:', `${API_BASE}/walls/${pub._id}/export/pdf?layout=${layout}&bg=${bgMode}`);
+    if (method === 'print') {
+      window.open(`${API_BASE}/walls/${pub._id}/export/preview?layout=${layout}&bg=${bgMode}&print=1`, '_blank');
+      return;
+    }
+    if (method === 'download') {
+      setExportingPdf(true);
+      try {
+        const [{ pdf }, { default: WallBookPdfDoc }] = await Promise.all([
+          import('@react-pdf/renderer'),
+          import('../components/WallBookPdfDoc.jsx'),
+        ]);
+        const res = await fetch(`${API_BASE}/walls/${pub._id}/export/data`);
+        if (!res.ok) throw new Error(`Data fetch failed: ${res.status}`);
+        const { publication, wishes } = await res.json();
+        const blob = await pdf(
+          <WallBookPdfDoc publication={publication} wishes={wishes} layout={layout} bgMode={bgMode} />
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        const recipient = (publication?.data?.recipient || publication?.data?.titleName || publication?.title || 'mur')
+          .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'mur';
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `livre-des-mots-${recipient}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert(`Erreur pendant l'export : ${err.message}`);
+      } finally {
+        setExportingPdf(false);
+      }
+      return;
+    }
+    /* Fallback Puppeteer (caché du modal). */
     window.open(`${API_BASE}/walls/${pub._id}/export/pdf?layout=${layout}&bg=${bgMode}`, '_blank');
   };
 
