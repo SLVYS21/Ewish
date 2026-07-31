@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Home, Layers, Wallet, Plus, Sparkles,
   ShieldAlert, BarChart2, Users, Ticket, Images, Cog,
-  User, BadgeCheck, ShieldCheck, LayoutTemplate, Package,
+  User, BadgeCheck, ShieldCheck, LayoutTemplate, Package, HelpCircle
 } from 'lucide-react';
 import versions from '../../changelog/versions.json';
 import WhatsAppFAB from '../../components/WhatsAppFAB';
@@ -38,6 +38,7 @@ export default function AdminLayout() {
   const location = useLocation();
   const [createOpen, setCreateOpen] = useState(false);
   const [mobileCreate, setMobileCreate] = useState(false);
+  const [runTour, setRunTour] = useState(false);
 
   const isSuperAdmin = user?.role === 'super_admin';
   const displayName = user?.name || user?.email || 'Utilisateur';
@@ -167,6 +168,14 @@ export default function AdminLayout() {
             </span>
           </button>
           <button
+            onClick={() => setRunTour(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 'var(--mk-r-xs)', fontSize: 12, fontWeight: 600, color: 'var(--mk-ink-3)', width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}
+            className="sb-user"
+          >
+            <HelpCircle size={14} />
+            <span>Visite guidée</span>
+          </button>
+          <button
             onClick={handleLogout}
             style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 'var(--mk-r-xs)', fontSize: 12, fontWeight: 600, color: 'var(--mk-ink-3)', width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}
             className="sb-user"
@@ -216,7 +225,7 @@ export default function AdminLayout() {
         onSelect={goCreate}
       />
 
-      <OnboardingTour />
+      <OnboardingTour run={runTour} onClose={() => setRunTour(false)} />
       <WhatsAppFAB />
     </div>
   );

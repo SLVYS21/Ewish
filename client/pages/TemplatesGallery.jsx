@@ -80,7 +80,7 @@ const WISH_CATS = [
   { id: 'all',      label: 'Tous' },
   { id: 'birthday', label: 'Anniversaire' },
   { id: 'love',     label: 'Amour' },
-  { id: 'pro',      label: 'Pro / RH' },
+  // { id: 'pro',      label: 'Pro / RH' },
   { id: 'special',  label: 'Spécial' },
 ];
 
@@ -304,7 +304,7 @@ export default function TemplatesGallery() {
 
                   <div className="field">
                     <label className="field-label">Pour qui ce mur ?</label>
-                    <div className="field-hint" style={{ marginBottom: 4 }}>Prénom ou nom du destinataire — apparaîtra dans le titre.</div>
+                    <div className="field-hint" style={{ marginBottom: 4 }}>Prénom ou nom du destinataire  apparaîtra dans le titre.</div>
                     <input
                       ref={wallRef}
                       className="mk-input"
@@ -381,7 +381,7 @@ export default function TemplatesGallery() {
           style={mode === 'wish' ? { background: 'var(--mk-accent)', borderColor: 'var(--mk-accent)', color: '#fff' } : {}}
         >
           <Sparkles size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 5 }} />
-          Vœux animés
+          Cartes animées
         </button>
         <button
           className={`pill${mode === 'wall' ? ' on' : ''}`}
@@ -391,14 +391,14 @@ export default function TemplatesGallery() {
           <MessageSquare size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 5 }} />
           Murs de mots
         </button>
-        <button
+        {/* <button
           className={`pill${mode === 'invitation' ? ' on' : ''}`}
           onClick={() => switchMode('invitation')}
           style={mode === 'invitation' ? { background: '#7C5CC9', borderColor: '#7C5CC9', color: '#fff' } : {}}
         >
           <MailOpen size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 5 }} />
           Invitations
-        </button>
+        </button> */}
       </div>
 
       {mode === 'invitation' ? (

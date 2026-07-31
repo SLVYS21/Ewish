@@ -68,7 +68,7 @@ const publicationSchema = new mongoose.Schema({
   },
 
   style: {
-    /* myKado defaults — Hybride C+A signature (indigo + gold + crème) */
+    /* myKado defaults  Hybride C+A signature (indigo + gold + crème) */
     primaryColor: { type: String, default: '#1E2952' },
     accentColor:  { type: String, default: '#E8A33D' },
     textColor:    { type: String, default: '#161311' },
@@ -93,6 +93,7 @@ const publicationSchema = new mongoose.Schema({
     revealIcon: { type: String },
     revealMascot: { type: Boolean, default: false },
     revealEmojis: { type: Boolean, default: true },
+    revealAnimation: {type: String},
     paletteAccentText: { type: String },
 
     /* Bannière du mur pilotée par la palette. Persistés en clair (string CSS)
@@ -143,19 +144,19 @@ const publicationSchema = new mongoose.Schema({
   planType:    { type: String, enum: ['free', 'premium', 'infinite'], default: 'free' },
   shortCode:   { type: String, unique: true, sparse: true },
 
-  /* Mot de merci du destinataire — ajouté après réception du mur, apparaît
+  /* Mot de merci du destinataire  ajouté après réception du mur, apparaît
      comme page finale du livre PDF et comme dernière scène de la vidéo.
      Étape 7 du flow murs (voir memory/project_walls_flow.md). */
   thankYouMessage: { type: String, default: '', trim: true, maxlength: 600 },
 
-  /* ── Étape 8 flow murs — destinataire & cagnotte ────────────────────
+  /* ── Étape 8 flow murs  destinataire & cagnotte ────────────────────
      Le créateur (merchantId) offre le mur à un destinataire qui doit :
        1. Cliquer sur un lien claim personnalisé (recipientClaimToken)
        2. Se connecter/inscrire, ce qui associe recipientUserId
        3. Passer le KYC via AdminUser.kycStatus === 'approved'
        4. Retirer la cagnotte (withdraw*)
      Ownership du "message de merci" et retrait cagnotte sont gated par
-     recipientUserId. Enjeu financier/légal — pas de raccourci ici. */
+     recipientUserId. Enjeu financier/légal  pas de raccourci ici. */
   recipientEmail:      { type: String, default: '', trim: true, lowercase: true },
   recipientClaimToken: { type: String, index: true, sparse: true },
   recipientClaimExpiry:{ type: Date },
@@ -175,7 +176,7 @@ const publicationSchema = new mongoose.Schema({
     reference: { type: String, default: '' },
   },
 
-  // URL canonique myKado — slug obligatoire visible dans /c/:slug /m/:slug /g/:slug
+  // URL canonique myKado  slug obligatoire visible dans /c/:slug /m/:slug /g/:slug
   // Auto-généré à la sauvegarde si absent, via pre-save hook (voir bas du fichier)
   // ASCII a-z 0-9 - _, 3–40 chars, unique
   slug:        { type: String, unique: true, sparse: true, index: true },

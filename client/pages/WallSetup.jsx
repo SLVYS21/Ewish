@@ -102,7 +102,7 @@ function WallSettings({ pub, id, onSave }) {
 
   const inited = useRef(false);
 
-  /* Petit helper — pousse un patch au preview iframe pour un rendu live
+  /* Petit helper  pousse un patch au preview iframe pour un rendu live
      (le template écoute WW_UPDATE et WW_CONFIG). */
   const notifyPreview = (payload) => {
     try {
@@ -115,7 +115,7 @@ function WallSettings({ pub, id, onSave }) {
 
 
 
-  /* Auto-save info — le titre est stocké tel quel dans pub.title.
+  /* Auto-save info  le titre est stocké tel quel dans pub.title.
      On le propage aussi à data.titleName (consommé par le template pour
      le rendu du <em>) et on force data.titlePrefix='' pour désactiver le
      préfixe auto TITLE_PREFIXES qui doublerait le titre.
@@ -568,6 +568,23 @@ function WallCagnotte({ pub, id, onSave }) {
   useEffect(() => {
     if (!inited.current) return;
     if (onSave) onSave('unsaved');
+
+    try {
+      const iframe = document.getElementById('wall-preview-iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'WW_CONFIG',
+          cagnotte: {
+            enabled: cagnotteEnabled,
+            goal: cagnotteGoal,
+            description: cagnotteDescription,
+            collectTitle: collectTitle,
+            name: cagnotteDescription || collectTitle || 'Un cadeau'
+          }
+        }, '*');
+      }
+    } catch { /* ignore */ }
+
     clearTimeout(ccTimer.current);
     ccTimer.current = setTimeout(async () => {
       if (onSave) onSave('saving');
@@ -665,9 +682,9 @@ function WallCagnotte({ pub, id, onSave }) {
             </div> */}
             <div className="field">
               <label className="field-label">C'est quoi le kado ?</label>
-              <textarea className="mk-input" value={cagnotteDescription}
+              <input className="mk-input" value={cagnotteDescription}
                 placeholder="Ex: Un nouveau PC."
-                onChange={e => setCollectTitle(e.target.value)} />
+                onChange={e => setCagnotteDescription(e.target.value)} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
               <div className="field">
@@ -863,7 +880,7 @@ export default function WallSetup() {
       try {
         const res = await getPublicationById(id);
         let data = res.data;
-        /* Backfill : anciens murs créés avant bannerTint — hydrate depuis l'occasion. */
+        /* Backfill : anciens murs créés avant bannerTint  hydrate depuis l'occasion. */
         const dd = data?.data || {};
         if (!dd.bannerTint && dd.occasion) {
           const ev = getEvent(dd.occasion);
@@ -939,7 +956,7 @@ export default function WallSetup() {
   const moderation   = cc.requireModeration || false;
   const VITE_SITE    = import.meta.env.VITE_API_URL || '';
   /* /site/* est servi par Express (VITE_SITE), mais /m/:slug est une route
-     du SPA React (App.jsx) — en dev Express n'a pas cette route et renvoie
+     du SPA React (App.jsx)  en dev Express n'a pas cette route et renvoie
      la landing. On utilise donc l'origine courante pour l'aperçu destinataire. */
   const SPA_ORIGIN   = typeof window !== 'undefined' ? window.location.origin : '';
   const siteUrl      = isPublished ? `${VITE_SITE}/site/${pub.templateName}/${pub.customName}` : null;
@@ -947,11 +964,7 @@ export default function WallSetup() {
   const buildPreviewSrc = () => {
     if (!pub?.customName) return '';
     if (previewRole === 'recipient') {
-      /* /m/:slug utilise le champ `slug` (ou `shortCode` en fallback) —
-         pas `customName`. Voir server/routes/publication.js:83. */
-      const recipientSlug = pub.slug || pub.shortCode;
-      if (!recipientSlug) return '';
-      return `${SPA_ORIGIN}/m/${recipientSlug}?preview=1`;
+      return `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1&showIntro=1`;
     }
     return `${VITE_SITE}/site/${pub.templateName}/${pub.customName}?preview=1`;
   };
@@ -1033,8 +1046,12 @@ export default function WallSetup() {
               </div>
             </div>
             {isPublished && siteUrl ? (
-              <button onClick={() => navigate(`/ewish-admin/share/${id}`)} style={{ background: '#fff', color: '#453E2E', border: '1.5px solid #E5DDC9', borderRadius: '10px', padding: '8px 13px', font: '800 12px var(--mk-body)', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                <Share2 size={13} color="#453E2E" /> Partager
+              <button onClick={() => setPreviewRole(previewRole === 'guest' ? 'recipient' : 'guest')} style={{ background: '#fff', color: '#453E2E', border: '1.5px solid #E5DDC9', borderRadius: '10px', padding: '8px 13px', font: '800 12px var(--mk-body)', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                {previewRole === 'guest' ? (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Vue invité</>
+                ) : (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Déballage</>
+                )}
               </button>
             ) : (
               <button onClick={handlePublishClick} disabled={publishing} style={{ background: '#1E2952', color: '#fff', border: 'none', borderRadius: '10px', padding: '8px 13px', font: '800 12px var(--mk-body)', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
@@ -1135,11 +1152,7 @@ export default function WallSetup() {
               )}
             </span>
 
-            {isPublished && siteUrl && (
-              <button onClick={() => navigate(`/ewish-admin/share/${id}`)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #E5DDC9', color: '#453E2E', borderRadius: '11px', padding: '9px 15px', font: '700 13px var(--mk-body)', cursor: 'pointer' }}>
-                <Share2 size={15} /> Partager
-              </button>
-            )}
+            {/* Partager button removed on desktop as it's redundant with the Share tab */}
             {!isPublished && (
               <button onClick={handlePublishClick} disabled={publishing} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: '#1E2952', color: '#fff', borderRadius: '11px', padding: '9px 17px', font: '700 13px var(--mk-body)', boxShadow: '0 10px 22px -10px rgba(30,41,82,.55)', cursor: 'pointer', border: 'none' }}>
                 {publishing ? <Loader2 size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>}

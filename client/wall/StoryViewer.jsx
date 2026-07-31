@@ -3,7 +3,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AnimatedBackground, { BG_VARIANT_KEYS } from './AnimatedBackground';
 import AudioWavePlayer from './AudioWavePlayer';
 
-/* Séquence aléatoire de fonds — recalculée à chaque ouverture pour
+/* Séquence aléatoire de fonds  recalculée à chaque ouverture pour
    éviter la même suite à chaque visite. Contrainte : pas deux fonds
    identiques consécutifs. Si le nombre de wishes dépasse les 30
    variantes, on répète mais toujours en évitant l'adjacent. */
@@ -23,9 +23,12 @@ function pickBgSequence(count, allKeys) {
 function StoryViewer({ wishes, initialIndex, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
+  const [mediaDuration, setMediaDuration] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef(null);
+  const mediaRef = useRef(null);
 
-  /* Séquence de fonds figée pour cette instance du viewer — évite que
+  /* Séquence de fonds figée pour cette instance du viewer  évite que
      le bg change à chaque re-render pendant la navigation entre slides
      (utilisation de useMemo avec wishes.length comme dep, plus stable
      que Math.random appelé dans le map). */
@@ -39,28 +42,41 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
   useEffect(() => {
     setCurrentIndex(initialIndex);
     setProgress(0);
+    setMediaDuration(null);
+    setIsPaused(false);
   }, [initialIndex]);
 
   useEffect(() => {
-    // Reset progress and start timer
-    setProgress(0);
+    if (mediaRef.current) {
+      if (isPaused) {
+        mediaRef.current.pause();
+      } else {
+        const p = mediaRef.current.play();
+        if (p && p.catch) p.catch(() => {});
+      }
+    }
+  }, [isPaused, currentIndex]);
+
+  useEffect(() => {
     clearInterval(timerRef.current);
     
-    // Auto advance every 6 seconds (6000ms)
-    // We update progress every 60ms (1%)
     timerRef.current = setInterval(() => {
+      if (isPaused) return;
+      
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(timerRef.current);
           handleNext();
           return 100;
         }
-        return prev + 1;
+        const currentDuration = mediaDuration || 6000;
+        const increment = (60 / currentDuration) * 100;
+        return prev + increment;
       });
     }, 60);
 
     return () => clearInterval(timerRef.current);
-  }, [currentIndex]);
+  }, [currentIndex, isPaused, mediaDuration]);
 
   const handlePrev = () => {
     if (currentIndex > 0) {
@@ -79,7 +95,14 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
   if (!currentWish) return null;
 
   return (
-    <div id="story-viewer" className="open">
+    <div 
+      id="story-viewer" 
+      className="open"
+      onPointerDown={() => setIsPaused(true)}
+      onPointerUp={() => setIsPaused(false)}
+      onPointerLeave={() => setIsPaused(false)}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <div className="story-bars">
         {wishes.map((_, idx) => (
           <i key={idx} className={idx < currentIndex ? 'done' : idx === currentIndex ? 'active' : ''}>
@@ -137,24 +160,41 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
                 </div>
                 <div className={`big-tx${(wish.message || '').length > 300 ? ' is-xl' : (wish.message || '').length > 120 ? ' is-lg' : ''}`}>{wish.message}</div>
                 {wish.mediaType === 'sticker' && wish.photoUrl && (
-                  <div className="s-media" style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', overflow: 'visible' }}>
+                  <div className="s-media" style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', overflow: 'visible', position: 'relative', zIndex: 10 }}>
                     <img src={wish.photoUrl} alt="Sticker" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.18))' }} />
                   </div>
                 )}
                 {wish.mediaType !== 'sticker' && wish.photoUrl && (
-                  <div className="s-media s-photo">
+                  <div className="s-media s-photo" style={{ position: 'relative', zIndex: 10 }}>
                     <img className="s-photo-bg" src={wish.photoUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" />
                     <img className="s-photo-fg" src={wish.photoUrl} alt="" loading="lazy" decoding="async" />
                   </div>
                 )}
                 {wish.videoUrl && (
-                  <div className="s-media" style={{ background: '#000' }}>
-                    <video src={wish.videoUrl} controls playsInline style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                  <div className="s-media" style={{ background: '#000', position: 'relative', zIndex: 10 }}>
+                    <video 
+                      ref={idx === currentIndex ? mediaRef : null}
+                      src={wish.videoUrl} 
+                      controls 
+                      playsInline 
+                      autoPlay={idx === currentIndex}
+                      onLoadedMetadata={(e) => {
+                        if (idx === currentIndex) setMediaDuration(e.target.duration * 1000);
+                      }}
+                      style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} 
+                    />
                   </div>
                 )}
                 {wish.audioUrl && (
-                  <div className="s-media" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-                    <AudioWavePlayer src={wish.audioUrl} />
+                  <div className="s-media" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', position: 'relative', zIndex: 10 }}>
+                    <AudioWavePlayer 
+                      src={wish.audioUrl} 
+                      externalAudioRef={idx === currentIndex ? mediaRef : null}
+                      autoPlay={idx === currentIndex}
+                      onLoadedMetadataCallback={(e) => {
+                        if (idx === currentIndex) setMediaDuration(e.target.duration * 1000);
+                      }}
+                    />
                   </div>
                 )}
               </div>

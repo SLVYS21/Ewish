@@ -1023,7 +1023,17 @@ window.addEventListener('message', function(e){
   if(!e.data) return;
   if(e.data.type==='WW_WISH_NEW'){var w=e.data.wish;if(!w||!w.text)return;var pos={x:CANVAS_W/2-98+(Math.random()-0.5)*300,y:CANVAS_H/2-130+(Math.random()-0.5)*300,rot:(Math.random()-0.5)*18,z:15};wishes.push(w);cardPositions.push(pos);var el=createCardEl(w,pos,wishes.length-1);el.style.opacity='0';$canvas.appendChild(el);setTimeout(function(){el.style.transition='opacity 0.5s';el.style.opacity='1';},30);document.getElementById('count-num').textContent=wishes.length;return;}
   if(e.data.type==='WW_UPDATE'){var d=e.data.data;if(!d)return;if(d.eyebrow!==undefined)document.querySelector('[data-node="eyebrow"]').textContent=d.eyebrow||'✦ Mur de mots';if(d.titleName!==undefined)document.querySelector('[data-node="titleName"]').textContent=d.titleName||'Prénom';return;}
-  if(e.data.type==='WW_CONFIG'){if(e.data.wishesEnabled!==undefined)setWishesEnabled(e.data.wishesEnabled);return;}
+  if(e.data.type==='WW_CONFIG'){
+    if(e.data.wishesEnabled!==undefined)setWishesEnabled(e.data.wishesEnabled);
+    if(e.data.cagnotte!==undefined){
+      _d.cagnotte = e.data.cagnotte;
+      if(typeof initCagnotteStrip==='function') initCagnotteStrip();
+      if(typeof initGiftSheet==='function') initGiftSheet();
+      if(_d.cagnotte && _d.cagnotte.enabled) document.getElementById('cagnotte-btn').classList.add('show');
+      else document.getElementById('cagnotte-btn').classList.remove('show');
+    }
+    return;
+  }
 });
 
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){closeSheet();closeDetail();}});

@@ -59,7 +59,7 @@ export const updatePublication = (id, data) => api.patch(`/publications/${id}`, 
 export const publishPublication = (id, data) => api.post(`/publications/${id}/publish`, data);
 //export const unpublishPublication = (id) => api.post(`/publications/${id}/unpublish`);
 
-/* ── Étape 8 flow murs — claim par le destinataire ──────────────── */
+/* ── Étape 8 flow murs  claim par le destinataire ──────────────── */
 export const inviteRecipient = (pubId, email) =>
   api.post(`/walls/${pubId}/invite-recipient`, { email });
 export const getWallClaim  = (token) => api.get(`/walls/claim/${token}`);
@@ -186,7 +186,7 @@ export const updateTemplate = (name, data) =>
 export const getShortLink = (id) => api.post(`/shortlinks/${id}`, {}, { withCredentials: true });
 export const setCustomSlug = (id, slug) => api.patch(`/shortlinks/${id}`, { slug }, { withCredentials: true });
 
-/* myKado canonical URLs — /c/:slug /m/:slug /g/:slug */
+/* myKado canonical URLs  /c/:slug /m/:slug /g/:slug */
 export const getPublicationBySlug = (slug) => api.get(`/publications/by-slug/${slug}`);
 export const checkSlugAvailability = (slug, publicationId) =>
   api.post('/publications/slug-check', { slug, publicationId }, { withCredentials: true });

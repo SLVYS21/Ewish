@@ -130,6 +130,7 @@ router.get('/public/slug/:slug', async (req, res) => {
       coverImage: pub.data?.coverImage || '',
       confettiType: pub.style?.confettiType || 'default',
       revealIcon: pub.style?.revealIcon || 'gift',
+      revealAnimation: pub.style?.revealAnimation || 'confetti',
       wallBackground: pub.style?.wallBackground || '',
       fontFamily: pub.style?.fontFamily || 'Playfair Display'
     });

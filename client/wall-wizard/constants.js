@@ -81,7 +81,7 @@ export const WALL_EVENTS = [
     eyebrow:  'Hommage',
     confettiSuggestion: 'default',
   },
-  /* "Autre" — filet de sécurité pour toutes les occasions non listées.
+  /* "Autre"  filet de sécurité pour toutes les occasions non listées.
      Titre volontairement générique, éditable ensuite dans l'onglet Réglages. */
   {
     id: 'other', label: 'Autre', Icon: Sparkles, festive: true,
@@ -150,7 +150,7 @@ export const BACKGROUND_TABS = [
    fond image dans l'éditeur (Fond du mur) si il le souhaite. */
 export const DEFAULT_BACKGROUND_ID = null;
 
-/* ─── Cagnotte presets — Contrast Effect ──────────────────── */
+/* ─── Cagnotte presets  Contrast Effect ──────────────────── */
 export const CAGNOTTE_PRESETS = [
   { id: 'small',  amount: 10000,  label: 'Petit geste',   hint: 'Un mot doux + petite attention' },
   { id: 'medium', amount: 50000,  label: 'Cadeau marquant', hint: 'Un vrai cadeau, souvenir durable', recommended: true },
@@ -159,7 +159,7 @@ export const CAGNOTTE_PRESETS = [
 
 export const DEFAULT_CAGNOTTE_GOAL = 25000;
 
-/* ─── Confetti effects — repris de ConfettiTab.jsx pour éviter
+/* ─── Confetti effects  repris de ConfettiTab.jsx pour éviter
    un import cross-directory dans un composant de wizard ─── */
 export const CONFETTI_EFFECTS = [
   { value: 'emoji_party', label: 'Fête festive', desc: 'Emojis colorés qui volent' },
@@ -186,7 +186,7 @@ export function defaultDeadlineISO() {
 /* ─── Template par défaut du wizard ─── */
 export const DEFAULT_WALL_TEMPLATE = 'wall-of-wishes';
 
-/* ─── Progress Gradient — Goal Gradient Effect
+/* ─── Progress Gradient  Goal Gradient Effect
    Toutes les étapes démarrent au-dessus de 0 (motivation).  */
 export const WIZARD_PROGRESS = {
   1: 20,

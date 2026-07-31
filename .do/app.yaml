@@ -1,5 +1,5 @@
 # ================================================================
-# DigitalOcean App Platform — spec du service `server`
+# DigitalOcean App Platform  spec du service `server`
 # ---------------------------------------------------------------
 # Objectif : forcer le build en mode Dockerfile (au lieu du
 # buildpack Heroku qui n'installe pas les libs Chromium).
@@ -48,7 +48,7 @@ services:
 
     # ─── ENV VARS ───────────────────────────────────────────────
     # Les vraies valeurs restent injectées par DO (elles sont déjà
-    # là dans l'app existante). On liste juste les noms — DO garde
+    # là dans l'app existante). On liste juste les noms  DO garde
     # les valeurs SECRET existantes tant que tu ne les écrases pas.
     #
     # Pour ajouter/modifier une valeur : mets `value: "..."` +

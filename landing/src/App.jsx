@@ -8,6 +8,7 @@ import Pricing    from './components/Pricing';
 import Business   from './components/Business';
 import FinalCTA   from './components/FinalCTA';
 import Footer     from './components/Footer';
+import Inspirations from './components/Inspirations';
 
 const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
 
@@ -28,6 +29,7 @@ export default function App() {
         <WhyMyKado  />
         <HowItWorks />
         <Briques    onCreate={handleRegister} />
+        <Inspirations />
         <TrustAndCredibility />
         <Pricing    onCreate={handleRegister} />
         <Business   onCreate={handleRegister} />

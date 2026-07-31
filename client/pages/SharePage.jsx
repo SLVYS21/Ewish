@@ -17,7 +17,7 @@ import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
 const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
 const FREE_WORDS = 10;
 
-/* Origine app (React SPA) — sert à construire les liens de partage /m/:code
+/* Origine app (React SPA)  sert à construire les liens de partage /m/:code
    directement vers le frontend, pour que la preview OG (banner) fonctionne
    sur WhatsApp/FB sans hop de redirection.
    Priorité :
@@ -1062,7 +1062,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
         />
       )}
 
-      {/* myKado — personnaliser le lien canonique /c/:slug /m/:slug /g/:slug */}
+      {/* myKado  personnaliser le lien canonique /c/:slug /m/:slug /g/:slug */}
       {pub?._id && (
         <PersonalizeLinkModal
           open={linkModalOpen}

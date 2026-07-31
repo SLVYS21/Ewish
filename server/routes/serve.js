@@ -381,6 +381,7 @@ router.get('/:templateName/:customName', async (req, res) => {
     publicData.isAdmin = isAdmin;
     publicData.adminReturnUrl = adminReturnUrl;
     publicData.previewMode = isPreview;
+    publicData.forceIntro = req.query.showIntro === '1';
     publicData.landingUrl = process.env.LANDING_URL || 'https://www.mykado.store';
     publicData.appUrl = appOrigin;
     publicData.skipIntro = req.query.noanim === '1' || req.query.collect !== undefined;

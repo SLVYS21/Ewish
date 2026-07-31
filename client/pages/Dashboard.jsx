@@ -13,7 +13,7 @@ import WallCreateSheet from '../components/WallCreateSheet';
 import { WallActivityPreview, WallThemePreview } from '../components/WallPreviews';
 import s from './Dashboard.module.css';
 
-/* Template thumbnails — reused across recent + featured */
+/* Template thumbnails  reused across recent + featured */
 const TEMPLATE_GRADIENTS = {
   birthday:                'linear-gradient(135deg,#FFB3C1,#FF8DAA)',
   special:                 'linear-gradient(135deg,#D7C5F2,#B59CF0)',
@@ -220,7 +220,7 @@ export default function Dashboard() {
         
         <div className={s.heroContent}>
           <div className={s.heroTitle}>Bonsoir, {firstName}</div>
-          <div className={s.heroSub}>Célèbre les gens qui comptent — une carte animée, un mur collectif, un cadeau.</div>
+          <div className={s.heroSub}>Célèbre les gens qui comptent  une carte animée, un mur collectif, un cadeau.</div>
         </div>
         
         {/* Decorative elements */}

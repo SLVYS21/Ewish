@@ -22,7 +22,7 @@ const TEMPLATE_COLORS = {
   'wall-of-wishes-space': 'linear-gradient(135deg,#ff8060,#d83070)',
 };
 
-/* Deux murs actifs seulement — les variantes 3d/space ont été retirées.
+/* Deux murs actifs seulement  les variantes 3d/space ont été retirées.
    Voir memory/project_walls_flow.md */
 const WALL_TEMPLATES = new Set([
   'wall-of-wishes', 'wall-of-wishes-modern',
@@ -126,7 +126,7 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
           </div>
         )}
 
-        {/* Row 4  action buttons — les créations reçues n'ont que "Ouvrir".
+        {/* Row 4  action buttons  les créations reçues n'ont que "Ouvrir".
             Delete/Dup/Dépublier appartiennent au créateur, pas au destinataire. */}
         <div className="crea-r4" onClick={e => e.stopPropagation()}>
           {isReceived ? (
@@ -200,7 +200,7 @@ export default function MyCreations() {
   const [search,    setSearch]    = useState('');
   const [type,      setType]      = useState('all');
   const [tplFilter, setTplFilter] = useState('all');
-  /* Étape 8 flow murs — tab "reçues" pour voir les murs offerts. */
+  /* Étape 8 flow murs  tab "reçues" pour voir les murs offerts. */
   const [tab,       setTab]       = useState('mine'); // 'mine' | 'received'
   const [receivedCount, setReceivedCount] = useState(0);
 
@@ -226,7 +226,7 @@ export default function MyCreations() {
     getTemplates().then(r => setTemplates(r.data || [])).catch(() => {});
   }, []);
 
-  /* Compteur des créations reçues — affiché sur l'onglet même quand
+  /* Compteur des créations reçues  affiché sur l'onglet même quand
      l'utilisateur est sur "Mes créations". Refresh à chaque activation. */
   useEffect(() => {
     getPublications({ received: 'true', limit: 1 })
@@ -339,7 +339,7 @@ export default function MyCreations() {
         )}
       </div>
 
-      {/* Tabs Mine / Received — étape 8 flow murs */}
+      {/* Tabs Mine / Received  étape 8 flow murs */}
       <div style={{
         display: 'inline-flex', gap: 4,
         background: '#F4F1F9', padding: 4, borderRadius: 12,

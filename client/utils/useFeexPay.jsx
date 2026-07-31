@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import FeexPayModal from '../components/FeexPayModal';
 
 /* ================================================================
-   useFeexPay — hook impératif type "openKkiapayWidget".
+   useFeexPay  hook impératif type "openKkiapayWidget".
    ---------------------------------------------------------------
    Usage :
      const { openCheckout, feexpayModal } = useFeexPay();
@@ -16,7 +16,7 @@ import FeexPayModal from '../components/FeexPayModal';
      });
    ---------------------------------------------------------------
    L'appelant DOIT rendre `feexpayModal` quelque part dans son arbre
-   (au niveau qu'il veut — l'overlay est fixed/inset:0 donc le
+   (au niveau qu'il veut  l'overlay est fixed/inset:0 donc le
    z-index reste le même partout).
    ================================================================ */
 
@@ -51,7 +51,7 @@ export default function useFeexPay() {
       }}
       onFailure={(err) => {
         state.onFailure?.(err);
-        /* on ne ferme pas automatiquement en cas d'échec — le user peut retenter */
+        /* on ne ferme pas automatiquement en cas d'échec  le user peut retenter */
       }}
     />
   ) : null;

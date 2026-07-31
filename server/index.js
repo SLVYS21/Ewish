@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-/* Fonds de mur (images fixes) — dossier client/public/backgrounds/ servi
+/* Fonds de mur (images fixes)  dossier client/public/backgrounds/ servi
    aussi côté serveur pour que les URLs stockées (/backgrounds/xxx.png)
    résolvent depuis n'importe où (wall SSR, éditeur, previews).
    En prod le Dockerfile copie ce dossier dans l'image (voir Dockerfile). */
@@ -49,7 +49,7 @@ app.use('/backgrounds', express.static(path.join(__dirname, '../client/public/ba
   immutable: false,
 }));
 
-/* Sticker bank — servie depuis server/public/stickers/ (bundlée dans l'image
+/* Sticker bank  servie depuis server/public/stickers/ (bundlée dans l'image
    Docker via COPY server/public → /app/server/public). L'endpoint
    /api/stickers plus bas renvoie la liste JSON pour les composers. */
 app.use('/stickers', express.static(path.join(__dirname, 'public/stickers'), {
@@ -116,8 +116,8 @@ app.use('/s',       require('./routes/shortlinks'));
 app.use('/preview', require('./routes/preview'));
 app.use('/site',    require('./routes/serve'));
 
-// Canonical brique URLs (myKado) — /c/:slug /m/:slug /g/:slug
-// Résout et redirige vers /site/… — voir notes/sitemap.md
+// Canonical brique URLs (myKado)  /c/:slug /m/:slug /g/:slug
+// Résout et redirige vers /site/…  voir notes/sitemap.md
 app.use('/',        require('./routes/canonical'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '2.0.0' }));

@@ -277,7 +277,7 @@ export default function WallApp() {
   }, [showIntro]);
 
   /* Historiquement on branchait un listener KKiaPay ici. FeexPay est
-     désormais géré par le hook useFeexPay via un modal dédié — la
+     désormais géré par le hook useFeexPay via un modal dédié  la
      vérification serveur se fait dans le onSuccess du openCheckout
      (voir handleGiftPay ci-dessous). */
 
@@ -495,7 +495,7 @@ export default function WallApp() {
                   <AudioWavePlayer src={wish.audioUrl} />
                 )}
                 {kind === 'video' && (
-                  <video className="pin-photo" src={wish.videoUrl} controls />
+                  <video className="pin-photo" src={wish.videoUrl} controls onClick={(e) => e.stopPropagation()} />
                 )}
               </div>
             );
@@ -559,6 +559,17 @@ export default function WallApp() {
                 style={{ width: '100%', marginBottom: 12 }}
               />
               {uploading && <div style={{ fontSize: 13, marginBottom: 12 }}>Téléchargement en cours...</div>}
+              {!uploading && wishForm.mediaType === 'audio' && wishForm.audioUrl && (
+                <div style={{ marginBottom: 12 }}>
+                  <AudioWavePlayer src={wishForm.audioUrl} />
+                </div>
+              )}
+              {!uploading && wishForm.mediaType === 'video' && wishForm.videoUrl && (
+                <video src={wishForm.videoUrl} controls style={{ width: '100%', maxHeight: 200, objectFit: 'contain', background: '#000', marginBottom: 12, borderRadius: 8 }} />
+              )}
+              {!uploading && wishForm.mediaType === 'photo' && wishForm.photoUrl && (
+                <img src={wishForm.photoUrl} alt="Aperçu" style={{ width: '100%', maxHeight: 200, objectFit: 'contain', marginBottom: 12, borderRadius: 8 }} />
+              )}
 
               {/* Sticker picker (banque interne) */}
               <button

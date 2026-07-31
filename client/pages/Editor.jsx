@@ -20,7 +20,7 @@ import { Joyride, STATUS } from 'react-joyride';
 import {
   QrCode, Sparkles, Coffee, Blocks, MailOpen, ClipboardList,
   Megaphone, Info, Copy, Check, X, RefreshCw, Gift, ArrowLeft, ChevronRight,
-  Shield, Lock, MessageSquare, Palette, Share2, LayoutTemplate,
+  Shield, Lock, MessageSquare, Palette, Share2, LayoutTemplate, HelpCircle,
 } from 'lucide-react';
 import KycModal from '../components/KycModal';
 import MSheet from '../components/MSheet';
@@ -270,7 +270,6 @@ export default function Editor() {
   const handleJoyrideCallback = ({ status }) => {
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setRunTour(false);
-      localStorage.setItem('ewish_onboarding_done', 'true');
     }
   };
 
@@ -409,7 +408,6 @@ export default function Editor() {
       } catch { navigate('/ewish-admin/ewish'); }
     };
     load();
-    if (!localStorage.getItem('ewish_onboarding_done')) setRunTour(true);
   }, [id, navigate]);
 
   /* auto-save */
@@ -699,7 +697,7 @@ export default function Editor() {
         const { priceFCFA } = e.response.data;
         openCheckout({
           amount:      priceFCFA,
-          description: `myKado — ${pub?.title || 'Publication'}`,
+          description: `myKado  ${pub?.title || 'Publication'}`,
           customId:    `pub:${id}`,
           onSuccess: async ({ reference }) => {
             try { await doPublishRequest(reference); }
@@ -1390,6 +1388,9 @@ export default function Editor() {
           </span>
         </div>
         <div className={styles.topbarRight}>
+          <button className={styles.btnGhost} onClick={() => setRunTour(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <HelpCircle size={16} /> Aide
+          </button>
           {pub.published && shortCode && (
             <button className={styles.btnGhost} onClick={() => setShowQrModal(true)}>
               <QrCode size={16} /> Code QR

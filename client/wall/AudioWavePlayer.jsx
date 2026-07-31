@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Play, Pause } from 'lucide-react';
 
-function AudioWavePlayer({ src }) {
-  const audioRef = useRef(null);
+function AudioWavePlayer({ src, autoPlay, onPlayCallback, onPauseCallback, onLoadedMetadataCallback, externalAudioRef }) {
+  const internalAudioRef = useRef(null);
+  const audioRef = externalAudioRef || internalAudioRef;
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -11,25 +12,45 @@ function AudioWavePlayer({ src }) {
     const audio = audioRef.current;
     if (!audio) return;
 
+    if (autoPlay) {
+      audio.play().catch(() => {});
+      setIsPlaying(true);
+    }
+
     const handleTimeUpdate = () => {
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
     };
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleLoadedMetadata = (e) => {
+      setDuration(audio.duration);
+      if (onLoadedMetadataCallback) onLoadedMetadataCallback(e);
+    };
     const handleEnded = () => {
       setIsPlaying(false);
       setProgress(0);
+    };
+    const handlePlay = () => {
+      setIsPlaying(true);
+      if (onPlayCallback) onPlayCallback();
+    };
+    const handlePause = () => {
+      setIsPlaying(false);
+      if (onPauseCallback) onPauseCallback();
     };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
     };
   }, []);
 
@@ -38,9 +59,8 @@ function AudioWavePlayer({ src }) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(() => {});
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -64,7 +84,9 @@ function AudioWavePlayer({ src }) {
   });
 
   return (
-    <div style={{
+    <div 
+      onClick={(e) => e.stopPropagation()}
+      style={{
       display: 'flex', alignItems: 'center', gap: '12px', background: '#f5f5f5',
       padding: '8px 12px', borderRadius: '40px', width: '100%', maxWidth: '300px',
       boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)', boxSizing: 'border-box'

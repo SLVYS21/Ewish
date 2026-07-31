@@ -5,7 +5,7 @@ import {
 import { checkSlugAvailability, updatePublicationSlug } from '../utils/api';
 
 /**
- * myKado — Modal "Personnaliser le lien"
+ * myKado  Modal "Personnaliser le lien"
  *
  * Conforme aux règles UX (notes/ux-rules.md §2) :
  * - Suggestion auto pré-remplie
@@ -129,7 +129,7 @@ export default function PersonalizeLinkModal({
 
         <Field
           label="Ton lien personnalisé"
-          hint="Utilise des lettres, chiffres et tirets — entre 3 et 40 caractères"
+          hint="Utilise des lettres, chiffres et tirets  entre 3 et 40 caractères"
           error={status.state === 'invalid' ? status.message : undefined}
         >
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 8 }}>
@@ -172,7 +172,7 @@ export default function PersonalizeLinkModal({
             <>
               <Icon name="CheckCircle2" size="sm" color="var(--mk-state-success)" />
               <span className="mk-caption" style={{ color: 'var(--mk-state-success)' }}>
-                Ce lien est libre — tu peux le prendre.
+                Ce lien est libre  tu peux le prendre.
               </span>
             </>
           )}

@@ -1,8 +1,8 @@
 # ================================================================
-# Réduit le context Docker envoyé au builder — build 3x plus rapide.
+# Réduit le context Docker envoyé au builder  build 3x plus rapide.
 # ================================================================
 
-# node_modules — reinstallés dans le container
+# node_modules  reinstallés dans le container
 **/node_modules
 
 # Caches Puppeteer (Chrome retéléchargé dans le container)
@@ -10,7 +10,7 @@
 server/.cache
 
 # Landing (build indépendant, pas dans l'image server)
-# NB: on n'ignore PAS client/ ici — le serveur a besoin de
+# NB: on n'ignore PAS client/ ici  le serveur a besoin de
 # client/public/backgrounds/ (voir Dockerfile + server/index.js:47).
 # Les gros dossiers (node_modules, dist, dev-dist) sont exclus plus bas.
 landing

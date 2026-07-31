@@ -1,4 +1,4 @@
-/* Confetti effects — factorisé depuis templates/birthday/index.html:1602.
+/* Confetti effects  factorisé depuis templates/birthday/index.html:1602.
    Utilise window.confetti (tsparticles bundle chargé dans index.html).
    fire(type, opts?) déclenche l'effet ; retourne un canceller. */
 

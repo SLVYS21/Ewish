@@ -70,7 +70,7 @@ export const STYLE_BACKGROUNDS = [
 ];
 
 /* ─── Fonds image du mur ───────────────────────────────────────
-   Fichiers dans client/public/backgrounds/ — copiés verbatim par Vite
+   Fichiers dans client/public/backgrounds/  copiés verbatim par Vite
    dans dist/backgrounds/, et servis par Express via /backgrounds/*
    (voir server/index.js). Liste hardcodée car public/ n'est pas dans
    le graphe modules Vite : quand tu ajoutes un fichier dans
@@ -117,7 +117,7 @@ function rgbToHex(r, g, b) {
   return `#${to(r)}${to(g)}${to(b)}`;
 }
 function lightenHex(hex, whiteRatio) {
-  /* Mélange linéaire vers le blanc — équivalent visuel à
+  /* Mélange linéaire vers le blanc  équivalent visuel à
      color-mix(in srgb, hex X%, white Y%). Précalculé côté client
      pour un support browser universel (pas de dépendance color-mix). */
   const { r, g, b } = hexToRgb(hex);
@@ -129,7 +129,7 @@ function luminance(hex) {
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 export function paletteToBannerTint(accent) {
-  /* Gradient à 2 stops hex — évite le retard/fallback bronze quand
+  /* Gradient à 2 stops hex  évite le retard/fallback bronze quand
      color-mix n'est pas encore évalué par le renderer. */
   const light = lightenHex(accent, 0.45);
   return `linear-gradient(160deg, ${light} 0%, ${accent} 100%)`;
@@ -159,12 +159,11 @@ export const STYLE_CONFETTI = [
   { id: 'gold_rain',    label: 'Pluie d\'or', emoji: '✨' },
 ];
 
-/* ─── Icônes de Révélation (Noto Emoji) ─── */
-export const STYLE_REVEAL_ICONS = [
-  { id: 'gift',  label: 'Cadeau', emojiCode: '1f381' },
-  { id: 'cake',  label: 'Gâteau', emojiCode: '1f382' },
-  { id: 'heart', label: 'Cœur',   emojiCode: '1f49d' },
-  { id: 'party', label: 'Canon',  emojiCode: '1f389' },
+/* ─── Animations d'ouverture ─── */
+export const STYLE_REVEAL_ANIMATIONS = [
+  { id: 'confetti', label: 'Confettis', emojiCode: '1f389' },
+  { id: 'comic_burst', label: 'Déballage « comic burst »', emojiCode: '1f4a5' },
+  { id: 'sunburst', label: 'Éclosion « sunburst »', emojiCode: '1f31e' },
 ];
 
 /* ────────────────────────────────────────────────────────────── */
@@ -262,7 +261,7 @@ function RevealIconPreview({ item }) {
   );
 }
 
-/* Dots de preview selon le type — visuellement représentatifs. */
+/* Dots de preview selon le type  visuellement représentatifs. */
 function confettiPreviewDots(type) {
   switch (type) {
     case 'emoji_party':
@@ -374,7 +373,7 @@ function StyleSection({ title, hint, size, children }) {
   );
 }
 
-/* Template picker — swatchs cliquables en haut du panneau. */
+/* Template picker  swatchs cliquables en haut du panneau. */
 function TemplatePicker({ current, onPick, published, isPublished }) {
   return (
     <div className={s.tplGrid} role="radiogroup" aria-label="Type de mur">
@@ -413,7 +412,7 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
   const [bgId, setBgId] = useState(style.styleBgPreset || style.wallBackgroundId || null);
   const [paletteId, setPaletteId] = useState(style.stylePalettePreset || null);
   const [confettiId, setConfettiId] = useState(style.styleConfettiPreset || null);
-  const [revealIconId, setRevealIconId] = useState(style.revealIcon || null);
+  const [revealAnimationId, setRevealAnimationId] = useState(style.revealAnimation || 'confetti');
   const [revealMascot, setRevealMascot] = useState(style.revealMascot ?? false);
   const [revealEmojis, setRevealEmojis] = useState(style.revealEmojis ?? true);
   const [customBgUrl, setCustomBgUrl] = useState(style.styleCustomBgUrl || '');
@@ -443,10 +442,10 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
     [paletteId]
   );
 
-  /* Autosave — On construit le patch.style IMMÉDIATEMENT et on l'envoie
+  /* Autosave  On construit le patch.style IMMÉDIATEMENT et on l'envoie
      à la preview via postMessage. La sauvegarde serveur suit avec un
      debounce de 700 ms. Sans ça, la preview attendait ~1,5s (debounce
-     + round-trip DB) avant de refléter le choix — perçu comme "cassé". */
+     + round-trip DB) avant de refléter le choix  perçu comme "cassé". */
   useEffect(() => {
     if (!inited.current) { inited.current = true; return; }
     const nextStyle = {
@@ -455,7 +454,7 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
       stylePalettePreset: paletteId,
       styleConfettiPreset: confettiId,
       styleCustomBgUrl: customBgUrl,
-      revealIcon: revealIconId,
+      revealAnimation: revealAnimationId,
       revealMascot,
       revealEmojis,
     };
@@ -465,7 +464,7 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
       nextStyle.wallBackgroundInk = activeBg.ink;
       nextStyle.wallBackgroundSize = activeBg.size || 'cover';
     } else {
-      /* "Aucun" — clear les champs pour que le serveur laisse tomber
+      /* "Aucun"  clear les champs pour que le serveur laisse tomber
          l'ancien fond (sinon le spread conserve les valeurs précédentes). */
       nextStyle.wallBackgroundId = null;
       nextStyle.wallBackground = null;
@@ -496,22 +495,36 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
     saveTimer.current = setTimeout(async () => {
       onSave?.('saving');
       try {
-        await updatePublication(id, { style: nextStyle });
+        if (id === 'draft') {
+          const raw = localStorage.getItem('ewish_wall_draft');
+          if (raw) {
+            const draft = JSON.parse(raw);
+            draft.style = { ...(draft.style || {}), ...nextStyle };
+            localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
+            onPubUpdated?.(draft);
+          }
+          onSave?.('saved');
+          return;
+        }
+
+        const res = await updatePublication(id, { style: nextStyle });
+        onPubUpdated?.(res.data);
         onSave?.('saved');
       } catch {
         onSave?.('unsaved');
       }
     }, 700);
-    return () => clearTimeout(saveTimer.current);
+    // On ne clear pas le timeout au démontage (unmount) pour garantir la sauvegarde 
+    // si l'utilisateur change d'onglet juste après avoir cliqué.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bgId, paletteId, confettiId, revealIconId, revealMascot, revealEmojis, customBgUrl]);
+  }, [bgId, paletteId, confettiId, revealAnimationId, revealMascot, revealEmojis, customBgUrl]);
 
   /* Switch de template : carry-over du style + info d'URL modifiée si publié */
   const handleTemplateSwitch = async (nextTpl) => {
     if (nextTpl === templateName || tplSwitching) return;
     if (pub?.published) {
       const ok = window.confirm(
-        "Ce mur est publié — changer le type de mur va modifier son URL publique. Continuer ?"
+        "Ce mur est publié  changer le type de mur va modifier son URL publique. Continuer ?"
       );
       if (!ok) return;
     }
@@ -570,7 +583,7 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
       <section className={s.section}>
         <div className={s.sectionHead}>
           <h3 className={s.sectionTitle}>Type de mur</h3>
-          <p className={s.sectionHint}>Le style de base — les mots s'affichent différemment.</p>
+          <p className={s.sectionHint}>Le style de base  les mots s'affichent différemment.</p>
         </div>
         <TemplatePicker current={templateName} onPick={handleTemplateSwitch} isPublished={pub?.published} />
         {tplSwitching && (
@@ -607,16 +620,16 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
         </div>
       </StyleSection>
 
-      {/* ── Icône de Révélation ── */}
+      {/* ── Animation d'ouverture ── */}
       <StyleSection
-        title="Icône de déballage"
-        hint="Ce que le destinataire touche pour ouvrir (animé)."
+        title="Animation d'ouverture"
+        hint="Ce que le destinataire voit avant que le mur n'apparaisse."
       >
         <div className={s.bgList}>
-          {STYLE_REVEAL_ICONS.map(icon => (
-            <div key={icon.id} className={`${s.iconCard} ${revealIconId === icon.id ? s.iconCardActive : ''}`} onClick={() => setRevealIconId(icon.id)}>
-              <img src={`https://fonts.gstatic.com/s/e/notoemoji/latest/${icon.emojiCode}/512.gif`} alt={icon.label} className={s.iconImg} />
-              <span className={s.iconLabel}>{icon.label}</span>
+          {STYLE_REVEAL_ANIMATIONS.map(anim => (
+            <div key={anim.id} className={`${s.iconCard} ${revealAnimationId === anim.id ? s.iconCardActive : ''}`} onClick={() => setRevealAnimationId(anim.id)}>
+              <img src={`https://fonts.gstatic.com/s/e/notoemoji/latest/${anim.emojiCode}/512.gif`} alt={anim.label} className={s.iconImg} />
+              <span className={s.iconLabel} style={{ textAlign: 'center', lineHeight: 1.2 }}>{anim.label}</span>
             </div>
           ))}
         </div>
@@ -628,6 +641,29 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
         hint=""
       >
         <div className={s.paletteList}>
+          <div
+            className={s.paletteCircle}
+            style={{
+              background: 'conic-gradient(from 180deg at 50% 50%, #FF5470 0deg, #FFC145 72deg, #2E7256 144deg, #3B82F6 216deg, #7C5CC9 288deg, #FF5470 360deg)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              const random = STYLE_PALETTES[Math.floor(Math.random() * STYLE_PALETTES.length)];
+              setPaletteId(random.id);
+            }}
+            title="Aléatoire"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))' }}>
+              <polyline points="16 3 21 3 21 8" />
+              <line x1="4" y1="20" x2="21" y2="3" />
+              <polyline points="21 16 21 21 16 21" />
+              <line x1="15" y1="15" x2="21" y2="21" />
+              <line x1="4" y1="4" x2="9" y2="9" />
+            </svg>
+          </div>
           {STYLE_PALETTES.map(p => (
             <div
               key={p.id}

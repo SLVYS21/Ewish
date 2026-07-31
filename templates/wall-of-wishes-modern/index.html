@@ -24,14 +24,14 @@
       --mk-lilac-bg: #F6F1FB;
       --mk-paper:    #FFFFFF;
 
-      /* Étape 2 flow murs — --wall-accent (injecté par serve.js) prend le pas
+      /* Étape 2 flow murs  --wall-accent (injecté par serve.js) prend le pas
          quand le wizard a défini un accent, sinon fallback rose Kado. */
       --mk-rose:      var(--wall-accent, #E11D48);
       --mk-rose-2:    #F35C7A;
       --mk-rose-soft: #FFB3C1;
       --mk-rose-pale: #FFE3E8;
 
-      /* Étape 2 flow murs — --wall-accent surcharge aussi la couleur principale
+      /* Étape 2 flow murs  --wall-accent surcharge aussi la couleur principale
          du template moderne (violet mur par défaut). */
       --mk-mur:       var(--wall-accent, #8A63D2);
       --mk-mur-bg:    #F4EFFB;
@@ -98,7 +98,7 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: var(--body);
-      /* Fond du mur — pilotable par le wizard (étape 2 flow murs).
+      /* Fond du mur  pilotable par le wizard (étape 2 flow murs).
          --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
       background: var(--wall-bg, linear-gradient(180deg, #FBF1F4, #F6EEF8));
       background-size: var(--wall-bg-size, cover);
@@ -341,7 +341,7 @@
     .cag-cta svg { width: 16px; height: 16px; }
     .cag-right, .cag-eyebrow, .cag-meta { display: none; }
 
-    /* Desktop cagnotte strip — horizontal, centered, max 1180px (Mur 1 mockup) */
+    /* Desktop cagnotte strip  horizontal, centered, max 1180px (Mur 1 mockup) */
     @media (min-width: 900px) {
       #cagnotte-strip { margin: -34px auto 0; max-width: 1180px; padding: 0 16px; }
       .cagnotte-card {
@@ -360,7 +360,7 @@
       }
     }
 
-    /* ── NOTES CONTAINER — masonry columns ─────────────── */
+    /* ── NOTES CONTAINER  masonry columns ─────────────── */
     /* Vraie mosaïque via CSS multi-column. column-count est piloté en
        inline style par updateWallCols() (JS) = min(breakpoint, nb-items).
        La valeur ci-dessous n'est qu'un fallback : on n'utilise pas
@@ -374,7 +374,7 @@
       column-gap: 12px;
     }
     #notes-container > .pin {
-      /* display: block (pas inline-block) — Chromium/Edge réduit le
+      /* display: block (pas inline-block)  Chromium/Edge réduit le
          column-count effectif quand les enfants sont en inline-block
          dans un multi-column. */
       display: block;
@@ -418,7 +418,7 @@
       cursor: pointer;
       transition: transform .18s, box-shadow .18s;
       animation: mk-note-in .42s cubic-bezier(.3,.9,.4,1) both;
-      /* Étape 2 flow murs — bg du mur en fond, overlay pastel semi-opaque
+      /* Étape 2 flow murs  bg du mur en fond, overlay pastel semi-opaque
          par-dessus pour préserver la lisibilité + variation par tone. */
       background: var(--wall-bg, var(--pin-bg, #FFEDF1));
       background-size: var(--wall-bg-size, cover);
@@ -442,7 +442,7 @@
     .pin:active { transform: scale(.97); }
     .pin.is-new { outline: 2.5px solid var(--accent-soft); outline-offset: 0; }
 
-    /* Mot en attente de modération ou de paiement (freemium) — visible
+    /* Mot en attente de modération ou de paiement (freemium)  visible
        pour le contributeur seulement, avec une pastille "En relecture"
        pour qu'il comprenne pourquoi les autres ne le voient pas encore. */
     .pin.pin-pending { opacity: .78; }
@@ -1252,7 +1252,7 @@
       word-break: break-word;
       min-width: 0;
     }
-    /* Auto-shrink font pour messages longs — meilleur rendu global. */
+    /* Auto-shrink font pour messages longs  meilleur rendu global. */
     .story-card .big-tx.is-lg { font-size: 22px; line-height: 1.3; }
     .story-card .big-tx.is-xl { font-size: 17px; line-height: 1.4; }
     .story-card .s-media {
@@ -1381,6 +1381,9 @@
     #env-overlay.show { display: flex; }
     
     /* React Reveal Animations */
+    @keyframes mkSunA{to{transform:rotate(360deg)}}
+    @keyframes mkZoom{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+    @keyframes mkPulse{0%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:.8}}
     @keyframes mkRevGift{0%{transform:scale(.55) rotate(-9deg);opacity:0}10%{transform:scale(1.06) rotate(0);opacity:1}20%{transform:scale(1) rotate(-4deg)}30%{transform:scale(1.04) rotate(4deg)}44%{transform:scale(1) rotate(0);opacity:1}52%{transform:scale(0) rotate(0);opacity:0}100%{transform:scale(0);opacity:0}}
     @keyframes mkRevPop{0%,50%{transform:scale(0);opacity:0}62%{transform:scale(1.18);opacity:1}84%{transform:scale(1);opacity:1}95%,100%{transform:scale(1);opacity:0}}
     @keyframes mkRevTitle{0%,56%{opacity:0;transform:translateY(26px)}72%{opacity:1;transform:translateY(0)}90%{opacity:1;transform:translateY(0)}99%,100%{opacity:0;transform:translateY(-8px)}}
@@ -1663,7 +1666,7 @@
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3 2.6-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c2.5.3 5 1.7 5 5"/></svg>
         CADEAU COMMUN
       </div>
-      <div class="gift-tag">et si on se cotisait pourâ€¦</div>
+      <div class="gift-tag">et si on se cotisait pour…</div>
       <h2 id="gift-sheet-name" class="gift-name">Cadeau commun</h2>
       <p id="gift-sheet-desc" class="gift-desc"></p>
     </div>
@@ -2086,7 +2089,7 @@ function applyLiveStats(stats) {
   }
 }
 
-/* Polling de secours — appelé uniquement si le stream SSE ne fonctionne pas. */
+/* Polling de secours  appelé uniquement si le stream SSE ne fonctionne pas. */
 function pollNewWishes() {
   if (!PUB_ID) return;
   apiFetch('/api/wishes/' + PUB_ID + '/approved').then(function(data) {
@@ -2134,7 +2137,7 @@ function startLiveUpdates() {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Composer + Gift + Media handlers (portés du template space —
+   Composer + Gift + Media handlers (portés du template space 
    nécessaires aux boutons "Laisser un mot" et "Participer au kado")
 ══════════════════════════════════════════════════════════════════ */
 function showToast(msg) {
@@ -2145,7 +2148,7 @@ function showToast(msg) {
   setTimeout(function() { t.classList.remove('show'); }, 2800);
 }
 
-function updateComposerPreview() { /* stub — pas d'aperçu dans le modern */ }
+function updateComposerPreview() { /* stub  pas d'aperçu dans le modern */ }
 
 function checkGate() {
   var input = document.getElementById('access-code-input');
@@ -2390,12 +2393,12 @@ function submitWish() {
       isSubmitting = false; if (sb) sb.disabled = false;
       if (err && err.status === 402) {
         showToast(err.code === 'FREE_LIMIT_REACHED'
-          ? '5 mots gratuits atteints — le créateur doit activer le mur complet.'
+          ? '5 mots gratuits atteints  le créateur doit activer le mur complet.'
           : 'Photos & médias disponibles sur les murs activés.');
       } else if (err && err.status === 403) {
         showToast(err.message || 'Les mots sont temporairement fermés.');
       } else {
-        showToast((err && err.message) || "Échec de l'envoi — réessayez");
+        showToast((err && err.message) || "Échec de l'envoi  réessayez");
       }
     });
   } else {
@@ -2553,7 +2556,7 @@ function showAddedOverlay(moderation) {
   overlay.classList.add('open');
 }
 
-/* Share the wall — ouvre une modale "merci" avec les options de partage.
+/* Share the wall  ouvre une modale "merci" avec les options de partage.
    L'action share native (ou copie du lien) est déclenchée depuis la modale. */
 function shareWallLink() {
   var url = window.location.href.split('?')[0];
@@ -2623,6 +2626,8 @@ var INTRO_KEY = 'ww_intro_seen';
 
 function shouldShowIntro() {
   if (_d.skipIntro === true) return false;
+  if (window.__WW_PREVIEW_MODE && !_d.forceIntro) return false;
+  if (window.__IS_THANK_YOU) return false;
   return true;
 }
 
@@ -2644,14 +2649,55 @@ function showEnvelope() {
   if (!env) return;
   env.classList.add('show');
   var name = getRecipientName() || 'Toi';
+  var safeName = escapeHtml(name);
   
   var s = window.__WW_STYLE__ || {};
-  var revealIconCode = s.revealIcon || '1f381';
+  var revealAnimation = s.revealAnimation || 'confetti';
   var revealMascot = s.revealMascot;
 
   var html = '';
 
-  if (revealMascot) {
+  if (revealAnimation === 'comic_burst') {
+    env.style.padding = '0'; // reset default padding
+    html += '<div style="width:100%;height:100%;position:relative;background:#F2D24C;overflow:hidden;align-items:center;justify-content:center;font-family:\'Plus Jakarta Sans\',sans-serif;display:flex;">' +
+      '<div style="position:absolute;top:50%;left:50%;width:200vh;height:200vh;margin-top:-100vh;margin-left:-100vh;background:repeating-conic-gradient(from 0deg,#161311 0 2.2deg,transparent 2.2deg 8deg);opacity:.9;animation:mkZoom 3.6s ease-in-out infinite;"></div>' +
+      '<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 46%,#F2D24C 0%,#F2D24C 20%,transparent 40%);"></div>' +
+      '<div style="position:absolute;inset:0;background:#fff;z-index:8;pointer-events:none;animation:mkRevFlash 5.5s ease-in-out infinite;"></div>' +
+      '<div style="position:absolute;top:48px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#161311;opacity:.7;z-index:9;">myKado</div>' +
+      '<div style="position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">' +
+        '<button onclick="openWallFromEnvelope()" style="position:relative;width:200px;height:200px;display:grid;place-items:center;background:none;border:none;cursor:pointer;padding:0;outline:none;" class="gift-box-burst">' +
+          '<div style="position:absolute;width:170px;height:170px;border-radius:50%;border:5px solid #C13B3B;animation:mkRevRing 5.5s ease-out infinite;"></div>' +
+          '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f381/512.gif" alt="" style="position:absolute;width:150px;height:150px;filter:drop-shadow(0 16px 16px rgba(120,70,10,.4));animation:mkRevGift 5.5s ease-in-out infinite;">' +
+          '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/512.gif" alt="" style="position:absolute;width:150px;height:150px;filter:drop-shadow(0 16px 16px rgba(120,70,10,.4));animation:mkRevPop 5.5s ease-in-out infinite;">' +
+        '</button>' +
+        '<div style="text-align:center;animation:mkRevTitle 5.5s ease-in-out infinite;margin-top:6px;">' +
+          '<div style="position:relative;display:inline-block;"><div style="position:absolute;inset:0;transform:translate(5px,6px) rotate(-2deg);background:#161311;border-radius:7px;"></div><div style="position:relative;transform:rotate(-2deg);background:#C13B3B;border:3px solid #161311;border-radius:7px;padding:9px 22px;font:800 30px \'Plus Jakarta Sans\';color:#fff;">SURPRISE&nbsp;!</div></div>' +
+          '<div style="font-family:\'Fraunces\',serif;font-style:italic;font-size:22px;color:#161311;margin-top:20px;">Le mur de ' + safeName + ' t\'attend</div>' +
+          '<button onclick="openWallFromEnvelope()" style="display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:#161311;color:#F2D24C;border-radius:99px;padding:11px 20px;font:800 13px \'Plus Jakarta Sans\';border:none;cursor:pointer;box-shadow:0 8px 16px rgba(0,0,0,.15);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.03)\'" onmouseout="this.style.transform=\'scale(1)\'">Ouvrir le mur<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F2D24C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  } else if (revealAnimation === 'sunburst') {
+    env.style.padding = '0'; // reset default padding
+    html += '<div style="width:100%;height:100%;position:relative;background:#1B2450;overflow:hidden;align-items:center;justify-content:center;font-family:\'Plus Jakarta Sans\',sans-serif;display:flex;">' +
+      '<div style="position:absolute;top:50%;left:50%;width:200vh;height:200vh;margin-top:-100vh;margin-left:-100vh;background:repeating-conic-gradient(from 0deg,#2C3A6E 0 10deg,#1C264F 10deg 20deg);animation:mkSunA 40s linear infinite;"></div>' +
+      '<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 46%,rgba(232,163,61,.2) 0%,transparent 50%);"></div>' +
+      '<div style="position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.9),transparent 40%);z-index:8;pointer-events:none;animation:mkRevFlash 5.5s ease-in-out infinite;"></div>' +
+      '<div style="position:absolute;top:48px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#fff;opacity:.7;z-index:9;">myKado</div>' +
+      '<div style="position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">' +
+        '<button onclick="openWallFromEnvelope()" style="position:relative;width:220px;height:220px;display:grid;place-items:center;background:none;border:none;cursor:pointer;padding:0;outline:none;" class="gift-box-burst">' +
+          '<div style="position:absolute;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(232,163,61,.5),transparent 68%);animation:mkPulse 4s ease-in-out infinite;"></div>' +
+          '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9e1/512.gif" alt="" style="position:absolute;width:150px;height:150px;filter:drop-shadow(0 16px 18px rgba(0,0,0,.5));animation:mkRevGift 5.5s ease-in-out infinite;">' +
+          '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2728/512.gif" alt="" style="position:absolute;width:150px;height:150px;filter:drop-shadow(0 16px 18px rgba(0,0,0,.5));animation:mkRevPop 5.5s ease-in-out infinite;">' +
+        '</button>' +
+        '<div style="text-align:center;animation:mkRevTitle 5.5s ease-in-out infinite;margin-top:6px;">' +
+          '<div style="position:relative;display:inline-block;"><div style="position:absolute;inset:0;transform:translate(5px,6px) rotate(-2deg);background:#0E1230;border-radius:7px;"></div><div style="position:relative;transform:rotate(-2deg);background:#E8A33D;border:3px solid #0E1230;border-radius:7px;padding:9px 22px;font:800 30px \'Plus Jakarta Sans\';color:#161311;">SURPRISE&nbsp;!</div></div>' +
+          '<div style="font-family:\'Fraunces\',serif;font-style:italic;font-size:22px;color:#fff;margin-top:20px;">Le mur de ' + safeName + ' t\'attend</div>' +
+          '<button onclick="openWallFromEnvelope()" style="display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:#fff;color:#0E1230;border-radius:99px;padding:11px 20px;font:800 13px \'Plus Jakarta Sans\';border:none;cursor:pointer;box-shadow:0 8px 16px rgba(0,0,0,.15);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.03)\'" onmouseout="this.style.transform=\'scale(1)\'">Ouvrir le mur<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0E1230" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  } else if (revealMascot) {
     html += '<div style="z-index:10;display:flex;flex-direction:column;align-items:center;">' +
       '<div style="text-align:center;animation:mkRevTitle 5.5s ease-in-out infinite;background:var(--pin-btn, var(--accent, #E11D48));color:var(--pin-btn-ink, #fff);background-image:var(--cover-image, none);background-blend-mode:soft-light;background-size:cover;background-position:center;padding:40px 24px;border-radius:28px;box-shadow:0 16px 50px rgba(0,0,0,0.3);width:90%;max-width:360px;display:flex;flex-direction:column;align-items:center;">' +
       '<div style="position:relative;width:200px;height:200px;display:flex;justify-content:center;margin-bottom:12px;">' +
@@ -2677,24 +2723,33 @@ function showEnvelope() {
           '</svg>' +
         '</div>' +
       '</div>' +
-      '<div style="font-family:\'Fraunces\',serif;font-size:32px;line-height:1.1;margin-bottom:12px;">Pour ' + escapeHtml(name) + '</div>' +
+      '<div style="font-family:\'Fraunces\',serif;font-size:32px;line-height:1.1;margin-bottom:12px;">Pour ' + safeName + '</div>' +
       '<div style="font-family:\'Fraunces\',serif;font-style:italic;font-size:20px;opacity:0.95;line-height:1.3;margin-bottom:28px;">Tes proches t\'ont préparé une belle surprise...</div>' +
       '<button onclick="openWallFromEnvelope()" style="display:inline-flex;align-items:center;gap:8px;background:var(--pin-btn-ink, #fff);color:var(--pin-btn, var(--accent, #1B2450));border-radius:99px;padding:14px 28px;font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer;border:none;box-shadow:0 6px 16px rgba(0,0,0,0.15);transition:transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">Ouvrir le mur <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
       '</div></div>';
   } else {
-    html += '<div style="z-index:10;display:flex;flex-direction:column;align-items:center;">' +
-      '<div style="text-align:center;animation:mkRevTitle 5.5s ease-in-out infinite;background:var(--pin-btn, var(--accent, #E11D48));color:var(--pin-btn-ink, #fff);background-image:var(--cover-image, none);background-blend-mode:soft-light;background-size:cover;background-position:center;padding:40px 24px;border-radius:28px;box-shadow:0 12px 40px rgba(0,0,0,0.3);width:90%;max-width:360px;display:flex;flex-direction:column;align-items:center;">' +
-      '<div style="position:relative;width:160px;height:160px;display:grid;place-items:center;margin-bottom:16px;">' +
-        '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/' + revealIconCode + '/512.gif" alt="" style="position:absolute;width:130px;height:130px;filter:drop-shadow(0 12px 16px rgba(0,0,0,.3));animation:mkRevGift 5.5s ease-in-out infinite;" />' +
-        '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2728/512.gif" alt="" style="position:absolute;width:130px;height:130px;filter:drop-shadow(0 12px 16px rgba(0,0,0,.3));animation:mkRevPop 5.5s ease-in-out infinite;" />' +
-      '</div>' +
-      '<div style="font-family:\'Fraunces\',serif;font-size:32px;line-height:1.1;margin-bottom:12px;">Pour ' + escapeHtml(name) + '</div>' +
-      '<div style="font-family:\'Fraunces\',serif;font-style:italic;font-size:20px;opacity:0.95;line-height:1.3;margin-bottom:28px;">Tes proches t\'ont préparé une belle surprise...</div>' +
-      '<button onclick="openWallFromEnvelope()" style="display:inline-flex;align-items:center;gap:8px;background:var(--pin-btn-ink, #fff);color:var(--pin-btn, var(--accent, #1B2450));border-radius:99px;padding:14px 28px;font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer;border:none;box-shadow:0 6px 16px rgba(0,0,0,0.15);transition:transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">Ouvrir le mur <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
-      '</div></div>';
+    env.style.padding = '30px'; // default padding for confetti version
+      html += '<div style="z-index:10;display:flex;flex-direction:column;align-items:center;">' +
+        '<div style="text-align:center;animation:mkRevTitle 5.5s ease-in-out infinite;background:var(--pin-btn, var(--accent, #E11D48));color:var(--pin-btn-ink, #fff);background-image:var(--cover-image, none);background-blend-mode:soft-light;background-size:cover;background-position:center;padding:40px 24px;border-radius:28px;box-shadow:0 12px 40px rgba(0,0,0,0.3);width:90%;max-width:360px;display:flex;flex-direction:column;align-items:center;">' +
+        '<div style="position:relative;width:160px;height:160px;display:grid;place-items:center;margin-bottom:16px;">' +
+          '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f381/512.gif" alt="" style="position:absolute;width:130px;height:130px;filter:drop-shadow(0 12px 16px rgba(0,0,0,.3));animation:mkRevGift 5.5s ease-in-out infinite;" />' +
+          '<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2728/512.gif" alt="" style="position:absolute;width:130px;height:130px;filter:drop-shadow(0 12px 16px rgba(0,0,0,.3));animation:mkRevPop 5.5s ease-in-out infinite;" />' +
+        '</div>' +
+        '<div style="font-family:\'Fraunces\',serif;font-size:32px;line-height:1.1;margin-bottom:12px;">Pour ' + safeName + '</div>' +
+        '<div style="font-family:\'Fraunces\',serif;font-style:italic;font-size:20px;opacity:0.95;line-height:1.3;margin-bottom:28px;">Tes proches t\'ont préparé une belle surprise...</div>' +
+        '<button onclick="openWallFromEnvelope()" style="display:inline-flex;align-items:center;gap:8px;background:var(--pin-btn-ink, #fff);color:var(--pin-btn, var(--accent, #1B2450));border-radius:99px;padding:14px 28px;font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer;border:none;box-shadow:0 6px 16px rgba(0,0,0,0.15);transition:transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">Ouvrir le mur <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
+        '</div></div>';
+    }
+    env.innerHTML = html;
   }
-
-  env.innerHTML = html;
+//getRecipientName
+function getRecipientName() {
+  var explicit = (_d.recipient || _d.recipientName || '').toString().trim();
+  if (explicit) return explicit;
+  var nameEl = document.querySelector('[data-node="titleName"]');
+  var domName = nameEl ? nameEl.textContent.trim() : '';
+  if (domName && domName !== 'Prénom') return domName;
+  return '';
 }
 
 function openWallFromEnvelope() {
@@ -2750,7 +2805,7 @@ function domCascade(dur) {
   setTimeout(function() { el.classList.remove('on'); el.innerHTML = ''; }, dur || 7500);
 }
 
-/* Confetti tsparticles — miroir de client/utils/confettiFx.js.
+/* Confetti tsparticles  miroir de client/utils/confettiFx.js.
    Retourne true si l'effet a été déclenché, false si window.confetti absent. */
 function fireTsConfetti(type) {
   var confetti = window.confetti;
@@ -2876,7 +2931,7 @@ function storyPrev() {
 }
 
 /* Séquence aléatoire de fonds (une par ouverture), sans deux adjacents
-   identiques — évite la répétition prévisible. */
+   identiques  évite la répétition prévisible. */
 function pickBgSequence(count, allKeys) {
   if (!count || !allKeys.length) return [];
   var out = []; var last = null;
@@ -3038,7 +3093,7 @@ function applyTitle(d) {
 
 function applyCover(d) {
   /* La bannière (data.bannerImage / coverImage / wallCover) n'est plus
-     affichée dans le mur — elle sert uniquement de preview og:image
+     affichée dans le mur  elle sert uniquement de preview og:image
      pour le partage sur WhatsApp / réseaux sociaux. On garde la fonction
      pour la compat mais elle ne fait plus qu'un no-op. */
 }
@@ -3051,7 +3106,7 @@ function applyCover(d) {
 
   if (d.isPrivate && d.accessCode) document.getElementById('access-gate').style.display = 'flex';
 
-  /* Eyebrow supprimé volontairement — la bannière ne porte plus le badge
+  /* Eyebrow supprimé volontairement  la bannière ne porte plus le badge
      ✦ occasion. On force le hide même sur les vieux murs qui avaient
      `data.eyebrow` sauvegardé en DB avant ce cleanup. */
   (function hideEyebrow() {
@@ -3087,7 +3142,7 @@ function applyCover(d) {
   loadWishes();
 
   /* Preview mode : skip intro, révèle direct + démo confetti immédiate. */
-  if (d.previewMode) {
+  if (d.previewMode && !d.forceIntro) {
     markIntroSeen();
     var header = document.getElementById('wall-header');
     if (header) header.classList.add('reveal');
@@ -3095,7 +3150,7 @@ function applyCover(d) {
   }
   /* Intro sequence    only on first visit and only for public visitors (not admin) */
   else if (shouldShowIntro()) {
-    setTimeout(showIntroSequence, 100);
+    setTimeout(showEnvelope, 100);
   } else {
     var header = document.getElementById('wall-header');
     if (header) header.classList.add('reveal');
@@ -3134,13 +3189,18 @@ window.addEventListener('message', function(e) {
     var data = e.data.data;
     var style = e.data.style;
     if (style) {
+      if (!window.__WW_STYLE__) window.__WW_STYLE__ = {};
+      if (style.revealAnimation !== undefined && style.revealAnimation !== window.__WW_STYLE__.revealAnimation) {
+        window.__WW_STYLE__.revealAnimation = style.revealAnimation;
+        if (typeof showEnvelope === 'function') showEnvelope();
+      }
       var r = document.documentElement;
       if (style.wallBackground) {
          r.style.setProperty('--wall-bg', style.wallBackground);
          r.style.setProperty('--wall-bg-size', style.wallBackgroundSize || 'cover');
          r.style.setProperty('--wall-bg-repeat', style.wallBackgroundSize === 'tile' ? 'repeat' : 'no-repeat');
       } else if (style.wallBackground === null || style.wallBackgroundId === null) {
-         /* "Aucun" en live preview — retire le fond appliqué précédemment. */
+         /* "Aucun" en live preview  retire le fond appliqué précédemment. */
          r.style.removeProperty('--wall-bg');
          r.style.removeProperty('--wall-bg-size');
          r.style.removeProperty('--wall-bg-repeat');
@@ -3161,7 +3221,7 @@ window.addEventListener('message', function(e) {
       if (style.paletteAccentText) {
          r.style.setProperty('--pin-btn-ink', style.paletteAccentText);
       }
-      /* Bannière pilotée par la palette — live preview. */
+      /* Bannière pilotée par la palette  live preview. */
       if (style.bannerTintFromPalette !== undefined) {
          var cover = document.getElementById('wall-cover');
          if (cover) {
@@ -3180,7 +3240,7 @@ window.addEventListener('message', function(e) {
       }
     }
     if (!data) return;
-    /* eyebrow ignoré en live edit — badge occasion supprimé du design. */
+    /* eyebrow ignoré en live edit  badge occasion supprimé du design. */
     if (data.recipient !== undefined) _d.recipient = data.recipient;
     if (data.titleName !== undefined || data.titlePrefix !== undefined || data.occasion !== undefined) {
       if (data.titleName   !== undefined) _d.titleName   = data.titleName;
@@ -3193,12 +3253,17 @@ window.addEventListener('message', function(e) {
       });
     }
     if (data.subtitle  !== undefined) document.querySelector('[data-node="subtitle"]').textContent  = data.subtitle  || '';
-    /* La bannière n'est plus rendue dans le mur — voir applyCover pour la raison. */
+    /* La bannière n'est plus rendue dans le mur  voir applyCover pour la raison. */
     return;
   }
 
   if (e.data.type === 'WW_CONFIG') {
     if (e.data.wishesEnabled !== undefined) setWishesEnabled(e.data.wishesEnabled);
+    if (e.data.cagnotte !== undefined) {
+      _d.cagnotte = e.data.cagnotte;
+      if (typeof initCagnotteStrip === 'function') initCagnotteStrip();
+      if (typeof initGiftSheet === 'function') initGiftSheet();
+    }
     return;
   }
 

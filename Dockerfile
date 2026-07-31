@@ -1,5 +1,5 @@
 # ================================================================
-# myKado — server image (DigitalOcean App Platform / any Docker host)
+# myKado  server image (DigitalOcean App Platform / any Docker host)
 # ---------------------------------------------------------------
 # Pourquoi un Dockerfile plutôt que les buildpacks Heroku ?
 #   Le buildpack heroku/nodejs n'installe pas les libs système

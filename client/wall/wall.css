@@ -15,7 +15,7 @@
       --mk-lilac-bg: #F6F1FB;
       --mk-paper:    #FFFFFF;
 
-      /* Étape 2 flow murs — --wall-accent (injecté par serve.js) prend le pas
+      /* Étape 2 flow murs  --wall-accent (injecté par serve.js) prend le pas
          quand le wizard a défini un accent, sinon fallback rose Kado. */
       --mk-rose:      var(--wall-accent, #E11D48);
       --mk-rose-2:    #F35C7A;
@@ -91,7 +91,7 @@
     html { scroll-behavior: smooth; }
     .ww-shell--classic {
       font-family: var(--body);
-      /* Fond du mur — pilotable par le wizard (étape 2 flow murs).
+      /* Fond du mur  pilotable par le wizard (étape 2 flow murs).
          --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
       color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
@@ -340,7 +340,7 @@
     .cag-cta svg { width: 16px; height: 16px; }
     .cag-right, .cag-eyebrow, .cag-meta { display: none; }
 
-    /* Desktop cagnotte strip — horizontal, centered, max 1180px (Mur 2 mockup) */
+    /* Desktop cagnotte strip  horizontal, centered, max 1180px (Mur 2 mockup) */
     @media (min-width: 900px) {
       .ww-shell--classic #cagnotte-strip { margin: -34px auto 0; max-width: 1180px; padding: 0 16px; }
       .cagnotte-card {
@@ -419,7 +419,7 @@
     .sticky.s6 { --pin-bg: #F6E3C8; }
     .sticky.s7 { --pin-bg: #F9F5EA; }
 
-    /* Étape 2 flow murs — chaque post-it laisse transparaître le fond du mur
+    /* Étape 2 flow murs  chaque post-it laisse transparaître le fond du mur
        via un overlay pastel semi-opaque. Cohérence visuelle + palette lisible. */
     .pin.sticky {
       background: var(--wall-bg, var(--pin-bg));
@@ -1253,7 +1253,7 @@
     /* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
        ENVELOPE OVERLAY
        â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
-    /* Gift Unwrap — dark scene with animated gift box (Mur 2 mockup .gift-scene) */
+    /* Gift Unwrap  dark scene with animated gift box (Mur 2 mockup .gift-scene) */
     #env-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 880;
@@ -1431,7 +1431,7 @@
       word-break: break-word;
       min-width: 0;
     }
-    /* Auto-shrink font pour messages longs — meilleur rendu global. */
+    /* Auto-shrink font pour messages longs  meilleur rendu global. */
     .story-card .big-tx.is-lg { font-size: 22px; line-height: 1.3; }
     .story-card .big-tx.is-xl { font-size: 17px; line-height: 1.4; }
     .story-card .s-media {
@@ -1554,14 +1554,14 @@
       --mk-lilac-bg: #F6F1FB;
       --mk-paper:    #FFFFFF;
 
-      /* Étape 2 flow murs — --wall-accent (injecté par serve.js) prend le pas
+      /* Étape 2 flow murs  --wall-accent (injecté par serve.js) prend le pas
          quand le wizard a défini un accent, sinon fallback rose Kado. */
       --mk-rose:      var(--wall-accent, #E11D48);
       --mk-rose-2:    #F35C7A;
       --mk-rose-soft: #FFB3C1;
       --mk-rose-pale: #FFE3E8;
 
-      /* Étape 2 flow murs — --wall-accent surcharge aussi la couleur principale
+      /* Étape 2 flow murs  --wall-accent surcharge aussi la couleur principale
          du template moderne (violet mur par défaut). */
       --mk-mur:       var(--wall-accent, #8A63D2);
       --mk-mur-bg:    #F4EFFB;
@@ -1628,7 +1628,7 @@
     html { scroll-behavior: smooth; }
     .ww-shell--modern {
       font-family: var(--body);
-      /* Fond du mur — pilotable par le wizard (étape 2 flow murs).
+      /* Fond du mur  pilotable par le wizard (étape 2 flow murs).
          --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
       color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
@@ -1867,7 +1867,7 @@
     .cag-cta svg { width: 16px; height: 16px; }
     .cag-right, .cag-eyebrow, .cag-meta { display: none; }
 
-    /* Desktop cagnotte strip — horizontal, centered, max 1180px (Mur 1 mockup) */
+    /* Desktop cagnotte strip  horizontal, centered, max 1180px (Mur 1 mockup) */
     @media (min-width: 900px) {
       .ww-shell--modern #cagnotte-strip { margin: -34px auto 0; max-width: 1180px; padding: 0 16px; }
       .cagnotte-card {
@@ -1915,7 +1915,7 @@
       cursor: pointer;
       transition: transform .18s, box-shadow .18s;
       animation: mk-note-in .42s cubic-bezier(.3,.9,.4,1) both;
-      /* Étape 2 flow murs — bg du mur en fond, overlay pastel semi-opaque
+      /* Étape 2 flow murs  bg du mur en fond, overlay pastel semi-opaque
          par-dessus pour préserver la lisibilité + variation par tone. */
       background: var(--wall-bg, var(--pin-bg, #FFEDF1));
       background-size: var(--wall-bg-size, cover);
@@ -2687,7 +2687,7 @@
       word-break: break-word;
       min-width: 0;
     }
-    /* Auto-shrink font pour messages longs — meilleur rendu global. */
+    /* Auto-shrink font pour messages longs  meilleur rendu global. */
     .story-card .big-tx.is-lg { font-size: 22px; line-height: 1.3; }
     .story-card .big-tx.is-xl { font-size: 17px; line-height: 1.4; }
     .story-card .s-media {

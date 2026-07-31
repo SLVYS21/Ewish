@@ -1,19 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 
-export default function OnboardingTour() {
-  const [run, setRun] = useState(false);
-
-  useEffect(() => {
-    // Only run the tour if the user hasn't seen it yet
-    const hasSeenTour = localStorage.getItem('mk_onboarding_completed');
-    if (!hasSeenTour) {
-      // Small delay to ensure UI has rendered
-      const timer = setTimeout(() => setRun(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
+export default function OnboardingTour({ run, onClose }) {
   const steps = [
     {
       target: 'body',
@@ -48,8 +36,7 @@ export default function OnboardingTour() {
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
-      setRun(false);
-      localStorage.setItem('mk_onboarding_completed', 'true');
+      if (onClose) onClose();
     }
   };
 
