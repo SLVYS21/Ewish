@@ -97,21 +97,38 @@
     }
 
     html, body { height: 100%; }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      /* Couleur de repli si --wall-bg est une URL non chargée : évite un
+         "flash blanc" avant que le fond fixed du body::before ne soit peint. */
+      background: #FFFFFF;
+    }
     body {
       font-family: var(--body);
       /* Fond du mur  pilotable par le wizard (étape 2 flow murs).
-         --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
-      background: var(--wall-bg, #FFFFFF);
-      background-size: var(--wall-bg-size, cover);
-      background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
-      background-position: center;
+         --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js.
+         Le fond réel est peint par body::before en position:fixed pour éviter
+         le bug iOS Safari : background-attachment:fixed dimensionne l'image
+         à la hauteur du document au lieu du viewport, ce qui l'étire à mort
+         quand le mur est long. */
+      background: transparent;
       color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: var(--wall-bg, #FFFFFF);
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-position: center;
+      pointer-events: none;
     }
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; color: inherit; }
@@ -463,14 +480,22 @@
     .sticky.s7 { --pin-bg: #F9F5EA; }
 
     /* Étape 2 flow murs  chaque post-it laisse transparaître le fond du mur
-       via un overlay pastel semi-opaque. Cohérence visuelle + palette lisible. */
+       via un overlay pastel semi-opaque. Cohérence visuelle + palette lisible.
+       Sans background-attachment:fixed pour éviter le bug iOS Safari qui
+       étire l'image à la hauteur du document ; on garde l'effet "peek" en
+       laissant le bg suivre le scroll du pin. Desktop réactive le fixed
+       pour l'effet "fenêtre sur le mur" original. */
     .pin.sticky {
       background: var(--wall-bg, var(--pin-bg));
       background-size: var(--wall-bg-size, cover);
       background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
       background-position: center;
       position: relative;
+    }
+    @media (min-width: 900px) {
+      .pin.sticky {
+        background-attachment: fixed;
+      }
     }
     .pin.sticky::after {
       content: '';
@@ -1259,7 +1284,9 @@
       background: var(--wall-bg, #FFFFFF);
       background-size: var(--wall-bg-size, cover);
       background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
+      /* Pas de background-attachment:fixed : l'overlay est déjà position:fixed,
+         donc son fond suit naturellement le viewport. Ajouter fixed en plus
+         provoque le bug d'étirement iOS Safari sur des vues longues. */
       background-position: center;
       color: #fff;
       flex-direction: column; align-items: center; justify-content: center;

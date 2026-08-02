@@ -95,21 +95,36 @@
     }
 
     html, body { height: 100%; }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      /* Repli couleur derrière body::before pour éviter le flash blanc si
+         --wall-bg est une image lente à charger. */
+      background: #FBF1F4;
+    }
     body {
       font-family: var(--body);
       /* Fond du mur  pilotable par le wizard (étape 2 flow murs).
-         --wall-bg / --wall-bg-size / --wall-bg-repeat injectés par serve.js. */
-      background: var(--wall-bg, linear-gradient(180deg, #FBF1F4, #F6EEF8));
-      background-size: var(--wall-bg-size, cover);
-      background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
-      background-position: center;
+         Peint via body::before en position:fixed : contourne le bug iOS
+         Safari où background-attachment:fixed dimensionne l'image à la
+         hauteur du document au lieu du viewport (l'image s'étire en scroll). */
+      background: transparent;
       color: var(--wall-ink, var(--mk-ink));
       min-height: 100vh;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: var(--wall-bg, linear-gradient(180deg, #FBF1F4, #F6EEF8));
+      background-size: var(--wall-bg-size, cover);
+      background-repeat: var(--wall-bg-repeat, no-repeat);
+      background-position: center;
+      pointer-events: none;
     }
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; color: inherit; }
@@ -419,14 +434,21 @@
       transition: transform .18s, box-shadow .18s;
       animation: mk-note-in .42s cubic-bezier(.3,.9,.4,1) both;
       /* Étape 2 flow murs  bg du mur en fond, overlay pastel semi-opaque
-         par-dessus pour préserver la lisibilité + variation par tone. */
+         par-dessus pour préserver la lisibilité + variation par tone.
+         Sans background-attachment:fixed sur mobile (bug iOS Safari qui
+         étire l'image à la hauteur du document). Desktop réactive le
+         fixed pour retrouver l'effet "fenêtre sur le mur". */
       background: var(--wall-bg, var(--pin-bg, #FFEDF1));
       background-size: var(--wall-bg-size, cover);
       background-repeat: var(--wall-bg-repeat, no-repeat);
-      background-attachment: fixed;
       background-position: center;
       color: var(--mk-ink);
       min-width: 0;
+    }
+    @media (min-width: 900px) {
+      .pin {
+        background-attachment: fixed;
+      }
     }
     .pin::before {
       content: '';
