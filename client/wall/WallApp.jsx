@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Gift, Lock, Send, Share2, Sparkles, X, Heart, Image as ImageIcon, Music, ImagePlay } from 'lucide-react';
 import api, {
   getApprovedWishes,
@@ -11,12 +11,29 @@ import { fireConfetti } from '../utils/confettiFx';
 import AnimatedBackground from './AnimatedBackground';
 import StoryViewer from './StoryViewer';
 import AudioWavePlayer from './AudioWavePlayer';
+import { cldThumb } from '../utils/cloudinary';
 
 const INITIAL_DATA = typeof window !== 'undefined' ? (window.__WW_DATA__ || {}) : {};
 const INITIAL_META = typeof window !== 'undefined' ? (window.__WW_META__ || {}) : {};
 const INITIAL_STYLE = typeof window !== 'undefined' ? (window.__WW_STYLE__ || {}) : {};
 const INITIAL_CONFETTI = typeof window !== 'undefined' ? (window.__WW_CONFETTI_TYPE__ || 'default') : 'default';
-const maxWishes = 80;
+
+// Taille des pages d'infinite scroll. 30 = bon compromis : ~2 écrans mobile,
+// payload JSON < 100 KB, temps de génération thumb Cloudinary imperceptible.
+const PAGE_SIZE = 30;
+
+// Hash stable d'une string vers un entier 0..2^31. Sert à dériver la
+// rotation/tape/polaroid d'un vœu depuis son _id, plutôt que d'utiliser
+// Math.random() dans le render (qui repositionne à chaque re-render).
+function stableHash(str) {
+  let h = 2166136261;
+  const s = String(str || '');
+  for (let i = 0; i < s.length; i += 1) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
 
 function formatMoney(value) {
   return Number(value || 0).toLocaleString('fr-FR');
@@ -142,6 +159,13 @@ export default function WallApp() {
   const isPreview = !!data.previewMode;
 
   const [wishes, setWishes] = useState([]);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalWishes, setTotalWishes] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const cursorRef = useRef(null);        // miroir de nextCursor pour l'IO callback
+  const loadingRef = useRef(false);      // évite les fetch concurrents
+  const sentinelRef = useRef(null);
   const [stats, setStats] = useState(INITIAL_DATA.cagnotte || null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
@@ -221,29 +245,50 @@ export default function WallApp() {
 
     let es = null;
     let alive = true;
-    let poll = null;
 
-    const refresh = async () => {
-      const wishesPromise = getApprovedWishes(publicId);
-      const statsPromise = data.cagnotte?.enabled ? getContributionStats(publicId) : Promise.resolve(null);
+    // Charge la première page (thank-you + 30 premiers mots) et la config cagnotte.
+    const bootstrap = async () => {
+      const wishesPromise = getApprovedWishes(publicId, { limit: PAGE_SIZE });
+      const statsPromise  = data.cagnotte?.enabled ? getContributionStats(publicId) : Promise.resolve(null);
       const [w, s] = await Promise.all([wishesPromise, statsPromise]);
       if (!alive) return;
-      setWishes(Array.isArray(w.data) ? w.data : []);
+      const payload = w.data || {};
+      const arr = Array.isArray(payload.wishes) ? payload.wishes : (Array.isArray(payload) ? payload : []);
+      // Merge (au lieu d'un simple set) pour tolérer une arrivée SSE entre le
+      // moment où on lance le fetch et sa résolution : les vœux SSE déjà
+      // prépendés restent en tête, la page fetchée s'ajoute derrière.
+      setWishes((prev) => {
+        if (!prev.length) return arr;
+        const seen = new Set(prev.map((w) => String(w._id)));
+        return prev.concat(arr.filter((w) => !seen.has(String(w._id))));
+      });
+      const cur = payload.nextCursor || null;
+      cursorRef.current = cur;
+      setNextCursor(cur);
+      setHasMore(!!payload.hasMore);
+      if (typeof payload.total === 'number') setTotalWishes((t) => Math.max(t, payload.total));
+      else setTotalWishes((t) => Math.max(t, arr.length));
       if (s?.data) setStats(s.data);
       setLoading(false);
     };
 
-    refresh().catch(() => {
+    bootstrap().catch(() => {
       if (alive) setLoading(false);
     });
 
+    // SSE : les nouveaux vœux arrivent en tête. On dédupe par _id pour tolérer
+    // les replays SSE, on incrémente le compteur total, mais on ne touche
+    // pas au curseur (le curseur reste ancré sur la fin de la page fetchée).
     try {
       es = new EventSource(streamUrl);
       es.addEventListener('wish', (event) => {
         const payload = JSON.parse(event.data);
+        const wish = payload.data;
+        if (!wish?._id) return;
         setWishes((prev) => {
-          const next = [payload.data, ...prev.filter((item) => String(item._id) !== String(payload.data._id))];
-          return next.slice(0, maxWishes);
+          if (prev.some((item) => String(item._id) === String(wish._id))) return prev;
+          setTotalWishes((t) => t + 1);
+          return [wish, ...prev];
         });
         fireConfetti(confettiType);
       });
@@ -260,16 +305,56 @@ export default function WallApp() {
       es = null;
     }
 
-    poll = setInterval(() => {
-      refresh().catch(() => {});
-    }, 30000);
-
     return () => {
       alive = false;
       if (es) es.close();
-      if (poll) clearInterval(poll);
     };
   }, [streamEnabled, publicId]);
+
+  // Charge la page suivante quand le sentinel entre dans le viewport.
+  // Utilise loadingRef + cursorRef pour éviter tout fetch concurrent lié
+  // aux re-renders (l'IO peut déclencher plusieurs fois avant l'update state).
+  useEffect(() => {
+    if (!hasMore || !sentinelRef.current) return;
+    const node = sentinelRef.current;
+
+    const loadMore = async () => {
+      if (loadingRef.current || !cursorRef.current) return;
+      loadingRef.current = true;
+      setLoadingMore(true);
+      try {
+        const res = await getApprovedWishes(publicId, {
+          limit: PAGE_SIZE,
+          cursor: cursorRef.current,
+        });
+        const payload = res.data || {};
+        const arr = Array.isArray(payload.wishes) ? payload.wishes : [];
+        // Dédup par _id : une arrivée SSE pendant le fetch peut déjà avoir
+        // inséré un vœu qu'on récupère aussi via la page.
+        setWishes((prev) => {
+          const seen = new Set(prev.map((w) => String(w._id)));
+          const merged = prev.concat(arr.filter((w) => !seen.has(String(w._id))));
+          return merged;
+        });
+        const cur = payload.nextCursor || null;
+        cursorRef.current = cur;
+        setNextCursor(cur);
+        setHasMore(!!payload.hasMore);
+      } catch {
+        /* silencieux : le sentinel re-tentera si l'utilisateur re-scrolle */
+      } finally {
+        loadingRef.current = false;
+        setLoadingMore(false);
+      }
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) loadMore();
+    }, { rootMargin: '400px 0px' });
+
+    io.observe(node);
+    return () => io.disconnect();
+  }, [hasMore, publicId]);
 
   useEffect(() => {
     if (showIntro) return;
@@ -386,7 +471,9 @@ export default function WallApp() {
     });
   };
 
-  const currentBoard = wishes.slice(0, maxWishes);
+  // Toutes les pages fetchées sont visibles simultanément : plus de cap.
+  const currentBoard = wishes;
+  const displayedTotal = Math.max(totalWishes, wishes.length);
 
   if (showIntro) {
     return <ModernIntro onReveal={() => { setShowIntro(false); fireConfetti('stars'); }} />;
@@ -471,35 +558,73 @@ export default function WallApp() {
             const kind = mediaKind(wish);
             const tones = ['tone-rose','tone-lilac','tone-mint','tone-butter','tone-peach','tone-sky'];
             const toneClass = tones[(wish.color || 0) % 6];
+            // Stable per-wish : plus de repositionnement au re-render.
+            const h = stableHash(wish._id || `${index}`);
+            const isPolaroid = !isModern && (h & 1) === 1;
+            const tapeSide   = (h & 2) === 2 ? 'tape-l' : 'tape-r';
             return (
-              <div 
-                key={wish._id || index} 
-                className={`pin ${toneClass} ${!isModern && Math.random() > 0.5 ? 'polaroid' : ''}`} 
+              <div
+                key={wish._id || index}
+                className={`pin ${toneClass} ${isPolaroid ? 'polaroid' : ''}`}
                 style={{ '--rot': `${wish.rot || 0}deg` }}
                 onClick={() => setStoryIndex(index)}
               >
-                {!isModern && <div className={`tape ${Math.random() > 0.5 ? 'tape-l' : 'tape-r'}`}></div>}
+                {!isModern && <div className={`tape ${tapeSide}`}></div>}
                 <div className="nm">
                   <span className="av">{wish.firstName?.[0] || '?'}</span>
                   <span className="nm-text">{wish.firstName || 'Anonyme'}</span>
                 </div>
                 <div className="tx">{wish.message}</div>
                 {kind === 'photo' && (
-                  <img className="pin-photo" src={wish.photoUrl} alt="Photo" />
+                  <img
+                    className="pin-photo"
+                    src={cldThumb(wish.photoUrl)}
+                    alt="Photo"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 )}
                 {kind === 'sticker' && (
-                  <img className="pin-photo" src={wish.photoUrl} alt="Sticker"
-                       style={{ objectFit: 'contain', background: 'transparent' }} />
+                  <img
+                    className="pin-photo"
+                    src={cldThumb(wish.photoUrl)}
+                    alt="Sticker"
+                    loading="lazy"
+                    decoding="async"
+                    style={{ objectFit: 'contain', background: 'transparent' }}
+                  />
                 )}
                 {kind === 'audio' && (
                   <AudioWavePlayer src={wish.audioUrl} />
                 )}
                 {kind === 'video' && (
-                  <video className="pin-photo" src={wish.videoUrl} controls onClick={(e) => e.stopPropagation()} />
+                  <video
+                    className="pin-photo"
+                    src={wish.videoUrl}
+                    controls
+                    preload="none"
+                    onClick={(e) => e.stopPropagation()}
+                  />
                 )}
               </div>
             );
           })}
+          {/* Sentinel invisible : dès qu'il croise le viewport, on charge la page suivante. */}
+          {hasMore && (
+            <div
+              ref={sentinelRef}
+              aria-hidden="true"
+              style={{ gridColumn: '1 / -1', height: 1 }}
+            />
+          )}
+          {loadingMore && (
+            <div
+              style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '16px 0', color: 'var(--mk-ink-3)', fontSize: 13 }}
+              aria-live="polite"
+            >
+              Chargement…
+            </div>
+          )}
         </main>
       )}
 

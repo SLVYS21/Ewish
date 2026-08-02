@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import QRExport from '../components/QRExport';
 import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
+import WallPublishModal from '../components/WallPublishModal';
 
 /* ─── constants ─── */
 const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
@@ -293,13 +294,15 @@ export function UnlockView({ pub, onUnlocked }) {
   const navigate = useNavigate();
   const [unlocking, setUnlocking] = useState(false);
   const [err, setErr] = useState('');
+  const [showPlanModal, setShowPlanModal] = useState(false);
 
   const isWall = WALL_NAMES.has(pub?.templateName);
   const cost = pub?.creditsRequired ?? 1;
   const credits = user?.credits ?? 0;
   const enough = credits >= cost;
 
-  const handleUnlock = async () => {
+  /* Chemin non-mur : publication crédit legacy (1 crédit, plan free implicite). */
+  const handleUnlockLegacy = async () => {
     if (!enough) { navigate('/ewish-admin/credits'); return; }
     setUnlocking(true); setErr('');
     try {
@@ -309,6 +312,28 @@ export function UnlockView({ pub, onUnlocked }) {
     } catch (e) {
       setErr(e.response?.data?.error || 'Erreur lors de la publication');
     } finally { setUnlocking(false); }
+  };
+
+  /* Chemin mur : passe par WallPublishModal → choix de plan (free/premium/
+     infinite) + éventuel checkout FeexPay. Le "Débloquer pour 1 crédit"
+     précédent forçait le plan free sans laisser le choix. */
+  const handleWallPublishConfirm = async (planType, feexpayReference) => {
+    setUnlocking(true); setErr('');
+    try {
+      await publishPublication(pub._id, { planType, feexpayReference });
+      /* Le solde crédits peut avoir bougé selon le plan choisi ; on laisse
+         le contexte auth se resynchroniser au prochain fetch user. */
+      setShowPlanModal(false);
+      onUnlocked();
+    } catch (e) {
+      setErr(e.response?.data?.error || 'Erreur lors de la publication');
+      setShowPlanModal(false);
+    } finally { setUnlocking(false); }
+  };
+
+  const handlePrimaryClick = () => {
+    if (isWall) { setShowPlanModal(true); return; }
+    handleUnlockLegacy();
   };
 
   const FEATURES = [
@@ -362,24 +387,40 @@ export function UnlockView({ pub, onUnlocked }) {
         {err && <p style={{ fontSize: 12, color: 'var(--mk-accent)', fontWeight: 700 }}>{err}</p>}
         <button
           className="btn btn-primary btn-lg"
-          onClick={handleUnlock}
+          onClick={handlePrimaryClick}
           disabled={unlocking}
           style={{ minWidth: 240, justifyContent: 'center' }}
         >
           {unlocking
             ? <><RefreshCw size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
-            : enough
-              ? <><Zap size={16} /> Débloquer avec {cost} crédit{cost > 1 ? 's' : ''}</>
-              : <><Coins size={16} /> Recharger mes crédits</>
+            : isWall
+              ? <><Zap size={16} /> Publier le mur</>
+              : enough
+                ? <><Zap size={16} /> Débloquer avec {cost} crédit{cost > 1 ? 's' : ''}</>
+                : <><Coins size={16} /> Recharger mes crédits</>
           }
         </button>
-        <p style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>
-          Il te reste <strong style={{ color: enough ? 'var(--mk-mint)' : 'var(--mk-accent)' }}>{credits} crédit{credits > 1 ? 's' : ''}</strong>
-          {enough
-            ? `  il t'en restera ${credits - cost} après.`
-            : `  il t'en faut ${cost}.`}
-        </p>
+        {/* Pour les murs, le solde crédits ne détermine plus l'action
+            (le modal propose free/premium/infinite + Mobile Money). On
+            n'affiche donc plus la mention crédits en-dessous du CTA. */}
+        {!isWall && (
+          <p style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>
+            Il te reste <strong style={{ color: enough ? 'var(--mk-mint)' : 'var(--mk-accent)' }}>{credits} crédit{credits > 1 ? 's' : ''}</strong>
+            {enough
+              ? `  il t'en restera ${credits - cost} après.`
+              : `  il t'en faut ${cost}.`}
+          </p>
+        )}
       </div>
+
+      {isWall && showPlanModal && (
+        <WallPublishModal
+          pubId={pub?._id}
+          onClose={() => !unlocking && setShowPlanModal(false)}
+          onConfirm={handleWallPublishConfirm}
+          loading={unlocking}
+        />
+      )}
     </div>
   );
 }

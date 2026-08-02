@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AnimatedBackground, { BG_VARIANT_KEYS } from './AnimatedBackground';
 import AudioWavePlayer from './AudioWavePlayer';
+import { cldStory } from '../utils/cloudinary';
 
 /* Séquence aléatoire de fonds  recalculée à chaque ouverture pour
    éviter la même suite à chaque visite. Contrainte : pas deux fonds
@@ -166,8 +167,8 @@ function StoryViewer({ wishes, initialIndex, onClose }) {
                 )}
                 {wish.mediaType !== 'sticker' && wish.photoUrl && (
                   <div className="s-media s-photo" style={{ position: 'relative', zIndex: 10 }}>
-                    <img className="s-photo-bg" src={wish.photoUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                    <img className="s-photo-fg" src={wish.photoUrl} alt="" loading="lazy" decoding="async" />
+                    <img className="s-photo-bg" src={cldStory(wish.photoUrl)} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                    <img className="s-photo-fg" src={cldStory(wish.photoUrl)} alt="" loading="lazy" decoding="async" />
                   </div>
                 )}
                 {wish.videoUrl && (

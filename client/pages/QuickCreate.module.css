@@ -167,7 +167,21 @@
 
 @media (max-width: 640px) {
   .topBar { padding: 14px 20px; }
-  .stepWrap, .stepWrapCenter { padding: 24px 20px 80px; }
+  .stepWrap, .stepWrapCenter { padding: 24px 16px 80px; }
   .stepTitle { font-size: 34px; }
   .footer { padding: 16px 20px; }
+
+  /* Mobile : 2 cartes côte à côte au lieu d'une seule colonne. On resserre
+     l'espacement et le padding interne pour tenir sur les écrans étroits. */
+  .occasionGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .occasionCard {
+    padding: 16px 12px;
+    border-radius: 18px;
+  }
+  .occasionEmoji { margin-bottom: 8px; }
+  .occasionName  { font-size: 13.5px; }
+  .checkMark { top: 10px; right: 10px; padding: 3px; }
 }

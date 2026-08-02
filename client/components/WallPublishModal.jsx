@@ -127,30 +127,32 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId })
                 );
               })}
             </div>
+          </div>
 
-            <div className={s.footer}>
-              <div className={s.balance}>
-                {userCredits > 0
-                  ? <>Solde crédits : <strong>{userCredits}</strong></>
-                  : <>Paiement Mobile Money ou carte</>}
-              </div>
-
-              <button
-                className={s.submitBtn}
-                onClick={handleContinue}
-                disabled={loading}
-              >
-                {loading ? (
-                  <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication en cours…</>
-                ) : (
-                  plan.credits === 0
-                    ? `Publier en ${plan.name}`
-                    : hasEnoughCredits
-                      ? `Publier avec ${plan.credits} crédits`
-                      : `Payer ${plan.priceFCFA.toLocaleString('fr-FR')} FCFA`
-                )}
-              </button>
+          {/* Footer sorti de .body pour rester sticky en bas quand la liste
+              des plans est scrollée sur petits écrans. */}
+          <div className={s.footer}>
+            <div className={s.balance}>
+              {userCredits > 0
+                ? <>Solde crédits : <strong>{userCredits}</strong></>
+                : <>Paiement Mobile Money ou carte</>}
             </div>
+
+            <button
+              className={s.submitBtn}
+              onClick={handleContinue}
+              disabled={loading}
+            >
+              {loading ? (
+                <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication en cours…</>
+              ) : (
+                plan.credits === 0
+                  ? `Publier en ${plan.name}`
+                  : hasEnoughCredits
+                    ? `Publier avec ${plan.credits} crédits`
+                    : `Payer ${plan.priceFCFA.toLocaleString('fr-FR')} FCFA`
+              )}
+            </button>
           </div>
         </div>
       </div>

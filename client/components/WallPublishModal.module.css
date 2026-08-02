@@ -16,6 +16,14 @@
   border-radius: 16px;
   width: 100%;
   max-width: 500px;
+  /* Borne verticale : le modal ne peut jamais dépasser la hauteur du
+     viewport (moins le padding de l'overlay). Combiné à `overflow:hidden`
+     et au layout flex-column, ça permet à .body de scroller sans que le
+     .footer (CTA) ne sorte de l'écran. */
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   animation: modal-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -58,6 +66,11 @@
 
 .body {
   padding: 24px;
+  /* Zone scrollable centrale : le header reste en haut, le footer en bas,
+     la liste des plans scrolle au milieu si elle déborde. */
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .subtitle {
@@ -184,8 +197,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 20px;
+  gap: 12px;
+  padding: 16px 24px;
   border-top: 1px solid #f0f0f0;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .balance {
+    text-align: center;
+  }
+  .submitBtn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .balance {

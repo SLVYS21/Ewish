@@ -113,15 +113,74 @@ router.get('/:publicationId', async (req, res) => {
 });
 
 // GET /api/wishes/:publicationId/approved  approved + not hidden (template display)
+//
+// Deux modes pour ne pas casser les templates historiques :
+//   - Sans query : renvoie un array complet (comportement legacy).
+//   - Avec ?limit ou ?cursor : renvoie { wishes, nextCursor, hasMore, total }.
+//     Le thank-you (max 1) est toujours en tête de la première page.
 router.get('/:publicationId/approved', async (req, res) => {
   try {
-    const wishes = await Wish.find({
-      publicationId: req.params.publicationId,
+    const publicationId = req.params.publicationId;
+    const paginated = req.query.limit !== undefined || req.query.cursor !== undefined;
+
+    const baseMatch = {
+      publicationId,
       approved: true,
       hidden: false,
       pendingPayment: { $ne: true },
-    }).sort({ isThankYou: -1, createdAt: 1 }).lean();
-    res.json(wishes);
+    };
+
+    if (!paginated) {
+      const wishes = await Wish.find(baseMatch)
+        .sort({ isThankYou: -1, createdAt: 1 })
+        .lean();
+      return res.json(wishes);
+    }
+
+    const rawLimit = parseInt(req.query.limit, 10);
+    const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 30, 1), 100);
+    const cursor = req.query.cursor ? new Date(req.query.cursor) : null;
+    const hasValidCursor = cursor && !Number.isNaN(cursor.getTime());
+
+    const results = [];
+
+    // Première page : thank-you en tête si présent.
+    if (!hasValidCursor) {
+      const thankYou = await Wish.findOne({ ...baseMatch, isThankYou: true })
+        .sort({ createdAt: 1 })
+        .lean();
+      if (thankYou) results.push(thankYou);
+    }
+
+    const wishMatch = { ...baseMatch, isThankYou: { $ne: true } };
+    if (hasValidCursor) wishMatch.createdAt = { $gt: cursor };
+
+    // limit+1 comme sonde de page suivante (évite un count par page).
+    const remaining = Math.max(limit - results.length, 1);
+    const probe = await Wish.find(wishMatch)
+      .sort({ createdAt: 1 })
+      .limit(remaining + 1)
+      .lean();
+
+    const hasMore = probe.length > remaining;
+    const page = probe.slice(0, remaining);
+    results.push(...page);
+
+    const last = page[page.length - 1];
+    const nextCursor = hasMore && last ? last.createdAt : null;
+
+    // Total absolu uniquement sur la première page (économie d'un count).
+    let total;
+    if (!hasValidCursor) {
+      total = await Wish.countDocuments(baseMatch);
+    }
+
+    res.json({
+      wishes: results,
+      nextCursor: nextCursor ? nextCursor.toISOString() : null,
+      hasMore,
+      ...(total !== undefined ? { total } : {}),
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

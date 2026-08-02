@@ -176,7 +176,15 @@ export const deletePromo = (id) => api.delete(`/promo/${id}`, { withCredentials:
 export const getWishes = (pubId) => api.get(`/wishes/${pubId}`, { withCredentials: true });
 export const updateWish = (id, data) => api.patch(`/wishes/${id}`, data, { withCredentials: true });
 export const deleteWish = (id) => api.delete(`/wishes/${id}`, { withCredentials: true });
-export const getApprovedWishes = (pubId) => api.get(`/wishes/${pubId}/approved`, { withCredentials: true });
+/* getApprovedWishes(pubId)                      → array complet (legacy)
+   getApprovedWishes(pubId, { limit, cursor })   → { wishes, nextCursor, hasMore, total? }
+   La forme paginée s'active dès qu'on passe limit ou cursor. */
+export const getApprovedWishes = (pubId, opts) => {
+  const params = {};
+  if (opts && opts.limit  != null) params.limit  = opts.limit;
+  if (opts && opts.cursor != null) params.cursor = opts.cursor;
+  return api.get(`/wishes/${pubId}/approved`, { params, withCredentials: true });
+};
 
 // ── Templates (admin update) ──
 export const updateTemplate = (name, data) =>

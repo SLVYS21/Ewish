@@ -56,6 +56,11 @@ const CODEPOINTS = {
   'money-face':         '1f911',
   'speech-balloon':     '1f4ac',
   'thought-balloon':    '1f4ad',
+  'ring':               '1f48d',
+  'baby':               '1f476',
+  'clinking-glasses':   '1f942',
+  'waving-hand':        '1f44b',
+  'dove':               '1f54a_fe0f',
 };
 
 const CDN_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest';
