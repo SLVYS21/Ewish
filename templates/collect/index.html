@@ -672,7 +672,7 @@ input, textarea { font-family: inherit; color: inherit; }
       </div>
     </div>
 
-    <!-- Amount picker -->
+    <!-- Amount picker FCFA -->
     <div style="margin-bottom:18px;">
       <div style="font-size:12.5px;font-weight:700;color:var(--mk-ink-2);margin-bottom:9px;letter-spacing:.02em;">JE PARTICIPE AVEC</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="amt-grid"></div>
@@ -834,7 +834,7 @@ input, textarea { font-family: inherit; color: inherit; }
 
 const D   = window.__WW_DATA__ || {};
 const cag = D.cagnotte || {};
-const AMTS = [2000, 5000, 10000, 20000];
+const AMTS = [2000, 5000, 10000];
 const STEP_DOTS = { write: 0, sign: 1 }; // dot index while on that step
 
 /* ── State ─────────────────────────────────────────────── */
@@ -1070,7 +1070,7 @@ function init() {
     const chip = document.createElement('button');
     chip.className = 'amt-chip';
     chip.dataset.a = a;
-    chip.innerHTML = `<div class="av">${a >= 1000 ? (a / 1000) + 'k' : a}</div><div class="ac">FCFA</div>`;
+    chip.innerHTML = `<div class="av">${/*a >= 1000 ? (a / 1000) + 'k' :*/ a}</div><div class="ac">FCFA</div>`;
     chip.onclick = () => pickAmt(a, chip);
     grid.appendChild(chip);
   });

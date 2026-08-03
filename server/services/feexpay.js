@@ -17,7 +17,11 @@
 
 const fetch = require('node-fetch');
 
-const BASE_URL = process.env.FEEXPAY_BASE_URL || 'https://api-v2.feexpay.me';
+/* Base URL alignée sur le SDK PHP officiel foxinnovs/feexpay-sdk-php :
+   les endpoints /api/transactions/requesttopay/integration et
+   /api/transactions/getrequesttopay/integration/{ref} n'existent que sur
+   api.feexpay.me — api-v2 renvoie 404 dessus. */
+const BASE_URL = process.env.FEEXPAY_BASE_URL || 'https://api.feexpay.me';
 const TOKEN    = process.env.FEEXPAY_TOKEN || '';
 const SHOP_ID  = process.env.FEEXPAY_SHOP_ID || '';
 
@@ -57,29 +61,31 @@ async function request(method, path, body) {
   return data;
 }
 
-/* Mapping opérateur → path endpoint FeexPay Mobile Money.
-   Les noms de path viennent du SDK PHP officiel. On accepte des alias
-   pour rester tolérant à la casse / aux abréviations. */
-const OPERATOR_PATHS = {
-  mtn:        'mtn_ci',      // fallback CI, override via req.operator
-  moov:       'moov_ci',
-  orange:     'orange_ci',
-  wave:       'wave_ci',
-  'mtn-benin':    'mtn',
-  'moov-benin':   'moov',
-  'mtn-ci':       'mtn_ci',
-  'moov-ci':      'moov_ci',
-  'orange-ci':    'orange_ci',
-  'orange-sn':    'orange_sn',
-  'free-sn':      'free_sn',
-  'togocom-tg':   'togocom_tg',
-  'moov-tg':      'moov_tg',
-  'airtel-ne':    'airtel_ne',
+/* Mapping opérateur → valeur `reseau` attendue par l'API v1 dans le body.
+   L'endpoint est fixe (/requesttopay/integration) ; c'est le champ `reseau`
+   qui identifie l'opérateur. Le SDK PHP passe des noms UPPERCASE, ex.
+   "MTN", "MOOV" pour Bénin, "MTN CI", "ORANGE CI", etc. pour les autres. */
+const OPERATOR_NETWORKS = {
+  'mtn-benin':  'MTN',
+  'moov-benin': 'MOOV',
+  mtn:          'MTN',
+  moov:         'MOOV',
+  'mtn-ci':     'MTN CI',
+  'moov-ci':    'MOOV CI',
+  'orange-ci':  'ORANGE CI',
+  'wave-ci':    'WAVE CI',
+  wave:         'WAVE CI',
+  orange:       'ORANGE CI',
+  'orange-sn':  'ORANGE SN',
+  'free-sn':    'FREE SN',
+  'togocom-tg': 'TOGOCOM TG',
+  'moov-tg':    'MOOV TG',
+  'airtel-ne':  'AIRTEL NE',
 };
 
 function resolveOperator(op) {
   const key = String(op || '').toLowerCase();
-  return OPERATOR_PATHS[key] || key.replace(/[^a-z_]/g, '_');
+  return OPERATOR_NETWORKS[key] || String(op || '').toUpperCase();
 }
 
 /* ---------------------------------------------------------------- *
@@ -122,18 +128,25 @@ async function initMobileMoney({
   if (!operator) throw new Error('operator requis');
   if (!SHOP_ID) throw new Error('FEEXPAY_SHOP_ID manquant en environnement.');
 
-  const opPath = resolveOperator(operator);
-  const url = `/api/transactions/public/requesttopay/${opPath}`;
+  const reseau = resolveOperator(operator);
+  const url = `/api/transactions/requesttopay/integration`;
+  /* Body aligné sur le SDK PHP officiel (paiementLocal). L'API attend
+     `token` en body en plus du header Authorization, et `reseau` pour
+     identifier l'opérateur. On garde `description`/`custom_id` en champs
+     additionnels : ignorés par l'API si non supportés, utiles pour debug. */
   const body = {
-    shop:        SHOP_ID,
-    amount:      Number(amount),
     phoneNumber: String(phone).replace(/\s+/g, ''),
-    description: description || 'Contribution myKado',
-    callback_info: callbackUrl || '',
+    amount:      Number(amount),
+    reseau,
+    token:       TOKEN,
+    shop:        SHOP_ID,
     first_name:  firstName || '',
     last_name:   lastName || '',
+    email:       email || '',
+    description: description || 'Paiement myKado',
+    custom_id:   customId || '',
+    callback_info: callbackUrl || '',
   };
-  console.log(url);
   const data = await request('POST', url, body);
   const reference = data?.reference || data?.transaction?.reference || data?.transaction_id;
   if (!reference) throw new Error('FeexPay: aucune référence retournée');
@@ -153,11 +166,13 @@ async function initCard({
   if (!amount || amount <= 0) throw new Error('amount invalide');
   if (!SHOP_ID) throw new Error('FEEXPAY_SHOP_ID manquant en environnement.');
 
-  const url = `/api/transactions/public/card/inittransact`;
+  const url = `/api/transactions/card/inittransact/integration`;
   const body = {
     shop:        SHOP_ID,
+    token:       TOKEN,
     amount:      Number(amount),
     reason:      description || 'Paiement myKado',
+    description: description || 'Paiement myKado',
     custom_id:   customId || '',
     callback_url: callbackUrl || '',
     email:       email || '',
