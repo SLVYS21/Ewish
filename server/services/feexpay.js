@@ -191,5 +191,5 @@ module.exports = {
   initMobileMoney,
   initCard,
   resolveOperator,
-  OPERATOR_PATHS,
 };
+// OPERATOR_PATHS,
