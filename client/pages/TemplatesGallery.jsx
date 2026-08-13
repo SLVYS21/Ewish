@@ -72,22 +72,39 @@ const WALL_DESCS = {
   'wall-of-wishes-space':  "Chaque mot est une étoile dans une galaxie que l'on explore.",
 };
 
-/* Deux murs actifs : classique + moderne. Les variantes 3d/space ont été
-   supprimées de la DB (voir memory/project_walls_flow.md). */
-const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-modern']);
+/* Murs actifs : classique + moderne + craft (moodboard corail).
+   Les variantes 3d/space ont été supprimées de la DB
+   (voir memory/project_walls_flow.md). */
+const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-modern','wall-of-wishes-craft']);
 
 const WISH_CATS = [
-  { id: 'all',      label: 'Tous' },
-  { id: 'birthday', label: 'Anniversaire' },
-  { id: 'love',     label: 'Amour' },
-  // { id: 'pro',      label: 'Pro / RH' },
-  { id: 'special',  label: 'Spécial' },
+  // { id: 'all',      label: 'Tous' },
+  // { id: 'birthday', label: 'Anniversaire' },
+  // { id: 'love',     label: 'Amour' },
+  // // { id: 'pro',      label: 'Pro / RH' },
+  // { id: 'special',  label: 'Spécial' },
 ];
 
 const TEMPLATE_CAT = {
   birthday: 'birthday', forever: 'love', 'notre-film': 'love',
   'collective-pro': 'pro', 'collective-family': 'pro',
   special: 'special', sanctuary: 'special',
+};
+
+/*
+ * Synthetic template for the new envelope-based card editor (/card-editor).
+ * It is prepended to the wish templates list so it appears first.
+ * Clicking it opens the dedicated wizard instead of the classic editor flow.
+ */
+const MYENVELOPE_TEMPLATE = {
+  _id: '__myenvelope',
+  name: 'myenvelope',
+  label: 'Carte Enveloppe myKado',
+  description: '4 pages + enveloppe. Design floral, animation 3D d\'ouverture.',
+  thumbnail: '/backgrounds/theme-floral/floral_frame.webp',
+  creditsRequired: 1,
+  _isCardEditor: true,
+  _isNew: true,
 };
 
 export default function TemplatesGallery() {
@@ -134,9 +151,13 @@ export default function TemplatesGallery() {
   };
 
   const isInvitationTpl = (t) => t.kind === 'invitation';
-  const wishTemplates = templates
-    .filter(t => !WALL_TEMPLATES.has(t.name) && !isInvitationTpl(t))
-    .filter(t => cat === 'all' || TEMPLATE_CAT[t.name] === cat);
+  const wishTemplates = [
+    // Envelope card editor pinned at the top of the wish list
+    MYENVELOPE_TEMPLATE,
+    ...templates
+      .filter(t => !WALL_TEMPLATES.has(t.name) && !isInvitationTpl(t))
+      .filter(t => cat === 'all' || TEMPLATE_CAT[t.name] === cat),
+  ];
   const wallTemplates = templates.filter(t => WALL_TEMPLATES.has(t.name));
   const invitationTemplates = templates.filter(isInvitationTpl);
 
@@ -368,9 +389,9 @@ export default function TemplatesGallery() {
                 : 'Tes invités répondent en un clic, leurs mots se posent sur un mur intégré, et tu suis tout en temps réel.'}
           </p>
         </div>
-        <button className="btn btn-ghost" onClick={() => navigate('/ewish-admin')}>
+        {/* <button className="btn btn-ghost" onClick={() => navigate('/ewish-admin')}>
           <ArrowLeft size={15} /> Accueil
-        </button>
+        </button> */}
       </div>
 
       {/* Mode switch pills */}
@@ -444,13 +465,13 @@ export default function TemplatesGallery() {
       ) : mode === 'wish' ? (
         <>
           {/* Category pills */}
-          <div className="pills" style={{ marginBottom: 'calc(var(--d-gap) + 4px)' }}>
+          {/* <div className="pills" style={{ marginBottom: 'calc(var(--d-gap) + 4px)' }}>
             {WISH_CATS.map(c => (
               <button key={c.id} className={`pill${cat === c.id ? ' on' : ''}`} onClick={() => setCat(c.id)}>
                 {c.label}
               </button>
             ))}
-          </div>
+          </div> */}
 
           {loading ? (
             <div style={{ padding: '40px 0', textAlign: 'center' }}>
@@ -464,12 +485,29 @@ export default function TemplatesGallery() {
                 const bg = tpl.thumbnail
                   ? `url(${tpl.thumbnail}) center/cover no-repeat`
                   : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
+                const goTo = tpl._isCardEditor
+                  ? '/card-editor'
+                  : `/ewish-admin/template/${tpl.name}`;
                 return (
                   <button
                     key={tpl._id}
                     className="card card-hover tpl-card"
-                    onClick={() => navigate(`/ewish-admin/template/${tpl.name}`)}
+                    onClick={() => navigate(goTo)}
+                    style={tpl._isNew ? { position: 'relative' } : undefined}
                   >
+                    {tpl._isNew && (
+                      <span
+                        style={{
+                          position: 'absolute', top: 10, left: 10, zIndex: 2,
+                          background: 'var(--mk-accent)', color: '#fff',
+                          fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
+                          textTransform: 'uppercase', padding: '3px 8px',
+                          borderRadius: 999, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                        }}
+                      >
+                        Nouveau
+                      </span>
+                    )}
                     <div className="tpl-thumb" style={{ background: bg }}>
                       <div className="tpl-scene">
                         <span className="ms-hand">Pour toi,</span>
@@ -485,7 +523,7 @@ export default function TemplatesGallery() {
                           {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mk-accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          Aperçu <ArrowRight size={13} />
+                          {tpl._isCardEditor ? 'Créer' : 'Aperçu'} <ArrowRight size={13} />
                         </span>
                       </div>
                     </div>
@@ -503,18 +541,18 @@ export default function TemplatesGallery() {
           </div>
         ) : (
           <div className="tpl-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
-            {wallTemplates.map(tpl => {
-              const bg = tpl.thumbnail
-                ? `url(${tpl.thumbnail}) center/cover no-repeat`
-                : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
-              return (
+            {wallTemplates.map(tpl => (
                 <div
                   key={tpl._id}
                   className="card card-hover"
                   onClick={() => setWallSheet(tpl)}
                   style={{ cursor: 'pointer', border: '1px solid var(--mk-line-2)', borderRadius: '18px', overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}
                 >
-                  <WallThemePreview templateName={tpl.name} />
+                  {tpl.thumbnail ? (
+                    <div style={{ position: 'relative', aspectRatio: '1.14', overflow: 'hidden', background: `url(${tpl.thumbnail}) center/cover no-repeat` }} />
+                  ) : (
+                    <WallThemePreview templateName={tpl.name} />
+                  )}
                   <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--mk-ink)' }}>{tpl.label || tpl.name}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
@@ -525,8 +563,7 @@ export default function TemplatesGallery() {
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              ))}
           </div>
         )
       )}

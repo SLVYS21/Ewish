@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte Enveloppe Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'BubbleFont';
+      src: url('../BubbleFont-subset.woff2') format('woff2');
+      font-display: block;
+    }
+    
+    :root {
+      --primary: #8B0000; /* Deep red for envelope by default */
+      --accent: #D4AF37; /* Gold */
+      --font-body: 'Outfit', sans-serif;
+      --font-title: 'Playfair Display', serif;
+      --fs-scale: 1;
+      
+      --card-bg: #FDFBF7;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+      background-size: cover;
+      background-position: center;
+      background-color: #111; /* Fallback */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      perspective: 1500px;
+    }
+
+    /* Ambient lighting */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scene {
+      position: relative;
+      width: 380px;
+      height: 260px;
+      margin-top: 120px;
+      z-index: 10;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
+    .scene:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Envelope Base (Inside back) */
+    .env-base {
+      position: absolute;
+      inset: 0;
+      background: var(--primary);
+      /* Darken inside */
+      background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5));
+      border-radius: 8px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+
+    /* The Letter / Card */
+    .card {
+      position: absolute;
+      bottom: 5px;
+      left: 15px;
+      right: 15px;
+      height: 440px;
+      background: var(--card-bg);
+      border-radius: 6px;
+      z-index: 2; /* Between back and front flaps */
+      box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+      padding: 45px 30px;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      transition: transform 1s 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      /* subtle paper texture */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+    
+    /* Card gold border */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .card-recipient {
+      font-family: 'BubbleFont', sans-serif;
+      font-size: 3.2rem;
+      color: var(--primary);
+      margin-bottom: 5px;
+      line-height: 1.1;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 25px;
+    }
+
+    .card-message {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #334155;
+      flex-grow: 1;
+      white-space: pre-wrap;
+    }
+
+    .card-sender {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-style: italic;
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    /* Envelope Front Flaps */
+    .env-flap {
+      position: absolute;
+      background: var(--primary);
+    }
+    
+    .env-left {
+      top: 0; left: 0; bottom: 0; width: 60%;
+      clip-path: polygon(0 0, 100% 50%, 0 100%);
+      z-index: 3;
+      background-image: linear-gradient(to right, rgba(255,255,255,0.1), transparent);
+    }
+    
+    .env-right {
+      top: 0; right: 0; bottom: 0; width: 60%;
+      clip-path: polygon(100% 0, 0 50%, 100% 100%);
+      z-index: 3;
+      background-image: linear-gradient(to left, rgba(255,255,255,0.1), transparent);
+    }
+
+    .env-bottom {
+      bottom: 0; left: 0; right: 0; height: 65%;
+      clip-path: polygon(0 100%, 50% 0, 100% 100%);
+      z-index: 4;
+      background-image: linear-gradient(to top, rgba(0,0,0,0.1), rgba(255,255,255,0.15));
+      /* Drop shadow simulation for clip-path */
+      filter: drop-shadow(0 -5px 5px rgba(0,0,0,0.2));
+    }
+
+    /* The top opening flap */
+    .env-top {
+      top: 0; left: 0; right: 0; height: 65%;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      z-index: 6;
+      background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.1));
+      transform-origin: top;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+    }
+
+    /* Wax Seal */
+    .wax-seal {
+      position: absolute;
+      bottom: -15px; /* relative to env-top */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 70px;
+      background-image: url('/backgrounds/wax_seal.jpg');
+      background-size: cover;
+      background-position: center;
+      /* Remove white background of JPG using mix-blend-mode if envelope is dark */
+      mix-blend-mode: multiply;
+      border-radius: 50%;
+      z-index: 7;
+      transition: opacity 0.3s;
+      /* Glow/shadow to make it pop */
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+    }
+
+    /* ── Open State ── */
+    .scene.open .env-top {
+      transform: rotateX(180deg);
+      z-index: 1; /* goes behind the card */
+    }
+    
+    .scene.open .wax-seal {
+      opacity: 0;
+    }
+
+    .scene.open .card {
+      transform: translateY(-240px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+    
+    .scene.open:hover {
+      transform: none; /* disable hover bounce when open */
+    }
+
+    .hint {
+      position: absolute;
+      bottom: -40px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.6;
+      transition: opacity 0.3s;
+    }
+    .scene.open .hint {
+      opacity: 0;
+    }
+
+    #tsparticles-confetti {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div id="tsparticles-confetti"></div>
+
+  <div class="scene" id="envelope-scene" onclick="openEnvelope()">
+    <div class="env-base"></div>
+    
+    <div class="card">
+      <div class="card-recipient" id="card-name">Prénom</div>
+      <div class="card-title" id="card-title">Titre</div>
+      <div class="card-message" id="card-message">Message</div>
+      <div class="card-sender" id="card-sender">De: </div>
+    </div>
+    
+    <div class="env-flap env-left"></div>
+    <div class="env-flap env-right"></div>
+    <div class="env-flap env-bottom"></div>
+    
+    <div class="env-flap env-top">
+      <div class="wax-seal"></div>
+    </div>
+
+    <div class="hint">Ouvrir l'enveloppe</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.11.0/tsparticles.confetti.bundle.min.js"></script>
+  <script>
+    let isOpen = false;
+    function openEnvelope() {
+      if (isOpen) return;
+      isOpen = true;
+      const env = document.getElementById('envelope-scene');
+      env.classList.add('open');
+      
+      setTimeout(() => {
+        confetti({
+          particleCount: 180,
+          spread: 100,
+          origin: { y: 0.5 },
+          colors: ['#D4AF37', '#8B0000', '#ffffff', '#1E293B'],
+          disableForReducedMotion: true
+        });
+      }, 700);
+    }
+
+    function renderData(data, style) {
+      if (style) {
+        if (style.primaryColor) {
+          document.documentElement.style.setProperty('--primary', style.primaryColor);
+        }
+        if (style.backgroundImg) {
+          document.body.style.backgroundImage = `url(${style.backgroundImg})`;
+        }
+      }
+      if (data) {
+        if (data.recipient) document.getElementById('card-name').textContent = data.recipient;
+        if (data.titleName) document.getElementById('card-title').textContent = data.titleName;
+        if (data.message) document.getElementById('card-message').textContent = data.message;
+        if (data.sender) document.getElementById('card-sender').textContent = data.sender;
+      }
+    }
+
+    if (window.__WW_DATA__ || window.__WW_STYLE__) {
+      renderData(window.__WW_DATA__, window.__WW_STYLE__);
+    }
+
+    window.addEventListener('message', (e) => {
+      if (!e.data || e.data.type !== 'WW_UPDATE') return;
+      renderData(e.data.data, e.data.style);
+    });
+  </script>
+</body>
+</html>

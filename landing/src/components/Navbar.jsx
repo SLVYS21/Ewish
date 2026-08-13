@@ -27,7 +27,10 @@ export default function Navbar({ onCreate, onLogin }) {
           </div>
           <div className={s.actions}>
             <button className="mk-btn mk-btn-ghost" onClick={onLogin}>Se connecter</button>
-            <button className="mk-btn mk-btn-primary" onClick={onCreate}>Créer</button>
+            <button className={`mk-btn mk-btn-primary ${s.ctaCreate}`} onClick={onCreate}>
+              <span className={s.ctaGlow} aria-hidden />
+              <span className={s.ctaLabel}>Créer</span>
+            </button>
           </div>
           <button
             className={s.burger}

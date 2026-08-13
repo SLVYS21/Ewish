@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import s from './FinalCTA.module.css';
 import Kado from './Kado/Kado';
+import NotoEmoji from './NotoEmoji';
 
 const PLACEHOLDERS = ['Maman', 'Marie', "l'équipe RH", 'Aminata', 'tes mariés'];
 
@@ -20,7 +21,7 @@ export default function FinalCTA({ onOrder }) {
 
   const submit = (e) => {
     e.preventDefault();
-    onOrder?.();
+    onOrder?.(name.trim() || placeholder);
   };
 
   return (
@@ -29,6 +30,13 @@ export default function FinalCTA({ onOrder }) {
         <div className={s.bgOrbs} aria-hidden>
           <div className={`${s.orb} ${s.o1}`} />
           <div className={`${s.orb} ${s.o2}`} />
+        </div>
+
+        <div className={`${s.floatingCard} ${s.floatingCardLeft}`} aria-hidden>
+          <img src="/assets/happy_family_card.png" alt="" />
+        </div>
+        <div className={s.floatingCard} aria-hidden>
+          <img src="/assets/corporate_wall.png" alt="" />
         </div>
 
         <div className={s.card}>
@@ -64,12 +72,18 @@ export default function FinalCTA({ onOrder }) {
               autoComplete="off"
               aria-label="Pour qui c'est ?"
             />
-            <button className={s.ctaBtn} type="submit">
-              C'est parti
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
-                <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            <div className={s.ctaBtnWrap}>
+              <span className={s.pointerEmoji} aria-hidden>
+                <NotoEmoji name="backhand-index-pointing-right" size={44} />
+              </span>
+              <button className={s.ctaBtn} type="submit">
+                <span className={s.ctaPulse} aria-hidden />
+                <span className={s.ctaBtnLabel}>C'est parti</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
+                  <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
           </form>
 
           <div className={s.assurances}>

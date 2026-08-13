@@ -51,6 +51,7 @@
   list-style: none;
   padding: 0;
   margin-top: auto;
+  margin-bottom: 24px;
 }
 .list li {
   display: flex;
@@ -59,6 +60,55 @@
   font-size: 14px;
   color: var(--mk-stone-700);
 }
+
+.actionBtn {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btnRose {
+  background: var(--mk-rose, #E11D48);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+}
+.btnRose:hover {
+  background: #BE123C;
+  transform: translateY(-1px);
+}
+
+.btnIndigo {
+  background: #6366F1;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+.btnIndigo:hover {
+  background: #4F46E5;
+  transform: translateY(-1px);
+}
+
+.btnDark {
+  background: #1A1715;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(26, 23, 21, 0.2);
+}
+.btnDark:hover {
+  background: #2D2825;
+  transform: translateY(-1px);
+}
+
 
 /* --- Interactive Miniatures --- */
 

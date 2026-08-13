@@ -85,3 +85,29 @@
   font-weight: 500;
   padding: 8px 0;
 }
+
+/* Créer CTA — glow pulse ring (subtle, always-on) */
+.ctaCreate {
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+}
+.ctaLabel { position: relative; z-index: 2; }
+.ctaGlow {
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.6);
+  animation: ctaGlowPulse 2.6s ease-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes ctaGlowPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.55); }
+  70%  { box-shadow: 0 0 0 12px rgba(232, 163, 61, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ctaGlow { animation: none; }
+}

@@ -1,90 +1,191 @@
-.inspirationsSection {
-  padding: 80px 0;
-  background: var(--mk-stone-50);
-  overflow: hidden;
+.section {
+  padding: 0px 0 50px;
+  background-color: #ffffff;
 }
 
-@media (min-width: 1024px) {
-  .inspirationsSection {
-    padding: 120px 0;
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Stylish Toggle */
+.toggleWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.toggleContainer {
+  position: relative;
+  display: inline-flex;
+  background-color: #F1F1F1;
+  border-radius: 100px;
+  padding: 6px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.togglePill {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: calc(50% - 6px);
+  height: calc(100% - 12px);
+  background: var(--pill-bg, #FFFFFF);
+  border-radius: 100px;
+  box-shadow: 0 6px 16px var(--pill-shadow, rgba(0, 0, 0, 0.1));
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.35s ease,
+    box-shadow 0.35s ease;
+  z-index: 1;
+}
+
+/* Mode tints — driven by wrapper class */
+.modeGroup {
+  --pill-bg: linear-gradient(135deg, var(--mk-indigo-700), var(--mk-indigo-500));
+  --pill-shadow: rgba(30, 41, 82, 0.35);
+  --pill-active: #FFFFFF;
+}
+.modePerso {
+  --pill-bg: linear-gradient(135deg, var(--mk-clay-500), #E67B7B);
+  --pill-shadow: rgba(193, 59, 59, 0.35);
+  --pill-active: #FFFFFF;
+}
+
+.toggleBtn {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mk-stone-500);
+  cursor: pointer;
+  transition: color 0.3s ease;
+  min-width: 180px;
+}
+
+.toggleBtnActive {
+  color: var(--pill-active, var(--mk-stone-900));
+}
+
+.tabsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tabsContainer {
+  display: flex;
+  flex-wrap: nowrap;
+  background-color: #FAFAFA;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid #EAEAEA;
+  border-bottom: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+
+.tabBtn {
+  flex: 0 0 auto;
+  min-width: max-content;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  border-top: 3px solid transparent;
+  border-right: 1px solid #EAEAEA;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mk-stone-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .tabBtn {
+    flex: 1; /* Sur desktop, on étire les onglets pour prendre toute la largeur */
+    min-width: 0;
   }
 }
 
-.marqueeContainer {
+.tabBtn:last-child {
+  border-right: none;
+}
+
+.tabBtn:hover {
+  background-color: #F3F3F3;
+  color: var(--mk-stone-900);
+}
+
+.tabActive {
+  background-color: #FFFFFF;
+  color: var(--mk-stone-900);
+  border-top-color: var(--tab-active-color, #111111);
+  transition: border-top-color 0.35s ease;
+}
+
+/* Tab bar mode tints — match the toggle */
+.tabsGroup { --tab-active-color: var(--mk-indigo-700); }
+.tabsPerso { --tab-active-color: var(--mk-clay-500); }
+
+/* Live Demo Area — l'iframe remplit entièrement la zone réservée.
+   Le mur/carte gère lui-même son propre titre, background et animations. */
+.demoBoard {
   position: relative;
   width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #111111;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid #EAEAEA;
+  border-top: none;
   overflow: hidden;
-  display: flex;
-  padding: 20px 0;
-  /* Fading edges */
-  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
-.marqueeTrack {
-  display: flex;
-  gap: 24px;
-  width: max-content;
-  animation: scrollMarquee 40s linear infinite;
-}
-
-.marqueeTrack:hover {
-  animation-play-state: paused;
-}
-
-@keyframes scrollMarquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-50% - 12px)); }
-}
-
-.card {
-  width: 320px;
-  background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: var(--sh-sm);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  flex-shrink: 0;
-}
-
-.card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--sh-lg);
-}
-
-.imgWrapper {
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-  position: relative;
-}
-
-.imgWrapper img {
+.demoIframe {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
+  border: none;
+  display: block;
+  background: #ffffff;
 }
 
-.card:hover .imgWrapper img {
-  transform: scale(1.05);
-}
-
-.cardInfo {
-  padding: 20px;
-}
-
-.cardInfo h4 {
+.iframeLoader {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  color: #ffffff;
   font-family: var(--sans);
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--mk-stone-900);
-  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
 }
 
-.cardInfo p {
-  font-size: 14px;
-  color: var(--mk-stone-600);
-  line-height: 1.4;
-  margin: 0;
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: mkSpin 0.9s linear infinite;
+}
+
+@keyframes mkSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .demoBoard { aspect-ratio: 4 / 5; }
 }

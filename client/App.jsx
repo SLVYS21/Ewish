@@ -9,6 +9,9 @@ import MyCreations from "./pages/MyCreations";
 import Editor from "./pages/Editor";
 import QuickCreate from "./pages/QuickCreate";
 import QuickCreateWall from "./pages/QuickCreateWall";
+import { CardStateProvider } from "./card-editor/hooks/useCardState";
+import CardEditorLayout from "./card-editor/components/CardEditorLayout";
+import CardPublicView from "./card-editor/preview/CardPublicView";
 
 import { AuthProvider, useAuth } from "./admin/context/AuthContext";
 import AdminLayout from "./admin/components/AdminLayout";
@@ -164,6 +167,11 @@ export default function App() {
 
           {/* Recipient Reveal UI for Walls */}
           <Route path="/m/:slug"       element={<RecipientReveal />} />
+          
+          <Route path="/card-editor" element={<CardStateProvider><CardEditorLayout /></CardStateProvider>} />
+
+          {/* Public route for published myenvelope cards (shared via /c/:slug) */}
+          <Route path="/c/:slug" element={<CardPublicView />} />
 
           <Route path="/" element={<Navigate to="/ewish-admin" replace />} />
           <Route path="*" element={<Navigate to="/ewish-admin" replace />} />

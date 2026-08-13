@@ -32,11 +32,17 @@ router.get('/', requireAdmin, async (req, res) => {
     } else if (premade === 'true') {
       query.isPremade = true;
     } else if (mine === 'true') {
-      query.merchantId = req.admin.merchantId;
+      /* Fallback : si le JWT est ancien (généré avant qu'un merchantId ne
+         soit set sur l'admin), req.admin.merchantId peut être undefined.
+         Dans ce cas on utilise l'_id de l'admin comme merchantId — c'est
+         la valeur assignée par défaut au login (auth.js) et par les seeds. */
+      const merchantIdFilter = req.admin.merchantId || String(req.admin.id);
+      query.merchantId = merchantIdFilter;
       query.isPremade = { $ne: true };
     } else if (req.admin.role === 'merchant') {
+      const merchantIdFilter = req.admin.merchantId || String(req.admin.id);
       query.$or = [
-        { merchantId: req.admin.merchantId },
+        { merchantId: merchantIdFilter },
         { isPremade: true }
       ];
     } else if (req.query.premade === 'true') { // legacy fallback
@@ -116,7 +122,21 @@ router.get('/public/slug/:slug', async (req, res) => {
     if (!isPreview) query.published = true;
     const pub = await Publication.findOne(query).lean();
     if (!pub) return res.status(404).json({ error: 'Not found' });
-    
+
+    // Card-editor "myenvelope" cards need the full data object to reconstruct
+    // the card in the SPA. Everything under `data` is client-authored and safe.
+    if (pub.templateName === 'myenvelope') {
+      return res.json({
+        _id:          pub._id,
+        slug:         pub.slug,
+        templateName: pub.templateName,
+        customName:   pub.customName,
+        title:        pub.title,
+        data:         pub.data || {},
+        style:        pub.style || {},
+      });
+    }
+
     // Only return safe public data needed for reveal UI
     res.json({
       _id: pub._id,

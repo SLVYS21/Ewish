@@ -16,86 +16,37 @@ const Template = require('../models/Template');
 
 const WALL_TEMPLATES = [
 
-  /* ── wall-of-wishes (classique) ───────────────────────────── */
+  /* ── wall-of-wishes-craft (moodboard corail quadrillé) ──── */
   {
-    name: 'wall-of-wishes',
-    label: 'Mur classique',
-    description: "Un mur interactif où chacun colle son message — comme des post-its numériques.",
+    name: 'wall-of-wishes-craft',
+    kind: 'wall', /* essentiel : sans ça le pré-save hook Publication mappe
+                     brique='carte' (default kind='animation'), et le mur
+                     apparaît dans le catalogue Cartes au lieu de Murs.
+                     Voir server/models/Publication.js KIND_TO_BRIQUE. */
+    label: 'Mur Atelier',
+    description: "Fond corail quadrillé, titre flottant sans bannière et post-its épinglés. Vibe atelier / moodboard chaleureuse.",
     price: 5000,
     creditsRequired: 10,
-    emoji: '💌',
-    gradient: 'linear-gradient(135deg,#FBF5EC,#FFE5D6,#FBCFE0)',
-    highlights: ["Jusqu'à 30 contributeurs", 'Modération avant publication', '4 couleurs de post-it', "Partage par lien d'invitation"],
-    tags: ['collectif', 'interactif'],
-    sortOrder: 2,
+    emoji: '📌',
+    gradient: 'linear-gradient(135deg,#FFB199,#FF8F6B,#F26B4C)',
+    highlights: ['Fond corail quadrillé signature', 'Titre éditorial flottant', 'Post-its avec rotation naturelle', "Partage par lien d'invitation"],
+    tags: ['collectif', 'interactif', 'moodboard', 'craft'],
+    sortOrder: 11,
     active: true,
-    featured: false,
+    featured: true,
     fields: [
       { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: 'Mur de mots' },
       { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
-      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien — laissez votre message ici.' },
+      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Un mur atelier pour épingler vos mots.' },
     ],
     defaultData: {
       eyebrow: 'Mur de mots',
       titleName: 'Prénom',
-      subtitle: 'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
+      subtitle: 'Un mur atelier où chacun épingle son mot, sa photo, son souvenir.',
     },
-    defaultStyle: { primaryColor: '#E11D48', accentColor: '#E11D48', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
+    defaultStyle: { primaryColor: '#FF8F6B', accentColor: '#111111', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
   },
 
-  /* ── wall-of-wishes-modern ────────────────────────────────── */
-  {
-    name: 'wall-of-wishes-modern',
-    label: 'Mur Moderne',
-    description: "Cartes pastel douces sur fond lilas, accent violet. Design moderne épuré et aéré.",
-    price: 5000,
-    creditsRequired: 10,
-    emoji: '💬',
-    gradient: 'linear-gradient(135deg,#F1EAFB,#FFEDF1,#E3F5EE)',
-    highlights: ['Design soft & aéré', 'Cartes pastel élégantes', 'Barre de cagnotte intégrée', "Partage par lien d'invitation"],
-    tags: ['collectif', 'interactif', 'moderne'],
-    sortOrder: 9,
-    active: true,
-    featured: false,
-    fields: [
-      { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: 'Mur de mots' },
-      { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
-      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Partagez ce lien — laissez votre message ici.' },
-    ],
-    defaultData: {
-      eyebrow: 'Mur de mots',
-      titleName: 'Prénom',
-      subtitle: 'Partagez ce lien — chacun peut laisser son mot sur ce mur.',
-    },
-    defaultStyle: { primaryColor: '#7C5CC9', accentColor: '#7C5CC9', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
-  },
-
-  /* ── wall-of-wishes-space (vibrant) ───────────────────────── */
-  {
-    name: 'wall-of-wishes-space',
-    label: 'Mur Spatial',
-    description: "Canvas infini de vœux style Polaroid sur fond corail. Pan, zoom et vue détail au clic.",
-    price: 5000,
-    creditsRequired: 10,
-    emoji: '🚀',
-    gradient: 'linear-gradient(135deg,#ff8060,#ff4878,#d83070)',
-    highlights: ['Canvas infini pan + zoom', 'Cartes Polaroid éparpillées', 'Vue détail au clic', "Partage par lien d'invitation"],
-    tags: ['collectif', 'interactif', 'spatial'],
-    sortOrder: 10,
-    active: true,
-    featured: false,
-    fields: [
-      { key: 'eyebrow',   label: 'Badge en haut du mur',   type: 'text',     section: 'Mur', placeholder: 'Mur de mots' },
-      { key: 'titleName', label: 'Prénom du destinataire', type: 'text',     section: 'Mur', placeholder: 'Sarah',                              required: true },
-      { key: 'subtitle',  label: 'Sous-titre du mur',      type: 'textarea', section: 'Mur', placeholder: 'Glisse pour explorer · Clique pour lire.' },
-    ],
-    defaultData: {
-      eyebrow: 'Mur de mots',
-      titleName: 'Prénom',
-      subtitle: 'Glisse pour explorer · Clique sur une carte pour lire le vœu.',
-    },
-    defaultStyle: { primaryColor: '#F2643D', accentColor: '#F0356E', fontFamily: 'Plus Jakarta Sans', fontSize: 'medium', theme: 'light' },
-  },
 ];
 
 async function seed() {

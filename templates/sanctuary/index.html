@@ -526,18 +526,6 @@
     }
 
     /* ===== INTRO SANCTUARY FLOURISH ===== */
-    #intro-overlay {
-      position: fixed; inset: 0; z-index: 10000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(ellipse 90% 80% at 50% 42%, #fdf8f0 0%, #f9f4ec 52%, #f5ede0 100%);
-      opacity: 1; transition: opacity 0.95s ease; overflow: hidden; pointer-events: none;
-    }
-    #intro-overlay.ib-dissolve { opacity: 0; }
-    #intro-overlay::before {
-      content: ''; position: absolute; width: 310px; height: 310px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(201,169,110,0.18) 0%, transparent 68%);
-      animation: ibGlow 2.6s ease-in-out infinite alternate; pointer-events: none;
-    }
     @keyframes ibGlow { from { transform:scale(0.9); opacity:0.5; } to { transform:scale(1.1); opacity:1; } }
     #bloom-svg { position:relative; z-index:1; width:min(285px,77vw); height:min(285px,77vw); overflow:visible; }
     .ib-axis   { fill:none; stroke:rgba(123,94,58,0.55); stroke-width:1.1; stroke-linecap:round; }
@@ -615,45 +603,7 @@
   </svg>
 </div>
 
-<div id="intro-overlay" aria-hidden="true">
-  <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-    <circle class="ib-ring-outer" cx="200" cy="200" r="118"/>
-    <!-- Outer diamond frame -->
-    <path class="ib-draw ib-frame" d="M200 85 L315 200 L200 315 L85 200 L200 85"/>
-    <!-- Cardinal axes -->
-    <path class="ib-draw ib-axis" d="M200 200 L200 95"/>
-    <path class="ib-draw ib-axis" d="M200 200 L200 305"/>
-    <path class="ib-draw ib-axis" d="M200 200 L95 200"/>
-    <path class="ib-draw ib-axis" d="M200 200 L305 200"/>
-    <!-- 4 diagonal flourish curves (to corners) -->
-    <path class="ib-draw ib-flourish" d="M200 200 C188 184 166 165 148 148"/>
-    <path class="ib-draw ib-flourish" d="M200 200 C216 184 234 165 252 148"/>
-    <path class="ib-draw ib-flourish" d="M200 200 C188 216 166 235 148 252"/>
-    <path class="ib-draw ib-flourish" d="M200 200 C216 216 234 235 252 252"/>
-    <!-- 4 small leaf curves between axes and diagonals -->
-    <path class="ib-draw ib-flourish" d="M200 200 C200 182 210 168 218 158" transform="rotate(0,200,200)"/>
-    <path class="ib-draw ib-flourish" d="M200 200 C200 182 210 168 218 158" transform="rotate(90,200,200)"/>
-    <path class="ib-draw ib-flourish" d="M200 200 C200 182 210 168 218 158" transform="rotate(180,200,200)"/>
-    <path class="ib-draw ib-flourish" d="M200 200 C200 182 210 168 218 158" transform="rotate(270,200,200)"/>
-    <circle class="ib-draw ib-ring-mid"    cx="200" cy="200" r="38"/>
-    <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="12"/>
-    <circle class="ib-dot" cx="200" cy="85"  r="3.5"/>
-    <circle class="ib-dot" cx="315" cy="200" r="3.5"/>
-    <circle class="ib-dot" cx="200" cy="315" r="3.5"/>
-    <circle class="ib-dot" cx="85"  cy="200" r="3.5"/>
-    <circle class="ib-dot" cx="148" cy="148" r="2.5"/>
-    <circle class="ib-dot" cx="252" cy="148" r="2.5"/>
-    <circle class="ib-dot" cx="148" cy="252" r="2.5"/>
-    <circle class="ib-dot" cx="252" cy="252" r="2.5"/>
-  </svg>
-  <div id="ib-text">
-    <p id="ib-label">Sanctuary</p>
-    <svg id="ib-line-svg" viewBox="0 0 240 18">
-      <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11"/>
-    </svg>
-  </div>
-  <div id="ib-burst"></div>
-</div>
+
 
 <!-- Music pill -->
 <div id="music-pill">
@@ -1400,7 +1350,7 @@ function runIntro() {
   setTimeout(()=>{ overlay.classList.add('ib-dissolve'); setTimeout(()=>{ overlay.style.display='none'; init(); },960); },drawDone+1080);
 }
 
-document.addEventListener('DOMContentLoaded', runIntro);
+fetchData();
 </script>
 </body>
 </html>

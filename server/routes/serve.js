@@ -2,6 +2,7 @@ const router = require('express').Router();
 const path   = require('path');
 const fs     = require('fs');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 const Publication = require('../models/Publication');
 const Font        = require('../models/Font');
 const { getTemplateHtml } = require('../utils/templateCache');
@@ -35,6 +36,7 @@ const BUBBLE_TEMPLATES = new Set(['birthday', 'collective-family', 'collective-p
 const WALL_DEFAULTS = {
   'wall-of-wishes':        { primaryColor: '#E11D48', accentColor: '#E11D48' },
   'wall-of-wishes-modern': { primaryColor: '#7C5CC9', accentColor: '#7C5CC9' },
+  'wall-of-wishes-craft':  { primaryColor: '#FF8F6B', accentColor: '#111111' },
   'wall-of-wishes-3d':     { primaryColor: '#c9a84c', accentColor: '#e05574' },
   'wall-of-wishes-space':  { primaryColor: '#ff7055', accentColor: '#ff3d6e' },
 };
@@ -71,15 +73,15 @@ function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_li
    ──────────────────────────────────────────────────────────── */
 const CSP = [
   "default-src 'self' https: data: blob:",
-  "script-src 'self' 'unsafe-inline' https: http://localhost:3000 http://localhost:5173",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
-  "connect-src 'self' https: http://localhost:3000 http://localhost:5173 ws://localhost:3000 ws://localhost:5173",
+  "connect-src 'self' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "object-src 'none'",
   "base-uri 'self'",
-  "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store",
+  "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* https://app.mykado.store https://mykado.store https://www.mykado.store https://go.mykado.store",
 ].join('; ');
 
 function sendError(res, status, publicMsg, err) {
@@ -89,6 +91,7 @@ function sendError(res, status, publicMsg, err) {
 }
 
 router.get('/:templateName/:customName', async (req, res) => {
+  res.removeHeader('X-Frame-Options');
   res.setHeader('Content-Security-Policy', CSP);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -101,7 +104,9 @@ router.get('/:templateName/:customName', async (req, res) => {
 
   try {
     let pub;
-    if (customName === 'draft' && req.query.preview === '1') {
+    const isPreview = req.query.preview === '1';
+
+    if (customName === 'draft' && isPreview) {
       pub = {
         _id: 'draft',
         templateName,
@@ -114,13 +119,31 @@ router.get('/:templateName/:customName', async (req, res) => {
       };
     } else {
       pub = await Publication.findOne({ templateName, customName }).lean();
+      if (!pub) {
+        const orConditions = [{ customName }];
+        if (mongoose.isValidObjectId(customName)) {
+          orConditions.push({ _id: customName });
+        }
+        pub = await Publication.findOne({ $or: orConditions }).lean();
+      }
     }
 
     if (!pub) {
-      return sendError(res, 404, 'Aucune création trouvée à cette adresse.');
+      if (isPreview) {
+        pub = {
+          _id: customName || 'draft',
+          templateName,
+          customName: customName || 'draft',
+          title: 'Aperçu',
+          data: {},
+          style: {},
+          cagnotteConfig: {},
+          published: false
+        };
+      } else {
+        return sendError(res, 404, 'Aucune création trouvée à cette adresse.');
+      }
     }
-
-    const isPreview = req.query.preview === '1';
     const isWallTemplate = pub.templateName.startsWith('wall-of-wishes');
     const isWallFreemium = isWallTemplate && !pub.published;
 
@@ -385,6 +408,11 @@ router.get('/:templateName/:customName', async (req, res) => {
     publicData.landingUrl = process.env.LANDING_URL || 'https://www.mykado.store';
     publicData.appUrl = appOrigin;
     publicData.skipIntro = req.query.noanim === '1' || req.query.collect !== undefined;
+    /* Mode démo landing (iframe embed section « Démos en direct ») :
+       lecture seule côté visiteur — pas d'ajout de mot, pas de collecte.
+       Le clic sur une carte de vœu reste actif (ouvre le StoryViewer).
+       Consommé côté client par WallApp.jsx (data.demoMode). */
+    publicData.demoMode = req.query.demo === '1';
     publicData.cagnotte = pub.cagnotteConfig?.enabled ? {
       enabled: true,
       name: pub.cagnotteConfig.description || '',

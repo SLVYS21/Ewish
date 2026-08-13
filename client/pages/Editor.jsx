@@ -16,7 +16,6 @@ import RsvpManager from '../components/RsvpManager';
 import ClientTab from '../components/ClientTab';
 import QRCodeModal from '../components/QRCodeModal';
 import useFeexPay from '../utils/useFeexPay';
-import { Joyride, STATUS } from 'react-joyride';
 import {
   QrCode, Sparkles, Coffee, Blocks, MailOpen, ClipboardList,
   Megaphone, Info, Copy, Check, X, RefreshCw, Gift, ArrowLeft, ChevronRight,
@@ -235,7 +234,6 @@ export default function Editor() {
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [showQrModal, setShowQrModal]           = useState(false);
   const { openCheckout, feexpayModal } = useFeexPay();
-  const [runTour, setRunTour]                   = useState(false);
   const [cagnotte, setCagnotte]               = useState(false);
   const [cagnotteGoal, setCagnotteGoal]       = useState(250000);
   const [cagnotteName, setCagnotteName]       = useState('');
@@ -260,18 +258,6 @@ export default function Editor() {
   const [accessCode, setAccessCode]             = useState('');
   const [requireModeration, setRequireModeration] = useState(false);
   const [invitationConfig, setInvitationConfig]   = useState(null);
-
-  const tourSteps = [
-    { target: '.tour-step-nav',     content: 'Suivez ces 4 étapes pour personnaliser votre création !', disableBeacon: true, placement: 'bottom' },
-    { target: '.tour-step-preview', content: 'Prévisualisez vos changements en temps réel ici.',        placement: 'left' },
-    { target: '.tour-step-publish', content: 'Une fois satisfait, publiez votre création !',            placement: 'bottom' },
-  ];
-
-  const handleJoyrideCallback = ({ status }) => {
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-      setRunTour(false);
-    }
-  };
 
   const iframeRef  = useRef(null);
   const saveTimer  = useRef(null);
@@ -1366,12 +1352,6 @@ export default function Editor() {
 
   return (
     <div className={styles.root}>
-      <Joyride
-        steps={tourSteps} run={runTour} callback={handleJoyrideCallback}
-        continuous showProgress showSkipButton
-        styles={{ options: { primaryColor: 'var(--brand)', zIndex: 10000 } }}
-      />
-
       {/* ── Top Bar ── */}
       <header className={styles.topbar}>
         <div className={styles.topbarLeft}>

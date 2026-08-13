@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, X, Music, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, X, Music, Plus, Smartphone, Monitor, Zap } from 'lucide-react';
 import { getTemplate, getPremadePublications, createPublication, duplicatePublication } from '../utils/api';
 
-const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
+const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-craft','wall-of-wishes-space']);
 
 const TEMPLATE_COLORS = {
   birthday:               'linear-gradient(145deg,#FFB3C1 0%,#FF8DAA 100%)',
@@ -39,6 +39,7 @@ export default function TemplateDetailPage() {
   const [premades, setPremades] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [picked, setPicked]     = useState(null); // null | 'zero' | premadeId
+  const [viewMode, setViewMode] = useState('mobile'); // 'mobile' | 'desktop'
 
   /* Naming modal */
   const [naming, setNaming]     = useState(false);
@@ -118,9 +119,6 @@ export default function TemplateDetailPage() {
     </div>
   );
 
-  const bg = tpl.thumbnail
-    ? `url(${tpl.thumbnail}) center/cover no-repeat`
-    : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
   const cat = TEMPLATE_CATS[tpl.name] || 'Vœu animé';
   const features = TEMPLATE_FEATURES[tpl.name] || ['Animation', 'Musique incluse', 'Personnalisable'];
 
@@ -175,17 +173,130 @@ export default function TemplateDetailPage() {
       </div>
 
       {/* Two-column layout */}
-      <div className="tplv">
+      <div className="tplv" style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1.2fr) minmax(300px, 1fr)', gap: 32, alignItems: 'start' }}>
 
-        {/* Left: live preview stage */}
+        {/* Left: live preview stage with device frame switcher */}
         <div>
-          <div className="tplv-stage">
-            <iframe
-              src={previewSrc}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-              title={tpl.label || tpl.name}
-              allow="autoplay"
-            />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--mk-ink-2)' }}>Aperçu du rendu</span>
+            <div style={{ display: 'inline-flex', background: 'var(--mk-bg-subtle, #F3F1ED)', padding: 3, borderRadius: 10, gap: 2 }}>
+              <button
+                type="button"
+                onClick={() => setViewMode('mobile')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '5px 10px',
+                  borderRadius: 7,
+                  border: 'none',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: viewMode === 'mobile' ? '#fff' : 'transparent',
+                  color: viewMode === 'mobile' ? 'var(--mk-ink)' : 'var(--mk-ink-3)',
+                  boxShadow: viewMode === 'mobile' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                }}
+              >
+                <Smartphone size={13} /> Mobile
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('desktop')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '5px 10px',
+                  borderRadius: 7,
+                  border: 'none',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: viewMode === 'desktop' ? '#fff' : 'transparent',
+                  color: viewMode === 'desktop' ? 'var(--mk-ink)' : 'var(--mk-ink-3)',
+                  boxShadow: viewMode === 'desktop' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                }}
+              >
+                <Monitor size={13} /> Bureau
+              </button>
+            </div>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #F8F7F5 0%, #EDE9E3 100%)',
+            padding: viewMode === 'mobile' ? '28px 16px' : '16px',
+            borderRadius: 24,
+            border: '1px solid rgba(0,0,0,0.06)'
+          }}>
+            {viewMode === 'mobile' ? (
+              <div style={{
+                width: '100%',
+                maxWidth: 320,
+                height: 560,
+                background: '#000',
+                borderRadius: 36,
+                border: '6px solid #222',
+                boxShadow: '0 16px 40px rgba(0,0,0,0.2)',
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 6,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 90,
+                  height: 16,
+                  background: '#222',
+                  borderRadius: 10,
+                  zIndex: 10
+                }} />
+                <iframe
+                  src={previewSrc}
+                  style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+                  title={tpl.label || tpl.name}
+                  allow="autoplay"
+                />
+              </div>
+            ) : (
+              <div style={{
+                width: '100%',
+                height: 480,
+                background: '#fff',
+                borderRadius: 16,
+                border: '1px solid #D5D0C7',
+                boxShadow: '0 16px 40px rgba(0,0,0,0.15)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{
+                  height: 28,
+                  background: '#F3F1ED',
+                  borderBottom: '1px solid #E5E0D8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0 12px',
+                  gap: 6
+                }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF5F56' }} />
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFBD2E' }} />
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#27C93F' }} />
+                  <span style={{ flex: 1, textAlign: 'center', fontSize: 11, color: '#888' }}>mykado.store</span>
+                </div>
+                <iframe
+                  src={previewSrc}
+                  style={{ flex: 1, width: '100%', height: '100%', border: 'none' }}
+                  title={tpl.label || tpl.name}
+                  allow="autoplay"
+                />
+              </div>
+            )}
           </div>
 
           {/* Feature badges */}
@@ -198,7 +309,7 @@ export default function TemplateDetailPage() {
           </div>
         </div>
 
-        {/* Right: wall CTA or premades + zero + CTA */}
+        {/* Right: Actions */}
         <div>
           {isWall ? (
             <div>
@@ -221,7 +332,33 @@ export default function TemplateDetailPage() {
             </div>
           ) : (
             <>
-              <div className="section-label" style={{ marginBottom: 14 }}>Comment veux-tu démarrer ?</div>
+              {/* Quick Wizard Fast-Track Box */}
+              <div style={{
+                background: '#FFF5F6',
+                border: '1.5px solid rgba(225, 29, 72, 0.25)',
+                borderRadius: 18,
+                padding: 18,
+                marginBottom: 20,
+                boxShadow: '0 4px 14px rgba(225, 29, 72, 0.08)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--mk-rose, #E11D48)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                  <Zap size={15} /> Le plus rapide
+                </div>
+                <h3 style={{ margin: '0 0 6px 0', fontSize: 16, fontWeight: 700, color: 'var(--mk-ink)' }}>Création Express pas à pas</h3>
+                <p style={{ margin: '0 0 14px 0', fontSize: 13, color: 'var(--mk-ink-2)', lineHeight: 1.4 }}>
+                  Remplis le prénom, ton mot doux et choisis le fond en 1 minute.
+                </p>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate(`/ewish-admin/ewish/new?occ=${name}`)}
+                  style={{ width: '100%', justifyContent: 'center', gap: 8 }}
+                >
+                  <span>Créer en 5 étapes simples</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+
+              <div className="section-label" style={{ marginBottom: 14 }}>Ou démarrer avec l'éditeur avancé</div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                 {/* Premade options */}
@@ -279,12 +416,12 @@ export default function TemplateDetailPage() {
 
               <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button
-                  className="btn btn-primary btn-lg"
+                  className="btn btn-ghost btn-lg"
                   disabled={!picked}
                   onClick={openNaming}
                   style={{ width: '100%', justifyContent: 'center' }}
                 >
-                  Créer à partir de ce template <ArrowRight size={16} />
+                  Ouvrir l'éditeur complet <ArrowRight size={16} />
                 </button>
                 <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center', lineHeight: 1.5 }}>
                   Création et édition gratuites. La publication se débloque avec {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}.

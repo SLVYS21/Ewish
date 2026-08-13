@@ -146,7 +146,9 @@ export default function WallApp() {
   const [confettiType, setConfettiType] = useState(INITIAL_CONFETTI);
   const meta = INITIAL_META;
 
-  const isModern = String(meta.templateName || data.templateName || '').includes('modern');
+  const templateNameStr = String(meta.templateName || data.templateName || '');
+  const isModern = templateNameStr.includes('modern');
+  const isCraft  = templateNameStr.includes('craft');
   const publicId = String(meta.id || data.publicationId || '');
   const apiBase = String(data.apiBase || '').trim();
   const streamBase = apiBase.replace(/\/api$/, '');
@@ -157,6 +159,10 @@ export default function WallApp() {
   const wishesEnabled = data.wishesEnabled !== false;
   const isPrivate = !!data.isPrivate && !!data.accessCode;
   const isPreview = !!data.previewMode;
+  /* Mode démo landing : lecture seule (?demo=1 injecté par serve.js).
+     On rend « Laisser un mot » et « Participer au kado » désactivés
+     mais les clics sur les cartes de vœux restent actifs. */
+  const isDemo = !!data.demoMode;
 
   const [wishes, setWishes] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
@@ -479,7 +485,9 @@ export default function WallApp() {
     return <ModernIntro onReveal={() => { setShowIntro(false); fireConfetti('stars'); }} />;
   }
 
-  const wrapperClass = isModern ? 'ww-shell--modern' : 'ww-shell--classic';
+  const wrapperClass = isCraft
+    ? 'ww-shell--classic ww-shell--craft'
+    : (isModern ? 'ww-shell--modern' : 'ww-shell--classic');
 
   return (
     <div className={wrapperClass}>
@@ -528,7 +536,13 @@ export default function WallApp() {
                   </div>
                 </div>
               </div>
-              <button className="cag-cta" onClick={() => setGiftOpen(true)}>
+              <button
+                className="cag-cta"
+                onClick={() => { if (!isDemo) setGiftOpen(true); }}
+                disabled={isDemo}
+                title={isDemo ? 'Aperçu — la contribution n\'est pas active ici' : undefined}
+                style={isDemo ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
+              >
                 Participer au kado
               </button>
             </div>
@@ -537,7 +551,14 @@ export default function WallApp() {
       </header>
 
       {wishesEnabled ? (
-        <button id="add-btn" onClick={() => setComposerOpen(true)} aria-label="Laisser un mot">
+        <button
+          id="add-btn"
+          onClick={() => { if (!isDemo) setComposerOpen(true); }}
+          aria-label={isDemo ? 'Aperçu — impossible d\'ajouter un mot' : 'Laisser un mot'}
+          disabled={isDemo}
+          title={isDemo ? 'Aperçu — la contribution n\'est pas active ici' : undefined}
+          style={isDemo ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
+        >
           <Send size={18} /> Laisser un mot
         </button>
       ) : (

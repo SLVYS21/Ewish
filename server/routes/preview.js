@@ -9,25 +9,110 @@ const {
 } = require('../utils/htmlSafe');
 const { getReactWallShell } = require('../utils/reactWallShell');
 
-const DEMO_DATA = {};
+const DEMO_DATA = {
+  'birthday': {
+    recipient: 'Léa',
+    titleName: 'Léa',
+    age: '25',
+    message: 'Joyeux 25ème anniversaire à la plus merveilleuse des personnes ! Que cette nouvelle année t\'apporte une pluie de bonheur, d\'amour et de succès.',
+    sender: 'De la part de toute la famille & tes amis ❤️',
+    bgKey: 'festi',
+  },
+  'booklet': {
+    recipient: 'Émilie',
+    titleName: 'Émilie',
+    age: '30 ans',
+    message: 'Un très joyeux anniversaire ! Que cette nouvelle décennie soit remplie de surprises et de beaux projets.',
+    sender: 'Tes amis pour la vie ✨',
+    bgKey: 'luxury_paper',
+  },
+  'envelope': {
+    recipient: 'Maxime',
+    titleName: 'Maxime',
+    message: 'Félicitations pour cette belle réussite ! Nous sommes très fiers de toi.',
+    sender: 'Maman & Papa ❤️',
+    bgKey: 'elegant_dark',
+  },
+  'forever': {
+    recipient: 'Sarah & Marc',
+    titleName: 'Sarah & Marc',
+    message: 'Toutes nos félicitations pour votre magnifique mariage ! Que votre amour continue de grandir et d\'illuminer vos vies chaque jour.',
+    sender: 'Vos amis qui vous aiment très fort 💍',
+  },
+  'collective-pro': {
+    recipient: 'Thomas',
+    titleName: 'Thomas',
+    message: 'Merci pour ces 4 superbes années parmi nous ! Tu vas énormément manquer à l\'équipe. Plein de succès dans ta nouvelle aventure pro !',
+    sender: 'Toute l\'équipe Produit & Tech 🚀',
+  },
+  'collective-family': {
+    recipient: 'Noah',
+    titleName: 'Noah',
+    message: 'Bienvenue dans notre monde petit ange Noah ! Félicitations aux nouveaux parents. Hâte de te dorloter et de te voir grandir.',
+    sender: 'Papi, Mamie et toute la famille 👶',
+  },
+  'special': {
+    recipient: 'Alexandre',
+    titleName: 'Alexandre',
+    message: 'Félicitations pour cette superbe promotion et cette nouvelle étape ! Ton travail acharné porte ses fruits, nous sommes tous très fiers.',
+    sender: 'Tes proches & collègues',
+  },
+  'sanctuary': {
+    recipient: 'Gabriel',
+    titleName: 'Gabriel',
+    message: 'En hommage à une personne d\'une bienveillance exceptionnelle. Ton souvenir et ta générosité restent à jamais gravés dans nos cœurs.',
+    sender: 'Tes proches pour l\'éternité 🕊️',
+  },
+  'notre-film': {
+    recipient: 'Camille',
+    titleName: 'Camille',
+    message: 'Chaque souvenir partagé avec toi est un chef-d\'œuvre. Merci pour ces années de rires et de complicité magique.',
+    sender: 'Avec tout mon amour ❤️',
+  },
+  'wall-of-wishes': {
+    recipient: 'Lucas',
+    titleName: '30 ans de Lucas',
+    theme: 'rose',
+    wishes: [
+      { id: 'w1', author: 'Léa', text: 'Joyeux anniversaire Lucas ! Toujours le sourire et la bonne humeur, ne change rien 🎉🎂', color: '#FFF3BF', date: 'il y a 2h' },
+      { id: 'w2', author: 'Julien & Chloé', text: '30 ans, le bel âge ! Profite à fond de ta journée mon ami 🥂✨', color: '#D3F9D8', date: 'il y a 4h' },
+      { id: 'w3', author: 'Sarah (RH)', text: 'Un immense joyeux anniversaire de la part de toute la team ! 🎈', color: '#FFE3E3', date: 'il y a 6h' },
+      { id: 'w4', author: 'Maxime', text: 'On fête ça dignement ce week-end ! Prépare-toi 🔥', color: '#E7F5FF', date: 'hier' }
+    ]
+  },
+  'wall-of-wishes-modern': {
+    recipient: 'Thomas',
+    titleName: 'Pot de départ de Thomas',
+    theme: 'purple',
+    wishes: [
+      { id: 'w1', author: 'Julie', text: 'Un plaisir d\'avoir bossé avec toi ! Bon vent pour la suite 🚀', color: '#EDE7FF', date: 'il y a 1h' },
+      { id: 'w2', author: 'Marc', text: 'Merci pour tout le coaching ! Tu vas laisser un grand vide dans l\'équipe.', color: '#FFF3BF', date: 'il y a 3h' },
+      { id: 'w3', author: 'David', text: 'Reste en contact ! On t\'attend au prochain afterwork 🍻', color: '#D3F9D8', date: 'il y a 5h' }
+    ]
+  },
+  'wall-of-wishes-space': {
+    recipient: 'Équipe',
+    titleName: 'Lancement Réussi 🚀',
+    theme: 'space',
+    wishes: [
+      { id: 'w1', author: 'Direction', text: 'Bravo à tous pour ce lancement record ! Félicitations à toute la team.', color: '#FFE3E3', date: 'il y a 1h' }
+    ]
+  }
+};
 
 /* ── Anti-copy layer (friction UX, PAS de la sécurité) ────
    Bloque le clic droit / F12 / drag pour décourager la copie.
    `view-source:` et `curl` contournent tout : ce n'est pas de
-   la protection, juste de la friction visuelle. */
+   la protection, juste de la friction visuelle.
+
+   NOTE: the visible watermark overlay ("DÉMO MYKADO" diagonal) has
+   been removed — templates now render clean in the in-app preview.
+   The anti-copy handlers below stay in place.
+*/
 function injectProtection(html) {
-  const watermarkCss = `
+  const selectionCss = `
 <style id="ww-demo-style">
   * { -webkit-user-select: none !important; user-select: none !important; }
-  body::after {
-    content: '';
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    z-index: 2147483647;
-    background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' fill='rgba(0,0,0,0.07)' font-family='sans-serif' font-weight='bold' font-size='22' letter-spacing='2' text-anchor='middle' transform='rotate(-45 150 150)'%3ED%C3%89MO MYKADO%3C/text%3E%3C/svg%3E"),
-      repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(255,105,180,0.03) 60px, rgba(255,105,180,0.03) 120px);
-  }
 </style>`;
 
   const protectionScript = `
@@ -45,7 +130,7 @@ function injectProtection(html) {
 })();
 <\/script>`;
 
-  html = html.replace('</head>', watermarkCss + '\n</head>');
+  html = html.replace('</head>', selectionCss + '\n</head>');
   html = html.replace('</body>', protectionScript + '\n</body>');
   return html;
 }
@@ -66,20 +151,21 @@ const GFONTS_MAP = {
 
 const CSP = [
   "default-src 'self' https: data: blob:",
-  "script-src 'self' 'unsafe-inline' https: http://localhost:3000 http://localhost:5173",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
-  "connect-src 'self' https: http://localhost:3000 http://localhost:5173 ws://localhost:3000 ws://localhost:5173",
+  "connect-src 'self' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "object-src 'none'",
   "base-uri 'self'",
-  "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store",
+  "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* https://app.mykado.store https://mykado.store https://www.mykado.store https://go.mykado.store",
 ].join('; ');
 
 router.get('/:templateName', async (req, res) => {
   const { templateName } = req.params;
 
+  res.removeHeader('X-Frame-Options');
   res.setHeader('Content-Security-Policy', CSP);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');

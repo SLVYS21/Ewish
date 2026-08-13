@@ -10,7 +10,8 @@
     "seed:ww": "node seeds/wallOfWishes.js",
     "seed:templates": "node seeds/seedTemplates.js",
     "seed:walls": "node seeds/seedWalls.js",
-    "seed:invitations": "node seeds/seedInvitations.js"
+    "seed:invitations": "node seeds/seedInvitations.js",
+    "seed:demo-landing": "node seeds/seedDemoLanding.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

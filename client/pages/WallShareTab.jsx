@@ -3,7 +3,7 @@ import { ShareView, UnlockView, buildShareUrl } from './SharePage';
 import { getShortLink } from '../utils/api';
 import { Loader2 } from 'lucide-react';
 
-const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
+const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-craft','wall-of-wishes-space']);
 
 export default function WallShareTab({ pub, setPub }) {
   const [shortCode, setShortCode] = useState('');

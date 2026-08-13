@@ -58,7 +58,7 @@ app.use('/stickers', express.static(path.join(__dirname, 'public/stickers'), {
 }));
 
 const TEMPLATES_DIR = process.env.TEMPLATES_DIR ||
-  (fs.existsSync(path.join(__dirname, 'templates')) 
+  (fs.existsSync(path.join(__dirname, 'templates')) && fs.existsSync(path.join(__dirname, 'templates', 'birthday'))
     ? path.join(__dirname, 'templates')
     : path.join(__dirname, '../templates'));
 
@@ -73,6 +73,7 @@ app.use('/site/notre-film',        express.static(path.join(TEMPLATES_DIR, 'notr
 app.use('/site/wall-of-wishes',        express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes')));
 app.use('/site/wall-of-wishes-3d',     express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-3d')));
 app.use('/site/wall-of-wishes-modern', express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-modern')));
+app.use('/site/wall-of-wishes-craft',  express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-craft')));
 app.use('/site/wall-of-wishes-space',  express.static(path.join(TEMPLATES_DIR, 'wall-of-wishes-space')));
 app.use('/site/forever',           express.static(path.join(TEMPLATES_DIR, 'forever')));
 app.use('/site/sanctuary',         express.static(path.join(TEMPLATES_DIR, 'sanctuary')));
@@ -250,3 +251,4 @@ mongoose.connect(MONGO_URI)
   });
 
 module.exports = app;
+// nodemon restart trigger

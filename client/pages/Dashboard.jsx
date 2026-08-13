@@ -29,7 +29,7 @@ const TEMPLATE_GRADIENTS = {
 };
 
 const WALL_TEMPLATES = new Set([
-  'wall-of-wishes', 'wall-of-wishes-3d', 'wall-of-wishes-modern', 'wall-of-wishes-space',
+  'wall-of-wishes', 'wall-of-wishes-3d', 'wall-of-wishes-modern', 'wall-of-wishes-craft', 'wall-of-wishes-space',
 ]);
 
 /* ── SVG waving hand icon (remplace l'emoji 👋) ── */

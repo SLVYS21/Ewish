@@ -22,10 +22,10 @@ const TEMPLATE_COLORS = {
   'wall-of-wishes-space': 'linear-gradient(135deg,#ff8060,#d83070)',
 };
 
-/* Deux murs actifs seulement  les variantes 3d/space ont été retirées.
+/* Murs actifs. Les variantes 3d/space ont été retirées.
    Voir memory/project_walls_flow.md */
 const WALL_TEMPLATES = new Set([
-  'wall-of-wishes', 'wall-of-wishes-modern',
+  'wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-craft',
 ]);
 
 const DISPLAY_DOMAIN = (import.meta.env.VITE_API_URL || 'mykado.store')

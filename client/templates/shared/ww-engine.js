@@ -544,8 +544,74 @@
 
     const decos = window.__WW_DECO__  || [];
 
+    function applyEnvelope(style) {
+      // Ne pas bloquer l'éditeur (iframe)
+      if (window.self !== window.top) return;
+      var theme = style.envelopeTheme;
+      if (!theme || theme === 'none') return;
+
+      var overlay = document.createElement('div');
+      overlay.id = 'ww-envelope-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:var(--bg, #FAF7F0);overflow:hidden;cursor:pointer;';
+      
+      var content = document.createElement('div');
+      content.style.cssText = 'position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;';
+      
+      if (theme === 'youth') {
+        overlay.style.background = 'radial-gradient(circle, #ffeaf2, #ffb3c6)';
+        content.innerHTML = '<div style="font-size:5rem;filter:drop-shadow(0 10px 15px rgba(255,0,100,0.3));animation:ww-bounce 1s infinite alternate;">🎁</div><div style="margin-top:20px;font-family:var(--font);font-weight:700;color:#d81159;font-size:1.2rem;letter-spacing:1px;">Ouvrir la surprise</div>';
+      } else if (theme === 'pro') {
+        overlay.style.background = '#1A1C23';
+        content.innerHTML = '<div style="width:80px;height:80px;background:#8c2323;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.4);border:2px solid #5a1414;color:#e8c060;font-size:2rem;font-family:serif;font-style:italic;">M</div><div style="margin-top:24px;font-family:var(--font);color:#E8A33D;font-size:0.9rem;letter-spacing:4px;text-transform:uppercase;">Briser le sceau</div>';
+      } else if (theme === 'casual') {
+        overlay.style.background = '#e9e1d3';
+        content.innerHTML = '<div style="width:200px;height:280px;background:#fff;border-radius:8px;box-shadow:0 15px 35px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;border-left:4px solid #d4c5b0;font-family:var(--font);color:#5c5447;font-size:1.1rem;">Ouvrir la carte</div>';
+      }
+
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+      
+      // Pause master timeline
+      var poll = setInterval(function() {
+        if (window._ww_tl) {
+          window._ww_tl.pause();
+          window._ww_tl.progress(0);
+          clearInterval(poll);
+        }
+      }, 20);
+
+      overlay.addEventListener('click', function() {
+        // Simple opening animation
+        if (typeof TweenMax !== 'undefined') {
+          if (theme === 'youth') {
+            if (window.confetti) window.confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+            TweenMax.to(content, 0.4, { scale: 1.5, opacity: 0, ease: Power2.easeIn });
+            TweenMax.to(overlay, 0.6, { opacity: 0, delay: 0.3, onComplete: finish });
+          } else if (theme === 'pro') {
+            TweenMax.to(content, 0.5, { scale: 2, opacity: 0 });
+            TweenMax.to(overlay, 1, { y: '-100%', ease: Power3.easeInOut, delay: 0.2, onComplete: finish });
+          } else {
+            TweenMax.to(content, 0.8, { rotationY: -90, transformOrigin: "left center", opacity: 0, ease: Power2.easeIn });
+            TweenMax.to(overlay, 0.6, { opacity: 0, delay: 0.5, onComplete: finish });
+          }
+        } else {
+          finish();
+        }
+
+        function finish() {
+          overlay.remove();
+          if (window._ww_tl) window._ww_tl.play();
+        }
+      });
+    }
+
+    // FIX: Remove the deprecated SVG intro overlay if it still exists in the HTML
+    const oldIntro = document.getElementById('intro-overlay');
+    if (oldIntro) oldIntro.remove();
+    
     applyBackgrounds(style);
     applyDecorations(decos);
+    applyEnvelope(style);
 
     window.addEventListener('message', handleLiveUpdate);
 

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>myKado Â· Mur de mots</title>
+  <title>myKado - Mur de mots</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       myKado Â· Mur 1    Mosaïque (pixel-perfect)
+       myKado - Mur 1    Mosaïque (pixel-perfect)
        Fond dégradé pastel, bannière roseâ†’lilas, cartes pastel,
        typo Instrument Serif italic + Plus Jakarta Sans, accent violet.
        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -2053,6 +2053,31 @@ function setWishesEnabled(enabled) {
   }
 }
 
+/* Demo mode (?demo=1 injecté par serve.js). Voir wall-of-wishes/index.html. */
+function applyDemoMode(d) {
+  if (!d || !d.demoMode) return;
+
+  d.skipIntro = true;
+  if (window.__WW_DATA__) window.__WW_DATA__.skipIntro = true;
+  window.__IS_THANK_YOU = true;
+  var env = document.getElementById('env-overlay');
+  if (env) { env.classList.remove('show'); env.style.display = 'none'; }
+  var header = document.getElementById('wall-header');
+  if (header) header.classList.add('reveal');
+
+  var msg = 'Aperçu — cette action n\'est pas disponible ici';
+  window.openSheet = function() { /* demo: no-op */ };
+  window.showGiftSheet = function() { /* demo: no-op */ };
+  ['add-btn', 'cagnotte-btn'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.style.opacity = '0.55';
+    btn.style.cursor = 'not-allowed';
+    btn.title = msg;
+    btn.setAttribute('aria-disabled', 'true');
+  });
+}
+
 /* Insère un vœu inconnu dans le mur avec l'animation d'arrivée.
    Utilisé à la fois par le polling de secours et par le stream SSE.
    Miroir du wall-of-wishes classique (applyLiveWish). */
@@ -2650,6 +2675,9 @@ function shouldShowIntro() {
   if (_d.skipIntro === true) return false;
   if (window.__WW_PREVIEW_MODE && !_d.forceIntro) return false;
   if (window.__IS_THANK_YOU) return false;
+  /* Mode standalone / test HTML brut hors serveur (file://). */
+  if (!window.__WW_DATA__) return false;
+  if (_d.demoMode === true) return false;
   return true;
 }
 
@@ -3140,6 +3168,7 @@ function applyCover(d) {
   if (d.subtitle)  document.querySelector('[data-node="subtitle"]').textContent  = d.subtitle;
 
   setWishesEnabled(d.wishesEnabled !== false);
+  applyDemoMode(d);
 
   if (!PUB_ID && !(_d.cagnotte && _d.cagnotte.enabled)) {
     _d.cagnotte = {
@@ -3148,7 +3177,7 @@ function applyCover(d) {
       collected: 62000,
       goal: 120000,
       contributors: 18,
-      amountChoices: [1000, 2000, 5000, 10000, 15000, 25000]
+      amountChoices: [2000, 5000, 10000]
     };
   }
 

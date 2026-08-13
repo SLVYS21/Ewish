@@ -22,12 +22,23 @@ const watchers = new Map();
 
 function resolveDir() {
   if (templatesDir) return templatesDir;
-  templatesDir = process.env.TEMPLATES_DIR
-    || (fs.existsSync(path.join(__dirname, '../templates'))
-        ? path.join(__dirname, '../templates')
-        : fs.existsSync(path.join(__dirname, '../../templates'))
-          ? path.join(__dirname, '../../templates')
-          : null);
+  if (process.env.TEMPLATES_DIR && fs.existsSync(process.env.TEMPLATES_DIR)) {
+    templatesDir = process.env.TEMPLATES_DIR;
+    return templatesDir;
+  }
+  const candidates = [
+    path.join(__dirname, '../../templates'),
+    path.join(__dirname, '../templates'),
+    path.join(process.cwd(), 'templates'),
+    path.join(process.cwd(), '../templates'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c) && (fs.existsSync(path.join(c, 'birthday')) || fs.existsSync(path.join(c, 'wall-of-wishes')))) {
+      templatesDir = c;
+      return templatesDir;
+    }
+  }
+  templatesDir = candidates.find(c => fs.existsSync(c)) || null;
   return templatesDir;
 }
 

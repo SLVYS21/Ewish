@@ -951,18 +951,6 @@
       background: transparent !important;
     }
     /* ===== INTRO NOTRE-FILM REEL ===== */
-    #intro-overlay {
-      position: fixed; inset: 0; z-index: 10000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(ellipse 90% 80% at 50% 42%, #fff5f7 0%, #fef5f7 52%, #fff0f5 100%);
-      opacity: 1; transition: opacity 0.95s ease; overflow: hidden; pointer-events: none;
-    }
-    #intro-overlay.ib-dissolve { opacity: 0; }
-    #intro-overlay::before {
-      content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(232,99,122,0.16) 0%, transparent 68%);
-      animation: ibGlow 2.3s ease-in-out infinite alternate; pointer-events: none;
-    }
     @keyframes ibGlow { from { transform:scale(0.88); opacity:0.5; } to { transform:scale(1.12); opacity:1; } }
     #bloom-svg { position:relative; z-index:1; width:min(285px,77vw); height:min(285px,77vw); overflow:visible; }
     .ib-reel-outer { fill:none; stroke:rgba(232,99,122,0.55); stroke-width:1.4; }
@@ -1075,49 +1063,7 @@
   </svg>
 </div>
 
-<div id="intro-overlay" aria-hidden="true">
-  <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-    <circle class="ib-ring-outer" cx="200" cy="200" r="125"/>
-    <!-- Sprocket holes (static, visible from start) -->
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(0,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(22.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(45,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(67.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(90,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(112.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(135,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(157.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(180,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(202.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(225,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(247.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(270,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(292.5,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(315,200,200)"/>
-    <circle class="ib-sprocket" cx="200" cy="102" r="5" transform="rotate(337.5,200,200)"/>
-    <!-- Animated elements draw in sequence -->
-    <circle class="ib-draw ib-reel-outer" cx="200" cy="200" r="115"/>
-    <circle class="ib-draw ib-reel-mid"   cx="200" cy="200" r="72"/>
-    <!-- 6 radiating petal arms -->
-    <path class="ib-draw ib-petal-out" d="M200 200 C184 170 182 128 200 102 C218 128 216 170 200 200" transform="rotate(0,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C184 170 182 128 200 102 C218 128 216 170 200 200" transform="rotate(60,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C184 170 182 128 200 102 C218 128 216 170 200 200" transform="rotate(120,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C184 170 182 128 200 102 C218 128 216 170 200 200" transform="rotate(180,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C184 170 182 128 200 102 C218 128 216 170 200 200" transform="rotate(240,200,200)"/>
-    <path class="ib-draw ib-petal-out" d="M200 200 C184 170 182 128 200 102 C218 128 216 170 200 200" transform="rotate(300,200,200)"/>
-    <!-- Film strip bars -->
-    <line class="ib-draw ib-film-bar" x1="155" y1="192" x2="245" y2="192"/>
-    <line class="ib-draw ib-film-bar" x1="155" y1="208" x2="245" y2="208"/>
-    <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="20"/>
-  </svg>
-  <div id="ib-text">
-    <p id="ib-label">Notre Cinéma</p>
-    <svg id="ib-line-svg" viewBox="0 0 240 18">
-      <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11"/>
-    </svg>
-  </div>
-  <div id="ib-burst"></div>
-</div>
+
 
   <!-- ═══ PILULE MUSIQUE ═══ -->
   <div id="music-pill">
@@ -1934,7 +1880,7 @@
       setTimeout(()=>{ introPetalReveal(overlay, init); },drawDone+1080);
     }
 
-    document.addEventListener('DOMContentLoaded', runIntro);
+    fetchData();
   </script>
 </body>
 

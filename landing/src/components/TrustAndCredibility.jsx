@@ -68,11 +68,27 @@ export default function TrustAndCredibility() {
             </div>
           </div>
           <div className={s.partners}>
-            <div className={s.partnerLogo}>MTN MoMo</div>
-            <div className={s.partnerLogo}>Wave</div>
-            <div className={s.partnerLogo}>Orange Money</div>
-            <div className={s.partnerLogo}>Moov Money</div>
-            <div className={s.partnerLogo}>Visa / Mastercard</div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/mtn.svg" alt="MTN MoMo" />
+            </div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/wave.svg" alt="Wave" />
+            </div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/moov.svg" alt="Moov Money" />
+            </div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/celtiis.svg" alt="Celtiis Cash" />
+            </div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/airtel.svg" alt="Airtel Money" />
+            </div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/visa.svg" alt="Visa" />
+            </div>
+            <div className={s.partnerLogo}>
+              <img src="/logos/mastercard.svg" alt="Mastercard" />
+            </div>
           </div>
         </div>
 

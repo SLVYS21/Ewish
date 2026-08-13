@@ -4,8 +4,8 @@
    ───────────────────────────────────────────────────────────── */
 
 .section {
-  padding: 120px 20px;
-  background: var(--mk-stone-50);
+  padding: 100px 20px 120px;
+  background: linear-gradient(180deg, var(--mk-stone-50) 0%, #FFF6EE 55%, var(--mk-stone-50) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -17,23 +17,59 @@
   margin: 0 auto;
 }
 
-/* Orbs pastel très discrets pour animer le fond crème. */
 .bgOrbs { position: absolute; inset: 0; pointer-events: none; }
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: .5;
+  filter: blur(70px);
+  opacity: .75;
 }
 .o1 {
-  width: 420px; height: 420px;
-  background: radial-gradient(circle, rgba(232,163,61,.35), transparent 65%);
-  top: -140px; left: -80px;
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, rgba(232,163,61,.55), transparent 65%);
+  top: -160px; left: -100px;
 }
 .o2 {
-  width: 380px; height: 380px;
-  background: radial-gradient(circle, rgba(193,59,59,.20), transparent 65%);
-  bottom: -120px; right: -60px;
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(193,59,59,.35), transparent 65%);
+  bottom: -140px; right: -80px;
+}
+
+/* Decorative floating card (happy_family) - desktop only */
+.floatingCard {
+  position: absolute;
+  top: 40px;
+  right: -40px;
+  width: 180px;
+  height: 240px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 48px -12px rgba(45, 32, 14, 0.24);
+  transform: rotate(6deg);
+  z-index: 0;
+  animation: floatCardAnim 6s ease-in-out infinite;
+  display: none;
+}
+.floatingCard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.floatingCardLeft {
+  top: auto;
+  bottom: 60px;
+  left: -50px;
+  right: auto;
+  transform: rotate(-8deg);
+  animation-delay: -3s;
+}
+@media (min-width: 1024px) { .floatingCard { display: block; } }
+@keyframes floatCardAnim {
+  0%, 100% { transform: rotate(6deg) translateY(0); }
+  50%      { transform: rotate(4deg) translateY(-14px); }
+}
+.floatingCardLeft {
+  animation-name: floatCardAnimLeft;
+}
+@keyframes floatCardAnimLeft {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  50%      { transform: rotate(-6deg) translateY(-12px); }
 }
 
 .card {
@@ -149,7 +185,35 @@
 }
 .ctaInput::placeholder { color: var(--mk-stone-500); font-style: italic; }
 
+/* Wrapper for the button + pointing emoji */
+.ctaBtnWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Emoji pointing hand → animated jiggle nudging the CTA */
+.pointerEmoji {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 4px;
+  display: inline-flex;
+  animation: pointerNudge 1.6s ease-in-out infinite;
+  transform-origin: 70% 50%;
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 4px 8px rgba(45, 32, 14, 0.18));
+}
+@keyframes pointerNudge {
+  0%, 100% { transform: translateY(-50%) translateX(0)   rotate(0deg); }
+  40%      { transform: translateY(-50%) translateX(-6px) rotate(-8deg); }
+  60%      { transform: translateY(-50%) translateX(4px)  rotate(4deg); }
+}
+
 .ctaBtn {
+  position: relative;
   background: var(--mk-indigo-700);
   color: #fff;
   border: none;
@@ -165,15 +229,50 @@
   transition: background .2s, transform .15s, box-shadow .25s;
   white-space: nowrap;
   box-shadow: var(--sh-brand);
+  overflow: visible;
+  isolation: isolate;
 }
+.ctaBtnLabel { position: relative; z-index: 2; }
+
+/* Continuous pulse ring around the CTA */
+.ctaPulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: 15px;
+  box-shadow: 0 0 0 0 rgba(30, 41, 82, 0.55);
+  animation: ctaFinalPulse 2.4s ease-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes ctaFinalPulse {
+  0%   { box-shadow: 0 0 0 0    rgba(30, 41, 82, 0.55); }
+  70%  { box-shadow: 0 0 0 16px rgba(30, 41, 82, 0);    }
+  100% { box-shadow: 0 0 0 0    rgba(30, 41, 82, 0);    }
+}
+
 .ctaBtn:hover {
   background: var(--mk-indigo-500);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -8px rgba(30, 41, 82, 0.45);
 }
 .ctaBtn svg {
   width: 16px; height: 16px;
   stroke: currentColor;
   fill: none;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  z-index: 2;
+}
+.ctaBtn:hover svg {
+  animation: arrowBounce 0.7s ease-in-out infinite;
+}
+@keyframes arrowBounce {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pointerEmoji, .ctaPulse, .ctaBtn:hover svg { animation: none; }
 }
 
 /* ─── assurances ─── */
@@ -223,4 +322,20 @@
   .ctaBtn { flex: 0 0 auto; padding: 12px 14px; font-size: 14px; }
   .assurances { gap: 12px 18px; }
   .assure { font-size: 12.5px; }
+  /* Pointer emoji moves above the button on mobile to avoid overflow */
+  .pointerEmoji {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 100%;
+    margin-right: 0;
+    margin-bottom: 2px;
+    transform: translateX(-50%) rotate(90deg);
+    animation: pointerNudgeDown 1.6s ease-in-out infinite;
+  }
+  @keyframes pointerNudgeDown {
+    0%, 100% { transform: translateX(-50%) rotate(90deg) translateX(0); }
+    40%      { transform: translateX(-50%) rotate(90deg) translateX(-6px); }
+    60%      { transform: translateX(-50%) rotate(90deg) translateX(4px); }
+  }
 }

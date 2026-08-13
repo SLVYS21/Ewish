@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>myKado Â· Mur de mots</title>
+  <title>myKado - Mur de mots</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* **********************************************************************************************************************************************************
-       myKado Â· Mur 2    Tableau d'épingles (pixel-perfect)
+       myKado - Mur 2    Tableau d'épingles (pixel-perfect)
        Fond blanc, bannière gradient bronze, polaroids inclinés,
        sticky notes avec ruban de tape, typo Caveat & Instrument Serif.
        ********************************************************************************************************************************************************** */
@@ -1278,26 +1278,6 @@
     /********************************************************************************************************************
        INTRO OVERLAY (recipient reveal)
       ******************************************************************************************************************* */
-    #intro-overlay {
-      display: none;
-      position: fixed; inset: 0; z-index: 900;
-      background: var(--wall-bg, #FFFFFF);
-      background-size: var(--wall-bg-size, cover);
-      background-repeat: var(--wall-bg-repeat, no-repeat);
-      /* Pas de background-attachment:fixed : l'overlay est déjà position:fixed,
-         donc son fond suit naturellement le viewport. Ajouter fixed en plus
-         provoque le bug d'étirement iOS Safari sur des vues longues. */
-      background-position: center;
-      color: #fff;
-      flex-direction: column; align-items: center; justify-content: center;
-      overflow: hidden; padding: 30px;
-    }
-    #intro-overlay.show { display: flex; }
-    #intro-overlay .intro-glow {
-      position: absolute; border-radius: 50%; filter: blur(50px); opacity: .55; pointer-events: none;
-    }
-    #intro-overlay .intro-glow.g1 { width: 220px; height: 220px; top: 60px; left: -40px; background: #9B7EE2; }
-    #intro-overlay .intro-glow.g2 { width: 240px; height: 240px; bottom: 60px; right: -50px; background: #E11D48; }
     #intro-skip {
       position: absolute; top: 24px; right: 20px; z-index: 4;
       display: inline-flex; align-items: center; gap: 5px;
@@ -1729,25 +1709,7 @@
   </div>
 </div>
 
-<div id="intro-overlay">
-  <span class="intro-glow g1"></span>
-  <span class="intro-glow g2"></span>
-  <button id="intro-skip" onclick="skipIntro()">
-    Passer l'intro
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg>
-  </button>
-  <div class="intro-brand">myKado</div>
-  <style>.intro-card .intro-big em { background: none !important; -webkit-text-fill-color: inherit !important; color: inherit; opacity: 0.95; }</style>
-  <div class="intro-card" style="background:var(--pin-btn, var(--accent, #E11D48));color:var(--pin-btn-ink, #fff);background-image:var(--cover-image, none);background-blend-mode:soft-light;background-size:cover;background-position:center;padding:36px 24px;border-radius:28px;box-shadow:0 12px 40px rgba(0,0,0,0.3);width:90%;max-width:380px;display:flex;flex-direction:column;align-items:center;margin-top:16px;">
-    <img class="intro-hero"
-         src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.webp"
-         alt=""
-         onerror="this.onerror=null;this.src='https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.gif'">
-    <div class="intro-big" id="intro-title">Quelqu'un a préparé<br>quelque chose <em>rien que pour toi</em></div>
-    <div class="intro-from">Un mur de mots t'attend</div>
-  </div>
-  <div class="intro-prog"><i></i></div>
-</div>
+
 
 <div id="env-overlay">
   <!-- Version: Default Confetti -->
@@ -2094,7 +2056,7 @@
     <button onclick="skipGift()" class="gift-skip-btn">Une autre fois, merci</button>
     <div class="gift-secure">
       <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
-      Paiement sécurisé Â· MTN, Moov, Orange Money
+      Paiement sécurisé - MTN, Moov, Orange Money
     </div>
   </div>
 </div>
@@ -2557,6 +2519,41 @@ function setWishesEnabled(enabled) {
 }
 
 /* **********************************************
+             DEMO MODE (?demo=1 injecté par serve.js)
+   Utilisé par la section « Démos en direct » de la landing :
+   iframe en lecture seule — désactive « Laisser un mot » et
+   « Participer au kado », le clic sur les cartes reste actif.
+   Skip aussi l'intro enveloppe : sans click possible, l'overlay
+   flou (backdrop-filter: blur(5px)) resterait bloqué à l'écran.
+********************************************** */
+function applyDemoMode(d) {
+  if (!d || !d.demoMode) return;
+
+  /* 1. Skip intro + cache l'overlay enveloppe (défensif : couvre le cas où
+        ?noanim=1 aurait été omis dans l'URL de l'iframe landing). */
+  d.skipIntro = true;
+  if (window.__WW_DATA__) window.__WW_DATA__.skipIntro = true;
+  window.__IS_THANK_YOU = true; // court-circuite shouldShowIntro (2nde ligne défense)
+  var env = document.getElementById('env-overlay');
+  if (env) { env.classList.remove('show'); env.style.display = 'none'; }
+  var header = document.getElementById('wall-header');
+  if (header) header.classList.add('reveal');
+
+  /* 2. Désactive les CTA d'écriture / de contribution. */
+  var msg = 'Aperçu — cette action n\'est pas disponible ici';
+  window.openSheet = function() { /* demo: no-op */ };
+  window.showGiftSheet = function() { /* demo: no-op */ };
+  ['add-btn', 'cagnotte-btn'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.style.opacity = '0.55';
+    btn.style.cursor = 'not-allowed';
+    btn.title = msg;
+    btn.setAttribute('aria-disabled', 'true');
+  });
+}
+
+/* **********************************************
              SHEET
 ********************************************** */
 function openSheet() {
@@ -2985,7 +2982,7 @@ function initCagnotteStrip() {
   var pct = goal > 0 ? Math.min(100, Math.round((col / goal) * 100)) : 0;
   document.getElementById('cag-stats').textContent =
     (goal > 0 ? fmtNum(col) + ' / ' + fmtNum(goal) + ' FCFA' : fmtNum(col) + ' FCFA') +
-    (cnt > 0 ? ' Â· ' + cnt + ' participant' + (cnt !== 1 ? 's' : '') : '');
+    (cnt > 0 ? ' - ' + cnt + ' participant' + (cnt !== 1 ? 's' : '') : '');
   document.getElementById('cag-pct').textContent = pct + '%';
   document.getElementById('cag-fill').style.width = pct + '%';
 }
@@ -3051,7 +3048,7 @@ function giftPickAmt(a, chip) {
 
   if (giftState.amt !== null) {
     chip.classList.add('active');
-    btn.textContent = 'Participer Â· ' + fmtNum(giftState.amt) + ' FCFA';
+    btn.textContent = 'Participer - ' + fmtNum(giftState.amt) + ' FCFA';
     btn.disabled    = false;
     var p0 = cag.goal > 0 ? Math.min(100, Math.round(((cag.collected || 0) / cag.goal) * 100)) : 0;
     var p1 = cag.goal > 0 ? Math.min(100, Math.round(((cag.collected || 0) + giftState.amt) / cag.goal * 100)) : 0;
@@ -3232,6 +3229,12 @@ function shouldShowIntro() {
   if (_d.skipIntro === true) return false;
   if (window.__WW_PREVIEW_MODE && !_d.forceIntro) return false;
   if (window.__IS_THANK_YOU) return false;
+  /* Mode standalone / test du HTML brut hors serveur (file://) :
+     aucune donnée n'est injectée par serve.js → on skip l'intro pour
+     ne pas rester bloqué sur l'env-overlay flou qui exige un clic
+     manuel sur le gift-box. En prod, __WW_DATA__ est toujours défini. */
+  if (!window.__WW_DATA__) return false;
+  if (_d.demoMode === true) return false;
   return true;
 }
 
@@ -3803,6 +3806,7 @@ function applyCover(d) {
   if (d.subtitle)  document.querySelector('[data-node="subtitle"]').textContent  = d.subtitle;
 
   setWishesEnabled(d.wishesEnabled !== false);
+  applyDemoMode(d);
 
   if (!PUB_ID && !(_d.cagnotte && _d.cagnotte.enabled)) {
     _d.cagnotte = {
@@ -3811,7 +3815,7 @@ function applyCover(d) {
       collected: 62000,
       goal: 120000,
       contributors: 18,
-      amountChoices: [1000, 2000, 5000, 10000, 15000, 25000]
+      amountChoices: [2000, 5000, 10000]
     };
   }
 

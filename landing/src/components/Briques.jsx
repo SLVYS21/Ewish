@@ -122,7 +122,7 @@ const InteractiveCardPreview = () => {
   );
 };
 
-export default function Briques() {
+export default function Briques({ onCreate }) {
   return (
     <section id="briques" className={`mk-section mk-section-elevated ${s.wrap}`}>
       <div className="mk-container">
@@ -140,13 +140,20 @@ export default function Briques() {
             <InteractiveCardPreview />
             <div className={s.content}>
               <h3 className={s.title}>1. Cartes Animées</h3>
-              <div className={s.tag}>L'émotion à l'état pur</div>
-              <p className={s.desc}>Un véritable déballage digital encapsulé dans un lien unique. Plus qu'une carte, une expérience.</p>
+              <div className={s.tag}>L'émotion en solo (1-to-1)</div>
+              <p className={s.desc}>Un véritable déballage digital interactif. Musique personnalisée, effet de surprise 3D et message intime.</p>
               <ul className={s.list}>
                 <li><Check className="mk-check"/> Musique, textes et médias combinés</li>
                 <li><Check className="mk-check"/> Effet de surprise avec ouverture 3D</li>
                 <li><Check className="mk-check"/> Livraison instantanée par WhatsApp ou SMS</li>
               </ul>
+              <button
+                className={`${s.actionBtn} ${s.btnRose}`}
+                onClick={() => onCreate?.('/ewish-admin/ewish/new')}
+              >
+                <span>Créer une carte animée</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
           </article>
 
@@ -155,13 +162,20 @@ export default function Briques() {
             <InteractiveBoard />
             <div className={s.content}>
               <h3 className={s.title}>2. Murs de Mots</h3>
-              <div className={s.tag}>Ensemble, même de loin</div>
-              <p className={s.desc}>Centralisez les vœux de tous vos proches sur un mur interactif, où qu'ils soient dans le monde.</p>
+              <div className={s.tag}>Ensemble, à plusieurs mains</div>
+              <p className={s.desc}>Centralisez les vœux de tous vos proches sur un livre d'or digital interactif, où qu'ils soient dans le monde.</p>
               <ul className={s.list}>
                 <li><Check className="mk-check"/> Contribution facile sans créer de compte</li>
                 <li><Check className="mk-check"/> Ajout de photos, mémos vocaux et GIFs</li>
                 <li><Check className="mk-check"/> Idéal pour les pots de départ et mariages</li>
               </ul>
+              <button
+                className={`${s.actionBtn} ${s.btnIndigo}`}
+                onClick={() => onCreate?.('/ewish-admin/wall/new')}
+              >
+                <span>Créer un mur collaboratif</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
           </article>
 
@@ -171,12 +185,19 @@ export default function Briques() {
             <div className={s.content}>
               <h3 className={s.title}>3. Cagnottes Partagées</h3>
               <div className={s.tag}>Le cadeau commun, sans friction</div>
-              <p className={s.desc}>Créez un pool de cadeaux fluide et sécurisé pour rassembler l'argent en toute simplicité.</p>
+              <p className={s.desc}>Créez une cagnotte fluide et sécurisée pour rassembler l'argent du cadeau en toute simplicité.</p>
               <ul className={s.list}>
                 <li><Check className="mk-check"/> Mobile Money local et cartes bancaires</li>
                 <li><Check className="mk-check"/> Participation sans inscription préalable</li>
                 <li><Check className="mk-check"/> Retrait instantané et transparent</li>
               </ul>
+              <button
+                className={`${s.actionBtn} ${s.btnDark}`}
+                onClick={() => onCreate?.('/ewish-admin/wall/new?pot=1')}
+              >
+                <span>Lancer une cagnotte</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
           </article>
         </div>

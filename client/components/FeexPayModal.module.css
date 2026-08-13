@@ -90,17 +90,14 @@
 .op {
   border: 2px solid #EAE0E5;
   border-radius: 10px;
-  padding: 10px 6px;
+  padding: 10px 6px 8px;
   background: #fff;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   transition: all .15s;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--mk-ink, #2B1A2D);
 }
 .op:hover { border-color: #DCC4CE; }
 .op.opActive {
@@ -108,17 +105,174 @@
   background: #FFF1F4;
   box-shadow: 0 2px 8px rgba(225,29,72,.08);
 }
-.opDot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+.opLogo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
 }
+.opLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mk-ink, #2B1A2D);
+}
+
+/* --- Sélecteur pays --- */
+.countryPicker {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid #EAE0E5;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border .15s;
+}
+.countryPicker:hover { border-color: #DCC4CE; }
+.countryFlag { font-size: 20px; line-height: 1; }
+.countryName {
+  flex: 1;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mk-ink, #2B1A2D);
+}
+.countryDial {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6D5C70;
+  background: #F9F5F6;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.chev { color: #A496A5; transition: transform .2s; }
+.chevOpen { transform: rotate(180deg); }
+
+.countryList {
+  margin-top: 6px;
+  border: 1px solid #EAE0E5;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+.countryItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .12s;
+}
+.countryItem:hover { background: #FAF5F7; }
+.countryItemActive { background: #FFF1F4; }
+.countryCheck { color: var(--mk-accent, #E11D48); }
+
+/* --- Téléphone avec préfixe fixe --- */
+.phoneWrap {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid #EAE0E5;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border .15s;
+}
+.phoneWrap:focus-within { border-color: var(--mk-accent, #E11D48); }
+.phonePrefix {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #F9F5F6;
+  color: var(--mk-ink, #2B1A2D);
+  font-weight: 700;
+  font-size: 14px;
+  border-right: 1.5px solid #EAE0E5;
+}
+.phoneInput {
+  flex: 1;
+  padding: 12px 14px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--mk-ink, #2B1A2D);
+  background: #fff;
+}
+.phoneInput[aria-invalid="true"] { color: #B91C1C; }
+
+/* --- Séparateur "ou" + bouton carte alt --- */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px;
+  color: #A496A5;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 600;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #EAE0E5;
+}
+
+.altPayBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1.5px solid #EAE0E5;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mk-ink, #2B1A2D);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.altPayBtn:hover { border-color: #DCC4CE; background: #FAF5F7; }
+.altPayBtnActive {
+  border-color: var(--mk-accent, #E11D48);
+  background: #FFF1F4;
+  color: var(--mk-accent, #E11D48);
+}
+
+.cardNotice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: #F9F5F6;
+  border: 1px solid #EAE0E5;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  color: var(--mk-ink, #2B1A2D);
+}
+.cardNoticeTitle { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.cardNoticeText { font-size: 12px; color: #6D5C70; line-height: 1.4; }
 
 .input {
   width: 100%;

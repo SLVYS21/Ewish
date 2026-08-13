@@ -1,7 +1,7 @@
 /* CLASSIC TEMPLATE CSS */
 
     /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       myKado Â· Mur 2    Tableau d'épingles (pixel-perfect)
+       myKado - Mur 2    Tableau d'épingles (pixel-perfect)
        Fond blanc, bannière gradient bronze, polaroids inclinés,
        sticky notes avec ruban de tape, typo Caveat & Instrument Serif.
        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -1540,7 +1540,7 @@
 /* MODERN TEMPLATE CSS */
 
     /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       myKado Â· Mur 1    Mosaïque (pixel-perfect)
+       myKado - Mur 1    Mosaïque (pixel-perfect)
        Fond dégradé pastel, bannière roseâ†’lilas, cartes pastel,
        typo Instrument Serif italic + Plus Jakarta Sans, accent violet.
        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -2768,4 +2768,104 @@
     }
     .story-tap-l { left: 0; }
     .story-tap-r { right: 0; }
-  
+
+    /* ══════════════════════════════════════════════════════════════
+       WALL-OF-WISHES-CRAFT
+       Variante « moodboard / atelier » — inspirée du fond quadrillé
+       orange de la landing (section « Démos en direct »). Reprend la
+       structure classique (post-its + rotation), remplace la bannière
+       bronze arrondie par un titre flottant centré + fond quadrillé.
+       Applique en cumul de .ww-shell--classic.
+       ══════════════════════════════════════════════════════════════ */
+
+    /* Fond quadrillé corail — remplace le ::before de .ww-shell--classic.
+       Le --wall-bg utilisateur (choisi dans le wizard) surcharge encore
+       si présent, sinon le corail avec grille est utilisé par défaut. */
+    .ww-shell--craft::before {
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+        var(--wall-bg, #FF8F6B);
+    }
+
+    /* Titre flottant : plus de bannière arrondie bronze, plus d'ombre.
+       Le cover devient un simple bloc de texte centré au-dessus des cartes. */
+    .ww-shell--craft #wall-cover {
+      background: transparent;
+      background-image: none;
+      color: #111111;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 60px 22px 34px;
+      text-align: center;
+    }
+    @media (min-width: 720px) {
+      .ww-shell--craft #wall-cover { padding: 84px 30px 46px; border-radius: 0; }
+    }
+    .ww-shell--craft #wall-cover::before { display: none; }
+    .ww-shell--craft #wall-cover.has-image { color: #111111; }
+
+    .ww-shell--craft .wall-eyebrow {
+      opacity: 0.9;
+      color: #111111;
+      background: rgba(255,255,255,0.7);
+      padding: 6px 14px;
+      border-radius: 99px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .ww-shell--craft .wall-title {
+      font-family: var(--display, 'Instrument Serif', serif);
+      color: #111111;
+      font-size: clamp(2.6rem, 8vw, 5rem);
+      line-height: 0.98;
+      letter-spacing: -0.01em;
+    }
+    .ww-shell--craft .wall-title em {
+      font-style: italic;
+      color: #111111;
+    }
+    .ww-shell--craft .wall-subtitle {
+      color: #222222;
+      opacity: 0.88;
+      font-weight: 500;
+      max-width: 44ch;
+    }
+
+    /* Cagnotte strip — carte blanche flottante sur le corail. */
+    .ww-shell--craft #cagnotte-strip .cagnotte-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.04),
+        0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    /* Les post-its ne doivent pas laisser transparaître le quadrillage
+       corail (sinon illisible) — on force un fond opaque. */
+    .ww-shell--craft .pin.sticky {
+      background: var(--pin-bg);
+    }
+    .ww-shell--craft .pin.sticky::before {
+      display: none;
+    }
+    .ww-shell--craft .pin {
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.04),
+        0 10px 22px rgba(60,30,10,0.18);
+    }
+    .ww-shell--craft .pin:hover {
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.04),
+        0 16px 32px rgba(60,30,10,0.28);
+    }
+
+    /* Bouton flottant « Laisser un mot » — noir sur corail pour contraste. */
+    .ww-shell--craft #add-btn {
+      background: #111111;
+      color: #FFFFFF;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+    }
+    .ww-shell--craft #add-btn:hover { filter: brightness(1.15); }

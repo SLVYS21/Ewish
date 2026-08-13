@@ -51,6 +51,12 @@ const CODEPOINTS = {
   'money-face':         '1f911',
   'globe-africa':       '1f30d',
   'handshake':          '1f91d',
+  'backhand-index-pointing-right': '1f449',
+  'backhand-index-pointing-left':  '1f448',
+  'backhand-index-pointing-down':  '1f447',
+  'backhand-index-pointing-up':    '1f446',
+  'index-pointing-up':             '261d_fe0f',
+  'eyes':                          '1f440',
 };
 
 const CDN_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest';

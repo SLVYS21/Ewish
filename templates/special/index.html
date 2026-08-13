@@ -1025,40 +1025,8 @@
     }
 
     /* ===== INTRO STAR OVERLAY ===== */
-    #intro-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(ellipse 80% 70% at 50% 38%,
-          color-mix(in srgb, var(--accent) 14%, var(--bg)) 0%,
-          var(--bg) 60%,
-          color-mix(in srgb, var(--primary) 8%, var(--bg)) 100%);
-      opacity: 1;
-      transition: opacity 0.95s ease;
-      overflow: hidden;
-      pointer-events: none;
-    }
 
-    #intro-overlay.ib-dissolve {
-      opacity: 0;
-    }
 
-    #intro-overlay::before {
-      content: '';
-      position: absolute;
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      background: radial-gradient(circle,
-          color-mix(in srgb, var(--primary) 18%, transparent) 0%,
-          transparent 65%);
-      animation: ibGlow 2.2s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
 
     @keyframes ibGlow {
       from {
@@ -1397,50 +1365,7 @@
     </svg>
   </div>
 
-  <div id="intro-overlay" aria-hidden="true">
-    <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-      <circle class="ib-ring-outer" cx="200" cy="200" r="118" />
-      <circle class="ib-dot" cx="200" cy="110" r="3" transform="rotate(0,200,200)" />
-      <circle class="ib-dot" cx="200" cy="110" r="3" transform="rotate(60,200,200)" />
-      <circle class="ib-dot" cx="200" cy="110" r="3" transform="rotate(120,200,200)" />
-      <circle class="ib-dot" cx="200" cy="110" r="3" transform="rotate(180,200,200)" />
-      <circle class="ib-dot" cx="200" cy="110" r="3" transform="rotate(240,200,200)" />
-      <circle class="ib-dot" cx="200" cy="110" r="3" transform="rotate(300,200,200)" />
-      <path class="ib-draw ib-petal-out" d="M200 200 C196 168 197 128 200 88 C203 128 204 168 200 200"
-        transform="rotate(0,200,200)" />
-      <path class="ib-draw ib-petal-out" d="M200 200 C196 168 197 128 200 88 C203 128 204 168 200 200"
-        transform="rotate(60,200,200)" />
-      <path class="ib-draw ib-petal-out" d="M200 200 C196 168 197 128 200 88 C203 128 204 168 200 200"
-        transform="rotate(120,200,200)" />
-      <path class="ib-draw ib-petal-out" d="M200 200 C196 168 197 128 200 88 C203 128 204 168 200 200"
-        transform="rotate(180,200,200)" />
-      <path class="ib-draw ib-petal-out" d="M200 200 C196 168 197 128 200 88 C203 128 204 168 200 200"
-        transform="rotate(240,200,200)" />
-      <path class="ib-draw ib-petal-out" d="M200 200 C196 168 197 128 200 88 C203 128 204 168 200 200"
-        transform="rotate(300,200,200)" />
-      <path class="ib-draw ib-petal-in" d="M200 200 C196 176 197 152 200 130 C203 152 204 176 200 200"
-        transform="rotate(30,200,200)" />
-      <path class="ib-draw ib-petal-in" d="M200 200 C196 176 197 152 200 130 C203 152 204 176 200 200"
-        transform="rotate(90,200,200)" />
-      <path class="ib-draw ib-petal-in" d="M200 200 C196 176 197 152 200 130 C203 152 204 176 200 200"
-        transform="rotate(150,200,200)" />
-      <path class="ib-draw ib-petal-in" d="M200 200 C196 176 197 152 200 130 C203 152 204 176 200 200"
-        transform="rotate(210,200,200)" />
-      <path class="ib-draw ib-petal-in" d="M200 200 C196 176 197 152 200 130 C203 152 204 176 200 200"
-        transform="rotate(270,200,200)" />
-      <path class="ib-draw ib-petal-in" d="M200 200 C196 176 197 152 200 130 C203 152 204 176 200 200"
-        transform="rotate(330,200,200)" />
-      <circle class="ib-draw ib-ring-mid" cx="200" cy="200" r="40" />
-      <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="13" />
-    </svg>
-    <div id="ib-text">
-      <p id="ib-label">Vœu Spécial</p>
-      <svg id="ib-line-svg" viewBox="0 0 240 18">
-        <path class="ib-wavy-line" d="M6 11 Q60 3 120 11 Q180 19 234 11" />
-      </svg>
-    </div>
-    <div id="ib-burst"></div>
-  </div>
+  
 
   <canvas id="tsparticles-confetti"></canvas>
 
@@ -2179,7 +2104,7 @@
       setTimeout(() => { overlay.classList.add('ib-dissolve'); setTimeout(() => { overlay.style.display = 'none'; fetchData(); }, 960); }, drawDone + 1080);
     }
 
-    runIntro();
+    fetchData();
 
     /* ============================================================
        LIVE PREVIEW postMessage

@@ -217,7 +217,7 @@ const publicationSchema = new mongoose.Schema({
     messageOnAccept:  { type: Boolean, default: true },     // message → post-it sur le mur
     linkedWallTemplate: {
       type: String,
-      enum: ['none', 'wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-space'],
+      enum: ['none', 'wall-of-wishes', 'wall-of-wishes-modern', 'wall-of-wishes-craft', 'wall-of-wishes-space'],
       default: 'wall-of-wishes',
     },
     notifyEmail:        { type: String, default: '' },

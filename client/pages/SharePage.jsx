@@ -15,7 +15,7 @@ import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
 import WallPublishModal from '../components/WallPublishModal';
 
 /* ─── constants ─── */
-const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-space']);
+const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-craft','wall-of-wishes-space']);
 const FREE_WORDS = 10;
 
 /* Origine app (React SPA)  sert à construire les liens de partage /m/:code
@@ -58,6 +58,10 @@ export function buildShareUrl({ pub, shortCode, isWall }) {
   if (!pub) return '';
   if (isWall && shortCode) {
     return `${apiBase}/m/${shortCode}`;
+  }
+  // myKado envelope cards (React SPA route /c/:slug served by canonical.js)
+  if (pub.templateName === 'myenvelope' && pub.slug) {
+    return `${apiBase}/c/${pub.slug}`;
   }
   if (shortCode) return `${apiBase}/s/${shortCode}`;
   return `${apiBase}/site/${pub.templateName}/${pub.customName}`;

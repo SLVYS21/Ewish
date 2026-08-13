@@ -11,7 +11,6 @@ import WhatsAppFAB from '../../components/WhatsAppFAB';
 import NotificationBell from '../../components/NotificationBell';
 import Kado from '../../components/Kado';
 import CreateModal from '../../components/CreateModal';
-import OnboardingTour from '../../components/OnboardingTour';
 
 const SUPER_NAV = [
   { to: '/ewish-admin/admin',             label: 'Tableau de bord',  Icon: BarChart2  },
@@ -38,7 +37,6 @@ export default function AdminLayout() {
   const location = useLocation();
   const [createOpen, setCreateOpen] = useState(false);
   const [mobileCreate, setMobileCreate] = useState(false);
-  const [runTour, setRunTour] = useState(false);
 
   const isSuperAdmin = user?.role === 'super_admin';
   const displayName = user?.name || user?.email || 'Utilisateur';
@@ -168,14 +166,6 @@ export default function AdminLayout() {
             </span>
           </button>
           <button
-            onClick={() => setRunTour(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 'var(--mk-r-xs)', fontSize: 12, fontWeight: 600, color: 'var(--mk-ink-3)', width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}
-            className="sb-user"
-          >
-            <HelpCircle size={14} />
-            <span>Visite guidée</span>
-          </button>
-          <button
             onClick={handleLogout}
             style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 'var(--mk-r-xs)', fontSize: 12, fontWeight: 600, color: 'var(--mk-ink-3)', width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}
             className="sb-user"
@@ -225,7 +215,6 @@ export default function AdminLayout() {
         onSelect={goCreate}
       />
 
-      <OnboardingTour run={runTour} onClose={() => setRunTour(false)} />
       <WhatsAppFAB />
     </div>
   );

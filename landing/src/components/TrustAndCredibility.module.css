@@ -45,18 +45,29 @@
 .partners {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 10px;
   align-items: center;
 }
 .partnerLogo {
-  padding: 8px 16px;
-  background: #fff;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--mk-stone-700);
-  box-shadow: var(--sh-sm);
-  border: 1px solid var(--mk-stone-100);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.partnerLogo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.partnerLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* Grid Layout for Testimonials & Use Cases */

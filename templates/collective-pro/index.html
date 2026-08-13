@@ -836,40 +836,8 @@
     }
 
     /* ===== INTRO PRO DIAMOND ===== */
-    #intro-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(ellipse 80% 70% at 50% 38%,
-          color-mix(in srgb, var(--accent) 14%, var(--bg)) 0%,
-          var(--bg) 60%,
-          color-mix(in srgb, var(--primary) 8%, var(--bg)) 100%);
-      opacity: 1;
-      transition: opacity 0.95s ease;
-      overflow: hidden;
-      pointer-events: none;
-    }
 
-    #intro-overlay.ib-dissolve {
-      opacity: 0;
-    }
 
-    #intro-overlay::before {
-      content: '';
-      position: absolute;
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      background: radial-gradient(circle,
-          color-mix(in srgb, var(--primary) 18%, transparent) 0%,
-          transparent 65%);
-      animation: ibGlow 2.5s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
 
     @keyframes ibGlow {
       from {
@@ -1207,52 +1175,7 @@
       <path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z" fill="white" opacity="0.9" />
     </svg>
   </div>
-  <div id="intro-overlay" aria-hidden="true">
-    <svg id="bloom-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-      <circle class="ib-ring-outer" cx="200" cy="200" r="118" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(0,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(45,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(90,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(135,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(180,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(225,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(270,200,200)" />
-      <circle class="ib-dot" cx="200" cy="108" r="3.5" transform="rotate(315,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(0,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(45,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(90,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(135,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(180,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(225,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(270,200,200)" />
-      <path class="ib-draw ib-spike" d="M200 200 L193 155 L200 88 L207 155 L200 200" transform="rotate(315,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(22.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(67.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(112.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(157.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(202.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(247.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(292.5,200,200)" />
-      <path class="ib-draw ib-spike-in" d="M200 200 L197 167 L200 130 L203 167 L200 200"
-        transform="rotate(337.5,200,200)" />
-      <circle class="ib-draw ib-ring-mid" cx="200" cy="200" r="40" />
-      <circle class="ib-draw ib-ring-center" cx="200" cy="200" r="13" />
-    </svg>
-    <div id="ib-text">
-      <p id="ib-label">Collectif Pro</p>
-      <svg id="ib-line-svg" viewBox="0 0 240 18">
-        <path class="ib-wavy-line" d="M6 9 L60 9 L120 13 L180 9 L234 9" />
-      </svg>
-    </div>
-    <div id="ib-burst"></div>
-  </div>
+  
   <div id="tsparticles-confetti" style="position:fixed;inset:0;pointer-events:none;z-index:1000"></div>
 
   <div id="music-pill">
@@ -1829,7 +1752,7 @@
       setTimeout(() => { overlay.classList.add('ib-dissolve'); setTimeout(() => { overlay.style.display = 'none'; fetchData(); }, 960); }, drawDone + 1080);
     }
 
-    runIntro();
+    fetchData();
 
     /* ===== LIVE PREVIEW ===== */
 

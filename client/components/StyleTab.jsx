@@ -57,6 +57,7 @@ export default function StyleTab({ style, onChange }) {
     textMuted:    '#7D7156',  /* stone-500 */
     paletteId:    'mk-signature',
     typographyId: 'mk-editorial',
+    envelopeTheme: 'none',
     ...style,
   };
 
@@ -177,6 +178,29 @@ export default function StyleTab({ style, onChange }) {
             >
               <span>{sz.label}</span>
               <small>{sz.desc}</small>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Expérience d'ouverture ── */}
+      <div className={styles.group}>
+        <div className={styles.groupLabel}>EXPÉRIENCE D'OUVERTURE (EMBALLAGE)</div>
+        <div className={styles.sizeRow} style={{ flexWrap: 'wrap' }}>
+          {[
+            { value: 'none',   label: 'Direct',     desc: 'Sans enveloppe' },
+            { value: 'youth',  label: 'Jeune/Fun',  desc: 'Coffret 3D & Confettis' },
+            { value: 'pro',    label: 'Élégant',    desc: 'Sceau de cire & Lin' },
+            { value: 'casual', label: 'Chaleureux', desc: 'Carte pliée' },
+          ].map(env => (
+            <button
+              key={env.value}
+              className={`${styles.sizeBtn} ${s.envelopeTheme === env.value ? styles.sizeBtnActive : ''}`}
+              onClick={() => onChange('envelopeTheme', env.value)}
+              style={{ minWidth: '45%' }}
+            >
+              <span>{env.label}</span>
+              <small>{env.desc}</small>
             </button>
           ))}
         </div>
