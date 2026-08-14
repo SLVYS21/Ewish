@@ -1,25 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useCardState } from '../hooks/useCardState';
 import { OCCASIONS } from '../data/occasions';
-import {
-  LucideChevronDown, LucideCake, LucideHeart, LucideBaby, LucideThumbsUp,
-  LucidePartyPopper, LucideFlower2, LucideGift, LucideSparkles, LucideSun, LucideStar,
-  LucideCheck, LucideUser,
-} from 'lucide-react';
-
-// icon dispatcher for the occasion catalog
-const OCCASION_ICON = {
-  'cake': LucideCake,
-  'heart': LucideHeart,
-  'baby': LucideBaby,
-  'thumbs-up': LucideThumbsUp,
-  'party-popper': LucidePartyPopper,
-  'flower': LucideFlower2,
-  'gift': LucideGift,
-  'sparkles': LucideSparkles,
-  'sun': LucideSun,
-  'star': LucideStar,
-};
+import NotoEmoji from '../../components/NotoEmoji';
+import { LucideChevronDown, LucideCheck, LucideUser } from 'lucide-react';
 
 export default function OccasionSelector() {
   const { occasionId, changeOccasion, occasion, texts, setRecipient, focusPreview } = useCardState();
@@ -33,8 +16,6 @@ export default function OccasionSelector() {
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
-
-  const CurrentIcon = OCCASION_ICON[occasion.icon] || LucideStar;
 
   return (
     <div className="mk-anim-fade-in">
@@ -50,7 +31,9 @@ export default function OccasionSelector() {
             className={`ce-dropdown-trigger ${open ? 'open' : ''}`}
             onClick={() => { setOpen(o => !o); focusPreview('cover'); }}
           >
-            <span className="ce-dropdown-icon"><CurrentIcon size={18} /></span>
+            <span className="ce-dropdown-icon ce-dropdown-icon-noto">
+              <NotoEmoji name={occasion.icon} size={24} />
+            </span>
             <span className="ce-dropdown-value">{occasion.label}</span>
             <LucideChevronDown
               size={18}
@@ -61,7 +44,6 @@ export default function OccasionSelector() {
           {open && (
             <div className="ce-dropdown-menu">
               {OCCASIONS.map(o => {
-                const Icon = OCCASION_ICON[o.icon] || LucideStar;
                 const selected = o.id === occasionId;
                 return (
                   <button
@@ -70,9 +52,11 @@ export default function OccasionSelector() {
                     className={`ce-dropdown-item ${selected ? 'selected' : ''}`}
                     onClick={() => { changeOccasion(o.id); setOpen(false); }}
                   >
-                    <span className="ce-dropdown-item-icon"><Icon size={16} /></span>
+                    <span className="ce-dropdown-item-icon ce-dropdown-item-icon-noto">
+                      <NotoEmoji name={o.icon} size={20} />
+                    </span>
                     <span style={{ flex: 1 }}>{o.label}</span>
-                    {selected && <LucideCheck size={16} style={{ color: 'var(--mk-accent)' }} />}
+                    {selected && <LucideCheck size={16} style={{ color: 'var(--ce-step-color-strong)' }} />}
                   </button>
                 );
               })}

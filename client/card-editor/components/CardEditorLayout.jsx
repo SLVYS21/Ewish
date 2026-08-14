@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useCardState } from '../hooks/useCardState';
 import OccasionSelector from './OccasionSelector';
 import ThemeSelector from './ThemeSelector';
@@ -7,7 +8,7 @@ import KadoStep from './KadoStep';
 import ShareStep from './ShareStep';
 import CardPreviewRenderer from '../preview/CardPreviewRenderer';
 import UnboxingView from '../preview/UnboxingView';
-import { LucideChevronRight, LucideChevronLeft } from 'lucide-react';
+import { LucideChevronRight, LucideChevronLeft, LucideArrowLeft } from 'lucide-react';
 import '../card-editor.css';
 
 const STEP_LABELS = ['Occasion', 'Style', 'Contenu', 'Kado', 'Partage'];
@@ -18,7 +19,24 @@ export default function CardEditorLayout() {
     currentStep, setCurrentStep,
     showUnboxing, setShowUnboxing,
     texts, publishState,
+    loadPublicationById,
+    saveStatus, draftId,
   } = useCardState();
+
+  const saveLabel = saveStatus === 'saving' ? 'Enregistrement…'
+    : saveStatus === 'saved' ? 'Brouillon enregistré'
+    : saveStatus === 'error' ? 'Erreur de sauvegarde'
+    : draftId ? 'Brouillon enregistré' : '';
+
+  /* Reopen an existing draft when arriving from the Dashboard via ?id=XXX.
+     If the pub is already published, loadPublicationById jumps to step 5. */
+  const [searchParams] = useSearchParams();
+  const idParam = searchParams.get('id');
+  useEffect(() => {
+    if (idParam) loadPublicationById(idParam);
+    // Intentionally only depend on idParam so we hydrate once per URL id.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idParam]);
 
   const next = () => setCurrentStep(s => Math.min(s + 1, MAX_STEP));
   const prev = () => setCurrentStep(s => Math.max(s - 1, 1));
@@ -31,20 +49,35 @@ export default function CardEditorLayout() {
   const showNext = currentStep < MAX_STEP;
 
   return (
-    <div className="ce-layout">
+    <div className="ce-layout" data-step={currentStep}>
       <aside className="ce-sidebar">
         <header className="ce-header">
+          <Link to="/ewish-admin" className="ce-back-link" title="Retour à mes créations">
+            <LucideArrowLeft size={14} />
+            <span>Mes créations</span>
+          </Link>
           <div>
             <div className="ce-brand">myKado</div>
             <div className="ce-brand-sub">Éditeur de carte</div>
           </div>
           <div className="ce-steps-bar">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className={`ce-step ${currentStep >= i ? 'active' : ''} ${currentStep === i ? 'current' : ''}`}>
-                <div className="ce-step-dot">{i}</div>
-                <div className="ce-step-label">{STEP_LABELS[i - 1]}</div>
-              </div>
-            ))}
+            {[1, 2, 3, 4, 5].map(i => {
+              const isReachable = i <= currentStep;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={`ce-step ${currentStep >= i ? 'active' : ''} ${currentStep === i ? 'current' : ''} ${isReachable ? 'reachable' : ''}`}
+                  onClick={() => isReachable && setCurrentStep(i)}
+                  disabled={!isReachable || publishState === 'publishing'}
+                  aria-label={`Étape ${i} : ${STEP_LABELS[i - 1]}`}
+                  aria-current={currentStep === i ? 'step' : undefined}
+                >
+                  <span className="ce-step-dot">{i}</span>
+                  <span className="ce-step-label">{STEP_LABELS[i - 1]}</span>
+                </button>
+              );
+            })}
           </div>
         </header>
 
@@ -65,6 +98,12 @@ export default function CardEditorLayout() {
             <LucideChevronLeft size={18} />
             <span>Retour</span>
           </button>
+          {saveLabel && (
+            <span className="ce-save-status" data-status={saveStatus} title={saveLabel}>
+              <span className="ce-save-dot" aria-hidden="true" />
+              <span>{saveLabel}</span>
+            </span>
+          )}
           {showNext && (
             <button
               className="ce-btn ce-btn-primary"
@@ -80,6 +119,11 @@ export default function CardEditorLayout() {
       </aside>
 
       <main className="ce-preview-area">
+        <div className="ce-sky" aria-hidden="true">
+          <div className="ce-sky-layer ce-sky-1" />
+          <div className="ce-sky-layer ce-sky-2" />
+          <div className="ce-sky-layer ce-sky-3" />
+        </div>
         <CardPreviewRenderer />
       </main>
 

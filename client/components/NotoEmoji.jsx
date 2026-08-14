@@ -61,6 +61,10 @@ const CODEPOINTS = {
   'clinking-glasses':   '1f942',
   'waving-hand':        '1f44b',
   'dove':               '1f54a_fe0f',
+  'bouquet':            '1f490',
+  'sun':                '2600_fe0f',
+  'sunflower':          '1f33b',
+  'cherry-blossom':     '1f338',
 };
 
 const CDN_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest';

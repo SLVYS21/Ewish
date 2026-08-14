@@ -2,17 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useCardState } from '../hooks/useCardState';
 import { ShareView, buildShareUrl } from '../../pages/SharePage';
 import { getShortLink } from '../../utils/api';
-import { formatAmount } from '../data/currencies';
+import { formatAmount, findCurrency } from '../data/currencies';
+import useFeexPay from '../../utils/useFeexPay';
+import NotoEmoji from '../../components/NotoEmoji';
 import {
-  LucideSparkles, LucideRotateCcw, LucideGift, LucideEye,
+  LucideSparkles, LucideRotateCcw, LucideGift, LucideEye, LucidePlay,
 } from 'lucide-react';
 
 /*
  * Step 5 — Aperçu et Partage.
- * Reuses the ShareView component from pages/SharePage.jsx to match the visual
- * language of the wall / other card editors (same QR renderer, same social
- * network buttons, same personalized-message flow).
+ * - Big "voir le rendu final" hero to preview the unboxing before commit
+ * - Publish button opens the FeexPay checkout for (1500 FCFA + gift amount)
+ * - Once published, reuses the shared ShareView (QR + social buttons)
  */
+
+const CARD_PUBLISH_FEE_FCFA = 1500;
+
 export default function ShareStep({ onOpenUnboxing }) {
   const {
     texts, occasion, gift,
@@ -21,10 +26,9 @@ export default function ShareStep({ onOpenUnboxing }) {
   } = useCardState();
 
   const [shortCode, setShortCode] = useState('');
+  const { openCheckout, feexpayModal } = useFeexPay();
 
-  // Once published, try to resolve a shortCode (it powers the "code court"
-  // section of ShareView). If it fails (e.g. anon user without auth), we
-  // just leave it empty — ShareView still works.
+  // Resolve a shortCode once published (for the "code court" section of ShareView).
   useEffect(() => {
     if (!publishedPub?._id) { setShortCode(''); return; }
     getShortLink(publishedPub._id)
@@ -39,14 +43,70 @@ export default function ShareStep({ onOpenUnboxing }) {
   const published  = publishState === 'published';
   const errored    = publishState === 'error';
 
+  // Total price to display + charge : 1500 base + gift (XOF only, other currencies
+  // stay symbolic — see server side publication.js).
+  const giftCfg = findCurrency(gift.currency);
+  const giftIncluded = gift.enabled && gift.currency === 'XOF' && gift.amount >= (giftCfg?.min || 0);
+  const giftFcfa = giftIncluded ? Math.floor(Number(gift.amount)) : 0;
+  const totalFcfa = CARD_PUBLISH_FEE_FCFA + giftFcfa;
+
+  const startPublish = async () => {
+    /* Try publishing first — if the server has already been paid (isPaid) it
+       skips the payment gate and we're done immediately. Otherwise we get a
+       PAYMENT_REQUIRED code and open FeexPay with the returned priceFCFA. */
+    const first = await publishCard();
+    if (first?.ok) return;
+
+    if (first?.paymentRequired && first?.priceFCFA) {
+      const finalize = async ({ reference }) => {
+        resetPublish();
+        await publishCard({ feexpayReference: reference });
+      };
+      openCheckout({
+        amount:      first.priceFCFA,
+        description: giftIncluded
+          ? `myKado — Carte + cadeau ${formatAmount(gift.amount, gift.currency)}`
+          : 'myKado — Publication de carte',
+        customId:    first.pubId ? `envelope:${first.pubId}` : `envelope_${Date.now()}`,
+        onSuccess:   finalize,
+        onFailure:   (err) => {
+          // eslint-disable-next-line no-console
+          console.warn('[card-editor] FeexPay failed:', err?.message || err);
+        },
+      });
+    }
+  };
+
   return (
     <div className="mk-anim-fade-in">
       <h2 className="ce-section-title">Aperçu et partage</h2>
       <p className="ce-section-desc">
-        Feuilletez la preview à droite pour vérifier chaque page, puis publiez votre carte.
+        Prévisualisez le rendu que verra le destinataire, puis publiez votre carte.
       </p>
 
-      {/* Summary — always visible so users can double-check before publishing */}
+      {/* ---- Big "voir le rendu final" hero — always visible on this step ---- */}
+      <button
+        type="button"
+        className="ce-preview-hero"
+        onClick={onOpenUnboxing}
+      >
+        <div className="ce-preview-hero-thumb" aria-hidden="true">
+          <NotoEmoji name="wrapped-gift" size={36} />
+          <span className="ce-preview-hero-play"><LucidePlay size={14} fill="currentColor" /></span>
+        </div>
+        <div className="ce-preview-hero-body">
+          <div className="ce-preview-hero-eyebrow">Prévisualiser</div>
+          <div className="ce-preview-hero-title">
+            {published ? 'Rejouer le rendu final' : 'Voir le rendu final'}
+          </div>
+          <div className="ce-preview-hero-sub">
+            Enveloppe qui s'ouvre, confettis, carte animée{gift.enabled ? ' + cadeau à gratter' : ''}
+          </div>
+        </div>
+        <LucideEye size={20} className="ce-preview-hero-icon" />
+      </button>
+
+      {/* ---- Summary ---- */}
       <div className="ce-final-summary">
         <div className="ce-final-row"><span>Occasion</span><strong>{occasion.label}</strong></div>
         <div className="ce-final-row"><span>Destinataire</span><strong>{texts.subtitle || '—'}</strong></div>
@@ -60,13 +120,32 @@ export default function ShareStep({ onOpenUnboxing }) {
 
       {idle && (
         <>
-          <button className="ce-cta" onClick={publishCard}>
+          {/* Price breakdown before publish */}
+          <div className="ce-price-card">
+            <div className="ce-price-row">
+              <span>Publication de la carte</span>
+              <span>{CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')} FCFA</span>
+            </div>
+            {giftIncluded && (
+              <div className="ce-price-row">
+                <span>Cadeau à gratter</span>
+                <span>{giftFcfa.toLocaleString('fr-FR')} FCFA</span>
+              </div>
+            )}
+            <div className="ce-price-row ce-price-total">
+              <span>Total</span>
+              <strong>{totalFcfa.toLocaleString('fr-FR')} FCFA</strong>
+            </div>
+            {gift.enabled && !giftIncluded && (
+              <div className="ce-price-hint">
+                Paiement en FCFA — les cadeaux en {gift.currency} restent symboliques pour l'instant.
+              </div>
+            )}
+          </div>
+
+          <button className="ce-cta" onClick={startPublish}>
             <LucideSparkles size={18} />
-            Publier ma carte
-          </button>
-          <button className="ce-btn ce-btn-ghost ce-final-secondary" onClick={onOpenUnboxing}>
-            <LucideEye size={16} />
-            Voir le rendu final
+            Payer {totalFcfa.toLocaleString('fr-FR')} FCFA & publier
           </button>
         </>
       )}
@@ -86,7 +165,7 @@ export default function ShareStep({ onOpenUnboxing }) {
           <div className="ce-share-error-msg">{publishError || 'Réessayez.'}</div>
           <button
             className="ce-btn ce-btn-primary ce-final-secondary"
-            onClick={() => { resetPublish(); publishCard(); }}
+            onClick={() => { resetPublish(); startPublish(); }}
           >
             <LucideRotateCcw size={16} /> Réessayer
           </button>
@@ -102,12 +181,10 @@ export default function ShareStep({ onOpenUnboxing }) {
             shareUrl={shareUrl}
             isWall={false}
           />
-          <button className="ce-btn ce-btn-ghost ce-final-secondary" onClick={onOpenUnboxing}>
-            <LucideEye size={16} />
-            Rejouer le rendu final
-          </button>
         </div>
       )}
+
+      {feexpayModal}
     </div>
   );
 }

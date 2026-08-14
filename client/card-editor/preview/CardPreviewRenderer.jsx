@@ -5,6 +5,8 @@ import CoverPage from './pages/CoverPage';
 import InsideLeftPage from './pages/InsideLeftPage';
 import InsideRightPage from './pages/InsideRightPage';
 import BackPage from './pages/BackPage';
+import { findCurrency, formatAmount } from '../data/currencies';
+import NotoEmoji from '../../components/NotoEmoji';
 import { LucideMailOpen, LucideBookOpen, LucideStickyNote, LucideMail } from 'lucide-react';
 
 // Base sizes at 1x scale
@@ -21,11 +23,14 @@ const VIEWS = [
 ];
 
 export default function CardPreviewRenderer() {
-  const { theme, texts, photo, currentStep, previewFocus } = useCardState();
+  const { theme, texts, photo, currentStep, previewFocus, gift } = useCardState();
   const [view, setView] = useState('cover');
   const [envOpen, setEnvOpen] = useState(false);
   const containerRef = useRef(null);
   const [scale, setScale] = useState(1);
+
+  const giftCfg = findCurrency(gift?.currency);
+  const hasGift = Boolean(gift?.enabled && gift?.amount >= (giftCfg?.min || 0));
 
   useEffect(() => {
     // On every step change before "Aperçu", reset to the cover view.
@@ -59,6 +64,21 @@ export default function CardPreviewRenderer() {
 
   return (
     <div className="ce-preview-inner">
+      {/* Persistent gift indicator — shows across all views when a valid gift is attached */}
+      {hasGift && (
+        <div className="ce-preview-gift-badge" role="status" aria-label="Cadeau attaché">
+          <span className="ce-preview-gift-orb" aria-hidden="true">
+            <NotoEmoji name="wrapped-gift" size={18} />
+          </span>
+          <div className="ce-preview-gift-body">
+            <span className="ce-preview-gift-eyebrow">Cadeau attaché</span>
+            <span className="ce-preview-gift-amount">
+              {formatAmount(gift.amount, gift.currency)}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="ce-canvas-container" ref={containerRef}>
         <div className="ce-stage" style={{ transform: `scale(${scale})` }}>
           {view === 'envelope' && (

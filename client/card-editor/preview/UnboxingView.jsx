@@ -8,7 +8,9 @@ import InsideRightPage from './pages/InsideRightPage';
 import BackPage from './pages/BackPage';
 import { fireConfetti } from '../data/confetti';
 import { UNBOXING_BG_MAP } from '../data/backgrounds';
-import { LucideArrowLeft, LucideRotateCcw } from 'lucide-react';
+import { findCurrency, formatAmount } from '../data/currencies';
+import NotoEmoji from '../../components/NotoEmoji';
+import { LucideArrowLeft, LucideRotateCcw, LucideX, LucideMousePointer2 } from 'lucide-react';
 
 /*
  * Interaction model:
@@ -44,14 +46,18 @@ const COVER_ROT_MS = 900;      // duration of the cover open/close animation
 const FLIP_MS      = 800;      // duration of the front/back flip
 const CROSSFADE_DELAY = 0.40;  // seconds into rotation before we swap faces
 
-export default function UnboxingView({ onBack }) {
-  const { theme, texts, photo, confettiStyle, unboxingBg } = useCardState();
+export default function UnboxingView({ onBack, publicMode = false }) {
+  const { theme, texts, photo, confettiStyle, unboxingBg, gift } = useCardState();
   const [step, setStep] = useState(0);                 // 0..3
   const [openState, setOpenState] = useState('front'); // 'front' | 'back' | 'open'
   const [scale, setScale] = useState(1);
+  const [showGift, setShowGift] = useState(false);
+  const [giftRevealed, setGiftRevealed] = useState(false);
   const stageRef = useRef(null);
 
   const bg = (UNBOXING_BG_MAP[unboxingBg] || UNBOXING_BG_MAP.default).bg;
+  const giftCfg = findCurrency(gift?.currency);
+  const hasGift = Boolean(gift?.enabled && gift?.amount >= (giftCfg?.min || 0));
 
   // The envelope opens on wax-seal click (step 0 -> 1). Everything from 1
   // onwards is auto-progressed with short delays.
@@ -68,10 +74,10 @@ export default function UnboxingView({ onBack }) {
     setOpenState('front');
   };
 
-  // Scale-to-fit. Two strategies:
-  //   Desktop: fit the OPEN spread (2×CARD_W) inside the stage
-  //   Mobile:  fit the CLOSED card (CARD_W) — the spread may overflow when
-  //            opened, but the closed cover stays big and readable
+  // Scale-to-fit — recalculated when the view changes (open/closed) or window resizes.
+  //   Desktop: always fit the full spread (2×CARD_W)
+  //   Mobile closed: fit the single card (CARD_W) for readability
+  //   Mobile open:   fit the spread (2×CARD_W) so the inside is fully visible
   useEffect(() => {
     const measure = () => {
       const el = stageRef.current;
@@ -80,15 +86,16 @@ export default function UnboxingView({ onBack }) {
       const h = el.clientHeight;
       const isMobile = w < 640;
       const availW = w - (isMobile ? 16 : 60);
-      const availH = h - (isMobile ? 140 : 180);
-      const baseW = isMobile ? CARD_W + 16 : CARD_W * 2 + 40;
+      const availH = h - (isMobile ? 100 : 180);
+      const showSpread = isMobile && openState === 'open';
+      const baseW = isMobile ? (showSpread ? CARD_W * 2 + 24 : CARD_W + 16) : CARD_W * 2 + 40;
       const baseH = CARD_H + 20;
       setScale(Math.min(availW / baseW, availH / baseH, 2));
     };
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, []);
+  }, [openState]);
 
   const interactive = step >= 3;
   const isOpen = openState === 'open';
@@ -99,7 +106,7 @@ export default function UnboxingView({ onBack }) {
   //   back  → cover flipped to left → shift +CARD_W/2
   //   open  → full spread visible   → shift 0
   const containerX = isOpen ? 0 : (isBack ? CARD_W / 2 : -CARD_W / 2);
-  const coverRotY  = isOpen ? -168 : (isBack ? 180 : 0);
+  const coverRotY  = (isOpen || isBack) ? -180 : 0;
 
   // ----- Interactions on the open spread -----
 
@@ -119,17 +126,43 @@ export default function UnboxingView({ onBack }) {
     setOpenState('back');
   };
 
+  const revealGift = () => {
+    if (giftRevealed) return;
+    setGiftRevealed(true);
+    fireConfetti(confettiStyle, { x: 0.5, y: 0.5 });
+  };
+
   return (
     <div className="ce-unboxing" ref={stageRef} style={{ background: bg }}>
-      <button onClick={onBack} className="ce-back-btn">
-        <LucideArrowLeft size={16} />
-        <span>Retour à l'édition</span>
-      </button>
+      {/* Back button — hidden for the public recipient view */}
+      {!publicMode && (
+        <button onClick={onBack} className="ce-back-btn">
+          <LucideArrowLeft size={16} />
+          <span>Retour à l'édition</span>
+        </button>
+      )}
 
       {interactive && (
         <button onClick={restart} className="ce-restart-btn">
           <LucideRotateCcw size={16} />
           <span>Rejouer</span>
+        </button>
+      )}
+
+      {/* Gift access button — shown once the envelope is opened, if a gift is attached */}
+      {interactive && hasGift && (
+        <button
+          type="button"
+          onClick={() => setShowGift(true)}
+          className={`ce-gift-cta ${giftRevealed ? 'is-opened' : ''}`}
+          aria-label="Voir mon cadeau"
+        >
+          <span className="ce-gift-cta-orb">
+            <NotoEmoji name="wrapped-gift" size={22} />
+          </span>
+          <span className="ce-gift-cta-label">
+            {giftRevealed ? 'Revoir mon cadeau' : 'Ton cadeau t\'attend'}
+          </span>
         </button>
       )}
 
@@ -159,7 +192,7 @@ export default function UnboxingView({ onBack }) {
         {/* ---- Card holder ---- */}
         <motion.div
           className="ce-unbox-card-holder"
-          style={{ zIndex: 10 }}
+          style={{ zIndex: 10, pointerEvents: interactive ? 'auto' : 'none' }}
           initial={{ y: 40, opacity: 0, scale: 0.85 }}
           animate={{
             y:      step >= 3 ? 0 : (step >= 2 ? -CARD_H * 0.42 : 40),
@@ -235,7 +268,7 @@ export default function UnboxingView({ onBack }) {
               }}
               animate={{ rotateY: coverRotY }}
               transition={{ duration: COVER_ROT_MS / 1000, ease: [0.5, 0, 0.2, 1] }}
-              onClick={interactive && openState === 'front' ? openCard : (openState === 'back' ? closeToFront : undefined)}
+              onClick={!interactive ? undefined : openState === 'front' ? openCard : closeToFront}
             >
               {/* Front face — hidden when we transition to back or open */}
               <motion.div
@@ -258,6 +291,7 @@ export default function UnboxingView({ onBack }) {
               <div style={{
                 position: 'absolute', inset: 0,
                 transform: 'rotateY(180deg)',
+                backfaceVisibility: 'hidden',
                 borderRadius: 2, overflow: 'hidden',
                 background: '#fff',
                 boxShadow: '-20px 20px 40px -12px rgba(0,0,0,0.25)',
@@ -268,7 +302,7 @@ export default function UnboxingView({ onBack }) {
                   animate={{ opacity: isOpen ? 1 : 0 }}
                   transition={{
                     duration: 0.25,
-                    delay: isOpen ? CROSSFADE_DELAY : 0,
+                    delay: CROSSFADE_DELAY,
                   }}
                 >
                   <InsideLeftPage theme={theme} texts={texts} photo={photo} />
@@ -279,7 +313,7 @@ export default function UnboxingView({ onBack }) {
                   animate={{ opacity: isBack ? 1 : 0 }}
                   transition={{
                     duration: 0.25,
-                    delay: isBack ? CROSSFADE_DELAY : 0,
+                    delay: CROSSFADE_DELAY,
                   }}
                 >
                   <BackPage theme={theme} texts={texts} />
@@ -291,13 +325,88 @@ export default function UnboxingView({ onBack }) {
       </div>
 
       {/* Contextual hint under the card */}
-      {interactive && (
+      {/* {interactive && (
         <div className="ce-unbox-hint">
           {openState === 'front' && "Cliquez sur la carte pour l'ouvrir"}
           {openState === 'open'  && "Clic à gauche pour refermer · Clic à droite pour voir le dos"}
           {openState === 'back'  && "Cliquez sur le dos pour revenir à la couverture"}
         </div>
+      )} */}
+
+      {showGift && hasGift && (
+        <GiftReveal
+          gift={gift}
+          revealed={giftRevealed}
+          onReveal={revealGift}
+          onClose={() => setShowGift(false)}
+          recipient={texts.subtitle}
+        />
       )}
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------------------
+   GiftReveal — golden scratch-card modal.
+   Tap-to-reveal (no drag-to-scratch) for touch friendliness. Once revealed,
+   the amount stays visible and the modal can be closed / re-opened.
+   -------------------------------------------------------------------------- */
+function GiftReveal({ gift, revealed, onReveal, onClose, recipient }) {
+  const displayName = (recipient || '').trim();
+  const amount = formatAmount(gift.amount, gift.currency);
+  const title = displayName ? `${displayName}, tu as un cadeau` : 'Tu as un cadeau';
+  const subtitle = revealed
+    ? 'Voilà ta surprise'
+    : 'Tape la carte dorée pour révéler ton cadeau';
+
+  return (
+    <div className="ce-gift-veil" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="ce-gift-modal-card" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="ce-gift-modal-close"
+          onClick={onClose}
+          aria-label="Fermer"
+        >
+          <LucideX size={18} />
+        </button>
+
+        <div className="ce-gift-modal-hero">
+          <div className="ce-gift-modal-orb" aria-hidden="true">
+            <NotoEmoji name="wrapped-gift" size={44} />
+          </div>
+          <h2 className="ce-gift-modal-title">{title}</h2>
+          <p className="ce-gift-modal-sub">{subtitle}</p>
+        </div>
+
+        <button
+          type="button"
+          className={`ce-gift-scratch ${revealed ? 'is-revealed' : ''}`}
+          onClick={onReveal}
+          disabled={revealed}
+          aria-label={revealed ? 'Cadeau révélé' : 'Révéler le cadeau'}
+        >
+          <div className="ce-gift-scratch-cover" aria-hidden="true">
+            <div className="ce-gift-scratch-stripes" />
+            <div className="ce-gift-scratch-shine" />
+            <div className="ce-gift-scratch-hint">
+              <LucideMousePointer2 size={14} />
+              <span>Tape pour révéler</span>
+            </div>
+          </div>
+          <div className="ce-gift-scratch-amount">
+            <span className="ce-gift-scratch-amount-value">{amount}</span>
+            <span className="ce-gift-scratch-amount-label">Pour toi</span>
+          </div>
+        </button>
+
+        {revealed && gift.message && (
+          <div className="ce-gift-modal-note">
+            <NotoEmoji name="sparkles" size={16} />
+            <span>« {gift.message} »</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -241,6 +241,8 @@ const { generateUniqueSlug, isValidSlug } = require('../utils/slug');
 
 const KIND_TO_BRIQUE = { animation: 'carte', wall: 'mur', invitation: 'carte' };
 
+const VIRTUAL_BRIQUE = { myenvelope: 'carte' };
+
 publicationSchema.pre('save', async function (next) {
   try {
     // Slug auto-generation si absent ou invalide
@@ -250,9 +252,13 @@ publicationSchema.pre('save', async function (next) {
     }
     // Brique auto-populate depuis Template.kind si absente
     if (!this.brique && this.templateName) {
-      const Template = require('./Template');
-      const tpl = await Template.findOne({ name: this.templateName }).select('kind').lean();
-      if (tpl?.kind) this.brique = KIND_TO_BRIQUE[tpl.kind] || 'carte';
+      if (VIRTUAL_BRIQUE[this.templateName]) {
+        this.brique = VIRTUAL_BRIQUE[this.templateName];
+      } else {
+        const Template = require('./Template');
+        const tpl = await Template.findOne({ name: this.templateName }).select('kind').lean();
+        if (tpl?.kind) this.brique = KIND_TO_BRIQUE[tpl.kind] || 'carte';
+      }
     }
     next();
   } catch (err) {

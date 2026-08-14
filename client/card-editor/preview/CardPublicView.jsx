@@ -79,7 +79,7 @@ export default function CardPublicView() {
     <CardStateProvider>
       <Hydrator pub={pub}>
         <div className="ce-unboxing-overlay ce-unboxing-overlay-standalone">
-          <UnboxingView onBack={() => { window.location.href = '/'; }} />
+          <UnboxingView publicMode />
         </div>
       </Hydrator>
     </CardStateProvider>

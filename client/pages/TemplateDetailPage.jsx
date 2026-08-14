@@ -131,7 +131,7 @@ export default function TemplateDetailPage() {
           <div className="mk-modal">
             <div className="mk-modal-head">
               <div>
-                <div className="mk-modal-title">Nomme ta création</div>
+                <div className="mk-modal-title">Qui est l'heureux(se) ?</div>
                 <div className="mk-modal-sub">Pour la retrouver facilement dans tes créations.</div>
               </div>
               <button className="btn-icon" onClick={() => setNaming(false)}><X size={18} /></button>

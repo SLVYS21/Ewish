@@ -9,6 +9,10 @@ const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 const { slugify: mkSlugify, isValidSlug, generateUniqueSlug } = require('../utils/slug');
 const feexpay = require('../services/feexpay');
 
+/* SPA-only virtual templates that live entirely on the client.
+   They have no record in the Template collection and are free to publish. */
+const SPA_VIRTUAL_TEMPLATES = new Set(['myenvelope']);
+
 /* Prix des plans mur en FCFA (source de vérité serveur, à ne pas dupliquer côté client) */
 const WALL_PLAN_PRICES = {
   free:     { credits: 0,  fcfa: 0 },
@@ -215,14 +219,20 @@ router.post('/', requireOptionalAdmin, async (req, res) => {
   try {
     const { templateName, customName, title, data, style, jarConfig } = req.body;
     
-    if (req.admin?.role === 'merchant') {
+    if (req.admin?.role === 'merchant' && !SPA_VIRTUAL_TEMPLATES.has(templateName)) {
       const template = await Template.findOne({ name: templateName }).lean();
       if (!template) return res.status(404).json({ error: 'Template introuvable' });
     }
 
     const slug = slugify(customName || title || 'wish', { lower: true, strict: true });
-    const merchantId = req.admin?.role === 'merchant' ? req.admin.merchantId : undefined;
-    
+    /* Attach the publication to any authenticated user (not just merchants) so
+       it appears in their Dashboard "mes créations" list. Mirrors the mine=true
+       filter above: merchantId falls back to the admin _id when the JWT has no
+       explicit merchantId (e.g. super_admin, or older tokens). */
+    const merchantId = req.admin
+      ? (req.admin.merchantId || String(req.admin.id))
+      : undefined;
+
     const createData = { templateName, customName: slug, title, data, style, jarConfig, merchantId };
     if (req.admin?.role === 'super_admin') {
       if (req.body.isPremade !== undefined) createData.isPremade = req.body.isPremade;
@@ -312,22 +322,92 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
 
     const { planType, feexpayReference } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
     const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
+    const isEnvelope     = existing.templateName === 'myenvelope';
     let finalPlanType = isWallTemplate ? (planType || 'free') : undefined;
     let creditsReq = 0;
     let priceFCFA = 0;
 
     /* -------------------------------------------------------------------
-       Calcul du coût (crédits ET FCFA équivalent).
+       Enveloppe (myenvelope) — paiement OBLIGATOIRE quel que soit le rôle.
+       On sort volontairement du bloc `role === 'merchant'` : le cadeau
+       nécessite un vrai escrow FeexPay, pas de bypass super_admin/anon.
+       Auth requis (Transaction.adminId est required).
+       ------------------------------------------------------------------- */
+    if (isEnvelope && !existing.isPaid) {
+      if (!req.admin?.id) {
+        return res.status(401).json({
+          error: 'Connexion requise pour publier une carte enveloppe.',
+          code:  'AUTH_REQUIRED',
+        });
+      }
+
+      const gift = existing.data?.gift || {};
+      const giftFcfa = (gift.enabled && gift.currency === 'XOF' && Number(gift.amount) > 0)
+        ? Math.floor(Number(gift.amount))
+        : 0;
+      const envelopePrice = 1500 + giftFcfa;
+
+      if (!feexpayReference) {
+        return res.status(402).json({
+          error: `Paiement requis : ${envelopePrice} FCFA.`,
+          code:  'PAYMENT_REQUIRED',
+          creditsRequired: 0,
+          priceFCFA: envelopePrice,
+        });
+      }
+
+      /* Vérification FeexPay (idempotent : ne re-vérifie pas si Transaction SUCCESS). */
+      const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
+      if (!existingTx || existingTx.status !== 'SUCCESS') {
+        let verifyRes;
+        try {
+          verifyRes = await feexpay.verify(feexpayReference);
+        } catch (err) {
+          console.error('[publish] FeexPay verify failed', err.message);
+          return res.status(502).json({
+            error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
+            code:  'FEEXPAY_UNAVAILABLE',
+          });
+        }
+        if (verifyRes.status !== 'SUCCESSFUL') {
+          return res.status(402).json({
+            error: 'Paiement FeexPay non confirmé.',
+            code:  'FEEXPAY_NOT_SUCCESSFUL',
+            status: verifyRes.status,
+          });
+        }
+        if (verifyRes.amount < envelopePrice) {
+          return res.status(402).json({
+            error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${envelopePrice} FCFA).`,
+            code:  'FEEXPAY_UNDERPAID',
+          });
+        }
+        const tx = existingTx || new Transaction({
+          adminId:       req.admin.id,
+          transactionId: feexpayReference,
+          amount:        verifyRes.amount,
+          credits:       0,
+          source:        'feexpay',
+          paymentData:   verifyRes.raw,
+        });
+        tx.status = 'SUCCESS';
+        await tx.save();
+      }
+      priceFCFA = envelopePrice;
+    }
+
+    /* -------------------------------------------------------------------
+       Calcul du coût pour les autres templates (mur / legacy card).
        - Mur : dépend du plan choisi (0 / 5 / 20 crédits).
-       - Carte (non-mur, pas encore payée) : template.creditsRequired × 500 FCFA.
+       - Carte legacy (non-mur, pas encore payée) : template.creditsRequired × 500 FCFA.
        - Free / carte déjà payée : 0.
        ------------------------------------------------------------------- */
-    if (req.admin?.role === 'merchant') {
+    if (!isEnvelope && req.admin?.role === 'merchant') {
       if (isWallTemplate) {
         const plan = WALL_PLAN_PRICES[finalPlanType] || WALL_PLAN_PRICES.free;
         creditsReq = plan.credits;
         priceFCFA  = plan.fcfa;
-      } else if (!existing.isPaid) {
+      } else if (!existing.isPaid && !SPA_VIRTUAL_TEMPLATES.has(existing.templateName)) {
         const template = await Template.findOne({ name: existing.templateName }).lean();
         creditsReq = template?.creditsRequired || 1;
         priceFCFA  = creditsReq * CREDIT_TO_FCFA;
@@ -347,8 +427,6 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
           user.credits -= creditsReq;
           await user.save();
         } else if (feexpayReference) {
-          /* Idempotence : si une Transaction SUCCESS existe déjà pour cette ref,
-             on ne re-vérifie pas — on la considère comme paiement valide. */
           const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
           if (existingTx && existingTx.status === 'SUCCESS') {
             /* déjà payé, on continue */
@@ -376,7 +454,6 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
                 code:  'FEEXPAY_UNDERPAID',
               });
             }
-            /* Log Transaction (source: feexpay). credits=0 car pas un achat de crédits. */
             const tx = existingTx || new Transaction({
               adminId:       req.admin.id,
               transactionId: feexpayReference,
@@ -400,7 +477,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     }
 
     const updateFields = { published: true, publishedAt: Date.now() };
-    if (creditsReq > 0 || finalPlanType !== 'free') {
+    if (creditsReq > 0 || (isEnvelope && priceFCFA > 0) || finalPlanType !== 'free') {
       updateFields.isPaid = true;
     }
     if (isWallTemplate) {

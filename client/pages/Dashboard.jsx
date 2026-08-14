@@ -68,10 +68,13 @@ function timeAgo(dateStr) {
 /* ── Recent creation tile ── */
 function RecentTile({ pub }) {
   const navigate = useNavigate();
-  const isWall   = WALL_TEMPLATES.has(pub.templateName);
+  const isWall     = WALL_TEMPLATES.has(pub.templateName);
+  const isEnvelope = pub.templateName === 'myenvelope';
   const editPath = isWall
     ? `/ewish-admin/wall/${pub._id}`
-    : `/ewish-admin/ewish/edit/${pub._id}`;
+    : isEnvelope
+      ? `/card-editor?id=${pub._id}`
+      : `/ewish-admin/ewish/edit/${pub._id}`;
 
   const thumbBg = pub.thumbnail
     ? { backgroundImage: `url(${pub.thumbnail})` }
