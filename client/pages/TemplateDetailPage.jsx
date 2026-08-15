@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, X, Music, Plus, Smartphone, Monitor, Zap } from 'lucide-react';
 import { getTemplate, getPremadePublications, createPublication, duplicatePublication } from '../utils/api';
+import { loadContext, clearContext } from '../create-flow/context';
 
 const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-craft','wall-of-wishes-space']);
 
@@ -34,6 +35,7 @@ const TEMPLATE_FEATURES = {
 export default function TemplateDetailPage() {
   const { name } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [tpl, setTpl]           = useState(null);
   const [premades, setPremades] = useState([]);
@@ -41,9 +43,18 @@ export default function TemplateDetailPage() {
   const [picked, setPicked]     = useState(null); // null | 'zero' | premadeId
   const [viewMode, setViewMode] = useState('mobile'); // 'mobile' | 'desktop'
 
-  /* Naming modal */
+  /* Naming modal — le titre est pré-rempli depuis /create (query params ou
+     sessionStorage) si l'utilisateur arrive du wizard front-door. */
+  const prefillTitle = useMemo(() => {
+    const fromQuery = searchParams.get('title');
+    if (fromQuery) return fromQuery;
+    const ctx = loadContext();
+    if (ctx && ctx.type === 'wish') return ctx.title || '';
+    return '';
+  }, [searchParams]);
+
   const [naming, setNaming]     = useState(false);
-  const [title, setTitle]       = useState('');
+  const [title, setTitle]       = useState(prefillTitle);
   const [titleErr, setTitleErr] = useState('');
   const [creating, setCreating] = useState(false);
   const inputRef = useRef(null);
@@ -80,7 +91,10 @@ export default function TemplateDetailPage() {
 
   const openNaming = () => {
     if (!isWall && !picked) return;
-    setNaming(true); setTitle(''); setTitleErr('');
+    setNaming(true);
+    /* Ne pas écraser le titre pré-rempli depuis /create (garde la valeur
+       actuelle si l'utilisateur ne l'a pas encore modifiée). */
+    setTitleErr('');
     setTimeout(() => inputRef.current?.focus(), 80);
   };
 
@@ -96,11 +110,13 @@ export default function TemplateDetailPage() {
           title: t,
           ...(isWall ? { data: { eyebrow: '✦ Mur de mots', wishesEnabled: true } } : {}),
         });
+        clearContext();
         navigate(isWall ? `/ewish-admin/wall/${res.data._id}` : `/ewish-admin/ewish/edit/${res.data._id}`);
       } else {
         const premade = premades.find(p => p._id === picked);
         const slug = t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) + '-' + Date.now();
         const res = await duplicatePublication(premade._id, { title: t, customName: slug });
+        clearContext();
         navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
       }
     } catch (e) { setTitleErr(e.response?.data?.error || 'Erreur'); }

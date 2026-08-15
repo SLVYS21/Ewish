@@ -1,0 +1,279 @@
+/* TileChooser — écran générique "choix" du wizard /create.
+   Palette Kado sur fond blanc, centré, responsive.
+   Desktop = grid N cols (prop desktopColumns).
+   Mobile = carrousel snap + dots OU grid 2 cols (prop mobileLayout). */
+
+.page {
+  min-height: 100vh;
+  background: #FFFFFF;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px 8px 10px;
+  border: 1px solid var(--mk-line-2, #EAD6DE);
+  background: #FFFFFF;
+  color: var(--mk-ink, #2B2440);
+  border-radius: 999px;
+  font-family: var(--mk-body, 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.back:hover {
+  border-color: var(--mk-rose, #FF5470);
+  color: var(--mk-rose, #FF5470);
+  transform: translateX(-2px);
+}
+
+.header {
+  max-width: 720px;
+  text-align: center;
+  margin: 60px auto 44px;
+}
+.title {
+  font-family: var(--mk-display, 'Instrument Serif', Georgia, serif);
+  font-weight: 400;
+  font-size: clamp(30px, 4.8vw, 44px);
+  line-height: 1.1;
+  color: var(--mk-ink, #2B2440);
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  font-family: var(--mk-body, 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-size: 16px;
+  color: var(--mk-ink-2, #5D5474);
+  margin: 0;
+}
+
+.grid {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  gap: 20px;
+}
+
+.tile {
+  appearance: none;
+  border: 2px solid var(--mk-line-2, #EAD6DE);
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 20px 22px 24px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease,
+    opacity .18s ease;
+  font-family: var(--mk-body, 'Plus Jakarta Sans', system-ui, sans-serif);
+  color: var(--mk-ink, #2B2440);
+  position: relative;
+  overflow: hidden;
+}
+.tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px -10px rgba(43, 36, 64, .18);
+}
+.tile:focus-visible {
+  outline: none;
+  border-color: var(--mk-rose, #FF5470);
+  box-shadow: 0 0 0 4px rgba(255, 84, 112, .18);
+}
+.tile:active { transform: translateY(-2px); }
+
+/* Tuile "disabled" (ex. Kado — Bientôt) : opacité + désaturation légère,
+   le clic reste possible pour que le parent affiche un toast. */
+.tileDisabled {
+  opacity: .78;
+}
+.tileDisabled:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -8px rgba(43, 36, 64, .12);
+}
+
+/* Badge pill (top-right) — ex. "Bientôt" */
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--mk-ink, #2B2440);
+  color: #FFFFFF;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px -4px rgba(43, 36, 64, .35);
+}
+
+.illuWrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  background: var(--mk-blush, #FFF3F5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  margin-bottom: 14px;
+  transition: background .18s ease;
+}
+/* Toute illustration svg passée en enfant se cale au wrapper. */
+.illuWrap > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tileTitle {
+  font-family: var(--mk-display, 'Instrument Serif', Georgia, serif);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--mk-ink, #2B2440);
+}
+.tileDesc {
+  font-size: 14px;
+  color: var(--mk-ink-2, #5D5474);
+  line-height: 1.4;
+}
+
+/* ── Accent par tuile ── */
+.tile_rose:hover   { border-color: var(--mk-rose, #FF5470); }
+.tile_rose .illuWrap { background: var(--mk-blush, #FFF3F5); }
+
+.tile_lilac:hover  { border-color: var(--mk-lilac, #7C5CFF); }
+.tile_lilac .illuWrap { background: var(--mk-lilac-soft, #EDE7FF); }
+
+.tile_butter:hover { border-color: var(--mk-butter, #FFC145); }
+.tile_butter .illuWrap { background: var(--mk-butter-soft, #FFF0C9); }
+
+.tile_mint:hover  { border-color: var(--mk-mint, #00A48D); }
+.tile_mint .illuWrap { background: var(--mk-mint-soft, #CFF2ED); }
+
+.tile_peach:hover { border-color: var(--mk-peach, #FF9F7A); }
+.tile_peach .illuWrap { background: var(--mk-peach-soft, #FFD7C2); }
+
+/* ── Dots pagination (mobile carousel uniquement) ── */
+.dots {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mk-line-strong, #DCC4CE);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease, width .2s ease;
+}
+.dot:focus-visible {
+  outline: 2px solid var(--mk-rose, #FF5470);
+  outline-offset: 3px;
+}
+.dotActive {
+  background: var(--mk-rose, #FF5470);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ── Mobile carousel — horizontal snap ── */
+@media (max-width: 720px) {
+  .page {
+    padding: 30px 0 40px;
+    align-items: stretch;
+  }
+  .header {
+    margin: 40px auto 24px;
+    padding: 0 20px;
+  }
+  .back {
+    top: 16px;
+    left: 16px;
+  }
+
+  .mobileCarousel {
+    grid-template-columns: unset !important;
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px 20px;
+    scrollbar-width: none;
+  }
+  .mobileCarousel::-webkit-scrollbar { display: none; }
+
+  .mobileCarousel .tile {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Mobile grid — 2 colonnes empilées. */
+  .mobileGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px;
+    padding: 0 16px;
+    max-width: 100%;
+  }
+  .mobileGrid .tile {
+    padding: 14px 14px 18px;
+    border-radius: 20px;
+  }
+  .mobileGrid .illuWrap {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+  }
+  .mobileGrid .tileTitle {
+    font-size: 17px;
+  }
+  .mobileGrid .tileDesc {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .mobileGrid .badge {
+    top: 8px;
+    right: 8px;
+    padding: 3px 7px;
+    font-size: 9px;
+  }
+
+  .tile:hover {
+    /* Sur mobile, pas de lift au hover (pas de vraie souris). */
+    transform: none;
+  }
+
+  .mobileCarousel + .dots { display: flex; }
+}

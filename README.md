@@ -76,7 +76,7 @@ Un utilisateur peut remplir un calendrier de potentielles dates.. en attendant d
 5. myKado for business
 myKado destiné au entreprises qui ont un certain nombre d'employés et qui ont ou veulent créer une culture entreprise.
 myKado permet aux entreprises:
-	- Organiser la cohésion sociale pour différents events like: Anniversaire, Naissances, mariage, Retirement, Fête de fin d'année etc
+	- Organiser la cohésion sociale pour différents events like: Anniversaire, Baptêmes, mariage, Retirement, Fête de fin d'année etc
 	- Personnaliser les murs avec leur logo et leurs liens
 	- Avoir des cartes digitales pour dire merci à leurs clients et pouvoir les rediriger vers leur interfaces again (Marketing)
 	- Reconnaissance des employers like,, meilleur employé du mois ou autre

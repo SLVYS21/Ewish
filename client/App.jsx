@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import MyCreations from "./pages/MyCreations";
 import Editor from "./pages/Editor";
 import QuickCreate from "./pages/QuickCreate";
+import CreateEntrypoint from "./pages/CreateEntrypoint";
+import KadoSend from "./pages/KadoSend";
 import QuickCreateWall from "./pages/QuickCreateWall";
 import { CardStateProvider } from "./card-editor/hooks/useCardState";
 import CardEditorLayout from "./card-editor/components/CardEditorLayout";
@@ -168,6 +170,12 @@ export default function App() {
           {/* Recipient Reveal UI for Walls */}
           <Route path="/m/:slug"       element={<RecipientReveal />} />
           
+          {/* Front-door unifié : choix du type de carte (public, sans auth) */}
+          <Route path="/create" element={<CreateEntrypoint />} />
+
+          {/* Kado seul — envoi d'argent sans carte (placeholder pour l'instant) */}
+          <Route path="/kado/send" element={<KadoSend />} />
+
           <Route path="/card-editor" element={<CardStateProvider><CardEditorLayout /></CardStateProvider>} />
 
           {/* Public route for published myenvelope cards (shared via /c/:slug) */}

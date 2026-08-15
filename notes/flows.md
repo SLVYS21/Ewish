@@ -19,7 +19,7 @@ Objectif : **6 étapes max**, chaque écran a **un CTA principal** et une flèch
 ┌─ Étape 1 ────────────────────────────────────────────┐
 │ Pourquoi tu veux célébrer ?                          │
 │                                                      │
-│ [ Anniversaire ] [ Mariage ] [ Naissance ]           │
+│ [ Anniversaire ] [ Mariage ] [ Baptême ]           │
 │ [ Retraite ] [ Fête de fin d'année ] [ Autre ]       │
 │                                                      │
 │ (icône + libellé grand format, cards cliquables)     │

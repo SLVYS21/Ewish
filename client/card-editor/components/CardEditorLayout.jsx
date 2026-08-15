@@ -8,11 +8,27 @@ import KadoStep from './KadoStep';
 import ShareStep from './ShareStep';
 import CardPreviewRenderer from '../preview/CardPreviewRenderer';
 import UnboxingView from '../preview/UnboxingView';
+import { loadContext, clearContext } from '../../create-flow/context';
 import { LucideChevronRight, LucideChevronLeft, LucideArrowLeft } from 'lucide-react';
 import '../card-editor.css';
 
 const STEP_LABELS = ['Occasion', 'Style', 'Contenu', 'Kado', 'Partage'];
 const MAX_STEP = 5;
+
+/* Mapping des IDs d'occasion : /create utilise des IDs courts (anniversary,
+   wedding, birth, ...) tandis que le card-editor a son propre catalogue
+   (anniversaire, mariage, naissance, ...). Ce mapping permet de pré-remplir
+   l'occasion de l'éditeur quand on arrive depuis /create. */
+const OCCASION_MAP_FROM_CREATE = {
+  anniversary: 'anniversaire',
+  wedding:     'mariage',
+  birth:       'naissance',
+  farewell:    'retraite',
+  welcome:     'felicitations',
+  thanks:      'merci',
+  tribute:     'condoleances',
+  other:       'autre',
+};
 
 export default function CardEditorLayout() {
   const {
@@ -21,6 +37,7 @@ export default function CardEditorLayout() {
     texts, publishState,
     loadPublicationById,
     saveStatus, draftId,
+    changeOccasion, setRecipient, updateText,
   } = useCardState();
 
   const saveLabel = saveStatus === 'saving' ? 'Enregistrement…'
@@ -35,6 +52,30 @@ export default function CardEditorLayout() {
   useEffect(() => {
     if (idParam) loadPublicationById(idParam);
     // Intentionally only depend on idParam so we hydrate once per URL id.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idParam]);
+
+  /* Fresh card creation (pas de ?id=) : consommer le contexte /create pour
+     pré-remplir occasion / destinataire / titre. Priorité aux query params
+     (name, occ, title) qui viennent en direct depuis l'étape 2, sinon
+     fallback sur sessionStorage (backup si l'utilisateur a rafraîchi). */
+  useEffect(() => {
+    if (idParam) return;
+    const ctx = loadContext();
+    const ctxForType = ctx && ctx.type === 'envelope' ? ctx : null;
+    const occRaw     = searchParams.get('occ')   || ctxForType?.occasion   || '';
+    const nameRaw    = searchParams.get('name')  || ctxForType?.recipient  || '';
+    const titleRaw   = searchParams.get('title') || ctxForType?.title      || '';
+    if (!occRaw && !nameRaw && !titleRaw) return;
+
+    const mappedOcc = OCCASION_MAP_FROM_CREATE[occRaw];
+    if (mappedOcc) changeOccasion(mappedOcc);
+    if (nameRaw)   setRecipient(nameRaw);
+    if (titleRaw)  updateText('title', titleRaw);
+
+    /* Contexte consommé — on nettoie pour éviter de le ré-appliquer si
+       l'utilisateur navigue puis revient sur /card-editor sans /create. */
+    clearContext();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idParam]);
 

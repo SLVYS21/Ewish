@@ -1,0 +1,444 @@
+/* ─────────────────────────────────────────────────────────
+   QrStories — sticky-stack cards
+   4 cards s'empilent au scroll (deck effect).
+   ───────────────────────────────────────────────────────── */
+
+.section {
+  --stack-top: 96px;         /* offset depuis le haut où les cards se collent */
+  --card-h: min(620px, calc(100vh - 140px));
+  --scroll-gap: 70vh;        /* scroll-space entre chaque card (= "vitesse" du stack) */
+  --peek: 22px;              /* décalage vertical entre chaque card (tranche visible) */
+
+  position: relative;
+  padding: 80px 0 40px;
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--mk-stone-50) 100%);
+  /* overflow-x: clip preserves sticky positioning (unlike overflow: hidden). */
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.container {
+  max-width: 1100px;
+}
+
+/* ── HEAD ───────────────────────────────────────────────── */
+.head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 40px;
+  position: relative;
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4.5vw, 52px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--mk-stone-900);
+  margin-top: 14px;
+  font-variation-settings: 'opsz' 96;
+}
+.titleAccent {
+  font-style: italic;
+  color: var(--mk-clay-500);
+  font-weight: 500;
+}
+
+.sub {
+  font-size: clamp(15px, 1.4vw, 18px);
+  color: var(--mk-stone-700);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.headArrow {
+  color: var(--mk-stone-500);
+  width: 60px;
+  height: 110px;
+  margin: 28px auto 0;
+  opacity: 0.7;
+  animation: mkBob 3s ease-in-out infinite;
+}
+
+/* ── STACK ──────────────────────────────────────────────────
+   Toutes les cards sont SIBLINGS ici → elles partagent le même
+   containing block, donc leurs sticky offsets s'accumulent :
+   Card 1 pin à top:96px, Card 2 arrive et pin à top:118px
+   (Card 1 reste visible, sa tranche de 22px dépasse), etc.
+   Le scroll-space entre chaque card est créé par margin-bottom
+   sur les cards elles-mêmes. */
+.stack {
+  position: relative;
+  padding-bottom: 20vh;
+}
+
+/* ── CARD ────────────────────────────────────────────────
+   position: sticky → chaque card se colle à son propre top
+   quand elle atteint cette position au scroll.
+   z-index croissant → les suivantes recouvrent les précédentes.
+   margin-bottom → distance de scroll avant la prochaine card. */
+.card {
+  position: sticky;
+  top: var(--stack-top);
+  height: var(--card-h);
+  border-radius: 28px;
+  padding: 40px;
+  overflow: hidden;
+  box-shadow:
+    0 30px 60px -20px rgba(45, 32, 14, 0.25),
+    0 12px 24px -12px rgba(45, 32, 14, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: var(--card-bg, #FFFFFF);
+  color: var(--card-text, var(--mk-stone-900));
+  transform-origin: top center;
+  will-change: transform, filter;
+}
+
+/* Espace de scroll après chaque card (sauf la dernière) */
+.card:not(:last-child) {
+  margin-bottom: var(--scroll-gap);
+}
+
+/* ── Tints ─────────────────────────────────────────────── */
+.tint_rose {
+  --card-bg: linear-gradient(135deg, #FFEFF3 0%, #FBE1E7 100%);
+  --card-accent: #C13B3B;
+  --card-num: #C13B3B;
+  --card-pill-bg: rgba(193, 59, 59, 0.10);
+  --card-pill-text: #A02C2C;
+  --card-illu: #C13B3B;
+}
+.tint_gold {
+  --card-bg: linear-gradient(135deg, #FDF7EA 0%, #F5E7C4 100%);
+  --card-accent: #9F6D22;
+  --card-num: #C88B2D;
+  --card-pill-bg: rgba(200, 139, 45, 0.12);
+  --card-pill-text: #9F6D22;
+  --card-illu: #9F6D22;
+}
+.tint_indigo {
+  --card-bg: linear-gradient(135deg, #EEF1FA 0%, #DFE3EE 100%);
+  --card-accent: #1E2952;
+  --card-num: #354270;
+  --card-pill-bg: rgba(30, 41, 82, 0.10);
+  --card-pill-text: #1E2952;
+  --card-illu: #1E2952;
+}
+.tint_mint {
+  --card-bg: linear-gradient(135deg, #E9F5EE 0%, #D3EADD 100%);
+  --card-accent: #2E4A3B;
+  --card-num: #2E4A3B;
+  --card-pill-bg: rgba(46, 74, 59, 0.10);
+  --card-pill-text: #2E4A3B;
+  --card-illu: #2E4A3B;
+}
+
+/* ── Contenu de card ───────────────────────────────────── */
+.cardInner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  height: 100%;
+  align-items: center;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.numRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.num {
+  font-family: var(--serif);
+  font-size: 44px;
+  font-weight: 600;
+  color: var(--card-num);
+  line-height: 1;
+  font-variation-settings: 'opsz' 96;
+}
+.kicker {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--card-accent);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cardTitle {
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--mk-stone-900);
+  font-variation-settings: 'opsz' 96;
+}
+
+.cardLead {
+  font-family: var(--sans);
+  font-size: clamp(14px, 1.15vw, 16px);
+  line-height: 1.55;
+  color: var(--mk-stone-700);
+  max-width: 46ch;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.pill {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--card-pill-bg);
+  color: var(--card-pill-text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--sans);
+}
+
+.qrHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  color: var(--mk-stone-500);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--sans);
+}
+.qrHint svg { color: var(--card-accent); }
+
+/* ── Visuel de card ────────────────────────────────────── */
+.cardVisual {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.illustration {
+  width: 100%;
+  height: 100%;
+  max-height: 420px;
+  color: var(--card-illu);
+  filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.12));
+  z-index: 1;
+}
+
+/* QR badge flottant sur le visuel */
+.qrBadge {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  width: 68px;
+  height: 68px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  color: var(--card-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: 5;
+  animation: mkPulse 2.4s ease-in-out infinite;
+}
+.qrBadge svg { width: 100%; height: 100%; }
+
+/* Flèche cursive pointant vers le QR (card 1 uniquement) */
+.arrowToQr {
+  position: absolute;
+  bottom: 92px;
+  right: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--card-accent);
+  z-index: 4;
+  animation: mkFadeIn 1.2s 0.6s both;
+}
+.arrowToQr svg {
+  width: 88px;
+  height: 82px;
+}
+.arrowLabel {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 500;
+  transform: translateX(-32px) translateY(-8px) rotate(-6deg);
+}
+
+/* Hint "continue…" en bas de card (sauf dernière) */
+.nextHint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--mk-stone-500);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  opacity: 0.65;
+  pointer-events: none;
+}
+.nextHint svg {
+  width: 34px;
+  height: 44px;
+}
+
+/* Flèche cursive générique */
+.arrow {
+  display: block;
+}
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes mkBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(10px); }
+}
+@keyframes mkPulse {
+  0%, 100% { transform: scale(1);   box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08); }
+  50%      { transform: scale(1.06); box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.30), 0 3px 8px rgba(0, 0, 0, 0.10); }
+}
+@keyframes mkFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Tablet ────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .section {
+    --stack-top: 72px;
+    --card-h: min(560px, calc(100vh - 100px));
+    --scroll-gap: 60vh;
+    --peek: 18px;
+    padding: 60px 0 20px;
+  }
+  .card {
+    padding: 26px;
+    border-radius: 22px;
+  }
+  .cardInner {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    grid-template-rows: auto 1fr;
+  }
+  .cardVisual { min-height: 220px; order: 2; }
+  .cardText   { order: 1; gap: 12px; }
+}
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .section {
+    --stack-top: 60px;
+    --card-h: min(560px, calc(100vh - 88px));
+    --scroll-gap: 55vh;
+    --peek: 14px;
+    padding: 40px 0 8px;
+  }
+
+  .head { margin-bottom: 24px; }
+  .headArrow {
+    width: 40px;
+    height: 70px;
+    margin-top: 18px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .cardInner {
+    gap: 14px;
+  }
+
+  .num { font-size: 32px; }
+  .kicker {
+    font-size: 11px;
+    padding: 5px 10px;
+    letter-spacing: 0.08em;
+  }
+  .numRow { gap: 10px; }
+
+  .cardTitle { font-size: 22px; }
+  .cardLead  { font-size: 14px; line-height: 1.5; }
+
+  .pill { padding: 6px 12px; font-size: 12px; }
+
+  .cardVisual {
+    min-height: 180px;
+    max-height: 240px;
+  }
+  .illustration { max-height: 240px; }
+
+  .qrBadge {
+    width: 52px;
+    height: 52px;
+    padding: 8px;
+    bottom: 12px;
+    right: 12px;
+    border-radius: 12px;
+  }
+  .arrowToQr {
+    bottom: 70px;
+    right: 64px;
+  }
+  .arrowToQr svg {
+    width: 64px;
+    height: 60px;
+  }
+  .arrowLabel {
+    font-size: 13px;
+    transform: translateX(-24px) translateY(-6px) rotate(-6deg);
+  }
+
+  .nextHint {
+    font-size: 11px;
+  }
+  .nextHint svg {
+    width: 26px;
+    height: 34px;
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .headArrow, .qrBadge, .arrowToQr {
+    animation: none !important;
+  }
+}

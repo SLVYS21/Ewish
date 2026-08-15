@@ -341,6 +341,12 @@ router.get('/:templateName/:customName', async (req, res) => {
       }
     });
 
+    /* Charge le HTML du template avant toute manipulation `html.replace(...)`
+       plus bas (fonts, bubble preloads, injection OG/CSP). Sans ce fetch en
+       amont, on retombe dans une TDZ sur `let html` → 500 sur /site/*. */
+    let html = await getTemplateHtml(pub.templateName);
+    if (!html) return sendError(res, 404, 'Template introuvable.');
+
     /* ── Fonts (validated) ─── */
     const chosenFont = safeFontFamily(s.fontFamily, 'Work Sans');
     const gFontQuery = GOOGLE_FONTS_MAP[chosenFont];
@@ -438,10 +444,6 @@ router.get('/:templateName/:customName', async (req, res) => {
     // Whitelist alphanumeric + tirets (label court, pas de sortie CSS/JS possible)
     const confettiType = (typeof s.confettiType === 'string' && /^[a-zA-Z0-9-]{1,30}$/.test(s.confettiType))
       ? s.confettiType : 'default';
-
-    let html;
-    html = await getTemplateHtml(pub.templateName);
-    if (!html) return sendError(res, 404, 'Template introuvable.');
 
     /* ── Open Graph / Twitter (preview WhatsApp, Facebook, iMessage…) ──
        Helper partagé avec /m/:slug (React SPA shell) — voir wallOgTags.js. */

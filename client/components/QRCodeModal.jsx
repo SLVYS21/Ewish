@@ -9,6 +9,7 @@ export default function QRCodeModal({ url, onClose }) {
   const [styleType, setStyleType] = useState('rounded'); // 'square', 'rounded', 'dots', 'classy'
   const [qrColor, setQrColor] = useState('#e60000');
   const [bgColor, setBgColor] = useState('#ffffff');
+  const [bareMode, setBareMode] = useState(false); // true = QR seul (sans padding/fond)
   const [qrSrc, setQrSrc] = useState('');
   
   const qrCode = useRef(null);
@@ -184,10 +185,44 @@ export default function QRCodeModal({ url, onClose }) {
           </div>
         </div>
 
-        {/* Preview Area */}
-        <div className={styles.previewBg}>
+        {/* Toggle "Avec / Sans arrière-plan" — bareMode = juste le QR dans la forme. */}
+        <div className={styles.bareToggle} role="group" aria-label="Mode d'export">
+          <button
+            type="button"
+            className={`${styles.bareOpt} ${!bareMode ? styles.bareOptActive : ''}`}
+            onClick={() => setBareMode(false)}
+            aria-pressed={!bareMode}
+          >
+            Avec arrière-plan
+          </button>
+          <button
+            type="button"
+            className={`${styles.bareOpt} ${bareMode ? styles.bareOptActive : ''}`}
+            onClick={() => setBareMode(true)}
+            aria-pressed={bareMode}
+          >
+            QR seul
+          </button>
+          <span
+            className={styles.bareIndicator}
+            style={{ transform: bareMode ? 'translateX(100%)' : 'translateX(0)' }}
+            aria-hidden
+          />
+        </div>
+
+        {/* Preview Area — s'anime doucement entre les 2 modes. */}
+        <div className={`${styles.previewBg} ${bareMode ? styles.previewBgBare : ''}`}>
           <div className={styles.scaleWrapper}>
-            <div className={styles.captureArea} ref={captureRef} style={{ padding: shape === 'heart' ? '80px' : '40px' }}>
+            <div
+              className={styles.captureArea}
+              ref={captureRef}
+              style={{
+                padding: bareMode ? '0px' : (shape === 'heart' ? '80px' : '40px'),
+                background: bareMode ? 'transparent' : bgColor,
+                borderRadius: bareMode ? 0 : 12,
+                transition: 'padding .35s cubic-bezier(.4,0,.2,1), background .3s ease, border-radius .3s ease',
+              }}
+            >
               {qrSrc && (
                 shape === 'heart' ? (
                   <div className={styles.heartWrapper}>

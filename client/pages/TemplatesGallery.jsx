@@ -7,6 +7,10 @@ import {
 import { getTemplates, createPublication } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import { WallThemePreview } from '../components/WallPreviews';
+import { loadContext, clearContext, saveContext } from '../create-flow/context';
+import { TemplateIllustration, hasTemplateIllustration } from '../create-flow/templateIllustrations';
+import { createFlowTypeFor, MYENVELOPE_TEMPLATE } from '../create-flow/syntheticTemplates';
+import TemplatePreviewFullscreen from '../components/TemplatePreviewFullscreen';
 
 /* ─────────────────────────────────────────────────────────── */
 /* Wall event catalog                                          */
@@ -18,13 +22,13 @@ const WALL_EVENTS = [
     subtitle: () => 'Laisse un mot doux pour cet anniversaire.',
     eyebrow: '✦ Anniversaire' },
   { id: 'wedding',     label: 'Mariage',             Icon: Heart, festive: true,
-    title: (n) => `Le mariage de ${n}`,
+    title: (n) => `Heureux Mariage ${n}`,
     subtitle: () => 'Un mot pour les jeunes mariés.',
     eyebrow: '✦ Mariage' },
-  { id: 'birth',       label: 'Naissance',           Icon: Baby,           festive: true,
+  { id: 'birth',       label: 'Baptême',           Icon: Baby,           festive: true,
     title: (n) => `Bienvenue à ${n}`,
     subtitle: () => 'Un mot doux pour son arrivée.',
-    eyebrow: '✦ Naissance' },
+    eyebrow: '✦ Baptême' },
   { id: 'farewell',    label: 'Pot de départ',       Icon: Waves,          festive: true,
     title: (n) => `Bon départ, ${n}`,
     subtitle: () => 'Un mot pour son nouveau chapitre.',
@@ -91,21 +95,8 @@ const TEMPLATE_CAT = {
   special: 'special', sanctuary: 'special',
 };
 
-/*
- * Synthetic template for the new envelope-based card editor (/card-editor).
- * It is prepended to the wish templates list so it appears first.
- * Clicking it opens the dedicated wizard instead of the classic editor flow.
- */
-const MYENVELOPE_TEMPLATE = {
-  _id: '__myenvelope',
-  name: 'myenvelope',
-  label: 'Carte Enveloppe myKado',
-  description: '4 pages + enveloppe. Design floral, animation 3D d\'ouverture.',
-  thumbnail: '/backgrounds/theme-floral/floral_frame.webp',
-  creditsRequired: 1,
-  _isCardEditor: true,
-  _isNew: true,
-};
+/* MYENVELOPE_TEMPLATE est désormais importé depuis create-flow/syntheticTemplates
+   (utilisé aussi par Dashboard pour l'ajouter aux featured cartes). */
 
 export default function TemplatesGallery() {
   const navigate = useNavigate();
@@ -161,12 +152,21 @@ export default function TemplatesGallery() {
   const wallTemplates = templates.filter(t => WALL_TEMPLATES.has(t.name));
   const invitationTemplates = templates.filter(isInvitationTpl);
 
-  /* Open wall naming modal */
+  /* Open wall naming modal — pré-remplit depuis /create (query params + sessionStorage)
+     si l'utilisateur arrive du wizard front-door. Priorité aux query params. */
   const openWallModal = (tpl) => {
+    const ctx = loadContext();
+    const ctxWall = ctx && ctx.type === 'wall' ? ctx : null;
+    const prefillOcc   = searchParams.get('occ')   || ctxWall?.occasion  || 'anniversary';
+    const prefillName  = searchParams.get('name')  || ctxWall?.recipient || '';
+    const prefillTitle = searchParams.get('title') || ctxWall?.title     || '';
+    const isInvitation = tpl.kind === 'invitation';
+    const validOcc = WALL_EVENTS.some(e => e.id === prefillOcc) ? prefillOcc : 'anniversary';
+
     setWallModal(tpl);
-    setWallTitle('');
-    setWallRecipient('');
-    setWallEventId('anniversary');
+    setWallTitle(isInvitation ? prefillTitle : '');
+    setWallRecipient(prefillName);
+    setWallEventId(validOcc);
     setWallError('');
     setTimeout(() => wallRef.current?.focus(), 80);
   };
@@ -222,6 +222,8 @@ export default function TemplatesGallery() {
         title,
         data,
       });
+      /* Publication créée : le contexte /create est consommé. */
+      clearContext();
       const destination = isInvitation
         ? `/ewish-admin/ewish/edit/${res.data._id}`
         : `/ewish-admin/wall/${res.data._id}`;
@@ -233,40 +235,18 @@ export default function TemplatesGallery() {
   return (
     <div className="page">
 
-      {/* Wall preview sheet */}
+      {/* Wall preview — fullscreen in-app (remplace la drawer + iframe minuscule).
+          Close X + CTA "Créer ce mur" flottants. */}
       {wallSheet && (
-        <div className="wall-sheet-veil" onMouseDown={e => { if (e.target === e.currentTarget) setWallSheet(null); }}>
-          <div className="wall-sheet">
-            <div className="wall-sheet-grip" />
-            <div className="wall-sheet-head">
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="wall-sheet-title">{wallSheet.label || wallSheet.name}</div>
-                <div className="wall-sheet-desc">{WALL_DESCS[wallSheet.name] || wallSheet.description || ''}</div>
-              </div>
-              <button className="btn-icon" onClick={() => setWallSheet(null)}><X size={18} /></button>
-            </div>
-            <div className="wall-sheet-preview">
-              <iframe
-                src={`${import.meta.env.VITE_API_URL}/preview/${wallSheet.name}`}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-                title={wallSheet.label || wallSheet.name}
-                allow="autoplay"
-              />
-            </div>
-            <div className="wall-sheet-foot">
-              <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setWallSheet(null)}>
-                Voir les autres
-              </button>
-              <button
-                className="btn btn-primary"
-                style={{ flex: 1, justifyContent: 'center' }}
-                onClick={() => { setWallSheet(null); openWallModal(wallSheet); }}
-              >
-                Créer ce mur <ArrowRight size={15} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <TemplatePreviewFullscreen
+          src={`${import.meta.env.VITE_API_URL}/preview/${wallSheet.name}`}
+          title={wallSheet.label || wallSheet.name}
+          onClose={() => setWallSheet(null)}
+          primaryAction={{
+            label: 'Créer ce mur',
+            onClick: () => { setWallSheet(null); openWallModal(wallSheet); },
+          }}
+        />
       )}
 
       {/* Wall naming modal */}
@@ -482,17 +462,29 @@ export default function TemplatesGallery() {
           ) : (
             <div className="tpl-grid">
               {wishTemplates.map(tpl => {
-                const bg = tpl.thumbnail
+                /* SVG dédié en priorité — le thumbnail image ne s'affiche
+                   que si aucune illustration n'existe pour ce template. */
+                const showIllu = hasTemplateIllustration(tpl.name);
+                const bg = !showIllu && tpl.thumbnail
                   ? `url(${tpl.thumbnail}) center/cover no-repeat`
                   : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
-                const goTo = tpl._isCardEditor
-                  ? '/card-editor'
-                  : `/ewish-admin/template/${tpl.name}`;
+                /* Clic → lance directement /create avec le template pré-sélectionné
+                   dans le contexte sessionStorage. CreateEntrypoint saute alors
+                   TemplateStep (pour wish) et va direct de InfoStep → PreviewStep. */
+                const handleClick = () => {
+                  const type = createFlowTypeFor(tpl.name);
+                  const ctx = { type };
+                  if (type === 'wish') ctx.wishTemplate = tpl.name;
+                  if (type === 'wall') ctx.wallTemplate = tpl.name;
+                  saveContext(ctx);
+                  const nameParam = searchParams.get('name');
+                  navigate(`/create?type=${type}${nameParam ? `&name=${encodeURIComponent(nameParam)}` : ''}`);
+                };
                 return (
                   <button
                     key={tpl._id}
                     className="card card-hover tpl-card"
-                    onClick={() => navigate(goTo)}
+                    onClick={handleClick}
                     style={tpl._isNew ? { position: 'relative' } : undefined}
                   >
                     {tpl._isNew && (
@@ -508,7 +500,16 @@ export default function TemplatesGallery() {
                         Nouveau
                       </span>
                     )}
-                    <div className="tpl-thumb" style={{ background: bg }}>
+                    <div className="tpl-thumb" style={{ background: bg, position: 'relative' }}>
+                      {showIllu && (
+                        <div style={{
+                          position: 'absolute', inset: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: '10%',
+                        }}>
+                          <TemplateIllustration name={tpl.name} />
+                        </div>
+                      )}
                       <div className="tpl-scene">
                         <span className="ms-hand">Pour toi,</span>
                         <span className="ms-title">{tpl.label || tpl.name}</span>
@@ -523,7 +524,7 @@ export default function TemplatesGallery() {
                           {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mk-accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          {tpl._isCardEditor ? 'Créer' : 'Aperçu'} <ArrowRight size={13} />
+                          Créer <ArrowRight size={13} />
                         </span>
                       </div>
                     </div>
@@ -541,14 +542,32 @@ export default function TemplatesGallery() {
           </div>
         ) : (
           <div className="tpl-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
-            {wallTemplates.map(tpl => (
+            {wallTemplates.map(tpl => {
+              const showIllu = hasTemplateIllustration(tpl.name);
+              /* Clic → lance /create?type=wall avec le template pré-sélectionné
+                 dans le contexte. PreviewStep utilise ctx.wallTemplate. */
+              const handleWallClick = () => {
+                saveContext({ type: 'wall', wallTemplate: tpl.name });
+                const nameParam = searchParams.get('name');
+                navigate(`/create?type=wall${nameParam ? `&name=${encodeURIComponent(nameParam)}` : ''}`);
+              };
+              return (
                 <div
                   key={tpl._id}
                   className="card card-hover"
-                  onClick={() => setWallSheet(tpl)}
+                  onClick={handleWallClick}
                   style={{ cursor: 'pointer', border: '1px solid var(--mk-line-2)', borderRadius: '18px', overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}
                 >
-                  {tpl.thumbnail ? (
+                  {showIllu ? (
+                    <div style={{
+                      position: 'relative', aspectRatio: '1.14', overflow: 'hidden',
+                      background: TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      padding: '12%',
+                    }}>
+                      <TemplateIllustration name={tpl.name} />
+                    </div>
+                  ) : tpl.thumbnail ? (
                     <div style={{ position: 'relative', aspectRatio: '1.14', overflow: 'hidden', background: `url(${tpl.thumbnail}) center/cover no-repeat` }} />
                   ) : (
                     <WallThemePreview templateName={tpl.name} />
@@ -563,7 +582,8 @@ export default function TemplatesGallery() {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
           </div>
         )
       )}

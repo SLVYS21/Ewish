@@ -38,7 +38,7 @@ export const TEMPLATES = [
   {
     id: 'baby',
     name: 'Bienvenue',
-    sub: 'Naissance · pastel',
+    sub: 'Baptême · pastel',
     cat: 'Personnel',
     credits: 8,
     size: 'sq',

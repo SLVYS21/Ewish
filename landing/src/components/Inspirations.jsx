@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const TABS_GROUP = [
   { id: 'birthday_group',    label: 'Anniversaire' },
   { id: 'wedding_group',     label: 'Mariage' },
-  { id: 'birth_group',       label: 'Naissance' },
+  { id: 'birth_group',       label: 'Baptême' },
   { id: 'party_group',       label: 'Soirées / Fête' },
   { id: 'congrats_group',    label: 'Félicitations' },
   { id: 'memorial_group',    label: 'Hommage' },
@@ -30,7 +30,7 @@ const TABS_PERSONAL = [
   { id: 'birthday_perso',    label: 'Anniversaire' },
   { id: 'wedding_perso',     label: 'Mariage' },
   { id: 'love_perso',        label: "Lettre d'Amour" },
-  { id: 'birth_perso',       label: 'Naissance' },
+  { id: 'birth_perso',       label: 'Baptême' },
   { id: 'congrats_perso',    label: 'Félicitations' },
   { id: 'memorial_perso',    label: 'Hommage' },
 ];
@@ -50,11 +50,17 @@ function buildDemoUrl(demo) {
   return `${API_URL}/site/${templateName}/${customName}?demo=1&noanim=1`;
 }
 
+/* Poster path convention: /posters/{tabId}.webp — see scripts/generate-landing-posters.js */
+function buildPosterUrl(tabId) {
+  return `/posters/${tabId}.webp`;
+}
+
 export default function Inspirations() {
   const [mode, setMode] = useState('group');
   const [activeTabGroup, setActiveTabGroup] = useState('birthday_group');
   const [activeTabPerso, setActiveTabPerso] = useState('birthday_perso');
-  const [loading, setLoading] = useState(true);
+  const [iframeReady, setIframeReady] = useState(false);
+  const [posterOk, setPosterOk] = useState(true);
   const iframeRef = useRef(null);
 
   const TABS = mode === 'group' ? TABS_GROUP : TABS_PERSONAL;
@@ -62,9 +68,11 @@ export default function Inspirations() {
   const activeTab = mode === 'group' ? activeTabGroup : activeTabPerso;
   const activeDemo = DEMOS_DATA[activeTab];
   const src = buildDemoUrl(activeDemo);
+  const poster = buildPosterUrl(activeTab);
 
   useEffect(() => {
-    setLoading(true);
+    setIframeReady(false);
+    setPosterOk(true);
   }, [src]);
 
   return (
@@ -106,21 +114,43 @@ export default function Inspirations() {
           ))}
         </div>
 
-        {/* Live preview : iframe fills the entire reserved area */}
-        <div className={s.demoBoard}>
-          {loading && (
-            <div className={s.iframeLoader}>
-              <div className={s.spinner} />
-              <span>Chargement de la démo…</span>
+        {/* Live preview : poster instantané + iframe fade-in derrière + skeleton fallback */}
+        <div className={`${s.demoBoard} ${mode === 'group' ? s.boardGroup : s.boardPerso}`}>
+          {/* Skeleton branded (mode-tinted) — visible tant que ni poster ni iframe ne sont prêts */}
+          {!iframeReady && !posterOk && (
+            <div className={s.skeleton} aria-hidden="true">
+              <div className={s.skelHeader} />
+              <div className={s.skelGrid}>
+                <div className={s.skelCard} />
+                <div className={s.skelCard} />
+                <div className={s.skelCard} />
+                <div className={s.skelCard} />
+                <div className={s.skelCard} />
+                <div className={s.skelCard} />
+              </div>
+              <div className={s.skelShimmer} />
             </div>
           )}
+
+          {/* Poster statique — masqué dès que l'iframe est prête */}
+          {posterOk && (
+            <img
+              src={poster}
+              alt=""
+              className={`${s.poster} ${iframeReady ? s.posterHidden : ''}`}
+              onError={() => setPosterOk(false)}
+              loading="eager"
+              decoding="async"
+            />
+          )}
+
           <iframe
             ref={iframeRef}
             key={src}
             src={src}
-            className={s.demoIframe}
+            className={`${s.demoIframe} ${iframeReady ? s.iframeReady : ''}`}
             title={`Démo ${activeTab}`}
-            onLoad={() => setLoading(false)}
+            onLoad={() => setIframeReady(true)}
             allow="autoplay; fullscreen"
             loading="lazy"
           />

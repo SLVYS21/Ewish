@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import s from '../pages/AdminLogin.module.css';
 
-export default function GoogleBtn({ label = 'Continuer avec Google', redirectTo = '/ewish-admin' }) {
+export default function GoogleBtn({
+  label = 'Continuer avec Google',
+  redirectTo = '/ewish-admin',
+  onSuccess,
+  className,
+}) {
   const { googleLogin } = useAuth();
   const navigate = useNavigate();
   const [error, setError]   = useState('');
@@ -14,8 +19,12 @@ export default function GoogleBtn({ label = 'Continuer avec Google', redirectTo 
     setLoading(true);
     setError('');
     try {
-      await googleLogin(response.credential);
-      navigate(redirectTo);
+      const user = await googleLogin(response.credential);
+      /* Si un onSuccess est fourni, on lui remet la main (ex. QuickAuthModal
+         qui veut resume un flow en cours). Sinon, comportement historique :
+         navigate vers redirectTo. */
+      if (onSuccess) onSuccess(user);
+      else navigate(redirectTo);
     } catch (e) {
       setError(e.response?.data?.error || 'Erreur Google');
     } finally {
@@ -61,7 +70,7 @@ export default function GoogleBtn({ label = 'Continuer avec Google', redirectTo 
   return (
     <>
       {error && <div className={s.error} style={{ marginBottom: 10 }}>{error}</div>}
-      <button className={s.btnOutline} onClick={handleClick} disabled={loading}>
+      <button className={className || s.btnOutline} onClick={handleClick} disabled={loading}>
         <GoogleIcon />
         {loading ? 'Connexion…' : label}
       </button>

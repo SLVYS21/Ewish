@@ -164,16 +164,21 @@ export default function WallApp() {
      mais les clics sur les cartes de vœux restent actifs. */
   const isDemo = !!data.demoMode;
 
-  const [wishes, setWishes] = useState([]);
+  /* En mode démo/preview (server injecte `wishes` inline + demoMode/publicId
+     vide), on hydrate directement depuis INITIAL_DATA sans appel API — sinon
+     le mur reste blanc puisque le fetch est court-circuité par !publicId. */
+  const initialWishes = Array.isArray(INITIAL_DATA.wishes) ? INITIAL_DATA.wishes : [];
+  const hasInitialWishes = initialWishes.length > 0;
+  const [wishes, setWishes] = useState(initialWishes);
   const [nextCursor, setNextCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
-  const [totalWishes, setTotalWishes] = useState(0);
+  const [totalWishes, setTotalWishes] = useState(initialWishes.length);
   const [loadingMore, setLoadingMore] = useState(false);
   const cursorRef = useRef(null);        // miroir de nextCursor pour l'IO callback
   const loadingRef = useRef(false);      // évite les fetch concurrents
   const sentinelRef = useRef(null);
   const [stats, setStats] = useState(INITIAL_DATA.cagnotte || null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialWishes);
   const [toast, setToast] = useState('');
   const [storyIndex, setStoryIndex] = useState(-1);
   const [gateOpen, setGateOpen] = useState(!isPrivate);

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --port 4000",
     "build": "vite build",
-    "preview": "vite preview --port 4000"
+    "preview": "vite preview --port 4000",
+    "posters": "node scripts/generate-posters.js"
   },
   "dependencies": {
     "framer-motion": "^11.3.0",

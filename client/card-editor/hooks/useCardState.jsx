@@ -179,6 +179,30 @@ export const CardStateProvider = ({ children }) => {
     setPublishError(null);
   }, []);
 
+  /* payGiftTopUp : carte déjà publiée, l'utilisateur augmente le gift.
+     On PATCH la nouvelle valeur puis on retente publishPublication.
+     Le serveur renvoie 402 avec priceFCFA = delta (owedGiftFcfa) — le caller
+     (KadoStep) ouvre FeexPay pour cette portion. On ne touche PAS publishState
+     pour ne pas casser l'affichage 'published' pendant le checkout. */
+  const payGiftTopUp = useCallback(async ({ feexpayReference } = {}) => {
+    const workingId = publishedPub?._id || draftId;
+    if (!workingId) return { ok: false, error: 'Publication introuvable.' };
+    try {
+      const nextData = { ...(publishedPub?.data || {}), gift };
+      await updatePublication(workingId, { data: nextData });
+      const res = await publishPublication(workingId, feexpayReference ? { feexpayReference } : {});
+      const finalPub = res?.data || null;
+      if (finalPub) setPublishedPub(finalPub);
+      return { ok: true, pub: finalPub };
+    } catch (err) {
+      const data = err?.response?.data || {};
+      if (data.code === 'PAYMENT_REQUIRED') {
+        return { ok: false, paymentRequired: true, priceFCFA: data.priceFCFA, topUp: !!data.topUp, pubId: workingId };
+      }
+      return { ok: false, error: data.error || err?.message || 'Erreur' };
+    }
+  }, [gift, publishedPub, draftId]);
+
   /* Reopen an existing publication (used when arriving at /card-editor?id=XXX
      from the Dashboard). Fetches the pub, hydrates every editor field, and
      jumps straight to the Share step if it's already published. */
@@ -303,7 +327,7 @@ export const CardStateProvider = ({ children }) => {
     confettiStyle, setConfettiStyle,
     unboxingBg, setUnboxingBg,
     gift, setGift,
-    publishState, publishedPub, publishError, publishCard, resetPublish,
+    publishState, publishedPub, publishError, publishCard, resetPublish, payGiftTopUp,
     loadPublicationById,
     draftId, saveStatus,
     theme,

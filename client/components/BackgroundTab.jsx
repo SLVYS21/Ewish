@@ -65,7 +65,7 @@ const TAG_LABELS = {
   colorful: 'Coloré',  minimal: 'Minimal',
   wedding:  'Mariage', romantic: 'Romantique', floral: 'Floral',
   elegant:  'Élégant',
-  birth:    'Naissance', baby: 'Bébé',       soft: 'Doux',
+  birth:    'Baptême', baby: 'Bébé',       soft: 'Doux',
   sky:      'Ciel',
   pro:      'Pro',     farewell: 'Départ',   welcome: 'Bienvenue',
   tribute:  'Hommage', night: 'Nuit',        stars: 'Étoiles',

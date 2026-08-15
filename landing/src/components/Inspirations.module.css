@@ -132,13 +132,12 @@
 .tabsGroup { --tab-active-color: var(--mk-indigo-700); }
 .tabsPerso { --tab-active-color: var(--mk-clay-500); }
 
-/* Live Demo Area — l'iframe remplit entièrement la zone réservée.
-   Le mur/carte gère lui-même son propre titre, background et animations. */
+/* Live Demo Area — poster instantané + iframe fade-in + skeleton fallback */
 .demoBoard {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  background: #111111;
+  background: #ffffff;
   border-radius: 0 0 12px 12px;
   border: 1px solid #EAEAEA;
   border-top: none;
@@ -146,6 +145,31 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
+/* Poster tint fallback (au cas où le poster mettrait quelques ms) */
+.boardGroup { --skel-tint: #EEF0F8; --skel-accent: rgba(30, 41, 82, 0.10); }
+.boardPerso { --skel-tint: #FBEEEE; --skel-accent: rgba(193, 59, 59, 0.10); }
+
+/* Poster (screenshot instantané) */
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+  will-change: opacity;
+  background: var(--skel-tint, #F5F5F5);
+}
+.posterHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Iframe — invisible tant que pas prête, puis fade-in */
 .demoIframe {
   position: absolute;
   inset: 0;
@@ -154,38 +178,63 @@
   border: none;
   display: block;
   background: #ffffff;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.iframeReady {
+  opacity: 1;
+  z-index: 3;
 }
 
-.iframeLoader {
+/* Skeleton branded — s'affiche seulement si le poster est manquant */
+.skeleton {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
+  padding: 24px;
+  background: var(--skel-tint, #F5F5F5);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 18px;
+}
+.skelHeader {
+  height: 44px;
+  width: 55%;
+  border-radius: 999px;
+  background: var(--skel-accent, rgba(0,0,0,0.06));
+}
+.skelGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-  color: #ffffff;
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 500;
+  flex: 1;
+}
+.skelCard {
+  border-radius: 14px;
+  background: var(--skel-accent, rgba(0,0,0,0.06));
+}
+.skelShimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: mkShimmer 1.6s ease-in-out infinite;
   pointer-events: none;
 }
 
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid rgba(255,255,255,0.12);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: mkSpin 0.9s linear infinite;
-}
-
-@keyframes mkSpin {
-  to { transform: rotate(360deg); }
+@keyframes mkShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @media (max-width: 640px) {
   .demoBoard { aspect-ratio: 4 / 5; }
+  .skelGrid { grid-template-columns: repeat(2, 1fr); }
 }

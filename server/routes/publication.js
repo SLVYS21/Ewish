@@ -25,7 +25,7 @@ const CREDIT_TO_FCFA = 500;
 // GET all
 router.get('/', requireAdmin, async (req, res) => {
   try {
-    const { limit = 20, page = 1, search, premade, mine, received } = req.query;
+    const { limit = 20, page = 1, search, premade, mine, received, type } = req.query;
     const query = {};
 
     /* Étape 8 flow murs — "Créations reçues" = publications où l'utilisateur
@@ -77,11 +77,28 @@ router.get('/', requireAdmin, async (req, res) => {
       query.templateName = req.query.templateName;
     }
 
+    /* Filtre type=wish|wall — miroir server du toggle de MyCreations, permet
+       une pagination correcte côté server (sinon on paginait sur un mélange
+       et le count était incohérent après filtrage client). */
+    if (type === 'wall') {
+      // Cible tous les templates murs (dont wall-of-wishes-modern/craft/etc.)
+      query.templateName = query.templateName || { $regex: /^wall-of-wishes/ };
+    } else if (type === 'wish') {
+      query.templateName = query.templateName || { $not: /^wall-of-wishes/ };
+    }
+
     if (req.query.published === 'true') {
       query.published = true;
     } else if (req.query.published === 'false') {
       query.published = false;
     }
+
+    /* Count total pour la pagination UI (avant skip/limit). Exposé via header
+       plutôt que dans le body pour garder la réponse array-only (backward compat
+       avec les autres callers de getPublications qui font r.data.filter/find). */
+    const totalCount = await Publication.countDocuments(query);
+    res.setHeader('X-Total-Count', totalCount);
+    res.setHeader('Access-Control-Expose-Headers', 'X-Total-Count');
 
     const pubs = await Publication.find(query).sort('-updatedAt').skip((page - 1) * limit).limit(Number(limit)).lean();
     
@@ -323,36 +340,53 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     const { planType, feexpayReference } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
     const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
     const isEnvelope     = existing.templateName === 'myenvelope';
+    /* Gift attaché (Kado) : partagé entre myenvelope et les cartes legacy
+       (birthday/notre-film/forever/sanctuary/special) via data.gift.
+       Un montant XOF > 0 déclenche l'escrow FeexPay quel que soit le rôle,
+       pour éviter les cadeaux gratuits non provisionnés. */
+    const giftCfg  = existing.data?.gift || {};
+    const giftFcfa = (giftCfg.enabled && giftCfg.currency === 'XOF' && Number(giftCfg.amount) > 0)
+      ? Math.floor(Number(giftCfg.amount))
+      : 0;
+    /* Top-up : si la carte est déjà publiée, on ne facture QUE le delta Kado
+       (owedGiftFcfa) sans re-facturer le socle 1500. Sans ce champ, ajouter un
+       Kado après publication passait gratuitement. Voir Publication.paidGiftFcfa. */
+    const paidGiftFcfa = Number(existing.paidGiftFcfa) || 0;
+    const owedGiftFcfa = Math.max(0, giftFcfa - paidGiftFcfa);
+    const hasLegacyGiftEscrow = giftFcfa > 0 && !isEnvelope && !isWallTemplate;
+    const needsFirstEscrow = (isEnvelope || hasLegacyGiftEscrow) && !existing.isPaid;
+    const needsGiftTopUp   = existing.isPaid && owedGiftFcfa > 0 && !isWallTemplate;
+    const requiresEscrow   = needsFirstEscrow || needsGiftTopUp;
     let finalPlanType = isWallTemplate ? (planType || 'free') : undefined;
     let creditsReq = 0;
     let priceFCFA = 0;
 
     /* -------------------------------------------------------------------
-       Enveloppe (myenvelope) — paiement OBLIGATOIRE quel que soit le rôle.
-       On sort volontairement du bloc `role === 'merchant'` : le cadeau
-       nécessite un vrai escrow FeexPay, pas de bypass super_admin/anon.
-       Auth requis (Transaction.adminId est required).
+       Escrow FeexPay — deux cas :
+       - First publish (needsFirstEscrow) : 1500 FCFA base + éventuel Kado.
+       - Top-up (needsGiftTopUp) : uniquement le delta Kado non provisionné.
+       Le bypass super_admin ne s'applique pas ici : le cadeau doit être
+       réellement provisionné (Transaction.adminId required).
        ------------------------------------------------------------------- */
-    if (isEnvelope && !existing.isPaid) {
+    if (requiresEscrow) {
       if (!req.admin?.id) {
         return res.status(401).json({
-          error: 'Connexion requise pour publier une carte enveloppe.',
+          error: 'Connexion requise pour publier une carte avec cadeau.',
           code:  'AUTH_REQUIRED',
         });
       }
 
-      const gift = existing.data?.gift || {};
-      const giftFcfa = (gift.enabled && gift.currency === 'XOF' && Number(gift.amount) > 0)
-        ? Math.floor(Number(gift.amount))
-        : 0;
-      const envelopePrice = 1500 + giftFcfa;
+      const envelopePrice = needsFirstEscrow ? (1500 + giftFcfa) : owedGiftFcfa;
 
       if (!feexpayReference) {
         return res.status(402).json({
-          error: `Paiement requis : ${envelopePrice} FCFA.`,
+          error: needsGiftTopUp
+            ? `Paiement requis pour le nouveau cadeau : ${envelopePrice} FCFA.`
+            : `Paiement requis : ${envelopePrice} FCFA.`,
           code:  'PAYMENT_REQUIRED',
           creditsRequired: 0,
           priceFCFA: envelopePrice,
+          topUp: needsGiftTopUp,
         });
       }
 
@@ -401,8 +435,10 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
        - Mur : dépend du plan choisi (0 / 5 / 20 crédits).
        - Carte legacy (non-mur, pas encore payée) : template.creditsRequired × 500 FCFA.
        - Free / carte déjà payée : 0.
+       Bypass si `requiresEscrow` : le paiement Kado FeexPay a déjà été validé
+       plus haut, on ne facture pas de crédits en plus.
        ------------------------------------------------------------------- */
-    if (!isEnvelope && req.admin?.role === 'merchant') {
+    if (!requiresEscrow && req.admin?.role === 'merchant') {
       if (isWallTemplate) {
         const plan = WALL_PLAN_PRICES[finalPlanType] || WALL_PLAN_PRICES.free;
         creditsReq = plan.credits;
@@ -476,9 +512,21 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       }
     }
 
-    const updateFields = { published: true, publishedAt: Date.now() };
-    if (creditsReq > 0 || (isEnvelope && priceFCFA > 0) || finalPlanType !== 'free') {
+    /* Sur un top-up (carte déjà en ligne), on ne réécrit pas publishedAt pour
+       ne pas fausser les tris "récemment publié". Sur first-publish, on marque
+       tout : published + publishedAt + isPaid + paidGiftFcfa. */
+    const updateFields = {};
+    if (!existing.published) {
+      updateFields.published   = true;
+      updateFields.publishedAt = Date.now();
+    }
+    if (creditsReq > 0 || (needsFirstEscrow && priceFCFA > 0) || finalPlanType !== 'free') {
       updateFields.isPaid = true;
+    }
+    if (requiresEscrow) {
+      // Après un escrow FeexPay réussi (first ou top-up), le montant provisionné
+      // est aligné sur le gift courant.
+      updateFields.paidGiftFcfa = giftFcfa;
     }
     if (isWallTemplate) {
       updateFields.planType = finalPlanType;

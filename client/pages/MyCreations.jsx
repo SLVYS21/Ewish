@@ -1,12 +1,39 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Edit2, Copy, Trash2, Share2, MoreHorizontal, X, Gift, Inbox } from 'lucide-react';
+import { Search, Plus, Edit2, Copy, Trash2, Share2, MoreHorizontal, X, Gift, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
 import { WallActivityPreview } from '../components/WallPreviews';
+import { TemplateIllustration, hasTemplateIllustration } from '../create-flow/templateIllustrations';
 import {
   getPublications, deletePublication, duplicatePublication, unpublishPublication,
   getTemplates,
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
+
+const PAGE_SIZE = 10;
+
+/* Les WallActivityPreview* sont dessinees en pixels absolus pour un canvas
+   ~200-240px (voir Dashboard.recentThumb=220). Sur crea-thumb (~100px), les
+   post-its 52px + paddings 20px debordaient et rendaient la preview illisible.
+   On rend a taille de reference puis on scale-down pour un aspect complet. */
+const WALL_THUMB_REF_PX = 240;
+
+function ScaledWallPreview({ pub, sizePx }) {
+  const scale = sizePx / WALL_THUMB_REF_PX;
+  return (
+    <div style={{
+      position: 'relative', width: sizePx, height: sizePx,
+      borderRadius: 'inherit', overflow: 'hidden',
+    }}>
+      <div style={{
+        position: 'absolute', top: 0, left: 0,
+        width: WALL_THUMB_REF_PX, height: WALL_THUMB_REF_PX,
+        transform: `scale(${scale})`, transformOrigin: '0 0',
+      }}>
+        <WallActivityPreview pub={pub} style={{ width: '100%', height: '100%' }} />
+      </div>
+    </div>
+  );
+}
 
 const TEMPLATE_COLORS = {
   birthday:               'linear-gradient(135deg,#FFB3C1,#FF8DAA)',
@@ -56,6 +83,8 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
   const thumbBg = pub.thumbnail
     ? `url(${pub.thumbnail}) center/cover no-repeat`
     : fallbackBg;
+  /* SVG dédié comme fallback quand pub.thumbnail est absent. */
+  const showTemplateIllu = !isWall && !pub.thumbnail && hasTemplateIllustration(pub.templateName);
 
   const isDraft = !pub.published;
   const isReceived = mode === 'received';
@@ -82,13 +111,23 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
   return (
     <div className="crea-row" onClick={() => navigate(editPath)}>
 
-      {/* Thumbnail */}
+      {/* Thumbnail - plus grande + preview mur non tronquee */}
       {isWall ? (
-        <div className="crea-thumb">
-          <WallActivityPreview pub={pub} style={{ width: '100%', height: '100%' }} />
+        <div className="crea-thumb crea-thumb-lg">
+          <ScaledWallPreview pub={pub} sizePx={104} />
         </div>
       ) : (
-        <div className="crea-thumb" style={{ background: thumbBg }} />
+        <div className="crea-thumb crea-thumb-lg" style={{ background: thumbBg, position: 'relative', overflow: 'hidden' }}>
+          {showTemplateIllu && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '10%',
+            }}>
+              <TemplateIllustration name={pub.templateName} />
+            </div>
+          )}
+        </div>
       )}
 
       {/* Main: 4 stacked rows */}
@@ -198,11 +237,17 @@ export default function MyCreations() {
   const [templates, setTemplates] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [search,    setSearch]    = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [type,      setType]      = useState('all');
   const [tplFilter, setTplFilter] = useState('all');
   /* Étape 8 flow murs  tab "reçues" pour voir les murs offerts. */
   const [tab,       setTab]       = useState('mine'); // 'mine' | 'received'
   const [receivedCount, setReceivedCount] = useState(0);
+  /* Pagination server-side. Total vient du header X-Total-Count. Toute
+     modification de filtre (search/type/tpl/tab) reset la page a 1. */
+  const [page,       setPage]       = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const [dupModal,   setDupModal]   = useState(null);
   const [dupTitle,   setDupTitle]   = useState('');
@@ -212,25 +257,47 @@ export default function MyCreations() {
   const fetchPubs = useCallback(async () => {
     setLoading(true);
     try {
-      const params = tab === 'received'
-        ? { received: 'true', limit: 80 }
-        : { mine: 'true', limit: 80 };
+      const params = { limit: PAGE_SIZE, page };
+      if (tab === 'received') params.received = 'true';
+      else params.mine = 'true';
+      if (search.trim())        params.search       = search.trim();
+      if (type !== 'all')       params.type         = type;
+      if (tplFilter !== 'all')  params.templateName = tplFilter;
       const res = await getPublications(params);
       setPubs(res.data || []);
+      const raw = res.headers?.['x-total-count'] ?? res.headers?.['X-Total-Count'];
+      const n = parseInt(raw ?? '0', 10);
+      setTotalCount(Number.isFinite(n) ? n : 0);
     } catch (_) {}
     setLoading(false);
-  }, [tab]);
+  }, [tab, page, search, type, tplFilter]);
 
   useEffect(() => { fetchPubs(); }, [fetchPubs]);
+
+  /* Debounce du champ recherche (300ms). Isole la frappe du fetch pour ne
+     pas spammer le serveur ni faire clignoter la liste a chaque touche. */
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(id);
+  }, [searchInput]);
   useEffect(() => {
     getTemplates().then(r => setTemplates(r.data || [])).catch(() => {});
   }, []);
 
   /* Compteur des créations reçues  affiché sur l'onglet même quand
-     l'utilisateur est sur "Mes créations". Refresh à chaque activation. */
+     l'utilisateur est sur "Mes créations". Refresh à chaque activation.
+     On lit X-Total-Count au lieu de (data.length) pour avoir le vrai total
+     (data etait borne a limit=1 donc plafonnait a 1). */
   useEffect(() => {
     getPublications({ received: 'true', limit: 1 })
-      .then(r => setReceivedCount((r.data || []).length))
+      .then(r => {
+        const raw = r.headers?.['x-total-count'] ?? r.headers?.['X-Total-Count'];
+        const n = parseInt(raw ?? '0', 10);
+        setReceivedCount(Number.isFinite(n) && n >= 0 ? n : (r.data || []).length);
+      })
       .catch(() => {});
   }, [tab]);
 
@@ -245,6 +312,12 @@ export default function MyCreations() {
     if (!confirm('Supprimer cette création définitivement ?')) return;
     await deletePublication(id);
     setPubs(p => p.filter(x => x._id !== id));
+    setTotalCount(n => Math.max(0, n - 1));
+    /* Ajustement de page :
+       - page vide apres suppression + on n'est pas en page 1 -> remonter d'une page (fetch auto)
+       - sinon, refetch pour "combler" avec l'element suivant de la BDD */
+    if (pubs.length === 1 && page > 1) setPage(p => p - 1);
+    else fetchPubs();
   };
 
   const openDup = (pub) => {
@@ -267,19 +340,28 @@ export default function MyCreations() {
     finally { setDupLoading(false); }
   };
 
-  const filtered = pubs.filter(pub => {
-    if (type === 'wish' && WALL_TEMPLATES.has(pub.templateName)) return false;
-    if (type === 'wall' && !WALL_TEMPLATES.has(pub.templateName)) return false;
-    if (tplFilter !== 'all' && pub.templateName !== tplFilter) return false;
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      return [pub.title, pub.customName, pub.shortCode].some(s => (s || '').toLowerCase().includes(q));
-    }
-    return true;
-  });
+  /* Le filtrage (search/type/tpl) est cote serveur maintenant : `pubs` contient
+     deja exactement ce qu'il faut afficher pour la page courante. */
 
   const wishTemplates = templates.filter(t => !WALL_TEMPLATES.has(t.name));
   const wallTemplates = templates.filter(t =>  WALL_TEMPLATES.has(t.name));
+
+  /* Genere une liste compacte de pages a afficher (avec ellipsis) pour la pagination.
+     Exemples : total=3 -> [1,2,3] | total=10 current=5 -> [1,'…',4,5,6,'…',10]. */
+  const pageItems = (() => {
+    const items = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) items.push(i);
+      return items;
+    }
+    const add = (v) => items.push(v);
+    add(1);
+    if (page > 3) add('…');
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) add(i);
+    if (page < totalPages - 2) add('…');
+    add(totalPages);
+    return items;
+  })();
 
   return (
     <div className="page">
@@ -347,7 +429,7 @@ export default function MyCreations() {
       }}>
         <button
           type="button"
-          onClick={() => setTab('mine')}
+          onClick={() => { setTab('mine'); setPage(1); }}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
             padding: '9px 16px', borderRadius: 9, border: 'none',
@@ -362,7 +444,7 @@ export default function MyCreations() {
         </button>
         <button
           type="button"
-          onClick={() => setTab('received')}
+          onClick={() => { setTab('received'); setPage(1); }}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
             padding: '9px 16px', borderRadius: 9, border: 'none',
@@ -395,8 +477,8 @@ export default function MyCreations() {
           <input
             className="mk-input"
             placeholder="Rechercher par nom, lien ou code court…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
           />
         </div>
 
@@ -406,7 +488,7 @@ export default function MyCreations() {
             { value: 'wish', label: 'Cartes' },
             { value: 'wall', label: 'Murs' },
           ].map(o => (
-            <button key={o.value} className={type === o.value ? 'on' : ''} onClick={() => setType(o.value)}>
+            <button key={o.value} className={type === o.value ? 'on' : ''} onClick={() => { setType(o.value); setPage(1); }}>
               {o.label}
             </button>
           ))}
@@ -416,7 +498,7 @@ export default function MyCreations() {
           className="mk-select"
           style={{ minWidth: 170 }}
           value={tplFilter}
-          onChange={e => setTplFilter(e.target.value)}
+          onChange={e => { setTplFilter(e.target.value); setPage(1); }}
         >
           <option value="all">Tous les templates</option>
           {wishTemplates.length > 0 && (
@@ -441,7 +523,7 @@ export default function MyCreations() {
             animation: 'mk-spin .75s linear infinite', margin: '0 auto',
           }} />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : pubs.length === 0 ? (
         <div className="empty-state">
           <div className="e-title">
             {tab === 'received' ? 'Aucun cadeau pour le moment' : 'Rien par ici'}
@@ -455,18 +537,65 @@ export default function MyCreations() {
           </p>
         </div>
       ) : (
-        <div className="crea-list">
-          {filtered.map(pub => (
-            <CreationRow
-              key={pub._id}
-              pub={pub}
-              tplLabel={tplMap[pub.templateName] || pub.templateName}
-              onDelete={handleDelete}
-              onDup={openDup}
-              mode={tab}
-            />
-          ))}
-        </div>
+        <>
+          <div className="crea-list">
+            {pubs.map(pub => (
+              <CreationRow
+                key={pub._id}
+                pub={pub}
+                tplLabel={tplMap[pub.templateName] || pub.templateName}
+                onDelete={handleDelete}
+                onDup={openDup}
+                mode={tab}
+              />
+            ))}
+          </div>
+
+          {/* Pagination : cachee si tout tient sur une page */}
+          {totalPages > 1 && (
+            <nav className="crea-pagination" aria-label="Pagination des créations">
+              <span className="crea-pagination-info">
+                {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, totalCount)} sur {totalCount}
+              </span>
+              <div className="crea-pagination-controls">
+                <button
+                  type="button"
+                  className="crea-page-btn"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || loading}
+                  aria-label="Page précédente"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                {pageItems.map((it, i) => (
+                  it === '…'
+                    ? <span key={`e-${i}`} className="crea-page-ellipsis">…</span>
+                    : (
+                      <button
+                        key={it}
+                        type="button"
+                        className={`crea-page-btn ${it === page ? 'on' : ''}`}
+                        onClick={() => setPage(it)}
+                        disabled={loading}
+                        aria-current={it === page ? 'page' : undefined}
+                      >
+                        {it}
+                      </button>
+                    )
+                ))}
+                <button
+                  type="button"
+                  className="crea-page-btn"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages || loading}
+                  aria-label="Page suivante"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );

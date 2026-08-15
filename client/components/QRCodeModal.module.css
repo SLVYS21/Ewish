@@ -99,7 +99,7 @@
 }
 .checkbox input { accent-color: var(--brand); width: 16px; height: 16px; cursor: pointer; }
 
-/* Checkerboard BG */
+/* Checkerboard BG (indique la transparence de l'export) */
 .previewBg {
   background-image:
     linear-gradient(45deg, rgba(128,128,128,0.15) 25%, transparent 25%),
@@ -113,6 +113,55 @@
   min-height: 280px;
   overflow: hidden;
   border: 1px solid var(--border);
+  transition: min-height .35s cubic-bezier(.4,0,.2,1);
+}
+/* Mode bare : le checkerboard reste (indique la transparence) mais on
+   réduit l'emprise visuelle pour focus sur la forme QR. */
+.previewBgBare {
+  min-height: 240px;
+}
+
+/* Toggle Avec/Sans arrière-plan — pilule 2 options avec indicateur glissant. */
+.bareToggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  overflow: hidden;
+}
+.bareOpt {
+  position: relative;
+  z-index: 2;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color .25s ease;
+  white-space: nowrap;
+}
+.bareOptActive {
+  color: var(--brand);
+}
+.bareIndicator {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px -2px rgba(0,0,0,.12);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
 }
 
 .captureArea {

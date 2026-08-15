@@ -5,6 +5,7 @@ import Pricing    from './components/Pricing';
 import FinalCTA   from './components/FinalCTA';
 import Footer     from './components/Footer';
 import Inspirations from './components/Inspirations';
+import QrStories   from './components/QrStories';
 
 const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
 
@@ -13,9 +14,9 @@ export default function App() {
     if (typeof target === 'string' && target.startsWith('/')) {
       window.location.href = `${APP_URL}${target}`;
     } else if (typeof target === 'string' && target.trim()) {
-      window.location.href = `${APP_URL}/ewish-admin/ewish/new?name=${encodeURIComponent(target.trim())}`;
+      window.location.href = `${APP_URL}/create?name=${encodeURIComponent(target.trim())}`;
     } else {
-      window.location.href = `${APP_URL}/ewish-admin/ewish/new`;
+      window.location.href = `${APP_URL}/create`;
     }
   };
 
@@ -26,13 +27,14 @@ export default function App() {
   return (
     <>
       <a href="#main" className="sr-only">Aller au contenu</a>
-      <Navbar onCreate={() => handleCreate('/ewish-admin/ewish/new')} onLogin={handleLogin} />
+      <Navbar onCreate={() => handleCreate('/create')} onLogin={handleLogin} />
       <main id="main">
-        <Hero       onCreate={() => handleCreate('/ewish-admin/ewish/new')} />
+        <Hero       onCreate={() => handleCreate('/create')} />
         <Inspirations onStartCreate={handleCreate} />
-        <HowItWorks onCreate={() => handleCreate('/ewish-admin/ewish/new')} />
-        <Pricing    onCreate={() => handleCreate('/ewish-admin/ewish/new')} />
-        <FinalCTA   onOrder={(name) => handleCreate(name ? `/ewish-admin/ewish/new?name=${encodeURIComponent(name)}` : '/ewish-admin/ewish/new')} />
+        <QrStories />
+        <HowItWorks onCreate={() => handleCreate('/create')} />
+        <Pricing    onCreate={() => handleCreate('/create')} />
+        <FinalCTA   onOrder={(name) => handleCreate(name ? `/create?name=${encodeURIComponent(name)}` : '/create')} />
       </main>
       <Footer />
     </>

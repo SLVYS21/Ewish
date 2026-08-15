@@ -233,26 +233,65 @@ function QrSvg({ url, shape, color }) {
 }
 
 /* ─── Branded QR card ─── */
-function QrCard({ pub, shortCode, shareUrl, shape, color, branded }) {
+function QrCard({ pub, shortCode, shareUrl, shape, color, branded, bareMode }) {
   /* Affiche l'URL réelle (celle du QR) plutôt qu'un domaine hardcodé, pour
      que la carte imprimée soit cohérente avec le lien scanné. */
   const displayUrl = shareUrl
     ? shareUrl.replace(/^https?:\/\//, '')
     : (import.meta.env.VITE_API_URL || 'mykado.store').replace(/^https?:\/\//, '');
+  /* bareMode : on masque le titre, l'URL, le brand et on rend le fond
+     transparent. Transitions douces sur les enfants qui apparaissent /
+     disparaissent (opacity + max-height + margin). */
   return (
-    <div className="card qr-card" id="mk-qr-card" style={{ background: color.bg, border: '1px solid rgba(0,0,0,.06)', padding: '20px 18px', gap: 14, alignItems: 'center', textAlign: 'center' }}>
-      <div>
+    <div
+      className="card qr-card"
+      id="mk-qr-card"
+      style={{
+        background: bareMode ? 'transparent' : color.bg,
+        border: bareMode ? 'none' : '1px solid rgba(0,0,0,.06)',
+        boxShadow: bareMode ? 'none' : undefined,
+        padding: bareMode ? '0' : '20px 18px',
+        gap: bareMode ? 0 : 14,
+        alignItems: 'center',
+        textAlign: 'center',
+        transition:
+          'background .35s cubic-bezier(.4,0,.2,1),' +
+          ' padding .35s cubic-bezier(.4,0,.2,1),' +
+          ' gap .35s cubic-bezier(.4,0,.2,1),' +
+          ' border-color .3s ease,' +
+          ' box-shadow .3s ease',
+      }}
+    >
+      <div style={{
+        opacity: bareMode ? 0 : 1,
+        maxHeight: bareMode ? 0 : 60,
+        overflow: 'hidden',
+        transition: 'opacity .25s ease, max-height .35s cubic-bezier(.4,0,.2,1)',
+      }}>
         <div style={{ fontFamily: 'var(--mk-hand)', fontSize: 19, color: color.fg, opacity: .85 }}>Scanne-moi</div>
         <div style={{ fontFamily: 'var(--mk-display)', fontSize: 20, color: color.fg, fontStyle: 'italic' }}>{pub?.title || 'myKado'}</div>
       </div>
       <div className="qr-frame">
         <QrSvg url={shareUrl || 'https://mykado.store'} shape={shape} color={color} />
       </div>
-      <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 700, color: color.fg, opacity: .85, letterSpacing: '.04em' }}>
+      <div style={{
+        fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 700,
+        color: color.fg, opacity: bareMode ? 0 : .85, letterSpacing: '.04em',
+        maxHeight: bareMode ? 0 : 22,
+        overflow: 'hidden',
+        transition: 'opacity .25s ease, max-height .35s cubic-bezier(.4,0,.2,1)',
+      }}>
         {displayUrl}
       </div>
       {branded && (
-        <div style={{ fontSize: 10, fontWeight: 700, color: color.fg, opacity: .55, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+        <div style={{
+          fontSize: 10, fontWeight: 700, color: color.fg,
+          opacity: bareMode ? 0 : .55,
+          letterSpacing: '.08em', textTransform: 'uppercase',
+          maxHeight: bareMode ? 0 : 20,
+          overflow: 'hidden',
+          transition: 'opacity .25s ease, max-height .35s cubic-bezier(.4,0,.2,1)',
+        }}>
           Propulsé par myKado
         </div>
       )}
@@ -736,6 +775,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
   const [shape,      setShape]      = useState('rounded');
   const [colorId,    setColorId]    = useState('rose');
   const [branded,    setBranded]    = useState(true);
+  const [bareMode,   setBareMode]   = useState(false); // true = QR seul (sans carte/texte/brand)
   const [customizing,setCustomizing]= useState(false);
   const [copied,     setCopied]     = useState(false);
   const [toast,      setToast]      = useState('');
@@ -867,6 +907,36 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
     try {
       const node = document.getElementById('mk-qr-card');
       const svgEl = node?.querySelector('svg');
+
+      /* Mode "QR seul" : on exporte juste le SVG QR dans un PNG carré
+         transparent, à la forme choisie. Aucun texte, aucun fond. */
+      if (bareMode) {
+        const SIZE = 720;
+        const canvas = document.createElement('canvas');
+        canvas.width = SIZE; canvas.height = SIZE;
+        const ctx = canvas.getContext('2d');
+        /* Fond transparent : on ne dessine rien */
+        if (svgEl) {
+          const svgStr = new XMLSerializer().serializeToString(svgEl);
+          const img = new Image();
+          await new Promise(res => {
+            img.onload = res;
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+          });
+          ctx.drawImage(img, 0, 0, SIZE, SIZE);
+        }
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `qr-${pub?.customName || 'mykado'}-seul.png`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        });
+        showToast('QR seul téléchargé');
+        return;
+      }
+
+      /* Mode complet : carte avec titre, URL et brand optionnel. */
       const W = 720, H = 880;
       const canvas = document.createElement('canvas');
       canvas.width = W; canvas.height = H;
@@ -914,7 +984,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
       });
       showToast('Image PNG téléchargée');
     } finally { setDownloading(false); }
-  }, [activeShareUrl, color, branded, pub, shortCode]);
+  }, [activeShareUrl, color, branded, bareMode, pub, shortCode]);
 
   const siteUrl = pub
     ? `${import.meta.env.VITE_API_URL || ''}/site/${pub.templateName}/${pub.customName}`
@@ -992,10 +1062,82 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
             shape={shape}
             color={color}
             branded={branded}
+            bareMode={bareMode}
           />
 
+          {/* Toggle Avec carte / QR seul — pilule glissante, transition douce. */}
+          <div
+            role="group"
+            aria-label="Mode d'export"
+            style={{
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              background: 'var(--mk-line, #F4E8EC)',
+              border: '1px solid var(--mk-line-2, #EAD6DE)',
+              borderRadius: 12,
+              padding: 4,
+              gap: 4,
+              overflow: 'hidden',
+              marginTop: 4,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setBareMode(false)}
+              aria-pressed={!bareMode}
+              style={{
+                position: 'relative', zIndex: 2,
+                padding: '9px 12px', border: 'none', background: 'transparent',
+                color: !bareMode ? 'var(--mk-rose, #FF5470)' : 'var(--mk-ink-2, #5D5474)',
+                fontSize: 12.5, fontWeight: 700, borderRadius: 8,
+                cursor: 'pointer', transition: 'color .25s ease', whiteSpace: 'nowrap',
+              }}
+            >
+              Avec carte
+            </button>
+            <button
+              type="button"
+              onClick={() => setBareMode(true)}
+              aria-pressed={bareMode}
+              style={{
+                position: 'relative', zIndex: 2,
+                padding: '9px 12px', border: 'none', background: 'transparent',
+                color: bareMode ? 'var(--mk-rose, #FF5470)' : 'var(--mk-ink-2, #5D5474)',
+                fontSize: 12.5, fontWeight: 700, borderRadius: 8,
+                cursor: 'pointer', transition: 'color .25s ease', whiteSpace: 'nowrap',
+              }}
+            >
+              QR seul
+            </button>
+            <span
+              aria-hidden
+              style={{
+                position: 'absolute', zIndex: 1,
+                top: 4, left: 4,
+                width: 'calc(50% - 4px)', height: 'calc(100% - 8px)',
+                background: '#FFFFFF', borderRadius: 8,
+                boxShadow: '0 2px 8px -2px rgba(0,0,0,.12)',
+                transform: bareMode ? 'translateX(100%)' : 'translateX(0)',
+                transition: 'transform .3s cubic-bezier(.4,0,.2,1)',
+                willChange: 'transform',
+              }}
+            />
+          </div>
+
           <div className="share-dl-row">
-            <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setCustomizing(true)}>
+            <button
+              className="btn btn-ghost"
+              style={{
+                flex: 1,
+                opacity: bareMode ? .45 : 1,
+                pointerEvents: bareMode ? 'none' : 'auto',
+                transition: 'opacity .25s ease',
+              }}
+              onClick={() => setCustomizing(true)}
+              disabled={bareMode}
+              title={bareMode ? 'Désactivé en mode QR seul' : ''}
+            >
               <Palette size={15} /> Personnaliser
             </button>
             <button
@@ -1008,15 +1150,25 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
             </button>
           </div>
 
+          {/* Le checkbox brand n'a de sens qu'en mode "Avec carte" — on l'anime. */}
           <label style={{
             display: 'flex', alignItems: 'center', gap: 9,
             fontSize: 12, color: 'var(--mk-ink-2)', fontWeight: 600,
-            cursor: 'pointer', userSelect: 'none', marginTop: 8,
+            cursor: bareMode ? 'default' : 'pointer', userSelect: 'none',
+            marginTop: bareMode ? 0 : 8,
+            maxHeight: bareMode ? 0 : 40,
+            opacity: bareMode ? 0 : 1,
+            overflow: 'hidden',
+            transition:
+              'opacity .25s ease,' +
+              ' max-height .3s cubic-bezier(.4,0,.2,1),' +
+              ' margin-top .3s cubic-bezier(.4,0,.2,1)',
           }}>
             <input
               type="checkbox"
               checked={branded}
               onChange={e => setBranded(e.target.checked)}
+              disabled={bareMode}
               style={{ accentColor: 'var(--mk-accent)', width: 15, height: 15 }}
             />
             Afficher « Propulsé par myKado » sur l'image

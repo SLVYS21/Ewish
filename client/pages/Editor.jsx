@@ -24,7 +24,13 @@ import {
 import KycModal from '../components/KycModal';
 import MSheet from '../components/MSheet';
 import { ShareView } from './SharePage';
+import { CURRENCIES, findCurrency, formatAmount } from '../card-editor/data/currencies';
 import styles from './Editor.module.css';
+
+/* Prix plancher d'une carte publiée (aligné card-editor / server publication.js
+   pour myenvelope). Utilisé pour afficher le breakdown dans la modal de paiement
+   avant que le serveur ne renvoie sa 402. */
+const CARD_PUBLISH_FEE_FCFA = 1500;
 
 /* ─── Guided steps ────────────────────────────────────────────── */
 const STEPS = [
@@ -176,17 +182,272 @@ function BrandingTab({ show, url, text, onToggle, onUrlChange, onTextChange }) {
   );
 }
 
-/* ─── AccordionCard (extras step) ────────────────────────────── */
-function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen);
+/* KadoExtras: version simplifiee du KadoStep du card-editor, packagee pour
+   vivre dans un AccordionCard des extras. Persiste sous data.gift via onChange.
+   La revelation visuelle (carte a gratter doree) est rendue cote visiteur
+   par ww-engine.js via window.__WW_DATA__.gift.
+   Post-publication : si le gift a ete augmente depuis le dernier paiement
+   (paidGiftFcfa), on affiche un CTA "Payer X FCFA" qui declenche onPayTopUp
+   (handlePublish) : le serveur repond 402 avec le delta et le front ouvre
+   FeexPay pour cette portion seulement. */
+function KadoExtras({ gift, onChange, recipientName, paidGiftFcfa = 0, isPublished = false, onPayTopUp, publishing = false }) {
+  const cfg = findCurrency(gift.currency);
+  const amount = Number(gift.amount) || 0;
+  const canEnable = amount >= (cfg?.min || 0);
+  const label = ['Symbolique', 'Sympathique', 'Généreux', 'Grand jour', 'Wow'];
+  const recipient = (recipientName || '').trim() || 'ton proche';
+  const currentXof = (gift.enabled && gift.currency === 'XOF') ? Math.floor(amount) : 0;
+  const owedFcfa   = Math.max(0, currentXof - Number(paidGiftFcfa || 0));
+  const showTopUp  = isPublished && owedFcfa > 0;
+
   return (
-    <div className={styles.extraCard} style={{ borderColor: open ? color + '50' : undefined }}>
+    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Hero interne : donne du poids au Kado pour ne pas passer inapercu. */}
+      <div style={{
+        display: 'flex', gap: 12, alignItems: 'center',
+        background: 'linear-gradient(135deg, rgba(247,222,132,0.22) 0%, rgba(201,168,76,0.15) 100%)',
+        border: '1px solid rgba(201,168,76,0.35)',
+        borderRadius: 14, padding: '12px 14px',
+      }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+          background: 'radial-gradient(circle at 30% 30%, #F7DE84 0%, #E0B94A 55%, #B58A2A 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: 'inset 0 -3px 6px rgba(0,0,0,.15), 0 4px 12px rgba(184,139,42,.35)',
+          fontSize: 22,
+        }}>🎁</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', letterSpacing: '.01em' }}>
+            Le petit geste qui rend la carte inoubliable
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--text-2)', marginTop: 3, lineHeight: 1.4 }}>
+            {recipient} grattera une carte dorée pour révéler ton montant. Effet garanti.
+          </div>
+        </div>
+      </div>
+
+      {/* Top-up CTA : la carte est deja en ligne mais le nouveau montant Kado
+         n'a pas encore ete provisionne cote FeexPay. */}
+      {showTopUp && (
+        <div style={{
+          background: 'linear-gradient(135deg, #FFF7DE 0%, #FDE7A5 100%)',
+          border: '1.5px solid #C29A3E',
+          borderRadius: 14, padding: '14px 16px',
+          display: 'flex', flexDirection: 'column', gap: 10,
+          boxShadow: '0 6px 20px rgba(184,139,42,.18)',
+        }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <Sparkles size={20} style={{ color: '#B58A2A', flexShrink: 0, marginTop: 2 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#5A4318' }}>
+                {paidGiftFcfa > 0 ? 'Nouveau montant à provisionner' : 'Cadeau à provisionner'}
+              </div>
+              <div style={{ fontSize: 12, color: '#7A5C24', marginTop: 3, lineHeight: 1.45 }}>
+                Ta carte est déjà en ligne. Pour que {recipient} découvre&nbsp;
+                <strong>{formatAmount(currentXof, 'XOF')}</strong>, il faut provisionner&nbsp;
+                <strong>{owedFcfa.toLocaleString('fr-FR')} FCFA</strong>
+                {paidGiftFcfa > 0 && <> supplémentaire (déjà provisionné&nbsp;: {paidGiftFcfa.toLocaleString('fr-FR')} FCFA)</>}.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onPayTopUp}
+            disabled={publishing}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              padding: '12px 16px', borderRadius: 12,
+              background: 'linear-gradient(135deg, #E0B94A 0%, #B58A2A 100%)',
+              border: 'none', color: '#fff', fontSize: 14, fontWeight: 800,
+              cursor: publishing ? 'wait' : 'pointer',
+              boxShadow: '0 4px 14px rgba(184,139,42,.4)',
+              opacity: publishing ? 0.7 : 1,
+            }}
+          >
+            {publishing
+              ? <>Chargement…</>
+              : <><Sparkles size={16} /> Payer {owedFcfa.toLocaleString('fr-FR')} FCFA maintenant</>}
+          </button>
+        </div>
+      )}
+
+      {/* Indicateur "déjà provisionné" quand tout est réglé */}
+      {isPublished && paidGiftFcfa > 0 && owedFcfa === 0 && gift.enabled && (
+        <div style={{
+          display: 'flex', gap: 8, alignItems: 'center',
+          background: 'rgba(62,207,142,0.10)', border: '1px solid rgba(62,207,142,0.35)',
+          borderRadius: 10, padding: '8px 12px', fontSize: 12, color: 'var(--text-2)',
+        }}>
+          <Check size={14} style={{ color: '#3ecf8e', flexShrink: 0 }} />
+          <span>Cadeau provisionné&nbsp;: <strong>{paidGiftFcfa.toLocaleString('fr-FR')} FCFA</strong></span>
+        </div>
+      )}
+
+      {/* On/Off */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <button
+          type="button"
+          onClick={() => onChange({ enabled: false })}
+          style={{
+            padding: '12px 14px', borderRadius: 12,
+            border: !gift.enabled ? '1.5px solid #c9a84c' : '1px solid var(--border)',
+            background: !gift.enabled ? 'rgba(201,168,76,0.10)' : 'var(--surface2)',
+            color: 'var(--text)', cursor: 'pointer', textAlign: 'left',
+            fontSize: 13, fontWeight: 600, display: 'flex', flexDirection: 'column', gap: 2,
+          }}
+        >
+          <span>Sans cadeau</span>
+          <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>Juste la carte</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange({ enabled: true })}
+          style={{
+            padding: '12px 14px', borderRadius: 12,
+            border: gift.enabled ? '1.5px solid #c9a84c' : '1px solid var(--border)',
+            background: gift.enabled ? 'rgba(201,168,76,0.12)' : 'var(--surface2)',
+            color: 'var(--text)', cursor: 'pointer', textAlign: 'left',
+            fontSize: 13, fontWeight: 600, display: 'flex', flexDirection: 'column', gap: 2,
+            position: 'relative',
+          }}
+        >
+          <span>Avec surprise</span>
+          <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>Argent à gratter</span>
+          <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 9, fontWeight: 800, color: '#c9a84c', background: 'rgba(201,168,76,0.15)', padding: '2px 6px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: '.05em' }}>
+            Recommandé
+          </span>
+        </button>
+      </div>
+
+      {gift.enabled && (
+        <>
+          {/* Devise */}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text-3)', marginBottom: 8 }}>
+              Devise
+            </label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {CURRENCIES.map(c => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => onChange({ currency: c.key })}
+                  style={{
+                    padding: '8px 14px', borderRadius: 999,
+                    border: gift.currency === c.key ? '1.5px solid #c9a84c' : '1px solid var(--border)',
+                    background: gift.currency === c.key ? 'rgba(201,168,76,0.12)' : 'var(--surface2)',
+                    color: 'var(--text)', cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  <span style={{ color: '#c9a84c', fontWeight: 800 }}>{c.symbol}</span>
+                  <span>{c.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Montant */}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text-3)', marginBottom: 8 }}>
+              Montant
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
+              <input
+                type="number"
+                value={gift.amount || ''}
+                onChange={e => onChange({ amount: Number(e.target.value) || 0 })}
+                step={cfg?.step}
+                min={0}
+                max={cfg?.max}
+                placeholder="0"
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--text)', fontSize: 18, fontWeight: 700 }}
+              />
+              <span style={{ color: '#c9a84c', fontWeight: 800, fontSize: 16 }}>{cfg?.symbol}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: 6, marginTop: 8 }}>
+              {(cfg?.presets || []).map((p, i) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => onChange({ amount: p })}
+                  style={{
+                    padding: '8px 6px', borderRadius: 10,
+                    border: gift.amount === p ? '1.5px solid #c9a84c' : '1px solid var(--border)',
+                    background: gift.amount === p ? 'rgba(201,168,76,0.10)' : 'var(--surface2)',
+                    color: 'var(--text)', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                  }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>{formatAmount(p, gift.currency)}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-3)' }}>{label[i]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Petit mot */}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text-3)', marginBottom: 8 }}>
+              Petit mot <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--text-3)', fontWeight: 500 }}>— sous la carte à gratter</span>
+            </label>
+            <textarea
+              rows={2}
+              value={gift.message || ''}
+              onChange={e => onChange({ message: e.target.value })}
+              placeholder="Ex : Pour te faire plaisir"
+              maxLength={140}
+              style={{ width: '100%', boxSizing: 'border-box', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', color: 'var(--text)', fontSize: 13, resize: 'vertical', outline: 'none' }}
+            />
+          </div>
+
+          {/* Confirmation */}
+          {canEnable && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'rgba(201,168,76,0.10)', border: '1px solid rgba(201,168,76,0.35)', borderRadius: 12, padding: '10px 12px' }}>
+              <Sparkles size={18} style={{ color: '#c9a84c' }} />
+              <div style={{ fontSize: 12.5, color: 'var(--text)', lineHeight: 1.4 }}>
+                <strong>{recipient}</strong> grattera cette carte pour découvrir <strong style={{ color: '#c9a84c' }}>{formatAmount(gift.amount, gift.currency)}</strong>.
+              </div>
+            </div>
+          )}
+          {amount > 0 && !canEnable && (
+            <div style={{ fontSize: 12, color: 'var(--red, #e05757)', background: 'rgba(224,87,87,0.08)', padding: '8px 10px', borderRadius: 8 }}>
+              Minimum {formatAmount(cfg?.min || 0, gift.currency)} pour attacher un cadeau.
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* AccordionCard (extras step)
+   - badge : petit chip a droite du titre (ex: "Recommande")
+   - highlight : fond legerement teinte + bordure marquee, pour sortir du lot */
+function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = false, badge, highlight = false }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const cardStyle = {
+    borderColor: highlight ? color + '80' : (open ? color + '50' : undefined),
+    borderWidth: highlight ? 1.5 : undefined,
+    background: highlight ? `linear-gradient(135deg, ${color}0f 0%, transparent 60%)` : undefined,
+    boxShadow: highlight ? `0 4px 18px ${color}22` : undefined,
+  };
+  return (
+    <div className={styles.extraCard} style={cardStyle}>
       <button className={styles.extraCardHeader} onClick={() => setOpen(o => !o)}>
         <span className={styles.extraCardIcon} style={{ background: color + '18', color }}>
           {Icon && <Icon size={16} />}
         </span>
         <div className={styles.extraCardInfo}>
-          <div className={styles.extraCardTitle}>{title}</div>
+          <div className={styles.extraCardTitle} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>{title}</span>
+            {badge && (
+              <span style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
+                color: '#fff', background: color, padding: '2px 6px', borderRadius: 999,
+              }}>{badge}</span>
+            )}
+          </div>
           <div className={styles.extraCardSub}>{sub}</div>
         </div>
         <ChevronRight size={16} className={styles.extraCardChevron} style={{ transform: open ? 'rotate(90deg)' : 'none', color }} />
@@ -652,7 +913,9 @@ export default function Editor() {
     if (id === 'draft') return; // Should not happen directly for unauthenticated drafts
     const r = await publishPublication(id, feexpayReference ? { feexpayReference } : {});
     setPublishedUrl(r.data.url);
-    setPub(p => ({ ...p, published: true, isPaid: true }));
+    /* On merge tout ce que renvoie le serveur pour que paidGiftFcfa (utile au
+       CTA top-up Kado) et publishedAt soient à jour côté client sans re-fetch. */
+    setPub(p => ({ ...p, ...r.data, published: true, isPaid: true }));
     try { const sl = await getShortLink(id); setShortCode(sl.data.shortCode); } catch {}
   };
 
@@ -697,6 +960,19 @@ export default function Editor() {
       alert(e.response?.data?.error || 'Publish failed');
       setPublishing(false);
     }
+  };
+
+  /* Gift (Kado) : configuré dans les extras du classic Editor pour les cartes
+     non-mur / non-invitation. Persistance sous data.gift pour partager le shape
+     avec le card-editor et le serveur (server/routes/publication.js). */
+  const gift = data?.gift || { enabled: false, amount: 0, currency: 'XOF', message: '' };
+  const giftCfg = findCurrency(gift.currency);
+  const giftIncluded = gift.enabled && gift.currency === 'XOF' && Number(gift.amount) >= (giftCfg?.min || 0);
+  const giftFcfa = giftIncluded ? Math.floor(Number(gift.amount)) : 0;
+  const publishPriceFcfa = CARD_PUBLISH_FEE_FCFA + giftFcfa;
+  const handleGiftChange = (patch) => {
+    const nextGift = { ...gift, ...patch };
+    handleDataChange('gift', nextGift);
   };
 
   /* visibility helpers */
@@ -1020,6 +1296,28 @@ export default function Editor() {
                   <JarTab jarConfig={jarConfig} onChange={handleJarChange} templateName={pub.templateName} />
                 </AccordionCard>
               )}
+              {/* Kado : mis en avant en tête d'extras + accordion ouvert par défaut,
+                  parce que noyé dans la liste il passait inaperçu. Le badge doré et
+                  le hero interne le vendent comme feature à part entière. */}
+              <AccordionCard
+                icon={Gift}
+                title="Kado à gratter"
+                sub="Ajoute une surprise que ton proche va gratter"
+                color="#c9a84c"
+                badge="Recommandé"
+                highlight
+                defaultOpen
+              >
+                <KadoExtras
+                  gift={gift}
+                  onChange={handleGiftChange}
+                  recipientName={data.name || data.titleName || ''}
+                  paidGiftFcfa={Number(pub?.paidGiftFcfa) || 0}
+                  isPublished={!!pub?.published}
+                  onPayTopUp={handlePublish}
+                  publishing={publishing}
+                />
+              </AccordionCard>
               <AccordionCard icon={Megaphone} title="Lien de promotion" sub="Bouton myKado discret" color="#047857">
                 <BrandingTab
                   show={showBranding} url={brandingUrl} text={brandingText}
@@ -1378,7 +1676,17 @@ export default function Editor() {
           )}
           <button
             className={`${styles.btnPublish} tour-step-publish`}
-            onClick={() => { handlePublish(); setIsPublishModalOpen(true); }}
+            onClick={() => {
+              /* Publié → on renvoie vers l'étape Partage (QR, lien, réseaux) plutôt que
+                 rouvrir la modal de publication.
+                 Pas publié → on ouvre la modal comme gate de paiement, SANS déclencher
+                 handlePublish tant que l'utilisateur n'a pas cliqué "Payer & publier". */
+              if (pub?.published) {
+                setActiveStep('Share');
+              } else {
+                setIsPublishModalOpen(true);
+              }
+            }}
           >
             {pub?.published ? 'Partager' : 'Publier'}
           </button>
@@ -1399,7 +1707,11 @@ export default function Editor() {
         </span>
       </div>
 
-      {/* ── Publish Modal ── */}
+      {/* ── Publish Modal ─────────────────────────────────────────────
+         Pré-paiement : breakdown du prix (base + Kado) + bouton "Payer & publier".
+         Le clic déclenche handlePublish qui, si le server répond 402
+         PAYMENT_REQUIRED, ouvre le checkout FeexPay. Une fois publié, on affiche
+         le lien / QR classique (utile aussi quand on rouvre depuis Share step). */}
       {isPublishModalOpen && (
         <div className={styles.publishModalOverlay} onClick={() => setIsPublishModalOpen(false)}>
           <div className={styles.publishModal} onClick={e => e.stopPropagation()}>
@@ -1413,67 +1725,113 @@ export default function Editor() {
                 ? <span className={styles.badgePublished}>● Publiée</span>
                 : <span className={styles.badgeDraft}>● Brouillon</span>}
             </div>
-            <div className={styles.publishModalSection}>
-              {publishing ? (
-                <div className={styles.publishingStatus}>
-                  <div className={styles.spinnerSmall} />
-                  <span>{pub?.published ? 'Mise à jour…' : 'Publication…'}</span>
-                </div>
-              ) : (
-                <>
-                  <div className={styles.publishLinkLabel}>Lien de publication</div>
-                  <div className={styles.publishLinkRow}>
-                    <span className={styles.publishUrlText}>
-                      {shortCode
-                        ? `${import.meta.env.VITE_API_URL}/s/${shortCode}`
-                        : <span className={styles.publishUrlPlaceholder}>Sera généré à la publication</span>}
-                    </span>
-                    {shortCode && (
-                      <button
-                        className={`${styles.copyBtn} ${linkCopied ? styles.copyBtnDone : ''}`}
-                        onClick={() => {
-                          navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL}/s/${shortCode}`);
-                          setLinkCopied(true);
-                          setTimeout(() => setLinkCopied(false), 2000);
-                        }}
-                      >
-                        {linkCopied ? <><Check size={16} /> Copié !</> : <><Copy size={16} /> Copier le lien</>}
-                      </button>
-                    )}
+
+            {!pub?.published ? (
+              <div className={styles.publishModalSection}>
+                {publishing ? (
+                  <div className={styles.publishingStatus}>
+                    <div className={styles.spinnerSmall} />
+                    <span>Publication…</span>
                   </div>
-                  {shortCode && (
-                    <div className={styles.slugSection}>
-                      <div className={styles.slugLabel}>Personnaliser l'adresse (URL)</div>
-                      <div className={styles.publishUrlBoxEdit}>
-                        <span className={styles.shortUrlPrefix}>/s/</span>
-                        <input
-                          className={styles.slugInput}
-                          value={slugDraft}
-                          onChange={e => setSlugDraft(e.target.value)}
-                          onBlur={async () => {
-                            if (slugDraft === shortCode) return;
-                            setSlugStatus('saving');
-                            try {
-                              const r = await setCustomSlug(id, slugDraft);
-                              setShortCode(r.data.shortCode);
-                              setSlugStatus('saved');
-                            } catch (err) { setSlugStatus(err.response?.data?.error || 'Erreur'); }
-                          }}
-                          onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setSlugDraft(shortCode); }}
-                          placeholder="mon-lien-custom"
-                        />
-                        {slugStatus === 'saving' && <RefreshCw size={14} className={styles.spinIcon} />}
-                        {slugStatus && slugStatus !== 'saving' && (
-                          <span className={`${styles.slugMsg} ${slugStatus === 'saved' ? styles.slugOk : styles.slugErr}`}>
-                            {slugStatus === 'saved' ? <><Check size={13} /> Sauvegardé</> : slugStatus}
-                          </span>
-                        )}
+                ) : (
+                  <>
+                    <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 14, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)' }}>
+                        <span>Publication de la carte</span>
+                        <span>{CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')} FCFA</span>
                       </div>
+                      {giftIncluded && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)' }}>
+                          <span><Gift size={12} style={{ verticalAlign: -1, marginRight: 4 }} />Cadeau à gratter</span>
+                          <span>{giftFcfa.toLocaleString('fr-FR')} FCFA</span>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 800, color: 'var(--text)', paddingTop: 8, borderTop: '1px dashed var(--border)' }}>
+                        <span>Total</span>
+                        <strong>{publishPriceFcfa.toLocaleString('fr-FR')} FCFA</strong>
+                      </div>
+                      {gift?.enabled && !giftIncluded && (
+                        <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>
+                          Paiement en FCFA — les cadeaux en {gift.currency} restent symboliques pour l'instant.
+                        </div>
+                      )}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+                    <button
+                      className={styles.modalConfirm}
+                      style={{ padding: '13px', borderRadius: 12, fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 }}
+                      onClick={handlePublish}
+                      disabled={publishing}
+                    >
+                      <Sparkles size={16} />
+                      Payer {publishPriceFcfa.toLocaleString('fr-FR')} FCFA & publier
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className={styles.publishModalSection}>
+                {publishing ? (
+                  <div className={styles.publishingStatus}>
+                    <div className={styles.spinnerSmall} />
+                    <span>Mise à jour…</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.publishLinkLabel}>Lien de publication</div>
+                    <div className={styles.publishLinkRow}>
+                      <span className={styles.publishUrlText}>
+                        {shortCode
+                          ? `${import.meta.env.VITE_API_URL}/s/${shortCode}`
+                          : <span className={styles.publishUrlPlaceholder}>Sera généré à la publication</span>}
+                      </span>
+                      {shortCode && (
+                        <button
+                          className={`${styles.copyBtn} ${linkCopied ? styles.copyBtnDone : ''}`}
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL}/s/${shortCode}`);
+                            setLinkCopied(true);
+                            setTimeout(() => setLinkCopied(false), 2000);
+                          }}
+                        >
+                          {linkCopied ? <><Check size={16} /> Copié !</> : <><Copy size={16} /> Copier le lien</>}
+                        </button>
+                      )}
+                    </div>
+                    {shortCode && (
+                      <div className={styles.slugSection}>
+                        <div className={styles.slugLabel}>Personnaliser l'adresse (URL)</div>
+                        <div className={styles.publishUrlBoxEdit}>
+                          <span className={styles.shortUrlPrefix}>/s/</span>
+                          <input
+                            className={styles.slugInput}
+                            value={slugDraft}
+                            onChange={e => setSlugDraft(e.target.value)}
+                            onBlur={async () => {
+                              if (slugDraft === shortCode) return;
+                              setSlugStatus('saving');
+                              try {
+                                const r = await setCustomSlug(id, slugDraft);
+                                setShortCode(r.data.shortCode);
+                                setSlugStatus('saved');
+                              } catch (err) { setSlugStatus(err.response?.data?.error || 'Erreur'); }
+                            }}
+                            onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setSlugDraft(shortCode); }}
+                            placeholder="mon-lien-custom"
+                          />
+                          {slugStatus === 'saving' && <RefreshCw size={14} className={styles.spinIcon} />}
+                          {slugStatus && slugStatus !== 'saving' && (
+                            <span className={`${styles.slugMsg} ${slugStatus === 'saved' ? styles.slugOk : styles.slugErr}`}>
+                              {slugStatus === 'saved' ? <><Check size={13} /> Sauvegardé</> : slugStatus}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
             <div className={styles.publishModalActions}>
               <button className={styles.modalConfirm} onClick={() => setIsPublishModalOpen(false)}>Terminer</button>
             </div>

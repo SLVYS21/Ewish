@@ -33,7 +33,7 @@ const CARDS = [
   },
   {
     tone: 'mint',
-    eyebrow: 'Naissance',
+    eyebrow: 'Baptême',
     title: 'Bienvenue',
     name: 'Kofi',
     meta: 'né le 3 mars · 3,4 kg',

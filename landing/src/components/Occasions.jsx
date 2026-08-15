@@ -50,7 +50,7 @@ const OCCASIONS = [
   {
     id: 'birth',
     tone: 'mint',
-    title: 'Naissance',
+    title: 'Baptême',
     sub: 'Annoncer un bébé avec autre chose qu\'un faire-part.',
     teaser: 'Pastel doux, illustrations rondes, vœux de toute la famille.',
     icon: (

@@ -188,7 +188,26 @@ router.get('/:templateName', async (req, res) => {
       if (!html) return res.status(404).send('<h1>Not found</h1>');
     }
 
-    const demoData  = DEMO_DATA[templateName] || {};
+    let demoData = DEMO_DATA[templateName] || {};
+    /* Wall preview : adapte les demo wishes au vrai schéma attendu par
+       WallApp.jsx (firstName/message/_id/color-as-index) et flag demoMode
+       pour que le client hydrate wishes depuis INITIAL_DATA sans faire
+       d'appel API (publicId vide). */
+    if (templateName.startsWith('wall-of-wishes') && Array.isArray(demoData.wishes)) {
+      demoData = {
+        ...demoData,
+        demoMode: true,
+        skipIntro: true,
+        wishes: demoData.wishes.map((w, i) => ({
+          _id: `demo-${w.id || i}`,
+          firstName: (w.author || 'Anonyme').split(/\s+&\s+|\s+/)[0],
+          role: '',
+          message: w.text || '',
+          color: i % 6,
+          createdAt: new Date(Date.now() - (i + 1) * 3600 * 1000).toISOString(),
+        })),
+      };
+    }
     const demoStyle = template.defaultStyle || {};
     const scale = '1';
     const fontFamily = safeFontFamily(demoStyle.fontFamily, 'Outfit');

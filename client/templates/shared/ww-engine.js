@@ -490,6 +490,233 @@
     container.appendChild(zone);
   }
 
+  /* ─── Gift (Kado) scratch card ─────────────────────────────────────
+     Injecté sur les templates HTML (birthday, notre-film, forever, sanctuary
+     et special) quand la publication a un data.gift.enabled avec un montant
+     valide. Un FAB rond en bas à droite ouvre une modal contenant une carte
+     dorée à gratter (canvas destination-out). Une fois 55% révélé, le foil
+     s'efface automatiquement et le montant reste visible. */
+  function formatGiftAmount(amount, currency) {
+    const n = Number(amount) || 0;
+    const parts = n.toLocaleString('fr-FR');
+    if (currency === 'EUR') return '€' + parts;
+    if (currency === 'USD') return '$' + parts;
+    return parts + ' FCFA';
+  }
+  function mountGift(gift) {
+    if (!gift || !gift.enabled || !gift.amount || Number(gift.amount) <= 0) return;
+    if (document.getElementById('ww-gift-fab')) return;
+
+    /* Styles injectés une fois */
+    if (!document.getElementById('ww-gift-styles')) {
+      const st = document.createElement('style');
+      st.id = 'ww-gift-styles';
+      st.textContent = `
+        #ww-gift-fab {
+          position: fixed; right: 18px; bottom: 18px; z-index: 999998;
+          width: 60px; height: 60px; border-radius: 50%; border: none;
+          background: radial-gradient(circle at 30% 30%, #F7DE84 0%, #E0B94A 55%, #B58A2A 100%);
+          box-shadow: 0 6px 20px rgba(184,139,42,.5), 0 2px 6px rgba(0,0,0,.15), inset 0 -3px 8px rgba(0,0,0,.15);
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          font-size: 28px; padding: 0;
+          animation: ww-gift-pulse 2.4s ease-in-out infinite;
+        }
+        #ww-gift-fab::after {
+          content: ''; position: absolute; inset: -4px; border-radius: 50%;
+          border: 2px solid rgba(224,185,74,.55); animation: ww-gift-ring 2.4s ease-out infinite;
+        }
+        @keyframes ww-gift-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes ww-gift-ring  { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.5); opacity: 0; } }
+        #ww-gift-modal {
+          position: fixed; inset: 0; z-index: 999999;
+          background: rgba(15,10,25,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+          display: flex; align-items: center; justify-content: center; padding: 20px;
+          animation: ww-gift-fadein .25s ease;
+        }
+        @keyframes ww-gift-fadein { from { opacity: 0; } to { opacity: 1; } }
+        .ww-gift-card {
+          position: relative; width: 100%; max-width: 340px;
+          background: #fff; border-radius: 22px; padding: 24px 22px 26px;
+          box-shadow: 0 30px 80px rgba(0,0,0,.4);
+          animation: ww-gift-slide .35s cubic-bezier(.22,1.14,.32,1);
+          text-align: center; font-family: system-ui,-apple-system,'Segoe UI',sans-serif; color: #221a10;
+        }
+        @keyframes ww-gift-slide { from { transform: translateY(24px) scale(.95); opacity: 0; } to { transform: none; opacity: 1; } }
+        .ww-gift-close {
+          position: absolute; top: 10px; right: 10px;
+          width: 32px; height: 32px; border-radius: 50%; border: none;
+          background: rgba(0,0,0,.06); color: #333; cursor: pointer; font-size: 18px; line-height: 1;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .ww-gift-title { font-size: 1.05rem; font-weight: 800; letter-spacing: .01em; margin: 4px 0 4px; color: #B58A2A; }
+        .ww-gift-sub   { font-size: .82rem; color: #6a5a3c; margin: 0 0 16px; line-height: 1.4; }
+        .ww-gift-scratch {
+          position: relative; width: 260px; height: 150px; margin: 0 auto;
+          border-radius: 14px; overflow: hidden;
+          background: linear-gradient(135deg,#FFF7D6 0%,#FDE7A5 40%,#FFF0BE 100%);
+          box-shadow: inset 0 0 0 2px rgba(184,139,42,.35), 0 6px 22px rgba(184,139,42,.25);
+        }
+        .ww-gift-reveal {
+          position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+          font-weight: 900; color: #B58A2A;
+        }
+        .ww-gift-amount { font-size: 2rem; letter-spacing: .02em; }
+        .ww-gift-label  { font-size: .7rem; text-transform: uppercase; letter-spacing: .18em; color: #A07826; margin-top: 4px; opacity: .8; }
+        .ww-gift-canvas { position: absolute; inset: 0; cursor: grab; touch-action: none; }
+        .ww-gift-canvas:active { cursor: grabbing; }
+        .ww-gift-hint { font-size: .72rem; color: #8a6b2c; margin-top: 10px; letter-spacing: .05em; }
+        .ww-gift-msg  { margin-top: 14px; padding: 10px 12px; border-radius: 12px;
+          background: rgba(224,185,74,.12); border: 1px dashed rgba(184,139,42,.4);
+          font-size: .82rem; color: #5a4318; line-height: 1.45; font-style: italic; }
+      `;
+      document.head.appendChild(st);
+    }
+
+    /* FAB */
+    const fab = document.createElement('button');
+    fab.id = 'ww-gift-fab';
+    fab.type = 'button';
+    fab.setAttribute('aria-label', 'Cadeau à gratter');
+    fab.textContent = '🎁';
+    document.body.appendChild(fab);
+
+    let modalOpen = false;
+    fab.addEventListener('click', function () {
+      if (modalOpen) return;
+      modalOpen = true;
+      openGiftModal(gift, function () {
+        modalOpen = false;
+      });
+    });
+  }
+
+  function openGiftModal(gift, onClose) {
+    const overlay = document.createElement('div');
+    overlay.id = 'ww-gift-modal';
+    overlay.innerHTML = `
+      <div class="ww-gift-card" role="dialog" aria-modal="true">
+        <button class="ww-gift-close" aria-label="Fermer">×</button>
+        <div class="ww-gift-title">Une petite surprise pour toi</div>
+        <div class="ww-gift-sub">Gratte la carte dorée pour découvrir ton cadeau</div>
+        <div class="ww-gift-scratch">
+          <div class="ww-gift-reveal">
+            <div class="ww-gift-amount">${formatGiftAmount(gift.amount, gift.currency)}</div>
+            <div class="ww-gift-label">Ton cadeau</div>
+          </div>
+          <canvas class="ww-gift-canvas" width="260" height="150"></canvas>
+        </div>
+        <div class="ww-gift-hint">Glisse ton doigt / la souris pour révéler</div>
+        ${gift.message ? `<div class="ww-gift-msg">${escapeHtml(gift.message)}</div>` : ''}
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    function close() {
+      overlay.remove();
+      if (onClose) onClose();
+    }
+    overlay.querySelector('.ww-gift-close').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    const canvas = overlay.querySelector('.ww-gift-canvas');
+    setupScratch(canvas);
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function setupScratch(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    /* Foil doré : dégradé + hachures diagonales pour l'effet gratter */
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#F5D976');
+    grad.addColorStop(0.5, '#C29A3E');
+    grad.addColorStop(1, '#8A6820');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    /* Motif diagonal subtil */
+    ctx.strokeStyle = 'rgba(255,255,255,.18)';
+    ctx.lineWidth = 1;
+    for (let x = -h; x < w; x += 8) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + h, h); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    ctx.font = 'bold 12px system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('À GRATTER', w / 2, h / 2 + 4);
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineWidth = 34;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    let drawing = false;
+    let last = null;
+    let revealed = false;
+
+    function pointFromEvent(e) {
+      const rect = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return {
+        x: (t.clientX - rect.left) * (w / rect.width),
+        y: (t.clientY - rect.top)  * (h / rect.height),
+      };
+    }
+
+    function checkReveal() {
+      if (revealed) return;
+      const img = ctx.getImageData(0, 0, w, h).data;
+      let cleared = 0;
+      const step = 16; /* échantillonnage */
+      for (let i = 3; i < img.length; i += step * 4) {
+        if (img[i] === 0) cleared++;
+      }
+      const total = img.length / (step * 4);
+      if (cleared / total > 0.55) {
+        revealed = true;
+        /* Clear the rest en douceur */
+        canvas.style.transition = 'opacity .5s ease';
+        canvas.style.opacity = '0';
+      }
+    }
+
+    function start(e) {
+      e.preventDefault();
+      drawing = true;
+      last = pointFromEvent(e);
+    }
+    function move(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const p = pointFromEvent(e);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      last = p;
+    }
+    function end() {
+      if (!drawing) return;
+      drawing = false;
+      last = null;
+      checkReveal();
+    }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', end);
+    canvas.addEventListener('mouseleave', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end);
+  }
+
   /* ─── Bootstrap ─────────────────────────────────────────────────── */
   ready(function () {
     injectKeyframes();
@@ -612,6 +839,7 @@
     applyBackgrounds(style);
     applyDecorations(decos);
     applyEnvelope(style);
+    mountGift(window.__WW_DATA__ && window.__WW_DATA__.gift);
 
     window.addEventListener('message', handleLiveUpdate);
 

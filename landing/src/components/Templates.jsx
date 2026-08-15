@@ -67,7 +67,7 @@ function PrevMariage() {
         <circle cx="30" cy="30" r="2" fill="currentColor"/>
       </svg>
       <div className="mariage-frame">
-        <div className="mariage-sm serif italic">le mariage de</div>
+        <div className="mariage-sm serif italic">Heureux Mariage</div>
         <div className="mariage-mono serif">M <span>&amp;</span> A</div>
         <div className="mariage-date">14 · juin · 2025</div>
       </div>

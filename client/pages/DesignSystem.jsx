@@ -461,7 +461,7 @@ function PrimitivesSection() {
                 <option value="" disabled>Choisir…</option>
                 <option>Anniversaire</option>
                 <option>Mariage</option>
-                <option>Naissance</option>
+                <option>Baptême</option>
                 <option>Retraite</option>
               </Select>
             </Field>

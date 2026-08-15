@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, X, MoreHorizontal, Wallet, ChevronDown,
@@ -9,8 +9,10 @@ import Kado from '../components/Kado';
 import ConfettiBurst from '../components/ConfettiBurst';
 import TileSparkles from '../components/TileSparkles';
 import NotoEmoji from '../components/NotoEmoji';
-import WallCreateSheet from '../components/WallCreateSheet';
 import { WallActivityPreview, WallThemePreview } from '../components/WallPreviews';
+import { TemplateIllustration, hasTemplateIllustration } from '../create-flow/templateIllustrations';
+import { MYENVELOPE_TEMPLATE, createFlowTypeFor } from '../create-flow/syntheticTemplates';
+import { saveContext } from '../create-flow/context';
 import s from './Dashboard.module.css';
 
 /* Template thumbnails  reused across recent + featured */
@@ -86,6 +88,10 @@ function RecentTile({ pub }) {
   // Pour les murs : on affiche le nom du destinataire centré
   const recipientName = pub.data?.titleName || pub.data?.recipient || pub.title?.split(' ')[0] || pub.title || 'Sans titre';
 
+  /* Fallback illustration : SVG dédié quand pub.thumbnail est absent et
+     que le template a une représentation graphique connue. */
+  const showTemplateIllu = !thumbBg && !isWall && hasTemplateIllustration(pub.templateName);
+
   return (
     <button className={s.recentCard} onClick={() => navigate(editPath)}>
       <div className={s.recentThumb} style={{ background: fallbackGradient }}>
@@ -94,9 +100,18 @@ function RecentTile({ pub }) {
         ) : (
           <>
             {thumbBg && <div className={s.recentThumbImg} style={thumbBg} />}
+            {showTemplateIllu && (
+              <div style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '10%',
+              }}>
+                <TemplateIllustration name={pub.templateName} />
+              </div>
+            )}
           </>
         )}
-        
+
         <span className={`${s.recentBadge} ${pub.published ? s.recentBadgeLive : s.recentBadgeDraft}`}>
           {pub.published ? 'EN LIGNE' : 'BROUILLON'}
         </span>
@@ -109,17 +124,29 @@ function RecentTile({ pub }) {
   );
 }
 
-/* ── Featured theme card ── */
+/* ── Featured theme card ──
+   Priorité au SVG dédié quand il existe (préférence utilisateur, v10).
+   Fallback : image thumbnail si présente, sinon gradient nu. */
 function ThemeTile({ tpl, onSelect }) {
   const isWall = WALL_TEMPLATES.has(tpl.name);
   const gradient = TEMPLATE_GRADIENTS[tpl.name] || 'linear-gradient(135deg,#FFB3C1,#E11D48)';
-  const thumb = tpl.thumbnail ? { backgroundImage: `url(${tpl.thumbnail})` } : null;
-  
+  const showIllu = hasTemplateIllustration(tpl.name);
+  const thumb = !showIllu && tpl.thumbnail ? { backgroundImage: `url(${tpl.thumbnail})` } : null;
+
   if (isWall) {
     return (
       <button className={s.themeCardWall} onClick={() => onSelect(tpl)}>
         <div style={{ position: 'relative', aspectRatio: '1.14', background: gradient, overflow: 'hidden' }}>
           {thumb && <div className={s.themeThumbImg} style={thumb} />}
+          {showIllu && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '10%',
+            }}>
+              <TemplateIllustration name={tpl.name} />
+            </div>
+          )}
         </div>
         <div style={{ padding: '11px 12px' }}>
           <div style={{ fontWeight: 700, fontSize: '13px' }}>{tpl.label || tpl.name}</div>
@@ -127,7 +154,7 @@ function ThemeTile({ tpl, onSelect }) {
             <span style={{ font: '800 10px Inter, sans-serif', background: '#EDE7FF', color: '#5B6994', padding: '3px 8px', borderRadius: '999px' }}>
               {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
             </span>
-            <span style={{ font: '700 11px Inter, sans-serif', color: '#9F6D22' }}>Aperçu ›</span>
+            <span style={{ font: '700 11px Inter, sans-serif', color: '#9F6D22' }}>Créer ›</span>
           </div>
         </div>
       </button>
@@ -135,8 +162,17 @@ function ThemeTile({ tpl, onSelect }) {
   }
 
   return (
-    <button className={s.themeCard} style={{ background: gradient }} onClick={() => onSelect(tpl)}>
+    <button className={s.themeCard} style={{ background: gradient, position: 'relative' }} onClick={() => onSelect(tpl)}>
       {thumb && <div className={s.themeThumbImg} style={thumb} />}
+      {showIllu && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '10%',
+        }}>
+          <TemplateIllustration name={tpl.name} />
+        </div>
+      )}
       <span className={s.themeLabel}>{tpl.label || tpl.name}</span>
     </button>
   );
@@ -156,16 +192,6 @@ export default function Dashboard() {
   const [announceOpen, setAnnounceOpen] = useState(true);
   const [promoOpen, setPromoOpen] = useState(true);
 
-  /* Name modal (création carte) */
-  const [nameModal,   setNameModal]   = useState(null);
-  const [nameInput,   setNameInput]   = useState('');
-  const [nameError,   setNameError]   = useState('');
-  const [nameLoading, setNameLoading] = useState(false);
-  const nameRef = useRef(null);
-
-  /* Wall create sheet */
-  const [wallSheetOpen, setWallSheetOpen] = useState(false);
-
   const firstName = (user?.name || '').split(' ')[0] || 'ami';
 
   useEffect(() => {
@@ -180,30 +206,24 @@ export default function Dashboard() {
     if (themesTab === 'walls') {
       return templates.filter(t => WALL_TEMPLATES.has(t.name)).slice(0, 4);
     }
-    return templates.filter(t => !WALL_TEMPLATES.has(t.name)).slice(0, 4);
+    /* Cartes : on épingle myenvelope en tête comme dans TemplatesGallery. */
+    return [
+      MYENVELOPE_TEMPLATE,
+      ...templates.filter(t => !WALL_TEMPLATES.has(t.name)),
+    ].slice(0, 4);
   }, [templates, themesTab]);
 
-  const openNameModal = () => {
-    setNameModal({});
-    setNameInput(''); setNameError('');
-    setTimeout(() => nameRef.current?.focus(), 80);
-  };
-
-  const confirmCreate = async () => {
-    const title = nameInput.trim();
-    if (!title) { setNameError('Donne un nom à ta création'); return; }
-    setNameLoading(true); setNameError('');
-    try {
-      /* Redirige vers la galerie carte avec le titre pré-rempli */
-      setNameModal(null);
-      navigate(`/ewish-admin/templates?mode=wish&title=${encodeURIComponent(title)}`);
-    } catch (e) { setNameError(e.response?.data?.error || 'Erreur'); }
-    finally { setNameLoading(false); }
-  };
-
+  /* Clic sur un template → lance directement le flow /create avec le template
+     pré-sélectionné. Le contexte porte `type` + `wishTemplate` (ou
+     `wallTemplate`) — CreateEntrypoint saute alors TemplateStep pour wish
+     et PreviewStep utilise le bon template pour wall/wish. */
   const goToTheme = (tpl) => {
-    const isWall = WALL_TEMPLATES.has(tpl.name);
-    navigate(`/ewish-admin/templates?mode=${isWall ? 'wall' : 'wish'}`);
+    const type = createFlowTypeFor(tpl.name);
+    const ctx = { type };
+    if (type === 'wish') ctx.wishTemplate = tpl.name;
+    if (type === 'wall') ctx.wallTemplate = tpl.name;
+    saveContext(ctx);
+    navigate(`/create?type=${type}`);
   };
 
   return (
@@ -235,7 +255,7 @@ export default function Dashboard() {
       <div className={s.section} id="tour-create" style={{ marginTop: '16px' }}>
         <div className={s.sectionTitle} style={{ fontSize: '20px', fontFamily: '"Fraunces", serif', fontWeight: 400, color: '#161311', marginBottom: '8px' }}>Qu'est-ce qu'on crée ?</div>
         <div className={s.quickGrid}>
-          <button className={s.cardMain} onClick={openNameModal}>
+          <button className={s.cardMain} onClick={() => navigate('/create')}>
             <div className={s.cardMainBg}></div>
             <NotoEmoji name="love-letter" size={46} className={s.cardIconAnim} />
             <div className={s.cardMainText}>
@@ -243,16 +263,16 @@ export default function Dashboard() {
               <div className={s.cardMainSub}>Une expérience animée à envoyer<br/>en solo.</div>
             </div>
           </button>
-          
-          <button className={s.cardWall} onClick={() => setWallSheetOpen(true)}>
+
+          <button className={s.cardWall} onClick={() => navigate('/create?type=wall')}>
             <NotoEmoji name="speech-balloon" size={42} className={s.cardIconAnimAlt} />
             <div className={s.cardSecondaryText}>
               <div className={s.cardSecondaryTitle}>Un mur</div>
               <div className={s.cardSecondarySub}>À plusieurs mains</div>
             </div>
           </button>
-          
-          <button className={s.cardGift} onClick={() => navigate('/ewish-admin/templates')}>
+
+          <button className={s.cardGift} onClick={() => navigate('/create?type=envelope')}>
             <NotoEmoji name="gift" size={42} className={s.cardIconAnimAlt2} />
             <div className={s.cardSecondaryText}>
               <div className={s.cardSecondaryTitle}>Un cadeau</div>
@@ -361,50 +381,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ══ Wall create sheet ═════════════════════════════════════ */}
-      <WallCreateSheet
-        open={wallSheetOpen}
-        onClose={() => setWallSheetOpen(false)}
-        onCreated={(pub) => {
-          setWallSheetOpen(false);
-          navigate(`/ewish-admin/wall/${pub._id}`);
-        }}
-      />
-
-      {/* ══ Name modal ════════════════════════════════════════════ */}
-      {nameModal && (
-        <div className={s.modalVeil} onMouseDown={e => { if (e.target === e.currentTarget) setNameModal(null); }}>
-          <div className={s.modal}>
-            <div className={s.modalHead}>
-              <div>
-                <div className={s.modalTitle}>Qui est le destinataire ?</div>
-                <div className={s.modalSub}>Pour la retrouver facilement.</div>
-              </div>
-              <button className={s.modalClose} onClick={() => setNameModal(null)}>
-                <X size={18} />
-              </button>
-            </div>
-            <div className={s.modalField}>
-              <label className={s.modalLabel}>Titre</label>
-              <input
-                ref={nameRef}
-                className={s.modalInput}
-                value={nameInput}
-                onChange={e => { setNameInput(e.target.value); setNameError(''); }}
-                onKeyDown={e => e.key === 'Enter' && !nameLoading && confirmCreate()}
-                placeholder="ex : Anniversaire de Sarah, Pot de départ Alex…"
-              />
-              {nameError && <div className={s.modalError}>{nameError}</div>}
-            </div>
-            <div className={s.modalActions}>
-              <button className={s.btnGhost} onClick={() => setNameModal(null)}>Annuler</button>
-              <button className={s.btnPrimary} onClick={confirmCreate} disabled={nameLoading}>
-                {nameLoading ? 'Chargement…' : <>Choisir un thème <ArrowRight size={15} /></>}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

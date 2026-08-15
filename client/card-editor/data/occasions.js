@@ -16,7 +16,7 @@ export const OCCASIONS = [
     message: "En ce jour si particulier, nous vous souhaitons une vie remplie d'amour, de complicité et de moments inoubliables. Que votre union soit aussi belle que votre histoire.",
   },
   {
-    id: 'naissance', label: 'Naissance', icon: 'baby',
+    id: 'naissance', label: 'Baptême', icon: 'baby',
     title: 'Bienvenue au monde',
     message: "Toutes nos félicitations pour cette merveilleuse nouvelle. Nous vous souhaitons plein de bonheur, de douceur et de tendres instants avec ce petit trésor.",
   },
