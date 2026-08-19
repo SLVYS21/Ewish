@@ -1,55 +1,17 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, X, Sparkles, MessageSquare, MailOpen,
-  Cake, Heart, Baby, Waves, Hand, Feather,
+  ArrowRight, Sparkles, MessageSquare, MailOpen,
 } from 'lucide-react';
-import { getTemplates, createPublication } from '../utils/api';
+import { getTemplates } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import { WallThemePreview } from '../components/WallPreviews';
-import { loadContext, clearContext, saveContext } from '../create-flow/context';
 import { TemplateIllustration, hasTemplateIllustration } from '../create-flow/templateIllustrations';
-import { createFlowTypeFor, MYENVELOPE_TEMPLATE } from '../create-flow/syntheticTemplates';
-import TemplatePreviewFullscreen from '../components/TemplatePreviewFullscreen';
-
-/* ─────────────────────────────────────────────────────────── */
-/* Wall event catalog                                          */
-/* Utilisé pour générer titre, sous-titre et confettis */
-/* ─────────────────────────────────────────────────────────── */
-const WALL_EVENTS = [
-  { id: 'anniversary', label: 'Anniversaire',        Icon: Cake,           festive: true,
-    title: (n) => `Joyeux anniversaire, ${n}`,
-    subtitle: () => 'Laisse un mot doux pour cet anniversaire.',
-    eyebrow: '✦ Anniversaire' },
-  { id: 'wedding',     label: 'Mariage',             Icon: Heart, festive: true,
-    title: (n) => `Heureux Mariage ${n}`,
-    subtitle: () => 'Un mot pour les jeunes mariés.',
-    eyebrow: '✦ Mariage' },
-  { id: 'birth',       label: 'Baptême',           Icon: Baby,           festive: true,
-    title: (n) => `Bienvenue à ${n}`,
-    subtitle: () => 'Un mot doux pour son arrivée.',
-    eyebrow: '✦ Baptême' },
-  { id: 'farewell',    label: 'Pot de départ',       Icon: Waves,          festive: true,
-    title: (n) => `Bon départ, ${n}`,
-    subtitle: () => 'Un mot pour son nouveau chapitre.',
-    eyebrow: '✦ Pot de départ' },
-  { id: 'welcome',     label: "Bienvenue équipe",     Icon: Hand,           festive: true,
-    title: (n) => `Bienvenue, ${n}`,
-    subtitle: () => 'Un mot chaleureux pour son arrivée.',
-    eyebrow: '✦ Bienvenue' },
-  { id: 'thanks',      label: 'Remerciement',        Icon: Heart,          festive: false,
-    title: (n) => `Merci, ${n}`,
-    subtitle: () => 'Un mot pour dire merci.',
-    eyebrow: '✦ Remerciement' },
-  { id: 'tribute',     label: 'Hommage',             Icon: Feather,        festive: false,
-    title: (n) => `En mémoire de ${n}`,
-    subtitle: () => 'Un mot doux, un souvenir partagé.',
-    eyebrow: '✦ Hommage' },
-  { id: 'other',       label: 'Autre',               Icon: Sparkles,       festive: false,
-    title: (n) => `Pour ${n}`,
-    subtitle: () => 'Un mot pour cette personne.',
-    eyebrow: '✦ Mur de mots' },
-];
+import {
+  createFlowTypeFor, isEnvelopeTemplate, MYENVELOPE_TEMPLATE,
+} from '../create-flow/syntheticTemplates';
+import TemplatePickerFullscreen from '../components/TemplatePickerFullscreen';
+import TemplateInfoModal from '../components/TemplateInfoModal';
 
 const TEMPLATE_COLORS = {
   birthday:               'linear-gradient(145deg,#FFB3C1 0%,#FF8DAA 100%)',
@@ -69,34 +31,18 @@ const TEMPLATE_COLORS = {
   'baby-shower-invitation':   'linear-gradient(145deg,#E3F5EE,#F1EAFB,#FFEDF1)',
 };
 
-const WALL_DESCS = {
-  'wall-of-wishes':        'Les mots apparaissent comme de petites cartes pastel. Chaleureux et festif.',
-  'wall-of-wishes-3d':     'Les mots flottent en profondeur dans un espace 3D spectaculaire.',
-  'wall-of-wishes-modern': 'Glassmorphisme épuré : cartes translucides. Élégant et contemporain.',
-  'wall-of-wishes-space':  "Chaque mot est une étoile dans une galaxie que l'on explore.",
-};
-
 /* Murs actifs : classique + moderne + craft (moodboard corail).
    Les variantes 3d/space ont été supprimées de la DB
    (voir memory/project_walls_flow.md). */
 const WALL_TEMPLATES = new Set(['wall-of-wishes','wall-of-wishes-modern','wall-of-wishes-craft']);
 
-const WISH_CATS = [
-  // { id: 'all',      label: 'Tous' },
-  // { id: 'birthday', label: 'Anniversaire' },
-  // { id: 'love',     label: 'Amour' },
-  // // { id: 'pro',      label: 'Pro / RH' },
-  // { id: 'special',  label: 'Spécial' },
-];
+const WISH_CATS = [];
 
 const TEMPLATE_CAT = {
   birthday: 'birthday', forever: 'love', 'notre-film': 'love',
   'collective-pro': 'pro', 'collective-family': 'pro',
   special: 'special', sanctuary: 'special',
 };
-
-/* MYENVELOPE_TEMPLATE est désormais importé depuis create-flow/syntheticTemplates
-   (utilisé aussi par Dashboard pour l'ajouter aux featured cartes). */
 
 export default function TemplatesGallery() {
   const navigate = useNavigate();
@@ -109,25 +55,13 @@ export default function TemplatesGallery() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  /* Wall preview sheet (bottom drawer) */
-  const [wallSheet, setWallSheet]   = useState(null); // tpl being previewed
-
-  /* Wall naming modal */
-  const [wallModal, setWallModal]     = useState(null);
-  const [wallEventId, setWallEventId] = useState('anniversary');
-  const [wallRecipient, setWallRecipient] = useState('');
-  const [wallTitle, setWallTitle]     = useState(''); // used only for invitation flow
-  const [wallError, setWallError]     = useState('');
-  const [wallLoading, setWallLoading] = useState(false);
-  const wallRef = useRef(null);
-
-  const currentEvent = useMemo(
-    () => WALL_EVENTS.find(e => e.id === wallEventId) || WALL_EVENTS[0],
-    [wallEventId]
-  );
-  const previewTitle = wallRecipient.trim()
-    ? currentEvent.title(wallRecipient.trim())
-    : '';
+  /* Picker fullscreen (preview + swipe/prev-next) et modale d'infos (occasion
+     + destinataire + titre → createPublication → éditeur). Le flow est :
+     click template → picker → CTA → modal info → éditeur. Pour l'enveloppe
+     (myenvelope) on saute le picker (pas de preview iframe) et on ouvre
+     directement la modale d'infos. */
+  const [pickerState, setPickerState] = useState(null); // { templates, initialIndex } | null
+  const [infoTpl, setInfoTpl] = useState(null);         // Template | null
 
   useEffect(() => {
     getTemplates()
@@ -143,7 +77,7 @@ export default function TemplatesGallery() {
 
   const isInvitationTpl = (t) => t.kind === 'invitation';
   const wishTemplates = [
-    // Envelope card editor pinned at the top of the wish list
+    /* Enveloppe épinglée en tête de liste wish (flow spécial : pas de picker). */
     MYENVELOPE_TEMPLATE,
     ...templates
       .filter(t => !WALL_TEMPLATES.has(t.name) && !isInvitationTpl(t))
@@ -152,201 +86,43 @@ export default function TemplatesGallery() {
   const wallTemplates = templates.filter(t => WALL_TEMPLATES.has(t.name));
   const invitationTemplates = templates.filter(isInvitationTpl);
 
-  /* Open wall naming modal — pré-remplit depuis /create (query params + sessionStorage)
-     si l'utilisateur arrive du wizard front-door. Priorité aux query params. */
-  const openWallModal = (tpl) => {
-    const ctx = loadContext();
-    const ctxWall = ctx && ctx.type === 'wall' ? ctx : null;
-    const prefillOcc   = searchParams.get('occ')   || ctxWall?.occasion  || 'anniversary';
-    const prefillName  = searchParams.get('name')  || ctxWall?.recipient || '';
-    const prefillTitle = searchParams.get('title') || ctxWall?.title     || '';
-    const isInvitation = tpl.kind === 'invitation';
-    const validOcc = WALL_EVENTS.some(e => e.id === prefillOcc) ? prefillOcc : 'anniversary';
-
-    setWallModal(tpl);
-    setWallTitle(isInvitation ? prefillTitle : '');
-    setWallRecipient(prefillName);
-    setWallEventId(validOcc);
-    setWallError('');
-    setTimeout(() => wallRef.current?.focus(), 80);
-  };
-
-  const confirmWall = async () => {
-    const isInvitation = wallModal.kind === 'invitation';
-
-    let title, data;
-    if (isInvitation) {
-      title = wallTitle.trim();
-      if (!title) { setWallError('Donne un nom à cette création'); return; }
-      data = { titleName: title, subtitle: wallModal.defaultData?.subtitle || '' };
-    } else {
-      const recipient = wallRecipient.trim();
-      if (!recipient) { setWallError('Indique le prénom du destinataire.'); return; }
-      title = currentEvent.title(recipient);
-      data = {
-        eyebrow:   currentEvent.eyebrow,
-        titleName: recipient,
-        subtitle:  currentEvent.subtitle(recipient),
-        occasion:  currentEvent.id,
-        occasionLabel: currentEvent.label,
-        recipient,
-        festive:   currentEvent.festive,
-        wishesEnabled: true,
-      };
-    }
-
-    setWallLoading(true); setWallError('');
-
-    if (!user && !isInvitation) {
-      // Offline Wall Draft
-      const draft = {
-        templateName: wallModal.name,
-        customName:   `wall-${Date.now()}`,
-        title,
-        data,
-        style: {},
-        decorations: [],
-        widgets: [],
-        cagnotteConfig: null,
-      };
-      localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
-      navigate(`/ewish-admin/wall/draft`);
+  /* Ouvre le picker : envelope shunte le picker et va directement à la modale
+     d'infos (pas de preview iframe pour l'éditeur de cartes). */
+  const openTemplate = (list, tpl) => {
+    if (isEnvelopeTemplate(tpl.name)) {
+      setInfoTpl(tpl);
       return;
     }
+    /* On exclut l'enveloppe du picker (pas de preview iframe). */
+    const previewable = list.filter(t => !isEnvelopeTemplate(t.name));
+    const idx = Math.max(0, previewable.findIndex(t => t.name === tpl.name));
+    setPickerState({ templates: previewable, initialIndex: idx });
+  };
 
-    try {
-      const slugPrefix = isInvitation ? 'invit' : 'wall';
-      const res = await createPublication({
-        templateName: wallModal.name,
-        customName:   `${slugPrefix}-${Date.now()}`,
-        title,
-        data,
-      });
-      /* Publication créée : le contexte /create est consommé. */
-      clearContext();
-      const destination = isInvitation
-        ? `/ewish-admin/ewish/edit/${res.data._id}`
-        : `/ewish-admin/wall/${res.data._id}`;
-      navigate(destination);
-    } catch (err) { setWallError(err.response?.data?.error || 'Erreur'); }
-    finally { setWallLoading(false); }
+  const handlePickerPick = (tpl) => {
+    setPickerState(null);
+    setInfoTpl(tpl);
   };
 
   return (
     <div className="page">
 
-      {/* Wall preview — fullscreen in-app (remplace la drawer + iframe minuscule).
-          Close X + CTA "Créer ce mur" flottants. */}
-      {wallSheet && (
-        <TemplatePreviewFullscreen
-          src={`${import.meta.env.VITE_API_URL}/preview/${wallSheet.name}`}
-          title={wallSheet.label || wallSheet.name}
-          onClose={() => setWallSheet(null)}
-          primaryAction={{
-            label: 'Créer ce mur',
-            onClick: () => { setWallSheet(null); openWallModal(wallSheet); },
-          }}
+      {/* Preview fullscreen avec swipe entre templates de la catégorie */}
+      {pickerState && (
+        <TemplatePickerFullscreen
+          templates={pickerState.templates}
+          initialIndex={pickerState.initialIndex}
+          onClose={() => setPickerState(null)}
+          onPick={handlePickerPick}
         />
       )}
 
-      {/* Wall naming modal */}
-      {wallModal && (
-        <div className="modal-veil" onMouseDown={e => { if (e.target === e.currentTarget) setWallModal(null); }}>
-          <div className="mk-modal" style={wallModal.kind === 'invitation' ? {} : { width: 520 }}>
-            <div className="mk-modal-head">
-              <div>
-                <div className="mk-modal-title">
-                  {wallModal.kind === 'invitation' ? 'Pour qui ?' : 'Pour qui et quelle occasion ?'}
-                </div>
-                <div className="mk-modal-sub">
-                  {wallModal.kind === 'invitation'
-                    ? 'Pour la retrouver facilement dans tes créations.'
-                    : 'On génère le titre du mur et l’intro pour toi.'}
-                </div>
-              </div>
-              <button className="btn-icon" onClick={() => setWallModal(null)}><X size={18} /></button>
-            </div>
-            <div className="mk-modal-body">
-              {wallModal.kind === 'invitation' ? (
-                <div className="field">
-                  <label className="field-label">Titre</label>
-                  <input
-                    ref={wallRef}
-                    className="mk-input"
-                    value={wallTitle}
-                    onChange={e => { setWallTitle(e.target.value); setWallError(''); }}
-                    onKeyDown={e => e.key === 'Enter' && !wallLoading && confirmWall()}
-                    placeholder="ex : Anniversaire de Sarah, Pot de départ Marc…"
-                  />
-                </div>
-              ) : (
-                <>
-                  <div className="field">
-                    <label className="field-label">L’occasion</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      {WALL_EVENTS.map(ev => {
-                        const on = ev.id === wallEventId;
-                        const Ico = ev.Icon;
-                        return (
-                          <button
-                            key={ev.id}
-                            type="button"
-                            className={`pill${on ? ' on' : ''}`}
-                            onClick={() => { setWallEventId(ev.id); setWallError(''); }}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                          >
-                            <Ico size={14} />
-                            {ev.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="field">
-                    <label className="field-label">Pour qui ce mur ?</label>
-                    <div className="field-hint" style={{ marginBottom: 4 }}>Prénom ou nom du destinataire  apparaîtra dans le titre.</div>
-                    <input
-                      ref={wallRef}
-                      className="mk-input"
-                      value={wallRecipient}
-                      onChange={e => { setWallRecipient(e.target.value); setWallError(''); }}
-                      onKeyDown={e => e.key === 'Enter' && !wallLoading && confirmWall()}
-                      placeholder="Sarah, Léa & Karim, l’équipe RH…"
-                    />
-                  </div>
-
-                  {previewTitle && (
-                    <div style={{
-                      background: 'var(--mk-blush)', border: '1px solid var(--mk-line-2)',
-                      borderRadius: 'var(--mk-r-sm)', padding: '14px 16px',
-                    }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--mk-ink-3)', marginBottom: 6 }}>
-                        Aperçu du mur
-                      </div>
-                      <div style={{ fontFamily: 'var(--mk-display)', fontSize: 22, lineHeight: 1.2, letterSpacing: '-.01em' }}>
-                        {previewTitle}
-                      </div>
-                      <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', marginTop: 4 }}>
-                        {currentEvent.subtitle(wallRecipient.trim())}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {wallError && <div className="field-error">{wallError}</div>}
-
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" onClick={() => setWallModal(null)}>Annuler</button>
-                <button className="btn btn-primary" onClick={confirmWall} disabled={wallLoading}>
-                  {wallLoading ? 'Création…' : <>Configurer le mur <ArrowRight size={15} /></>}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modale d'infos (occasion + destinataire + titre) → createPublication → éditeur */}
+      <TemplateInfoModal
+        open={!!infoTpl}
+        template={infoTpl}
+        onClose={() => setInfoTpl(null)}
+      />
 
       {/* Page header */}
       <div className="ph">
@@ -369,9 +145,6 @@ export default function TemplatesGallery() {
                 : 'Tes invités répondent en un clic, leurs mots se posent sur un mur intégré, et tu suis tout en temps réel.'}
           </p>
         </div>
-        {/* <button className="btn btn-ghost" onClick={() => navigate('/ewish-admin')}>
-          <ArrowLeft size={15} /> Accueil
-        </button> */}
       </div>
 
       {/* Mode switch pills */}
@@ -392,14 +165,6 @@ export default function TemplatesGallery() {
           <MessageSquare size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 5 }} />
           Murs de mots
         </button>
-        {/* <button
-          className={`pill${mode === 'invitation' ? ' on' : ''}`}
-          onClick={() => switchMode('invitation')}
-          style={mode === 'invitation' ? { background: '#7C5CC9', borderColor: '#7C5CC9', color: '#fff' } : {}}
-        >
-          <MailOpen size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 5 }} />
-          Invitations
-        </button> */}
       </div>
 
       {mode === 'invitation' ? (
@@ -419,7 +184,7 @@ export default function TemplatesGallery() {
                 <div
                   key={tpl._id}
                   className="card card-hover tpl-card"
-                  onClick={() => openWallModal(tpl)}
+                  onClick={() => openTemplate(invitationTemplates, tpl)}
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="tpl-thumb" style={{ height: 158, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -432,7 +197,7 @@ export default function TemplatesGallery() {
                       <span className="badge badge-cost">
                         {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
                       </span>
-                      <button className="btn btn-soft btn-sm" onClick={e => { e.stopPropagation(); openWallModal(tpl); }}>
+                      <button className="btn btn-soft btn-sm" onClick={e => { e.stopPropagation(); openTemplate(invitationTemplates, tpl); }}>
                         Choisir <ArrowRight size={13} />
                       </button>
                     </div>
@@ -444,15 +209,6 @@ export default function TemplatesGallery() {
         )
       ) : mode === 'wish' ? (
         <>
-          {/* Category pills */}
-          {/* <div className="pills" style={{ marginBottom: 'calc(var(--d-gap) + 4px)' }}>
-            {WISH_CATS.map(c => (
-              <button key={c.id} className={`pill${cat === c.id ? ' on' : ''}`} onClick={() => setCat(c.id)}>
-                {c.label}
-              </button>
-            ))}
-          </div> */}
-
           {loading ? (
             <div style={{ padding: '40px 0', textAlign: 'center' }}>
               <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2.5px solid var(--mk-line)', borderTopColor: 'var(--mk-accent)', animation: 'mk-spin .75s linear infinite', margin: '0 auto' }} />
@@ -468,23 +224,11 @@ export default function TemplatesGallery() {
                 const bg = !showIllu && tpl.thumbnail
                   ? `url(${tpl.thumbnail}) center/cover no-repeat`
                   : (TEMPLATE_COLORS[tpl.name] || 'linear-gradient(145deg,#FFB3C1,#E11D48)');
-                /* Clic → lance directement /create avec le template pré-sélectionné
-                   dans le contexte sessionStorage. CreateEntrypoint saute alors
-                   TemplateStep (pour wish) et va direct de InfoStep → PreviewStep. */
-                const handleClick = () => {
-                  const type = createFlowTypeFor(tpl.name);
-                  const ctx = { type };
-                  if (type === 'wish') ctx.wishTemplate = tpl.name;
-                  if (type === 'wall') ctx.wallTemplate = tpl.name;
-                  saveContext(ctx);
-                  const nameParam = searchParams.get('name');
-                  navigate(`/create?type=${type}${nameParam ? `&name=${encodeURIComponent(nameParam)}` : ''}`);
-                };
                 return (
                   <button
                     key={tpl._id}
                     className="card card-hover tpl-card"
-                    onClick={handleClick}
+                    onClick={() => openTemplate(wishTemplates, tpl)}
                     style={tpl._isNew ? { position: 'relative' } : undefined}
                   >
                     {tpl._isNew && (
@@ -524,7 +268,7 @@ export default function TemplatesGallery() {
                           {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mk-accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          Créer <ArrowRight size={13} />
+                          Aperçu <ArrowRight size={13} />
                         </span>
                       </div>
                     </div>
@@ -544,18 +288,11 @@ export default function TemplatesGallery() {
           <div className="tpl-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
             {wallTemplates.map(tpl => {
               const showIllu = hasTemplateIllustration(tpl.name);
-              /* Clic → lance /create?type=wall avec le template pré-sélectionné
-                 dans le contexte. PreviewStep utilise ctx.wallTemplate. */
-              const handleWallClick = () => {
-                saveContext({ type: 'wall', wallTemplate: tpl.name });
-                const nameParam = searchParams.get('name');
-                navigate(`/create?type=wall${nameParam ? `&name=${encodeURIComponent(nameParam)}` : ''}`);
-              };
               return (
                 <div
                   key={tpl._id}
                   className="card card-hover"
-                  onClick={handleWallClick}
+                  onClick={() => openTemplate(wallTemplates, tpl)}
                   style={{ cursor: 'pointer', border: '1px solid var(--mk-line-2)', borderRadius: '18px', overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}
                 >
                   {showIllu ? (

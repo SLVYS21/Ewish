@@ -141,6 +141,27 @@ router.get('/me', requireAdmin, async (req, res) => {
   }
 });
 
+/* PATCH /api/auth/me/onboarding
+   Marque un tour guidé comme vu. Body : { home?: bool, cardEditor?: bool }.
+   On accepte seulement ces deux clés pour éviter les updates arbitraires. */
+router.patch('/me/onboarding', requireAdmin, async (req, res) => {
+  try {
+    const update = {};
+    if (typeof req.body.home === 'boolean') update.onboardingHome = req.body.home;
+    if (typeof req.body.cardEditor === 'boolean') update.onboardingCardEditor = req.body.cardEditor;
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ error: 'No valid flags provided' });
+    }
+    const user = await AdminUser.findByIdAndUpdate(
+      req.admin.id, { $set: update }, { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    res.json({ user: user.toSafeObject() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/auth/logout
 router.post('/logout', (req, res) => {
   res.clearCookie('ww_admin_token');

@@ -107,7 +107,12 @@ export default defineConfig({
       },
 
       devOptions: {
-        enabled: true, // Activer en dev pour tester
+        /* Désactivé en dev : le SW en dev intercepte les modules internes Vite
+           (/@vite/client, /@react-refresh) et sert une réponse HTML/JSON à la
+           place, ce qui casse toute l'app (modules qui ne se chargent pas,
+           page blanche, réponses JSON à la place de la nav). Le SW n'est utile
+           qu'en prod pour le PWA/offline. Le tester avec `vite preview`. */
+        enabled: false,
         type: 'module',
       },
     }),

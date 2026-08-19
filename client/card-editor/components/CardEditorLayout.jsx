@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useCardState } from '../hooks/useCardState';
+import { useAuth } from '../../admin/context/AuthContext';
 import OccasionSelector from './OccasionSelector';
 import ThemeSelector from './ThemeSelector';
 import ContentWizard from './ContentWizard';
@@ -8,8 +9,14 @@ import KadoStep from './KadoStep';
 import ShareStep from './ShareStep';
 import CardPreviewRenderer from '../preview/CardPreviewRenderer';
 import UnboxingView from '../preview/UnboxingView';
+import WelcomeOnboardingModal from '../../components/WelcomeOnboardingModal';
+import OnboardingTourCardEditor from '../../components/OnboardingTourCardEditor';
 import { loadContext, clearContext } from '../../create-flow/context';
-import { LucideChevronRight, LucideChevronLeft, LucideArrowLeft } from 'lucide-react';
+import { patchOnboarding } from '../../utils/api';
+import {
+  LucideChevronRight, LucideChevronLeft, LucideArrowLeft,
+  LucideEye, LucideEyeOff,
+} from 'lucide-react';
 import '../card-editor.css';
 
 const STEP_LABELS = ['Occasion', 'Style', 'Contenu', 'Kado', 'Partage'];
@@ -79,6 +86,57 @@ export default function CardEditorLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idParam]);
 
+  /* Visibilité de la preview live. Fermée par défaut : à l'étape Occasion il
+     n'y a encore rien à voir, et sur mobile la preview mangeait la place utile
+     pour comprendre les étapes. Auto-ouverte à l'étape Style (2) où l'utilisateur
+     a besoin de voir le rendu appliqué. Reset à chaque changement d'étape :
+     ouvre en Style, referme partout ailleurs. L'utilisateur peut toujours
+     override manuellement via le bouton toggle. */
+  const [previewVisible, setPreviewVisible] = useState(false);
+  useEffect(() => {
+    setPreviewVisible(currentStep === 2);
+  }, [currentStep]);
+
+  /* Onboarding first-visit de l'éditeur : modale d'accueil + tour react-joyride
+     ciblant la stepbar, le toggle preview et le carrousel de styles. Skip →
+     PATCH direct ; fin de tour → PATCH aussi. Le tour force currentStep=2
+     pour que .ce-theme-list soit dans le DOM avant de spotlight. */
+  const { user, setUser } = useAuth();
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [tourRun,     setTourRun]     = useState(false);
+
+  useEffect(() => {
+    /* Truthy check : couvre à la fois false (défaut mongoose) et undefined
+       (utilisateurs existants avant l'ajout du champ). */
+    if (user && !user.onboardingCardEditor) setWelcomeOpen(true);
+  }, [user]);
+
+  const markCardEditorOnboardingDone = async () => {
+    try {
+      const res = await patchOnboarding({ cardEditor: true });
+      if (res?.data?.user) setUser(res.data.user);
+    } catch {
+      /* silent */
+    }
+  };
+
+  const handleWelcomeStart = () => {
+    setWelcomeOpen(false);
+    /* Prérequis pour spotlight .ce-theme-list : forcer l'étape Style. */
+    setCurrentStep(2);
+    setTimeout(() => setTourRun(true), 350);
+  };
+
+  const handleWelcomeSkip = () => {
+    setWelcomeOpen(false);
+    markCardEditorOnboardingDone();
+  };
+
+  const handleTourClose = () => {
+    setTourRun(false);
+    markCardEditorOnboardingDone();
+  };
+
   const next = () => setCurrentStep(s => Math.min(s + 1, MAX_STEP));
   const prev = () => setCurrentStep(s => Math.max(s - 1, 1));
 
@@ -90,13 +148,26 @@ export default function CardEditorLayout() {
   const showNext = currentStep < MAX_STEP;
 
   return (
-    <div className="ce-layout" data-step={currentStep}>
+    <div
+      className={`ce-layout${previewVisible ? '' : ' preview-hidden'}`}
+      data-step={currentStep}
+    >
       <aside className="ce-sidebar">
         <header className="ce-header">
           <Link to="/ewish-admin" className="ce-back-link" title="Retour à mes créations">
             <LucideArrowLeft size={14} />
             <span>Mes créations</span>
           </Link>
+          <button
+            type="button"
+            className="ce-preview-toggle"
+            onClick={() => setPreviewVisible(v => !v)}
+            aria-pressed={previewVisible}
+            title={previewVisible ? "Masquer l'aperçu" : "Voir l'aperçu"}
+          >
+            {previewVisible ? <LucideEyeOff size={14} /> : <LucideEye size={14} />}
+            <span>{previewVisible ? 'Masquer' : 'Aperçu'}</span>
+          </button>
           <div>
             <div className="ce-brand">myKado</div>
             <div className="ce-brand-sub">Éditeur de carte</div>
@@ -139,12 +210,12 @@ export default function CardEditorLayout() {
             <LucideChevronLeft size={18} />
             <span>Retour</span>
           </button>
-          {saveLabel && (
+          {/*saveLabel && (
             <span className="ce-save-status" data-status={saveStatus} title={saveLabel}>
               <span className="ce-save-dot" aria-hidden="true" />
               <span>{saveLabel}</span>
             </span>
-          )}
+          )*/}
           {showNext && (
             <button
               className="ce-btn ce-btn-primary"
@@ -173,6 +244,17 @@ export default function CardEditorLayout() {
           <UnboxingView onBack={() => setShowUnboxing(false)} />
         </div>
       )}
+
+      {/* Onboarding first-visit : modale d'accueil + tour guidé */}
+      <WelcomeOnboardingModal
+        open={welcomeOpen}
+        title="Bienvenue dans l'éditeur"
+        subtitle="30 secondes pour voir comment personnaliser ta carte enveloppe : étapes, aperçu, styles."
+        noto="love-letter"
+        onStart={handleWelcomeStart}
+        onSkip={handleWelcomeSkip}
+      />
+      <OnboardingTourCardEditor run={tourRun} onClose={handleTourClose} />
     </div>
   );
 }

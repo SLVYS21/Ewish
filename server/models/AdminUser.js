@@ -22,6 +22,10 @@ const adminUserSchema = new mongoose.Schema({
   googleId:             { type: String, default: '' },
   resetPasswordToken:   { type: String },
   resetPasswordExpiry:  { type: Date },
+  /* Flags d'onboarding par contexte : true = l'utilisateur a déjà vu ce tour
+     guidé (visite terminée ou skip). Évite le spam à chaque connexion. */
+  onboardingHome:       { type: Boolean, default: false },
+  onboardingCardEditor: { type: Boolean, default: false },
 }, { timestamps: true });
 
 adminUserSchema.pre('save', async function(next) {
@@ -39,11 +43,13 @@ adminUserSchema.methods.toSafeObject = function() {
     _id, email, name, role, merchantId, credits, lastLogin, createdAt,
     kycStatus, kycName, kycMethod, kycPhone,
     kycDocumentUrl, kycSelfieUrl, kycSubmittedAt, kycRejectionReason,
+    onboardingHome, onboardingCardEditor,
   } = this;
   return {
     _id, email, name, role, merchantId, credits, lastLogin, createdAt,
     kycStatus, kycName, kycMethod, kycPhone,
     kycDocumentUrl, kycSelfieUrl, kycSubmittedAt, kycRejectionReason,
+    onboardingHome, onboardingCardEditor,
   };
 };
 

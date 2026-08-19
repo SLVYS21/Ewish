@@ -1669,11 +1669,7 @@ export default function Editor() {
           <button className={styles.btnGhost} onClick={() => setRunTour(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <HelpCircle size={16} /> Aide
           </button>
-          {pub.published && shortCode && (
-            <button className={styles.btnGhost} onClick={() => setShowQrModal(true)}>
-              <QrCode size={16} /> Code QR
-            </button>
-          )}
+          {/*  */}
           <button
             className={`${styles.btnPublish} tour-step-publish`}
             onClick={() => {

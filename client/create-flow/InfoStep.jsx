@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, Check } from 'lucide-react';
 import NotoEmoji from '../components/NotoEmoji';
 import { OCCASIONS, OCC_BY_ID } from './occasions';
 import { loadContext } from './context';
@@ -36,9 +36,28 @@ export default function InfoStep({ type, initialName = '', onBack, onSubmit }) {
   const [title, setTitle] = useState(stored?.title || '');
   const [titleDirty, setTitleDirty] = useState(Boolean(stored?.title));
   const [placeholder, setPlaceholder] = useState(RECIPIENT_PLACEHOLDERS[0]);
+  const [occDropdownOpen, setOccDropdownOpen] = useState(false);
   const recipientRef = useRef(null);
+  const occDropdownRef = useRef(null);
 
   const occasion = occasionId ? OCC_BY_ID[occasionId] : null;
+
+  /* Fermeture du dropdown occasion sur clic extérieur ou Escape. */
+  useEffect(() => {
+    if (!occDropdownOpen) return;
+    const onClick = (e) => {
+      if (occDropdownRef.current && !occDropdownRef.current.contains(e.target)) {
+        setOccDropdownOpen(false);
+      }
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOccDropdownOpen(false); };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [occDropdownOpen]);
 
   /* Auto-suggestion du titre depuis occasion + destinataire (sauf si l'utilisateur
      a manuellement édité le titre — dans ce cas on ne touche plus). */
@@ -98,22 +117,54 @@ export default function InfoStep({ type, initialName = '', onBack, onSubmit }) {
           <p className={s.subtitle}>On pré-remplit le reste depuis ces infos.</p>
         </div>
 
-        {/* Section 1 — Occasion */}
+        {/* Section 1 — Occasion (dropdown) */}
         <div className={s.section}>
-          <label className={s.label}>Quelle occasion ?</label>
-          <div className={s.chips}>
-            {OCCASIONS.map((occ) => (
-              <button
-                key={occ.id}
-                type="button"
-                className={`${s.chip} ${occasionId === occ.id ? s.chipActive : ''}`}
-                onClick={() => setOccasionId(occ.id)}
-                aria-pressed={occasionId === occ.id}
-              >
-                <NotoEmoji name={occ.noto} size={22} />
-                <span>{occ.label}</span>
-              </button>
-            ))}
+          <label className={s.label} id="mk-occasion-label">Quelle occasion ?</label>
+          <div className={s.dropdown} ref={occDropdownRef}>
+            <button
+              type="button"
+              className={s.dropdownTrigger}
+              onClick={() => setOccDropdownOpen((o) => !o)}
+              aria-haspopup="listbox"
+              aria-expanded={occDropdownOpen}
+              aria-labelledby="mk-occasion-label"
+            >
+              {occasion ? (
+                <span className={s.dropdownSelected}>
+                  <NotoEmoji name={occasion.noto} size={22} />
+                  <span>{occasion.label}</span>
+                </span>
+              ) : (
+                <span className={s.dropdownPlaceholder}>Choisis une occasion</span>
+              )}
+              <ChevronDown
+                size={18}
+                className={`${s.dropdownCaret} ${occDropdownOpen ? s.dropdownCaretOpen : ''}`}
+              />
+            </button>
+            {occDropdownOpen && (
+              <ul className={s.dropdownMenu} role="listbox" aria-labelledby="mk-occasion-label">
+                {OCCASIONS.map((occ) => {
+                  const selected = occ.id === occasionId;
+                  return (
+                    <li
+                      key={occ.id}
+                      role="option"
+                      aria-selected={selected}
+                      className={`${s.dropdownOption} ${selected ? s.dropdownOptionActive : ''}`}
+                      onClick={() => {
+                        setOccasionId(occ.id);
+                        setOccDropdownOpen(false);
+                      }}
+                    >
+                      <NotoEmoji name={occ.noto} size={22} />
+                      <span className={s.dropdownOptionLabel}>{occ.label}</span>
+                      {selected && <Check size={16} className={s.dropdownCheck} />}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
 

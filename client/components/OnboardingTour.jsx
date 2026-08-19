@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 
+/* On ne monte le composant Joyride que quand run=true : évite les side-effects
+   (portails, observers, layout mesures) au mount inactif — un crash silencieux
+   dans ces phases peut faire clignoter le tree parent. */
 export default function OnboardingTour({ run, onClose }) {
+  if (!run) return null;
+
   const steps = [
     {
       target: 'body',

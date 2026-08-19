@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, X, MoreHorizontal, Wallet, ChevronDown,
 } from 'lucide-react';
-import { getPublications, getTemplates } from '../utils/api';
+import { getPublications, getTemplates, patchOnboarding } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import Kado from '../components/Kado';
 import ConfettiBurst from '../components/ConfettiBurst';
@@ -11,8 +11,11 @@ import TileSparkles from '../components/TileSparkles';
 import NotoEmoji from '../components/NotoEmoji';
 import { WallActivityPreview, WallThemePreview } from '../components/WallPreviews';
 import { TemplateIllustration, hasTemplateIllustration } from '../create-flow/templateIllustrations';
-import { MYENVELOPE_TEMPLATE, createFlowTypeFor } from '../create-flow/syntheticTemplates';
-import { saveContext } from '../create-flow/context';
+import { MYENVELOPE_TEMPLATE, isEnvelopeTemplate } from '../create-flow/syntheticTemplates';
+import TemplatePickerFullscreen from '../components/TemplatePickerFullscreen';
+import TemplateInfoModal from '../components/TemplateInfoModal';
+import OnboardingTour from '../components/OnboardingTour';
+import WelcomeOnboardingModal from '../components/WelcomeOnboardingModal';
 import s from './Dashboard.module.css';
 
 /* Template thumbnails  reused across recent + featured */
@@ -182,7 +185,7 @@ function ThemeTile({ tpl, onSelect }) {
    Dashboard
    ══════════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
   const [pubs,      setPubs]      = useState([]);
@@ -191,6 +194,50 @@ export default function Dashboard() {
   const [themesTab, setThemesTab] = useState('walls'); // 'walls' | 'cards'
   const [announceOpen, setAnnounceOpen] = useState(true);
   const [promoOpen, setPromoOpen] = useState(true);
+
+  /* Picker fullscreen (preview + swipe) + modale d'infos (occasion/destinataire/titre)
+     — même flow qu'à la galerie de templates. Envelope shunte le picker. */
+  const [pickerState, setPickerState] = useState(null); // { templates, initialIndex } | null
+  const [infoTpl,     setInfoTpl]     = useState(null); // Template | null
+
+  /* Onboarding first-visit : modale d'accueil + tour react-joyride guidé.
+     Ne se déclenche que si le user est chargé ET n'a pas déjà vu le tour Home. */
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [tourRun,     setTourRun]     = useState(false);
+
+  useEffect(() => {
+    /* Truthy check : couvre à la fois false (défaut mongoose) et undefined
+       (utilisateurs existants avant l'ajout du champ). */
+    if (user && !user.onboardingHome) setWelcomeOpen(true);
+  }, [user]);
+
+  /* Marque le tour Home comme vu côté serveur et met à jour le user local
+     pour ne pas re-déclencher la modale au prochain re-render. */
+  const markOnboardingDone = async () => {
+    try {
+      const res = await patchOnboarding({ home: true });
+      if (res?.data?.user) setUser(res.data.user);
+    } catch {
+      /* silent : si le PATCH échoue, on retentera au prochain login */
+    }
+  };
+
+  const handleWelcomeStart = () => {
+    setWelcomeOpen(false);
+    /* Petit délai pour laisser la modale se démonter avant de spotlight
+       le premier élément — évite un flash visuel. */
+    setTimeout(() => setTourRun(true), 200);
+  };
+
+  const handleWelcomeSkip = () => {
+    setWelcomeOpen(false);
+    markOnboardingDone();
+  };
+
+  const handleTourClose = () => {
+    setTourRun(false);
+    markOnboardingDone();
+  };
 
   const firstName = (user?.name || '').split(' ')[0] || 'ami';
 
@@ -213,21 +260,54 @@ export default function Dashboard() {
     ].slice(0, 4);
   }, [templates, themesTab]);
 
-  /* Clic sur un template → lance directement le flow /create avec le template
-     pré-sélectionné. Le contexte porte `type` + `wishTemplate` (ou
-     `wallTemplate`) — CreateEntrypoint saute alors TemplateStep pour wish
-     et PreviewStep utilise le bon template pour wall/wish. */
+  /* Clic sur un template → picker preview (avec swipe entre les featured)
+     puis modale d'infos → createPublication → éditeur. Envelope skip le
+     picker (pas de preview iframe pour l'éditeur de cartes). */
   const goToTheme = (tpl) => {
-    const type = createFlowTypeFor(tpl.name);
-    const ctx = { type };
-    if (type === 'wish') ctx.wishTemplate = tpl.name;
-    if (type === 'wall') ctx.wallTemplate = tpl.name;
-    saveContext(ctx);
-    navigate(`/create?type=${type}`);
+    if (isEnvelopeTemplate(tpl.name)) {
+      setInfoTpl(tpl);
+      return;
+    }
+    const previewable = featuredThemes.filter(t => !isEnvelopeTemplate(t.name));
+    const idx = Math.max(0, previewable.findIndex(t => t.name === tpl.name));
+    setPickerState({ templates: previewable, initialIndex: idx });
+  };
+
+  const handlePickerPick = (tpl) => {
+    setPickerState(null);
+    setInfoTpl(tpl);
   };
 
   return (
     <div className={s.wrap}>
+
+      {/* Onboarding : modale d'accueil + tour react-joyride guidé */}
+      <WelcomeOnboardingModal
+        open={welcomeOpen}
+        title={`Bienvenue${user?.name ? `, ${user.name.split(' ')[0]}` : ''} !`}
+        subtitle="En 30 secondes, on te fait découvrir l'essentiel : créer, retrouver tes créations, gérer tes crédits."
+        noto="party-popper"
+        onStart={handleWelcomeStart}
+        onSkip={handleWelcomeSkip}
+      />
+      <OnboardingTour run={tourRun} onClose={handleTourClose} />
+
+      {/* Preview fullscreen avec swipe entre templates featured */}
+      {pickerState && (
+        <TemplatePickerFullscreen
+          templates={pickerState.templates}
+          initialIndex={pickerState.initialIndex}
+          onClose={() => setPickerState(null)}
+          onPick={handlePickerPick}
+        />
+      )}
+
+      {/* Modale d'infos (occasion + destinataire + titre) → createPublication → éditeur */}
+      <TemplateInfoModal
+        open={!!infoTpl}
+        template={infoTpl}
+        onClose={() => setInfoTpl(null)}
+      />
 
       {/* ══ Indigo Hero ════════════════════════════════════════════ */}
       <div className={s.indigoHero}>
@@ -235,7 +315,7 @@ export default function Dashboard() {
           <div className={s.heroEyebrow}>
             {`${new Date().toLocaleDateString('fr-FR', { weekday: 'long' })} ${new Date().getDate()} ${new Date().toLocaleDateString('fr-FR', { month: 'long' })} • RAVI DE TE REVOIR`.toUpperCase()}
           </div>
-          <button className={s.heroCredits} onClick={() => navigate('/ewish-admin/credits')}>
+          <button id="tour-credits" className={s.heroCredits} onClick={() => navigate('/ewish-admin/credits')}>
             <Wallet size={14} />
             {user?.credits ?? 0} crédits
           </button>

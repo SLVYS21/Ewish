@@ -235,6 +235,6 @@
 }
 
 @media (max-width: 640px) {
-  .demoBoard { aspect-ratio: 4 / 5; }
+  .demoBoard { aspect-ratio: 2 / 3; }
   .skelGrid { grid-template-columns: repeat(2, 1fr); }
 }

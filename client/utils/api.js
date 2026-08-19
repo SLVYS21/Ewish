@@ -155,6 +155,7 @@ export const register = (email, password, name) => api.post('/auth/register', { 
 export const googleLogin = (credential) => api.post('/auth/google', { credential }, { withCredentials: true });
 export const logout = () => api.post('/auth/logout', {}, { withCredentials: true });
 export const getMe = () => api.get('/auth/me', { withCredentials: true });
+export const patchOnboarding = (flags) => api.patch('/auth/me/onboarding', flags, { withCredentials: true });
 export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
 export const resetPassword = (token, password) => api.post('/auth/reset-password', { token, password });
 
