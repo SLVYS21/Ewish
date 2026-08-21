@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(201).json({ user: user.toSafeObject() });
+    res.status(201).json({ user: await formatUser(user) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -73,7 +73,7 @@ router.post('/login', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ user: user.toSafeObject() });
+    res.json({ user: await formatUser(user) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -124,18 +124,40 @@ router.post('/google', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ user: user.toSafeObject() });
+    res.json({ user: await formatUser(user) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
+const SiteSettings = require('../models/SiteSettings');
+
+async function formatUser(user) {
+  const safeUser = user.toSafeObject();
+  try {
+    const settingsDocs = await SiteSettings.find({ key: { $in: ['disable_paywalls', 'tester_emails'] } }).lean();
+    const sMap = {};
+    settingsDocs.forEach(d => sMap[d.key] = d.value);
+
+    const disableAll = sMap.disable_paywalls === true;
+    const testerEmails = (sMap.tester_emails || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+    const isTester = user.email && testerEmails.includes(user.email.toLowerCase());
+
+    if (disableAll || isTester) {
+      safeUser.canBypassPaywall = true;
+    }
+  } catch (e) {
+    console.error('Error fetching paywall bypass settings', e);
+  }
+  return safeUser;
+}
 
 // GET /api/auth/me
 router.get('/me', requireAdmin, async (req, res) => {
   try {
     const user = await AdminUser.findById(req.admin.id);
     if (!user) return res.status(404).json({ error: 'Not found' });
-    res.json({ user: user.toSafeObject() });
+    res.json({ user: await formatUser(user) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

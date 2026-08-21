@@ -5,6 +5,8 @@ const SiteSettings = require('../models/SiteSettings');
 const DEFAULTS = {
   wa_support_phone:   '+2290159571057',
   wa_support_message: 'Bonjour myKado 👋 J\'ai besoin d\'aide !',
+  disable_paywalls: false,
+  tester_emails: '',
 };
 
 /* ── GET /api/settings   Public (used by FAB, templates, etc.) */
@@ -22,7 +24,7 @@ router.get('/', async (req, res) => {
 /* ── PUT /api/settings   Super Admin only */
 router.put('/', requireSuperAdmin, async (req, res) => {
   try {
-    const allowed = ['wa_support_phone', 'wa_support_message'];
+    const allowed = ['wa_support_phone', 'wa_support_message', 'disable_paywalls', 'tester_emails'];
     const ops = allowed
       .filter(k => req.body[k] !== undefined)
       .map(k => SiteSettings.findOneAndUpdate(

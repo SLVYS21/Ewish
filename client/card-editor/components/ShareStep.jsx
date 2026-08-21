@@ -16,9 +16,12 @@ import {
  * - Once published, reuses the shared ShareView (QR + social buttons)
  */
 
+import { useAuth } from '../../admin/context/AuthContext';
+
 const CARD_PUBLISH_FEE_FCFA = 1500;
 
 export default function ShareStep({ onOpenUnboxing }) {
+  const { user } = useAuth();
   const {
     texts, occasion, gift,
     publishState, publishedPub, publishError,
@@ -121,31 +124,35 @@ export default function ShareStep({ onOpenUnboxing }) {
       {idle && (
         <>
           {/* Price breakdown before publish */}
-          <div className="ce-price-card">
-            <div className="ce-price-row">
-              <span>Publication de la carte</span>
-              <span>{CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')} FCFA</span>
-            </div>
-            {giftIncluded && (
+          {!user?.canBypassPaywall && (
+            <div className="ce-price-card">
               <div className="ce-price-row">
-                <span>Cadeau à gratter</span>
-                <span>{giftFcfa.toLocaleString('fr-FR')} FCFA</span>
+                <span>Publication de la carte</span>
+                <span>{CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')} FCFA</span>
               </div>
-            )}
-            <div className="ce-price-row ce-price-total">
-              <span>Total</span>
-              <strong>{totalFcfa.toLocaleString('fr-FR')} FCFA</strong>
+              {giftIncluded && (
+                <div className="ce-price-row">
+                  <span>Cadeau à gratter</span>
+                  <span>{giftFcfa.toLocaleString('fr-FR')} FCFA</span>
+                </div>
+              )}
+              <div className="ce-price-row ce-price-total">
+                <span>Total</span>
+                <strong>{totalFcfa.toLocaleString('fr-FR')} FCFA</strong>
+              </div>
+              {gift.enabled && !giftIncluded && (
+                <div className="ce-price-hint">
+                  Paiement en FCFA — les cadeaux en {gift.currency} restent symboliques pour l'instant.
+                </div>
+              )}
             </div>
-            {gift.enabled && !giftIncluded && (
-              <div className="ce-price-hint">
-                Paiement en FCFA — les cadeaux en {gift.currency} restent symboliques pour l'instant.
-              </div>
-            )}
-          </div>
+          )}
 
           <button className="ce-cta" onClick={startPublish}>
             <LucideSparkles size={18} />
-            Payer {totalFcfa.toLocaleString('fr-FR')} FCFA & publier
+            {user?.canBypassPaywall && !giftIncluded
+              ? 'Publier gratuitement (Testeur)'
+              : `Payer ${(user?.canBypassPaywall ? giftFcfa : totalFcfa).toLocaleString('fr-FR')} FCFA & publier`}
           </button>
         </>
       )}

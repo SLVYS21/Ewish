@@ -342,7 +342,8 @@ export function UnlockView({ pub, onUnlocked }) {
   const isWall = WALL_NAMES.has(pub?.templateName);
   const cost = pub?.creditsRequired ?? 1;
   const credits = user?.credits ?? 0;
-  const enough = credits >= cost;
+  const canBypass = user?.canBypassPaywall === true;
+  const enough = credits >= cost || canBypass;
 
   /* Chemin non-mur : publication crédit legacy (1 crédit, plan free implicite). */
   const handleUnlockLegacy = async () => {
@@ -350,7 +351,7 @@ export function UnlockView({ pub, onUnlocked }) {
     setUnlocking(true); setErr('');
     try {
       await publishPublication(pub._id);
-      if (setUser) setUser(prev => ({ ...prev, credits: (prev.credits ?? 0) - cost }));
+      if (setUser && !canBypass) setUser(prev => ({ ...prev, credits: (prev.credits ?? 0) - cost }));
       onUnlocked();
     } catch (e) {
       setErr(e.response?.data?.error || 'Erreur lors de la publication');
@@ -438,15 +439,17 @@ export function UnlockView({ pub, onUnlocked }) {
             ? <><RefreshCw size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
             : isWall
               ? <><Zap size={16} /> Publier le mur</>
-              : enough
-                ? <><Zap size={16} /> Débloquer avec {cost} crédit{cost > 1 ? 's' : ''}</>
-                : <><Coins size={16} /> Recharger mes crédits</>
+              : canBypass
+                ? <><Zap size={16} /> Publier gratuitement (Testeur)</>
+                : enough
+                  ? <><Zap size={16} /> Débloquer avec {cost} crédit{cost > 1 ? 's' : ''}</>
+                  : <><Coins size={16} /> Recharger mes crédits</>
           }
         </button>
         {/* Pour les murs, le solde crédits ne détermine plus l'action
             (le modal propose free/premium/infinite + Mobile Money). On
             n'affiche donc plus la mention crédits en-dessous du CTA. */}
-        {!isWall && (
+        {!isWall && !canBypass && (
           <p style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>
             Il te reste <strong style={{ color: enough ? 'var(--mk-mint)' : 'var(--mk-accent)' }}>{credits} crédit{credits > 1 ? 's' : ''}</strong>
             {enough

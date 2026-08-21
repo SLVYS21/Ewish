@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import PageShell from '../components/PageShell';
 import { getSettings, updateSettings } from '../../utils/api';
-import { Save, Phone, MessageSquare } from 'lucide-react';
+import { Save, Phone, MessageSquare, Unlock } from 'lucide-react';
 import s from './SuperAdminSettings.module.css';
 
 export default function SuperAdminSettings() {
   const [settings, setSettings] = useState({
     wa_support_phone: '',
-    wa_support_message: ''
+    wa_support_message: '',
+    disable_paywalls: false,
+    tester_emails: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,6 +44,35 @@ export default function SuperAdminSettings() {
       <div className={s.container}>
         <form className={s.card} onSubmit={handleSave}>
           <div className={s.section}>
+            <h3><Unlock size={18} /> Configuration des Paywalls</h3>
+            <p className={s.desc}>Désactivez temporairement les paiements (pour tests ou promotions).</p>
+            
+            <div className={s.field}>
+              <label className={s.checkboxLabel}>
+                <input 
+                  type="checkbox" 
+                  checked={settings.disable_paywalls || false} 
+                  onChange={e => setSettings({...settings, disable_paywalls: e.target.checked})}
+                />
+                Désactiver tous les paywalls (gratuit pour TOUS les utilisateurs)
+              </label>
+            </div>
+
+            <div className={s.field}>
+              <label>Emails des testeurs (séparés par des virgules)</label>
+              <div className={s.inputWrap}>
+                <textarea 
+                  rows={2}
+                  value={settings.tester_emails || ''} 
+                  onChange={e => setSettings({...settings, tester_emails: e.target.value})}
+                  placeholder="testeur1@gmail.com, testeur2@gmail.com"
+                />
+              </div>
+              <span className={s.hint}>Ces utilisateurs pourront publier gratuitement même si le paywall global est actif.</span>
+            </div>
+          </div>
+
+          <div className={s.section}>
             <h3><Phone size={18} /> Support WhatsApp</h3>
             <p className={s.desc}>Configurez le numéro et le message par défaut pour le bouton de support flottant.</p>
             
@@ -50,7 +81,7 @@ export default function SuperAdminSettings() {
               <div className={s.inputWrap}>
                 <input 
                   type="text" 
-                  value={settings.wa_support_phone} 
+                  value={settings.wa_support_phone || ''} 
                   onChange={e => setSettings({...settings, wa_support_phone: e.target.value})}
                   placeholder="+22901XXXXXXXX"
                 />
@@ -63,7 +94,7 @@ export default function SuperAdminSettings() {
               <div className={s.inputWrap}>
                 <textarea 
                   rows={4}
-                  value={settings.wa_support_message} 
+                  value={settings.wa_support_message || ''} 
                   onChange={e => setSettings({...settings, wa_support_message: e.target.value})}
                   placeholder="Bonjour, j'ai besoin d'aide..."
                 />

@@ -1568,7 +1568,7 @@ export default function Editor() {
                 <button className={styles.sharePublishBtn} onClick={handlePublish} disabled={publishing}>
                   {publishing
                     ? <><RefreshCw size={16} className={styles.spinIcon} /> Publication…</>
-                    : <><Sparkles size={15} /> Publier ma création  3 💎</>}
+                    : <><Sparkles size={15} /> {user?.canBypassPaywall ? 'Publier (Testeur)' : 'Publier ma création  3 💎'}</>}
                 </button>
                 <div className={styles.partageLockedList}>
                   {[
@@ -1759,7 +1759,9 @@ export default function Editor() {
                       disabled={publishing}
                     >
                       <Sparkles size={16} />
-                      Payer {publishPriceFcfa.toLocaleString('fr-FR')} FCFA & publier
+                      {user?.canBypassPaywall && !giftIncluded
+                        ? 'Publier gratuitement (Testeur)'
+                        : `Payer ${(user?.canBypassPaywall ? giftFcfa : publishPriceFcfa).toLocaleString('fr-FR')} FCFA & publier`}
                     </button>
                   </>
                 )}

@@ -3,6 +3,7 @@ const Publication = require('../models/Publication');
 const AdminUser = require('../models/AdminUser');
 const Template = require('../models/Template');
 const Transaction = require('../models/Transaction');
+const SiteSettings = require('../models/SiteSettings');
 const Wish = require('../models/Wish');
 const slugify = require('slugify');
 const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
@@ -369,6 +370,18 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     let creditsReq = 0;
     let priceFCFA = 0;
 
+    /* Check paywall bypass */
+    const userObj = await AdminUser.findById(req.admin?.id);
+    let canBypass = false;
+    if (userObj) {
+      const settingsDocs = await SiteSettings.find({ key: { $in: ['disable_paywalls', 'tester_emails'] } }).lean();
+      const sMap = {};
+      settingsDocs.forEach(d => sMap[d.key] = d.value);
+      const disableAll = sMap.disable_paywalls === true;
+      const testerEmails = (sMap.tester_emails || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+      canBypass = disableAll || (userObj.email && testerEmails.includes(userObj.email.toLowerCase()));
+    }
+
     /* -------------------------------------------------------------------
        Escrow FeexPay — deux cas :
        - First publish (needsFirstEscrow) : 1500 FCFA base + éventuel Kado.
@@ -384,7 +397,8 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
         });
       }
 
-      const envelopePrice = needsFirstEscrow ? (1500 + giftFcfa) : owedGiftFcfa;
+      const baseFee = canBypass ? 0 : 1500;
+      const envelopePrice = needsFirstEscrow ? (baseFee + giftFcfa) : owedGiftFcfa;
 
       if (!feexpayReference) {
         return res.status(402).json({
@@ -457,17 +471,23 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
         priceFCFA  = creditsReq * CREDIT_TO_FCFA;
       }
 
-      /* Deux chemins de paiement en cascade :
-         1. Crédits legacy : si solde suffisant on déduit sans appeler FeexPay.
-         2. FeexPay : si le front a fourni une référence, on vérifie et on log.
-         Si aucun ne s'applique : 402 avec le prix (le front sait alors ouvrir FeexPay). */
+      /* Vérification du bypass paywall (testeurs ou switch global) */
+      if (canBypass) {
+        creditsReq = 0;
+        priceFCFA = 0;
+      }
+
       if (creditsReq > 0) {
-        const user = await AdminUser.findById(req.admin.id);
+        const user = userObj || await AdminUser.findById(req.admin.id);
         if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
+        /* Deux chemins de paiement en cascade :
+           1. Crédits legacy : si solde suffisant on déduit sans appeler FeexPay.
+           2. FeexPay : si le front a fourni une référence, on vérifie et on log.
+           Si aucun ne s'applique : 402 avec le prix (le front sait alors ouvrir FeexPay). */
         const canPayWithCredits = user.credits >= creditsReq;
 
-        if (canPayWithCredits && !feexpayReference) {
+          if (canPayWithCredits && !feexpayReference) {
           user.credits -= creditsReq;
           await user.save();
         } else if (feexpayReference) {
@@ -517,8 +537,8 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
             priceFCFA,
           });
         }
+        }
       }
-    }
 
     /* Sur un top-up (carte déjà en ligne), on ne réécrit pas publishedAt pour
        ne pas fausser les tris "récemment publié". Sur first-publish, on marque

@@ -62,10 +62,11 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId })
 
   const plan = PLANS.find(p => p.id === selectedPlan);
   const userCredits = user?.credits || 0;
-  const hasEnoughCredits = plan.credits === 0 || userCredits >= plan.credits;
+  const canBypass = user?.canBypassPaywall === true;
+  const hasEnoughCredits = plan.credits === 0 || userCredits >= plan.credits || canBypass;
 
   const handleContinue = () => {
-    if (plan.credits === 0) {
+    if (plan.credits === 0 || canBypass) {
       onConfirm(selectedPlan);
       return;
     }
@@ -148,9 +149,11 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId })
               ) : (
                 plan.credits === 0
                   ? `Publier en ${plan.name}`
-                  : hasEnoughCredits
-                    ? `Publier avec ${plan.credits} crédits`
-                    : `Payer ${plan.priceFCFA.toLocaleString('fr-FR')} FCFA`
+                  : canBypass
+                    ? `Publier gratuitement (Mode testeur)`
+                    : hasEnoughCredits
+                      ? `Publier avec ${plan.credits} crédits`
+                      : `Payer ${plan.priceFCFA.toLocaleString('fr-FR')} FCFA`
               )}
             </button>
           </div>
