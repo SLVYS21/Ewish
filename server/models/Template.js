@@ -3,12 +3,13 @@ const mongoose = require('mongoose');
 const fieldSchema = new mongoose.Schema({
   key: String,
   label: String,
-  type: { type: String, enum: ['text', 'textarea', 'image', 'url', 'color', 'select'] },
+  type: { type: String, enum: ['text', 'textarea', 'image', 'url', 'color', 'select', 'starttime', 'layout'] },
   placeholder: String,
   options: [{type: mongoose.Schema.Types.Mixed}],   // for select
   section: String,     // Content section grouping e.g. "Intro", "Story", "Wishes"
   required: { type: Boolean, default: false },
   price: { type: Number, default: 0 },
+  importance: { type: String, enum: ['primary', 'secondary'], default: 'primary' },
 });
 
 const templateSchema = new mongoose.Schema({

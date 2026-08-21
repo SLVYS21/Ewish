@@ -2,6 +2,7 @@ import Navbar     from './components/Navbar';
 import Hero       from './components/Hero';
 import HowItWorks from './components/HowItWorks';
 import Pricing    from './components/Pricing';
+import FAQ        from './components/FAQ';
 import FinalCTA   from './components/FinalCTA';
 import Footer     from './components/Footer';
 import Inspirations from './components/Inspirations';
@@ -35,6 +36,7 @@ export default function App() {
         <HowItWorks onCreate={() => handleCreate('/create')} />
         <Pricing    onCreate={() => handleCreate('/create')} />
         <FinalCTA   onOrder={(name) => handleCreate(name ? `/create?name=${encodeURIComponent(name)}` : '/create')} />
+        <FAQ />
       </main>
       <Footer />
     </>

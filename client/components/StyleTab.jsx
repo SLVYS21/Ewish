@@ -9,14 +9,6 @@ const STYLE_PALETTES = [
   { id: 'mk-nuit-doree',  name: 'Nuit dorée',       colors: ['#1E2952', '#E8A33D', '#161311'] },
   { id: 'mk-argile',      name: 'Argile & or',      colors: ['#F9EBC7', '#C13B3B', '#9F6D22'] },
   { id: 'mk-indigo-clair',name: 'Indigo clair',     colors: ['#DFE3EE', '#E8A33D', '#354270'] },
-
-  /* ─── Legacy pastel (conservé pour compat, à retirer plus tard) ─── */
-  { id: 'rose',    name: 'Tendre rose',       colors: ['#FFE0E6', '#FFB3C1', '#E11D48'] },
-  { id: 'lilac',   name: 'Lilas onirique',    colors: ['#E5D9F5', '#B59CF0', '#6E4FBA'] },
-  { id: 'mint',    name: 'Menthe frais',      colors: ['#D4F1E5', '#9FE3CB', '#1F6E55'] },
-  { id: 'sunset',  name: 'Coucher de soleil', colors: ['#FFD7C2', '#FFAE82', '#B84C1F'] },
-  { id: 'gold',    name: 'Or doré',           colors: ['#FFE7AD', '#FFC95A', '#A86E00'] },
-  { id: 'night',   name: 'Nuit étoilée',      colors: ['#3A2D5F', '#6B5BA0', '#FFC95A'] },
 ];
 
 const TEXT_PALETTES = [
@@ -25,26 +17,12 @@ const TEXT_PALETTES = [
   { id: 'mk-indigo', name: 'Indigo doux',  textColor: '#1E2952', textMuted: '#5B6994' },
   { id: 'mk-creme',  name: 'Sur crème',    textColor: '#FFFFFF', textMuted: '#F3EEE1' },
   { id: 'mk-brasse', name: 'Or sur nuit',  textColor: '#E8A33D', textMuted: '#C88B2D' },
-
-  /* ─── Legacy ─── */
-  { id: 'dark',  name: 'Nuit',    textColor: '#1A1424', textMuted: '#8A8195' },
-  { id: 'light', name: 'Blanc',   textColor: '#FFFFFF', textMuted: '#D0C8D4' },
-  { id: 'sepia', name: 'Sépia',   textColor: '#2C1810', textMuted: '#9E7B6A' },
-  { id: 'gold',  name: 'Doré',    textColor: '#F5E6D3', textMuted: '#C9A97A' },
-  { id: 'slate', name: 'Ardoise', textColor: '#0D1B2A', textMuted: '#607B96' },
-  { id: 'berry', name: 'Grenat',  textColor: '#3B0A1A', textMuted: '#9E4060' },
 ];
 
 const TYPOGRAPHY = [
   /* ─── myKado Hybride C+A ─── */
   { id: 'mk-editorial', label: 'Éditorial (myKado)', fontFamily: 'Fraunces',      italic: false },
   { id: 'mk-moderne',   label: 'Moderne (myKado)',   fontFamily: 'Inter'                        },
-
-  /* ─── Legacy ─── */
-  { id: 'serif',  label: 'Élégant',   fontFamily: 'Playfair Display', italic: true  },
-  { id: 'fest',   label: 'Festif',    fontFamily: 'Pacifico'                        },
-  { id: 'mod',    label: 'Moderne',   fontFamily: 'Poppins'                         },
-  { id: 'bold',   label: 'Audacieux', fontFamily: 'Raleway',          bold: true    },
 ];
 
 export default function StyleTab({ style, onChange }) {

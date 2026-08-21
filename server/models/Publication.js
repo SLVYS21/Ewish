@@ -33,6 +33,7 @@ const sectionBgSchema = new mongoose.Schema({
 // position: { x, y } as percentage of section
 // size: width in px
 // opacity, zIndex, delay (s)
+// pdfUrl
 const decorationSchema = new mongoose.Schema({
   id:        { type: String, required: true },   // client-generated uuid
   src:       { type: String, required: true },   // Cloudinary URL
@@ -228,6 +229,13 @@ const publicationSchema = new mongoose.Schema({
     notifyEmail:        { type: String, default: '' },
     notifyOnEachRsvp:   { type: Boolean, default: false },
     confirmationMessage:{ type: String, default: '' },      // message affiché après réponse
+  },
+
+  pdfUrl: { type: String, default: '' },
+  pdfConfig: {
+    size:   { type: String, enum: ['A4', 'A5'], default: 'A4' },
+    format: { type: String, enum: ['portrait', 'landscape'], default: 'portrait' },
+    totalWords: { type: Number, default: 0 },
   },
 
   createdAt:   { type: Date, default: Date.now },

@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CardStateProvider } from '../card-editor/hooks/useCardState';
+import UnboxingView from '../card-editor/preview/UnboxingView';
+import '../card-editor/card-editor.css';
 
 /* Preview fullscreen avec navigation swipe/prev/next entre templates d'une
    même catégorie (wish, wall, invitation). Remplace le click-direct vers
@@ -80,18 +83,25 @@ export default function TemplatePickerFullscreen({
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* Iframe — key = name pour forcer le re-render à chaque changement */}
-      <iframe
-        key={current.name}
-        src={src}
-        title={current.label || current.name}
-        allow="autoplay"
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          border: 'none', background: '#FFFFFF',
-        }}
-      />
+      {current.name === 'myenvelope' ? (
+        <CardStateProvider key={current.name}>
+          <div className="ce-unboxing-overlay ce-unboxing-overlay-standalone" style={{ position: 'absolute', inset: 0, zIndex: 1, background: '#FFF3F5' }}>
+            <UnboxingView publicMode />
+          </div>
+        </CardStateProvider>
+      ) : (
+        <iframe
+          key={current.name}
+          src={src}
+          title={current.label || current.name}
+          allow="autoplay"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            border: 'none', background: '#FFFFFF',
+          }}
+        />
+      )}
 
       {/* Chip titre haut gauche */}
       <div

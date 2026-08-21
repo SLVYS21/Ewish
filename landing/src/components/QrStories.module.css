@@ -95,8 +95,8 @@
   will-change: transform, filter;
 }
 
-/* Espace de scroll après chaque card (sauf la dernière) */
-.card:not(:last-child) {
+/* Espace de scroll après chaque card pour l'effet sticky */
+.card {
   margin-bottom: var(--scroll-gap);
 }
 

@@ -1,8 +1,5 @@
 import s from './Hero.module.css';
-import { useState, useEffect } from 'react';
 import NotoEmoji from './NotoEmoji';
-
-const WORDS = ['Équipe.', 'Amis.', 'Communauté.', 'Entreprise.'];
 
 /* Emojis flottants autour du hero.
    layer=bg  → flou + opacity basse + plus grand + z-index derrière
@@ -30,15 +27,6 @@ const FLOATING_EMOJIS = [
 ];
 
 export default function Hero({ onCreate }) {
-  const [wordIndex, setWordIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % WORDS.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <section className={s.hero}>
       <div className={s.floatingLayer} aria-hidden="true">
@@ -80,30 +68,22 @@ export default function Hero({ onCreate }) {
           </div>
 
           <h1 className={s.h1}>
-            Cartes de groupe conçues<br />
-            pour votre{' '}
-            <span className={s.wordContainer}>
-              <span className={s.invisibleSpacer}>Entreprise.</span>
-              {WORDS.map((word, i) => (
-                <span
-                  key={word}
-                  className={`${s.highlight} ${i === wordIndex ? s.wordVisible : s.wordHidden}`}
-                >
-                  {word}
-                </span>
-              ))}
-            </span>
+            Faites de chaque occasion un<br />
+            souvenir <span className={s.highlightStatic}>inoubliable.</span>
           </h1>
 
           <p className={s.sub}>
-            Rassemblez votre équipe avec de superbes cartes de groupe pour les anniversaires, les départs, les célébrations, et tous les moments qui comptent.
+            Anniversaires, déclarations, départs... Envoyez seul ou ensemble une attention magique.
           </p>
 
-          {/* <div className={s.actions}>
+          <div className={s.actions}>
             <button className={s.demoBtn} onClick={onCreate}>
-              Essayer la Démo (Sans inscription)
+              Créer une carte
             </button>
-          </div> */}
+            <a href="#inspirations" className={s.secondaryBtn}>
+              Explorer les démos
+            </a>
+          </div>
         </div>
       </div>
     </section>

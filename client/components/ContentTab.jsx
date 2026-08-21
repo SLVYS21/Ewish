@@ -296,18 +296,17 @@ export default function ContentTab({ fields, data, onChange, onUpload }) {
   }, []);
 
   /* Categorise */
-  const musicFields  = effectiveFields.filter(isMusicField);
-  const photoFields  = effectiveFields.filter(f => f.type === 'url' && isPhotoKey(f.key) && !isMusicField(f));
+  const musicFields  = effectiveFields.filter(f => isMusicField(f) && f.importance !== 'secondary');
+  const photoFields  = effectiveFields.filter(f => f.type === 'url' && isPhotoKey(f.key) && !isMusicField(f) && f.importance !== 'secondary');
 
   /* Always show photo cards  use template's own if defined, else inject defaults */
   const finalPhotoFields = photoFields.length > 0 ? photoFields : DEFAULT_PHOTO_FIELDS;
 
   const primaryFields = effectiveFields.filter(f =>
-    PRIMARY_SECTIONS.has(f.section) && !isMusicField(f) && !(f.type === 'url' && isPhotoKey(f.key))
+    f.importance !== 'secondary' && !isMusicField(f) && !(f.type === 'url' && isPhotoKey(f.key))
   );
-  const advancedFields = effectiveFields.filter(f =>
-    !musicFields.includes(f) && !photoFields.includes(f) && !primaryFields.includes(f)
-  );
+  
+  const advancedFields = effectiveFields.filter(f => f.importance === 'secondary');
 
   return (
     <div className={styles.flatRoot}>

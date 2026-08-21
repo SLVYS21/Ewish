@@ -152,7 +152,7 @@ const GFONTS_MAP = {
 const CSP = [
   "default-src 'self' https: data: blob:",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
@@ -180,22 +180,31 @@ router.get('/:templateName', async (req, res) => {
     if (!template) return res.status(404).send('<h1>Template not found</h1>');
 
     let html;
-    if (templateName.startsWith('wall-of-wishes')) {
-      html = getReactWallShell();
-      if (!html) return res.status(503).send('<h1>Mur React indisponible</h1>');
-    } else {
-      html = await getTemplateHtml(templateName);
-      if (!html) return res.status(404).send('<h1>Not found</h1>');
-    }
+    html = await getTemplateHtml(templateName);
+    if (!html) return res.status(404).send('<h1>Not found</h1>');
+    // if (templateName.startsWith('wall-of-wishes')) {
+    //   // html = getReactWallShell();
+    //   // if (!html) return res.status(503).send('<h1>Mur React indisponible</h1>');
+    // } else {
+          // html = await getTemplateHtml(templateName);
+          // if (!html) return res.status(404).send('<h1>Not found</h1>');
+    // }
 
-    let demoData = DEMO_DATA[templateName] || {};
+    let demoData = DEMO_DATA[templateName];
+    if (!demoData && templateName.startsWith('wall-of-wishes')) {
+      demoData = DEMO_DATA['wall-of-wishes'];
+    }
+    demoData = demoData || {};
+
     /* Wall preview : adapte les demo wishes au vrai schéma attendu par
        WallApp.jsx (firstName/message/_id/color-as-index) et flag demoMode
        pour que le client hydrate wishes depuis INITIAL_DATA sans faire
        d'appel API (publicId vide). */
     if (templateName.startsWith('wall-of-wishes') && Array.isArray(demoData.wishes)) {
       demoData = {
+        wallBackgroundId: demoData.bgKey || (templateName.includes('modern') ? 'bg-bokeh:nocturne' : undefined),
         ...demoData,
+        templateName, // Required for WallApp to deduce isModern/isCraft
         demoMode: true,
         skipIntro: true,
         wishes: demoData.wishes.map((w, i) => ({
@@ -214,14 +223,13 @@ router.get('/:templateName', async (req, res) => {
     const primary    = safeColor(demoStyle.primaryColor, '#E11D74');
     const accent     = safeColor(demoStyle.accentColor,  '#F5B544');
     const gfontParam = GFONTS_MAP[fontFamily];
-    const fontLink = gfontParam
+    const fontLink = gfontParam && !templateName.startsWith('wall-of-wishes')
       ? `<link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${gfontParam}&display=swap">`
       : '';
 
-    const injection = `
-    ${fontLink}
+    const legacyStyle = !templateName.startsWith('wall-of-wishes') ? `
     <style>
       :root {
         --primary: ${primary};
@@ -230,7 +238,11 @@ router.get('/:templateName', async (req, res) => {
         --fs-scale: ${scale};
       }
       body { font-family: var(--font) !important; }
-    </style>
+    </style>` : '';
+
+    const injection = `
+    ${fontLink}
+    ${legacyStyle}
     <script>
       window.__WW_DATA__  = ${safeJsonForScript(demoData)};
       window.__WW_STYLE__ = ${safeJsonForScript(demoStyle)};
@@ -249,3 +261,4 @@ router.get('/:templateName', async (req, res) => {
 });
 
 module.exports = router;
+

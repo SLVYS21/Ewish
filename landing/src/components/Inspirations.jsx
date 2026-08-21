@@ -14,6 +14,7 @@ const TABS_GROUP = [
   { id: 'party_group',       label: 'Soirées / Fête' },
   { id: 'congrats_group',    label: 'Félicitations' },
   { id: 'memorial_group',    label: 'Hommage' },
+  { id: 'vision_group',      label: 'Vision Board' },
 ];
 
 const DEMOS_GROUP = {
@@ -23,6 +24,7 @@ const DEMOS_GROUP = {
   party_group:     { templateName: 'wall-of-wishes-craft',  customName: 'demo-soiree-groupe' },
   congrats_group:  { templateName: 'wall-of-wishes',        customName: 'demo-felicitations-groupe' },
   memorial_group:  { templateName: 'wall-of-wishes-modern', customName: 'demo-deces-groupe' },
+  vision_group:    { templateName: 'wall-of-wishes-craft',  customName: 'demo-vision-board' },
 };
 
 /* ── Cartes Perso (solo) ─────────────────────────────────────── */

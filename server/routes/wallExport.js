@@ -10,6 +10,8 @@ const router = require('express').Router();
 const Publication = require('../models/Publication');
 const Wish = require('../models/Wish');
 const { renderWallBookPdf, buildBookHtml } = require('../services/wallBookPdf');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
 
 function safeSlug(s) {
   return String(s || 'mur')
@@ -30,6 +32,42 @@ async function loadWallData(pubId) {
   }).sort('createdAt').lean();
   return { publication, wishes };
 }
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_, file, cb) => {
+    const ok = file.mimetype.startsWith('pdf/');
+    cb(null, true);
+  },
+});
+
+
+router.post('/:pubId/export/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+  const wallId = req.params.pubId;
+  const pdfFilePath = req.file.path;
+
+  const size = req.body.size || 'A4';
+  const totalWords = Number(req.body.totalWords) || 0;
+
+  const publication = await Publication.findById(wallId);
+  if (!publication) return res.status(404).json({ error: 'Publication not found' });
+
+  const result = await cloudinary.uploader.upload(pdfFilePath, {
+    resource_type: 'raw',
+    folder: 'ewishes/pdfs'
+  });
+
+  publication.pdfUrl = result.secure_url;
+  publication.pdfConfig = {
+    ...publication.pdfConfig,
+    size: size,
+    totalWords: totalWords,
+  };
+  await publication.save();
+  res.status(200).json({ message: 'PDF uploaded and cached successfully', url: result.secure_url });
+});
+
 
 router.get('/:pubId/export/pdf', async (req, res) => {
   try {

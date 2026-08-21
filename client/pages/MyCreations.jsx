@@ -414,20 +414,21 @@ export default function MyCreations() {
               : 'Retrouve, partage ou duplique tout ce que tu as créé.'}
           </p>
         </div>
-        {tab === 'mine' && (
+        {/* {tab === 'mine' && (
           <button className="btn btn-primary" onClick={() => navigate('/ewish-admin/templates')}>
             <Plus size={15} /> Nouvelle
           </button>
-        )}
+        )} */}
       </div>
 
-      {/* Tabs Mine / Received  étape 8 flow murs */}
-      <div style={{
+      {/* Tabs Mine / Received  étape 8 flow murs Nouvelle*/}
+      <div /*style={{
         display: 'inline-flex', gap: 4,
         background: '#F4F1F9', padding: 4, borderRadius: 12,
         marginBottom: 18,
-      }}>
-        <button
+      }}*/>
+        
+        {/* <button
           type="button"
           onClick={() => { setTab('mine'); setPage(1); }}
           style={{
@@ -467,7 +468,7 @@ export default function MyCreations() {
               {receivedCount}
             </span>
           )}
-        </button>
+        </button> */}
       </div>
 
       {/* Toolbar */}
@@ -500,7 +501,7 @@ export default function MyCreations() {
           value={tplFilter}
           onChange={e => { setTplFilter(e.target.value); setPage(1); }}
         >
-          <option value="all">Tous les templates</option>
+          {/* <option value="all">Tous les templates</option> */}
           {wishTemplates.length > 0 && (
             <optgroup label="Vœux animés">
               {wishTemplates.map(t => <option key={t.name} value={t.name}>{t.label || t.name}</option>)}

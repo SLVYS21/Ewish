@@ -721,6 +721,13 @@ function PdfExportModal({ open, onClose, onConfirm }) {
                 <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Plusieurs mots par page, façon tableau d'affichage. Idéal pour avoir une vue d'ensemble.</div>
               </div>
             </label>
+            <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'poster' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'poster' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
+              <input type="radio" name="layout" value="poster" checked={layout === 'poster'} onChange={() => setLayout('poster')} style={{ marginTop: 4 }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Panneau de signatures (Paysage A3)</div>
+                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Le design élégant de ton inspiration Pinterest. Les mots manuscrits entourent le titre au centre.</div>
+              </div>
+            </label>
             <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'book' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'book' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
               <input type="radio" name="layout" value="book" checked={layout === 'book'} onChange={() => setLayout('book')} style={{ marginTop: 4 }} />
               <div>
@@ -818,9 +825,64 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
         const res = await fetch(`${API_BASE}/walls/${pub._id}/export/data`);
         if (!res.ok) throw new Error(`Data fetch failed: ${res.status}`);
         const { publication, wishes } = await res.json();
+        
+        const currentSize = layout === 'poster' ? 'A3' : (layout === 'mosaic' ? 'A4' : 'A5');
+
+        /* 0. Vérifier si un PDF à jour existe déjà sur le serveur */
+        if (
+          publication.pdfUrl &&
+          publication.pdfConfig?.totalWords === wishes.length &&
+          publication.pdfConfig?.size === currentSize
+        ) {
+          window.open(publication.pdfUrl, '_blank');
+          setExportingPdf(false);
+          return;
+        }
+
+        /* 1. Convertir les stickers locaux (.webp/.gif) en PNG base64 via Canvas 
+              car react-pdf ne supporte ni le WebP, ni le chemin relatif. */
+        const convertToPng = (url) => new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+          };
+          img.onerror = () => resolve(url);
+          // Construction URL absolue
+          img.src = url.startsWith('/') ? (window.location.origin + url) : url;
+        });
+
+        for (let i = 0; i < wishes.length; i++) {
+          const w = wishes[i];
+          if (w.mediaType === 'sticker' && w.photoUrl && !w.photoUrl.startsWith('data:')) {
+            w.photoUrl = await convertToPng(w.photoUrl);
+          }
+        }
+
+        /* 2. Génération locale via CPU client */
         const blob = await pdf(
           <WallBookPdfDoc publication={publication} wishes={wishes} layout={layout} bgMode={bgMode} />
         ).toBlob();
+        
+        /* 3. Architecture : Envoi silencieux au serveur avec métadonnées */
+        try {
+          const fd = new FormData();
+          fd.append('pdfFile', blob, `livre-des-mots-${pub._id}.pdf`);
+          fd.append('size', currentSize);
+          fd.append('totalWords', wishes.length);
+          
+          fetch(`${API_BASE}/walls/${pub._id}/export/upload-pdf`, {
+            method: 'POST',
+            body: fd
+          }).catch(e => console.warn('Silently failed to upload PDF to server:', e));
+        } catch (e) {
+          console.warn('PDF Upload error', e);
+        }
+
+        /* 4. Téléchargement ou affichage direct au client */
         const url = URL.createObjectURL(blob);
         const recipient = (publication?.data?.recipient || publication?.data?.titleName || publication?.title || 'mur')
           .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'mur';
@@ -830,7 +892,7 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
       } catch (err) {
         alert(`Erreur pendant l'export : ${err.message}`);
       } finally {

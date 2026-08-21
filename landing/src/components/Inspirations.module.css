@@ -73,7 +73,16 @@
 }
 
 .tabsContainer::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.tabsContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabsContainer::-webkit-scrollbar-thumb {
+  background: #EAEAEA;
+  border-radius: 4px;
 }
 
 .tabsContainer {
@@ -85,24 +94,39 @@
   border-bottom: none;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #EAEAEA transparent;
 }
 
 .tabBtn {
   flex: 0 0 auto;
   min-width: max-content;
-  padding: 16px 20px;
+  padding: 18px 24px;
   background: transparent;
   border: none;
   border-top: 3px solid transparent;
   border-right: 1px solid #EAEAEA;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--mk-stone-600);
+  color: var(--mk-stone-500);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   text-align: center;
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .tabsContainer {
+    /* Petit padding à gauche pour décaler les éléments et casser l'alignement parfait */
+    padding-left: 8px;
+  }
+  .tabBtn {
+    /* On force une largeur relative pour s'assurer que le 3ème ou 4ème onglet est coupé visuellement */
+    min-width: 40vw;
+    padding: 14px 12px;
+    font-size: 14px;
+  }
 }
 
 @media (min-width: 768px) {

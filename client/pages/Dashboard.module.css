@@ -29,10 +29,20 @@
   z-index: 2;
 }
 .heroEyebrow {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .14em;
-  color: #E8A33D;
+  margin-bottom: 8px;
+}
+.welcomeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: #fff;
 }
 .heroCredits {
   display: inline-flex;
@@ -64,6 +74,13 @@
   line-height: 1.05;
   letter-spacing: -0.015em;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.heroEmojiAnim {
+  display: inline-block;
+  transform-origin: center bottom;
 }
 .heroSub {
   font-size: 15px;
@@ -575,13 +592,41 @@
   .greetingWave { width: 22px; height: 22px; }
   .credits { padding: 6px 11px; font-size: 12px; }
 
+  .indigoHero {
+    padding: 24px 20px 22px;
+    border-radius: 24px;
+  }
+  .heroTop {
+    margin-bottom: 16px;
+  }
+  .heroTitle {
+    font-size: 26px;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .heroEmojiAnim {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .heroSub {
+    font-size: 13.5px;
+    max-width: 90%;
+  }
+  .heroContent {
+    max-width: 100%;
+  }
+  .heroCircle1 {
+    width: 90px;
+    height: 90px;
+    right: -10px;
+    top: -20px;
+  }
+  .heroDot {
+    right: 5%;
+    top: 70%;
+  }
+
   .announce { padding: 16px; gap: 12px; border-radius: 18px; }
-  .announceTitle { font-size: 18px; padding-right: 30px; }
-  .announceBody { font-size: 13.5px; }
-  .announceHero { min-height: 170px; padding: 18px; border-radius: 14px; }
-  .announceHeroTitle { font-size: 20px; max-width: 55%; }
-  .mascotWrap { right: 8px; bottom: -8px; }
-  .mascotWrap > * { width: 110px !important; height: 110px !important; }
 
   .sectionTitle { font-size: 20px; }
 

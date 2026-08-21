@@ -335,10 +335,21 @@ function WallSettings({ pub, id, onSave }) {
 /* ─────────────────────────────────────────────────────────── */
 /* Mots tab                                                    */
 /* ─────────────────────────────────────────────────────────── */
-function WallWords({ id, moderation: moderationEnabled, isPaid, onRequestPay }) {
+function WallWords({ id, pub, moderation: moderationEnabled, isPaid, onRequestPay }) {
   const [words, setWords]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast]   = useState('');
+
+  const occasionId = pub?.data?.occasion;
+  const recipient = pub?.data?.recipient || 'cette personne';
+  let suggestedText = `Coucou ${recipient} ! J'ai créé ce mur pour toi. Voici le tout premier mot ! ✨`;
+  if (occasionId === 'anniversary') suggestedText = `Joyeux anniversaire ${recipient} ! Je lance le mur avec ce premier mot. Que ta journée soit remplie de bonheur et de surprises ! 🎂`;
+  else if (occasionId === 'wedding') suggestedText = `Félicitations pour votre mariage ! Je suis tellement heureux d'ouvrir ce mur de mots pour vous. Plein d'amour ! 💍`;
+  else if (occasionId === 'birth') suggestedText = `Bienvenue au monde ${recipient} ! On inaugure ce mur avec plein d'amour pour cette nouvelle aventure. 👶`;
+  else if (occasionId === 'farewell') suggestedText = `Bon vent ${recipient} ! C'est parti pour le mur. On va tous te regretter au bureau, profite bien de la suite ! 🥂`;
+  else if (occasionId === 'welcome') suggestedText = `Bienvenue ${recipient} ! Toute l'équipe a hâte de bosser avec toi. Voici le premier mot d'une longue série ! 👋`;
+  else if (occasionId === 'thanks') suggestedText = `Un immense merci ${recipient} ! Je commence ce mur pour te témoigner toute ma gratitude. ❤️`;
+  else if (occasionId === 'tribute') suggestedText = `En douce mémoire. Je dépose ce premier mot sur le mur pour partager nos souvenirs. 🕊️`;
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2000); };
 
@@ -493,7 +504,24 @@ function WallWords({ id, moderation: moderationEnabled, isPaid, onRequestPay }) 
           <div className="empty-state card" style={{ padding: '28px 20px', textAlign: 'center' }}>
             <NotoEmoji name="writing-hand" size={56} style={{ marginBottom: 10 }} />
             <div className="e-title">Pas encore de mots</div>
-            <p style={{ fontSize: 13 }}>Partage le lien du mur pour recevoir les premiers.</p>
+            <p style={{ fontSize: 13, marginBottom: 18 }}>Donne l'exemple en ajoutant le premier mot sur le mur !</p>
+            
+            <div style={{ background: 'var(--mk-accent-pale)', padding: '14px 16px', borderRadius: '12px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px', border: '1px solid var(--mk-accent-soft)' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--mk-accent)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Idée de premier mot</div>
+              <div style={{ fontSize: 13.5, color: 'var(--mk-ink-2)', fontStyle: 'italic', lineHeight: 1.5 }}>
+                "{suggestedText}"
+              </div>
+              <button 
+                className="btn btn-primary" 
+                style={{ alignSelf: 'flex-start', marginTop: 6, padding: '7px 12px', fontSize: 12.5 }} 
+                onClick={() => {
+                  navigator.clipboard.writeText(suggestedText);
+                  showToast('Texte copié !');
+                }}
+              >
+                 Copier ce texte
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
@@ -1018,6 +1046,7 @@ export default function WallSetup() {
       {tab === 'words' && (
         <WallWords
           id={id}
+          pub={pub}
           moderation={moderation}
           isPaid={pub?.isPaid}
           onRequestPay={handlePublishClick}

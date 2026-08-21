@@ -25,24 +25,28 @@ import {
 Font.register({
   family: 'Fraunces',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/fraunces/v33/6NUh8FyLNQOQZAnv9ZwNjucMGGX_bo_r-lo.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/fraunces/v33/6NUh8FyLNQOQZAnv9ZwNjucMGGX_JI_r-lo.ttf', fontWeight: 700 },
+    { src: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIctxuTCf7Wp0hGNw.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIcUByTCf7Wp0hGNw.ttf', fontWeight: 700 },
   ],
 });
 Font.register({
   family: 'Caveat',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/caveat/v18/WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9SIQ.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/caveat/v18/WnznHAc5bAfYB2QRah7pcpNvOx-pjcx7SIQ.ttf', fontWeight: 600 },
+    { src: 'https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9eIWpZD5Mmgo.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjSx6eIWpZD5Mmgo.ttf', fontWeight: 600 },
   ],
 });
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7.ttf', fontWeight: 600 },
-    { src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1pL7.ttf', fontWeight: 700 },
+    { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjZ-Ck-8.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYAZ9hjZ-Ck-8.ttf', fontWeight: 600 },
+    { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYAZ9hjZ-Ck-8.ttf', fontWeight: 700 },
   ],
+});
+Font.registerEmojiSource({
+  format: 'png',
+  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
 });
 /* Désactive hyphénation (pas de dictionnaire fr embarqué). */
 Font.registerHyphenationCallback(word => [word]);
@@ -265,6 +269,32 @@ const s = StyleSheet.create({
     borderRadius: 8,
   },
 
+  /* Poster — A3 Paysage */
+  posterPage: {
+    padding: '20mm',
+    backgroundColor: '#FFFFFF', // Fond blanc pur type affiche
+    flexDirection: 'row',
+  },
+  posterColumnSide: {
+    flex: 1,
+    paddingHorizontal: 15,
+    justifyContent: 'space-evenly',
+  },
+  posterColumnCenter: {
+    flex: 1.5,
+    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  posterCenterpiece: {
+    alignItems: 'center',
+    marginVertical: 40,
+  },
+  posterWish: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
   /* Thank you */
   thankyouPage: {
     padding: '22mm 20mm',
@@ -326,10 +356,12 @@ function WishPhoto({ w }) {
   const hasSticker = w.mediaType === 'sticker' && w.photoUrl;
   const hasVideo = w.mediaType === 'video' && w.videoUrl;
   if (hasSticker) {
-    return <Image src={w.photoUrl} style={s.wishSticker} />;
+    // Force f_png pour les stickers (évite les WebP/SVG non gérés)
+    return <Image src={cldThumb(w.photoUrl, 'w_300,f_png')} style={s.wishSticker} />;
   }
   if (hasImage) {
-    return <Image src={cldThumb(w.photoUrl, 'c_fill,g_auto,w_900,h_680,q_auto,f_auto')} style={s.wishPhoto} />;
+    // Force f_jpg because react-pdf does not support WebP/AVIF well.
+    return <Image src={cldThumb(w.photoUrl, 'c_fill,g_auto,w_900,h_680,q_auto,f_jpg')} style={s.wishPhoto} />;
   }
   if (hasVideo) {
     const p = videoPoster(w.videoUrl);
@@ -352,6 +384,52 @@ function WishNote({ w, style }) {
   );
 }
 
+const PEN_COLORS = ['#1E2952', '#000000', '#631321', '#113A23', '#2a2540', '#3b2512'];
+const ROTATIONS = [-2, 1.5, 3, -1, -3, 2, -1.5, 2.5];
+
+function PosterWishNote({ w, index }) {
+  const color = PEN_COLORS[index % PEN_COLORS.length];
+  const rot = ROTATIONS[index % ROTATIONS.length];
+  
+  return (
+    <View style={[s.posterWish, { transform: `rotate(${rot}deg)` }]}>
+      {(w.photoUrl || w.videoUrl) ? (
+         <View style={{ width: 90, height: 90, marginBottom: 8, borderRadius: 4, overflow: 'hidden' }}>
+            <WishPhoto w={w} />
+         </View>
+      ) : null}
+      <Text style={{ fontFamily: 'Caveat', fontSize: 18, color, textAlign: 'center', lineHeight: 1.3 }}>
+        {w.message}
+      </Text>
+      <Text style={{ fontFamily: 'Caveat', fontSize: 14, color, marginTop: 6, textAlign: 'center' }}>
+        — {w.firstName || 'Anonyme'}
+      </Text>
+    </View>
+  );
+}
+
+function splitPoster(wishes) {
+  const chunks = [];
+  const WISHES_PER_PAGE = 12; // 4 left, 4 right, 2 top-center, 2 bottom-center
+  for (let i = 0; i < wishes.length; i += WISHES_PER_PAGE) {
+    const pageWishes = wishes.slice(i, i + WISHES_PER_PAGE);
+    const left = [], right = [], centerTop = [], centerBottom = [];
+    pageWishes.forEach((w, idx) => {
+      if (idx % 4 === 0) left.push(w);
+      else if (idx % 4 === 1) right.push(w);
+      else if (idx % 4 === 2) {
+        if (centerTop.length < 2) centerTop.push(w);
+        else left.push(w);
+      } else {
+        if (centerBottom.length < 2) centerBottom.push(w);
+        else right.push(w);
+      }
+    });
+    chunks.push({ left, right, centerTop, centerBottom });
+  }
+  return chunks;
+}
+
 /* Répartit N wishes en 2 colonnes pour la mosaïque (round-robin). */
 function splitMosaic(wishes) {
   const cols = [[], []];
@@ -369,10 +447,13 @@ export default function WallBookPdfDoc({ publication, wishes, layout = 'book', b
   const generatedAt = formatFrenchDate(new Date());
   const wishCount = wishes.length;
   const isMosaic = layout === 'mosaic';
+  const isPoster = layout === 'poster';
   const isClean = bgMode === 'clean';
   const wallBg = isClean ? {} : resolveWallBg(publication?.style);
 
-  const pageSize = isMosaic ? 'A4' : 'A5';
+  let pageSize = 'A5';
+  if (isMosaic) pageSize = 'A4';
+  if (isPoster) pageSize = 'A3';
 
   /* Cover : fond du mur si dispo, sinon gradient pastel figé en couleur unie. */
   const coverBg = wallBg.image
@@ -382,36 +463,80 @@ export default function WallBookPdfDoc({ publication, wishes, layout = 'book', b
 
   return (
     <Document title={`Livre des mots — ${recipient}`} author="myKado">
-      {/* Cover */}
-      <Page size={pageSize} style={[s.coverPage, { backgroundColor: coverBg, color: coverInk }]}>
-        {wallBg.image ? (
-          <Image src={wallBg.image} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' }} />
-        ) : null}
-        {wallBg.image || wallBg.color ? (
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.25)' }} />
-        ) : null}
-        <View style={[s.coverFrame, { borderColor: coverInk, backgroundColor: wallBg.color || wallBg.image ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.35)' }]}>
-          <Text style={[s.coverKicker, { color: coverInk }]}>Livre des mots</Text>
-          <Text style={[s.coverTitle, { color: coverInk }]}>{displayTitle}</Text>
-          {eventName ? <Text style={s.coverEvent}>{eventName}</Text> : null}
-          <Text style={[s.coverSub, { color: coverInk }]}>{subtitle}</Text>
-          <Text style={[s.coverCount, { color: coverInk }]}>{wishCount} mot{wishCount > 1 ? 's' : ''} reçu{wishCount > 1 ? 's' : ''}</Text>
-          <Text style={[s.coverDate, { color: coverInk }]}>{generatedAt}</Text>
-        </View>
-      </Page>
+      {/* Cover (affichée uniquement si ce n'est pas un Poster qui a déjà un titre massif) */}
+      {!isPoster && (
+        <Page size={pageSize} style={[s.coverPage, { backgroundColor: coverBg, color: coverInk }]}>
+          {wallBg.image ? (
+            <Image src={wallBg.image} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' }} />
+          ) : null}
+          {wallBg.image || wallBg.color ? (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.25)' }} />
+          ) : null}
+          <View style={[s.coverFrame, { borderColor: coverInk, backgroundColor: wallBg.color || wallBg.image ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.35)' }]}>
+            <Text style={[s.coverKicker, { color: coverInk }]}>Livre des mots</Text>
+            <Text style={[s.coverTitle, { color: coverInk }]}>{displayTitle}</Text>
+            {eventName ? <Text style={s.coverEvent}>{eventName}</Text> : null}
+            <Text style={[s.coverSub, { color: coverInk }]}>{subtitle}</Text>
+            <Text style={[s.coverCount, { color: coverInk }]}>{wishCount} mot{wishCount > 1 ? 's' : ''} reçu{wishCount > 1 ? 's' : ''}</Text>
+            <Text style={[s.coverDate, { color: coverInk }]}>{generatedAt}</Text>
+          </View>
+        </Page>
+      )}
 
       {/* Preface */}
-      <Page size={pageSize} style={s.prefacePage}>
-        <View style={s.prefaceInner}>
-          <Text style={s.prefaceMark}>«</Text>
-          <Text style={s.prefaceText}>Voici tous les mots que tes proches ont laissés sur ton mur.</Text>
-          <Text style={s.prefaceText}>Chaque page est un souvenir. Prends ton temps.</Text>
-          <Text style={s.prefaceMark}>»</Text>
-        </View>
-      </Page>
+      {!isPoster && (
+        <Page size={pageSize} style={s.prefacePage}>
+          <View style={s.prefaceInner}>
+            <Text style={s.prefaceMark}>«</Text>
+            <Text style={s.prefaceText}>Voici tous les mots que tes proches ont laissés sur ton mur.</Text>
+            <Text style={s.prefaceText}>Chaque page est un souvenir. Prends ton temps.</Text>
+            <Text style={s.prefaceMark}>»</Text>
+          </View>
+        </Page>
+      )}
 
       {/* Wish pages */}
-      {isMosaic ? (
+      {isPoster ? (
+        splitPoster(wishes).map((chunk, pageIndex) => (
+          <Page key={`poster-${pageIndex}`} size="A3" orientation="landscape" style={s.posterPage}>
+            {/* Colonne Gauche */}
+            <View style={s.posterColumnSide}>
+              {chunk.left.map((w, i) => <PosterWishNote key={w._id} w={w} index={i} />)}
+            </View>
+
+            {/* Colonne Centrale */}
+            <View style={s.posterColumnCenter}>
+              <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 20 }}>
+                {chunk.centerTop.map((w, i) => <PosterWishNote key={w._id} w={w} index={i + 10} />)}
+              </View>
+
+              <View style={s.posterCenterpiece}>
+                <Text style={[s.coverKicker, { color: '#7D7156', marginBottom: 12 }]}>Livre des mots</Text>
+                <Text style={{ fontFamily: 'Fraunces', fontSize: 42, color: '#1E2952', textAlign: 'center', lineHeight: 1.1 }}>
+                  {displayTitle}
+                </Text>
+                {eventName ? (
+                  <Text style={{ fontFamily: 'Caveat', fontSize: 32, color: '#E8A33D', marginTop: 10 }}>
+                    {eventName}
+                  </Text>
+                ) : null}
+                <Text style={{ fontFamily: 'Inter', fontSize: 10, color: '#7D7156', marginTop: 16, letterSpacing: 1.5, textTransform: 'uppercase' }}>
+                  {generatedAt}
+                </Text>
+              </View>
+
+              <View style={{ flex: 1, justifyContent: 'flex-start', paddingTop: 20 }}>
+                {chunk.centerBottom.map((w, i) => <PosterWishNote key={w._id} w={w} index={i + 20} />)}
+              </View>
+            </View>
+
+            {/* Colonne Droite */}
+            <View style={s.posterColumnSide}>
+              {chunk.right.map((w, i) => <PosterWishNote key={w._id} w={w} index={i + 30} />)}
+            </View>
+          </Page>
+        ))
+      ) : isMosaic ? (
         <Page size="A4" style={s.mosaicPage}>
           <View style={s.mosaicColumns}>
             {splitMosaic(wishes).map((col, ci) => (

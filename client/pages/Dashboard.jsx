@@ -181,6 +181,19 @@ function ThemeTile({ tpl, onSelect }) {
   );
 }
 
+function RotatingEmoji({ emojis, interval = 2000, size = 18, className }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % emojis.length);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [emojis, interval]);
+
+  return <NotoEmoji name={emojis[index]} size={size} className={className} />;
+}
+
 /* ══════════════════════════════════════════════════════════════════
    Dashboard
    ══════════════════════════════════════════════════════════════════ */
@@ -264,13 +277,8 @@ export default function Dashboard() {
      puis modale d'infos → createPublication → éditeur. Envelope skip le
      picker (pas de preview iframe pour l'éditeur de cartes). */
   const goToTheme = (tpl) => {
-    if (isEnvelopeTemplate(tpl.name)) {
-      setInfoTpl(tpl);
-      return;
-    }
-    const previewable = featuredThemes.filter(t => !isEnvelopeTemplate(t.name));
-    const idx = Math.max(0, previewable.findIndex(t => t.name === tpl.name));
-    setPickerState({ templates: previewable, initialIndex: idx });
+    const idx = Math.max(0, featuredThemes.findIndex((t) => t.name === tpl.name));
+    setPickerState({ templates: featuredThemes, initialIndex: idx });
   };
 
   const handlePickerPick = (tpl) => {
@@ -313,7 +321,9 @@ export default function Dashboard() {
       <div className={s.indigoHero}>
         <div className={s.heroTop}>
           <div className={s.heroEyebrow}>
-            {`${new Date().toLocaleDateString('fr-FR', { weekday: 'long' })} ${new Date().getDate()} ${new Date().toLocaleDateString('fr-FR', { month: 'long' })} • RAVI DE TE REVOIR`.toUpperCase()}
+            <span className={s.welcomeBadge}>
+              RAVI DE TE REVOIR
+            </span>
           </div>
           <button id="tour-credits" className={s.heroCredits} onClick={() => navigate('/ewish-admin/credits')}>
             <Wallet size={14} />
@@ -322,7 +332,9 @@ export default function Dashboard() {
         </div>
         
         <div className={s.heroContent}>
-          <div className={s.heroTitle}>Bonsoir, {firstName}</div>
+          <div className={s.heroTitle}>
+            Bonsoir, {firstName} <RotatingEmoji emojis={['waving-hand', 'sparkles', 'party-popper', 'star-struck', 'growing-heart']} size={36} className={s.heroEmojiAnim} />
+          </div>
           <div className={s.heroSub}>Célèbre les gens qui comptent  une carte animée, un mur collectif, un cadeau.</div>
         </div>
         
@@ -335,7 +347,7 @@ export default function Dashboard() {
       <div className={s.section} id="tour-create" style={{ marginTop: '16px' }}>
         <div className={s.sectionTitle} style={{ fontSize: '20px', fontFamily: '"Fraunces", serif', fontWeight: 400, color: '#161311', marginBottom: '8px' }}>Qu'est-ce qu'on crée ?</div>
         <div className={s.quickGrid}>
-          <button className={s.cardMain} onClick={() => navigate('/create')}>
+          <button className={s.cardMain} onClick={() => navigate('/ewish-admin/templates?mode=wish')}>
             <div className={s.cardMainBg}></div>
             <NotoEmoji name="love-letter" size={46} className={s.cardIconAnim} />
             <div className={s.cardMainText}>
@@ -344,7 +356,7 @@ export default function Dashboard() {
             </div>
           </button>
 
-          <button className={s.cardWall} onClick={() => navigate('/create?type=wall')}>
+          <button className={s.cardWall} onClick={() => navigate('/ewish-admin/templates?mode=wall')}>
             <NotoEmoji name="speech-balloon" size={42} className={s.cardIconAnimAlt} />
             <div className={s.cardSecondaryText}>
               <div className={s.cardSecondaryTitle}>Un mur</div>
@@ -352,7 +364,7 @@ export default function Dashboard() {
             </div>
           </button>
 
-          <button className={s.cardGift} onClick={() => navigate('/create?type=envelope')}>
+          <button className={s.cardGift} onClick={() => navigate('/ewish-admin/templates?mode=wish')}>
             <NotoEmoji name="gift" size={42} className={s.cardIconAnimAlt2} />
             <div className={s.cardSecondaryText}>
               <div className={s.cardSecondaryTitle}>Un cadeau</div>

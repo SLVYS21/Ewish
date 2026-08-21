@@ -41,7 +41,15 @@ router.get('/', requireAdmin, async (req, res) => {
          Dans ce cas on utilise l'_id de l'admin comme merchantId — c'est
          la valeur assignée par défaut au login (auth.js) et par les seeds. */
       const merchantIdFilter = req.admin.merchantId || String(req.admin.id);
-      query.merchantId = merchantIdFilter;
+      if (req.admin.role === 'super_admin') {
+        query.$or = [
+          { isPremade: true },
+          { merchantId: merchantIdFilter },
+          { merchantId: { $exists: false } }
+        ];
+      } else {
+        query.merchantId = merchantIdFilter;
+      }
       query.isPremade = { $ne: true };
     } else if (req.admin.role === 'merchant') {
       const merchantIdFilter = req.admin.merchantId || String(req.admin.id);

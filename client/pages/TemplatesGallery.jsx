@@ -89,14 +89,8 @@ export default function TemplatesGallery() {
   /* Ouvre le picker : envelope shunte le picker et va directement à la modale
      d'infos (pas de preview iframe pour l'éditeur de cartes). */
   const openTemplate = (list, tpl) => {
-    if (isEnvelopeTemplate(tpl.name)) {
-      setInfoTpl(tpl);
-      return;
-    }
-    /* On exclut l'enveloppe du picker (pas de preview iframe). */
-    const previewable = list.filter(t => !isEnvelopeTemplate(t.name));
-    const idx = Math.max(0, previewable.findIndex(t => t.name === tpl.name));
-    setPickerState({ templates: previewable, initialIndex: idx });
+    const idx = Math.max(0, list.findIndex((t) => t.name === tpl.name));
+    setPickerState({ templates: list, initialIndex: idx });
   };
 
   const handlePickerPick = (tpl) => {
@@ -139,10 +133,10 @@ export default function TemplatesGallery() {
           </h1>
           <p className="ph-sub">
             {mode === 'wish'
-              ? "Chaque template est une petite expérience animée et musicale. Clique pour voir l'aperçu avant de te lancer."
+              ? "Clique pour voir"
               : mode === 'wall'
-                ? 'Une page où chacun laisse un mot. Les 10 premiers mots sont gratuits  tu débloqueras ensuite pour aller plus loin.'
-                : 'Tes invités répondent en un clic, leurs mots se posent sur un mur intégré, et tu suis tout en temps réel.'}
+                ? "Une page où chacun laisse un mot. Clique sur un modèle pour en voir l'aperçu et choisir celui que tu souhaites créer."
+                : "Tes invités répondent en un clic. Clique sur un modèle pour en voir l'aperçu et choisir ce que tu veux créer."}
           </p>
         </div>
       </div>

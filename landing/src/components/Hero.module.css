@@ -144,41 +144,14 @@
   }
 }
 
-.wordContainer {
+.highlightStatic {
   position: relative;
   display: inline-block;
-  vertical-align: bottom;
-  text-align: left;
-}
-
-.invisibleSpacer {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.highlight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: inline-block;
   color: var(--mk-stone-900);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
-.wordVisible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.wordHidden {
-  opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
-}
-
-.highlight::after {
+.highlightStatic::after {
   content: "";
   position: absolute;
   bottom: 4px;
@@ -203,24 +176,73 @@
 .actions {
   display: flex;
   justify-content: center;
-  margin-top: 12px;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 16px;
+  }
+  .demoBtn, .secondaryBtn {
+    width: 100%;
+  }
 }
 
 .demoBtn {
-  background-color: #2D2725;
+  background: linear-gradient(180deg, #2D2725 0%, #1A1615 100%);
   color: #FFFFFF;
   font-family: var(--sans);
   font-size: 16px;
   font-weight: 600;
-  padding: 16px 32px;
-  border-radius: 12px;
-  border: none;
+  padding: 16px 36px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 
+    0 4px 14px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 .demoBtn:hover {
-  background-color: #1A1615;
+  background: linear-gradient(180deg, #362F2C 0%, #201B1A 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.demoBtn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #2D2725;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: 2px solid #EAEAEA;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+
+.secondaryBtn:hover {
+  border-color: #2D2725;
+  background-color: #FAFAFA;
   transform: translateY(-2px);
 }

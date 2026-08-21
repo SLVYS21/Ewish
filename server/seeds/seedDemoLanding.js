@@ -39,7 +39,7 @@ const WALLS = [
     title: 'Mur — Anniversaire Léa',
     data: {
       eyebrow: 'Mur de mots',
-      titleName: 'Léa',
+      titleName: 'Joyeux 30 ans Léa 🎂',
       subtitle: 'Ses proches ont laissé leurs mots pour ses 30 ans.',
     },
     style: { primaryColor: '#E11D48', accentColor: '#E11D48', fontFamily: 'Plus Jakarta Sans' },
@@ -56,8 +56,8 @@ const WALLS = [
     templateName: 'wall-of-wishes-modern',
     title: 'Mur — Mariage Sarah & Marc',
     data: {
-      eyebrow: 'Mur de mots',
-      titleName: 'Sarah & Marc',
+      eyebrow: 'Livre d\'or',
+      titleName: 'Vive les mariés ! Sarah & Marc 💍',
       subtitle: 'Vœux et messages des invités du mariage.',
     },
     style: { primaryColor: '#7C5CC9', accentColor: '#7C5CC9', fontFamily: 'Plus Jakarta Sans' },
@@ -75,7 +75,7 @@ const WALLS = [
     title: 'Mur — Hommage à Gabriel',
     data: {
       eyebrow: 'En mémoire',
-      titleName: 'Gabriel',
+      titleName: 'À la mémoire de Gabriel 🕊️',
       subtitle: 'Souvenirs et hommages partagés par ses proches.',
     },
     style: { primaryColor: '#5F6A82', accentColor: '#5F6A82', fontFamily: 'Plus Jakarta Sans' },
@@ -87,7 +87,7 @@ const WALLS = [
     title: 'Mur — Soirée du 15/03',
     data: {
       eyebrow: 'Best-of soirée',
-      titleName: 'La bande',
+      titleName: 'La bande : Soirée du 15 🕺',
       subtitle: 'Photos, best-of et moments cocasses de la soirée.',
     },
     style: { primaryColor: '#FF8F6B', accentColor: '#111111', fontFamily: 'Plus Jakarta Sans' },
@@ -99,7 +99,7 @@ const WALLS = [
     title: 'Mur — Baptême de Noah',
     data: {
       eyebrow: 'Mur de bienvenue',
-      titleName: 'Noah',
+      titleName: 'Bienvenue au petit Noah 🍼',
       subtitle: 'Vœux de toute la famille pour l\'arrivée de bébé.',
     },
     style: { primaryColor: '#7ECFC9', accentColor: '#F5B5C8', fontFamily: 'Plus Jakarta Sans' },
@@ -111,10 +111,22 @@ const WALLS = [
     title: 'Mur — Félicitations Équipe',
     data: {
       eyebrow: 'Bravo l\'équipe',
-      titleName: 'l\'Équipe',
+      titleName: 'Bravo l\'équipe ! 🚀',
       subtitle: 'Reconnaissance collective pour un accomplissement partagé.',
     },
     style: { primaryColor: '#E8A33D', accentColor: '#E8A33D', fontFamily: 'Plus Jakarta Sans' },
+  },
+  {
+    key: 'vision_group',
+    customName: 'demo-vision-board',
+    templateName: 'wall-of-wishes-craft',
+    title: 'Mur — Vision Board 2026',
+    data: {
+      eyebrow: 'Vision Board',
+      titleName: 'Objectifs & Motivations 🌟',
+      subtitle: 'Mes inspirations et rappels personnels pour l\'année.',
+    },
+    style: { primaryColor: '#6D4FC7', accentColor: '#F5B544', fontFamily: 'Plus Jakarta Sans' },
   },
 ];
 

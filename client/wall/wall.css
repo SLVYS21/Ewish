@@ -368,7 +368,8 @@
       column-gap: 14px;
     }
     .ww-shell--classic #notes-container > .pin {
-      display: block;
+      display: inline-block;
+      width: 100%;
       break-inside: avoid;
       -webkit-column-break-inside: avoid;
       page-break-inside: avoid;
@@ -1895,7 +1896,8 @@
       column-gap: 12px;
     }
     .ww-shell--modern #notes-container > .pin {
-      display: block;
+      display: inline-block;
+      width: 100%;
       break-inside: avoid;
       -webkit-column-break-inside: avoid;
       page-break-inside: avoid;
@@ -1906,7 +1908,7 @@
     @media (min-width: 1240px) { .ww-shell--modern #notes-container { columns: 5; } }
 
     /* â”€â”€ NOTE CARD    pastel mosaic tone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-    .pin {
+.ww-shell--modern .pin {
       position: relative;
       border-radius: 16px;
       padding: 13px;
@@ -1924,7 +1926,7 @@
       color: var(--mk-ink);
       min-width: 0;
     }
-    .pin::before {
+.ww-shell--modern .pin::before {
       content: '';
       position: absolute; inset: 0;
       background: var(--pin-bg, #FFEDF1);
@@ -1933,10 +1935,10 @@
       pointer-events: none;
       z-index: 0;
     }
-    .pin > * { position: relative; z-index: 1; }
-    .pin:hover { z-index: 2; transform: translateY(-3px); box-shadow: 0 10px 22px rgba(80,40,80,.16); }
-    .pin:active { transform: scale(.97); }
-    .pin.is-new { outline: 2.5px solid var(--accent-soft); outline-offset: 0; }
+.ww-shell--modern .pin > * { position: relative; z-index: 1; }
+.ww-shell--modern .pin:hover { z-index: 2; transform: translateY(-3px); box-shadow: 0 10px 22px rgba(80,40,80,.16); }
+.ww-shell--modern .pin:active { transform: scale(.97); }
+.ww-shell--modern .pin.is-new { outline: 2.5px solid var(--accent-soft); outline-offset: 0; }
 
     /* Tone palette (from Mur 1 design) */
     .tone-rose   { --pin-bg: #FFEDF1; }
@@ -1953,24 +1955,24 @@
     .tone-sky    .nm-text { color: #3E77C2; }
 
     /* Name row */
-    .pin .nm {
+.ww-shell--modern .pin .nm {
       font-family: var(--body);
       font-size: 11.5px; font-weight: 800;
       display: flex; align-items: center; gap: 7px;
       line-height: 1;
     }
-    .pin .av {
+.ww-shell--modern .pin .av {
       width: 22px; height: 22px; border-radius: 50%;
       display: grid; place-items: center;
       font-size: 9.5px; font-weight: 800; color: #fff;
       flex-shrink: 0;
     }
-    .pin .nm-text {
+.ww-shell--modern .pin .nm-text {
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     /* Text body */
-    .pin .tx {
+.ww-shell--modern .pin .tx {
       font-family: var(--body);
       font-size: 13.5px; line-height: 1.42;
       color: var(--mk-ink);
@@ -1979,34 +1981,34 @@
     }
 
     /* Media inside */
-    .pin .pin-photo {
+.ww-shell--modern .pin .pin-photo {
       display: block;
       width: 100%; height: 96px;
       object-fit: cover;
       border-radius: 11px;
       margin-top: 10px;
     }
-    .pin .pin-photo-placeholder {
+.ww-shell--modern .pin .pin-photo-placeholder {
       display: grid; place-items: center;
       height: 96px;
       color: rgba(255,255,255,.95);
     }
-    .pin .pin-photo-placeholder svg {
+.ww-shell--modern .pin .pin-photo-placeholder svg {
       filter: drop-shadow(0 1px 2px rgba(0,0,0,.18));
     }
-    .pin .pin-gifwrap {
+.ww-shell--modern .pin .pin-gifwrap {
       margin-top: 10px;
       border-radius: 11px;
       background: rgba(255,255,255,.6);
       display: grid; place-items: center;
       padding: 8px;
     }
-    .pin .pin-gifwrap img { width: 70px; height: 70px; display: block; }
-    .pin .pin-audio {
+.ww-shell--modern .pin .pin-gifwrap img { width: 70px; height: 70px; display: block; }
+.ww-shell--modern .pin .pin-audio {
       width: 100%; margin-top: 10px;
       accent-color: var(--mk-mur);
     }
-    .pin .mchip.mchip-audio {
+.ww-shell--modern .pin .mchip.mchip-audio {
       background: rgba(0,0,0,.06);
       color: var(--mk-ink);
     }

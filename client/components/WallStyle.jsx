@@ -581,15 +581,15 @@ export default function WallStyle({ pub, id, onSave, onPubUpdated }) {
 
       {/* ── Template picker ── */}
       <section className={s.section}>
-        <div className={s.sectionHead}>
+        {/* <div className={s.sectionHead}>
           <h3 className={s.sectionTitle}>Type de mur</h3>
           <p className={s.sectionHint}>Le style de base  les mots s'affichent différemment.</p>
-        </div>
-        <TemplatePicker current={templateName} onPick={handleTemplateSwitch} isPublished={pub?.published} />
-        {tplSwitching && (
+        </div> */}
+        {/* <TemplatePicker current={templateName} onPick={handleTemplateSwitch} isPublished={pub?.published} /> */}
+        {/* {tplSwitching && (
           <div className={s.tplSaving}><Loader2 size={12} style={{ animation: 'mk-spin .75s linear infinite' }} /> Changement en cours…</div>
         )}
-        {tplWarn && <div className={s.tplError}>{tplWarn}</div>}
+        {tplWarn && <div className={s.tplError}>{tplWarn}</div>} */}
       </section>
 
       {/* ── Fond du mur ── */}

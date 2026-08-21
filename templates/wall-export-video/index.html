@@ -90,6 +90,25 @@
     </button>
   </div>
 
+  <div style="margin-top: 16px; background: #fff; padding: 16px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+    <label style="font-size: 13px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+      Musique d'ambiance
+    </label>
+    
+    <select id="music-library" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 14px; background: #fafafa; cursor: pointer;">
+      <option value="">Aucune musique</option>
+      <option value="/music/acoustic-guitare.mp3">🎸 Guitare douce & Chaleureuse</option>
+      <option value="/music/piano-emotion.mp3">🎹 Piano émotion (Mariage / Nostalgie)</option>
+      <option value="/music/upbeat-party.mp3">🎉 Fête & Joie (Upbeat)</option>
+      <option value="custom">📁 Importer mon propre fichier MP3...</option>
+    </select>
+
+    <input type="file" id="audio-upload" accept="audio/mp3,audio/wav,audio/m4a" style="display: none;">
+    <audio id="bg-music" crossorigin="anonymous" style="display: none;"></audio>
+    <div id="audio-filename" style="font-size: 11.5px; margin-top: 8px; color: var(--gold); font-weight: 600; text-align: center;"></div>
+  </div>
+
   <p class="hint">
     Format : 1080×1920 (portrait), 30 fps, WebM.
     Le rendu se fait dans ton navigateur — ne ferme pas cet onglet pendant l'enregistrement.
@@ -969,6 +988,40 @@
     );
   });
 
+  var musicSelect = document.getElementById('music-library');
+  var audioInput = document.getElementById('audio-upload');
+  var audioElement = document.getElementById('bg-music');
+  var audioFilename = document.getElementById('audio-filename');
+  var audioCtx, audioSource, audioDest;
+
+  if (musicSelect) {
+    musicSelect.addEventListener('change', function(e) {
+      var val = e.target.value;
+      if (val === 'custom') {
+        audioInput.click();
+        musicSelect.value = ''; // Reset select to let them choose again if needed
+      } else if (val === '') {
+        audioElement.src = '';
+        audioFilename.textContent = '';
+      } else {
+        // Load predefined track from server
+        audioElement.src = val;
+        var trackName = musicSelect.options[musicSelect.selectedIndex].text;
+        audioFilename.textContent = '🎵 ' + trackName;
+      }
+    });
+  }
+
+  if (audioInput) {
+    audioInput.addEventListener('change', function(e) {
+      if (e.target.files && e.target.files[0]) {
+        var file = e.target.files[0];
+        audioElement.src = URL.createObjectURL(file);
+        audioFilename.textContent = '🎵 ' + file.name + ' (Fichier importé)';
+      }
+    });
+  }
+
   btnRecord.addEventListener('click', function () {
     console.log('[VideoExport] btnRecord clicked. Busy?', busy);
     if (busy) return;
@@ -984,6 +1037,28 @@
     recordLabel.textContent = 'Enregistrement…';
 
     var stream = canvas.captureStream(30);
+
+    /* --- AUDIO MERGING --- */
+    if (audioElement && audioElement.src) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          audioSource = audioCtx.createMediaElementSource(audioElement);
+          audioDest = audioCtx.createMediaStreamDestination();
+          audioSource.connect(audioDest);
+          audioSource.connect(audioCtx.destination); // Play to speakers
+        }
+        audioElement.currentTime = 0;
+        audioElement.play().catch(function(e) { console.warn('Audio play failed', e); });
+        
+        var combinedTracks = stream.getVideoTracks().concat(audioDest.stream.getAudioTracks());
+        stream = new MediaStream(combinedTracks);
+      } catch(err) {
+        console.warn('[VideoExport] Failed to merge audio:', err);
+      }
+    }
+    /* --------------------- */
+
     var mimeType = pickMimeType();
     var chunks = [];
     var recorder;
@@ -1001,6 +1076,9 @@
     };
     recorder.onstop = function () {
       console.log('[VideoExport] recorder.onstop triggered. Total chunks:', chunks.length);
+      if (audioElement && !audioElement.paused) {
+        audioElement.pause();
+      }
       var blob = new Blob(chunks, { type: mimeType });
       console.log('[VideoExport] Blob created, size:', blob.size);
       var url  = URL.createObjectURL(blob);
