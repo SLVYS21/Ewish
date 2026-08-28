@@ -78,7 +78,8 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef   = useRef(null);
 
-  const isWall  = WALL_TEMPLATES.has(pub.templateName);
+  const isWall     = WALL_TEMPLATES.has(pub.templateName);
+  const isEnvelope = pub.templateName === 'myenvelope';
   const fallbackBg = TEMPLATE_COLORS[pub.templateName] || 'linear-gradient(135deg,#FFB3C1,#E11D48)';
   const thumbBg = pub.thumbnail
     ? `url(${pub.thumbnail}) center/cover no-repeat`
@@ -90,7 +91,9 @@ function CreationRow({ pub, tplLabel, onDelete, onDup, mode = 'mine' }) {
   const isReceived = mode === 'received';
   const editPath = isWall
     ? `/ewish-admin/wall/${pub._id}`
-    : `/ewish-admin/ewish/edit/${pub._id}`;
+    : isEnvelope
+      ? `/card-editor?id=${pub._id}`
+      : `/ewish-admin/ewish/edit/${pub._id}`;
 
   // Row 3 URL: show domain/customName (readable slug)
   const displayUrl = pub.customName
