@@ -400,54 +400,59 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       const baseFee = canBypass ? 0 : 1500;
       const envelopePrice = needsFirstEscrow ? (baseFee + giftFcfa) : owedGiftFcfa;
 
-      if (!feexpayReference) {
-        return res.status(402).json({
-          error: needsGiftTopUp
-            ? `Paiement requis pour le nouveau cadeau : ${envelopePrice} FCFA.`
-            : `Paiement requis : ${envelopePrice} FCFA.`,
-          code:  'PAYMENT_REQUIRED',
-          creditsRequired: 0,
-          priceFCFA: envelopePrice,
-          topUp: needsGiftTopUp,
-        });
-      }
+      /* Bypass paywall + aucun cadeau → rien à provisionner, on publie gratuitement.
+         Sans ce court-circuit on renverrait PAYMENT_REQUIRED avec priceFCFA:0 et
+         le client resterait bloqué (FeexPay ne s'ouvre pas pour un montant nul). */
+      if (envelopePrice > 0) {
+        if (!feexpayReference) {
+          return res.status(402).json({
+            error: needsGiftTopUp
+              ? `Paiement requis pour le nouveau cadeau : ${envelopePrice} FCFA.`
+              : `Paiement requis : ${envelopePrice} FCFA.`,
+            code:  'PAYMENT_REQUIRED',
+            creditsRequired: 0,
+            priceFCFA: envelopePrice,
+            topUp: needsGiftTopUp,
+          });
+        }
 
-      /* Vérification FeexPay (idempotent : ne re-vérifie pas si Transaction SUCCESS). */
-      const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
-      if (!existingTx || existingTx.status !== 'SUCCESS') {
-        let verifyRes;
-        try {
-          verifyRes = await feexpay.verify(feexpayReference);
-        } catch (err) {
-          console.error('[publish] FeexPay verify failed', err.message);
-          return res.status(502).json({
-            error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
-            code:  'FEEXPAY_UNAVAILABLE',
+        /* Vérification FeexPay (idempotent : ne re-vérifie pas si Transaction SUCCESS). */
+        const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
+        if (!existingTx || existingTx.status !== 'SUCCESS') {
+          let verifyRes;
+          try {
+            verifyRes = await feexpay.verify(feexpayReference);
+          } catch (err) {
+            console.error('[publish] FeexPay verify failed', err.message);
+            return res.status(502).json({
+              error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
+              code:  'FEEXPAY_UNAVAILABLE',
+            });
+          }
+          if (verifyRes.status !== 'SUCCESSFUL') {
+            return res.status(402).json({
+              error: 'Paiement FeexPay non confirmé.',
+              code:  'FEEXPAY_NOT_SUCCESSFUL',
+              status: verifyRes.status,
+            });
+          }
+          if (verifyRes.amount < envelopePrice) {
+            return res.status(402).json({
+              error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${envelopePrice} FCFA).`,
+              code:  'FEEXPAY_UNDERPAID',
+            });
+          }
+          const tx = existingTx || new Transaction({
+            adminId:       req.admin.id,
+            transactionId: feexpayReference,
+            amount:        verifyRes.amount,
+            credits:       0,
+            source:        'feexpay',
+            paymentData:   verifyRes.raw,
           });
+          tx.status = 'SUCCESS';
+          await tx.save();
         }
-        if (verifyRes.status !== 'SUCCESSFUL') {
-          return res.status(402).json({
-            error: 'Paiement FeexPay non confirmé.',
-            code:  'FEEXPAY_NOT_SUCCESSFUL',
-            status: verifyRes.status,
-          });
-        }
-        if (verifyRes.amount < envelopePrice) {
-          return res.status(402).json({
-            error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${envelopePrice} FCFA).`,
-            code:  'FEEXPAY_UNDERPAID',
-          });
-        }
-        const tx = existingTx || new Transaction({
-          adminId:       req.admin.id,
-          transactionId: feexpayReference,
-          amount:        verifyRes.amount,
-          credits:       0,
-          source:        'feexpay',
-          paymentData:   verifyRes.raw,
-        });
-        tx.status = 'SUCCESS';
-        await tx.save();
       }
       priceFCFA = envelopePrice;
     }
