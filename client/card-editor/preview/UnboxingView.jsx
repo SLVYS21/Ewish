@@ -247,7 +247,7 @@ export default function UnboxingView({ onBack, publicMode = false }) {
                 }}
                 title="Voir le dos"
               >
-                <InsideRightPage theme={theme} texts={texts} />
+                <InsideRightPage theme={theme} texts={texts} animateMessage={isOpen} />
               </div>
               <div className="ce-book-crease" />
             </motion.div>
