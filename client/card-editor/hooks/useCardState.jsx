@@ -253,8 +253,10 @@ export const CardStateProvider = ({ children }) => {
   /* ── Autosave draft ──────────────────────────────────────────────────
      Debounced (~1.2s). Creates the publication on first meaningful edit,
      then PATCHes on every subsequent change. Puts ?id=XXX in the URL so
-     a refresh reopens the same draft. Skips while publishing or once
-     the card is published (nothing more to draft). */
+     a refresh reopens the same draft. Continues after publish : le
+     lecteur public /c/:slug relit pub.data à chaque requête, donc un
+     PATCH post-publish se propage immédiatement. On skip juste pendant
+     la fenêtre de publication pour éviter la course avec publishCard. */
   const draftPayload = useMemo(() => ({
     occasionId, themeId, envelopeColor, envelopeTexture, linerChoice,
     confettiStyle, unboxingBg, texts, photo, gift,
@@ -267,7 +269,7 @@ export const CardStateProvider = ({ children }) => {
 
   useEffect(() => {
     if (skipNextSaveRef.current) { skipNextSaveRef.current = false; return; }
-    if (publishState === 'publishing' || publishState === 'published') return;
+    if (publishState === 'publishing') return;
 
     const hasContent = (texts.subtitle || '').trim().length > 0;
     if (!draftId && !hasContent) return;   // wait until user starts typing
