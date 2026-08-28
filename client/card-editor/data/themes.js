@@ -35,7 +35,8 @@ export const THEMES = {
 
     envelope: {
       color: '#EDE0CC',
-      texture: 'linen',                 // linen | smooth | kraft | satin
+      texture: 'linen',                 // linen | smooth | kraft | satin (fallback procédural)
+      paperUrl: '/textures/paper-cream.webp',
       linerPattern: { imageUrl: '/backgrounds/theme-floral/floral_liner.webp', svg: 'floral_liner' },
       waxSeal:  { color: '#B4614A', letter: '' },
     },
@@ -143,6 +144,10 @@ export const THEMES = {
     envelope: {
       color: '#FF3E88',
       texture: 'smooth',
+      // Grain ivoire posé en multiply pour donner du relief sans altérer le rose vif.
+      paperUrl: '/textures/paper-ivory.webp',
+      paperBlend: 'multiply',
+      paperOpacity: 0.55,
       linerPattern: { imageUrl: null, svg: 'confetti_liner' },
       waxSeal:  { color: '#FFC145', letter: '' },
     },
@@ -249,6 +254,7 @@ export const THEMES = {
     envelope: {
       color: '#111111',
       texture: 'smooth',
+      paperUrl: '/textures/paper-black.webp',
       linerPattern: { imageUrl: null, svg: 'gold_liner' },
       waxSeal:  { color: '#C9A961', letter: '' },
     },

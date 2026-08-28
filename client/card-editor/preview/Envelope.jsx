@@ -51,6 +51,16 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
 
   const foil = foilTone(color);
 
+  // Photo paper texture (WebP, scanné). Deux modes :
+  //   - direct   : la texture EST le fond de l'enveloppe (couleur intégrée dans l'image)
+  //   - multiply : la texture est posée en overlay grain sur env.color (garde la teinte du thème)
+  // background-position: center 8% pousse le watermark d'origine hors zone visible.
+  const paperUrl     = env.paperUrl || null;
+  const paperBlend   = env.paperBlend || 'normal';
+  const paperOpacity = env.paperOpacity ?? 1;
+  const hasPaperImg  = Boolean(paperUrl);
+  const paperIsDirect = hasPaperImg && paperBlend === 'normal';
+
   return (
     <div className="ce-envelope" style={{ position: 'relative', width: '100%', height: '100%' }}>
       {/* -----  BODY (back panel) — flat matte paper with edge shading  ----- */}
@@ -67,7 +77,17 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
         ].join(', '),
         overflow: 'hidden',
       }}>
-        {textureImg && (
+        {hasPaperImg && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${paperUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 8%',
+            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+            opacity: paperOpacity,
+          }} />
+        )}
+        {!hasPaperImg && textureImg && (
           <div style={{
             position: 'absolute', inset: 0,
             backgroundImage: textureImg,
@@ -122,6 +142,16 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
         background: color,
         clipPath: 'polygon(0 100%, 50% 0, 100% 100%)',
       }}>
+        {hasPaperImg && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${paperUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 8%',
+            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+            opacity: paperOpacity,
+          }} />
+        )}
         {/* Subtle top-edge fold shadow (crease at the apex) */}
         <div style={{
           position: 'absolute', inset: 0,
@@ -130,7 +160,7 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
           opacity: 0.5,
           pointerEvents: 'none',
         }} />
-        {textureImg && (
+        {!hasPaperImg && textureImg && (
           <div style={{
             position: 'absolute', inset: 0,
             backgroundImage: textureImg,
@@ -159,7 +189,18 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             backfaceVisibility: 'hidden',
             filter: `drop-shadow(0 4px 6px rgba(0,0,0,0.20))`,
+            overflow: 'hidden',
           }}>
+            {hasPaperImg && (
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: `url(${paperUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center 8%',
+                mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+                opacity: paperOpacity,
+              }} />
+            )}
             {/* Fold-line shadow near the hinge (top) for depth */}
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: '18%',
@@ -167,7 +208,7 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
               opacity: 0.35,
               pointerEvents: 'none',
             }} />
-            {textureImg && (
+            {!hasPaperImg && textureImg && (
               <div style={{
                 position: 'absolute', inset: 0,
                 backgroundImage: textureImg,
