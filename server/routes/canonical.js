@@ -5,18 +5,15 @@
 
    Nouveau : le template `myenvelope` (créé via /card-editor) est
    rendu directement par la SPA React, pas par un template statique.
-   → on renvoie le shell React (prod) ou on redirige vers le dev
-   server Vite (dev).
+   La SPA vit sur le DO Static Site (app.mykado.store) — Express
+   (go.mykado.store) n'a PAS le build React (client/dist n'est pas
+   copié dans l'image Docker, voir Dockerfile). On redirige donc
+   vers APP_URL, comme wallShell.js le fait pour /m/:slug.
    ================================================================ */
 
 const router = require('express').Router();
-const path   = require('path');
-const fs     = require('fs');
 const Publication = require('../models/Publication');
 
-const PROD           = process.env.NODE_ENV === 'production';
-const REACT_DIST     = path.join(__dirname, '../../client/dist');
-const REACT_INDEX    = path.join(REACT_DIST, 'index.html');
 const SPA_TEMPLATES  = new Set(['myenvelope']);
 const APP_HOST_DEV   = process.env.APP_HOST_DEV || 'http://localhost:3000';
 
@@ -36,15 +33,21 @@ function serverError(res) {
   return res.status(500).send('<h1>Erreur serveur</h1>');
 }
 
-function serveSpa(req, res) {
-  if (!PROD) {
-    return res.redirect(302, `${APP_HOST_DEV}${req.originalUrl}`);
-  }
-  if (!fs.existsSync(REACT_INDEX)) {
-    return res.status(503).send('React app not built. Run: cd client && npm run build');
-  }
-  res.setHeader('Cache-Control', 'no-store');
-  return res.sendFile(REACT_INDEX);
+/* Résout l'URL du frontend React (SPA). Aligné sur shortlinks.js:resolveAppUrl. */
+function resolveAppUrl(req) {
+  const host = String(req.hostname || '').toLowerCase();
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
+  if (isLocal) return APP_HOST_DEV;
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/+$/, '');
+  const appHost = process.env.APP_HOST || 'app.mykado.store';
+  return `${req.protocol}://${appHost}`;
+}
+
+function redirectToSpa(req, res, prefix, slug) {
+  const appUrl = resolveAppUrl(req);
+  const qIdx = req.originalUrl.indexOf('?');
+  const search = qIdx >= 0 ? req.originalUrl.slice(qIdx) : '';
+  return res.redirect(302, `${appUrl}/${prefix}/${encodeURIComponent(slug)}${search}`);
 }
 
 async function handleCanonical(prefix, slug, req, res) {
@@ -61,9 +64,11 @@ async function handleCanonical(prefix, slug, req, res) {
       }
     }
 
-    // Card-editor cards live in the React SPA — no static template file.
+    // Card-editor cards live in the React SPA hosted on app.mykado.store.
+    // Express n'a pas le build React → redirect vers APP_URL (même pattern
+    // que wallShell.js pour /m/:slug).
     if (SPA_TEMPLATES.has(pub.templateName)) {
-      return serveSpa(req, res);
+      return redirectToSpa(req, res, prefix, pub.slug);
     }
 
     // Legacy templates: redirect to /site/:templateName/:customName
