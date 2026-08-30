@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useCardState } from '../hooks/useCardState';
 import { ShareView, buildShareUrl } from '../../pages/SharePage';
 import { getShortLink } from '../../utils/api';
@@ -20,7 +20,7 @@ import { useAuth } from '../../admin/context/AuthContext';
 
 const CARD_PUBLISH_FEE_FCFA = 1500;
 
-export default function ShareStep({ onOpenUnboxing }) {
+function ShareStep({ onOpenUnboxing }, ref) {
   const { user } = useAuth();
   const {
     texts, occasion, gift,
@@ -79,6 +79,10 @@ export default function ShareStep({ onOpenUnboxing }) {
       });
     }
   };
+
+  /* Expose startPublish au parent (EnvelopeEditorLayout) pour que le bouton
+     footer permanent puisse déclencher la publication depuis l'onglet Partage. */
+  useImperativeHandle(ref, () => ({ startPublish }), [startPublish]);
 
   return (
     <div className="mk-anim-fade-in">
@@ -195,3 +199,5 @@ export default function ShareStep({ onOpenUnboxing }) {
     </div>
   );
 }
+
+export default forwardRef(ShareStep);

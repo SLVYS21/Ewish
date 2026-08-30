@@ -109,42 +109,57 @@ export const CardStateProvider = ({ children }) => {
     setTexts(prev => ({ ...prev, subtitle: name }));
   }, []);
 
+  /* Payload PATCH/POST vers les nouveaux champs plats du back (Publication.js).
+     Remplace l'ancien blob data.kind='myenvelope'. Le back shallow-merge les
+     sous-objets (envelopeTheme, envelopeTexts, envelopeGift) — voir
+     server/routes/publication.js PATCH /publications/:id. */
+  const buildEnvelopePayload = useCallback(() => ({
+    envelopeOccasion: occasionId,
+    envelopeTheme: {
+      id:      themeId,
+      color:   envelopeColor,
+      texture: envelopeTexture,
+      liner:   linerChoice,
+    },
+    envelopeTexts: {
+      title:        texts.title || '',
+      recipient:    texts.subtitle || '',
+      photoCaption: texts.photoCaption || '',
+      message:      texts.message || '',
+      signature:    texts.signature || '',
+      backNote:     texts.backNote || '',
+    },
+    envelopePhoto: photo || '',
+    envelopeGift: {
+      enabled:  !!gift.enabled,
+      amount:   Number(gift.amount) || 0,
+      currency: gift.currency || 'XOF',
+      message:  gift.message || '',
+    },
+    envelopeConfetti:   confettiStyle,
+    envelopeUnboxingBg: unboxingBg,
+  }), [occasionId, themeId, envelopeColor, envelopeTexture, linerChoice,
+       texts, photo, gift, confettiStyle, unboxingBg]);
+
   const publishCard = useCallback(async ({ feexpayReference } = {}) => {
     setPublishState('publishing');
     setPublishError(null);
     let workingId = draftId;
     try {
-      // Everything the public renderer needs to reconstruct the card.
-      // Kept under `data` so we don't collide with the Publication model's
-      // top-level fields (title, style, etc.).
-      const cardData = {
-        kind:            'myenvelope',
-        occasionId,
-        themeId,
-        envelopeColor,
-        envelopeTexture,
-        linerChoice,
-        confettiStyle,
-        unboxingBg,
-        texts,
-        photo,
-        gift,
-        recipient: texts.subtitle || '',
-        occasion:  occasionId,
-      };
+      const envelopePayload = buildEnvelopePayload();
       const title = `${texts.title || 'Carte'} — ${texts.subtitle || 'myKado'}`;
 
-      // Reuse the autosave draft if one exists; otherwise create fresh + flush data.
+      // Reuse the autosave draft if one exists; otherwise create fresh + flush.
       if (workingId) {
-        await updatePublication(workingId, { title, data: cardData });
+        await updatePublication(workingId, { title, ...envelopePayload });
       } else {
         const customName = 'card-' + Math.random().toString(36).slice(2, 10);
         const created = await createPublication({
           templateName: 'myenvelope',
           customName,
           title,
-          data: cardData,
           style: { primaryColor: '#FF5470', accentColor: '#FFC145' },
+          ...envelopePayload,
         });
         workingId = created.data._id;
         setDraftId(workingId);
@@ -171,7 +186,7 @@ export const CardStateProvider = ({ children }) => {
       }
       return { ok: false, error: message };
     }
-  }, [themeId, texts, photo, occasionId, envelopeColor, envelopeTexture, linerChoice, confettiStyle, unboxingBg, gift, draftId]);
+  }, [buildEnvelopePayload, texts.title, texts.subtitle, draftId]);
 
   const resetPublish = useCallback(() => {
     setPublishState('idle');
@@ -180,16 +195,21 @@ export const CardStateProvider = ({ children }) => {
   }, []);
 
   /* payGiftTopUp : carte déjà publiée, l'utilisateur augmente le gift.
-     On PATCH la nouvelle valeur puis on retente publishPublication.
-     Le serveur renvoie 402 avec priceFCFA = delta (owedGiftFcfa) — le caller
-     (KadoStep) ouvre FeexPay pour cette portion. On ne touche PAS publishState
-     pour ne pas casser l'affichage 'published' pendant le checkout. */
+     On PATCH la nouvelle valeur (champ envelopeGift plat) puis on retente
+     publishPublication. Le serveur renvoie 402 avec priceFCFA = delta
+     (owedGiftFcfa) — le caller (KadoStep) ouvre FeexPay pour cette portion. */
   const payGiftTopUp = useCallback(async ({ feexpayReference } = {}) => {
     const workingId = publishedPub?._id || draftId;
     if (!workingId) return { ok: false, error: 'Publication introuvable.' };
     try {
-      const nextData = { ...(publishedPub?.data || {}), gift };
-      await updatePublication(workingId, { data: nextData });
+      await updatePublication(workingId, {
+        envelopeGift: {
+          enabled:  !!gift.enabled,
+          amount:   Number(gift.amount) || 0,
+          currency: gift.currency || 'XOF',
+          message:  gift.message || '',
+        },
+      });
       const res = await publishPublication(workingId, feexpayReference ? { feexpayReference } : {});
       const finalPub = res?.data || null;
       if (finalPub) setPublishedPub(finalPub);
@@ -211,22 +231,68 @@ export const CardStateProvider = ({ children }) => {
     try {
       const res = await getPublicationById(id);
       const pub = res?.data;
-      if (!pub || !pub.data) return;
-      const d = pub.data;
+      if (!pub) return;
 
       // Prevent the autosave effect from firing on the hydration setState burst.
       skipNextSaveRef.current = true;
 
-      if (d.occasionId)      setOccasionId(d.occasionId);
-      if (d.themeId)         setThemeId(d.themeId);
-      if (d.envelopeColor)   setEnvelopeColor(d.envelopeColor);
-      if (d.envelopeTexture) setEnvelopeTexture(d.envelopeTexture);
-      if (d.linerChoice)     setLinerChoice(d.linerChoice);
-      if (d.confettiStyle)   setConfettiStyle(d.confettiStyle);
-      if (d.unboxingBg)      setUnboxingBg(d.unboxingBg);
-      if (d.texts)           setTexts(prev => ({ ...prev, ...d.texts }));
-      if (d.photo)           setPhoto(d.photo);
-      if (d.gift)            setGift(d.gift);
+      /* Lecture prioritaire des nouveaux champs plats (envelopeXxx).
+         Fallback sur pub.data.* pour les enveloppes pré-migration. */
+      const d = pub.data || {};
+      const t = pub.envelopeTheme || {};
+      const tx = pub.envelopeTexts || {};
+      const g = pub.envelopeGift || null;
+
+      const occ = pub.envelopeOccasion || d.occasionId;
+      if (occ) setOccasionId(occ);
+
+      const themeIdRaw = t.id || d.themeId;
+      if (themeIdRaw) setThemeId(themeIdRaw);
+
+      const color = t.color || d.envelopeColor;
+      if (color) setEnvelopeColor(color);
+
+      const texture = t.texture || d.envelopeTexture;
+      if (texture) setEnvelopeTexture(texture);
+
+      const liner = t.liner || d.linerChoice;
+      if (liner) setLinerChoice(liner);
+
+      const conf = pub.envelopeConfetti || d.confettiStyle;
+      if (conf) setConfettiStyle(conf);
+
+      const bg = pub.envelopeUnboxingBg || d.unboxingBg;
+      if (bg) setUnboxingBg(bg);
+
+      const hasNewTexts = tx && (tx.title || tx.recipient || tx.message);
+      if (hasNewTexts) {
+        setTexts(prev => ({
+          ...prev,
+          title:        tx.title        || prev.title,
+          subtitle:     tx.recipient    || prev.subtitle,
+          photoCaption: tx.photoCaption || prev.photoCaption,
+          message:      tx.message      || prev.message,
+          signature:    tx.signature    || prev.signature,
+          backNote:     tx.backNote     || prev.backNote,
+        }));
+      } else if (d.texts) {
+        setTexts(prev => ({ ...prev, ...d.texts }));
+      }
+
+      const photoUrl = pub.envelopePhoto || d.photo;
+      if (photoUrl) setPhoto(photoUrl);
+
+      if (g && (g.enabled || g.amount)) {
+        setGift({
+          enabled:  !!g.enabled,
+          amount:   Number(g.amount) || 0,
+          currency: g.currency || 'XOF',
+          message:  g.message || '',
+        });
+      } else if (d.gift) {
+        setGift(d.gift);
+      }
+
       /* Auto-edited flags so switching occasion later doesn't nuke the loaded
          title/message that the user has explicitly chosen and saved. */
       setTitleEdited(true);
@@ -239,8 +305,6 @@ export const CardStateProvider = ({ children }) => {
         setPublishedPub(pub);
         setPublishState('published');
         setCurrentStep(MAX_STEP);
-      } else if (typeof d.currentStep === 'number' && d.currentStep >= 1 && d.currentStep <= MAX_STEP) {
-        setCurrentStep(d.currentStep);
       }
     } catch (err) {
       // Silent : dashboard can only reach this for pubs the user owns, but
@@ -254,18 +318,33 @@ export const CardStateProvider = ({ children }) => {
      Debounced (~1.2s). Creates the publication on first meaningful edit,
      then PATCHes on every subsequent change. Puts ?id=XXX in the URL so
      a refresh reopens the same draft. Continues after publish : le
-     lecteur public /c/:slug relit pub.data à chaque requête, donc un
-     PATCH post-publish se propage immédiatement. On skip juste pendant
-     la fenêtre de publication pour éviter la course avec publishCard. */
-  const draftPayload = useMemo(() => ({
-    occasionId, themeId, envelopeColor, envelopeTexture, linerChoice,
-    confettiStyle, unboxingBg, texts, photo, gift,
-    currentStep,
-    recipient: texts.subtitle || '',
-    occasion:  occasionId,
-    kind:      'myenvelope',
+     lecteur public /c/:slug relit les champs envelope* à chaque requête,
+     donc un PATCH post-publish se propage immédiatement. On skip juste
+     pendant la fenêtre de publication pour éviter la course avec publishCard. */
+  const envelopeDraft = useMemo(() => ({
+    envelopeOccasion: occasionId,
+    envelopeTheme: {
+      id: themeId, color: envelopeColor, texture: envelopeTexture, liner: linerChoice,
+    },
+    envelopeTexts: {
+      title:        texts.title || '',
+      recipient:    texts.subtitle || '',
+      photoCaption: texts.photoCaption || '',
+      message:      texts.message || '',
+      signature:    texts.signature || '',
+      backNote:     texts.backNote || '',
+    },
+    envelopePhoto: photo || '',
+    envelopeGift: {
+      enabled:  !!gift.enabled,
+      amount:   Number(gift.amount) || 0,
+      currency: gift.currency || 'XOF',
+      message:  gift.message || '',
+    },
+    envelopeConfetti:   confettiStyle,
+    envelopeUnboxingBg: unboxingBg,
   }), [occasionId, themeId, envelopeColor, envelopeTexture, linerChoice,
-       confettiStyle, unboxingBg, texts, photo, gift, currentStep]);
+       confettiStyle, unboxingBg, texts, photo, gift]);
 
   useEffect(() => {
     if (skipNextSaveRef.current) { skipNextSaveRef.current = false; return; }
@@ -280,7 +359,7 @@ export const CardStateProvider = ({ children }) => {
       setSaveStatus('saving');
       try {
         if (draftId) {
-          await updatePublication(draftId, { data: draftPayload });
+          await updatePublication(draftId, envelopeDraft);
         } else {
           const title = `${texts.title || 'Carte'} — ${texts.subtitle || 'Brouillon'}`;
           const customName = 'card-' + Math.random().toString(36).slice(2, 10);
@@ -288,8 +367,8 @@ export const CardStateProvider = ({ children }) => {
             templateName: 'myenvelope',
             customName,
             title,
-            data: draftPayload,
             style: { primaryColor: '#FF5470', accentColor: '#FFC145' },
+            ...envelopeDraft,
           });
           const newId = res?.data?._id;
           if (newId) {
@@ -312,7 +391,7 @@ export const CardStateProvider = ({ children }) => {
       }
     }, 1200);
     return () => clearTimeout(timeout);
-  }, [draftPayload, draftId, publishState, texts.subtitle, texts.title]);
+  }, [envelopeDraft, draftId, publishState, texts.subtitle, texts.title]);
 
   const value = {
     occasionId, occasion, changeOccasion,

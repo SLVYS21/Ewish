@@ -12,7 +12,7 @@ import CreateEntrypoint from "./pages/CreateEntrypoint";
 import KadoSend from "./pages/KadoSend";
 import QuickCreateWall from "./pages/QuickCreateWall";
 import { CardStateProvider } from "./card-editor/hooks/useCardState";
-import CardEditorLayout from "./card-editor/components/CardEditorLayout";
+import EnvelopeEditorLayout from "./card-editor/components/EnvelopeEditorLayout";
 import CardPublicView from "./card-editor/preview/CardPublicView";
 
 import { AuthProvider, useAuth } from "./admin/context/AuthContext";
@@ -176,7 +176,7 @@ export default function App() {
           {/* Kado seul — envoi d'argent sans carte (placeholder pour l'instant) */}
           <Route path="/kado/send" element={<KadoSend />} />
 
-          <Route path="/card-editor" element={<CardStateProvider><CardEditorLayout /></CardStateProvider>} />
+          <Route path="/card-editor" element={<CardStateProvider><EnvelopeEditorLayout /></CardStateProvider>} />
 
           {/* Public route for published myenvelope cards (shared via /c/:slug) */}
           <Route path="/c/:slug" element={<CardPublicView />} />

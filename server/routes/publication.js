@@ -153,17 +153,26 @@ router.get('/public/slug/:slug', async (req, res) => {
     const pub = await Publication.findOne(query).lean();
     if (!pub) return res.status(404).json({ error: 'Not found' });
 
-    // Card-editor "myenvelope" cards need the full data object to reconstruct
-    // the card in the SPA. Everything under `data` is client-authored and safe.
+    // Card-editor "myenvelope" cards : renvoyer les champs plats typés
+    // (envelopeOccasion/envelopeTheme/envelopeTexts/envelopePhoto/envelopeGift)
+    // pour que le renderer SPA reconstruise la carte. `data` reste inclus
+    // en fallback pour les enveloppes non encore migrées.
     if (pub.templateName === 'myenvelope') {
       return res.json({
-        _id:          pub._id,
-        slug:         pub.slug,
-        templateName: pub.templateName,
-        customName:   pub.customName,
-        title:        pub.title,
-        data:         pub.data || {},
-        style:        pub.style || {},
+        _id:                pub._id,
+        slug:               pub.slug,
+        templateName:       pub.templateName,
+        customName:         pub.customName,
+        title:              pub.title,
+        envelopeOccasion:   pub.envelopeOccasion,
+        envelopeTheme:      pub.envelopeTheme,
+        envelopeTexts:      pub.envelopeTexts,
+        envelopePhoto:      pub.envelopePhoto,
+        envelopeGift:       pub.envelopeGift,
+        envelopeConfetti:   pub.envelopeConfetti,
+        envelopeUnboxingBg: pub.envelopeUnboxingBg,
+        data:               pub.data || {},
+        style:              pub.style || {},
       });
     }
 
@@ -276,10 +285,17 @@ router.post('/', requireOptionalAdmin, async (req, res) => {
 // PATCH update (save draft)
 // - data   : shallow-merged (preserves keys not sent)
 // - style  : shallow-merged
+// - envelope* : shallow-merged for sub-objects (theme, texts, gift)
 // - jarConfig : replaced entirely when present (it's a self-contained object)
 router.patch('/:id', requireOptionalAdmin, async (req, res) => {
   try {
-    const { data, style, jarConfig, decorations, widgets, photoTransforms, showBranding, brandingUrl, brandingText, invitationConfig, ...rest } = req.body;
+    const {
+      data, style, jarConfig, decorations, widgets, photoTransforms,
+      showBranding, brandingUrl, brandingText, invitationConfig,
+      envelopeOccasion, envelopeTheme, envelopeTexts, envelopePhoto,
+      envelopeGift, envelopeConfetti, envelopeUnboxingBg,
+      ...rest
+    } = req.body;
 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
@@ -332,6 +348,24 @@ router.patch('/:id', requireOptionalAdmin, async (req, res) => {
       update.invitationConfig = { ...(existing.invitationConfig || {}), ...invitationConfig };
     }
 
+    /* envelope* : sous-objets shallow-mergés pour permettre le PATCH partiel
+       (envoyer envelopeTexts: { title: 'X' } sans wiper message/signature/etc.).
+       Les scalaires (envelopeOccasion, envelopePhoto, envelopeConfetti, envelopeUnboxingBg)
+       sont remplacés directement s'ils sont fournis. */
+    if (envelopeOccasion !== undefined)   update.envelopeOccasion = envelopeOccasion;
+    if (envelopePhoto !== undefined)      update.envelopePhoto = envelopePhoto;
+    if (envelopeConfetti !== undefined)   update.envelopeConfetti = envelopeConfetti;
+    if (envelopeUnboxingBg !== undefined) update.envelopeUnboxingBg = envelopeUnboxingBg;
+    if (envelopeTheme !== undefined) {
+      update.envelopeTheme = { ...(existing.envelopeTheme || {}), ...envelopeTheme };
+    }
+    if (envelopeTexts !== undefined) {
+      update.envelopeTexts = { ...(existing.envelopeTexts || {}), ...envelopeTexts };
+    }
+    if (envelopeGift !== undefined) {
+      update.envelopeGift = { ...(existing.envelopeGift || {}), ...envelopeGift };
+    }
+
     const pub = await Publication.findByIdAndUpdate(req.params.id, update, { new: true });
     res.json(pub);
   } catch (e) { res.status(400).json({ error: e.message }); }
@@ -350,10 +384,15 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
     const isEnvelope     = existing.templateName === 'myenvelope';
     /* Gift attaché (Kado) : partagé entre myenvelope et les cartes legacy
-       (birthday/notre-film/forever/sanctuary/special) via data.gift.
+       (birthday/notre-film/forever/sanctuary/special).
+       - myenvelope : lit existing.envelopeGift (nouveau schéma typé)
+       - autres     : lit existing.data.gift (legacy)
+       Fallback data.gift sur myenvelope pendant la fenêtre de migration.
        Un montant XOF > 0 déclenche l'escrow FeexPay quel que soit le rôle,
        pour éviter les cadeaux gratuits non provisionnés. */
-    const giftCfg  = existing.data?.gift || {};
+    const giftCfg  = isEnvelope
+      ? (existing.envelopeGift?.enabled ? existing.envelopeGift : (existing.data?.gift || {}))
+      : (existing.data?.gift || {});
     const giftFcfa = (giftCfg.enabled && giftCfg.currency === 'XOF' && Number(giftCfg.amount) > 0)
       ? Math.floor(Number(giftCfg.amount))
       : 0;

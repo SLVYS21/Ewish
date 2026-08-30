@@ -18,19 +18,64 @@ function Hydrator({ pub, children }) {
   const state = useCardState();
 
   useEffect(() => {
-    if (!pub || !pub.data) return;
-    const d = pub.data;
+    if (!pub) return;
 
-    if (d.occasionId)      state.changeOccasion(d.occasionId);
-    if (d.themeId)         state.changeTheme(d.themeId);
-    if (d.envelopeColor)   state.setEnvelopeColor(d.envelopeColor);
-    if (d.envelopeTexture) state.setEnvelopeTexture(d.envelopeTexture);
-    if (d.linerChoice)     state.setLinerChoice(d.linerChoice);
-    if (d.confettiStyle)   state.setConfettiStyle(d.confettiStyle);
-    if (d.unboxingBg)      state.setUnboxingBg(d.unboxingBg);
-    if (d.texts)           state.setTexts(prev => ({ ...prev, ...d.texts }));
-    if (d.photo)           state.setPhoto(d.photo);
-    if (d.gift)            state.setGift(d.gift);
+    /* Lecture des nouveaux champs plats (envelopeXxx). Fallback sur
+       pub.data.* pour les enveloppes pré-migration. */
+    const d = pub.data || {};
+    const t = pub.envelopeTheme || {};
+    const tx = pub.envelopeTexts || {};
+    const g = pub.envelopeGift;
+
+    const occ = pub.envelopeOccasion || d.occasionId;
+    if (occ) state.changeOccasion(occ);
+
+    const themeId = t.id || d.themeId;
+    if (themeId) state.changeTheme(themeId);
+
+    const color = t.color || d.envelopeColor;
+    if (color) state.setEnvelopeColor(color);
+
+    const texture = t.texture || d.envelopeTexture;
+    if (texture) state.setEnvelopeTexture(texture);
+
+    const liner = t.liner || d.linerChoice;
+    if (liner) state.setLinerChoice(liner);
+
+    const conf = pub.envelopeConfetti || d.confettiStyle;
+    if (conf) state.setConfettiStyle(conf);
+
+    const bg = pub.envelopeUnboxingBg || d.unboxingBg;
+    if (bg) state.setUnboxingBg(bg);
+
+    const hasNewTexts = tx && (tx.title || tx.recipient || tx.message);
+    if (hasNewTexts) {
+      state.setTexts(prev => ({
+        ...prev,
+        title:        tx.title        || prev.title,
+        subtitle:     tx.recipient    || prev.subtitle,
+        photoCaption: tx.photoCaption || prev.photoCaption,
+        message:      tx.message      || prev.message,
+        signature:    tx.signature    || prev.signature,
+        backNote:     tx.backNote     || prev.backNote,
+      }));
+    } else if (d.texts) {
+      state.setTexts(prev => ({ ...prev, ...d.texts }));
+    }
+
+    const photoUrl = pub.envelopePhoto || d.photo;
+    if (photoUrl) state.setPhoto(photoUrl);
+
+    if (g && (g.enabled || g.amount)) {
+      state.setGift({
+        enabled:  !!g.enabled,
+        amount:   Number(g.amount) || 0,
+        currency: g.currency || 'XOF',
+        message:  g.message || '',
+      });
+    } else if (d.gift) {
+      state.setGift(d.gift);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pub]);
 

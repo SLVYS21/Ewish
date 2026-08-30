@@ -56,12 +56,50 @@ const decorationSchema = new mongoose.Schema({
   hideAfter: { type: Number, default: 0}
 }, { _id: false });
 
+/* ── myenvelope sub-schemas ──────────────────────────────────────────
+   Champs plats typés pour les enveloppes (templateName='myenvelope').
+   Historiquement stockés sous data.* (data.kind='myenvelope', data.texts,
+   data.themeId, etc.). Migrés vers ces sous-schémas dédiés pour aligner
+   le back sur le pattern wishcards (typage + validation).
+   Voir server/scripts/migrate-myenvelope.js pour la migration. */
+const envelopeThemeSchema = new mongoose.Schema({
+  id:      { type: String, default: 'floral' },
+  color:   { type: String, default: '' },
+  texture: { type: String, enum: ['smooth', 'linen', 'kraft', 'satin'], default: 'linen' },
+  liner:   { type: String, default: 'theme' },
+}, { _id: false });
+
+const envelopeTextsSchema = new mongoose.Schema({
+  title:        { type: String, default: '' },
+  recipient:    { type: String, default: '' },
+  photoCaption: { type: String, default: '' },
+  message:      { type: String, default: '' },
+  signature:    { type: String, default: '' },
+  backNote:     { type: String, default: '' },
+}, { _id: false });
+
+const envelopeGiftSchema = new mongoose.Schema({
+  enabled:  { type: Boolean, default: false },
+  amount:   { type: Number,  default: 0 },
+  currency: { type: String,  default: 'XOF' },
+  message:  { type: String,  default: '' },
+}, { _id: false });
+
 const publicationSchema = new mongoose.Schema({
   templateName: { type: String, required: true },
   customName:   { type: String, required: true },
   title:        { type: String, default: 'My Wish' },
 
   data: { type: mongoose.Schema.Types.Mixed, default: {} },
+
+  /* ── myenvelope fields (templateName='myenvelope') ─────────────── */
+  envelopeOccasion:   { type: String, default: 'birthday' },
+  envelopeTheme:      { type: envelopeThemeSchema, default: () => ({}) },
+  envelopeTexts:      { type: envelopeTextsSchema, default: () => ({}) },
+  envelopePhoto:      { type: String, default: '' },
+  envelopeGift:       { type: envelopeGiftSchema, default: () => ({}) },
+  envelopeConfetti:   { type: String, default: 'default' },
+  envelopeUnboxingBg: { type: String, default: 'default' },
 
   jarConfig: {
     type: jarConfigSchema,

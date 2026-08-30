@@ -1,0 +1,339 @@
+/* ────────────────────────────────────────────────────────────────────
+   EnvelopeEditorLayout — Calqué sur client/pages/Editor.module.css.
+   Utilise les tokens globaux d'index.css (--brand, --mk-ink, --mk-body,
+   etc.) pour rester cohérent avec l'éditeur wishcards.
+   ──────────────────────────────────────────────────────────────────── */
+
+.root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #FFFFFF;
+  font-family: var(--mk-body);
+}
+
+/* ── Topbar ── */
+.topbar {
+  height: 58px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(255,255,255,.92);
+  border-bottom: 1px solid #F2E4EA;
+  backdrop-filter: blur(12px);
+  gap: 16px;
+}
+.topbarLeft   { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+.topbarCenter { flex-shrink: 0; }
+.topbarRight  { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
+
+.back {
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.back:hover { color: var(--brand); }
+
+.divider { width: 1px; height: 18px; background: var(--border); }
+
+.pubTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.saveStatus {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.saveDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.saveStatus[data-status="saving"] { background: rgba(0,0,0,0.05); color: var(--text-2); }
+.saveStatus[data-status="saved"]  { background: rgba(0,164,141,.10); color: var(--green); }
+.saveStatus[data-status="error"]  { background: rgba(225,29,72,.10); color: #E11D48; }
+
+.btnGhost {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-family: var(--mk-body);
+}
+.btnGhost:hover { background: var(--surface2); color: var(--text); }
+
+.btnPublish {
+  background: linear-gradient(135deg, #FF6F8B, #E11D48);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 22px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--mk-body);
+  box-shadow: 0 6px 18px rgba(225,29,72,.28);
+  white-space: nowrap;
+  transition: transform .18s, box-shadow .18s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.btnPublish:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(225,29,72,.38);
+}
+.btnPublish:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Step nav (horizontal 4-tab bar, calqué Editor.jsx stepNav) ── */
+.stepNav {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.stepNavBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  font-family: var(--mk-body);
+  color: var(--mk-ink-2);
+}
+.stepNavBtn:hover { background: #FFF1F4; }
+.stepNavBtnActive { border-bottom-color: #E11D48; color: var(--mk-ink); }
+.stepNavIcon {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  transition: transform 0.2s;
+}
+.stepNavBtnActive .stepNavIcon { transform: scale(1.12); color: #E11D48; }
+.stepNavLabel {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* ── Workspace (panel + preview) ── */
+.workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Panel (side edit column) ── */
+.panel {
+  width: 360px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #F2E4EA;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+}
+.panelMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.panelContent {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 24px 24px;
+  /* Micro-transition douce sur switch de tab. */
+  animation: fadeIn 150ms ease-out;
+}
+
+/* Footer permanent (Continuer / Publier). Reste toujours visible en bas
+   du panel, ne recouvre pas le contenu (flex item, pas position:absolute). */
+.panel :global(.ee-panel-footer) {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,.98) 30%);
+  display: flex;
+  gap: 8px;
+}
+.panel :global(.ee-footer-btn) {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: none;
+  font-family: var(--mk-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .15s ease;
+}
+.panel :global(.ee-footer-btn-primary) {
+  background: linear-gradient(135deg, #FF6F8B, #E11D48);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(225,29,72,.25);
+}
+.panel :global(.ee-footer-btn-primary:hover:not(:disabled)) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(225,29,72,.32);
+}
+.panel :global(.ee-footer-btn:disabled) {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.panel :global(.ee-spin) { animation: eeSpin 1s linear infinite; }
+@keyframes eeSpin { to { transform: rotate(360deg); } }
+.panelContent::-webkit-scrollbar { width: 8px; }
+.panelContent::-webkit-scrollbar-thumb { background: #E5DFEA; border-radius: 4px; }
+.panelContent::-webkit-scrollbar-thumb:hover { background: #D4CCDD; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Preview area ── */
+.preview {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #FDF7F3 0%, #F9EDF1 100%);
+  min-width: 0;
+}
+
+.previewInner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Mobile (viewport étroit uniquement) ── */
+.previewToggle { display: none; }
+
+@media (max-width: 760px) {
+  .workspace { flex-direction: column; }
+  .panel     { width: 100%; border-right: none; border-bottom: 1px solid #F2E4EA; }
+  .preview   { display: none; padding: 16px; }
+  .root[data-preview-open="true"] .preview { display: flex; flex: 1; }
+  .root[data-preview-open="true"] .panel   { display: none; }
+  .previewToggle { display: inline-flex; }
+  .topbar { padding: 0 12px; }
+  .pubTitle { display: none; }
+  .divider  { display: none; }
+  .panelContent { padding: 16px; }
+}
+
+/* ── Overrides des classes globales .ce-* du preview ─────────────
+   Les classes .ce-preview-nav / .ce-nav-btn / .ce-envelope-hint / .ce-stage
+   ont été conçues pour le fond nuit du wizard flashy. Sur fond clair, elles
+   deviennent illisibles. On les re-scope ici pour rester dans le style
+   Editor.jsx (light, rose myKado). */
+.root {
+  --ce-step-color: #E11D48;
+  --ce-step-color-strong: #B0173A;
+  --ce-step-glow: rgba(225,29,72,.25);
+}
+
+.preview :global(.ce-preview-nav) {
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+}
+.preview :global(.ce-nav-btn) {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 7px 13px;
+  font-size: 12.5px;
+}
+.preview :global(.ce-nav-btn:hover) {
+  background: #FFF1F4;
+  color: var(--text);
+  border-color: #FBCFE0;
+}
+.preview :global(.ce-nav-btn.active) {
+  background: linear-gradient(135deg, #FF6F8B, #E11D48);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(225,29,72,.25);
+}
+.preview :global(.ce-envelope-hint) {
+  color: var(--text-2);
+  text-shadow: none;
+  font-weight: 700;
+}
+.preview :global(.ce-stage) {
+  filter: drop-shadow(0 18px 32px rgba(0,0,0,.15)) drop-shadow(0 6px 12px rgba(0,0,0,.08));
+}
+.preview :global(.ce-canvas-container) { padding: 24px; }
+
+/* Panel inner tweaks — les composants .ce-* enfants (OccasionSelector, etc.)
+   utilisent leur propre padding, on garantit juste que le scroll marche. */
+.panelContent :global(.ce-content) { padding: 0; }
+
+/* ── Unboxing overlay ── */
+.unboxingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
