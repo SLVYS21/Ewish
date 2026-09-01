@@ -2248,6 +2248,9 @@
     0 12px 24px -12px rgba(0,0,0,0.35);
   overflow: hidden;
 }
+.ce-page-frame.ce-page-frame-envelope {
+  overflow: visible !important;
+}
 .ce-page-frame.ce-spread { display: flex; }
 .ce-spread-crease {
   width: 8px;

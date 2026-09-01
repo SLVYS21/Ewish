@@ -69,12 +69,14 @@
   align-items: stretch;
   max-width: 1080px;
   margin: 0 auto;
+  perspective: 1400px;
 }
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;
     gap: 24px;
     max-width: 420px;
+    perspective: none;
   }
 }
 
@@ -155,6 +157,27 @@
     inset 0 -1px 1px rgba(0, 0, 0, 0.5),
     0 34px 60px -18px rgba(193, 59, 59, 0.32),
     0 14px 28px -12px rgba(45, 32, 14, 0.18);
+}
+
+/* ─── 3D Transforms (Phones facing each other) ─── */
+@media (min-width: 901px) {
+  .card:first-child .phone {
+    transform: rotateY(18deg) rotateX(6deg) rotateZ(-2deg);
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .card:first-child:hover .phone {
+    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg);
+  }
+
+  .cardKado .phone {
+    transform: rotateY(-18deg) rotateX(6deg) rotateZ(2deg);
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .cardKado:hover .phone {
+    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg);
+  }
 }
 
 /* Écran (inner rounded rect) */

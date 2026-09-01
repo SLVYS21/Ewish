@@ -51,7 +51,7 @@ export default function CardPreviewRenderer() {
       const w = el.clientWidth - 64;
       const h = el.clientHeight - 64;
       let baseW, baseH;
-      if (view === 'envelope')      { baseW = ENV_W;      baseH = ENV_H; }
+      if (view === 'envelope')      { baseW = ENV_W;      baseH = ENV_H + 160; }
       else if (view === 'inside')   { baseW = CARD_W * 2 + 8; baseH = CARD_H; }
       else                          { baseW = CARD_W;     baseH = CARD_H; }
       const s = Math.min(w / baseW, h / baseH, 1);
@@ -83,8 +83,8 @@ export default function CardPreviewRenderer() {
         <div className="ce-stage" style={{ transform: `scale(${scale})` }}>
           {view === 'envelope' && (
             <div
-              className="ce-page-frame"
-              style={{ width: ENV_W, height: ENV_H, background: 'transparent', boxShadow: 'none' }}
+              className="ce-page-frame ce-page-frame-envelope"
+              style={{ width: ENV_W, height: ENV_H, background: 'transparent', boxShadow: 'none', overflow: 'visible' }}
               onClick={() => setEnvOpen(o => !o)}
               role="button"
             >

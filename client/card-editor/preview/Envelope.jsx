@@ -27,19 +27,18 @@ function foilTone(envColor) {
 }
 
 /**
- * Envelope — realistic paper envelope with foil interior.
- *
- * Base size 500 x 360. Consumers scale via CSS transform.
+ * Envelope — realistic 3D paper envelope with foil interior and animated flap.
  *
  * Props:
  *  - theme
- *  - open      : bool, whether the top flap is rotated back
- *  - showBack  : bool, if true render only the closed *back* face (no flap logic)
+ *  - open      : bool, whether the top flap is rotated open
+ *  - showBack  : bool, if true render only the closed back face (no flap logic)
+ *  - onSealClick : callback when the wax seal is clicked
  */
 export default function Envelope({ theme, open = false, showBack = false, onSealClick = null }) {
   const env = theme.envelope;
   const color = env.color;
-  const linerSpec = env.linerPattern;
+  const linerSpec = env.linerPattern || {};
   const texture = env.texture || 'smooth';
 
   const edge = shade(color, -0.22);
@@ -51,10 +50,6 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
 
   const foil = foilTone(color);
 
-  // Photo paper texture (WebP, scanné). Deux modes :
-  //   - direct   : la texture EST le fond de l'enveloppe (couleur intégrée dans l'image)
-  //   - multiply : la texture est posée en overlay grain sur env.color (garde la teinte du thème)
-  // background-position: center 8% pousse le watermark d'origine hors zone visible.
   const paperUrl     = env.paperUrl || null;
   const paperBlend   = env.paperBlend || 'normal';
   const paperOpacity = env.paperOpacity ?? 1;
@@ -62,20 +57,24 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
   const paperIsDirect = hasPaperImg && paperBlend === 'normal';
 
   return (
-    <div className="ce-envelope" style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {/* -----  BODY (back panel) — flat matte paper with edge shading  ----- */}
+    <div className="ce-envelope" style={{ position: 'relative', width: '100%', height: '100%', transformStyle: 'preserve-3d' }}>
+      
+      {/* ===== 1. BODY (Back Panel) — sturdy back plate with soft depth shadows ===== */}
       <div className="env-back" style={{
         position: 'absolute',
         inset: 0,
         background: color,
-        borderRadius: '3px',
+        borderRadius: '4px',
         boxShadow: [
-          '0 30px 60px -20px rgba(0,0,0,0.45)',        // drop shadow under envelope
-          '0 10px 20px -8px rgba(0,0,0,0.25)',
-          `inset 0 0 0 1px ${edge}`,                    // paper edge outline
-          `inset 0 -2px 6px ${shade(color, -0.18)}`,   // bottom edge shading
+          '0 35px 70px -20px rgba(0,0,0,0.48)',
+          '0 15px 30px -10px rgba(0,0,0,0.28)',
+          '0 4px 10px rgba(0,0,0,0.14)',
+          `inset 0 0 0 1px ${edge}`,
+          `inset 0 1px 0 0 ${shade(color, 0.15)}`,
+          `inset 0 -3px 8px ${shade(color, -0.20)}`,
         ].join(', '),
         overflow: 'hidden',
+        zIndex: 0,
       }}>
         {hasPaperImg && (
           <div style={{
@@ -102,45 +101,83 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
             mixBlendMode: 'overlay',
           }} />
         )}
-
-        {/* Construction seams — the diagonals of the four folded back flaps.
-            Rendered as an SVG on top of the body, showing where the paper meets. */}
-        <svg
-          viewBox="0 0 500 360"
-          preserveAspectRatio="none"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-        >
-          {/* Two long diagonals from top corners meeting near the bottom-center */}
-          <line x1="0"   y1="0"   x2="250" y2="220" stroke={seam} strokeWidth="0.8" opacity="0.55" />
-          <line x1="500" y1="0"   x2="250" y2="220" stroke={seam} strokeWidth="0.8" opacity="0.55" />
-          {/* Two shorter diagonals from bottom corners meeting at the tip of the bottom flap */}
-          <line x1="0"   y1="360" x2="250" y2="220" stroke={seam} strokeWidth="0.8" opacity="0.55" />
-          <line x1="500" y1="360" x2="250" y2="220" stroke={seam} strokeWidth="0.8" opacity="0.55" />
-          {/* Very faint horizontal fold at the mid-line where flaps meet */}
-          <line x1="0"   y1="220" x2="500" y2="220" stroke={seam} strokeWidth="0.4" opacity="0.25" />
-        </svg>
+        {/* Subtle realistic paper curvature vignette */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.06) 0%, transparent 60%, rgba(0,0,0,0.10) 100%)',
+          pointerEvents: 'none',
+        }} />
       </div>
 
-      {/* -----  INTERIOR pocket — soft cream layer under the flap when open ----- */}
-      {open && (
-        <div className="env-pocket" style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: '58%',
-          clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-          overflow: 'hidden',
-          background: '#FDFCFA',
-          boxShadow: 'inset 0 12px 20px -12px rgba(0,0,0,0.35)',
-        }} />
-      )}
-
-      {/* -----  BOTTOM FLAP — clean triangle with fold crease  --------------- */}
-      <div className="env-bottom-flap" style={{
+      {/* ===== 2. INTERIOR LINER — luxurious foil / pattern seen inside the throat ===== */}
+      <div className="env-interior-liner" style={{
         position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        height: '58%',
+        top: 0, left: 0, right: 0,
+        height: '62%',
+        clipPath: 'polygon(0 0, 100% 0, 50% 88%)',
+        overflow: 'hidden',
+        zIndex: 1,
+        background: `
+          radial-gradient(ellipse at 30% 20%, ${foil.hi} 0%, transparent 55%),
+          radial-gradient(ellipse at 70% 80%, ${foil.hi} 0%, transparent 45%),
+          linear-gradient(160deg, ${foil.hi} 0%, ${foil.mid} 45%, ${foil.lo} 100%)
+        `,
+      }}>
+        {/* Crumpled foil texture */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: FOIL_CRUMPLE,
+          backgroundSize: '160px 160px',
+          mixBlendMode: 'overlay',
+          opacity: 0.55,
+          pointerEvents: 'none',
+        }} />
+        {/* Sheen sweep */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: `linear-gradient(115deg,
+            rgba(255,255,255,0.50) 0%,
+            rgba(255,255,255,0.12) 25%,
+            rgba(255,255,255,0.00) 45%,
+            rgba(255,255,255,0.10) 65%,
+            rgba(255,255,255,0.30) 100%)`,
+          mixBlendMode: 'screen',
+          pointerEvents: 'none',
+        }} />
+        {/* Pattern / Decor overlay */}
+        {linerSpec.imageUrl && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${linerSpec.imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            mixBlendMode: 'multiply',
+            opacity: 0.85,
+          }} />
+        )}
+        {!linerSpec.imageUrl && !linerSpec.color && (
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.75, mixBlendMode: 'multiply' }}>
+            <Decor spec={{ ...linerSpec, position: 'fill', opacity: 1 }} />
+          </div>
+        )}
+        {/* Deep throat shadow — gives realistic cavity depth */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 90%, rgba(0,0,0,0.55) 100%)',
+          mixBlendMode: 'multiply',
+          pointerEvents: 'none',
+        }} />
+      </div>
+
+      {/* ===== 3. LEFT FLAP — folding in over the interior ===== */}
+      <div className="env-left-flap" style={{
+        position: 'absolute',
+        top: 0, bottom: 0, left: 0,
+        width: '52%',
         background: color,
-        clipPath: 'polygon(0 100%, 50% 0, 100% 100%)',
+        clipPath: 'polygon(0 0, 100% 55%, 0 100%)',
+        filter: 'drop-shadow(4px 2px 9px rgba(0,0,0,0.22))',
+        zIndex: 2,
       }}>
         {hasPaperImg && (
           <div style={{
@@ -152,12 +189,78 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
             opacity: paperOpacity,
           }} />
         )}
-        {/* Subtle top-edge fold shadow (crease at the apex) */}
+        {!hasPaperImg && textureImg && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: textureImg,
+            mixBlendMode: textureBlend,
+            opacity: 0.55,
+          }} />
+        )}
+        {/* Crease shadow & bevel highlight */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, transparent 82%, ${shade(color, -0.18)} 100%)`, opacity: 0.6, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${shade(color, 0.12)} 0%, transparent 4%)`, opacity: 0.7, pointerEvents: 'none' }} />
+      </div>
+
+      {/* ===== 4. RIGHT FLAP — folding in over the interior ===== */}
+      <div className="env-right-flap" style={{
+        position: 'absolute',
+        top: 0, bottom: 0, right: 0,
+        width: '52%',
+        background: color,
+        clipPath: 'polygon(100% 0, 0 55%, 100% 100%)',
+        filter: 'drop-shadow(-4px 2px 9px rgba(0,0,0,0.22))',
+        zIndex: 2,
+      }}>
+        {hasPaperImg && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${paperUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 8%',
+            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+            opacity: paperOpacity,
+          }} />
+        )}
+        {!hasPaperImg && textureImg && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: textureImg,
+            mixBlendMode: textureBlend,
+            opacity: 0.55,
+          }} />
+        )}
+        {/* Crease shadow & bevel highlight */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(-135deg, transparent 82%, ${shade(color, -0.18)} 100%)`, opacity: 0.6, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${shade(color, 0.12)} 0%, transparent 4%)`, opacity: 0.7, pointerEvents: 'none' }} />
+      </div>
+
+      {/* ===== 5. BOTTOM FLAP — overlapping bottom pouch ===== */}
+      <div className="env-bottom-flap" style={{
+        position: 'absolute',
+        bottom: 0, left: 0, right: 0,
+        height: '58%',
+        background: color,
+        clipPath: 'polygon(0 100%, 50% 46%, 100% 100%)',
+        filter: 'drop-shadow(0 -5px 12px rgba(0,0,0,0.25))',
+        zIndex: 3,
+      }}>
+        {hasPaperImg && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${paperUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 8%',
+            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+            opacity: paperOpacity,
+          }} />
+        )}
+        {/* Top-edge fold crease & apex shadow */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: `linear-gradient(180deg, ${hinge} 0%, transparent 12%)`,
-          clipPath: 'polygon(0 100%, 50% 0, 100% 100%)',
-          opacity: 0.5,
+          background: `linear-gradient(180deg, ${hinge} 0%, transparent 14%)`,
+          clipPath: 'polygon(0 100%, 50% 46%, 100% 100%)',
+          opacity: 0.55,
           pointerEvents: 'none',
         }} />
         {!hasPaperImg && textureImg && (
@@ -170,7 +273,7 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
         )}
       </div>
 
-      {/* -----  TOP FLAP — animated open/close, foil interior  --------------- */}
+      {/* ===== 6. TOP FLAP — flips open/closed with 3D double-sided rendering ===== */}
       {!showBack && (
         <div className="env-top-flap" style={{
           position: 'absolute',
@@ -178,17 +281,19 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
           height: '58%',
           transformOrigin: 'top center',
           transformStyle: 'preserve-3d',
-          transform: open ? 'rotateX(-172deg)' : 'rotateX(0deg)',
-          transition: 'transform 900ms cubic-bezier(0.6, 0, 0.3, 1)',
+          transform: open ? 'rotateX(180deg)' : 'rotateX(0deg)',
+          transition: 'transform 850ms cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: open ? 1 : 6,
         }}>
-          {/* FRONT face — flat colored paper with subtle hinge shadow */}
+          {/* ----- A. FRONT FACE (Outer paper, seen when CLOSED) ----- */}
           <div style={{
             position: 'absolute', inset: 0,
             background: color,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             backfaceVisibility: 'hidden',
-            filter: `drop-shadow(0 4px 6px rgba(0,0,0,0.20))`,
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'translateZ(1px)',
+            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.24))',
             overflow: 'hidden',
           }}>
             {hasPaperImg && (
@@ -201,11 +306,11 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
                 opacity: paperOpacity,
               }} />
             )}
-            {/* Fold-line shadow near the hinge (top) for depth */}
+            {/* Fold crease shadow at top hinge */}
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: '18%',
               background: `linear-gradient(180deg, ${hinge}, transparent)`,
-              opacity: 0.35,
+              opacity: 0.4,
               pointerEvents: 'none',
             }} />
             {!hasPaperImg && textureImg && (
@@ -218,21 +323,22 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
             )}
           </div>
 
-          {/* BACK face — this is the INSIDE of the flap, i.e. the foil liner */}
+          {/* ----- B. BACK FACE (Interior foil liner, seen when OPEN) ----- */}
           <div style={{
             position: 'absolute', inset: 0,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-            transform: 'rotateY(180deg)',
             backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateX(180deg) translateZ(1px)',
             overflow: 'hidden',
-            // Base metallic gradient (silver by default, gold on dark envelopes)
+            filter: 'drop-shadow(0 -8px 16px rgba(0,0,0,0.26))',
             background: `
               radial-gradient(ellipse at 30% 20%, ${foil.hi} 0%, transparent 55%),
               radial-gradient(ellipse at 70% 80%, ${foil.hi} 0%, transparent 45%),
               linear-gradient(160deg, ${foil.hi} 0%, ${foil.mid} 45%, ${foil.lo} 100%)
             `,
           }}>
-            {/* Crumpled foil texture — SVG turbulence bake-in */}
+            {/* Crumpled foil texture */}
             <div style={{
               position: 'absolute', inset: 0,
               backgroundImage: FOIL_CRUMPLE,
@@ -241,7 +347,7 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
               opacity: 0.55,
               pointerEvents: 'none',
             }} />
-            {/* Wide diagonal sheen sweep */}
+            {/* Wide diagonal sheen */}
             <div style={{
               position: 'absolute', inset: 0,
               background: `linear-gradient(115deg,
@@ -254,7 +360,7 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
               pointerEvents: 'none',
             }} />
 
-            {/* Optional decor image/SVG overlaid on the foil */}
+            {/* Pattern / Decor overlay */}
             {linerSpec.imageUrl && (
               <div style={{
                 position: 'absolute', inset: 0,
@@ -271,29 +377,16 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
               </div>
             )}
 
-            {/* Hinge shadow along the fold (top edge) for depth */}
+            {/* Hinge shadow along fold */}
             <div style={{
               position: 'absolute',
               top: 0, left: 0, right: 0, height: '22%',
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0))',
-              pointerEvents: 'none',
-            }} />
-
-            {/* Bottom V-tip shadow (converging fold shadow along the two edges) */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: `
-                linear-gradient(60deg,  transparent 48%, rgba(0,0,0,0.10) 50%, transparent 52%),
-                linear-gradient(-60deg, transparent 48%, rgba(0,0,0,0.10) 50%, transparent 52%)
-              `,
-              mixBlendMode: 'multiply',
-              opacity: 0.6,
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.30), rgba(0,0,0,0))',
               pointerEvents: 'none',
             }} />
           </div>
 
-          {/* Wax seal */}
+          {/* ----- C. WAX SEAL — affixed to the apex when closed ----- */}
           {!open && (
             <div
               className={`env-wax ${onSealClick ? 'is-clickable' : ''}`}
@@ -301,33 +394,150 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
               style={{
                 position: 'absolute',
                 left: '50%',
-                top: '85%',
-                width: '13%',
+                top: '86%',
+                width: '18%',
                 aspectRatio: '1 / 1',
-                transform: 'translate(-50%, -50%)',
-                borderRadius: '50%',
-                background: `radial-gradient(circle at 32% 30%, ${shade(env.waxSeal.color, 0.25)}, ${env.waxSeal.color} 55%, ${shade(env.waxSeal.color, -0.28)})`,
-                boxShadow: '0 4px 10px rgba(0,0,0,0.4), inset -2px -3px 5px rgba(0,0,0,0.35), inset 2px 3px 5px rgba(255,255,255,0.25)',
+                transform: 'translate(-50%, -50%) translateZ(3px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: 'italic',
-                fontWeight: 700,
-                color: shade(env.waxSeal.color, -0.42),
-                fontSize: '18px',
                 zIndex: 10,
                 cursor: onSealClick ? 'pointer' : 'default',
                 animation: onSealClick ? 'ce-seal-pulse 2s ease-in-out infinite' : 'none',
+                filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.42))',
               }}
             >
-              {env.waxSeal.letter}
+              <WaxSealSVG color={env.waxSeal.color} letter={env.waxSeal.letter} seed={1701} />
             </div>
           )}
         </div>
       )}
     </div>
   );
+}
+
+/**
+ * WaxSealSVG — ultra-realistic glossy blood-red wax seal with molten organic rim,
+ * specular highlights, and crisp letter deboss/emboss.
+ */
+function WaxSealSVG({ color, letter, seed = 1701 }) {
+  // Pure deep crimson/blood-red color palette
+  const pureBlood = saturateBloodRed(color);
+  const bloodLight = shade(pureBlood, 0.28);    // Bright crimson highlight
+  const bloodShadow = shade(pureBlood, -0.65);   // Dark deep blood cavity
+  const bloodMid = pureBlood;
+
+  const waxId = 'wax-blob-' + seed;
+  const debossId = 'wax-deboss-' + seed;
+  const embossId = 'wax-emboss-' + seed;
+  const gradId = 'wax-grad-' + seed;
+  const specGradId = 'wax-spec-' + seed;
+
+  return (
+    <svg viewBox="0 0 40 40" width="100%" height="100%" style={{ overflow: 'visible' }}>
+      <defs>
+        {/* Rich blood-red radial gradient with glossy specular hot spot */}
+        <radialGradient id={gradId} cx="36%" cy="30%" r="68%">
+          <stop offset="0%" stopColor="#FF4D4D" />
+          <stop offset="22%" stopColor={bloodLight} />
+          <stop offset="55%" stopColor={bloodMid} />
+          <stop offset="85%" stopColor={shade(pureBlood, -0.38)} />
+          <stop offset="100%" stopColor={bloodShadow} />
+        </radialGradient>
+
+        {/* Specular gloss crescent on top-left edge */}
+        <linearGradient id={specGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="rgba(255, 255, 255, 0.85)" />
+          <stop offset="25%" stopColor="rgba(255, 180, 180, 0.45)" />
+          <stop offset="55%" stopColor="rgba(255, 255, 255, 0.00)" />
+        </linearGradient>
+
+        {/* Organic wax displacement filter */}
+        <filter id={waxId} x="-25%" y="-25%" width="150%" height="150%">
+          <feTurbulence type="turbulence" baseFrequency="0.18" numOctaves="3" result="turb" seed={seed} />
+          <feGaussianBlur in="turb" stdDeviation="0.8" result="blurTurb" />
+          <feDisplacementMap in="SourceGraphic" in2="blurTurb" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+          
+          {/* Bevel lighting on displaced wax edges */}
+          <feDropShadow in="displaced" dx="-0.6" dy="-0.6" stdDeviation="0.4" floodColor="#FFA0A0" floodOpacity="0.85" result="hi" />
+          <feDropShadow in="displaced" dx="0.8" dy="0.9" stdDeviation="0.6" floodColor={bloodShadow} floodOpacity="0.95" result="sh" />
+          <feMerge>
+            <feMergeNode in="sh" />
+            <feMergeNode in="hi" />
+            <feMergeNode in="displaced" />
+          </feMerge>
+        </filter>
+
+        {/* Deboss stamp filter */}
+        <filter id={debossId}>
+          <feDropShadow dx="-0.4" dy="-0.4" stdDeviation="0.2" floodColor={bloodShadow} floodOpacity="0.9" />
+          <feDropShadow dx="0.4" dy="0.4" stdDeviation="0.2" floodColor="#FFA0A0" floodOpacity="0.6" />
+        </filter>
+
+        {/* Emboss letter filter */}
+        <filter id={embossId}>
+          <feDropShadow dx="0.3" dy="0.3" stdDeviation="0.2" floodColor={bloodShadow} floodOpacity="0.95" />
+          <feDropShadow dx="-0.3" dy="-0.3" stdDeviation="0.2" floodColor="#FFBABA" floodOpacity="0.75" />
+        </filter>
+      </defs>
+
+      {/* 1. Molten organic wax pool (base body) */}
+      <circle cx="20" cy="20" r="16.5" fill={`url(#${gradId})`} filter={`url(#${waxId})`} />
+
+      {/* 2. Top-left glossy specular highlight rim */}
+      <path
+        d="M 10 13 A 14 14 0 0 1 28 9"
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.75)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        style={{ filter: 'blur(0.6px)' }}
+      />
+
+      {/* 3. Bottom-right subtle rim light */}
+      <path
+        d="M 14 31 A 14 14 0 0 0 31 16"
+        fill="none"
+        stroke="rgba(255, 120, 120, 0.35)"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+
+      {/* 4. Stamped inner groove ring */}
+      <circle cx="20" cy="20" r="11.5" fill="none" stroke={shade(pureBlood, -0.25)} strokeWidth="1.2" filter={`url(#${debossId})`} />
+      <circle cx="20" cy="20" r="10.4" fill="none" stroke={shade(pureBlood, 0.15)} strokeWidth="0.6" filter={`url(#${embossId})`} />
+
+      {/* 5. Center Seal Monogram / Letter */}
+      <text
+        x="20"
+        y="21.5"
+        dominantBaseline="middle"
+        textAnchor="middle"
+        fill={shade(pureBlood, -0.15)}
+        fontFamily="'Playfair Display', 'Cinzel', Georgia, serif"
+        fontSize="11"
+        fontWeight="bold"
+        filter={`url(#${embossId})`}
+        style={{ letterSpacing: '0px' }}
+      >
+        {letter || '✦'}
+      </text>
+    </svg>
+  );
+}
+
+// Convert any hex color into a rich, pure blood-red crimson
+function saturateBloodRed(hex) {
+  if (!hex || hex[0] !== '#') return '#96111B';
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) & 0xff;
+  let g = (num >> 8) & 0xff;
+  let b = num & 0xff;
+  // Boost red strongly, push green and blue into deep velvet blood tones
+  r = Math.min(255, Math.max(145, Math.round(r * 1.25 + 30)));
+  g = Math.max(8, Math.min(30, Math.round(g * 0.18)));
+  b = Math.max(12, Math.min(38, Math.round(b * 0.22)));
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).padStart(6, '0');
 }
 
 // Small helper: lighten/darken a hex color by a percent [-1, 1].
@@ -342,5 +552,5 @@ function shade(hex, pct) {
   r = Math.round((t - r) * p) + r;
   g = Math.round((t - g) * p) + g;
   b = Math.round((t - b) * p) + b;
-  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).padStart(6, '0');
 }

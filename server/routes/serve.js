@@ -64,15 +64,15 @@ function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_li
    ──────────────────────────────────────────────────────────── */
 const CSP = [
   "default-src 'self' https: data: blob:",
-  "script-src 'self' 'unsafe-inline' https: http://localhost:3000 http://localhost:5173",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "script-src 'self' 'unsafe-inline' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
-  "connect-src 'self' https: http://localhost:3000 http://localhost:5173 ws://localhost:3000 ws://localhost:5173",
+  "connect-src 'self' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "object-src 'none'",
   "base-uri 'self'",
-  "frame-ancestors 'self' http://localhost:3000 http://localhost:5173 https://app.mykado.store https://mykado.store",
+  "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* https://app.mykado.store https://mykado.store https://www.mykado.store https://go.mykado.store",
 ].join('; ');
 
 function sendError(res, status, publicMsg, err) {
