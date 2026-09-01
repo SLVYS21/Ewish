@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Check, Loader2, Sparkles, Infinity as InfinityIcon } from 'lucide-react';
 import { useAuth } from '../admin/context/AuthContext';
 import useFeexPay from '../utils/useFeexPay';
+import PromoInput from './PromoInput';
 import s from './WallPublishModal.module.css';
 
 /* Doit rester aligné avec WALL_PLAN_PRICES côté serveur (publication.js). */
@@ -55,9 +56,10 @@ const PLANS = [
   },
 ];
 
-export default function WallPublishModal({ onClose, onConfirm, loading, pubId }) {
+export default function WallPublishModal({ onClose, onConfirm, loading, pubId, templateName }) {
   const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState('free');
+  const [promo, setPromo] = useState(null); // { code, discount, finalPrice }
   const { openCheckout, feexpayModal } = useFeexPay();
 
   const plan = PLANS.find(p => p.id === selectedPlan);
@@ -65,9 +67,34 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId })
   const canBypass = user?.canBypassPaywall === true;
   const hasEnoughCredits = plan.credits === 0 || userCredits >= plan.credits || canBypass;
 
+  /* Promo réduit le prix du plan (jamais un plan gratuit). Reset auto si
+     l'user change de plan (le discount recompté n'aurait plus de sens). */
+  const promoDiscount = plan.priceFCFA > 0 ? (promo?.discount || 0) : 0;
+  const priceAfterPromo = Math.max(0, plan.priceFCFA - promoDiscount);
+
+  const handlePlanChange = (planId) => {
+    setSelectedPlan(planId);
+    setPromo(null);
+  };
+
   const handleContinue = () => {
     if (plan.credits === 0 || canBypass) {
       onConfirm(selectedPlan);
+      return;
+    }
+    /* Chemin promo : force FeexPay (le serveur refuse la combinaison promo+crédits).
+       Si le promo ramène le prix à 0, on publie sans checkout. */
+    if (promo && promoDiscount > 0) {
+      if (priceAfterPromo === 0) {
+        onConfirm(selectedPlan, undefined, promo.code);
+        return;
+      }
+      openCheckout({
+        amount:      priceAfterPromo,
+        description: `myKado — Mur ${plan.name} (code ${promo.code})`,
+        customId:    pubId ? `wall:${pubId}` : `wall_${Date.now()}`,
+        onSuccess: ({ reference }) => onConfirm(selectedPlan, reference, promo.code),
+      });
       return;
     }
     if (hasEnoughCredits) {
@@ -103,13 +130,22 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId })
                   <div
                     key={p.id}
                     className={`${s.planCard} ${active ? s.active : ''} ${p.id !== 'free' ? s.premium : ''}`}
-                    onClick={() => !loading && setSelectedPlan(p.id)}
+                    onClick={() => !loading && handlePlanChange(p.id)}
                   >
                     <div className={s.planHead}>
                       <div className={s.planName}>
                         {p.icon} {p.name}
                       </div>
-                      <div className={s.planPrice}>{p.price}</div>
+                      <div className={s.planPrice}>
+                        {active && promoDiscount > 0 ? (
+                          <>
+                            <span style={{ textDecoration: 'line-through', opacity: .5, marginRight: 6, fontWeight: 400 }}>
+                              {p.price}
+                            </span>
+                            {priceAfterPromo.toLocaleString('fr-FR')} FCFA
+                          </>
+                        ) : p.price}
+                      </div>
                     </div>
 
                     <ul className={s.featureList}>
@@ -128,6 +164,17 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId })
                 );
               })}
             </div>
+
+            {plan.priceFCFA > 0 && !canBypass && (
+              <PromoInput
+                templateName={templateName}
+                baseAmount={plan.priceFCFA}
+                applied={promo}
+                onApplied={setPromo}
+                onCleared={() => setPromo(null)}
+                disabled={loading}
+              />
+            )}
           </div>
 
           {/* Footer sorti de .body pour rester sticky en bas quand la liste

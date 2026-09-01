@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import KycModal from '../components/KycModal';
 import MSheet from '../components/MSheet';
+import PromoInput from '../components/PromoInput';
 import { ShareView } from './SharePage';
 import { CURRENCIES, findCurrency, formatAmount } from '../card-editor/data/currencies';
 import styles from './Editor.module.css';
@@ -483,6 +484,9 @@ export default function Editor() {
   const [saveStatus, setSaveStatus]         = useState('saved');
   const [publishing, setPublishing]         = useState(false);
   const [publishedUrl, setPublishedUrl]     = useState('');
+  /* Code promo appliqué au publish courant. Reset après publish réussi.
+     Le serveur consomme le code seulement si le paiement réussit. */
+  const [appliedPromo, setAppliedPromo]     = useState(null); // { code, discount, finalPrice }
   const [showBranding, setShowBranding]     = useState(false);
   const [brandingUrl, setBrandingUrl]       = useState('');
   const [brandingText, setBrandingText]     = useState('');
@@ -911,11 +915,16 @@ export default function Editor() {
 
   const doPublishRequest = async (feexpayReference) => {
     if (id === 'draft') return; // Should not happen directly for unauthenticated drafts
-    const r = await publishPublication(id, feexpayReference ? { feexpayReference } : {});
+    const body = {};
+    if (feexpayReference) body.feexpayReference = feexpayReference;
+    if (appliedPromo?.code) body.promoCode = appliedPromo.code;
+    const r = await publishPublication(id, body);
     setPublishedUrl(r.data.url);
     /* On merge tout ce que renvoie le serveur pour que paidGiftFcfa (utile au
        CTA top-up Kado) et publishedAt soient à jour côté client sans re-fetch. */
     setPub(p => ({ ...p, ...r.data, published: true, isPaid: true }));
+    // Le code a été consommé côté serveur — on nettoie l'état local.
+    setAppliedPromo(null);
     try { const sl = await getShortLink(id); setShortCode(sl.data.shortCode); } catch {}
   };
 
@@ -969,7 +978,15 @@ export default function Editor() {
   const giftCfg = findCurrency(gift.currency);
   const giftIncluded = gift.enabled && gift.currency === 'XOF' && Number(gift.amount) >= (giftCfg?.min || 0);
   const giftFcfa = giftIncluded ? Math.floor(Number(gift.amount)) : 0;
-  const publishPriceFcfa = CARD_PUBLISH_FEE_FCFA + giftFcfa;
+  /* Base à laquelle s'applique un éventuel code promo : socle 1500 pour
+     l'enveloppe, template.creditsRequired × 500 pour une carte legacy.
+     Le gift n'est jamais remisé, aligné avec la règle serveur. */
+  const basePublishFee = pub?.templateName === 'myenvelope'
+    ? CARD_PUBLISH_FEE_FCFA
+    : (template?.creditsRequired ? template.creditsRequired * 500 : CARD_PUBLISH_FEE_FCFA);
+  const promoDiscount = appliedPromo?.discount || 0;
+  const baseAfterPromo = Math.max(0, basePublishFee - promoDiscount);
+  const publishPriceFcfa = baseAfterPromo + giftFcfa;
   const handleGiftChange = (patch) => {
     const nextGift = { ...gift, ...patch };
     handleDataChange('gift', nextGift);
@@ -1568,7 +1585,7 @@ export default function Editor() {
                 <button className={styles.sharePublishBtn} onClick={handlePublish} disabled={publishing}>
                   {publishing
                     ? <><RefreshCw size={16} className={styles.spinIcon} /> Publication…</>
-                    : <><Sparkles size={15} /> {user?.canBypassPaywall ? 'Publier (Testeur)' : 'Publier ma création  3 💎'}</>}
+                    : <><Sparkles size={15} /> {user?.canBypassPaywall ? 'Publier (Testeur)' : `Publier ma création  ${template?.creditsRequired || 1} 💎`}</>}
                 </button>
                 <div className={styles.partageLockedList}>
                   {[
@@ -1734,7 +1751,14 @@ export default function Editor() {
                     <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 14, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)' }}>
                         <span>Publication de la carte</span>
-                        <span>{CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')} FCFA</span>
+                        <span>
+                          {promoDiscount > 0 && (
+                            <span style={{ textDecoration: 'line-through', opacity: .5, marginRight: 6 }}>
+                              {basePublishFee.toLocaleString('fr-FR')}
+                            </span>
+                          )}
+                          {baseAfterPromo.toLocaleString('fr-FR')} FCFA
+                        </span>
                       </div>
                       {giftIncluded && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)' }}>
@@ -1752,6 +1776,16 @@ export default function Editor() {
                         </div>
                       )}
                     </div>
+                    {!user?.canBypassPaywall && (
+                      <PromoInput
+                        templateName={pub?.templateName}
+                        baseAmount={basePublishFee}
+                        applied={appliedPromo}
+                        onApplied={setAppliedPromo}
+                        onCleared={() => setAppliedPromo(null)}
+                        disabled={publishing}
+                      />
+                    )}
                     <button
                       className={styles.modalConfirm}
                       style={{ padding: '13px', borderRadius: 12, fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 }}
@@ -1761,7 +1795,9 @@ export default function Editor() {
                       <Sparkles size={16} />
                       {user?.canBypassPaywall && !giftIncluded
                         ? 'Publier gratuitement (Testeur)'
-                        : `Payer ${(user?.canBypassPaywall ? giftFcfa : publishPriceFcfa).toLocaleString('fr-FR')} FCFA & publier`}
+                        : publishPriceFcfa === 0
+                          ? 'Publier gratuitement'
+                          : `Payer ${(user?.canBypassPaywall ? giftFcfa : publishPriceFcfa).toLocaleString('fr-FR')} FCFA & publier`}
                     </button>
                   </>
                 )}
@@ -2026,7 +2062,7 @@ export default function Editor() {
                 onClick={() => { setMobileSheetOpen(false); handlePublish(); }}
                 disabled={publishing}
               >
-                {pub?.published ? '✨ Mettre à jour' : '✨ Publier  3 💎'}
+                {pub?.published ? '✨ Mettre à jour' : `✨ Publier  ${template?.creditsRequired || 1} 💎`}
               </button>
             )}
           </div>

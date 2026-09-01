@@ -961,9 +961,43 @@
      16. INTRO  BUBBLE CHARACTERS ANIMATION
      (replaces the previous SVG mandala bloom)
      ===================================================== */
+    #intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse 80% 70% at 50% 38%,
+          color-mix(in srgb, var(--accent) 14%, var(--bg)) 0%,
+          var(--bg) 60%,
+          color-mix(in srgb, var(--primary) 8%, var(--bg)) 100%);
+      overflow: hidden;
+      pointer-events: none;
+      transition: opacity 0.95s ease;
+    }
 
+    #intro-overlay.ib-dissolve {
+      opacity: 0;
+    }
 
     /* Soft glow pulse behind letters */
+    #intro-overlay::before {
+      content: '';
+      position: absolute;
+      width: 60vw;
+      height: 60vw;
+      max-width: 720px;
+      max-height: 720px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+          color-mix(in srgb, var(--primary) 18%, transparent) 0%,
+          transparent 65%);
+      animation: ibGlow 2.8s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
 
     @keyframes ibGlow {
       from {
@@ -1236,7 +1270,19 @@
   <!-- ===================================================
      INTRO  BUBBLE CHARACTERS OVERLAY
      =================================================== -->
-  
+  <div id="intro-overlay" aria-hidden="true">
+    <div class="ib-bubbles" id="ib-bubbles">
+      <span data-letter="H">H</span><span data-letter="B">B</span><span data-letter="D">D</span>
+    </div>
+
+    <div id="ib-text">
+      <p id="ib-label">Joyeux anniversaire <span class="ib-name" id="ib-name">Prénom</span></p>
+      <span id="ib-underline" aria-hidden="true"></span>
+    </div>
+
+    <!-- floating bubbles spawn into this layer -->
+    <div id="ib-floaters" aria-hidden="true"></div>
+  </div>
 
   <!-- Ambient sparkles after intro -->
   <div id="ambient-layer" aria-hidden="true">
@@ -2053,7 +2099,7 @@
       }
     })();
 
-    fetchData();
+    runIntro();
 
     /* ============================================================
        PHOTO TRANSFORMS

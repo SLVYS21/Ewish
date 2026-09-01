@@ -58,8 +58,9 @@ export const CardStateProvider = ({ children }) => {
   const skipNextSaveRef  = useRef(false);  // set right after hydration to avoid re-saving what we just loaded
 
   const theme = useMemo(() => {
-    const base = THEMES[themeId];
-    if (!base) return null;
+    // Fallback to default when the id is unknown (legacy pub, renamed theme, etc.)
+    // so downstream preview pages can safely read theme.cover / theme.envelope / ...
+    const base = THEMES[themeId] || THEMES[DEFAULT_THEME_ID];
     const liner = resolveLiner(linerChoice, base.envelope.linerPattern);
     return {
       ...base,
@@ -141,7 +142,7 @@ export const CardStateProvider = ({ children }) => {
   }), [occasionId, themeId, envelopeColor, envelopeTexture, linerChoice,
        texts, photo, gift, confettiStyle, unboxingBg]);
 
-  const publishCard = useCallback(async ({ feexpayReference } = {}) => {
+  const publishCard = useCallback(async ({ feexpayReference, promoCode } = {}) => {
     setPublishState('publishing');
     setPublishError(null);
     let workingId = draftId;
@@ -167,8 +168,12 @@ export const CardStateProvider = ({ children }) => {
 
       // Flag it as published so /c/:slug resolves it. Server returns 402 if
       // the FCFA fee (1500 + gift) hasn't been paid — the caller retries with
-      // a feexpayReference obtained from the FeexPay widget.
-      const publishRes = await publishPublication(workingId, feexpayReference ? { feexpayReference } : {});
+      // a feexpayReference obtained from the FeexPay widget. promoCode réduit
+      // le socle 1500 côté serveur (jamais le gift).
+      const publishBody = {};
+      if (feexpayReference) publishBody.feexpayReference = feexpayReference;
+      if (promoCode)        publishBody.promoCode        = promoCode;
+      const publishRes = await publishPublication(workingId, publishBody);
       const finalPub = publishRes?.data || null;
 
       setPublishedPub(finalPub);
@@ -247,7 +252,7 @@ export const CardStateProvider = ({ children }) => {
       if (occ) setOccasionId(occ);
 
       const themeIdRaw = t.id || d.themeId;
-      if (themeIdRaw) setThemeId(themeIdRaw);
+      if (themeIdRaw && THEMES[themeIdRaw]) setThemeId(themeIdRaw);
 
       const color = t.color || d.envelopeColor;
       if (color) setEnvelopeColor(color);

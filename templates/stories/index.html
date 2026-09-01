@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Stories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@500;700&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #FF3B7F;
+      --accent: #7C5CFF;
+      --ink: #0B0B12;
+      --paper: #FFFFFF;
+      --text-color: #FFFFFF;
+      --font-b: 'Inter', system-ui, sans-serif;
+      --font-hand: 'Caveat', cursive;
+      --font-brand: 'Pacifico', cursive;
+      --fs-scale: 1;
+      --slide-dur: 6s;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: var(--font-b);
+      background: #000;
+      overflow: hidden;
+      color: var(--text-color);
+      overscroll-behavior: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       STAGE  frame that hosts the vertical 9:16 story
+    ═══════════════════════════════════════════════════════════ */
+    #stage {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(124,92,255,0.35), transparent 60%),
+        radial-gradient(900px 600px at 100% 110%, rgba(255,59,127,0.35), transparent 60%),
+        linear-gradient(180deg, #0B0B12 0%, #05050A 100%);
+    }
+
+    #frame {
+      position: relative;
+      width: 100vw; height: 100vh;
+      max-width: 480px;
+      aspect-ratio: 9 / 16;
+      max-height: 100vh;
+      background: #111;
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    @media (min-width: 640px) {
+      #frame {
+        width: auto;
+        height: min(95vh, 900px);
+        max-height: 95vh;
+        border-radius: 28px;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SLIDES
+    ═══════════════════════════════════════════════════════════ */
+    .slide {
+      position: absolute; inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .5s ease;
+      overflow: hidden;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; }
+
+    .slide-photo {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-color: #222;
+      transform-origin: center;
+      animation: kenburns 12s ease-in-out infinite alternate;
+    }
+    @keyframes kenburns {
+      from { transform: scale(1.08) translate(0,0); }
+      to   { transform: scale(1.18) translate(-2%, 2%); }
+    }
+
+    .slide-tint {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 55%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+    }
+
+    /* Text block */
+    .slide-text-wrap {
+      position: absolute; left: 0; right: 0;
+      padding: 0 32px;
+      display: flex; flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .slide-text-wrap[data-pos="top"]    { top: 22%;   transform: translateY(0); }
+    .slide-text-wrap[data-pos="center"] { top: 50%;   transform: translateY(-50%); }
+    .slide-text-wrap[data-pos="bottom"] { bottom: 18%; }
+
+    .slide-title {
+      font-family: var(--font-brand);
+      font-size: calc(2.5rem * var(--fs-scale));
+      line-height: 1.05;
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.55);
+      margin: 0 0 14px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .slide-msg {
+      font-family: var(--font-hand);
+      font-size: calc(1.7rem * var(--fs-scale));
+      line-height: 1.25;
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 3px 16px rgba(0,0,0,0.5);
+      margin: 0;
+      white-space: pre-wrap;
+      max-width: 22ch;
+    }
+
+    /* Enter animations */
+    .slide.active .slide-title { animation: rise 0.7s cubic-bezier(.2,.7,.3,1) 0.15s both; }
+    .slide.active .slide-msg   { animation: rise 0.7s cubic-bezier(.2,.7,.3,1) 0.35s both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+      to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+    }
+
+    /* Ambient sticker container */
+    .slide-stickers {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+    .sticker {
+      position: absolute;
+      font-size: 34px;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .slide.active .sticker { animation: floatUp linear forwards; }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translate(var(--tx,0), 20px) rotate(var(--rot,0deg)) scale(0.5); }
+      15%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(var(--tx,0) + var(--dx,0)), -120vh) rotate(calc(var(--rot,0deg) + var(--dr,360deg))) scale(1); }
+    }
+
+    /* SVG icon stickers */
+    .icn { width: 32px; height: 32px; display: inline-block; }
+    .icn svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+
+    /* ═══════════════════════════════════════════════════════════
+       HEADER  progress bars + avatar + name
+    ═══════════════════════════════════════════════════════════ */
+    #header {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 12px 14px 0;
+      z-index: 20;
+      pointer-events: none;
+    }
+    #progress {
+      display: flex; gap: 4px;
+      margin-bottom: 12px;
+    }
+    .p-bar {
+      flex: 1;
+      height: 3px;
+      background: rgba(255,255,255,0.28);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .p-fill {
+      position: absolute; inset: 0;
+      background: #fff;
+      transform-origin: left center;
+      transform: scaleX(0);
+    }
+    .p-bar.done .p-fill { transform: scaleX(1); transition: none; }
+    .p-bar.active .p-fill {
+      animation: fill var(--slide-dur) linear forwards;
+    }
+    @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .p-bar.paused .p-fill { animation-play-state: paused; }
+
+    #meta {
+      display: flex; align-items: center;
+      gap: 10px;
+      padding: 4px 4px;
+      pointer-events: auto;
+    }
+    #avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      background-size: cover; background-position: center;
+      border: 2px solid rgba(255,255,255,0.9);
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+    #avatar-initial { font-family: var(--font-b); }
+    #meta-name {
+      color: #fff; font-weight: 600; font-size: 14px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+      display: flex; flex-direction: column;
+      line-height: 1.1;
+    }
+    #meta-name small {
+      font-weight: 400; font-size: 11px; opacity: 0.85;
+      margin-top: 2px;
+    }
+    #sound-btn {
+      margin-left: auto;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    #sound-btn svg { width: 18px; height: 18px; }
+
+    /* ═══════════════════════════════════════════════════════════
+       NAV ZONES  tap left/right
+    ═══════════════════════════════════════════════════════════ */
+    .nav-zone {
+      position: absolute; top: 60px; bottom: 90px;
+      width: 33%;
+      z-index: 15;
+      cursor: pointer;
+    }
+    .nav-zone.left  { left: 0; }
+    .nav-zone.right { right: 0; }
+    .nav-zone.hold  { left: 33%; right: 33%; }
+
+    /* ═══════════════════════════════════════════════════════════
+       FOOTER  reactions + send
+    ═══════════════════════════════════════════════════════════ */
+    #footer {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 14px 18px calc(18px + env(safe-area-inset-bottom, 0));
+      display: flex; align-items: center; gap: 10px;
+      z-index: 25;
+    }
+    #reply {
+      flex: 1;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255,255,255,0.28);
+      border-radius: 999px;
+      padding: 12px 18px;
+      color: #fff;
+      font-family: var(--font-b);
+      font-size: 14px;
+      outline: none;
+      pointer-events: auto;
+    }
+    #reply::placeholder { color: rgba(255,255,255,0.65); }
+    .react-btn {
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50%;
+      width: 46px; height: 46px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: transform .15s;
+      color: #fff;
+    }
+    .react-btn:active { transform: scale(0.9); }
+    .react-btn svg { width: 22px; height: 22px; }
+
+    /* Flying reactions layer */
+    #reactions-layer {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 30;
+    }
+    .react-fly {
+      position: absolute;
+      bottom: 80px;
+      right: 60px;
+      font-size: 28px;
+      animation: reactUp 2.2s cubic-bezier(.2,.7,.3,1) forwards;
+      will-change: transform, opacity;
+    }
+    @keyframes reactUp {
+      0%   { transform: translate(0, 0) scale(.5) rotate(0);   opacity: 0; }
+      15%  { transform: translate(var(--rx,-30px), -60px) scale(1.4) rotate(var(--rr,-15deg)); opacity: 1; }
+      100% { transform: translate(calc(var(--rx,-30px) + var(--rxe,60px)), -420px) scale(.8) rotate(calc(var(--rr,-15deg) + 40deg)); opacity: 0; }
+    }
+
+    /* End card */
+    #endcard {
+      position: absolute; inset: 0;
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      background: linear-gradient(160deg, rgba(11,11,18,0.85), rgba(11,11,18,0.95));
+      backdrop-filter: blur(14px);
+      z-index: 50;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    #endcard.show { display: flex; animation: endin .5s ease both; }
+    @keyframes endin { from { opacity: 0; } to { opacity: 1; } }
+    #endcard h2 {
+      font-family: var(--font-brand);
+      font-size: 2.6rem;
+      margin: 0 0 8px;
+      background: linear-gradient(120deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    #endcard p {
+      font-family: var(--font-hand);
+      font-size: 1.6rem;
+      color: #fff;
+      margin: 0 0 32px;
+      max-width: 22ch;
+      line-height: 1.25;
+    }
+    #replay-btn {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 30px;
+      font-family: var(--font-b);
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center; gap: 8px;
+      box-shadow: 0 10px 30px rgba(124,92,255,0.4);
+    }
+    #replay-btn svg { width: 18px; height: 18px; }
+
+    /* Ambient particles (whole frame) */
+    #ambient {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      overflow: hidden;
+    }
+    .amb-dot {
+      position: absolute;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      box-shadow: 0 0 8px rgba(255,255,255,0.7);
+      animation: ambDrift linear infinite;
+    }
+    @keyframes ambDrift {
+      from { transform: translateY(110vh) translateX(0); opacity: 0; }
+      10%  { opacity: 0.8; }
+      90%  { opacity: 0.8; }
+      to   { transform: translateY(-10vh) translateX(30px); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div id="frame">
+
+      <!-- Ambient particles -->
+      <div id="ambient"></div>
+
+      <!-- Slides container -->
+      <div id="slides"></div>
+
+      <!-- Header -->
+      <div id="header">
+        <div id="progress"></div>
+        <div id="meta">
+          <div id="avatar"><span id="avatar-initial"></span></div>
+          <div id="meta-name">
+            <span data-node-name="recipientName">Emma</span>
+            <small><span data-node-name="fromLabel">de</span> <span data-node-name="senderName">ton crush secret</span></small>
+          </div>
+          <button id="sound-btn" onclick="toggleSound()" aria-label="Son">
+            <svg id="sound-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Nav zones -->
+      <div class="nav-zone left"  onclick="prevSlide()"></div>
+      <div class="nav-zone hold"  onpointerdown="holdStart()" onpointerup="holdEnd()" onpointercancel="holdEnd()" onpointerleave="holdEnd()"></div>
+      <div class="nav-zone right" onclick="nextSlide()"></div>
+
+      <!-- Footer -->
+      <div id="footer">
+        <input id="reply" type="text" placeholder="Envoie ta réaction..." />
+        <button class="react-btn" onclick="fireReaction('heart')" aria-label="J'adore">
+          <svg viewBox="0 0 24 24" fill="#FF3B7F" stroke="#FF3B7F" stroke-width="1.5">
+            <path d="M12 21s-7-4.5-9.5-9C.7 8.5 3 4.5 7 4.5c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.3 4 4.5 7.5C19 16.5 12 21 12 21z"/>
+          </svg>
+        </button>
+        <button class="react-btn" onclick="fireReaction('spark')" aria-label="Sparkle">
+          <svg viewBox="0 0 24 24" fill="#FFD84D" stroke="#FFD84D" stroke-width="1.2">
+            <path d="M12 2l1.8 5.6L19.5 9l-4.5 3.3L16.6 18 12 14.7 7.4 18l1.6-5.7L4.5 9l5.7-1.4L12 2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Flying reactions -->
+      <div id="reactions-layer"></div>
+
+      <!-- End card -->
+      <div id="endcard">
+        <h2 data-node-name="endTitle">Merci d'avoir regardé ✦</h2>
+        <p data-node-name="endText">J'espère que ça t'a fait sourire.</p>
+        <button id="replay-btn" onclick="replay()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+          <span data-node-name="replayBtn">Revoir</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SVG sticker definitions (referenced by symbol id) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="ic-heart" viewBox="0 0 24 24">
+        <path fill="#FF3B7F" d="M12 21s-7-4.5-9.5-9C.7 8.5 3 4.5 7 4.5c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.3 4 4.5 7.5C19 16.5 12 21 12 21z"/>
+      </symbol>
+      <symbol id="ic-star" viewBox="0 0 24 24">
+        <path fill="#FFD84D" d="M12 2l1.8 5.6L19.5 9l-4.5 3.3L16.6 18 12 14.7 7.4 18l1.6-5.7L4.5 9l5.7-1.4L12 2z"/>
+      </symbol>
+      <symbol id="ic-sparkle" viewBox="0 0 24 24">
+        <path fill="#7C5CFF" d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>
+      </symbol>
+      <symbol id="ic-cake" viewBox="0 0 24 24">
+        <path fill="#FF7EA5" d="M12 2c.7 0 1.2.6 1.2 1.3v1.2h-2.4V3.3C10.8 2.6 11.3 2 12 2zM5 12h14v3c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2v-3zm0-1c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4H5zM4 19h16v3H4v-3z"/>
+      </symbol>
+      <symbol id="ic-balloon" viewBox="0 0 24 24">
+        <path fill="#5EC4FF" d="M12 2c3.3 0 6 2.7 6 6 0 4.2-4.5 8-6 8s-6-3.8-6-8c0-3.3 2.7-6 6-6zm-.5 14h1l1 5-1.5-.5-1.5.5 1-5z"/>
+      </symbol>
+      <symbol id="ic-confetti" viewBox="0 0 24 24">
+        <path fill="#00D9A6" d="M3 21l4.5-14 9 9L3 21zm11-14l2-3 2 3-2 1-2-1zm5 6l3-2v3l-3-1zM8 3l3 2-3 1-1-3h1z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script src="/templates/shared/ww-engine.js"></script>
+  <script>
+    /* ═══════════════════════════════════════════════════════════
+       STATE
+    ═══════════════════════════════════════════════════════════ */
+    const STATE = {
+      slides: [],
+      current: 0,
+      isPaused: false,
+      soundOn: false,
+      slideDurMs: 6000,
+      audio: null,
+      audioSrc: '',
+      audioStart: 0,
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       BUILD SLIDES
+    ═══════════════════════════════════════════════════════════ */
+    function buildSlides(slides) {
+      STATE.slides = slides;
+      const container = document.getElementById('slides');
+      container.innerHTML = '';
+
+      const progress = document.getElementById('progress');
+      progress.innerHTML = '';
+
+      slides.forEach((s, idx) => {
+        // Slide DOM
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+        slide.dataset.idx = idx;
+
+        // Photo layer
+        const photo = document.createElement('div');
+        photo.className = 'slide-photo';
+        if (s.photo) photo.style.backgroundImage = `url("${s.photo}")`;
+        slide.appendChild(photo);
+
+        // Tint overlay
+        const tint = document.createElement('div');
+        tint.className = 'slide-tint';
+        slide.appendChild(tint);
+
+        // Stickers container (rain)
+        const stickers = document.createElement('div');
+        stickers.className = 'slide-stickers';
+        slide.appendChild(stickers);
+
+        // Text
+        const textWrap = document.createElement('div');
+        textWrap.className = 'slide-text-wrap';
+        textWrap.dataset.pos = s.textPos || 'bottom';
+        if (s.title) {
+          const t = document.createElement('h2');
+          t.className = 'slide-title';
+          t.textContent = s.title;
+          textWrap.appendChild(t);
+        }
+        if (s.text) {
+          const m = document.createElement('p');
+          m.className = 'slide-msg';
+          m.textContent = s.text;
+          textWrap.appendChild(m);
+        }
+        slide.appendChild(textWrap);
+
+        container.appendChild(slide);
+
+        // Progress bar
+        const bar = document.createElement('div');
+        bar.className = 'p-bar';
+        const fill = document.createElement('div');
+        fill.className = 'p-fill';
+        bar.appendChild(fill);
+        progress.appendChild(bar);
+      });
+
+      if (slides.length) showSlide(0, true);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════════════════ */
+    let slideTimer = null;
+
+    function showSlide(idx, first = false) {
+      if (idx < 0) idx = 0;
+      if (idx >= STATE.slides.length) { showEnd(); return; }
+
+      STATE.current = idx;
+
+      // Slides opacity
+      document.querySelectorAll('.slide').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+        if (i === idx) {
+          spawnStickers(el, STATE.slides[i].sticker);
+        } else {
+          const st = el.querySelector('.slide-stickers');
+          if (st) st.innerHTML = '';
+        }
+      });
+
+      // Progress bars
+      document.querySelectorAll('.p-bar').forEach((bar, i) => {
+        bar.classList.remove('active', 'done', 'paused');
+        const fill = bar.querySelector('.p-fill');
+        fill.style.animation = 'none';
+        // force reflow
+        void fill.offsetWidth;
+        if (i < idx) bar.classList.add('done');
+        if (i === idx) {
+          fill.style.animation = '';
+          bar.classList.add('active');
+        }
+      });
+
+      clearTimeout(slideTimer);
+      if (!STATE.isPaused) {
+        slideTimer = setTimeout(() => nextSlide(), STATE.slideDurMs);
+      }
+    }
+
+    function nextSlide() { showSlide(STATE.current + 1); }
+    function prevSlide() { showSlide(Math.max(0, STATE.current - 1)); }
+
+    function pauseSlide() {
+      STATE.isPaused = true;
+      clearTimeout(slideTimer);
+      document.querySelectorAll('.p-bar.active').forEach(b => b.classList.add('paused'));
+    }
+    function resumeSlide() {
+      STATE.isPaused = false;
+      const bar = document.querySelector('.p-bar.active');
+      if (!bar) return;
+      bar.classList.remove('paused');
+      const fill = bar.querySelector('.p-fill');
+      const cs = getComputedStyle(fill);
+      const scale = new DOMMatrixReadOnly(cs.transform).a || 0;
+      const remaining = STATE.slideDurMs * (1 - scale);
+      slideTimer = setTimeout(() => nextSlide(), remaining);
+    }
+
+    let holdTimer = null;
+    function holdStart() { holdTimer = setTimeout(pauseSlide, 180); }
+    function holdEnd()   { clearTimeout(holdTimer); if (STATE.isPaused) resumeSlide(); }
+
+    /* ═══════════════════════════════════════════════════════════
+       STICKERS  animated floaters
+    ═══════════════════════════════════════════════════════════ */
+    const STICKER_MAP = {
+      heart:    'ic-heart',
+      star:     'ic-star',
+      sparkle:  'ic-sparkle',
+      cake:     'ic-cake',
+      balloon:  'ic-balloon',
+      confetti: 'ic-confetti',
+    };
+
+    function spawnStickers(slideEl, kind) {
+      const layer = slideEl.querySelector('.slide-stickers');
+      layer.innerHTML = '';
+      if (!kind || kind === 'none') return;
+      const symId = STICKER_MAP[kind];
+      if (!symId) return;
+
+      const count = 14;
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'sticker';
+        el.innerHTML = `<span class="icn"><svg><use href="#${symId}"/></svg></span>`;
+        const x = Math.random() * 100;
+        const size = 22 + Math.random() * 30;
+        const dur = 5 + Math.random() * 4;
+        const delay = Math.random() * 4;
+        const dx = (Math.random() * 60 - 30);
+        const rot = Math.random() * 40 - 20;
+        const dr = 200 + Math.random() * 300;
+        el.style.cssText = `
+          left: ${x}%;
+          bottom: -50px;
+          font-size: ${size}px;
+          --tx: 0px; --dx: ${dx}px;
+          --rot: ${rot}deg; --dr: ${dr}deg;
+          animation-duration: ${dur}s;
+          animation-delay: ${delay}s;
+        `;
+        el.querySelector('.icn').style.width = size + 'px';
+        el.querySelector('.icn').style.height = size + 'px';
+        layer.appendChild(el);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       REACTIONS  send fly-up
+    ═══════════════════════════════════════════════════════════ */
+    const REACT_MAP = { heart: 'ic-heart', spark: 'ic-star' };
+    function fireReaction(kind) {
+      const layer = document.getElementById('reactions-layer');
+      const symId = REACT_MAP[kind] || 'ic-heart';
+      const el = document.createElement('div');
+      el.className = 'react-fly';
+      el.innerHTML = `<span class="icn" style="width:32px;height:32px"><svg><use href="#${symId}"/></svg></span>`;
+      el.style.setProperty('--rx',  (-40 - Math.random() * 40) + 'px');
+      el.style.setProperty('--rxe', (Math.random() * 120 - 60) + 'px');
+      el.style.setProperty('--rr',  (Math.random() * 30 - 15) + 'deg');
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 2200);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       END + REPLAY
+    ═══════════════════════════════════════════════════════════ */
+    function showEnd() {
+      clearTimeout(slideTimer);
+      document.getElementById('endcard').classList.add('show');
+      if (STATE.audio) { try { STATE.audio.pause(); } catch(_){} }
+    }
+    function replay() {
+      document.getElementById('endcard').classList.remove('show');
+      if (STATE.audio && STATE.soundOn) { try { STATE.audio.play(); } catch(_){} }
+      showSlide(0);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       AUDIO
+    ═══════════════════════════════════════════════════════════ */
+    function setAudioSrc(src) {
+      if (!src) return;
+      STATE.audioSrc = src;
+      if (!STATE.audio) {
+        STATE.audio = new Audio();
+        STATE.audio.loop = true;
+      }
+      if (STATE.audio.src !== src) STATE.audio.src = src;
+      if (STATE.audioStart > 0) {
+        const fn = () => { STATE.audio.currentTime = STATE.audioStart; STATE.audio.removeEventListener('loadedmetadata', fn); };
+        STATE.audio.addEventListener('loadedmetadata', fn);
+      }
+    }
+    function toggleSound() {
+      if (!STATE.audio || !STATE.audioSrc) return;
+      const icon = document.getElementById('sound-icon');
+      if (STATE.soundOn) {
+        STATE.audio.pause();
+        STATE.soundOn = false;
+        icon.innerHTML = '<path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/>';
+      } else {
+        STATE.audio.play().catch(()=>{});
+        STATE.soundOn = true;
+        icon.innerHTML = '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       AMBIENT DOTS
+    ═══════════════════════════════════════════════════════════ */
+    function startAmbient() {
+      const amb = document.getElementById('ambient');
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const d = document.createElement('div');
+        d.className = 'amb-dot';
+        d.style.left = (Math.random() * 100) + '%';
+        d.style.animationDuration = (10 + Math.random() * 14) + 's';
+        d.style.animationDelay = (-Math.random() * 20) + 's';
+        d.style.opacity = 0.5 + Math.random() * 0.5;
+        const s = 2 + Math.random() * 4;
+        d.style.width = s + 'px'; d.style.height = s + 'px';
+        amb.appendChild(d);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       DATA WIRE  __WW_DATA__ + postMessage
+    ═══════════════════════════════════════════════════════════ */
+    function collectSlidesFromData(data) {
+      const out = [];
+      for (let i = 1; i <= 8; i++) {
+        const photo   = data[`slide${i}Photo`]   || '';
+        const title   = data[`slide${i}Title`]   || '';
+        const text    = data[`slide${i}Text`]    || '';
+        const sticker = data[`slide${i}Sticker`] || 'none';
+        const textPos = data[`slide${i}TextPos`] || 'bottom';
+        if (photo || title || text) out.push({ photo, title, text, sticker, textPos });
+      }
+      return out;
+    }
+
+    function applyField(key, val) {
+      if (val == null || val === '') return;
+      if (key === 'musicSrc')       { setAudioSrc(val); return; }
+      if (key === 'musicStartTime') { STATE.audioStart = parseFloat(val) || 0; return; }
+      if (key === 'slideDurationSec') {
+        STATE.slideDurMs = Math.max(2000, parseFloat(val) * 1000);
+        document.documentElement.style.setProperty('--slide-dur', (STATE.slideDurMs / 1000) + 's');
+        return;
+      }
+      if (key === 'avatarSrc') {
+        const av = document.getElementById('avatar');
+        av.style.backgroundImage = `url("${val}")`;
+        av.querySelector('#avatar-initial').textContent = '';
+        return;
+      }
+      if (key === 'recipientName') {
+        const initEl = document.getElementById('avatar-initial');
+        const av = document.getElementById('avatar');
+        if (!av.style.backgroundImage) initEl.textContent = (val || '?').charAt(0);
+      }
+      const el = document.querySelector(`[data-node-name="${key}"]`);
+      if (el) el.textContent = val;
+    }
+
+    function renderAll(data) {
+      if (!data) return;
+      Object.keys(data).forEach(k => applyField(k, data[k]));
+      const slides = collectSlidesFromData(data);
+      if (slides.length) buildSlides(slides);
+    }
+
+    function init() {
+      startAmbient();
+      const data = window.__WW_DATA__ || {};
+      renderAll(data);
+      // Fallback demo slide if nothing seeded
+      if (!STATE.slides.length) {
+        buildSlides([
+          { photo: '', title: 'Joyeux Anniversaire', text: 'Ajoute des slides depuis l\'éditeur', sticker: 'heart', textPos: 'center' },
+        ]);
+      }
+    }
+
+    window.addEventListener('message', (e) => {
+      if (!e.data || e.data.type !== 'WW_UPDATE') return;
+      const { data, style } = e.data;
+      if (style) {
+        const r = document.documentElement;
+        if (style.primaryColor) r.style.setProperty('--primary', style.primaryColor);
+        if (style.accentColor)  r.style.setProperty('--accent', style.accentColor);
+        if (style.fontFamily)   r.style.setProperty('--font-b', `'${style.fontFamily}', sans-serif`);
+        if (style.fontSize) {
+          const sc = style.fontSize === 'small' ? '0.85' : style.fontSize === 'large' ? '1.15' : '1';
+          r.style.setProperty('--fs-scale', sc);
+        }
+        if (style.backgrounds && window.wwEngine) {
+          window.wwEngine.applyBackgrounds(style);
+        }
+      }
+      if (data) renderAll(data);
+    });
+
+    // Keyboard nav
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft')  prevSlide();
+      if (e.key === ' ')          { e.preventDefault(); STATE.isPaused ? resumeSlide() : pauseSlide(); }
+    });
+
+    init();
+  </script>
+</body>
+</html>

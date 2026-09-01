@@ -1,5 +1,6 @@
 import Navbar     from './components/Navbar';
 import Hero       from './components/Hero';
+import Analogy    from './components/Analogy';
 import HowItWorks from './components/HowItWorks';
 import Pricing    from './components/Pricing';
 import FAQ        from './components/FAQ';
@@ -16,7 +17,7 @@ export default function App() {
       window.location.href = `${APP_URL}${target}`;
     } else if (typeof target === 'string' && target.trim()) {
       window.location.href = `${APP_URL}/create?name=${encodeURIComponent(target.trim())}`;
-    } else {
+    } else {continu
       window.location.href = `${APP_URL}/create`;
     }
   };
@@ -32,6 +33,7 @@ export default function App() {
       <main id="main">
         <Hero       onCreate={() => handleCreate('/create')} />
         <Inspirations onStartCreate={handleCreate} />
+        <Analogy />
         <QrStories />
         <HowItWorks onCreate={() => handleCreate('/create')} />
         <Pricing    onCreate={() => handleCreate('/create')} />

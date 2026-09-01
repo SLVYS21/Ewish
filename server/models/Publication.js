@@ -186,6 +186,14 @@ const publicationSchema = new mongoose.Schema({
      endpoint /publish. */
   paidGiftFcfa:{ type: Number, default: 0 },
   planType:    { type: String, enum: ['free', 'premium', 'infinite'], default: 'free' },
+
+  /* Code promo appliqué au moment du publish (audit + support).
+     promoDiscountFcfa = montant en FCFA déduit des frais de publication
+     (base envelope 1500, plan mur, creditsRequired×500). Ne s'applique
+     jamais au cadeau Kado, qui reste facturé au montant plein. */
+  promoCode:         { type: String, default: '', uppercase: true, trim: true },
+  promoDiscountFcfa: { type: Number, default: 0 },
+
   shortCode:   { type: String, unique: true, sparse: true },
 
   /* Mot de merci du destinataire  ajouté après réception du mur, apparaît

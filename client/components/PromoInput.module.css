@@ -1,0 +1,108 @@
+.wrap { margin: 12px 0; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .12);
+  border-radius: 10px;
+  padding: 8px 10px;
+  transition: border-color .15s ease;
+}
+.row:focus-within { border-color: #2B2440; }
+
+.tagIcon { color: rgba(0, 0, 0, .45); flex-shrink: 0; }
+
+.input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  color: #2B2440;
+  min-width: 0;
+}
+.input::placeholder { font-weight: 400; letter-spacing: 0; color: rgba(0, 0, 0, .35); }
+
+.applyBtn {
+  border: none;
+  background: #2B2440;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s ease;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.applyBtn:hover:not(:disabled) { background: #1a1530; }
+.applyBtn:disabled { background: rgba(0, 0, 0, .2); cursor: not-allowed; }
+
+.spin { animation: promo-spin .75s linear infinite; }
+@keyframes promo-spin { to { transform: rotate(360deg); } }
+
+.error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #c0392b;
+  padding: 0 4px;
+}
+
+.applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(62, 207, 142, .12);
+  border: 1px solid rgba(62, 207, 142, .35);
+  border-radius: 10px;
+  margin: 12px 0;
+}
+.appliedLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.appliedIcon { color: #3ecf8e; flex-shrink: 0; }
+.appliedCode {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: #2B2440;
+  background: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px dashed rgba(62, 207, 142, .5);
+}
+.appliedDiscount {
+  font-size: 12px;
+  color: rgba(0, 0, 0, .6);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.appliedRemove {
+  border: none;
+  background: transparent;
+  color: rgba(0, 0, 0, .5);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  transition: background .15s ease, color .15s ease;
+  flex-shrink: 0;
+}
+.appliedRemove:hover:not(:disabled) { background: rgba(0, 0, 0, .06); color: #c0392b; }
+.appliedRemove:disabled { opacity: .5; cursor: not-allowed; }

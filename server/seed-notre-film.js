@@ -6,17 +6,16 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/wishwell';
 const notreFilmTemplate = {
   name:           'notre-film',
   label:          "Cinéma",
-  description:    "Un souvenir animé scène par scène. Photo cliquable, vinyle qui tourne, polaroids, lettre qui s'écrit, vidéo surprise. Pour anniversaire, mariage, amitié ou hommage.",
+  description:    "Un souvenir animé scène par scène. Photo cliquable, vinyle qui tourne, polaroids, lettre qui s'écrit. Pour anniversaire, mariage, amitié ou hommage.",
   thumbnail:      '/thumbnails/notre-film.png',
   active: true, featured: true, collectEnabled: false,
   price: 8500, priceLabel: '8 500 FCFA', sortOrder: 3,
-  tags: ['souvenir', 'cinématique', 'polaroid', 'vidéo', 'QR'],
+  tags: ['souvenir', 'cinématique', 'polaroid', 'QR'],
   highlights: [
     "Photo circulaire cliquable",
     "Vinyle qui tourne (cover album)",
     "Galerie de polaroids (jusqu'à 6 photos)",
     "Lettre qui s'écrit lettre par lettre",
-    "Vidéo surprise en boucle",
     "Player audio en pilule",
   ],
 
@@ -42,8 +41,7 @@ const notreFilmTemplate = {
     letterBtn: "Lire ma lettre",
     letterTitle: "pour toi...", letterSalut: "Salut,",
     letterText: "Aujourd'hui je voulais prendre le temps de t'écrire.\n\nParce qu'il y a des choses qui ne se disent pas en passant, des mots qui méritent d'être posés.\n\nMerci d'être là.",
-    senderName: "Avec affection", surpriseBtn: "J'ai une dernière surprise...",
-    videoSrc: "", videoLabel: "Notre film", replayBtn: "Revoir le film",
+    senderName: "Avec affection", surpriseBtn: "↺ Revoir nos souvenirs",
   },
 
   fields: [
@@ -78,11 +76,7 @@ const notreFilmTemplate = {
     { key: 'letterSalut',  label: 'Salutation lettre',      type: 'text',     section: 'Lettre', placeholder: 'Salut,' },
     { key: 'letterText',   label: 'Corps de la lettre',     type: 'textarea', section: 'Lettre', placeholder: 'Aujourd\'hui je voulais te dire...', required: true },
     { key: 'senderName',   label: 'Signature',              type: 'text',     section: 'Lettre', placeholder: 'Avec affection' },
-    { key: 'surpriseBtn',  label: 'Bouton surprise',        type: 'text',     section: 'Lettre', placeholder: "J'ai une dernière surprise..." },
-    // Vidéo
-    { key: 'videoSrc',    label: 'Vidéo surprise (mp4)',    type: 'url',  section: 'Vidéo', placeholder: 'https://... .mp4' },
-    { key: 'videoLabel',  label: 'Titre de la vidéo',       type: 'text', section: 'Vidéo', placeholder: 'Notre film' },
-    { key: 'replayBtn',   label: 'Bouton replay',           type: 'text', section: 'Vidéo', placeholder: 'Revoir le film' },
+    { key: 'surpriseBtn',  label: 'Bouton revoir',          type: 'text',     section: 'Lettre', placeholder: '↺ Revoir nos souvenirs' },
   ],
 };
 

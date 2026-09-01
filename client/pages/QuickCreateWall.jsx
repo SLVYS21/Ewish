@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { createPublication } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import NotoEmoji from '../components/NotoEmoji';
-import styles from './QuickCreate.module.css';
+import styles from './QuickCreateWall.module.css';
 
 /* Mêmes occasions que TemplatesGallery — `noto` mappe sur le CODEPOINTS de
    NotoEmoji.jsx pour utiliser les emojis animés Google Noto (WebP animé). */

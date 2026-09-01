@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Check, Loader2, ExternalLink, Share2,
   Upload, X, Eye, Inbox, ShieldCheck, Shield, Lock, Gift,
-  Trash2, RotateCcw, Clock, LockKeyhole, Zap,
+  Trash2, RotateCcw, Clock, LockKeyhole, Zap, ChevronRight,
 } from 'lucide-react';
 import {
   updatePublication, publishPublication, uploadFile, getPublicationById, createPublication,
@@ -1005,6 +1005,11 @@ export default function WallSetup() {
     { id: 'share',    label: 'Partager' },
   ];
 
+  const currentTabIdx = tabs.findIndex(t => t.id === tab);
+  const nextTab = currentTabIdx >= 0 && currentTabIdx < tabs.length - 1
+    ? tabs[currentTabIdx + 1]
+    : null;
+
   const styleTouched = !!(
     pub?.style?.styleBgPreset ||
     pub?.style?.stylePalettePreset ||
@@ -1135,6 +1140,31 @@ export default function WallSetup() {
                     renderActiveTabContent()
                   )}
                 </div>
+
+                {nextTab && (
+                  <div style={{ flexShrink: 0, padding: '12px 16px 22px', borderTop: '1px solid #EFE9DB', background: '#fff' }}>
+                    <button
+                      onClick={() => setTab(nextTab.id)}
+                      style={{
+                        width: '100%',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        background: '#161311',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '13px 18px',
+                        font: '700 14px var(--mk-body)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuer vers {nextTab.label}
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1265,18 +1295,46 @@ export default function WallSetup() {
                 </div>
 
                 {/* Right Inspector */}
-                <aside className="mk-scroll" style={{ borderLeft: '1px solid #F0EBDE', background: '#fff', overflowY: 'auto', padding: '22px 20px 26px', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontFamily: 'var(--mk-display)', fontSize: '20px', color: '#161311', marginBottom: '4px' }}>
-                    {tabs.find(t => t.id === tab)?.label}
-                  </div>
-                  <div style={{ font: '400 12.5px var(--mk-body)', color: '#8C8570', marginBottom: '20px', lineHeight: 1.5 }}>
-                    {tab === 'style' && "L'aspect du mur et de son ouverture."}
-                    {tab === 'settings' && "Les paramètres de base de ton mur."}
-                    {tab === 'words' && "Gère les mots laissés par tes proches."}
-                    {tab === 'cagnotte' && "Suis la collecte de fonds en direct."}
+                <aside style={{ borderLeft: '1px solid #F0EBDE', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <div className="mk-scroll" style={{ flex: 1, overflowY: 'auto', padding: '22px 20px 16px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontFamily: 'var(--mk-display)', fontSize: '20px', color: '#161311', marginBottom: '4px' }}>
+                      {tabs.find(t => t.id === tab)?.label}
+                    </div>
+                    <div style={{ font: '400 12.5px var(--mk-body)', color: '#8C8570', marginBottom: '20px', lineHeight: 1.5 }}>
+                      {tab === 'style' && "L'aspect du mur et de son ouverture."}
+                      {tab === 'settings' && "Les paramètres de base de ton mur."}
+                      {tab === 'words' && "Gère les mots laissés par tes proches."}
+                      {tab === 'cagnotte' && "Suis la collecte de fonds en direct."}
+                    </div>
+
+                    {renderActiveTabContent()}
                   </div>
 
-                  {renderActiveTabContent()}
+                  {nextTab && (
+                    <div style={{ flexShrink: 0, padding: '12px 20px 18px', borderTop: '1px solid #F0EBDE', background: '#fff', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        onClick={() => setTab(nextTab.id)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: '#161311',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '12px',
+                          padding: '11px 20px',
+                          font: '700 13.5px var(--mk-body)',
+                          cursor: 'pointer',
+                          transition: 'background .15s ease, transform .15s ease',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#2A2521'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#161311'; }}
+                      >
+                        Continuer vers {nextTab.label}
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
                 </aside>
               </>
             )}

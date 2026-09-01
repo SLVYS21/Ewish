@@ -214,6 +214,11 @@ export const unpublishPublication = (id) => api.post(`/publications/${id}/unpubl
 
 // ── Billing / Promos ──
 export const applyPromoCode = (code) => api.post('/billing/apply-promo', { code }, { withCredentials: true });
+/* Preview du discount avant publish (auth optionnelle : si connecté, refuse
+   les codes déjà utilisés par cet user). amount = frais de publication en
+   FCFA (jamais le cadeau Kado). */
+export const validatePromo = (code, templateName, amount) =>
+  api.post('/promo/validate', { code, templateName, amount }, { withCredentials: true });
 
 // ── KYC ──
 export const submitKyc              = (data)        => api.post('/kyc/submit', data, { withCredentials: true });

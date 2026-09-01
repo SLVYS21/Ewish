@@ -1,9 +1,11 @@
 const router = require('express').Router();
 const Promo = require('../models/Promo');
-const { requireAdmin } = require('../middleware/auth');
+const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 
-// POST /api/promo/validate  public, validate a promo code
-router.post('/validate', async (req, res) => {
+/* POST /api/promo/validate — preview du discount avant paiement.
+   Auth optionnelle : si l'user est connecté, on refuse aussi les codes
+   qu'il a déjà utilisés (sinon on découvre le refus au /publish, trop tard). */
+router.post('/validate', requireOptionalAdmin, async (req, res) => {
   try {
     const { code, templateName, amount } = req.body;
     if (!code) return res.status(400).json({ error: 'Code requis' });
@@ -11,12 +13,16 @@ router.post('/validate', async (req, res) => {
     const promo = await Promo.findOne({ code: code.toUpperCase() });
     if (!promo) return res.status(404).json({ error: 'Code introuvable' });
 
+    if (promo.isCreditGift) {
+      return res.status(400).json({ error: 'Ce code est un cadeau de crédits, applique-le depuis ton compte.' });
+    }
+
     // Template restriction
     if (promo.templates.length > 0 && !promo.templates.includes(templateName)) {
       return res.status(400).json({ error: 'Ce code ne s\'applique pas à ce template' });
     }
 
-    const check = promo.isValid(amount || 0);
+    const check = promo.isValid(amount || 0, req.admin?.id);
     if (!check.ok) return res.status(400).json({ error: check.reason });
 
     const discount = promo.computeDiscount(amount || 0);

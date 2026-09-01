@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import s from './Hero.module.css';
 import NotoEmoji from './NotoEmoji';
 
@@ -26,7 +27,27 @@ const FLOATING_EMOJIS = [
   { name: 'folded-hands',   top: '40%', right: '4%',  size: 42,  layer: 'fg', anim: 'float', delay: 0.8, rotate: -8 },
 ];
 
+/* Émotions cyclées après le point de "inoubliable."
+   Chaque emoji illustre une émotion qu'on peut faire passer au destinataire. */
+const EMOTION_EMOJIS = [
+  'partying-face',
+  'heart-eyes',
+  'star-struck',
+  'smiling-face-hearts',
+  'grinning-squinting',
+  'sparkling-heart',
+];
+
 export default function Hero({ onCreate }) {
+  const [emotionIdx, setEmotionIdx] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setEmotionIdx((i) => (i + 1) % EMOTION_EMOJIS.length);
+    }, 1600);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section className={s.hero}>
       <div className={s.floatingLayer} aria-hidden="true">
@@ -38,8 +59,9 @@ export default function Hero({ onCreate }) {
             right: e.right,
             width: e.size,
             height: e.size,
-            animationDelay: `${e.delay}s`,
             '--r': `${e.rotate}deg`,
+            '--enter-delay': `${0.4 + i * 0.06}s`,
+            '--float-delay': `${e.delay}s`,
           };
           if (m) {
             if (m.top !== undefined)    style['--m-top']    = m.top;
@@ -51,10 +73,12 @@ export default function Hero({ onCreate }) {
           return (
             <span
               key={i}
-              className={`${s.floater} ${s[`layer_${e.layer}`]} ${s[`anim_${e.anim}`]} ${m ? s.hasMobile : ''}`}
+              className={`${s.floater} ${s[`layer_${e.layer}`]} ${m ? s.hasMobile : ''}`}
               style={style}
             >
-              <NotoEmoji name={e.name} size={e.size} />
+              <span className={`${s.floaterInner} ${s[`anim_${e.anim}`]}`}>
+                <NotoEmoji name={e.name} size={e.size} />
+              </span>
             </span>
           );
         })}
@@ -68,8 +92,20 @@ export default function Hero({ onCreate }) {
           </div>
 
           <h1 className={s.h1}>
-            Faites de chaque occasion un<br />
-            souvenir <span className={s.highlightStatic}>inoubliable.</span>
+            <span className={s.line1}>Faites de chaque occasion un</span>
+            <span className={s.line2}>
+              souvenir <span className={s.highlightStatic}>inoubliable.</span>
+              <span className={s.emotionSlot} aria-hidden="true">
+                {EMOTION_EMOJIS.map((name, i) => (
+                  <span
+                    key={name}
+                    className={`${s.emotion} ${i === emotionIdx ? s.emotionActive : ''}`}
+                  >
+                    <NotoEmoji name={name} size={64} />
+                  </span>
+                ))}
+              </span>
+            </span>
           </h1>
 
           <p className={s.sub}>

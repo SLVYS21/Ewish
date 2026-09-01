@@ -5,6 +5,7 @@ import { getShortLink } from '../../utils/api';
 import { formatAmount, findCurrency } from '../data/currencies';
 import useFeexPay from '../../utils/useFeexPay';
 import NotoEmoji from '../../components/NotoEmoji';
+import PromoInput from '../../components/PromoInput';
 import {
   LucideSparkles, LucideRotateCcw, LucideGift, LucideEye, LucidePlay,
 } from 'lucide-react';
@@ -29,6 +30,7 @@ function ShareStep({ onOpenUnboxing }, ref) {
   } = useCardState();
 
   const [shortCode, setShortCode] = useState('');
+  const [promo, setPromo]         = useState(null); // { code, discount, finalPrice }
   const { openCheckout, feexpayModal } = useFeexPay();
 
   // Resolve a shortCode once published (for the "code court" section of ShareView).
@@ -47,23 +49,27 @@ function ShareStep({ onOpenUnboxing }, ref) {
   const errored    = publishState === 'error';
 
   // Total price to display + charge : 1500 base + gift (XOF only, other currencies
-  // stay symbolic — see server side publication.js).
+  // stay symbolic — see server side publication.js). Le promo réduit le socle
+  // uniquement (jamais le gift), aligné avec la règle serveur.
   const giftCfg = findCurrency(gift.currency);
   const giftIncluded = gift.enabled && gift.currency === 'XOF' && gift.amount >= (giftCfg?.min || 0);
   const giftFcfa = giftIncluded ? Math.floor(Number(gift.amount)) : 0;
-  const totalFcfa = CARD_PUBLISH_FEE_FCFA + giftFcfa;
+  const promoDiscount = promo?.discount || 0;
+  const baseAfterPromo = Math.max(0, CARD_PUBLISH_FEE_FCFA - promoDiscount);
+  const totalFcfa = baseAfterPromo + giftFcfa;
 
   const startPublish = async () => {
     /* Try publishing first — if the server has already been paid (isPaid) it
        skips the payment gate and we're done immediately. Otherwise we get a
        PAYMENT_REQUIRED code and open FeexPay with the returned priceFCFA. */
-    const first = await publishCard();
+    const promoCode = promo?.code || undefined;
+    const first = await publishCard({ promoCode });
     if (first?.ok) return;
 
     if (first?.paymentRequired && first?.priceFCFA) {
       const finalize = async ({ reference }) => {
         resetPublish();
-        await publishCard({ feexpayReference: reference });
+        await publishCard({ feexpayReference: reference, promoCode });
       };
       openCheckout({
         amount:      first.priceFCFA,
@@ -132,7 +138,14 @@ function ShareStep({ onOpenUnboxing }, ref) {
             <div className="ce-price-card">
               <div className="ce-price-row">
                 <span>Publication de la carte</span>
-                <span>{CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')} FCFA</span>
+                <span>
+                  {promoDiscount > 0 && (
+                    <span style={{ textDecoration: 'line-through', opacity: .5, marginRight: 6 }}>
+                      {CARD_PUBLISH_FEE_FCFA.toLocaleString('fr-FR')}
+                    </span>
+                  )}
+                  {baseAfterPromo.toLocaleString('fr-FR')} FCFA
+                </span>
               </div>
               {giftIncluded && (
                 <div className="ce-price-row">
@@ -152,11 +165,24 @@ function ShareStep({ onOpenUnboxing }, ref) {
             </div>
           )}
 
+          {!user?.canBypassPaywall && (
+            <PromoInput
+              templateName="myenvelope"
+              baseAmount={CARD_PUBLISH_FEE_FCFA}
+              applied={promo}
+              onApplied={setPromo}
+              onCleared={() => setPromo(null)}
+              disabled={publishing}
+            />
+          )}
+
           <button className="ce-cta" onClick={startPublish}>
             <LucideSparkles size={18} />
             {user?.canBypassPaywall && !giftIncluded
               ? 'Publier gratuitement (Testeur)'
-              : `Payer ${(user?.canBypassPaywall ? giftFcfa : totalFcfa).toLocaleString('fr-FR')} FCFA & publier`}
+              : totalFcfa === 0
+                ? 'Publier gratuitement'
+                : `Payer ${(user?.canBypassPaywall ? giftFcfa : totalFcfa).toLocaleString('fr-FR')} FCFA & publier`}
           </button>
         </>
       )}

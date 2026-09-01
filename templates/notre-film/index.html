@@ -685,103 +685,6 @@
     }
 
     /* ══════════════════════════════════
-       S5  VIDÉO
-    ══════════════════════════════════ */
-    #s5 {
-      background: var(--accent);
-      padding: 0;
-      justify-content: center;
-      align-items: center;
-      gap: 0;
-    }
-
-    .s5-title {
-      font-family: var(--font-b);
-      font-size: calc(1.3rem * var(--fs-scale));
-      color: rgba(255, 255, 255, .88);
-      text-align: center;
-      margin-bottom: 8px;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 5;
-    }
-
-    /* Conteneur 9:16 centré avec marges */
-    .s5-video-container {
-      position: relative;
-      /* hauteur max = viewport - titre - bouton replay - espaces */
-      height: calc(100vh - 160px);
-      width: calc((100vh - 160px) * 9 / 16);
-      max-width: calc(100vw - 32px);
-      background: #111;
-      border-radius: 16px;
-      overflow: hidden;
-      flex-shrink: 0;
-      margin: 0 auto;
-    }
-
-    #surprise-video {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 1.2s ease;
-    }
-
-    #surprise-video.ready {
-      opacity: 1;
-    }
-
-    .s5-no-video {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      color: rgba(255, 255, 255, .4);
-      font-family: var(--font-b);
-      font-size: .85rem;
-      letter-spacing: .08em;
-    }
-
-    .s5-no-video span {
-      font-size: 3rem;
-    }
-
-    .s5-overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 4;
-      pointer-events: none;
-      background: linear-gradient(to bottom,
-          rgba(0, 0, 0, .3) 0%, transparent 20%,
-          transparent 75%, rgba(0, 0, 0, .4) 100%);
-    }
-
-    /* s5-bottom removed  button is now in normal flow */
-    .s5-replay-btn {
-      background: rgba(255, 255, 255, .15);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, .28);
-      border-radius: 50px;
-      padding: 12px 32px;
-      font-family: var(--font-b);
-      font-size: calc(.88rem * var(--fs-scale));
-      color: #fff;
-      cursor: pointer;
-      letter-spacing: .04em;
-      transition: all .3s;
-    }
-
-    .s5-replay-btn:hover {
-      background: rgba(255, 255, 255, .25);
-    }
-
-    /* ══════════════════════════════════
        PILULE MUSICALE  Top Right (Mini)
     ══════════════════════════════════ */
     #music-pill {
@@ -922,8 +825,7 @@
     #s1,
     #s2,
     #s3,
-    #s4,
-    #s5 {
+    #s4 {
       background: transparent !important;
       background-color: transparent !important;
       background-image: none !important;
@@ -1165,29 +1067,11 @@
         </svg>
       </div>
       <div class="s4-footer">
-        <button class="s4-surprise-btn" id="s4-next" onclick="nextScene()" style="display:none">
-          <span data-node-name="surpriseBtn">J'ai une dernière surprise...</span>
+        <button class="s4-surprise-btn" id="s4-next" onclick="replayAll()" style="display:none">
+          <span data-node-name="surpriseBtn">↺ Revoir nos souvenirs</span>
         </button>
       </div>
     </div>
-  </div>
-
-  <!-- ═══════════════════════════
-     S5  VIDÉO
-═══════════════════════════ -->
-  <div class="scene" id="s5">
-    <div class="s5-title" data-node-name="videoLabel">Notre film</div>
-    <div class="s5-video-container">
-      <div class="s5-overlay"></div>
-      <div class="s5-no-video" id="s5-empty">
-        <span>🎬</span>
-        <p>Ajoute une vidéo<br>depuis l'éditeur</p>
-      </div>
-      <video id="surprise-video" playsinline loop muted></video>
-    </div>
-    <button class="s5-replay-btn" onclick="replayAll()" style="margin-top:16px;flex-shrink:0">
-      ↺ <span data-node-name="replayBtn">Revoir nos souvenirs</span>
-    </button>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
@@ -1277,7 +1161,7 @@
     let _typed = false;
     let _isPlaying = false;
     let _startTime = 0;
-    const SCENES = ['s1', 's2', 's3', 's4', 's5'];
+    const SCENES = ['s1', 's2', 's3', 's4'];
     // Vitesse de balayage des pétales qui révèlent une scène (intro + transitions).
     // Plus la valeur est grande, plus la révélation est lente.
     const PETAL_REVEAL_DURATION = 1.9;
@@ -1485,7 +1369,6 @@
       if (idx === 1) enterS2();
       if (idx === 2) enterS3();
       if (idx === 3) enterS4();
-      if (idx === 4) enterS5();
     }
 
     /* ══════════════════════════════════════════════
@@ -1521,17 +1404,6 @@
       if (!_typed) { _typed = true; setTimeout(startTyping, 550); }
     }
 
-    function enterS5() {
-      burstPetals(34);
-      const vid = document.getElementById('surprise-video');
-      if (vid.src && vid.src !== window.location.href) {
-        vid.play().catch(() => { });
-        vid.classList.add('ready');
-      }
-      TweenMax.from('.s5-title', 0.8, { opacity: 0, y: -12, ease: Power2.easeOut, delay: 0.2 });
-      TweenMax.from('.s5-bottom', 0.8, { opacity: 0, y: 20, ease: Power2.easeOut, delay: 0.5 });
-    }
-
     /* ══════════════════════════════════════════════
        REPLAY
     ══════════════════════════════════════════════ */
@@ -1542,7 +1414,6 @@
       TweenMax.set('#s4-sig', { opacity: 0 });
       document.getElementById('s4-next').style.display = 'none';
       if (_typeTimer) { clearTimeout(_typeTimer); _typeTimer = null; }
-      document.getElementById('surprise-video').pause();
 
       if (_transitioning) return;
       _transitioning = true;
@@ -1750,14 +1621,6 @@
 
       if (key === 'trackTitle') {
         document.getElementById('pill-title').textContent = val.toUpperCase();
-      }
-
-      if (key === 'videoSrc') {
-        const vid = document.getElementById('surprise-video');
-        const emp = document.getElementById('s5-empty');
-        vid.src = val;
-        if (emp) emp.style.display = 'none';
-        return;
       }
 
       if (key === 'photos' && Array.isArray(val)) {

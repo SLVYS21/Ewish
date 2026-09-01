@@ -5,6 +5,7 @@ const Template = require('../models/Template');
 const Transaction = require('../models/Transaction');
 const SiteSettings = require('../models/SiteSettings');
 const Wish = require('../models/Wish');
+const Promo = require('../models/Promo');
 const slugify = require('slugify');
 const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 const { slugify: mkSlugify, isValidSlug, generateUniqueSlug } = require('../utils/slug');
@@ -374,13 +375,24 @@ router.patch('/:id', requireOptionalAdmin, async (req, res) => {
 // POST publish
 router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
   try {
+    /* Auth obligatoire pour publier : sans compte on ne peut ni
+       provisionner un paiement, ni tracer l'ownership. Le front
+       redirige vers /register avant d'appeler cette route. */
+    if (!req.admin?.id) {
+      return res.status(401).json({
+        error: 'Connexion requise pour publier.',
+        code:  'AUTH_REQUIRED',
+      });
+    }
+
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
     if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
       return res.status(403).json({ error: 'Accès refusé' });
     }
 
-    const { planType, feexpayReference } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
+    const { planType, feexpayReference, promoCode: rawPromoCode } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
+    const promoCodeInput = rawPromoCode ? String(rawPromoCode).trim().toUpperCase() : '';
     const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
     const isEnvelope     = existing.templateName === 'myenvelope';
     /* Gift attaché (Kado) : partagé entre myenvelope et les cartes legacy
@@ -422,6 +434,37 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     }
 
     /* -------------------------------------------------------------------
+       Code promo — chargement + validations statiques (existence, type,
+       template). La validation dynamique (isValid : expiré/épuisé/déjà
+       utilisé + minOrder) est faite plus bas quand on connaît la base à
+       laquelle le discount s'applique. Le discount ne touche JAMAIS le
+       cadeau Kado — uniquement les frais de publication (socle enveloppe,
+       plan mur, template legacy). Le promo n'est consommé qu'après un
+       paiement réussi (ou une publication gratuite provoquée par un promo
+       100%), jamais avant, pour éviter de "brûler" un code sur un échec.
+       ------------------------------------------------------------------- */
+    let promo = null;
+    let promoDiscountFcfa = 0;
+    if (promoCodeInput) {
+      promo = await Promo.findOne({ code: promoCodeInput });
+      if (!promo) {
+        return res.status(400).json({ error: 'Code promo introuvable.', code: 'PROMO_NOT_FOUND' });
+      }
+      if (promo.isCreditGift) {
+        return res.status(400).json({
+          error: 'Ce code est un cadeau de crédits, applique-le depuis ton compte.',
+          code:  'PROMO_IS_GIFT',
+        });
+      }
+      if (promo.templates && promo.templates.length > 0 && !promo.templates.includes(existing.templateName)) {
+        return res.status(400).json({
+          error: 'Ce code ne s\'applique pas à ce template.',
+          code:  'PROMO_TEMPLATE_MISMATCH',
+        });
+      }
+    }
+
+    /* -------------------------------------------------------------------
        Escrow FeexPay — deux cas :
        - First publish (needsFirstEscrow) : 1500 FCFA base + éventuel Kado.
        - Top-up (needsGiftTopUp) : uniquement le delta Kado non provisionné.
@@ -429,14 +472,19 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
        réellement provisionné (Transaction.adminId required).
        ------------------------------------------------------------------- */
     if (requiresEscrow) {
-      if (!req.admin?.id) {
-        return res.status(401).json({
-          error: 'Connexion requise pour publier une carte avec cadeau.',
-          code:  'AUTH_REQUIRED',
-        });
+      let baseFee = canBypass ? 0 : 1500;
+
+      /* Promo appliqué au socle uniquement (pas au gift, pas au top-up).
+         On valide ici pour catcher "expiré/épuisé/déjà utilisé" + minOrder. */
+      if (promo && needsFirstEscrow && baseFee > 0) {
+        const check = promo.isValid(baseFee, req.admin.id);
+        if (!check.ok) {
+          return res.status(400).json({ error: check.reason, code: 'PROMO_INVALID' });
+        }
+        promoDiscountFcfa = Math.min(baseFee, promo.computeDiscount(baseFee));
+        baseFee = baseFee - promoDiscountFcfa;
       }
 
-      const baseFee = canBypass ? 0 : 1500;
       const envelopePrice = needsFirstEscrow ? (baseFee + giftFcfa) : owedGiftFcfa;
 
       /* Bypass paywall + aucun cadeau → rien à provisionner, on publie gratuitement.
@@ -504,7 +552,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
        Bypass si `requiresEscrow` : le paiement Kado FeexPay a déjà été validé
        plus haut, on ne facture pas de crédits en plus.
        ------------------------------------------------------------------- */
-    if (!requiresEscrow && req.admin?.role === 'merchant') {
+    if (!requiresEscrow && req.admin?.id) {
       if (isWallTemplate) {
         const plan = WALL_PLAN_PRICES[finalPlanType] || WALL_PLAN_PRICES.free;
         creditsReq = plan.credits;
@@ -519,6 +567,70 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       if (canBypass) {
         creditsReq = 0;
         priceFCFA = 0;
+      }
+
+      /* Promo : appliqué au prix FCFA (frais de publication). Force le
+         chemin FeexPay — on ne combine pas promo et crédits legacy (sinon
+         ambigüité sur le "prix" d'un crédit après discount). Si le promo
+         ramène le prix à 0, la publication passe gratuite (creditsReq
+         reste à 0, priceFCFA=0 → skip du bloc paiement). */
+      if (promo && priceFCFA > 0) {
+        const check = promo.isValid(priceFCFA, req.admin.id);
+        if (!check.ok) {
+          return res.status(400).json({ error: check.reason, code: 'PROMO_INVALID' });
+        }
+        promoDiscountFcfa = Math.min(priceFCFA, promo.computeDiscount(priceFCFA));
+        priceFCFA = priceFCFA - promoDiscountFcfa;
+        creditsReq = 0;
+
+        if (priceFCFA > 0) {
+          if (!feexpayReference) {
+            return res.status(402).json({
+              error: `Paiement requis : ${priceFCFA} FCFA (code ${promo.code} appliqué).`,
+              code:  'PAYMENT_REQUIRED',
+              creditsRequired: 0,
+              priceFCFA,
+              promoApplied: promo.code,
+              promoDiscountFcfa,
+            });
+          }
+          const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
+          if (!existingTx || existingTx.status !== 'SUCCESS') {
+            let verifyRes;
+            try {
+              verifyRes = await feexpay.verify(feexpayReference);
+            } catch (err) {
+              console.error('[publish] FeexPay verify failed', err.message);
+              return res.status(502).json({
+                error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
+                code:  'FEEXPAY_UNAVAILABLE',
+              });
+            }
+            if (verifyRes.status !== 'SUCCESSFUL') {
+              return res.status(402).json({
+                error: 'Paiement FeexPay non confirmé.',
+                code:  'FEEXPAY_NOT_SUCCESSFUL',
+                status: verifyRes.status,
+              });
+            }
+            if (verifyRes.amount < priceFCFA) {
+              return res.status(402).json({
+                error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${priceFCFA} FCFA).`,
+                code:  'FEEXPAY_UNDERPAID',
+              });
+            }
+            const tx = existingTx || new Transaction({
+              adminId:       req.admin.id,
+              transactionId: feexpayReference,
+              amount:        verifyRes.amount,
+              credits:       0,
+              source:        'feexpay',
+              paymentData:   verifyRes.raw,
+            });
+            tx.status = 'SUCCESS';
+            await tx.save();
+          }
+        }
       }
 
       if (creditsReq > 0) {
@@ -599,6 +711,19 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       // Après un escrow FeexPay réussi (first ou top-up), le montant provisionné
       // est aligné sur le gift courant.
       updateFields.paidGiftFcfa = giftFcfa;
+    }
+
+    /* Promo effectivement appliqué (discount > 0) : on persiste le code
+       + le montant remisé sur la Publication (audit), et on consomme le
+       code sur le Promo (usedCount + usedBy). isValid() a déjà refusé
+       plus haut les codes déjà utilisés par ce user, donc pas de doublon
+       à craindre ici. */
+    if (promo && promoDiscountFcfa > 0) {
+      updateFields.promoCode         = promo.code;
+      updateFields.promoDiscountFcfa = promoDiscountFcfa;
+      promo.usedCount = (promo.usedCount || 0) + 1;
+      promo.usedBy.push(req.admin.id);
+      await promo.save();
     }
     if (isWallTemplate) {
       updateFields.planType = finalPlanType;
