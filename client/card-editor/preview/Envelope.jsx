@@ -329,7 +329,7 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            transform: 'rotateX(180deg) translateZ(1px)',
+            transform: 'rotateY(180deg) translateZ(1px)',
             overflow: 'hidden',
             filter: 'drop-shadow(0 -8px 16px rgba(0,0,0,0.26))',
             background: `
