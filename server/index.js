@@ -40,6 +40,15 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const REACT_DIST = path.join(__dirname, '../client/dist');
+// Serve client dist assets globally (accessible on go.mykado.store, app.mykado.store, etc.)
+if (fs.existsSync(REACT_DIST)) {
+  app.use('/assets', express.static(path.join(REACT_DIST, 'assets'), {
+    maxAge: '1y',
+    immutable: true,
+  }));
+}
+
 /* Fonds de mur (images fixes)  dossier client/public/backgrounds/ servi
    aussi côté serveur pour que les URLs stockées (/backgrounds/xxx.png)
    résolvent depuis n'importe où (wall SSR, éditeur, previews).
@@ -144,8 +153,6 @@ function serveLanding(req, res) {
 // serve the Vite build directly from Express as shown here.
 // In dev, Vite handles app.localhost:3000  Express just responds
 // with a helpful message if you hit :5000 directly.
-const REACT_DIST = path.join(__dirname, '../client/dist');
-
 function serveReact(req, res) {
   if (!PROD) {
     return res.redirect(`http://localhost:3000${req.path}`);

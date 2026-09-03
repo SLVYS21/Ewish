@@ -59,218 +59,223 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
   return (
     <div className="ce-envelope" style={{ position: 'relative', width: '100%', height: '100%', transformStyle: 'preserve-3d' }}>
       
-      {/* ===== 1. BODY (Back Panel) — sturdy back plate with soft depth shadows ===== */}
-      <div className="env-back" style={{
+      {/* ===== ENVELOPE BODY CONTAINER — clips all 4 outer corners to perfect smooth rounded radius ===== */}
+      <div className="env-body" style={{
         position: 'absolute',
         inset: 0,
-        background: color,
-        borderRadius: '4px',
+        borderRadius: '12px',
+        overflow: 'hidden',
         boxShadow: [
           '0 35px 70px -20px rgba(0,0,0,0.48)',
           '0 15px 30px -10px rgba(0,0,0,0.28)',
           '0 4px 10px rgba(0,0,0,0.14)',
           `inset 0 0 0 1px ${edge}`,
-          `inset 0 1px 0 0 ${shade(color, 0.15)}`,
-          `inset 0 -3px 8px ${shade(color, -0.20)}`,
+          `inset 0 2px 4px rgba(255,255,255,0.22)`,
+          `inset 0 -4px 10px ${shade(color, -0.22)}`,
         ].join(', '),
-        overflow: 'hidden',
-        zIndex: 0,
       }}>
-        {hasPaperImg && (
+        {/* ----- 1. BODY (Back Panel) ----- */}
+        <div className="env-back" style={{
+          position: 'absolute',
+          inset: 0,
+          background: color,
+        }}>
+          {hasPaperImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${paperUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 8%',
+              mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+              opacity: paperOpacity,
+            }} />
+          )}
+          {!hasPaperImg && textureImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: textureImg,
+              mixBlendMode: textureBlend,
+              opacity: 0.55,
+            }} />
+          )}
+          {isSatin && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(105deg, rgba(255,255,255,0.24) 0%, transparent 30%, transparent 70%, rgba(255,255,255,0.16) 100%)',
+              mixBlendMode: 'overlay',
+            }} />
+          )}
+          {/* Soft volumetric 3D pillowing gradient */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: `url(${paperUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 8%',
-            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
-            opacity: paperOpacity,
+            background: 'radial-gradient(ellipse at 50% 48%, rgba(255,255,255,0.08) 0%, transparent 65%, rgba(0,0,0,0.12) 100%)',
+            pointerEvents: 'none',
           }} />
-        )}
-        {!hasPaperImg && textureImg && (
+        </div>
+
+        {/* ----- 2. INTERIOR LINER ----- */}
+        <div className="env-interior-liner" style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '62%',
+          clipPath: 'polygon(0 0, 100% 0, 50% 86%)',
+          overflow: 'hidden',
+          zIndex: 1,
+          background: `
+            radial-gradient(ellipse at 30% 20%, ${foil.hi} 0%, transparent 55%),
+            radial-gradient(ellipse at 70% 80%, ${foil.hi} 0%, transparent 45%),
+            linear-gradient(160deg, ${foil.hi} 0%, ${foil.mid} 45%, ${foil.lo} 100%)
+          `,
+        }}>
+          {/* Crumpled foil texture */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: textureImg,
-            mixBlendMode: textureBlend,
-            opacity: 0.55,
-          }} />
-        )}
-        {isSatin && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(105deg, rgba(255,255,255,0.24) 0%, transparent 30%, transparent 70%, rgba(255,255,255,0.16) 100%)',
+            backgroundImage: FOIL_CRUMPLE,
+            backgroundSize: '160px 160px',
             mixBlendMode: 'overlay',
+            opacity: 0.55,
+            pointerEvents: 'none',
           }} />
-        )}
-        {/* Subtle realistic paper curvature vignette */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.06) 0%, transparent 60%, rgba(0,0,0,0.10) 100%)',
-          pointerEvents: 'none',
-        }} />
-      </div>
-
-      {/* ===== 2. INTERIOR LINER — luxurious foil / pattern seen inside the throat ===== */}
-      <div className="env-interior-liner" style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: '62%',
-        clipPath: 'polygon(0 0, 100% 0, 50% 88%)',
-        overflow: 'hidden',
-        zIndex: 1,
-        background: `
-          radial-gradient(ellipse at 30% 20%, ${foil.hi} 0%, transparent 55%),
-          radial-gradient(ellipse at 70% 80%, ${foil.hi} 0%, transparent 45%),
-          linear-gradient(160deg, ${foil.hi} 0%, ${foil.mid} 45%, ${foil.lo} 100%)
-        `,
-      }}>
-        {/* Crumpled foil texture */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: FOIL_CRUMPLE,
-          backgroundSize: '160px 160px',
-          mixBlendMode: 'overlay',
-          opacity: 0.55,
-          pointerEvents: 'none',
-        }} />
-        {/* Sheen sweep */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `linear-gradient(115deg,
-            rgba(255,255,255,0.50) 0%,
-            rgba(255,255,255,0.12) 25%,
-            rgba(255,255,255,0.00) 45%,
-            rgba(255,255,255,0.10) 65%,
-            rgba(255,255,255,0.30) 100%)`,
-          mixBlendMode: 'screen',
-          pointerEvents: 'none',
-        }} />
-        {/* Pattern / Decor overlay */}
-        {linerSpec.imageUrl && (
+          {/* Sheen sweep */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: `url(${linerSpec.imageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            background: `linear-gradient(115deg,
+              rgba(255,255,255,0.50) 0%,
+              rgba(255,255,255,0.12) 25%,
+              rgba(255,255,255,0.00) 45%,
+              rgba(255,255,255,0.10) 65%,
+              rgba(255,255,255,0.30) 100%)`,
+            mixBlendMode: 'screen',
+            pointerEvents: 'none',
+          }} />
+          {/* Pattern / Decor overlay */}
+          {linerSpec.imageUrl && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${linerSpec.imageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              mixBlendMode: 'multiply',
+              opacity: 0.85,
+            }} />
+          )}
+          {!linerSpec.imageUrl && !linerSpec.color && (
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.75, mixBlendMode: 'multiply' }}>
+              <Decor spec={{ ...linerSpec, position: 'fill', opacity: 1 }} />
+            </div>
+          )}
+          {/* Deep throat shadow */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 90%, rgba(0,0,0,0.55) 100%)',
             mixBlendMode: 'multiply',
-            opacity: 0.85,
+            pointerEvents: 'none',
           }} />
-        )}
-        {!linerSpec.imageUrl && !linerSpec.color && (
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.75, mixBlendMode: 'multiply' }}>
-            <Decor spec={{ ...linerSpec, position: 'fill', opacity: 1 }} />
-          </div>
-        )}
-        {/* Deep throat shadow — gives realistic cavity depth */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 90%, rgba(0,0,0,0.55) 100%)',
-          mixBlendMode: 'multiply',
-          pointerEvents: 'none',
-        }} />
-      </div>
+        </div>
 
-      {/* ===== 3. LEFT FLAP — folding in over the interior ===== */}
-      <div className="env-left-flap" style={{
-        position: 'absolute',
-        top: 0, bottom: 0, left: 0,
-        width: '52%',
-        background: color,
-        clipPath: 'polygon(0 0, 100% 55%, 0 100%)',
-        filter: 'drop-shadow(4px 2px 9px rgba(0,0,0,0.22))',
-        zIndex: 2,
-      }}>
-        {hasPaperImg && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `url(${paperUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 8%',
-            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
-            opacity: paperOpacity,
-          }} />
-        )}
-        {!hasPaperImg && textureImg && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: textureImg,
-            mixBlendMode: textureBlend,
-            opacity: 0.55,
-          }} />
-        )}
-        {/* Crease shadow & bevel highlight */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, transparent 82%, ${shade(color, -0.18)} 100%)`, opacity: 0.6, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${shade(color, 0.12)} 0%, transparent 4%)`, opacity: 0.7, pointerEvents: 'none' }} />
-      </div>
+        {/* ----- 3. LEFT FLAP ----- */}
+        <div className="env-left-flap" style={{
+          position: 'absolute',
+          top: 0, bottom: 0, left: 0,
+          width: '52%',
+          background: color,
+          clipPath: 'polygon(0 0, 100% 55%, 0 100%)',
+          filter: 'drop-shadow(4px 2px 8px rgba(0,0,0,0.20))',
+          zIndex: 2,
+        }}>
+          {hasPaperImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${paperUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 8%',
+              mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+              opacity: paperOpacity,
+            }} />
+          )}
+          {!hasPaperImg && textureImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: textureImg,
+              mixBlendMode: textureBlend,
+              opacity: 0.55,
+            }} />
+          )}
+          {/* Crease shadow & bevel highlight */}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, transparent 80%, ${shade(color, -0.18)} 100%)`, opacity: 0.6, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${shade(color, 0.12)} 0%, transparent 4%)`, opacity: 0.7, pointerEvents: 'none' }} />
+        </div>
 
-      {/* ===== 4. RIGHT FLAP — folding in over the interior ===== */}
-      <div className="env-right-flap" style={{
-        position: 'absolute',
-        top: 0, bottom: 0, right: 0,
-        width: '52%',
-        background: color,
-        clipPath: 'polygon(100% 0, 0 55%, 100% 100%)',
-        filter: 'drop-shadow(-4px 2px 9px rgba(0,0,0,0.22))',
-        zIndex: 2,
-      }}>
-        {hasPaperImg && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `url(${paperUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 8%',
-            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
-            opacity: paperOpacity,
-          }} />
-        )}
-        {!hasPaperImg && textureImg && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: textureImg,
-            mixBlendMode: textureBlend,
-            opacity: 0.55,
-          }} />
-        )}
-        {/* Crease shadow & bevel highlight */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(-135deg, transparent 82%, ${shade(color, -0.18)} 100%)`, opacity: 0.6, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${shade(color, 0.12)} 0%, transparent 4%)`, opacity: 0.7, pointerEvents: 'none' }} />
-      </div>
+        {/* ----- 4. RIGHT FLAP ----- */}
+        <div className="env-right-flap" style={{
+          position: 'absolute',
+          top: 0, bottom: 0, right: 0,
+          width: '52%',
+          background: color,
+          clipPath: 'polygon(100% 0, 0 55%, 100% 100%)',
+          filter: 'drop-shadow(-4px 2px 8px rgba(0,0,0,0.20))',
+          zIndex: 2,
+        }}>
+          {hasPaperImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${paperUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 8%',
+              mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+              opacity: paperOpacity,
+            }} />
+          )}
+          {!hasPaperImg && textureImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: textureImg,
+              mixBlendMode: textureBlend,
+              opacity: 0.55,
+            }} />
+          )}
+          {/* Crease shadow & bevel highlight */}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(-135deg, transparent 80%, ${shade(color, -0.18)} 100%)`, opacity: 0.6, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${shade(color, 0.12)} 0%, transparent 4%)`, opacity: 0.7, pointerEvents: 'none' }} />
+        </div>
 
-      {/* ===== 5. BOTTOM FLAP — overlapping bottom pouch ===== */}
-      <div className="env-bottom-flap" style={{
-        position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        height: '58%',
-        background: color,
-        clipPath: 'polygon(0 100%, 50% 46%, 100% 100%)',
-        filter: 'drop-shadow(0 -5px 12px rgba(0,0,0,0.25))',
-        zIndex: 3,
-      }}>
-        {hasPaperImg && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `url(${paperUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 8%',
-            mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
-            opacity: paperOpacity,
-          }} />
-        )}
-        {/* Top-edge fold crease & apex shadow */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `linear-gradient(180deg, ${hinge} 0%, transparent 14%)`,
+        {/* ----- 5. BOTTOM FLAP ----- */}
+        <div className="env-bottom-flap" style={{
+          position: 'absolute',
+          bottom: 0, left: 0, right: 0,
+          height: '58%',
+          background: color,
           clipPath: 'polygon(0 100%, 50% 46%, 100% 100%)',
-          opacity: 0.55,
-          pointerEvents: 'none',
-        }} />
-        {!hasPaperImg && textureImg && (
+          filter: 'drop-shadow(0 -5px 12px rgba(0,0,0,0.25))',
+          zIndex: 3,
+        }}>
+          {hasPaperImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${paperUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 8%',
+              mixBlendMode: paperIsDirect ? 'normal' : 'multiply',
+              opacity: paperOpacity,
+            }} />
+          )}
+          {/* Top-edge fold crease */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: textureImg,
-            mixBlendMode: textureBlend,
-            opacity: 0.45,
+            background: `linear-gradient(180deg, ${hinge} 0%, transparent 14%)`,
+            clipPath: 'polygon(0 100%, 50% 46%, 100% 100%)',
+            opacity: 0.55,
+            pointerEvents: 'none',
           }} />
-        )}
+          {!hasPaperImg && textureImg && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: textureImg,
+              mixBlendMode: textureBlend,
+              opacity: 0.45,
+            }} />
+          )}
+        </div>
       </div>
 
       {/* ===== 6. TOP FLAP — flips open/closed with 3D double-sided rendering ===== */}
@@ -289,11 +294,13 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
           <div style={{
             position: 'absolute', inset: 0,
             background: color,
+            borderTopLeftRadius: '12px',
+            borderTopRightRadius: '12px',
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             transform: 'translateZ(1px)',
-            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.24))',
+            filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.25))',
             overflow: 'hidden',
           }}>
             {hasPaperImg && (
@@ -306,6 +313,12 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
                 opacity: paperOpacity,
               }} />
             )}
+            {/* Subtle flap puffiness/cushioning gradient */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 40%, rgba(0,0,0,0.08) 100%)',
+              pointerEvents: 'none',
+            }} />
             {/* Fold crease shadow at top hinge */}
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: '18%',
@@ -326,6 +339,8 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
           {/* ----- B. BACK FACE (Interior foil liner, seen when OPEN) ----- */}
           <div style={{
             position: 'absolute', inset: 0,
+            borderTopLeftRadius: '12px',
+            borderTopRightRadius: '12px',
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',

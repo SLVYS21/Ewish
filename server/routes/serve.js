@@ -65,7 +65,7 @@ function optimizeCloudinaryUrl(url, transforms = 'f_auto,q_auto:good,w_1400,c_li
 const CSP = [
   "default-src 'self' https: data: blob:",
   "script-src 'self' 'unsafe-inline' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
+  "style-src 'self' 'unsafe-inline' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",

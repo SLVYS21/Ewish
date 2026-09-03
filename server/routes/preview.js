@@ -152,7 +152,7 @@ const GFONTS_MAP = {
 const CSP = [
   "default-src 'self' https: data: blob:",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
+  "style-src 'self' 'unsafe-inline' https: http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*",
   "font-src 'self' https://fonts.gstatic.com https://res.cloudinary.com data:",
   "img-src 'self' https: data: blob:",
   "media-src 'self' https: blob:",
