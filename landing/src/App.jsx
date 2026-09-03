@@ -17,7 +17,7 @@ export default function App() {
       window.location.href = `${APP_URL}${target}`;
     } else if (typeof target === 'string' && target.trim()) {
       window.location.href = `${APP_URL}/create?name=${encodeURIComponent(target.trim())}`;
-    } else {continu
+    } else {
       window.location.href = `${APP_URL}/create`;
     }
   };

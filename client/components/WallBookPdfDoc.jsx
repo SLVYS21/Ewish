@@ -22,11 +22,17 @@ import {
 /* ─── Fonts ─── */
 /* On fetch les WOFF2 depuis Google Fonts. react-pdf ne supporte pas
    les variable fonts avec `opsz`, on donne des URLs figées par poids. */
+/* react-pdf exige des entrées italic explicites sinon `fontStyle: italic`
+   crash avec "Could not resolve font for X, fontWeight N, fontStyle italic".
+   Faute de TTF italic stables sur gstatic, on remappe l'italic vers la même
+   URL que le regular : le texte s'affiche (non slanté, mais valide). */
 Font.register({
   family: 'Fraunces',
   fonts: [
     { src: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIctxuTCf7Wp0hGNw.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIctxuTCf7Wp0hGNw.ttf', fontWeight: 400, fontStyle: 'italic' },
     { src: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIcUByTCf7Wp0hGNw.ttf', fontWeight: 700 },
+    { src: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIcUByTCf7Wp0hGNw.ttf', fontWeight: 700, fontStyle: 'italic' },
   ],
 });
 Font.register({
@@ -40,6 +46,7 @@ Font.register({
   family: 'Inter',
   fonts: [
     { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjZ-Ck-8.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjZ-Ck-8.ttf', fontWeight: 400, fontStyle: 'italic' },
     { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYAZ9hjZ-Ck-8.ttf', fontWeight: 600 },
     { src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYAZ9hjZ-Ck-8.ttf', fontWeight: 700 },
   ],

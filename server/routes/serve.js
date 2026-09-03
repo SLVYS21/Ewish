@@ -13,7 +13,6 @@ const {
   safeCssUrl,
   safeHttpUrl,
 } = require('../utils/htmlSafe');
-const { getReactWallShell } = require('../utils/reactWallShell');
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -216,14 +215,18 @@ router.get('/:templateName/:customName', async (req, res) => {
       const rawAccentInk = safeColor(s.paletteAccentText || '', '');
       if (rawAccentInk) wallBgLines.push(`  --pin-btn-ink: ${rawAccentInk};`);
       /* Bannière (#wall-cover) : lit --cover-image (gradient) et --cover-ink (couleur texte).
-         Sources : data.bannerTint (gradient de l'occasion) + data.bannerInk (contraste). */
-      const rawBanner = String((pub.data && pub.data.bannerTint) || '').trim();
+         Sources (priorité) : style.bannerTintFromPalette (palette choisie dans
+         WallStyle) → data.bannerTint (gradient de l'occasion). Idem pour l'ink.
+         Le fallback palette évite qu'une palette choisie n'ait aucun effet sur
+         la bannière côté React wall shell (les templates legacy le géraient déjà
+         via JS runtime — cf. templates/wall-of-wishes/index.html). */
+      const rawBanner = String(s.bannerTintFromPalette || (pub.data && pub.data.bannerTint) || '').trim();
       let safeBanner = '';
       if (!/[;<>}]/.test(rawBanner) && (/^(?:linear|radial|conic)-gradient/i.test(rawBanner) || /^#[0-9a-f]{3,8}$/i.test(rawBanner) || /^url\(/i.test(rawBanner))) {
         safeBanner = rawBanner;
       }
       if (safeBanner) wallBgLines.push(`  --cover-image: ${safeBanner};`);
-      const rawBannerInk = safeColor((pub.data && pub.data.bannerInk) || '', '');
+      const rawBannerInk = safeColor(s.bannerInkFromPalette || (pub.data && pub.data.bannerInk) || '', '');
       if (rawBannerInk) wallBgLines.push(`  --cover-ink: ${rawBannerInk};`);
     }
 
@@ -264,13 +267,6 @@ router.get('/:templateName/:customName', async (req, res) => {
     const googleFontLink = gFontQuery
       ? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=${gFontQuery}&display=swap" rel="stylesheet">`
       : '';
-    if (googleFontLink) {
-      html = html.replace('</head>', `${googleFontLink}\n</head>`);
-    }
-
-    if (bubbleFontPreloads) {
-      html = html.replace('<head>', `<head>\n  ${bubbleFontPreloads}`);
-    }
 
     /* ── Colors: wall smart fallback + validation ─── */
     let wallPrimary, wallAccent;
@@ -321,7 +317,12 @@ router.get('/:templateName/:customName', async (req, res) => {
     publicData.isAdmin = isAdmin;
     publicData.adminReturnUrl = adminReturnUrl;
     publicData.previewMode = isPreview;
-    publicData.skipIntro = req.query.noanim === '1';
+    /* Mode contributeur : lien partagé aux invités (?collect=1). Skip l'envelope
+       intro + le mode "Dire merci" post-envelope — ces UX sont réservées au
+       destinataire qui ouvre son propre mur (URL sans query). */
+    const isCollect = req.query.collect === '1';
+    publicData.collectMode = isCollect;
+    publicData.skipIntro = req.query.noanim === '1' || isCollect;
     publicData.cagnotte = pub.cagnotteConfig?.enabled ? {
       enabled: true,
       name: pub.cagnotteConfig.description || '',
@@ -348,15 +349,17 @@ router.get('/:templateName/:customName', async (req, res) => {
     const confettiType = (typeof s.confettiType === 'string' && /^[a-zA-Z0-9-]{1,30}$/.test(s.confettiType))
       ? s.confettiType : 'default';
 
-    let html;
-    if (isWallTemplate) {
-      html = getReactWallShell();
-      if (!html) {
-        return sendError(res, 503, 'Le mur React doit être compilé avant affichage.');
-      }
-    } else {
-      html = await getTemplateHtml(pub.templateName);
-      if (!html) return sendError(res, 404, 'Template introuvable.');
+    // Rendu des murs : templates HTML/CSS/JS complets (templates/<name>/index.html)
+    // = source de vérité. La réécriture React (getReactWallShell) était incomplète
+    // et ne reproduisait pas fidèlement le design/features (bannière, rotation, tones).
+    let html = await getTemplateHtml(pub.templateName);
+    if (!html) return sendError(res, 404, 'Template introuvable.');
+
+    if (googleFontLink) {
+      html = html.replace('</head>', `${googleFontLink}\n</head>`);
+    }
+    if (bubbleFontPreloads) {
+      html = html.replace('<head>', `<head>\n  ${bubbleFontPreloads}`);
     }
 
     const injection = `

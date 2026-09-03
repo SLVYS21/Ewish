@@ -1,0 +1,91 @@
+.wrap {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px;
+  background: linear-gradient(135deg, #FFF7EA, #FFE8D6);
+  border: 1.5px solid #FBD8A6;
+  border-radius: 16px;
+}
+.header {
+  display: flex; align-items: center; gap: 10px;
+}
+.iconCircle {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #E89400; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.headerText { flex: 1; }
+.title {
+  font-size: 13px; font-weight: 800; color: #2B1A2D;
+  letter-spacing: -0.005em;
+}
+.sub {
+  font-size: 11.5px; color: #8B6F4E; margin-top: 1px;
+}
+
+/* ── Rail horizontal scrollable ─────────────────────────
+   Layout : ligne unique, cartes côte à côte, scroll-snap
+   sur x. Le rail déborde du padding du wrap (marges neg)
+   pour que les cartes touchent le bord et signalent qu'il
+   y a plus de contenu si on scrolle.                     */
+.railWrap {
+  position: relative;
+  margin: 0 -14px;                /* bleed-out du padding du wrap */
+}
+.rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 14px;
+  scroll-behavior: smooth;
+  padding: 4px 14px;              /* padding intérieur = bleed-out */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;          /* Firefox */
+}
+.rail::-webkit-scrollbar { display: none; }
+
+.card {
+  flex: 0 0 auto;
+  min-width: 148px;
+  max-width: 200px;
+  scroll-snap-align: start;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 12px; border-radius: 12px;
+  background: #fff; border: 1.5px solid #F2DFB8;
+  cursor: pointer; text-align: left;
+  font-family: inherit;
+  transition: all .15s ease;
+}
+.card:hover {
+  border-color: #E89400; transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(232, 148, 0, 0.15);
+}
+.cardActive {
+  border-color: #E89400;
+  background: #FFF3D6;
+  box-shadow: 0 2px 8px rgba(232, 148, 0, 0.2);
+}
+.cardHead {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+.cardLabel {
+  font-size: 12.5px; font-weight: 800; color: #2B1A2D;
+  letter-spacing: -0.005em;
+}
+.check { color: #E89400; }
+.cardTag {
+  font-size: 11px; color: #8B6F4E; line-height: 1.35;
+}
+
+/* ── Edge fade cue : indique qu'il y a du contenu à droite ── */
+.railWrap::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 24px;
+  background: linear-gradient(90deg, rgba(255,247,234,0), #FFE8D6);
+  pointer-events: none;
+  border-radius: 0 12px 12px 0;
+}

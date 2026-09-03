@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Loader2, CreditCard, Smartphone, ChevronDown, Check } from 'lucide-react';
 import axios from 'axios';
 import s from './FeexPayModal.module.css';
@@ -228,7 +229,7 @@ export default function FeexPayModal({
   const selectedOp = country.ops.find(op => op.id === operator);
   const selectedOpBrand = selectedOp?.brand || 'MTN';
 
-  return (
+  const modalContent = (
     <div className={s.overlay} onClick={phase === 'waiting' ? undefined : onClose}>
       <div className={s.modal} onClick={e => e.stopPropagation()}>
         <div className={s.header}>
@@ -381,4 +382,8 @@ export default function FeexPayModal({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 }

@@ -47,6 +47,20 @@ if (fs.existsSync(REACT_DIST)) {
     maxAge: '1y',
     immutable: true,
   }));
+
+  /* Service worker + manifest doivent être re-fetch à chaque nouveau deploy.
+     Sans no-cache, un ancien SW précache des hashes d'assets rebuildés →
+     302 vers landing → erreurs MIME/CSP dans le navigateur. */
+  const noCacheFile = (filename) => (req, res, next) => {
+    const filePath = path.join(REACT_DIST, filename);
+    if (!fs.existsSync(filePath)) return next();
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.sendFile(filePath);
+  };
+  app.get('/sw.js', noCacheFile('sw.js'));
+  app.get('/registerSW.js', noCacheFile('registerSW.js'));
+  app.get('/manifest.webmanifest', noCacheFile('manifest.webmanifest'));
 }
 
 /* Fonds de mur (images fixes)  dossier client/public/backgrounds/ servi
@@ -133,15 +147,26 @@ app.use('/',        require('./routes/canonical'));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '2.0.0' }));
 
 // ── Landing page (www subdomain) ──────────────────────────────
-// In production this route is hit directly via Express.
-// In dev it also serves localhost:5000/ for convenience.
-const LANDING_PATH = path.join(__dirname, '../landing/index.html');
+// In production : sert landing/dist/index.html (build Vite avec assets hashés).
+// En dev : si le build existe on le sert, sinon on redirige vers le dev server
+// Vite (par défaut :4000). Sert landing/index.html brut (source dev) provoquait
+// une erreur MIME sur /src/main.jsx car Express ne connait pas ce path.
+const LANDING_DIST_PATH = path.join(__dirname, '../landing/dist/index.html');
+const LANDING_DEV_PATH  = path.join(__dirname, '../landing/index.html');
+const LANDING_DIST_DIR  = path.join(__dirname, '../landing/dist');
+const LANDING_DEV_URL   = process.env.LANDING_DEV_URL || 'http://localhost:4000';
+
+if (fs.existsSync(LANDING_DIST_DIR)) {
+  app.use(express.static(LANDING_DIST_DIR, { maxAge: '1h', index: false }));
+}
 
 function serveLanding(req, res) {
-  if (!fs.existsSync(LANDING_PATH)) {
+  const target = fs.existsSync(LANDING_DIST_PATH) ? LANDING_DIST_PATH : LANDING_DEV_PATH;
+  if (!fs.existsSync(target)) {
+    if (!PROD) return res.redirect(`${LANDING_DEV_URL}${req.path}`);
     return res.status(404).send('Landing not found.');
   }
-  let html = fs.readFileSync(LANDING_PATH, 'utf8');
+  let html = fs.readFileSync(target, 'utf8');
   html = html.replace(/\{\{FB_PIXEL_ID\}\}/g, process.env.FB_PIXEL_ID || '');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=300');
@@ -219,6 +244,14 @@ app.use((req, res) => {
   // Ne pas rediriger les requêtes API (retourner 404 JSON)
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Route introuvable' });
+  }
+  // Requêtes de type asset : renvoyer 404 plutôt qu'un 302 vers la landing.
+  // Sinon le navigateur reçoit du HTML pour un module JS/CSS → erreurs MIME
+  // ("text/html blocked") + CSP style-src violations. Cas fréquent quand un
+  // vieux service worker précache des hashes d'assets qui n'existent plus.
+  if (/^\/(assets|icons|logos|backgrounds|uploads|stickers|templates)\//.test(req.path)
+      || /\.(js|mjs|css|map|json|png|jpg|jpeg|webp|svg|ico|woff2?|ttf|otf)$/i.test(req.path)) {
+    return res.status(404).send('Not found');
   }
   res.redirect(302, LANDING_URL);
 });

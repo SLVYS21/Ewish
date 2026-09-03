@@ -34,7 +34,7 @@ const OCCASION_MAP_FROM_CREATE = {
 const TABS = [
   { id: 'content', label: 'CONTENU', Icon: LucideType,    step: 3 },
   { id: 'style',   label: 'STYLE',   Icon: LucidePalette, step: 2 },
-  { id: 'gift',    label: 'CADEAU',  Icon: LucideGift,    step: 4 },
+  { id: 'gift',    label: 'CADEAU',  Icon: LucideGift,    step: 4, comingSoon: true },
   { id: 'share',   label: 'PARTAGE', Icon: LucideShare2,  step: 5 },
 ];
 
@@ -225,6 +225,24 @@ export default function EnvelopeEditorLayout() {
                 <tab.Icon size={16} />
               </span>
               <span className={styles.stepNavLabel}>{tab.label}</span>
+              {tab.comingSoon && (
+                <span
+                  style={{
+                    marginLeft: 6,
+                    padding: '2px 7px',
+                    borderRadius: 999,
+                    background: '#161311',
+                    color: '#FDE7A5',
+                    fontSize: 9,
+                    fontWeight: 800,
+                    letterSpacing: '.08em',
+                    textTransform: 'uppercase',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Bientôt
+                </span>
+              )}
             </button>
           );
         })}

@@ -1,5 +1,9 @@
-import { useState, useRef } from 'react';
-import { Music, Camera, ChevronRight, X, Timer } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { Music, Camera, ChevronRight, X, Timer, ImagePlus } from 'lucide-react';
+import MusicPickerModal from './MusicPickerModal';
+import NarrativeVariantPicker from './NarrativeVariantPicker';
+import { findTrack } from '../data/musicLibrary';
+import { NARRATIVE_VARIANTS } from '../data/narrativeVariants';
 import styles from './ContentTab.module.css';
 
 /* ─── Default field schema ─────────────────────────────────────── */
@@ -27,7 +31,6 @@ const DEFAULT_FIELDS = [
   { key: 'replayText',     label: 'Texte bouton revoir',    type: 'text',      section: 'Outro' },
 ];
 
-const PRIMARY_SECTIONS = new Set(['Intro', 'Story', 'Message']);
 const MUSIC_KEYS = new Set(['musicSrc', 'albumArt', 'trackTitle', 'trackArtist', 'musicHint', 'musicStartTime']);
 const isMusicField = f => MUSIC_KEYS.has(f.key) || f.section === 'Music' || f.section === 'Musique';
 const isPhotoKey = k =>
@@ -42,6 +45,15 @@ const DEFAULT_PHOTO_FIELDS = [
   { key: 'photo1',    label: 'Photo gauche',      type: 'url', section: 'Photos' },
   { key: 'photo2',    label: 'Photo droite',      type: 'url', section: 'Photos' },
 ];
+
+/* ── Whitelist des champs "principaux" pour les 3 cartes actives.
+   Tout le reste passe en "Champs avancés" (avec valeurs par défaut).
+   `wishKey` : clé du champ principal du vœu (customisée par template). */
+const REDUCED_PRIMARY = {
+  'birthday':   { keys: ['name', 'wish1'],     wishKey: 'wish1',     wishLabel: 'Votre vœu (message principal)',   wishPlaceholder: 'Écris ici ton message principal pour la personne…' },
+  'notre-film': { keys: ['name', 'wishText'],  wishKey: 'wishText',  wishLabel: 'Votre message (générique de fin)', wishPlaceholder: 'Ex : Avec tout notre amour 🎬' },
+  'forever':    { keys: ['name', 'photoCaption'], wishKey: 'photoCaption', wishLabel: 'Votre message principal', wishPlaceholder: 'Ex : Toujours dans nos cœurs, toujours aussi belle.' },
+};
 
 /* ── Start Time Field ── */
 function StartTimeField({ value, onChange }) {
@@ -92,7 +104,7 @@ function DateField({ value, onChange, placeholder }) {
   );
 }
 
-/* ── Photo Card ── */
+/* ── Photo Card (row layout, used dans avancés) ── */
 function PhotoCard({ label, value, onChange, onUpload }) {
   const fileRef = useRef();
   const [uploading, setUploading] = useState(false);
@@ -143,88 +155,87 @@ function PhotoCard({ label, value, onChange, onUpload }) {
   );
 }
 
-/* ── Music Section ── */
-function MusicSection({ fields, data, onChange, onUpload }) {
-  const [expanded, setExpanded] = useState(false);
+/* ── Photo Tile (grid layout, principale) ── */
+function PhotoTile({ label, value, onUpload, onRemove }) {
   const fileRef = useRef();
   const [uploading, setUploading] = useState(false);
 
+  const handleFile = async (file) => {
+    if (!file?.type.startsWith('image/')) return;
+    setUploading(true);
+    try { await onUpload(file); } finally { setUploading(false); }
+  };
+
+  return (
+    <div className={styles.photoTile}>
+      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => handleFile(e.target.files?.[0])} />
+      <button
+        type="button"
+        className={`${styles.photoTileBtn} ${value ? styles.photoTileBtnFilled : ''}`}
+        onClick={() => fileRef.current?.click()}
+      >
+        {value ? (
+          <>
+            <img src={value} alt={label} className={styles.photoTileImg} onError={e=>e.target.style.opacity='.3'} />
+            <span className={styles.photoTileOverlay}>
+              <Camera size={16} />
+              <span>Changer</span>
+            </span>
+            {onRemove && (
+              <span
+                role="button"
+                tabIndex={0}
+                className={styles.photoTileRemove}
+                onClick={e => { e.preventDefault(); e.stopPropagation(); onRemove(); }}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); onRemove(); } }}
+                aria-label="Supprimer la photo"
+              >
+                <X size={12} />
+              </span>
+            )}
+          </>
+        ) : (
+          <>
+            <span className={styles.photoTileIcon}>
+              {uploading ? <span className={styles.spin}>…</span> : <ImagePlus size={22} />}
+            </span>
+            <span className={styles.photoTileLabel}>{label}</span>
+            <span className={styles.photoTileHint}>{uploading ? 'Upload…' : 'Cliquer pour ajouter'}</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
+/* ── Music Trigger (bouton qui ouvre la modale) ── */
+function MusicTrigger({ data, onOpen }) {
+  const currentSrc  = data.musicSrc || '';
   const trackTitle  = data.trackTitle  || '';
   const trackArtist = data.trackArtist || '';
   const albumArt    = data.albumArt    || '';
-  const musicSrc    = data.musicSrc    || '';
-  const hasTrack    = !!(musicSrc || trackTitle);
+  const hasTrack    = !!(currentSrc || trackTitle);
 
-  const handleAudioFile = async (file) => {
-    if (!file) return;
-    setUploading(true);
-    try { await onUpload(file, 'musicSrc'); } finally { setUploading(false); }
-  };
-
-  const hasStartTime = fields.some(f => f.key === 'musicStartTime');
-  const hasAlbumArt  = fields.some(f => f.key === 'albumArt');
-  const hasHint      = fields.some(f => f.key === 'musicHint');
+  const libraryMatch = useMemo(() => findTrack(currentSrc), [currentSrc]);
+  const displayTitle  = trackTitle  || libraryMatch?.title  || (hasTrack ? 'Musique personnalisée' : 'Aucune musique');
+  const displayArtist = trackArtist || libraryMatch?.artist || (hasTrack ? 'Fichier importé' : 'Ajouter une piste pour renforcer l\'ambiance');
+  const displayCover  = albumArt   || libraryMatch?.cover   || '';
 
   return (
-    <div className={styles.musicWrapper}>
-      <div className={styles.musicCard}>
-        {albumArt ? (
-          <img src={albumArt} alt="" className={styles.musicAlbumArt} onError={e=>e.target.style.display='none'}/>
-        ) : (
-          <span className={styles.musicIconCircle}><Music size={16}/></span>
-        )}
-        <div className={styles.musicInfo}>
-          <div className={styles.musicTitle}>{hasTrack ? (trackTitle||'Musique sans titre') : 'Musique d\'ambiance'}</div>
-          <div className={styles.musicSub}>{hasTrack ? (trackArtist||'Artiste inconnu') : 'Aucune musique sélectionnée'}</div>
-        </div>
-        <button className={styles.musicChangeBtn} onClick={() => setExpanded(o=>!o)}>
-          {expanded ? 'Fermer' : hasTrack ? 'Modifier' : 'Choisir'}
-        </button>
-      </div>
-
-      {expanded && (
-        <div className={styles.musicExpandedFields}>
-          <input ref={fileRef} type="file" accept="audio/*" style={{display:'none'}}
-            onChange={e => handleAudioFile(e.target.files?.[0])} />
-          <div className={styles.flatFieldRow}>
-            <div className={styles.flatLabel}>FICHIER AUDIO</div>
-            <div className={styles.urlRowInputs}>
-              <input type="text" value={musicSrc} onChange={e=>onChange('musicSrc',e.target.value)}
-                placeholder="https://... .mp3" className={styles.input}/>
-              <button className={styles.uploadBtn} onClick={()=>fileRef.current?.click()} disabled={uploading}>
-                {uploading ? '…' : <><Music size={13}/> Charger</>}
-              </button>
-            </div>
-          </div>
-          <div className={styles.flatFieldRow}>
-            <div className={styles.flatLabel}>TITRE</div>
-            <input type="text" value={trackTitle} onChange={e=>onChange('trackTitle',e.target.value)}
-              placeholder="Notre chanson" className={styles.input}/>
-          </div>
-          <div className={styles.flatFieldRow}>
-            <div className={styles.flatLabel}>ARTISTE</div>
-            <input type="text" value={trackArtist} onChange={e=>onChange('trackArtist',e.target.value)}
-              placeholder="Artiste" className={styles.input}/>
-          </div>
-          {hasAlbumArt && (
-            <PhotoCard label="POCHETTE D'ALBUM" value={albumArt}
-              onChange={v=>onChange('albumArt',v)} onUpload={f=>onUpload(f,'albumArt')}/>
-          )}
-          {hasStartTime && (
-            <div className={styles.flatFieldRow}>
-              <div className={styles.flatLabel}>DÉMARRER À</div>
-              <StartTimeField value={data.musicStartTime} onChange={v=>onChange('musicStartTime',v)}/>
-            </div>
-          )}
-          {hasHint && (
-            <div className={styles.flatFieldRow}>
-              <div className={styles.flatLabel}>INDICATION (affiché au visiteur)</div>
-              <input type="text" value={data.musicHint||''} onChange={e=>onChange('musicHint',e.target.value)}
-                placeholder="C'est mieux avec de la musique 🎶" className={styles.input}/>
-            </div>
-          )}
-        </div>
+    <div className={styles.musicTrigger}>
+      {displayCover ? (
+        <img src={displayCover} alt="" className={styles.musicTriggerCover} onError={e=>e.target.style.display='none'}/>
+      ) : (
+        <span className={styles.musicTriggerIcon}><Music size={16}/></span>
       )}
+      <div className={styles.musicTriggerInfo}>
+        <div className={styles.musicTriggerTitle}>{displayTitle}</div>
+        <div className={styles.musicTriggerSub}>{displayArtist}</div>
+      </div>
+      <button type="button" className={styles.musicTriggerBtn} onClick={onOpen}>
+        {hasTrack ? 'Changer' : 'Choisir'}
+      </button>
     </div>
   );
 }
@@ -283,9 +294,13 @@ function FlatField({ field, value, onChange, onUpload }) {
 }
 
 /* ── Main export ── */
-export default function ContentTab({ fields, data, onChange, onUpload }) {
+export default function ContentTab({ fields, data, onChange, onUpload, templateName = '' }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [musicModalOpen, setMusicModalOpen] = useState(false);
   const baseFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
+
+  const reduced = REDUCED_PRIMARY[templateName] || null;
+  const hasVariants = !!NARRATIVE_VARIANTS[templateName];
 
   /* Inject musicStartTime after musicSrc if missing */
   const effectiveFields = baseFields.reduce((acc, f) => {
@@ -295,23 +310,88 @@ export default function ContentTab({ fields, data, onChange, onUpload }) {
     return acc;
   }, []);
 
+  /* Champ vœu synthétique pour les templates actifs (au cas où absent du schéma) */
+  const wishField = useMemo(() => {
+    if (!reduced) return null;
+    const existing = effectiveFields.find(f => f.key === reduced.wishKey);
+    return {
+      key: reduced.wishKey,
+      label: reduced.wishLabel,
+      type: existing?.type === 'textarea' ? 'textarea' : (reduced.wishKey === 'wish1' ? 'textarea' : 'text'),
+      placeholder: reduced.wishPlaceholder,
+      required: false,
+    };
+  }, [reduced, effectiveFields]);
+
   /* Categorise */
-  const musicFields  = effectiveFields.filter(f => isMusicField(f) && f.importance !== 'secondary');
-  const photoFields  = effectiveFields.filter(f => f.type === 'url' && isPhotoKey(f.key) && !isMusicField(f) && f.importance !== 'secondary');
+  const musicFieldsAll = effectiveFields.filter(isMusicField);
+  const photoFieldsAll = effectiveFields.filter(f => f.type === 'url' && isPhotoKey(f.key) && !isMusicField(f));
 
-  /* Always show photo cards  use template's own if defined, else inject defaults */
-  const finalPhotoFields = photoFields.length > 0 ? photoFields : DEFAULT_PHOTO_FIELDS;
+  /* Always show photo cards — use template's own if defined, else inject defaults */
+  const finalPhotoFields = (photoFieldsAll.length > 0 ? photoFieldsAll : DEFAULT_PHOTO_FIELDS)
+    .filter(f => f.importance !== 'secondary');
 
-  const primaryFields = effectiveFields.filter(f =>
-    f.importance !== 'secondary' && !isMusicField(f) && !(f.type === 'url' && isPhotoKey(f.key))
-  );
-  
-  const advancedFields = effectiveFields.filter(f => f.importance === 'secondary');
+  let primaryFields;
+  let advancedFields;
+
+  if (reduced) {
+    /* Mode "3 cartes actives" : whitelist stricte pour le principal */
+    const whitelist = new Set(reduced.keys);
+    primaryFields = [];
+    // Toujours name en premier
+    const nameField = effectiveFields.find(f => f.key === 'name') || { key: 'name', label: 'Prénom du destinataire', type: 'text', required: true, placeholder: 'Prénom' };
+    primaryFields.push(nameField);
+    // Puis le vœu principal
+    if (wishField) primaryFields.push(wishField);
+    // Avancés = tout le reste (hors photos et hors musique)
+    advancedFields = effectiveFields.filter(f =>
+      !whitelist.has(f.key)
+      && !isMusicField(f)
+      && !(f.type === 'url' && isPhotoKey(f.key))
+    );
+  } else {
+    /* Mode standard (autres templates) : basé sur importance */
+    primaryFields = effectiveFields.filter(f =>
+      f.importance !== 'secondary' && !isMusicField(f) && !(f.type === 'url' && isPhotoKey(f.key))
+    );
+    advancedFields = effectiveFields.filter(f => f.importance === 'secondary');
+  }
+
+  /* Sélection d'un track depuis la modale : maj des 4 champs d'un coup */
+  const handleMusicSelect = (track) => {
+    onChange('musicSrc', track.src || '');
+    onChange('trackTitle', track.title || '');
+    onChange('trackArtist', track.artist || '');
+    if (track.cover !== undefined) onChange('albumArt', track.cover || '');
+  };
+
+  /* Upload audio depuis la modale : renvoie une URL. */
+  const handleMusicUpload = async (file) => {
+    const result = await onUpload(file, 'musicSrc');
+    // Éventuel format {url} vs URL brute — normalise
+    if (typeof result === 'string') return result;
+    if (result?.url) return result.url;
+    return '';
+  };
+
+  /* Application d'une variante narrative : merge les champs. */
+  const handleVariantApply = (patch) => {
+    Object.entries(patch).forEach(([k, v]) => onChange(k, v));
+  };
 
   return (
     <div className={styles.flatRoot}>
 
-      {/* ── Destinataire & message primary fields ── */}
+      {/* ── Fil narratif (uniquement pour les templates avec variantes) ── */}
+      {hasVariants && (
+        <NarrativeVariantPicker
+          templateName={templateName}
+          data={data}
+          onApply={handleVariantApply}
+        />
+      )}
+
+      {/* ── Destinataire & message principal ── */}
       {primaryFields.map(f => (
         <FlatField key={f.key} field={f}
           value={data[f.key] ?? ''}
@@ -320,18 +400,33 @@ export default function ContentTab({ fields, data, onChange, onUpload }) {
         />
       ))}
 
-      {/* ── Photos ── */}
-      {finalPhotoFields.map(f => (
-        <PhotoCard key={f.key} label={f.label}
-          value={data[f.key] ?? ''}
-          onChange={v => onChange(f.key, v)}
-          onUpload={file => onUpload(file, f.key)}
-        />
-      ))}
+      {/* ── Photos en grille (côte à côte) ── */}
+      {finalPhotoFields.length > 0 && (
+        <div className={styles.photoBlock}>
+          <div className={styles.flatLabel}>PHOTOS</div>
+          <div
+            className={styles.photoGrid}
+            data-count={finalPhotoFields.length}
+          >
+            {finalPhotoFields.map(f => (
+              <PhotoTile
+                key={f.key}
+                label={f.label}
+                value={data[f.key] ?? ''}
+                onUpload={file => onUpload(file, f.key)}
+                onRemove={() => onChange(f.key, '')}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* ── Musique ── */}
-      {musicFields.length > 0 && (
-        <MusicSection fields={musicFields} data={data} onChange={onChange} onUpload={onUpload} />
+      {/* ── Musique (déclencheur qui ouvre la modale) ── */}
+      {musicFieldsAll.length > 0 && (
+        <div className={styles.musicBlock}>
+          <div className={styles.flatLabel}>MUSIQUE</div>
+          <MusicTrigger data={data} onOpen={() => setMusicModalOpen(true)} />
+        </div>
       )}
 
       {/* ── Champs avancés ── */}
@@ -354,6 +449,16 @@ export default function ContentTab({ fields, data, onChange, onUpload }) {
             </div>
           )}
         </div>
+      )}
+
+      {musicModalOpen && (
+        <MusicPickerModal
+          currentSrc={data.musicSrc || ''}
+          templateName={templateName}
+          onSelect={handleMusicSelect}
+          onUpload={handleMusicUpload}
+          onClose={() => setMusicModalOpen(false)}
+        />
       )}
     </div>
   );

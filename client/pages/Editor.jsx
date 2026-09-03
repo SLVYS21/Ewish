@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../admin/context/AuthContext';
-import { getPublications, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug, createPublication } from '../utils/api';
+import { getPublications, getPublicationById, updatePublication, publishPublication, uploadFile, getShortLink, setCustomSlug, createPublication } from '../utils/api';
 import ContentTab from '../components/ContentTab';
 import StyleTab from '../components/StyleTab';
 import BackgroundTab from '../components/BackgroundTab';
@@ -605,8 +605,19 @@ export default function Editor() {
           return;
         }
 
-        const r     = await getPublications({ limit: 1000 });
-        const found = r.data.find(p => p._id === id);
+        /* Fetch direct par ID — évite de télécharger toutes les publications. */
+        let found = null;
+        try {
+          const r = await getPublicationById(id);
+          found = r.data;
+        } catch {
+          /* Fallback : ancien comportement au cas où l'endpoint /id/:id
+             refuserait (auth expirée, etc.). Log utile en dev. */
+          try {
+            const r2 = await getPublications({ limit: 1000 });
+            found = r2.data.find(p => p._id === id);
+          } catch {}
+        }
         if (!found) { navigate('/'); return; }
 
         setPub(found);
@@ -879,7 +890,11 @@ export default function Editor() {
     try {
       const r = await uploadFile(file);
       handleDataChange(fieldKey, r.data.url);
-    } catch (e) { alert('Upload failed: ' + (e.response?.data?.error || e.message)); }
+      return r.data.url;
+    } catch (e) {
+      alert('Upload failed: ' + (e.response?.data?.error || e.message));
+      return null;
+    }
   };
 
   /* publish : deux étapes séparées pour permettre la re-entrée avec
@@ -1205,6 +1220,7 @@ export default function Editor() {
             data={data}
             onChange={handleDataChange}
             onUpload={handleUpload}
+            templateName={template?.name || ''}
           />
         );
 

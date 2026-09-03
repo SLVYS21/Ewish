@@ -309,7 +309,120 @@
 }
 .photoRemoveBtn:hover { background: rgba(225,29,72,.15); color: #E11D48; }
 
-/* ── Music Section ── */
+/* ── Photo block (grid layout, principale) ─────────────── */
+.photoBlock { display: flex; flex-direction: column; }
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.photoGrid[data-count="1"] { grid-template-columns: 1fr; }
+.photoGrid[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+
+.photoTile { position: relative; aspect-ratio: 1; }
+.photoTileBtn {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; padding: 10px 6px;
+  background: #EDE8F8;
+  border: 1.5px dashed #C7B7EA;
+  border-radius: 14px;
+  cursor: pointer;
+  overflow: hidden;
+  font-family: inherit;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.photoTileBtn:hover {
+  background: #E1D8F3; border-color: #9B7EE2; transform: translateY(-1px);
+}
+.photoTileBtnFilled {
+  border-style: solid;
+  padding: 0;
+}
+.photoTileImg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 12px;
+}
+.photoTileOverlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  background: rgba(43, 26, 45, 0.55);
+  color: #fff; font-size: 11px; font-weight: 700;
+  opacity: 0; transition: opacity .15s;
+  border-radius: 12px;
+}
+.photoTileBtn:hover .photoTileOverlay { opacity: 1; }
+.photoTileIcon {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #9B7EE2; color: #fff;
+  margin-bottom: 2px;
+}
+.photoTileLabel {
+  font-size: 11px; font-weight: 700; color: #4A3A5C;
+  text-align: center; line-height: 1.2;
+  max-width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.photoTileHint {
+  font-size: 10px; color: #7A6A7D;
+  text-align: center;
+}
+.photoTileRemove {
+  position: absolute; top: 6px; right: 6px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92); color: #E11D48;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  transition: background .15s, color .15s;
+  z-index: 2;
+}
+.photoTileRemove:hover { background: #E11D48; color: #fff; }
+
+.spin { display: inline-block; animation: mkSpinCT 1s linear infinite; }
+@keyframes mkSpinCT { to { transform: rotate(360deg); } }
+
+/* ── Music block (déclencheur modale) ─────────────────── */
+.musicBlock { display: flex; flex-direction: column; }
+.musicTrigger {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 14px;
+  background: #FFF1F4; border: none;
+}
+.musicTriggerCover {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  object-fit: cover;
+}
+.musicTriggerIcon {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #FF6F8B, #E11D48); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.musicTriggerInfo { flex: 1; min-width: 0; }
+.musicTriggerTitle {
+  font-size: 13px; font-weight: 700; color: #2B1A2D;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.musicTriggerSub {
+  font-size: 11px; color: #7A6A7D; margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.musicTriggerBtn {
+  flex-shrink: 0;
+  padding: 7px 14px; border-radius: 999px;
+  background: #E11D48; color: #fff; border: none;
+  font-size: 11.5px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: background .15s;
+}
+.musicTriggerBtn:hover { background: #BE1240; }
+
+/* ── Music Section (kept for compat) ── */
 .musicSection { display: flex; flex-direction: column; gap: 12px; }
 .musicCard {
   display: flex; align-items: center; gap: 12px;

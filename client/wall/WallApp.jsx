@@ -152,10 +152,10 @@ export default function WallApp() {
   const publicId = String(meta.id || data.publicationId || '');
   const apiBase = String(data.apiBase || '').trim();
   const streamBase = apiBase.replace(/\/api$/, '');
-  const streamUrl = `${streamBase || ''}/api/walls/${publicId}/stream`;
-  const wallTitle = data.title || meta.title || 'Mur myKado';
-  const wallName = data.name || data.recipientName || data.customName || '';
-  const wallMessage = data.subtitle || data.tagline || data.description || 'Un espace vivant pour déposer des mots, des souvenirs et des gestes d’amour.';
+  const wallTitle = data.title || data.titleName || meta.title || 'Mur myKado';
+  const wallName = data.titleName || data.name || data.recipientName || data.recipient || data.customName || data.title || meta.title || '';
+  const wallMessage = data.subtitle || data.tagline || data.description || data.message || 'Un espace vivant pour déposer des mots, des souvenirs et des gestes d’amour.';
+  const eyebrowText = data.eyebrow || 'Mur de mots';
   const wishesEnabled = data.wishesEnabled !== false;
   const isPrivate = !!data.isPrivate && !!data.accessCode;
   const isPreview = !!data.previewMode;
@@ -508,14 +508,14 @@ export default function WallApp() {
         />
       ) : null}
 
-      <header id="wall-header">
+      <header id="wall-header" className="reveal">
         <div id="wall-cover">
           <div className="cover-body">
             <div className="wall-eyebrow">
-              <Sparkles size={16} /> Mur de mots
+              <Sparkles size={16} /> {eyebrowText}
             </div>
             <h1 className="wall-title">
-              <em>{wallName || 'Prénom'}</em>
+              <em>{wallName || wallTitle || 'Mur myKado'}</em>
             </h1>
             <p className="wall-subtitle">{wallMessage}</p>
           </div>
@@ -543,12 +543,15 @@ export default function WallApp() {
               </div>
               <button
                 className="cag-cta"
-                onClick={() => { if (!isDemo) setGiftOpen(true); }}
-                disabled={isDemo}
-                title={isDemo ? 'Aperçu — la contribution n\'est pas active ici' : undefined}
-                style={isDemo ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
+                type="button"
+                onClick={() => {}}
+                disabled
+                aria-disabled="true"
+                title="Bientôt — la participation au kado arrive très prochainement"
+                style={{ opacity: 0.6, cursor: 'not-allowed', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               >
-                Participer au kado
+                <Lock size={14} />
+                Participer au kado — Bientôt
               </button>
             </div>
           </div>

@@ -693,20 +693,132 @@ function PersonnaliserModal({ shape, setShape, colorId, setColorId, shareUrl, on
   );
 }
 
+/* ─── Illustrations SVG des layouts PDF ─── */
+function LayoutIllustration({ variant, active }) {
+  const stroke = active ? 'var(--mk-ink)' : 'var(--mk-ink-3, #9a9a9a)';
+  const fill = active ? 'var(--mk-blush)' : '#fff';
+  const accent = active ? 'var(--mk-ink)' : '#c9c9c9';
+
+  if (variant === 'mosaic') {
+    /* Page portrait A4 : 6 post-its irréguliers, façon tableau d'affichage */
+    return (
+      <svg viewBox="0 0 64 84" width="64" height="84" aria-hidden="true">
+        <rect x="1" y="1" width="62" height="82" rx="4" fill={fill} stroke={stroke} strokeWidth="1.2" />
+        <rect x="6"  y="8"  width="16" height="18" rx="1.5" fill={accent} opacity="0.85" transform="rotate(-4 14 17)" />
+        <rect x="26" y="6"  width="18" height="14" rx="1.5" fill={accent} opacity="0.55" transform="rotate(3 35 13)" />
+        <rect x="46" y="10" width="14" height="16" rx="1.5" fill={accent} opacity="0.7"  transform="rotate(-2 53 18)" />
+        <rect x="6"  y="34" width="20" height="16" rx="1.5" fill={accent} opacity="0.6"  transform="rotate(2 16 42)" />
+        <rect x="30" y="30" width="14" height="20" rx="1.5" fill={accent} opacity="0.8"  transform="rotate(-3 37 40)" />
+        <rect x="48" y="34" width="12" height="14" rx="1.5" fill={accent} opacity="0.5"  transform="rotate(4 54 41)" />
+        <rect x="8"  y="58" width="22" height="16" rx="1.5" fill={accent} opacity="0.7"  transform="rotate(-2 19 66)" />
+        <rect x="34" y="60" width="24" height="14" rx="1.5" fill={accent} opacity="0.55" transform="rotate(3 46 67)" />
+      </svg>
+    );
+  }
+  if (variant === 'poster') {
+    /* Page paysage A3 : titre central + mots manuscrits en périphérie */
+    return (
+      <svg viewBox="0 0 84 64" width="84" height="64" aria-hidden="true">
+        <rect x="1" y="1" width="82" height="62" rx="4" fill={fill} stroke={stroke} strokeWidth="1.2" />
+        <rect x="30" y="24" width="24" height="4" rx="0.8" fill={accent} />
+        <rect x="34" y="30" width="16" height="2" rx="0.5" fill={accent} opacity="0.6" />
+        {/* mots manuscrits périphériques (traits) */}
+        {[
+          [8, 8, 14],  [26, 6, 12],  [46, 8, 14], [66, 7, 12],
+          [7, 18, 10], [70, 16, 10],
+          [7, 34, 12], [68, 36, 12],
+          [7, 46, 10], [70, 46, 12],
+          [10, 54, 14],[28, 55, 12],[46, 55, 14],[64, 54, 14],
+        ].map(([x, y, w], i) => (
+          <line key={i} x1={x} y1={y} x2={x + w} y2={y} stroke={accent} strokeWidth="1" opacity="0.7" strokeLinecap="round" />
+        ))}
+      </svg>
+    );
+  }
+  /* book : petit livret A5 ouvert, un mot par page */
+  return (
+    <svg viewBox="0 0 84 64" width="84" height="64" aria-hidden="true">
+      <rect x="2"  y="6" width="38" height="52" rx="2" fill={fill} stroke={stroke} strokeWidth="1.2" />
+      <rect x="44" y="6" width="38" height="52" rx="2" fill={fill} stroke={stroke} strokeWidth="1.2" />
+      <line x1="42" y1="6" x2="42" y2="58" stroke={stroke} strokeWidth="0.8" opacity="0.5" />
+      {/* page gauche : titre + lignes */}
+      <rect x="10" y="16" width="20" height="3" rx="0.6" fill={accent} />
+      <line x1="10" y1="26" x2="30" y2="26" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+      <line x1="10" y1="30" x2="28" y2="30" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+      <line x1="10" y1="34" x2="24" y2="34" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+      <line x1="10" y1="46" x2="18" y2="46" stroke={accent} strokeWidth="0.8" opacity="0.4" />
+      {/* page droite */}
+      <rect x="52" y="16" width="16" height="3" rx="0.6" fill={accent} />
+      <line x1="52" y1="26" x2="74" y2="26" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+      <line x1="52" y1="30" x2="72" y2="30" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+      <line x1="52" y1="34" x2="70" y2="34" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+      <line x1="52" y1="38" x2="66" y2="38" stroke={accent} strokeWidth="0.8" opacity="0.6" />
+    </svg>
+  );
+}
+
+function BgIllustration({ variant, active }) {
+  const stroke = active ? 'var(--mk-ink)' : 'var(--mk-ink-3, #9a9a9a)';
+  const accent = active ? 'var(--mk-ink)' : '#c9c9c9';
+  if (variant === 'wall') {
+    /* Page avec motif de fond (mur) */
+    return (
+      <svg viewBox="0 0 48 36" width="48" height="36" aria-hidden="true">
+        <defs>
+          <pattern id={`wallp-${active ? '1' : '0'}`} width="6" height="6" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="0.9" fill={accent} opacity="0.5" />
+          </pattern>
+        </defs>
+        <rect x="1" y="1" width="46" height="34" rx="3" fill={`url(#wallp-${active ? '1' : '0'})`} stroke={stroke} strokeWidth="1" />
+        <rect x="8"  y="8"  width="14" height="10" rx="1" fill="#fff" transform="rotate(-3 15 13)" />
+        <rect x="26" y="12" width="14" height="10" rx="1" fill="#fff" transform="rotate(3 33 17)" />
+        <rect x="14" y="22" width="16" height="8"  rx="1" fill="#fff" transform="rotate(-2 22 26)" />
+      </svg>
+    );
+  }
+  /* Fond uni clair */
+  return (
+    <svg viewBox="0 0 48 36" width="48" height="36" aria-hidden="true">
+      <rect x="1" y="1" width="46" height="34" rx="3" fill="#fff" stroke={stroke} strokeWidth="1" />
+      <rect x="8"  y="8"  width="14" height="10" rx="1" fill={accent} opacity="0.75" transform="rotate(-3 15 13)" />
+      <rect x="26" y="12" width="14" height="10" rx="1" fill={accent} opacity="0.6"  transform="rotate(3 33 17)" />
+      <rect x="14" y="22" width="16" height="8"  rx="1" fill={accent} opacity="0.7"  transform="rotate(-2 22 26)" />
+    </svg>
+  );
+}
+
 /* ─── Pdf Export modal ─── */
 function PdfExportModal({ open, onClose, onConfirm }) {
-  const [layout, setLayout] = useState('mosaic'); // 'mosaic' or 'book'
-  const [bgMode, setBgMode] = useState('wall');   // 'wall' or 'clean' (for mosaic)
-  /* Méthode :
-     - 'print'    → ouvre la preview HTML avec auto-window.print() (léger, dialog navigateur)
-     - 'download' → génère le PDF côté client via @react-pdf/renderer (téléchargement direct) */
-  const [method, setMethod] = useState('print');
+  const [layout, setLayout] = useState('mosaic'); // 'mosaic' | 'poster' | 'book'
+  const [bgMode, setBgMode] = useState('wall');   // 'wall' | 'clean'
 
   if (!open) return null;
 
+  const LAYOUTS = [
+    { id: 'mosaic', title: 'Mosaïque A4', hint: 'Recommandé',
+      desc: "Plusieurs mots par page, façon tableau d'affichage. Vue d'ensemble." },
+    { id: 'poster', title: 'Panneau signatures',    hint: 'Paysage A3',
+      desc: "Design élégant : les mots manuscrits entourent le titre au centre." },
+    { id: 'book',   title: 'Livre A5 classique',    hint: null,
+      desc: 'Un seul mot par page, format petit livre. Idéal pour longs mots intimes.' },
+  ];
+  const BGS = [
+    { id: 'wall',  title: 'Fond du mur',  desc: 'Reprend le motif du mur.' },
+    { id: 'clean', title: 'Fond uni',     desc: 'Crème neutre, ultra lisible.' },
+  ];
+
+  const cardStyle = (active) => ({
+    display: 'flex', gap: 12, padding: 12,
+    border: active ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)',
+    borderRadius: 12, cursor: 'pointer',
+    background: active ? 'var(--mk-blush)' : 'transparent',
+    alignItems: 'center',
+    transition: 'border-color .15s, background .15s',
+  });
+
   return (
     <div className="modal-veil" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="mk-modal" style={{ maxWidth: 520 }}>
+      <div className="mk-modal" style={{ maxWidth: 560 }}>
         <div className="mk-modal-head">
           <div>
             <div className="mk-modal-title">Livre PDF</div>
@@ -717,61 +829,47 @@ function PdfExportModal({ open, onClose, onConfirm }) {
         <div className="mk-modal-body">
           <div className="section-label" style={{ marginBottom: 8 }}>Format de page</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-            <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'mosaic' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'mosaic' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
-              <input type="radio" name="layout" value="mosaic" checked={layout === 'mosaic'} onChange={() => setLayout('mosaic')} style={{ marginTop: 4 }} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Mosaïque A4 (Recommandé)</div>
-                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Plusieurs mots par page, façon tableau d'affichage. Idéal pour avoir une vue d'ensemble.</div>
-              </div>
-            </label>
-            <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'poster' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'poster' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
-              <input type="radio" name="layout" value="poster" checked={layout === 'poster'} onChange={() => setLayout('poster')} style={{ marginTop: 4 }} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Panneau de signatures (Paysage A3)</div>
-                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Le design élégant de ton inspiration Pinterest. Les mots manuscrits entourent le titre au centre.</div>
-              </div>
-            </label>
-            <label style={{ display: 'flex', gap: 12, padding: 12, border: layout === 'book' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: layout === 'book' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
-              <input type="radio" name="layout" value="book" checked={layout === 'book'} onChange={() => setLayout('book')} style={{ marginTop: 4 }} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Livre A5 classique</div>
-                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Un seul mot par page, format petit livre. Idéal pour de longs mots intimes.</div>
-              </div>
-            </label>
+            {LAYOUTS.map(({ id, title, hint, desc }) => {
+              const active = layout === id;
+              return (
+                <label key={id} style={cardStyle(active)}>
+                  <input type="radio" name="layout" value={id} checked={active} onChange={() => setLayout(id)} style={{ display: 'none' }} />
+                  <div style={{ flexShrink: 0, display: 'grid', placeItems: 'center', width: 92, height: 84 }}>
+                    <LayoutIllustration variant={id} active={active} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 14 }}>
+                      <span>{title}</span>
+                      {hint && (
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 99, background: 'var(--mk-ink)', color: '#fff', letterSpacing: 0.3 }}>{hint}</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', marginTop: 4, lineHeight: 1.4 }}>{desc}</div>
+                  </div>
+                </label>
+              );
+            })}
           </div>
 
           <div className="section-label" style={{ marginBottom: 8 }}>Arrière-plan</div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-            <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 12, border: bgMode === 'wall' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', textAlign: 'center', background: bgMode === 'wall' ? 'var(--mk-blush)' : 'transparent' }}>
-              <input type="radio" name="bgMode" value="wall" checked={bgMode === 'wall'} onChange={() => setBgMode('wall')} style={{ alignSelf: 'center' }} />
-              <div style={{ fontWeight: 600, fontSize: 13 }}>Fond du mur</div>
-            </label>
-            <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 12, border: bgMode === 'clean' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', textAlign: 'center', background: bgMode === 'clean' ? 'var(--mk-blush)' : 'transparent' }}>
-              <input type="radio" name="bgMode" value="clean" checked={bgMode === 'clean'} onChange={() => setBgMode('clean')} style={{ alignSelf: 'center' }} />
-              <div style={{ fontWeight: 600, fontSize: 13 }}>Fond uni clair</div>
-            </label>
+            {BGS.map(({ id, title, desc }) => {
+              const active = bgMode === id;
+              return (
+                <label key={id} style={{ ...cardStyle(active), flex: 1, flexDirection: 'column', alignItems: 'stretch', textAlign: 'left' }}>
+                  <input type="radio" name="bgMode" value={id} checked={active} onChange={() => setBgMode(id)} style={{ display: 'none' }} />
+                  <div style={{ display: 'grid', placeItems: 'center', marginBottom: 8 }}>
+                    <BgIllustration variant={id} active={active} />
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--mk-ink-2)', marginTop: 2 }}>{desc}</div>
+                </label>
+              );
+            })}
           </div>
 
-          <div className="section-label" style={{ marginBottom: 8 }}>Méthode</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-            <label style={{ display: 'flex', gap: 12, padding: 12, border: method === 'print' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: method === 'print' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
-              <input type="radio" name="method" value="print" checked={method === 'print'} onChange={() => setMethod('print')} style={{ marginTop: 4 }} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Impression navigateur (Recommandé)</div>
-                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Rapide, rendu identique au mur. Choisis « Enregistrer en PDF » dans la boîte d'impression.</div>
-              </div>
-            </label>
-            <label style={{ display: 'flex', gap: 12, padding: 12, border: method === 'download' ? '2px solid var(--mk-ink)' : '2px solid var(--mk-line)', borderRadius: 12, cursor: 'pointer', background: method === 'download' ? 'var(--mk-blush)' : 'transparent', alignItems: 'flex-start' }}>
-              <input type="radio" name="method" value="download" checked={method === 'download'} onChange={() => setMethod('download')} style={{ marginTop: 4 }} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Téléchargement direct</div>
-                <div style={{ fontSize: 13, color: 'var(--mk-ink-2)', marginTop: 2 }}>Fichier PDF prêt à envoyer par email. Léger décalage visuel avec le mur.</div>
-              </div>
-            </label>
-          </div>
-
-          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => onConfirm(layout, bgMode, method)}>
-            <Download size={16} /> Générer le PDF
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => onConfirm(layout, bgMode)}>
+            <Download size={16} /> Télécharger le PDF
           </button>
         </div>
       </div>
@@ -805,106 +903,91 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
   const handleExportPdf = () => {
     setPdfModalOpen(true);
   };
-  /* 3 méthodes routées ici :
-     - 'print' (défaut, léger) : ouvre la preview HTML avec auto-print.
-       Le user choisit "Enregistrer en PDF" dans la boîte système.
-     - 'download' : fetch la data JSON puis pdf() via @react-pdf/renderer,
-       télécharge le blob. Import dynamique pour ne pas gonfler le bundle
-       initial (~500KB gzip).
-     - fallback Puppeteer : ancienne route /export/pdf, gardée pour QA. */
-  const confirmExportPdf = async (layout, bgMode, method = 'print') => {
+  /* Génère et télécharge le PDF côté client via @react-pdf/renderer.
+     Import dynamique pour ne pas gonfler le bundle initial (~500KB gzip). */
+  const confirmExportPdf = async (layout, bgMode) => {
     setPdfModalOpen(false);
-    if (method === 'print') {
-      window.open(`${API_BASE}/walls/${pub._id}/export/preview?layout=${layout}&bg=${bgMode}&print=1`, '_blank');
-      return;
-    }
-    if (method === 'download') {
-      setExportingPdf(true);
-      try {
-        const [{ pdf }, { default: WallBookPdfDoc }] = await Promise.all([
-          import('@react-pdf/renderer'),
-          import('../components/WallBookPdfDoc.jsx'),
-        ]);
-        const res = await fetch(`${API_BASE}/walls/${pub._id}/export/data`);
-        if (!res.ok) throw new Error(`Data fetch failed: ${res.status}`);
-        const { publication, wishes } = await res.json();
-        
-        const currentSize = layout === 'poster' ? 'A3' : (layout === 'mosaic' ? 'A4' : 'A5');
+    setExportingPdf(true);
+    try {
+      const [{ pdf }, { default: WallBookPdfDoc }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('../components/WallBookPdfDoc.jsx'),
+      ]);
+      const res = await fetch(`${API_BASE}/walls/${pub._id}/export/data`);
+      if (!res.ok) throw new Error(`Data fetch failed: ${res.status}`);
+      const { publication, wishes } = await res.json();
 
-        /* 0. Vérifier si un PDF à jour existe déjà sur le serveur */
-        if (
-          publication.pdfUrl &&
-          publication.pdfConfig?.totalWords === wishes.length &&
-          publication.pdfConfig?.size === currentSize
-        ) {
-          window.open(publication.pdfUrl, '_blank');
-          setExportingPdf(false);
-          return;
-        }
+      const currentSize = layout === 'poster' ? 'A3' : (layout === 'mosaic' ? 'A4' : 'A5');
 
-        /* 1. Convertir les stickers locaux (.webp/.gif) en PNG base64 via Canvas 
-              car react-pdf ne supporte ni le WebP, ni le chemin relatif. */
-        const convertToPng = (url) => new Promise((resolve) => {
-          const img = new Image();
-          img.crossOrigin = 'Anonymous';
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width; canvas.height = img.height;
-            canvas.getContext('2d').drawImage(img, 0, 0);
-            resolve(canvas.toDataURL('image/png'));
-          };
-          img.onerror = () => resolve(url);
-          // Construction URL absolue
-          img.src = url.startsWith('/') ? (window.location.origin + url) : url;
-        });
-
-        for (let i = 0; i < wishes.length; i++) {
-          const w = wishes[i];
-          if (w.mediaType === 'sticker' && w.photoUrl && !w.photoUrl.startsWith('data:')) {
-            w.photoUrl = await convertToPng(w.photoUrl);
-          }
-        }
-
-        /* 2. Génération locale via CPU client */
-        const blob = await pdf(
-          <WallBookPdfDoc publication={publication} wishes={wishes} layout={layout} bgMode={bgMode} />
-        ).toBlob();
-        
-        /* 3. Architecture : Envoi silencieux au serveur avec métadonnées */
-        try {
-          const fd = new FormData();
-          fd.append('pdfFile', blob, `livre-des-mots-${pub._id}.pdf`);
-          fd.append('size', currentSize);
-          fd.append('totalWords', wishes.length);
-          
-          fetch(`${API_BASE}/walls/${pub._id}/export/upload-pdf`, {
-            method: 'POST',
-            body: fd
-          }).catch(e => console.warn('Silently failed to upload PDF to server:', e));
-        } catch (e) {
-          console.warn('PDF Upload error', e);
-        }
-
-        /* 4. Téléchargement ou affichage direct au client */
-        const url = URL.createObjectURL(blob);
-        const recipient = (publication?.data?.recipient || publication?.data?.titleName || publication?.title || 'mur')
-          .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'mur';
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `livre-des-mots-${recipient}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-      } catch (err) {
-        alert(`Erreur pendant l'export : ${err.message}`);
-      } finally {
+      /* 0. Vérifier si un PDF à jour existe déjà sur le serveur */
+      if (
+        publication.pdfUrl &&
+        publication.pdfConfig?.totalWords === wishes.length &&
+        publication.pdfConfig?.size === currentSize
+      ) {
+        window.open(publication.pdfUrl, '_blank');
         setExportingPdf(false);
+        return;
       }
-      return;
+
+      /* 1. Convertir les stickers locaux (.webp/.gif) en PNG base64 via Canvas
+            car react-pdf ne supporte ni le WebP, ni le chemin relatif. */
+      const convertToPng = (url) => new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = () => resolve(url);
+        img.src = url.startsWith('/') ? (window.location.origin + url) : url;
+      });
+
+      for (let i = 0; i < wishes.length; i++) {
+        const w = wishes[i];
+        if (w.mediaType === 'sticker' && w.photoUrl && !w.photoUrl.startsWith('data:')) {
+          w.photoUrl = await convertToPng(w.photoUrl);
+        }
+      }
+
+      /* 2. Génération locale via CPU client */
+      const blob = await pdf(
+        <WallBookPdfDoc publication={publication} wishes={wishes} layout={layout} bgMode={bgMode} />
+      ).toBlob();
+
+      /* 3. Envoi silencieux au serveur avec métadonnées (cache pour prochain dl) */
+      try {
+        const fd = new FormData();
+        fd.append('pdfFile', blob, `livre-des-mots-${pub._id}.pdf`);
+        fd.append('size', currentSize);
+        fd.append('totalWords', wishes.length);
+
+        fetch(`${API_BASE}/walls/${pub._id}/export/upload-pdf`, {
+          method: 'POST',
+          body: fd
+        }).catch(e => console.warn('Silently failed to upload PDF to server:', e));
+      } catch (e) {
+        console.warn('PDF Upload error', e);
+      }
+
+      /* 4. Téléchargement direct */
+      const url = URL.createObjectURL(blob);
+      const recipient = (publication?.data?.recipient || publication?.data?.titleName || publication?.title || 'mur')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'mur';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `livre-des-mots-${recipient}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (err) {
+      alert(`Erreur pendant l'export : ${err.message}`);
+    } finally {
+      setExportingPdf(false);
     }
-    /* Fallback Puppeteer (caché du modal). */
-    window.open(`${API_BASE}/walls/${pub._id}/export/pdf?layout=${layout}&bg=${bgMode}`, '_blank');
   };
 
   /* Export Video */

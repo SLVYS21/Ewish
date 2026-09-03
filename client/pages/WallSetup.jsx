@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Check, Loader2, ExternalLink, Share2,
-  Upload, X, Eye, Inbox, ShieldCheck, Shield, Lock, Gift,
+  ArrowLeft, Check, Loader2, ExternalLink,
+  Upload, X, Inbox, ShieldCheck, Lock, Gift,
   Trash2, RotateCcw, Clock, LockKeyhole, Zap, ChevronRight,
 } from 'lucide-react';
 import {
   updatePublication, publishPublication, uploadFile, getPublicationById, createPublication,
   getWishes, updateWish, deleteWish,
-  getContributions, getContributionStats,
 } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import NotoEmoji from '../components/NotoEmoji';
@@ -571,256 +570,88 @@ function WallWords({ id, pub, moderation: moderationEnabled, isPaid, onRequestPa
 }
 
 /* ─────────────────────────────────────────────────────────── */
-/* Cagnotte tab                                                */
+/* Cagnotte tab — verrouillé "Bientôt".                        */
+/* L'activation, la participation et les retraits sont          */
+/* désactivés tant que la feature n'est pas ouverte.            */
 /* ─────────────────────────────────────────────────────────── */
-function WallCagnotte({ pub, id, onSave }) {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [contributions, setContributions] = useState([]);
-  const [stats, setStats]                 = useState(null);
-  const [loading, setLoading]             = useState(true);
-
-  const cc = pub.cagnotteConfig || {};
-
-  const [cagnotteEnabled, setCagnotteEnabled]         = useState(cc.enabled || false);
-  const [collectTitle, setCollectTitle]               = useState(cc.collectTitle || '');
-  const [cagnotteDescription, setCagnotteDescription] = useState(cc.description || '');
-  const [cagnotteGoal, setCagnotteGoal]               = useState(cc.goal || 250000);
-  const [cagnotteDeadline, setCagnotteDeadline]       = useState(cc.deadline ? cc.deadline.slice(0, 10) : '');
-  const [minContrib, setMinContrib]                   = useState(cc.minContribution || 0);
-  const [maxContrib, setMaxContrib]                   = useState(cc.maxContribution || 0);
-
-  const inited = useRef(false);
-  const ccTimer = useRef(null);
-
-  useEffect(() => {
-    if (!inited.current) return;
-    if (onSave) onSave('unsaved');
-
-    try {
-      const iframe = document.getElementById('wall-preview-iframe');
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({
-          type: 'WW_CONFIG',
-          cagnotte: {
-            enabled: cagnotteEnabled,
-            goal: cagnotteGoal,
-            description: cagnotteDescription,
-            collectTitle: collectTitle,
-            name: cagnotteDescription || collectTitle || 'Un cadeau'
-          }
-        }, '*');
-      }
-    } catch { /* ignore */ }
-
-    clearTimeout(ccTimer.current);
-    ccTimer.current = setTimeout(async () => {
-      if (onSave) onSave('saving');
-      try {
-        const updateData = {
-          cagnotteConfig: {
-            ...pub.cagnotteConfig,
-            enabled: cagnotteEnabled, description: cagnotteDescription,
-            goal: cagnotteGoal, deadline: cagnotteDeadline || null,
-            collectTitle, minContribution: minContrib, maxContribution: maxContrib,
-          },
-        };
-        if (id === 'draft') {
-          const raw = localStorage.getItem('ewish_wall_draft');
-          if (raw) {
-            const draft = JSON.parse(raw);
-            Object.assign(draft, updateData);
-            localStorage.setItem('ewish_wall_draft', JSON.stringify(draft));
-          }
-          if (onSave) onSave('saved');
-        } else {
-          await updatePublication(id, updateData);
-          if (onSave) onSave('saved');
-        }
-      } catch { if (onSave) onSave('unsaved'); }
-    }, 800);
-  }, [cagnotteEnabled, cagnotteGoal, cagnotteDescription, cagnotteDeadline, minContrib, maxContrib, collectTitle]);
-
-  useEffect(() => { inited.current = true; }, []);
-
-  useEffect(() => {
-    if (!cagnotteEnabled) { setLoading(false); return; }
-    Promise.all([getContributions(id), getContributionStats(id)])
-      .then(([cRes, sRes]) => {
-        setContributions(cRes.data || []);
-        setStats(sRes.data || null);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id, cagnotteEnabled]);
-
-  if (!cagnotteEnabled) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
-        <div className="card" style={{ padding: '20px 22px' }}>
-          <div className="section-label" style={{ marginBottom: 4 }}>La cagnotte</div>
-          <div className="setting-row" style={{ paddingTop: 8 }}>
-            <IconBubble bg="var(--mk-accent-pale)" color="var(--mk-accent)"><Gift size={16} /></IconBubble>
-            <div className="body">
-              <div className="t">Activer la cagnotte</div>
-              <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible  jamais les montants individuels.</div>
-            </div>
-            <Toggle on={cagnotteEnabled} onChange={setCagnotteEnabled} />
-          </div>
-        </div>
-        <div className="empty-state card" style={{ padding: '40px 20px' }}>
-          <div className="e-title">La cagnotte est désactivée</div>
-          <p style={{ fontSize: 13 }}>Active-la ci-dessus pour collecter des fonds avec Kkiapay.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) return (
-    <div style={{ padding: '40px 0', textAlign: 'center' }}>
-      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2.5px solid var(--mk-line)', borderTopColor: 'var(--mk-accent)', animation: 'mk-spin .75s linear infinite', margin: '0 auto' }} />
-    </div>
-  );
-
-  const raised = stats?.total || contributions.reduce((s, t) => s + (t.amount || 0), 0);
-  const goal   = cc.goal || 0;
-  const pct    = goal ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-  const isKycVerified = user?.kyc === 'verified';
-
+function WallCagnotte() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
-
-      <div className="card" style={{ padding: '20px 22px' }}>
+      <div
+        className="card"
+        style={{
+          padding: '20px 22px',
+          opacity: 0.72,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
         <div className="section-label" style={{ marginBottom: 4 }}>La cagnotte</div>
         <div className="setting-row" style={{ paddingTop: 8 }}>
           <IconBubble bg="var(--mk-accent-pale)" color="var(--mk-accent)"><Gift size={16} /></IconBubble>
           <div className="body">
             <div className="t">Activer la cagnotte</div>
-            <div className="s">Les visiteurs participent via Kkiapay. Sur le mur, seule la progression est visible  jamais les montants individuels.</div>
+            <div className="s">Les visiteurs participeront via un paiement sécurisé. Sur le mur, seule la progression sera visible — jamais les montants individuels.</div>
           </div>
-          <Toggle on={cagnotteEnabled} onChange={setCagnotteEnabled} />
+          <Toggle on={false} onChange={() => {}} disabled />
         </div>
-
-        {cagnotteEnabled && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--mk-line)' }}>
-            {/* <div className="field">
-              <label className="field-label">Titre de la collecte</label>
-              <input className="mk-input" value={collectTitle} placeholder="Le vélo de Marc"
-                onChange={e => setCollectTitle(e.target.value)} />
-            </div> */}
-            <div className="field">
-              <label className="field-label">C'est quoi le kado ?</label>
-              <input className="mk-input" value={cagnotteDescription}
-                placeholder="Ex: Un nouveau PC."
-                onChange={e => setCagnotteDescription(e.target.value)} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
-              <div className="field">
-                <label className="field-label">Objectif (FCFA)</label>
-                <input className="mk-input" type="number" value={cagnotteGoal} placeholder="250 000"
-                  onChange={e => setCagnotteGoal(Number(e.target.value))} min={0} step={1000} />
-              </div>
-              <div className="field">
-                <label className="field-label">Date limite</label>
-                <input className="mk-input" type="date" value={cagnotteDeadline}
-                  onChange={e => setCagnotteDeadline(e.target.value)} />
-              </div>
-              <div className="field">
-                <label className="field-label">Participation min.</label>
-                <input className="mk-input" type="number" value={minContrib} placeholder="500"
-                  onChange={e => setMinContrib(Number(e.target.value))} min={0} step={500} />
-              </div>
-              <div className="field">
-                <label className="field-label">Participation max.</label>
-                <div className="field-hint" style={{ marginBottom: 4 }}>0 = illimité</div>
-                <input className="mk-input" type="number" value={maxContrib} placeholder="0"
-                  onChange={e => setMaxContrib(Number(e.target.value))} min={0} step={1000} />
-              </div>
-            </div>
-            <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', display: 'flex', gap: 7, alignItems: 'flex-start', lineHeight: 1.5 }}>
-              <Shield size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-              Encaissement sécurisé par Kkiapay. Retrait des fonds après vérification d'identité (KYC).
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* Progress + transactions */}
-      <div className="card" style={{ padding: '20px 22px' }}>
-        <div className="section-label" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
-          <span>{cc.collectTitle || 'Cagnotte'}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--mk-mint)', textTransform: 'none', letterSpacing: 0, fontSize: 11.5, fontWeight: 700 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--mk-mint)', animation: 'mk-pulse-soft 1.8s infinite' }} />
-            En direct
-          </span>
+      <div
+        className="empty-state card"
+        style={{
+          padding: '36px 24px 32px',
+          textAlign: 'center',
+          background: 'linear-gradient(160deg, #FFF7DE 0%, #FDE7A5 100%)',
+          border: '1.5px solid #E5C97A',
+          position: 'relative',
+        }}
+      >
+        <span
+          style={{
+            position: 'absolute',
+            top: 14,
+            right: 14,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '5px 10px',
+            borderRadius: 999,
+            background: '#161311',
+            color: '#FDE7A5',
+            fontSize: 10.5,
+            fontWeight: 800,
+            letterSpacing: '.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          <Lock size={11} />
+          Bientôt
+        </span>
+
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: '50%',
+            display: 'grid',
+            placeItems: 'center',
+            margin: '0 auto 12px',
+            background: 'radial-gradient(circle at 30% 30%, #FFF6C7 0%, #F2C866 70%, #B58A2A 100%)',
+            boxShadow: '0 8px 22px -8px rgba(184,139,42,.55)',
+            color: '#5A4318',
+          }}
+        >
+          <Gift size={28} />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, marginBottom: 10 }}>
-          <span style={{ fontFamily: 'var(--mk-display)', fontSize: 34, letterSpacing: '-.01em' }}>{fmtFCFA(raised)}</span>
-          {goal > 0 && <span style={{ fontSize: 13, color: 'var(--mk-ink-3)', fontWeight: 600 }}>sur {fmtFCFA(goal)} · {pct} %</span>}
+        <div className="e-title" style={{ color: '#5A4318', marginBottom: 6 }}>
+          La cagnotte arrive bientôt
         </div>
-        {goal > 0 && (
-          <div className="progress-track" style={{ marginBottom: 10 }}>
-            <div className="progress-fill" style={{ width: pct + '%' }} />
-          </div>
-        )}
-        <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', margin: '8px 0 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
-          <Eye size={13} /> Les visiteurs du mur voient cette progression  toi seul vois le détail ci-dessous.
+        <p style={{ fontSize: 13, color: '#7A5C24', maxWidth: 360, margin: '0 auto', lineHeight: 1.55 }}>
+          On finalise la collecte sécurisée, le suivi en direct et le retrait des fonds.
+          En attendant, ton mur fonctionne parfaitement pour recevoir des mots et des souvenirs.
         </p>
-
-        <div className="section-label" style={{ marginBottom: 4 }}>Participations  {contributions.length}</div>
-        <div>
-          {contributions.length === 0 ? (
-            <p style={{ fontSize: 13, color: 'var(--mk-ink-3)', padding: '12px 0' }}>Pas encore de contributions.</p>
-          ) : (
-            contributions.map(t => (
-              <div className="tx-row" key={t._id || t.id}>
-                <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--mk-accent-pale)', color: 'var(--mk-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 800, flexShrink: 0 }}>
-                  {(t.contributor || t.name || '?').slice(0, 2).toUpperCase()}
-                </span>
-                <span style={{ flex: 1, fontWeight: 700, fontSize: 13 }}>{t.contributor || t.name || 'Anonyme'}</span>
-                <span style={{ color: 'var(--mk-ink-3)', fontSize: 11.5 }}>{t.method || 'Kkiapay'} · {timeAgo(t.createdAt)}</span>
-                <span style={{ fontWeight: 800 }}>{fmtFCFA(t.amount)}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Withdraw / transfer */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--d-gap)' }}>
-        <div className="card" style={{ padding: '20px 22px' }}>
-          <div className="section-label" style={{ marginBottom: 10 }}>Récupérer les fonds</div>
-          <p style={{ fontSize: 12.5, color: 'var(--mk-ink-2)', lineHeight: 1.6, marginBottom: 14 }}>
-            Avant tout retrait ou transfert, une vérification d'identité (KYC) est demandée  une seule fois.
-          </p>
-          {isKycVerified ? (
-            <div className="badge badge-live" style={{ marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <ShieldCheck size={12} /> Identité vérifiée <NotoEmoji name="sparkles" size={14} />
-            </div>
-          ) : (
-            <div className="badge badge-draft" style={{ marginBottom: 12 }}>
-              <Shield size={12} /> Identité non vérifiée
-            </div>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-            <button
-              className="btn btn-ink"
-              onClick={() => isKycVerified ? null : navigate('/ewish-admin/profile')}
-            >
-              <Gift size={15} /> Récupérer les fonds
-            </button>
-            <button
-              className="btn btn-ghost"
-              onClick={() => isKycVerified ? null : navigate('/ewish-admin/profile')}
-            >
-              <Share2 size={15} /> Transférer la cagnotte
-            </button>
-          </div>
-          <p style={{ fontSize: 11, color: 'var(--mk-ink-3)', marginTop: 12, lineHeight: 1.5 }}>
-            Le transfert confie la cagnotte à une autre personne (le destinataire fera son propre KYC).
-          </p>
-        </div>
       </div>
     </div>
   );
@@ -1001,7 +832,7 @@ export default function WallSetup() {
     { id: 'settings', label: 'Réglages' },
     { id: 'style',    label: 'Style' },
     { id: 'words',    label: 'Mots', count: wordCounts.pending + wordCounts.locked },
-    { id: 'cagnotte', label: 'Cagnotte' },
+    { id: 'cagnotte', label: 'Cagnotte', comingSoon: true },
     { id: 'share',    label: 'Partager' },
   ];
 
@@ -1110,7 +941,10 @@ export default function WallSetup() {
             {tabs.map(t => {
               const active = tab === t.id && mobilePreviewOpen;
               return (
-                <div key={t.id} onClick={() => { setTab(t.id); setMobilePreviewOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: active ? '#9F6D22' : '#8C8570', cursor: 'pointer' }}>
+                <div key={t.id} onClick={() => { setTab(t.id); setMobilePreviewOpen(true); }} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: active ? '#9F6D22' : '#8C8570', cursor: 'pointer' }}>
+                  {t.comingSoon && (
+                    <span style={{ position: 'absolute', top: -6, right: -6, background: '#161311', color: '#FDE7A5', font: '800 8px var(--mk-body)', letterSpacing: '.06em', textTransform: 'uppercase', padding: '1px 5px', borderRadius: '999px', lineHeight: 1.3 }}>Bientôt</span>
+                  )}
                   {t.id === 'style' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="14" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="14.5" r="2.5"/><path d="M12 22a10 10 0 1 1 0-20"/></svg>}
                   {t.id === 'settings' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>}
                   {t.id === 'words' && <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>}
@@ -1232,6 +1066,9 @@ export default function WallSetup() {
                     <div key={t.id} onClick={() => setTab(t.id)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 12px', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', background: active ? '#FDF7EA' : 'transparent', color: active ? '#9F6D22' : '#453E2E', font: active ? '700 13.5px var(--mk-body)' : '600 13.5px var(--mk-body)' }}>
                       {getIconForTab(t.id)}
                       {t.label}
+                      {t.comingSoon && (
+                        <span style={{ marginLeft: 6, font: '800 9px var(--mk-body)', background: '#161311', color: '#FDE7A5', padding: '2px 7px', borderRadius: '999px', letterSpacing: '.08em', textTransform: 'uppercase' }}>Bientôt</span>
+                      )}
                       <span style={{ flex: 1 }}></span>
                       {t.count > 0 && <span style={{ font: '800 9px var(--mk-body)', background: '#C13B3B', color: '#fff', padding: '2px 7px', borderRadius: '999px' }}>{t.count}</span>}
                       {active && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C6A15A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>}
@@ -1304,7 +1141,7 @@ export default function WallSetup() {
                       {tab === 'style' && "L'aspect du mur et de son ouverture."}
                       {tab === 'settings' && "Les paramètres de base de ton mur."}
                       {tab === 'words' && "Gère les mots laissés par tes proches."}
-                      {tab === 'cagnotte' && "Suis la collecte de fonds en direct."}
+                      {tab === 'cagnotte' && "Bientôt disponible — collecte sécurisée et suivi en direct."}
                     </div>
 
                     {renderActiveTabContent()}

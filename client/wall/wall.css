@@ -263,7 +263,7 @@
     .ww-shell--classic #wall-header .wall-eyebrow,
     .ww-shell--classic #wall-header .wall-title,
     .ww-shell--classic #wall-header .wall-subtitle {
-      opacity: 0; transform: translateY(12px);
+      opacity: 1; transform: none;
     }
     .ww-shell--classic #wall-header.reveal .wall-eyebrow  { animation: mk-up .55s .05s ease-out both; }
     .ww-shell--classic #wall-header.reveal .wall-title    { animation: mk-up .65s .20s cubic-bezier(.16,1,.3,1) both; }
@@ -441,12 +441,16 @@
     .pin.sticky > * { position: relative; z-index: 1; }
 
     /* Contenu texte (Caveat handwriting) */
-    .pin .nm {
+    .ww-shell--classic .pin .nm {
       font-family: var(--hand);
       font-size: 18px; font-weight: 700;
       color: #3A2814;
       line-height: 1.1;
+      display: flex; align-items: baseline; gap: 6px;
     }
+    /* Classic : l'initiale (.av) fait double emploi avec le nom sur post-it,
+       on la masque pour éviter le rendu "CCéline". */
+    .ww-shell--classic .pin .av { display: none; }
     .pin .tx {
       font-family: var(--hand);
       font-size: 16px; line-height: 1.32;
@@ -1794,7 +1798,7 @@
     .ww-shell--modern #wall-header .wall-eyebrow,
     .ww-shell--modern #wall-header .wall-title,
     .ww-shell--modern #wall-header .wall-subtitle {
-      opacity: 0; transform: translateY(12px);
+      opacity: 1; transform: none;
     }
     .ww-shell--modern #wall-header.reveal .wall-eyebrow  { animation: mk-up .55s .05s ease-out both; }
     .ww-shell--modern #wall-header.reveal .wall-title    { animation: mk-up .65s .20s cubic-bezier(.16,1,.3,1) both; }
@@ -1966,7 +1970,15 @@
       display: grid; place-items: center;
       font-size: 9.5px; font-weight: 800; color: #fff;
       flex-shrink: 0;
+      background: var(--mk-rose);
     }
+    /* Le rond avatar prend la même couleur que le nom (tone). */
+    .tone-rose   .av { background: var(--mk-rose); }
+    .tone-lilac  .av { background: var(--mk-mur); }
+    .tone-mint   .av { background: var(--mk-mint); }
+    .tone-butter .av { background: #B8842A; }
+    .tone-peach  .av { background: #D9713F; }
+    .tone-sky    .av { background: #3E77C2; }
 .ww-shell--modern .pin .nm-text {
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
