@@ -2713,10 +2713,14 @@
   to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Wax seal pulse when it's clickable */
+/* Wax seal pulse when it's clickable.
+   translateZ(20px) MUST stay in every keyframe: the seal sits in a preserve-3d
+   context (.ce-envelope) and needs to render in front of the top-flap's face
+   stack (which lives at translateZ(1px)). Dropping the Z here pushes the seal
+   behind the flap — visually hidden AND unclickable — on all three themes. */
 @keyframes ce-seal-pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1);   filter: brightness(1); }
-  50%      { transform: translate(-50%, -50%) scale(1.08); filter: brightness(1.15); }
+  0%, 100% { transform: translate(-50%, -50%) translateZ(20px) scale(1);   filter: brightness(1); }
+  50%      { transform: translate(-50%, -50%) translateZ(20px) scale(1.08); filter: brightness(1.15); }
 }
 /* Typewriter caret blink for the inside-right message */
 @keyframes ce-caret-blink {

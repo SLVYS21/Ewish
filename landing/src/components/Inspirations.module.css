@@ -1,5 +1,5 @@
 .section {
-  padding: 0px 0 50px;
+  padding: 12px 0 50px;
   background-color: #ffffff;
 }
 
@@ -52,20 +52,67 @@
   transition: color 0.3s ease;
   min-width: 160px;
   letter-spacing: -0.005em;
+  white-space: nowrap;
 }
 
 .toggleBtnActive {
   color: var(--mk-paper-noble, #FDFBF7);
 }
 
-/* Category pills — wrap row */
+/* Mode helper — legende pédagogique sous le toggle */
+.modeHelper {
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--mk-stone-600, #6B5D52);
+  max-width: 520px;
+  margin: 0 auto 8px;
+  padding: 0 20px;
+}
+
+/* Tabs scroll wrapper — carrousel mobile, wrap desktop */
+.tabsScrollWrap {
+  position: relative;
+  margin: 20px -16px 20px;
+}
+
+.tabsScroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabsScroller::-webkit-scrollbar { display: none; }
+
+/* Fades sur les bords pour indiquer qu'on peut scroller */
+.tabsFade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.tabsFadeLeft {
+  left: 0;
+  background: linear-gradient(90deg, #ffffff 20%, rgba(255,255,255,0) 100%);
+}
+.tabsFadeRight {
+  right: 0;
+  background: linear-gradient(-90deg, #ffffff 20%, rgba(255,255,255,0) 100%);
+}
+
+/* Category pills — desktop wrap ; mobile: 1 rangée scroll-snap */
 .tabsContainer {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  margin: 24px 0 28px;
-  padding: 0 8px;
+  padding: 4px 16px;
 }
 
 .tabBtn {
@@ -119,9 +166,76 @@
 .tabIcon img { display: block; }
 
 @media (max-width: 640px) {
-  .toggleBtn { min-width: 130px; font-size: 13px; }
+  /* Toggle : min-width réduit + padding compact pour éviter que "Cartes de
+     Groupe" wrappe sur 2 lignes (bug vu en 486px). */
+  .toggleWrapper { margin-bottom: 12px; }
+  .toggleContainer { padding: 4px; }
+  .toggleBtn {
+    min-width: 0;
+    padding: 8px 18px;
+    font-size: 13px;
+  }
+  .togglePill { top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); }
+
   .tabBtn { font-size: 12.5px; padding: 7px 14px 7px 8px; }
   .tabIcon { width: 20px; height: 20px; }
+
+  /* Le wrap s'empile sur mobile → on passe en carrousel horizontal. */
+  .tabsScrollWrap { margin: 10px 0 10px; }
+  .tabsContainer {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding: 4px 20px;
+    gap: 8px;
+  }
+  .tabBtn {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+  }
+  .tabsFade { opacity: 1; }
+  .modeHelper {
+    font-size: 13px;
+    padding: 0 24px;
+    margin-bottom: 4px;
+  }
+  .demoCaption {
+    font-size: 12px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+  }
+}
+
+/* Caption "Vue destinataire — ..." au-dessus de l'iframe */
+.demoCaption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 14px;
+  padding: 8px 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mk-plum-800, #201524);
+  background: var(--mk-paper-cream, #F7F3EE);
+  border: 1px solid var(--mk-border-warm, rgba(32, 21, 36, 0.08));
+  border-radius: 999px;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  text-align: center;
+}
+.demoCaptionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mk-coral-600, #E25B45);
+  box-shadow: 0 0 0 4px rgba(226, 91, 69, 0.18);
+  animation: mkLiveDot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes mkLiveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.6; transform: scale(0.85); }
 }
 
 /* Live Demo Area — poster + iframe + skeleton */
@@ -134,6 +248,16 @@
   border: 1px solid var(--mk-border-warm, rgba(32, 21, 36, 0.08));
   overflow: hidden;
   box-shadow: var(--mk-shadow-lg, 0 24px 48px -12px rgba(32, 21, 36, 0.12));
+}
+
+/* Shield transparent au-dessus de l'iframe : bloque les taps sur les CTA
+   internes du mur (Ajouter / Participer). Desktop garde l'interaction. */
+.demoShield {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: transparent;
 }
 
 /* Poster tint fallback (au cas où le poster mettrait quelques ms) */
@@ -226,6 +350,14 @@
 }
 
 @media (max-width: 640px) {
-  .demoBoard { aspect-ratio: 2 / 3; }
+  /* 4/5 au lieu de 2/3 : moins vertical → la bannière du mur ne bouffe
+     plus la moitié de l'iframe. */
+  .demoBoard { aspect-ratio: 4 / 5; }
   .skelGrid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Mobile : le shield capture les taps pour bloquer les CTA internes.
+     L'utilisateur reste dans le flow de scroll de la landing plutôt que
+     de tomber sur un "Ajouter" sans effet. */
+  .demoShield { pointer-events: auto; }
+  .demoIframe { pointer-events: none; }
 }

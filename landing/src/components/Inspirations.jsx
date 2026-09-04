@@ -31,21 +31,23 @@ const DEMOS_GROUP = {
 
 /* ── Cartes Perso (solo) ─────────────────────────────────────── */
 const TABS_PERSONAL = [
-  { id: 'birthday_perso',    label: 'Anniversaire',      icon: 'birthday-cake' },
-  { id: 'wedding_perso',     label: 'Mariage',           icon: 'sparkling-heart' },
-  { id: 'love_perso',        label: 'Forever',           icon: 'two-hearts' },
-  { id: 'birth_perso',       label: 'Baptême',           icon: 'ribbon' },
-  { id: 'congrats_perso',    label: 'Félicitations',     icon: 'trophy' },
-  { id: 'memorial_perso',    label: 'Hommage',           icon: 'folded-hands' },
+  { id: 'wedding_perso',        label: 'Mariage',           icon: 'sparkling-heart' },
+  { id: 'birthday_perso',       label: 'Anniversaire',      icon: 'birthday-cake' },
+  { id: 'birth_perso',          label: 'Baptême',           icon: 'ribbon' },
+  { id: 'love_perso',           label: 'Forever',           icon: 'two-hearts' },
+  { id: 'congrats_perso',       label: 'Félicitations',     icon: 'trophy' },
+  { id: 'memorial_perso',       label: 'Hommage',           icon: 'folded-hands' },
+  { id: 'birthday_perso_env',   label: 'Anniv · enveloppe', icon: 'wrapped-gift' },
 ];
 
 const DEMOS_PERSONAL = {
-  birthday_perso:  { templateName: 'birthday',   customName: 'demo-anniversaire-solo' },
-  love_perso:      { templateName: 'forever',    customName: 'demo-amour-solo' },
-  wedding_perso:   { templateName: 'myenvelope', customName: 'demo-mariage-solo' },
-  birth_perso:     { templateName: 'myenvelope', customName: 'demo-naissance-solo' },
-  congrats_perso:  { templateName: 'myenvelope', customName: 'demo-felicitations-solo' },
-  memorial_perso:  { templateName: 'myenvelope', customName: 'demo-deces-solo' },
+  wedding_perso:      { templateName: 'myenvelope', customName: 'demo-mariage-solo' },
+  birthday_perso:     { templateName: 'birthday',   customName: 'demo-anniversaire-solo' },
+  birth_perso:        { templateName: 'myenvelope', customName: 'demo-naissance-solo' },
+  love_perso:         { templateName: 'forever',    customName: 'demo-amour-solo' },
+  congrats_perso:     { templateName: 'myenvelope', customName: 'demo-felicitations-solo' },
+  memorial_perso:     { templateName: 'myenvelope', customName: 'demo-deces-solo' },
+  birthday_perso_env: { templateName: 'myenvelope', customName: 'demo-anniversaire-solo-env' },
 };
 
 function buildDemoUrl(demo) {
@@ -65,13 +67,19 @@ function buildPosterUrl(tabId) {
   return `/posters/${tabId}.webp`;
 }
 
+const MODE_HELPERS = {
+  group:    'Un mur collaboratif — vos proches y déposent messages, photos & vidéos, tous ensemble.',
+  personal: 'Une carte solo — un message unique de vous, animé et partagé par lien.',
+};
+
 export default function Inspirations() {
   const [mode, setMode] = useState('group');
   const [activeTabGroup, setActiveTabGroup] = useState('birthday_group');
-  const [activeTabPerso, setActiveTabPerso] = useState('birthday_perso');
+  const [activeTabPerso, setActiveTabPerso] = useState('wedding_perso');
   const [iframeReady, setIframeReady] = useState(false);
   const [posterOk, setPosterOk] = useState(true);
   const iframeRef = useRef(null);
+  const tabsScrollRef = useRef(null);
 
   const TABS = mode === 'group' ? TABS_GROUP : TABS_PERSONAL;
   const DEMOS_DATA = mode === 'group' ? DEMOS_GROUP : DEMOS_PERSONAL;
@@ -84,6 +92,23 @@ export default function Inspirations() {
     setIframeReady(false);
     setPosterOk(true);
   }, [src]);
+
+  /* Auto-centre le tab actif dans le carrousel mobile pour que la sélection
+     reste visible sans que l'utilisateur ait à scroller manuellement.
+     rAF garantit que le layout est calculé (sinon getBoundingClientRect
+     peut renvoyer des dimensions nulles au premier render, ce qui empêche
+     le centrage et laisse le tab actif hors écran à gauche). */
+  useEffect(() => {
+    const scroller = tabsScrollRef.current;
+    if (!scroller) return;
+    const raf = requestAnimationFrame(() => {
+      const activeEl = scroller.querySelector(`[data-tab-id="${activeTab}"]`);
+      if (!activeEl) return;
+      const targetLeft = activeEl.offsetLeft - (scroller.clientWidth / 2) + (activeEl.clientWidth / 2);
+      scroller.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [activeTab, mode]);
 
   return (
     <section className={s.section} id="inspirations">
@@ -100,33 +125,46 @@ export default function Inspirations() {
               className={`${s.toggleBtn} ${mode === 'group' ? s.toggleBtnActive : ''}`}
               onClick={() => setMode('group')}
             >
-              Cartes de Groupe
+              Démo Mur
             </button>
             <button
               className={`${s.toggleBtn} ${mode === 'personal' ? s.toggleBtnActive : ''}`}
               onClick={() => setMode('personal')}
             >
-              Cartes Perso
+              Démo eCard
             </button>
           </div>
         </div>
 
-        {/* Category pills — wrap layout, dark active fill */}
-        <div className={s.tabsContainer}>
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              className={`${s.tabBtn} ${activeTab === tab.id ? s.tabActive : ''}`}
-              onClick={() => mode === 'group' ? setActiveTabGroup(tab.id) : setActiveTabPerso(tab.id)}
-            >
-              {tab.icon && (
-                <span className={s.tabIcon} aria-hidden>
-                  <NotoEmoji name={tab.icon} size={18} static />
-                </span>
-              )}
-              <span>{tab.label}</span>
-            </button>
-          ))}
+        {/* Explication du mode — indispensable pour un marché qui découvre.
+            Répond au feedback "les gens ne comprennent pas tout de suite". */}
+        <p className={s.modeHelper}>{MODE_HELPERS[mode]}</p>
+
+        {/* Category pills — desktop: wrap ; mobile: scroll-snap horizontal
+            avec fades sur les bords, pour ne pas empiler et laisser voir la
+            démo au-dessus du fold. */}
+        <div className={s.tabsScrollWrap}>
+          <div className={s.tabsScroller} ref={tabsScrollRef}>
+            <div className={s.tabsContainer}>
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  data-tab-id={tab.id}
+                  className={`${s.tabBtn} ${activeTab === tab.id ? s.tabActive : ''}`}
+                  onClick={() => mode === 'group' ? setActiveTabGroup(tab.id) : setActiveTabPerso(tab.id)}
+                >
+                  {tab.icon && (
+                    <span className={s.tabIcon} aria-hidden>
+                      <NotoEmoji name={tab.icon} size={18} static />
+                    </span>
+                  )}
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={`${s.tabsFade} ${s.tabsFadeLeft}`} aria-hidden />
+          <div className={`${s.tabsFade} ${s.tabsFadeRight}`} aria-hidden />
         </div>
 
         {/* Live preview : poster instantané + iframe fade-in derrière + skeleton fallback */}
@@ -169,6 +207,13 @@ export default function Inspirations() {
             allow="autoplay; fullscreen"
             loading="lazy"
           />
+
+          {/* Click-shield : bloque tout tap/click qui atteindrait les boutons
+              "Ajouter"/"Participer" du mur. Le mur a déjà un demoMode côté
+              serveur mais les CTA restent visuellement tapables — cet overlay
+              évite le doute "je clique et rien ne se passe". Sur desktop on
+              autorise l'interaction (hover, scroll interne). */}
+          <div className={s.demoShield} aria-hidden />
         </div>
 
       </div>

@@ -17,13 +17,15 @@ const FLOATING_EMOJIS = [
 
   // FOREGROUND (sharp, punchy)
   { name: 'party-popper',   top: '14%', left: '10%',  size: 56,  layer: 'fg', anim: 'drift', delay: 0.3, rotate: -14,
-    mobile: { top: '2%',  left: '4%',  size: 40 } },
-  { name: 'wrapped-gift',   top: '58%', left: '14%',  size: 52,  layer: 'fg', anim: 'bob',   delay: 0.9, rotate: 8,
-    mobile: { top: 'auto', bottom: '4%', left: '4%',  size: 38 } },
+    mobile: { top: '1%',  left: '3%',  size: 34 } },
+  /* wrapped-gift & birthday-cake : plus de mobile config → cachés en <768px
+     car ils tombaient sur les format badges. Le hero garde deux emojis
+     discrets en haut (party-popper + balloon), suffisant pour la touche
+     festive sans polluer le contenu. */
+  { name: 'wrapped-gift',   top: '58%', left: '14%',  size: 52,  layer: 'fg', anim: 'bob',   delay: 0.9, rotate: 8 },
   { name: 'balloon',        top: '10%', right: '12%', size: 58,  layer: 'fg', anim: 'float', delay: 1.5, rotate: 6,
-    mobile: { top: '2%',  right: '4%', size: 42 } },
-  { name: 'birthday-cake',  top: '62%', right: '14%', size: 54,  layer: 'fg', anim: 'drift', delay: 0.5, rotate: -6,
-    mobile: { top: 'auto', bottom: '4%', right: '4%', size: 40 } },
+    mobile: { top: '1%',  right: '3%', size: 36 } },
+  { name: 'birthday-cake',  top: '62%', right: '14%', size: 54,  layer: 'fg', anim: 'drift', delay: 0.5, rotate: -6 },
   { name: 'sparkling-heart',top: '32%', left: '5%',   size: 40,  layer: 'fg', anim: 'bob',   delay: 1.8, rotate: 12 },
   { name: 'folded-hands',   top: '40%', right: '4%',  size: 42,  layer: 'fg', anim: 'float', delay: 0.8, rotate: -8 },
 ];
@@ -110,7 +112,9 @@ export default function Hero({ onCreate }) {
           </h1>
 
           <p className={s.sub}>
-            Anniversaires, déclarations, départs... Envoyez seul ou ensemble une attention magique.
+            Un <strong>mur collaboratif</strong> où tout le monde dépose mots, photos & vidéos —
+            ou une <strong>carte solo animée</strong>, à ouvrir comme un cadeau.
+            Un lien, un QR, un souvenir gardé pour toujours.
           </p>
 
           <div className={s.actions}>
@@ -118,11 +122,11 @@ export default function Hero({ onCreate }) {
               <span>Créer une carte</span>
               <ArrowRight size={18} strokeWidth={2.4} aria-hidden />
             </button>
-            <a href="#inspirations" className={s.secondaryBtn}>
+            <a href="#inspirations" className={s.secondaryBtn} aria-label="Voir les démos">
               <span className={s.playCircle} aria-hidden>
                 <Play size={12} strokeWidth={0} fill="currentColor" />
               </span>
-              <span>Explorer les démos</span>
+              <span className={s.secondaryLabel}>Voir les démos ↓</span>
             </a>
           </div>
         </div>

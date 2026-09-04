@@ -7,6 +7,15 @@
   min-height: 520px;
 }
 
+/* Mobile : min-height 520px forçait un énorme vide sous les CTA. On laisse
+   le contenu dicter la hauteur, avec juste un peu d'air en dessous. */
+@media (max-width: 640px) {
+  .hero {
+    min-height: 0;
+    padding-bottom: 24px;
+  }
+}
+
 /* Floating emojis layer around the hero content */
 .floatingLayer {
   position: absolute;
@@ -248,9 +257,14 @@
   font-family: var(--sans);
   font-size: 16px;
   color: var(--mk-stone-600);
-  line-height: 1.6;
-  margin-top: 24px;
-  max-width: 600px;
+  line-height: 1.55;
+  margin-top: 20px;
+  max-width: 620px;
+  padding: 0 20px;
+}
+.sub strong {
+  color: var(--mk-plum-800, #201524);
+  font-weight: 700;
 }
 
 .actions {
@@ -258,17 +272,62 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 32px;
+  margin-top: 28px;
+}
+
+@media (max-width: 480px) {
+  .sub {
+    font-size: 15px;
+    padding: 0 24px;
+    margin-top: 16px;
+  }
+  .actions {
+    margin-top: 22px;
+    gap: 12px;
+  }
 }
 
 @media (max-width: 480px) {
   .actions {
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
     width: 100%;
     padding: 0 16px;
   }
-  .demoBtn, .secondaryBtn {
-    width: 100%;
+  /* Mobile : "Créer une carte" garde de la présence (pill large),
+     "Voir les démos" se réduit à un cercle avec juste le play (aria-label
+     porte le sens). Le label texte est masqué visuellement. */
+  .demoBtn {
+    flex: 1;
+    min-width: 0;
+    max-width: 260px;
+    padding: 14px 20px;
+  }
+  .secondaryBtn {
+    padding: 0;
+    width: 52px;
+    height: 52px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1.5px solid var(--mk-plum-800, #201524);
+    background: var(--mk-paper-cream, #F7F3EE);
+    flex-shrink: 0;
+    flex-grow: 0;
+    gap: 0;
+    align-self: center;
+  }
+  .secondaryLabel {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0);
+    white-space: nowrap; border: 0;
+  }
+  /* Le playCircle occupe tout le bouton mobile — plus besoin de bordure
+     dédiée puisque le bouton lui-même est un cercle. */
+  .secondaryBtn .playCircle {
+    width: 22px; height: 22px;
+    border: none;
   }
 }
 

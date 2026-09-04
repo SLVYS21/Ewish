@@ -259,6 +259,28 @@ const CARDS = [
     envelopeUnboxingBg: 'default',
     style: { primaryColor: '#1A1A1A', accentColor: '#C9A961', fontFamily: 'Cormorant Garamond' },
   },
+  {
+    /* Variante Anniversaire en format enveloppe (card-editor / myenvelope).
+       Complémentaire de `demo-anniversaire-solo` qui est en template `birthday`
+       (démo animée) — cette variante montre le rendu "carte à ouvrir" pour
+       l'anniversaire, format prisé par les moments intimes. */
+    key: 'birthday_perso_env',
+    customName: 'demo-anniversaire-solo-env',
+    templateName: 'myenvelope',
+    title: 'Carte — Anniversaire de Camille',
+    envelopeOccasion: 'anniversaire',
+    envelopeTheme: { id: 'confetti_pop', color: '#F8BE68', texture: 'smooth', liner: 'theme' },
+    envelopeTexts: {
+      title:     'Joyeux anniversaire 🎂',
+      recipient: 'Camille',
+      message:   "Une nouvelle année qui commence, remplie de tout ce que tu aimes. Que cette journée ressemble à la personne exceptionnelle que tu es : lumineuse, joyeuse et pleine de vie.",
+      signature: 'Avec toute notre tendresse',
+      backNote:  'Fait avec amour · myKado',
+    },
+    envelopeConfetti:   'confetti',
+    envelopeUnboxingBg: 'default',
+    style: { primaryColor: '#E25B45', accentColor: '#F8BE68', fontFamily: 'Fredoka' },
+  },
 ];
 
 async function ensureTemplateExists(templateName) {
