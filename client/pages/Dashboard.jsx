@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, X, MoreHorizontal, Wallet, ChevronDown,
+  ArrowRight, X, MoreHorizontal, ChevronDown,
 } from 'lucide-react';
 import { getPublications, getTemplates, patchOnboarding } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
@@ -155,7 +155,7 @@ function ThemeTile({ tpl, onSelect }) {
           <div style={{ fontWeight: 700, fontSize: '13px' }}>{tpl.label || tpl.name}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
             <span style={{ font: '800 10px Inter, sans-serif', background: '#EDE7FF', color: '#5B6994', padding: '3px 8px', borderRadius: '999px' }}>
-              {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
+              {(tpl.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA
             </span>
             <span style={{ font: '700 11px Inter, sans-serif', color: '#9F6D22' }}>Créer ›</span>
           </div>
@@ -325,15 +325,11 @@ export default function Dashboard() {
               RAVI DE TE REVOIR
             </span>
           </div>
-          <button id="tour-credits" className={s.heroCredits} onClick={() => navigate('/ewish-admin/credits')}>
-            <Wallet size={14} />
-            {user?.credits ?? 0} crédits
-          </button>
         </div>
         
         <div className={s.heroContent}>
           <div className={s.heroTitle}>
-            Bonsoir, {firstName} <RotatingEmoji emojis={['waving-hand', 'sparkles', 'party-popper', 'star-struck', 'growing-heart']} size={36} className={s.heroEmojiAnim} />
+            Bonsoir, <strong>{firstName}</strong> <RotatingEmoji emojis={['waving-hand', 'sparkles', 'party-popper', 'star-struck', 'growing-heart']} size={36} className={s.heroEmojiAnim} />
           </div>
           <div className={s.heroSub}>Célèbre les gens qui comptent  une carte animée, un mur collectif, un cadeau.</div>
         </div>
@@ -345,7 +341,7 @@ export default function Dashboard() {
 
       {/* ══ What are we creating? ════════════════════════════════ */}
       <div className={s.section} id="tour-create" style={{ marginTop: '16px' }}>
-        <div className={s.sectionTitle} style={{ fontSize: '20px', fontFamily: '"Fraunces", serif', fontWeight: 400, color: '#161311', marginBottom: '8px' }}>Qu'est-ce qu'on crée ?</div>
+        <div className={s.sectionTitle} style={{ fontSize: '22px', fontFamily: 'var(--mk-font-display)', fontWeight: 700, letterSpacing: '-0.015em', color: 'var(--mk-text-primary)', marginBottom: '8px' }}>Qu'est-ce qu'on crée ?</div>
         <div className={s.quickGrid}>
           <button className={s.cardMain} onClick={() => navigate('/ewish-admin/templates?mode=wish')}>
             <div className={s.cardMainBg}></div>
@@ -382,7 +378,7 @@ export default function Dashboard() {
       {!loading && pubs.length > 0 && (
         <div className={s.section} id="tour-recent">
           <div className={s.sectionHead}>
-            <div className={s.sectionTitle} style={{ fontSize: '20px', fontFamily: '"Fraunces", serif', fontWeight: 400, color: '#161311' }}>Récents</div>
+            <div className={s.sectionTitle} style={{ fontSize: '22px', fontFamily: 'var(--mk-font-display)', fontWeight: 700, letterSpacing: '-0.015em', color: 'var(--mk-text-primary)' }}>Récents</div>
             <button className={s.seeAll} onClick={() => navigate('/ewish-admin/ewish')}>
               Tout voir
             </button>

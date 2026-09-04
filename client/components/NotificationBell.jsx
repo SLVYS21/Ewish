@@ -21,6 +21,7 @@ const TYPE_ICON = {
   moderation_pending:    'ShieldCheck',
   kyc_approved:          'CheckCircle2',
   kyc_rejected:          'AlertCircle',
+  date_reminder:         'CalendarDays',
   system:                'Bell',
 };
 

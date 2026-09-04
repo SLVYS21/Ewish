@@ -17,12 +17,10 @@ const SPA_VIRTUAL_TEMPLATES = new Set(['myenvelope']);
 
 /* Prix des plans mur en FCFA (source de vérité serveur, à ne pas dupliquer côté client) */
 const WALL_PLAN_PRICES = {
-  free:     { credits: 0,  fcfa: 0 },
-  premium:  { credits: 5,  fcfa: 2500 },
-  infinite: { credits: 20, fcfa: 10000 },
+  free:     0,
+  premium:  2500,
+  infinite: 10000,
 };
-/* Cartes non-mur : 1 crédit = 500 FCFA (même ratio qu'historiquement). */
-const CREDIT_TO_FCFA = 500;
 
 // GET all
 router.get('/', requireAdmin, async (req, res) => {
@@ -418,7 +416,6 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     const needsGiftTopUp   = existing.isPaid && owedGiftFcfa > 0 && !isWallTemplate;
     const requiresEscrow   = needsFirstEscrow || needsGiftTopUp;
     let finalPlanType = isWallTemplate ? (planType || 'free') : undefined;
-    let creditsReq = 0;
     let priceFCFA = 0;
 
     /* Check paywall bypass */
@@ -449,12 +446,6 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       promo = await Promo.findOne({ code: promoCodeInput });
       if (!promo) {
         return res.status(400).json({ error: 'Code promo introuvable.', code: 'PROMO_NOT_FOUND' });
-      }
-      if (promo.isCreditGift) {
-        return res.status(400).json({
-          error: 'Ce code est un cadeau de crédits, applique-le depuis ton compte.',
-          code:  'PROMO_IS_GIFT',
-        });
       }
       if (promo.templates && promo.templates.length > 0 && !promo.templates.includes(existing.templateName)) {
         return res.status(400).json({
@@ -497,7 +488,6 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
               ? `Paiement requis pour le nouveau cadeau : ${envelopePrice} FCFA.`
               : `Paiement requis : ${envelopePrice} FCFA.`,
             code:  'PAYMENT_REQUIRED',
-            creditsRequired: 0,
             priceFCFA: envelopePrice,
             topUp: needsGiftTopUp,
           });
@@ -533,7 +523,6 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
             adminId:       req.admin.id,
             transactionId: feexpayReference,
             amount:        verifyRes.amount,
-            credits:       0,
             source:        'feexpay',
             paymentData:   verifyRes.raw,
           });
@@ -546,34 +535,26 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
 
     /* -------------------------------------------------------------------
        Calcul du coût pour les autres templates (mur / legacy card).
-       - Mur : dépend du plan choisi (0 / 5 / 20 crédits).
-       - Carte legacy (non-mur, pas encore payée) : template.creditsRequired × 500 FCFA.
+       - Mur : dépend du plan choisi (free / premium / infinite).
+       - Carte legacy (non-mur, pas encore payée) : template.priceFCFA.
        - Free / carte déjà payée : 0.
        Bypass si `requiresEscrow` : le paiement Kado FeexPay a déjà été validé
-       plus haut, on ne facture pas de crédits en plus.
+       plus haut, on ne facture pas en plus.
        ------------------------------------------------------------------- */
     if (!requiresEscrow && req.admin?.id) {
       if (isWallTemplate) {
-        const plan = WALL_PLAN_PRICES[finalPlanType] || WALL_PLAN_PRICES.free;
-        creditsReq = plan.credits;
-        priceFCFA  = plan.fcfa;
+        priceFCFA = WALL_PLAN_PRICES[finalPlanType] ?? WALL_PLAN_PRICES.free;
       } else if (!existing.isPaid && !SPA_VIRTUAL_TEMPLATES.has(existing.templateName)) {
         const template = await Template.findOne({ name: existing.templateName }).lean();
-        creditsReq = template?.creditsRequired || 1;
-        priceFCFA  = creditsReq * CREDIT_TO_FCFA;
+        priceFCFA = template?.priceFCFA ?? 500;
       }
 
       /* Vérification du bypass paywall (testeurs ou switch global) */
       if (canBypass) {
-        creditsReq = 0;
         priceFCFA = 0;
       }
 
-      /* Promo : appliqué au prix FCFA (frais de publication). Force le
-         chemin FeexPay — on ne combine pas promo et crédits legacy (sinon
-         ambigüité sur le "prix" d'un crédit après discount). Si le promo
-         ramène le prix à 0, la publication passe gratuite (creditsReq
-         reste à 0, priceFCFA=0 → skip du bloc paiement). */
+      /* Promo : appliqué au prix FCFA (frais de publication). */
       if (promo && priceFCFA > 0) {
         const check = promo.isValid(priceFCFA, req.admin.id);
         if (!check.ok) {
@@ -581,120 +562,56 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
         }
         promoDiscountFcfa = Math.min(priceFCFA, promo.computeDiscount(priceFCFA));
         priceFCFA = priceFCFA - promoDiscountFcfa;
-        creditsReq = 0;
-
-        if (priceFCFA > 0) {
-          if (!feexpayReference) {
-            return res.status(402).json({
-              error: `Paiement requis : ${priceFCFA} FCFA (code ${promo.code} appliqué).`,
-              code:  'PAYMENT_REQUIRED',
-              creditsRequired: 0,
-              priceFCFA,
-              promoApplied: promo.code,
-              promoDiscountFcfa,
-            });
-          }
-          const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
-          if (!existingTx || existingTx.status !== 'SUCCESS') {
-            let verifyRes;
-            try {
-              verifyRes = await feexpay.verify(feexpayReference);
-            } catch (err) {
-              console.error('[publish] FeexPay verify failed', err.message);
-              return res.status(502).json({
-                error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
-                code:  'FEEXPAY_UNAVAILABLE',
-              });
-            }
-            if (verifyRes.status !== 'SUCCESSFUL') {
-              return res.status(402).json({
-                error: 'Paiement FeexPay non confirmé.',
-                code:  'FEEXPAY_NOT_SUCCESSFUL',
-                status: verifyRes.status,
-              });
-            }
-            if (verifyRes.amount < priceFCFA) {
-              return res.status(402).json({
-                error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${priceFCFA} FCFA).`,
-                code:  'FEEXPAY_UNDERPAID',
-              });
-            }
-            const tx = existingTx || new Transaction({
-              adminId:       req.admin.id,
-              transactionId: feexpayReference,
-              amount:        verifyRes.amount,
-              credits:       0,
-              source:        'feexpay',
-              paymentData:   verifyRes.raw,
-            });
-            tx.status = 'SUCCESS';
-            await tx.save();
-          }
-        }
       }
 
-      if (creditsReq > 0) {
-        const user = userObj || await AdminUser.findById(req.admin.id);
-        if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-
-        /* Deux chemins de paiement en cascade :
-           1. Crédits legacy : si solde suffisant on déduit sans appeler FeexPay.
-           2. FeexPay : si le front a fourni une référence, on vérifie et on log.
-           Si aucun ne s'applique : 402 avec le prix (le front sait alors ouvrir FeexPay). */
-        const canPayWithCredits = user.credits >= creditsReq;
-
-          if (canPayWithCredits && !feexpayReference) {
-          user.credits -= creditsReq;
-          await user.save();
-        } else if (feexpayReference) {
-          const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
-          if (existingTx && existingTx.status === 'SUCCESS') {
-            /* déjà payé, on continue */
-          } else {
-            let verifyRes;
-            try {
-              verifyRes = await feexpay.verify(feexpayReference);
-            } catch (err) {
-              console.error('[publish] FeexPay verify failed', err.message);
-              return res.status(502).json({
-                error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
-                code:  'FEEXPAY_UNAVAILABLE',
-              });
-            }
-            if (verifyRes.status !== 'SUCCESSFUL') {
-              return res.status(402).json({
-                error: 'Paiement FeexPay non confirmé.',
-                code:  'FEEXPAY_NOT_SUCCESSFUL',
-                status: verifyRes.status,
-              });
-            }
-            if (verifyRes.amount < priceFCFA) {
-              return res.status(402).json({
-                error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${priceFCFA} FCFA).`,
-                code:  'FEEXPAY_UNDERPAID',
-              });
-            }
-            const tx = existingTx || new Transaction({
-              adminId:       req.admin.id,
-              transactionId: feexpayReference,
-              amount:        verifyRes.amount,
-              credits:       0,
-              source:        'feexpay',
-              paymentData:   verifyRes.raw,
-            });
-            tx.status = 'SUCCESS';
-            await tx.save();
-          }
-        } else {
+      if (priceFCFA > 0) {
+        if (!feexpayReference) {
           return res.status(402).json({
-            error: `Paiement requis. ${creditsReq} crédits ou ${priceFCFA} FCFA.`,
+            error: promo
+              ? `Paiement requis : ${priceFCFA} FCFA (code ${promo.code} appliqué).`
+              : `Paiement requis : ${priceFCFA} FCFA.`,
             code:  'PAYMENT_REQUIRED',
-            creditsRequired: creditsReq,
             priceFCFA,
+            ...(promo ? { promoApplied: promo.code, promoDiscountFcfa } : {}),
           });
         }
+        const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
+        if (!existingTx || existingTx.status !== 'SUCCESS') {
+          let verifyRes;
+          try {
+            verifyRes = await feexpay.verify(feexpayReference);
+          } catch (err) {
+            console.error('[publish] FeexPay verify failed', err.message);
+            return res.status(502).json({
+              error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
+              code:  'FEEXPAY_UNAVAILABLE',
+            });
+          }
+          if (verifyRes.status !== 'SUCCESSFUL') {
+            return res.status(402).json({
+              error: 'Paiement FeexPay non confirmé.',
+              code:  'FEEXPAY_NOT_SUCCESSFUL',
+              status: verifyRes.status,
+            });
+          }
+          if (verifyRes.amount < priceFCFA) {
+            return res.status(402).json({
+              error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${priceFCFA} FCFA).`,
+              code:  'FEEXPAY_UNDERPAID',
+            });
+          }
+          const tx = existingTx || new Transaction({
+            adminId:       req.admin.id,
+            transactionId: feexpayReference,
+            amount:        verifyRes.amount,
+            source:        'feexpay',
+            paymentData:   verifyRes.raw,
+          });
+          tx.status = 'SUCCESS';
+          await tx.save();
         }
       }
+    }
 
     /* Sur un top-up (carte déjà en ligne), on ne réécrit pas publishedAt pour
        ne pas fausser les tris "récemment publié". Sur first-publish, on marque
@@ -704,7 +621,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       updateFields.published   = true;
       updateFields.publishedAt = Date.now();
     }
-    if (creditsReq > 0 || (needsFirstEscrow && priceFCFA > 0) || finalPlanType !== 'free') {
+    if (priceFCFA > 0 || finalPlanType !== 'free') {
       updateFields.isPaid = true;
     }
     if (requiresEscrow) {

@@ -1,68 +1,29 @@
-/* ──────────────────────────────────────────────────────────────────────
-   myKado Landing  Hybride C+A (Afro-Modern Elegance + Editorial)
-   Aligné sur client/design-system/tokens.css
-   ────────────────────────────────────────────────────────────────────── */
+/* ================================================================
+   myKado Landing — Global stylesheet
+   Direction : WARM CELEBRATION (voir client/design-system/BRAND.md)
+   ================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Inter:wght@400;500;600;700&display=swap');
+@import './tokens.css';
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  /* Brand */
-  --mk-indigo-50:  #F0F2F7;
-  --mk-indigo-100: #DFE3EE;
-  --mk-indigo-500: #354270;
-  --mk-indigo-700: #1E2952;
-  --mk-indigo-800: #171F3F;
-
-  --mk-gold-50:  #FDF7EA;
-  --mk-gold-100: #F9EBC7;
-  --mk-gold-400: #E8A33D;
-  --mk-gold-500: #C88B2D;
-  --mk-gold-600: #9F6D22;
-
-  --mk-clay-50:  #FBEEEE;
-  --mk-clay-500: #C13B3B;
-  --mk-clay-600: #A02C2C;
-
-  --mk-stone-50:  #FAF7F0;
-  --mk-stone-100: #F3EEE1;
-  --mk-stone-200: #E5DDC9;
-  --mk-stone-300: #CFC3A7;
-  --mk-stone-500: #7D7156;
-  --mk-stone-700: #453E2E;
-  --mk-stone-900: #161311;
-
-  --mk-forest-700: #2E4A3B;
-
-  /* Fonts */
-  --serif: 'Fraunces', ui-serif, Georgia, serif;
-  --sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-  /* Shadows warm */
-  --sh-sm: 0 2px 4px -1px rgba(45,32,14,.06), 0 1px 2px -1px rgba(45,32,14,.04);
-  --sh-md: 0 4px 12px -2px rgba(45,32,14,.08), 0 2px 4px -2px rgba(45,32,14,.04);
-  --sh-lg: 0 12px 24px -6px rgba(45,32,14,.10), 0 4px 8px -4px rgba(45,32,14,.06);
-  --sh-xl: 0 24px 48px -12px rgba(45,32,14,.14), 0 8px 16px -8px rgba(45,32,14,.08);
-  --sh-brand: 0 12px 32px -8px rgba(30,41,82,.25);
-}
-
 html { scroll-behavior: smooth; }
 body {
-  font-family: var(--sans);
-  color: var(--mk-stone-900);
-  background: #FFFFFF;
+  font-family: var(--mk-font-sans);
+  color: var(--mk-text-primary);
+  background: var(--mk-surface-base);   /* paper-noble #FDFBF7 */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-.serif { font-family: var(--serif); font-optical-sizing: auto; }
+.serif { font-family: var(--mk-font-display); }
 
+/* ─── Eyebrow — accent honey, ligne fine ─── */
 .eyebrow {
-  font-family: var(--sans);
+  font-family: var(--mk-font-sans);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--mk-gold-600);
+  font-weight: 700;
+  color: var(--mk-honey-600);
   letter-spacing: .08em;
   text-transform: uppercase;
   display: inline-flex;
@@ -73,85 +34,135 @@ body {
   content: '';
   width: 24px;
   height: 1px;
-  background: var(--mk-gold-400);
+  background: var(--mk-honey-500);
 }
 
-/* Container */
+/* ─── Container ─── */
 .mk-container {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
 }
-@media (min-width: 768px) { .mk-container { padding: 0 32px; } }
+@media (min-width: 768px)  { .mk-container { padding: 0 32px; } }
 @media (min-width: 1024px) { .mk-container { padding: 0 48px; } }
 
-/* Buttons */
+/* ─── Buttons — pill, coral primary, plum secondary ─── */
 .mk-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: var(--sans);
+  font-family: var(--mk-font-sans);
   font-weight: 600;
   font-size: 15px;
   padding: 12px 24px;
-  border-radius: 999px;
+  border-radius: var(--mk-radius-full);
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: all .15s cubic-bezier(.22,1,.36,1);
-  color: var(--mk-stone-900);
+  transition: all .15s var(--mk-ease-out);
+  color: var(--mk-text-primary);
+  white-space: nowrap;
 }
-.mk-btn-primary { background: var(--mk-indigo-700); color: #fff; }
-.mk-btn-primary:hover { background: var(--mk-indigo-500); box-shadow: var(--sh-brand); transform: translateY(-1px); }
-.mk-btn-ghost { background: transparent; }
-.mk-btn-ghost:hover { background: var(--mk-stone-100); }
-.mk-btn-gold { background: var(--mk-gold-400); color: var(--mk-stone-900); }
-.mk-btn-gold:hover { background: var(--mk-gold-500); }
-.mk-btn-outline { background: transparent; border: 1px solid var(--mk-stone-300); }
-.mk-btn-outline:hover { background: var(--mk-stone-100); }
+.mk-btn-primary {
+  background: var(--mk-coral-500);
+  color: var(--mk-paper-noble);
+  box-shadow: var(--mk-shadow-coral);
+}
+.mk-btn-primary:hover {
+  background: var(--mk-coral-400);
+  transform: translateY(-1px) scale(1.015);
+  box-shadow: 0 12px 32px rgba(226, 91, 69, 0.35);
+}
+.mk-btn-secondary {
+  background: var(--mk-plum-800);
+  color: var(--mk-paper-noble);
+}
+.mk-btn-secondary:hover {
+  background: var(--mk-plum-700);
+  transform: translateY(-1px);
+  box-shadow: var(--mk-shadow-md);
+}
+.mk-btn-ghost {
+  background: transparent;
+  color: var(--mk-text-primary);
+  border-color: var(--mk-border-warm-strong);
+}
+.mk-btn-ghost:hover {
+  background: var(--mk-coral-100);
+  border-color: var(--mk-coral-300);
+  color: var(--mk-coral-700);
+}
+.mk-btn-gold {
+  background: var(--mk-honey-500);
+  color: var(--mk-plum-800);
+  box-shadow: var(--mk-shadow-honey);
+}
+.mk-btn-gold:hover {
+  background: var(--mk-honey-300);
+  transform: translateY(-1px) scale(1.015);
+}
+.mk-btn-outline {
+  background: transparent;
+  border: 1px solid var(--mk-border-warm-strong);
+  color: var(--mk-text-primary);
+}
+.mk-btn-outline:hover {
+  background: var(--mk-paper-cream);
+  border-color: var(--mk-plum-800);
+}
 .mk-btn-lg { font-size: 16px; padding: 16px 32px; }
 
-/* Sections */
+.mk-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--mk-ring-focus);
+}
+
+/* ─── Sections ─── */
 .mk-section { padding: 80px 0; }
 @media (min-width: 1024px) { .mk-section { padding: 128px 0; } }
-/* muted = respire, laisse voir le body crème */
-.mk-section-muted { background: transparent; }
-/* elevated = surface blanche qui ressort du crème ambient */
-.mk-section-elevated { background: #FFFFFF; }
-.mk-section-inverted { background: var(--mk-indigo-700); color: #fff; }
+
+.mk-section-muted    { background: transparent; }             /* laisse voir le paper-noble ambient */
+.mk-section-elevated { background: var(--mk-paper-white); }   /* surface blanche qui ressort du crème */
+.mk-section-inverted {
+  background: var(--mk-plum-800);
+  color: var(--mk-paper-noble);
+}
 
 .mk-sec-head { text-align: center; max-width: 720px; margin: 0 auto 60px; }
 .mk-sec-h2 {
-  font-family: var(--serif);
+  font-family: var(--mk-font-display);
   font-size: 40px;
-  font-variation-settings: 'opsz' 96;
   line-height: 1.1;
-  letter-spacing: -.02em;
-  color: var(--mk-stone-900);
+  letter-spacing: -.025em;
+  color: var(--mk-text-primary);
   margin-top: 12px;
-  font-weight: 500;
+  font-weight: 700;
 }
 @media (min-width: 768px) { .mk-sec-h2 { font-size: 48px; } }
 .mk-sec-sub {
   font-size: 18px;
-  color: var(--mk-stone-700);
+  color: var(--mk-text-secondary);
   margin-top: 16px;
   line-height: 1.6;
 }
-.mk-section-inverted .mk-sec-h2 { color: #fff; }
-.mk-section-inverted .mk-sec-sub { color: rgba(255,255,255,.75); }
-.mk-section-inverted .eyebrow { color: var(--mk-gold-400); }
+.mk-section-inverted .mk-sec-h2 { color: var(--mk-paper-noble); }
+.mk-section-inverted .mk-sec-sub { color: rgba(253, 251, 247, .75); }
+.mk-section-inverted .eyebrow { color: var(--mk-honey-300); }
 .mk-section-inverted .eyebrow::before,
-.mk-section-inverted .eyebrow::after { background: var(--mk-gold-400); }
+.mk-section-inverted .eyebrow::after { background: var(--mk-honey-300); }
 
-/* Check icon utility */
+/* ─── Check icon utility ─── */
 .mk-check {
   width: 16px; height: 16px;
   flex-shrink: 0;
-  color: var(--mk-gold-500);
+  color: var(--mk-honey-500);
   margin-top: 3px;
 }
+
+/* Selection */
+::selection      { background: var(--mk-coral-100); color: var(--mk-text-primary); }
+::-moz-selection { background: var(--mk-coral-100); color: var(--mk-text-primary); }
 
 /* Skip link for accessibility */
 .sr-only {

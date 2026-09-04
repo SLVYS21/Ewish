@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Home, Layers, Wallet, Plus, Sparkles,
+  Home, Layers, Plus, Sparkles,
   ShieldAlert, BarChart2, Users, Ticket, Images, Cog,
   User, BadgeCheck, ShieldCheck, LayoutTemplate, Package, HelpCircle
 } from 'lucide-react';
@@ -75,24 +75,28 @@ export default function AdminLayout() {
 
       {/* ── Mobile top bar ── */}
       <header className="mk-mobile-topbar">
-        <div className="sb-logo" style={{ cursor: 'pointer', fontSize: 21, padding: 0, gap: 6 }} onClick={() => navigate('/ewish-admin')}>
-          <Kado mode="logo" size={30} cycle={['jump', 'wink', 'confetti', 'love', 'drop']} cycleInterval={4200} />
-          <span>myKado</span>
-        </div>
+        <button
+          className="mk-brand mk-brand--mobile"
+          onClick={() => navigate('/ewish-admin')}
+          aria-label="Retour à l'accueil myKado"
+        >
+          <img src="/logos/mykado-mark.svg" alt="" className="mk-brand__img" />
+          <span className="mk-brand__text">myKado</span>
+        </button>
         <div style={{ flex: 1 }} />
         <NotificationBell authOk={!!user} />
-        <button className="mtopbar-credits" onClick={() => navigate('/ewish-admin/credits')}>
-          <Wallet size={13} />
-          <strong>{user?.credits ?? 0}</strong>
-        </button>
       </header>
 
       {/* ── Sidebar (desktop) ── */}
       <aside className="sidebar">
-        <div className="sb-logo" style={{ cursor: 'pointer', gap: 8 }} onClick={() => navigate('/ewish-admin')}>
-          <Kado mode="logo" size={36} cycle={['jump', 'wink', 'confetti', 'love', 'drop']} cycleInterval={4200} />
-          <span className="word">myKado</span>
-        </div>
+        <button
+          className="mk-brand mk-brand--sidebar"
+          onClick={() => navigate('/ewish-admin')}
+          aria-label="Retour à l'accueil myKado"
+        >
+          <img src="/logos/mykado-mark.svg" alt="" className="mk-brand__img" />
+          <span className="mk-brand__text">myKado</span>
+        </button>
         <div className="sb-tag">Des vœux qui font des souvenirs</div>
 
         {/* Créer button — opens unified CreateModal */}

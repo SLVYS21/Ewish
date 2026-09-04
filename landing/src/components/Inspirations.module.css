@@ -8,165 +8,132 @@
   margin: 0 auto;
 }
 
-/* Stylish Toggle */
+/* Toggle — sober warm pill with plum active */
 .toggleWrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .toggleContainer {
   position: relative;
   display: inline-flex;
-  background-color: #F1F1F1;
-  border-radius: 100px;
-  padding: 6px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--mk-paper-cream, #F7F3EE);
+  border: 1px solid var(--mk-border-warm, rgba(32, 21, 36, 0.08));
+  border-radius: 999px;
+  padding: 5px;
 }
 
 .togglePill {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  width: calc(50% - 6px);
-  height: calc(100% - 12px);
-  background: var(--pill-bg, #FFFFFF);
-  border-radius: 100px;
-  box-shadow: 0 6px 16px var(--pill-shadow, rgba(0, 0, 0, 0.1));
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    background 0.35s ease,
-    box-shadow 0.35s ease;
+  top: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  height: calc(100% - 10px);
+  background: var(--mk-plum-800, #201524);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(32, 21, 36, 0.25);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1;
-}
-
-/* Mode tints — driven by wrapper class */
-.modeGroup {
-  --pill-bg: linear-gradient(135deg, var(--mk-indigo-700), var(--mk-indigo-500));
-  --pill-shadow: rgba(30, 41, 82, 0.35);
-  --pill-active: #FFFFFF;
-}
-.modePerso {
-  --pill-bg: linear-gradient(135deg, var(--mk-clay-500), #E67B7B);
-  --pill-shadow: rgba(193, 59, 59, 0.35);
-  --pill-active: #FFFFFF;
 }
 
 .toggleBtn {
   position: relative;
   z-index: 2;
   flex: 1;
-  padding: 12px 24px;
+  padding: 10px 24px;
   background: transparent;
   border: none;
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--mk-stone-500);
+  color: var(--mk-plum-800, #201524);
   cursor: pointer;
   transition: color 0.3s ease;
-  min-width: 180px;
+  min-width: 160px;
+  letter-spacing: -0.005em;
 }
 
 .toggleBtnActive {
-  color: var(--pill-active, var(--mk-stone-900));
+  color: var(--mk-paper-noble, #FDFBF7);
 }
 
-.tabsContainer::-webkit-scrollbar {
-  height: 4px;
-}
-
-.tabsContainer::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.tabsContainer::-webkit-scrollbar-thumb {
-  background: #EAEAEA;
-  border-radius: 4px;
-}
-
+/* Category pills — wrap row */
 .tabsContainer {
   display: flex;
-  flex-wrap: nowrap;
-  background-color: #FAFAFA;
-  border-radius: 12px 12px 0 0;
-  border: 1px solid #EAEAEA;
-  border-bottom: none;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: #EAEAEA transparent;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 24px 0 28px;
+  padding: 0 8px;
 }
 
 .tabBtn {
-  flex: 0 0 auto;
-  min-width: max-content;
-  padding: 18px 24px;
-  background: transparent;
-  border: none;
-  border-top: 3px solid transparent;
-  border-right: 1px solid #EAEAEA;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 8px 10px;
+  background: var(--mk-paper-cream, #F7F3EE);
+  border: 1px solid var(--mk-border-warm, rgba(32, 21, 36, 0.08));
+  border-radius: 999px;
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--mk-stone-500);
+  color: var(--mk-plum-800, #201524);
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  position: relative;
-}
-
-@media (max-width: 767px) {
-  .tabsContainer {
-    /* Petit padding à gauche pour décaler les éléments et casser l'alignement parfait */
-    padding-left: 8px;
-  }
-  .tabBtn {
-    /* On force une largeur relative pour s'assurer que le 3ème ou 4ème onglet est coupé visuellement */
-    min-width: 40vw;
-    padding: 14px 12px;
-    font-size: 14px;
-  }
-}
-
-@media (min-width: 768px) {
-  .tabBtn {
-    flex: 1; /* Sur desktop, on étire les onglets pour prendre toute la largeur */
-    min-width: 0;
-  }
-}
-
-.tabBtn:last-child {
-  border-right: none;
+  transition:
+    background 0.24s var(--mk-ease-out, cubic-bezier(0.22, 1, 0.36, 1)),
+    color 0.24s var(--mk-ease-out, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 0.24s var(--mk-ease-out, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.18s var(--mk-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  letter-spacing: -0.005em;
+  white-space: nowrap;
 }
 
 .tabBtn:hover {
-  background-color: #F3F3F3;
-  color: var(--mk-stone-900);
+  background: var(--mk-paper-sand, #EFE9E0);
+  border-color: var(--mk-border-warm-strong, rgba(32, 21, 36, 0.14));
+  transform: translateY(-1px);
 }
 
 .tabActive {
-  background-color: #FFFFFF;
-  color: var(--mk-stone-900);
-  border-top-color: var(--tab-active-color, #111111);
-  transition: border-top-color 0.35s ease;
+  background: var(--mk-plum-800, #201524);
+  color: var(--mk-paper-noble, #FDFBF7);
+  border-color: var(--mk-plum-800, #201524);
+  box-shadow: 0 6px 16px -6px rgba(32, 21, 36, 0.45);
 }
 
-/* Tab bar mode tints — match the toggle */
-.tabsGroup { --tab-active-color: var(--mk-indigo-700); }
-.tabsPerso { --tab-active-color: var(--mk-clay-500); }
+.tabActive:hover {
+  background: var(--mk-plum-900, #1B181E);
+  border-color: var(--mk-plum-900, #1B181E);
+}
 
-/* Live Demo Area — poster instantané + iframe fade-in + skeleton fallback */
+.tabIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.tabIcon img { display: block; }
+
+@media (max-width: 640px) {
+  .toggleBtn { min-width: 130px; font-size: 13px; }
+  .tabBtn { font-size: 12.5px; padding: 7px 14px 7px 8px; }
+  .tabIcon { width: 20px; height: 20px; }
+}
+
+/* Live Demo Area — poster + iframe + skeleton */
 .demoBoard {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
   background: #ffffff;
-  border-radius: 0 0 12px 12px;
-  border: 1px solid #EAEAEA;
-  border-top: none;
+  border-radius: var(--mk-radius-xl, 28px);
+  border: 1px solid var(--mk-border-warm, rgba(32, 21, 36, 0.08));
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  box-shadow: var(--mk-shadow-lg, 0 24px 48px -12px rgba(32, 21, 36, 0.12));
 }
 
 /* Poster tint fallback (au cas où le poster mettrait quelques ms) */

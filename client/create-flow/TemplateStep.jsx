@@ -15,8 +15,8 @@ const WISH_TEMPLATES = [
   },
   {
     id: 'forever',
-    title: "Lettre d'amour",
-    description: "Lettre d'amour à un être cher",
+    title: "Forever",
+    description: "Carte spéciale pour un ",
     Illustration: ForeverIllustration,
     accent: 'butter',
   },

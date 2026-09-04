@@ -994,11 +994,11 @@ export default function Editor() {
   const giftIncluded = gift.enabled && gift.currency === 'XOF' && Number(gift.amount) >= (giftCfg?.min || 0);
   const giftFcfa = giftIncluded ? Math.floor(Number(gift.amount)) : 0;
   /* Base à laquelle s'applique un éventuel code promo : socle 1500 pour
-     l'enveloppe, template.creditsRequired × 500 pour une carte legacy.
+     l'enveloppe, template.priceFCFA pour une carte legacy.
      Le gift n'est jamais remisé, aligné avec la règle serveur. */
   const basePublishFee = pub?.templateName === 'myenvelope'
     ? CARD_PUBLISH_FEE_FCFA
-    : (template?.creditsRequired ? template.creditsRequired * 500 : CARD_PUBLISH_FEE_FCFA);
+    : (template?.priceFCFA ?? CARD_PUBLISH_FEE_FCFA);
   const promoDiscount = appliedPromo?.discount || 0;
   const baseAfterPromo = Math.max(0, basePublishFee - promoDiscount);
   const publishPriceFcfa = baseAfterPromo + giftFcfa;
@@ -1601,7 +1601,7 @@ export default function Editor() {
                 <button className={styles.sharePublishBtn} onClick={handlePublish} disabled={publishing}>
                   {publishing
                     ? <><RefreshCw size={16} className={styles.spinIcon} /> Publication…</>
-                    : <><Sparkles size={15} /> {user?.canBypassPaywall ? 'Publier (Testeur)' : `Publier ma création  ${template?.creditsRequired || 1} 💎`}</>}
+                    : <><Sparkles size={15} /> {user?.canBypassPaywall ? 'Publier (Testeur)' : `Publier — ${(template?.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA`}</>}
                 </button>
                 <div className={styles.partageLockedList}>
                   {[
@@ -2078,7 +2078,7 @@ export default function Editor() {
                 onClick={() => { setMobileSheetOpen(false); handlePublish(); }}
                 disabled={publishing}
               >
-                {pub?.published ? '✨ Mettre à jour' : `✨ Publier  ${template?.creditsRequired || 1} 💎`}
+                {pub?.published ? '✨ Mettre à jour' : `✨ Publier — ${(template?.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA`}
               </button>
             )}
           </div>

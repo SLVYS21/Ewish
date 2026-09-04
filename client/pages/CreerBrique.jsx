@@ -46,7 +46,7 @@ const BRIQUES = [
     description: 'Envoie une carte cadeau chez un partenaire ou un montant directement, avec un petit mot personnalisé.',
     accent: 'var(--mk-action-accent-gold)',
     accentBg: 'var(--mk-gold-50)',
-    route: '/ewish-admin/credits',
+    route: '/ewish-admin',
     comingSoon: true,
   },
 ];

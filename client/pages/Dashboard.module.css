@@ -11,14 +11,17 @@
   gap: 32px;
 }
 
-/* ── Indigo Hero ─────────────────────────────────────────────────── */
+/* ── Hero — Warm Celebration ────────────────────────────────────
+   Fond plum midnight (secondary du DS) — éditorial, autoritaire,
+   avec accents honey qui apportent la chaleur festive.            */
 .indigoHero {
   position: relative;
-  background: linear-gradient(160deg, #263258 0%, #1E2952 55%, #171F3F 100%);
-  border-radius: 34px;
+  background: linear-gradient(160deg, var(--mk-plum-700) 0%, var(--mk-plum-800) 55%, var(--mk-plum-900) 100%);
+  border-radius: var(--mk-radius-2xl);      /* 36px — keepsake feel */
   padding: 42px 42px 40px;
   overflow: hidden;
-  color: #fff;
+  color: var(--mk-paper-noble);
+  box-shadow: var(--mk-shadow-lg);
 }
 .heroTop {
   display: flex;
@@ -35,31 +38,34 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(253, 251, 247, 0.14);
+  border: 1px solid rgba(253, 251, 247, 0.14);
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--mk-radius-full);
+  font-family: var(--mk-font-sans);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: .1em;
-  color: #fff;
+  text-transform: uppercase;
+  color: var(--mk-paper-noble);
 }
 .heroCredits {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(253,247,234,.14);
-  border: 1px solid rgba(242,214,138,.4);
-  color: #F9EBC7;
-  border-radius: 999px;
+  background: rgba(233, 162, 59, 0.16);        /* honey wash */
+  border: 1px solid rgba(248, 190, 104, 0.4);
+  color: var(--mk-honey-300);
+  border-radius: var(--mk-radius-full);
   padding: 8px 14px;
+  font-family: var(--mk-font-sans);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background .15s, transform .15s;
+  transition: background .15s var(--mk-ease-out), transform .15s var(--mk-ease-out);
 }
 .heroCredits:hover {
-  background: rgba(253,247,234,.2);
+  background: rgba(233, 162, 59, 0.24);
   transform: translateY(-1px);
 }
 .heroContent {
@@ -68,24 +74,32 @@
   max-width: 65%;
 }
 .heroTitle {
-  font-family: "Fraunces", serif;
-  font-size: 38px;
-  font-weight: 400;
+  font-family: var(--mk-font-display);         /* Epilogue — aligné DA */
+  font-size: 40px;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.025em;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
+  color: var(--mk-paper-noble);
+}
+/* Petit accent honey sur le prénom pour créer le rythme éditorial */
+.heroTitle strong {
+  font-weight: 700;
+  color: var(--mk-honey-300);
 }
 .heroEmojiAnim {
   display: inline-block;
   transform-origin: center bottom;
 }
 .heroSub {
+  font-family: var(--mk-font-sans);
   font-size: 15px;
-  color: rgba(255,255,255,.8);
-  line-height: 1.5;
+  color: rgba(253, 251, 247, 0.82);
+  line-height: 1.55;
+  max-width: 52ch;
 }
 .heroCircle1 {
   position: absolute;
@@ -94,7 +108,7 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  border: 2px solid rgba(232,163,61,.35);
+  border: 2px solid rgba(248, 190, 104, 0.35);
   animation: mk-drift 10s ease-in-out infinite;
 }
 .heroDot {
@@ -104,7 +118,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #E8A33D;
+  background: var(--mk-honey-300);
   animation: mk-pulse 3.4s ease-in-out infinite;
 }
 @keyframes mk-drift {
@@ -153,27 +167,32 @@
   grid-template-columns: 1.5fr 1fr 1fr;
   gap: 16px;
 }
+/* ── Créer une carte — CTA principal, coral festif signature ── */
 .cardMain {
   grid-column: 1 / 2;
   position: relative;
   overflow: hidden;
   border: none;
-  border-radius: 22px;
+  border-radius: var(--mk-radius-xl);                  /* 28px */
   padding: 24px;
   text-align: left;
-  background: linear-gradient(135deg, #1E2952, #354270);
-  color: #fff;
+  background: linear-gradient(135deg, var(--mk-coral-400) 0%, var(--mk-coral-500) 55%, var(--mk-coral-600) 100%);
+  color: var(--mk-paper-noble);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 140px;
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
+  box-shadow: var(--mk-shadow-coral);
+  transition: transform var(--mk-motion-hover), box-shadow var(--mk-motion-hover);
 }
 .cardMain:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -8px rgba(30,41,82,.4);
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: 0 16px 40px -8px rgba(226, 91, 69, 0.42);
 }
+.cardMain:active { transform: translateY(-1px) scale(1); }
+
+/* Halo honey dans le coin inférieur droit — reprend le ruban doré du logo */
 .cardMainBg {
   position: absolute;
   right: -20px;
@@ -181,7 +200,7 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: rgba(232,163,61,.18);
+  background: radial-gradient(circle, rgba(248, 190, 104, 0.35) 0%, rgba(248, 190, 104, 0) 70%);
   pointer-events: none;
 }
 .cardIconAnim {
@@ -191,53 +210,64 @@
   transform-origin: bottom center;
 }
 .cardMainTitle {
+  font-family: var(--mk-font-display);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 20px;
+  letter-spacing: -0.015em;
   position: relative;
+  color: var(--mk-paper-noble);
 }
 .cardMainSub {
+  font-family: var(--mk-font-sans);
   font-size: 13px;
-  color: #B8C0D8;
+  color: rgba(253, 251, 247, 0.85);
   margin-top: 4px;
   position: relative;
+  line-height: 1.45;
 }
+
+/* ── Un mur — coral pale (variante festive douce) ── */
 .cardWall {
   position: relative;
   overflow: hidden;
-  border: 1px solid #ECE6D8;
-  border-radius: 22px;
+  border: 1px solid var(--mk-coral-200);
+  border-radius: var(--mk-radius-xl);
   padding: 20px;
   text-align: left;
-  background: #FBEEEE;
+  background: var(--mk-coral-50);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 140px;
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
+  transition: transform var(--mk-motion-hover), box-shadow var(--mk-motion-hover), border-color var(--mk-motion-hover);
 }
 .cardWall:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -8px rgba(0,0,0,.08);
+  transform: translateY(-3px);
+  box-shadow: var(--mk-shadow-md);
+  border-color: var(--mk-coral-300);
 }
+
+/* ── Un cadeau — honey pale (keepsake doré) ── */
 .cardGift {
   position: relative;
   overflow: hidden;
-  border: 1px solid #ECE6D8;
-  border-radius: 22px;
+  border: 1px solid var(--mk-honey-200);
+  border-radius: var(--mk-radius-xl);
   padding: 20px;
   text-align: left;
-  background: #FDF7EA;
+  background: var(--mk-honey-50);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 140px;
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
+  transition: transform var(--mk-motion-hover), box-shadow var(--mk-motion-hover), border-color var(--mk-motion-hover);
 }
 .cardGift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -8px rgba(0,0,0,.08);
+  transform: translateY(-3px);
+  box-shadow: var(--mk-shadow-md);
+  border-color: var(--mk-honey-300);
 }
 .cardIconAnimAlt {
   animation: mk-float 4.5s ease-in-out infinite;
@@ -248,16 +278,20 @@
   margin-bottom: 12px;
 }
 .cardSecondaryTitle {
+  font-family: var(--mk-font-display);
   font-weight: 700;
-  font-size: 16px;
-  color: #161311;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--mk-text-primary);
 }
 .cardSecondarySub {
+  font-family: var(--mk-font-sans);
   font-size: 13px;
   margin-top: 4px;
+  line-height: 1.45;
 }
-.cardWall .cardSecondarySub { color: #7C2020; }
-.cardGift .cardSecondarySub { color: #9F6D22; }
+.cardWall .cardSecondarySub { color: var(--mk-coral-700); }
+.cardGift .cardSecondarySub { color: var(--mk-honey-700); }
 
 @keyframes mk-bob {
   0%, 100% { transform: translateY(0); }

@@ -21,6 +21,7 @@ const notificationSchema = new mongoose.Schema({
       'moderation_pending',       // Nouveau message à modérer
       'kyc_approved',
       'kyc_rejected',
+      'date_reminder',            // Rappel d'une date importante (J-3 / J-1)
       'system',                   // annonce plateforme
     ],
     index: true,

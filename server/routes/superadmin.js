@@ -12,7 +12,6 @@ router.get('/stats', requireSuperAdmin, async (req, res) => {
       newUsers30d,
       totalPubs,
       publishedPubs,
-      totalCredits,
       revenueResult
     ] = await Promise.all([
       AdminUser.countDocuments({ role: { $in: ['merchant', 'admin'] } }),
@@ -22,10 +21,6 @@ router.get('/stats', requireSuperAdmin, async (req, res) => {
       }),
       Publication.countDocuments({}),
       Publication.countDocuments({ published: true }),
-      AdminUser.aggregate([
-        { $match: { role: { $in: ['merchant', 'admin'] } } },
-        { $group: { _id: null, total: { $sum: '$credits' } } },
-      ]),
       Transaction.aggregate([
         { $match: { status: 'SUCCESS' } },
         { $group: { _id: null, total: { $sum: '$amount' } } },
@@ -44,7 +39,6 @@ router.get('/stats', requireSuperAdmin, async (req, res) => {
       newUsers30d,
       totalPubs,
       publishedPubs,
-      totalCredits: totalCredits[0]?.total || 0,
       totalRevenue: revenueResult[0]?.total || 0,
       topTemplates,
     });
@@ -136,12 +130,11 @@ router.get('/users/:id', requireSuperAdmin, async (req, res) => {
   }
 });
 
-/* ── PUT /api/superadmin/users/:id ── Modifier crédits / suspendre */
+/* ── PUT /api/superadmin/users/:id ── Modifier profil / rôle */
 router.put('/users/:id', requireSuperAdmin, async (req, res) => {
   try {
-    const { credits, name, role } = req.body;
+    const { name, role } = req.body;
     const allowed = {};
-    if (credits !== undefined) allowed.credits = parseInt(credits);
     if (name    !== undefined) allowed.name    = name;
     // Only allow promoting to admin, not super_admin via API
     if (role    !== undefined && ['admin', 'merchant'].includes(role)) allowed.role = role;

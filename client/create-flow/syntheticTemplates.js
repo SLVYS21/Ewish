@@ -7,10 +7,10 @@
 export const MYENVELOPE_TEMPLATE = {
   _id: '__myenvelope',
   name: 'myenvelope',
-  label: 'Carte Enveloppe myKado',
+  label: '',
   description: '4 pages + enveloppe. Design floral, animation 3D d\'ouverture.',
   thumbnail: '/backgrounds/theme-floral/floral_frame.webp',
-  creditsRequired: 1,
+  priceFCFA: 500,
   _isCardEditor: true,
   _isNew: true,
 };
@@ -23,7 +23,7 @@ export const WALL_TEMPLATE_NAMES = new Set([
 ]);
 
 export function isEnvelopeTemplate(name) {
-  return name === 'myenvelope';
+  return name === '';
 }
 
 export function isWallTemplate(name) {

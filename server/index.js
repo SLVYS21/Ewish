@@ -117,7 +117,6 @@ app.use('/api/publications',  require('./routes/publication'));
 app.use('/api/analytics',    require('./routes/analytics'));
 app.use('/api/shortlinks',   require('./routes/shortlinks'));
 app.use('/api/fonts',        require('./routes/fonts.js'));
-app.use('/api/billing',      require('./routes/billing.js'));
 app.use('/api/feexpay',      require('./routes/feexpay'));
 app.use('/api/stickers',     require('./routes/stickers'));
 app.use('/api/superadmin',   require('./routes/superadmin'));
@@ -128,6 +127,7 @@ app.use('/api/settings',     require('./routes/settings'));
 app.use('/api/kyc',          require('./routes/kyc'));
 app.use('/api/contributions', require('./routes/contributions'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/user-dates',    require('./routes/userDates'));
 app.use('/api/walls',         require('./routes/wallStream'));
 app.use('/api/walls',         require('./routes/wallExport'));
 app.use('/api/walls',         require('./routes/wallVideo'));
@@ -271,6 +271,15 @@ mongoose.connect(MONGO_URI)
       console.log(`✅ Templates préchargés en cache (${names.length})`);
     } catch (err) {
       console.warn('⚠  Preload templates failed:', err.message);
+    }
+
+    // Rappels d'occasions (dates utilisateurs J-3 / J-1)
+    try {
+      const { startDailyJob } = require('./services/dateReminders');
+      startDailyJob();
+      console.log('✅ Date reminders job started');
+    } catch (err) {
+      console.warn('⚠  Date reminders job failed to start:', err.message);
     }
 
     app.listen(PORT, () => {

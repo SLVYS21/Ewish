@@ -20,7 +20,7 @@ const STORIES = [
     lead: 'Grave le QR sur une bague, un bracelet, un collier. Un scan et la carte rejoue — partout, à tout moment.',
     pills: ['Bague', 'Bracelet', 'Collier', 'Médaillon'],
     tint: 'rose',
-    image: '/qr-stories/jewel.webp',
+    image: '/assets/collier_gravé.jpg',
     Illustration: JewelIllustration,
   },
   {
@@ -31,7 +31,7 @@ const STORIES = [
     lead: 'Encadre la photo, glisse le QR au dos ou en filigrane. Chaque passant devient invité de la fête.',
     pills: ['Salon', 'Chevet', 'Bureau', 'Cadeau'],
     tint: 'gold',
-    image: '/qr-stories/frame.webp',
+    image: '/assets/cadre_photo.jpg',
     Illustration: FrameIllustration,
   },
   {
@@ -42,7 +42,7 @@ const STORIES = [
     lead: 'Tous les messages du mur, mis en page, prêts à imprimer. PDF haute qualité, format cadeau.',
     pills: ['PDF A4', 'A5 carré', 'Impression pro'],
     tint: 'indigo',
-    image: '/qr-stories/book.webp',
+    image: '/assets/digital_book.jpg',
     Illustration: BookIllustration,
   },
   {
@@ -53,7 +53,7 @@ const STORIES = [
     lead: 'Export MP4 avec musique, photos, transitions. WhatsApp, Insta, TikTok — tout accepte.',
     pills: ['MP4', '9:16 vertical', '16:9 story'],
     tint: 'mint',
-    image: '/qr-stories/video.webp',
+    image: '/assets/video_remember.jpg',
     Illustration: VideoIllustration,
   },
 ];

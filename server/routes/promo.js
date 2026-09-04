@@ -13,10 +13,6 @@ router.post('/validate', requireOptionalAdmin, async (req, res) => {
     const promo = await Promo.findOne({ code: code.toUpperCase() });
     if (!promo) return res.status(404).json({ error: 'Code introuvable' });
 
-    if (promo.isCreditGift) {
-      return res.status(400).json({ error: 'Ce code est un cadeau de crédits, applique-le depuis ton compte.' });
-    }
-
     // Template restriction
     if (promo.templates.length > 0 && !promo.templates.includes(templateName)) {
       return res.status(400).json({ error: 'Ce code ne s\'applique pas à ce template' });

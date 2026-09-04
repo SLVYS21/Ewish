@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, ChevronRight, Trash2, Coins, X, Check, User } from 'lucide-react';
-import { getSuperAdminUsers, getSuperAdminUser, updateSuperAdminUser, deleteSuperAdminUser } from '../../utils/api';
+import { Search, ChevronRight, Trash2, X } from 'lucide-react';
+import { getSuperAdminUsers, getSuperAdminUser, deleteSuperAdminUser } from '../../utils/api';
 import PageShell from '../components/PageShell';
 import s from './SuperAdminUsers.module.css';
 
@@ -10,33 +10,18 @@ function fmt(d) {
 }
 
 /* ── Detail Drawer ── */
-function UserDrawer({ userId, onClose, onUpdated }) {
+function UserDrawer({ userId, onClose }) {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
-  const [credits, setCredits] = useState('');
-  const [saving, setSaving]   = useState(false);
-  const [msg, setMsg]         = useState('');
 
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
     getSuperAdminUser(userId)
-      .then(r => { setData(r.data); setCredits(r.data.user.credits ?? 0); })
+      .then(r => setData(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [userId]);
-
-  const saveCredits = async () => {
-    setSaving(true); setMsg('');
-    try {
-      await updateSuperAdminUser(userId, { credits: parseInt(credits) });
-      setMsg('Crédits mis à jour');
-      onUpdated();
-    } catch (e) {
-      setMsg(e.response?.data?.error || 'Erreur');
-    }
-    setSaving(false);
-  };
 
   return (
     <div className={s.drawerOverlay} onClick={onClose}>
@@ -73,33 +58,6 @@ function UserDrawer({ userId, onClose, onUpdated }) {
                 <div className={s.dStatVal}>{data.publications.filter(p => p.published).length}</div>
                 <div className={s.dStatLabel}>Publiées</div>
               </div>
-              <div className={s.dStat}>
-                <div className={s.dStatVal}>{data.user.credits}</div>
-                <div className={s.dStatLabel}>Crédits</div>
-              </div>
-            </div>
-
-            {/* Credits editor */}
-            <div className={s.drawerSection}>
-              <div className={s.fieldLabel}>Modifier les crédits</div>
-              <div className={s.creditRow}>
-                <input
-                  className={s.creditInput}
-                  type="number"
-                  min="0"
-                  value={credits}
-                  onChange={e => setCredits(e.target.value)}
-                />
-                <button className={s.saveBtn} onClick={saveCredits} disabled={saving}>
-                  {saving ? '…' : <><Check size={15} /> Sauvegarder</>}
-                </button>
-              </div>
-              <div className={s.quickAdd}>
-                <button onClick={() => setCredits(prev => (parseInt(prev) || 0) + 10)}>+10</button>
-                <button onClick={() => setCredits(prev => (parseInt(prev) || 0) + 50)}>+50</button>
-                <button onClick={() => setCredits(prev => (parseInt(prev) || 0) + 100)}>+100</button>
-              </div>
-              {msg && <div className={s.msg}>{msg}</div>}
             </div>
 
             {/* Publications list */}
@@ -183,16 +141,15 @@ export default function SuperAdminUsers() {
               <th>Marchand</th>
               <th>Rôle</th>
               <th>Publications</th>
-              <th>Crédits</th>
               <th>Inscrit le</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className={s.empty}>Chargement…</td></tr>
+              <tr><td colSpan={5} className={s.empty}>Chargement…</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={6} className={s.empty}>Aucun marchand trouvé</td></tr>
+              <tr><td colSpan={5} className={s.empty}>Aucun marchand trouvé</td></tr>
             ) : users.map(u => (
               <tr key={u._id} className={s.row} onClick={() => setSelected(u._id)}>
                 <td data-label="Marchand">
@@ -208,11 +165,6 @@ export default function SuperAdminUsers() {
                 <td data-label="Publications">
                   <span className={s.pubStats}>
                     {u.pubStats.total} <span>({u.pubStats.published} pub.)</span>
-                  </span>
-                </td>
-                <td data-label="Crédits">
-                  <span className={s.creditBadge}>
-                    <Coins size={13} /> {u.credits}
                   </span>
                 </td>
                 <td data-label="Inscrit le" className={s.dateCell}>{fmt(u.createdAt)}</td>
@@ -250,7 +202,6 @@ export default function SuperAdminUsers() {
         <UserDrawer
           userId={selectedId}
           onClose={() => setSelected(null)}
-          onUpdated={() => load(page, search)}
         />
       )}
     </PageShell>

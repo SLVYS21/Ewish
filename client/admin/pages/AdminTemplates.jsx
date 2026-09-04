@@ -68,7 +68,7 @@ export default function AdminTemplates() {
       await api.patch(`/templates/${tmplModal.name}`, {
         label:       tmplModal.label,
         price:       Number(tmplModal.price) || 0,
-        creditsRequired: Number(tmplModal.creditsRequired) || 1,
+        priceFCFA:   Number(tmplModal.priceFCFA) || 500,
         description: tmplModal.description,
         priceLabel:  tmplModal.priceLabel,
         active:      tmplModal.active,
@@ -140,7 +140,7 @@ export default function AdminTemplates() {
                 </div>
                 <div className={s.tmplPriceWrap}>
                   <div className={s.tmplPrice}>{fmtPrice(t.price)}</div>
-                  <div className={s.tmplCredits}>{t.creditsRequired || 1} Crédit(s)</div>
+                  <div className={s.tmplCredits}>Publier : {fmtPrice(t.priceFCFA ?? 500)}</div>
                 </div>
                 {isAdmin && <button className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} onClick={()=>openTmpl(t)}><Edit2 size={14}/> Modifier</button>}
               </div>
@@ -220,8 +220,8 @@ export default function AdminTemplates() {
               <div className={s.formGroup}><label className={s.formLabel}>Prix (FCFA)</label>
                 <input type="number" className={s.formInput} value={tmplModal.price||''} onChange={e=>setTmplModal(m=>({...m,price:e.target.value}))} disabled={!isAdmin} />
               </div>
-              <div className={s.formGroup}><label className={s.formLabel}>Crédits requis</label>
-                <input type="number" className={s.formInput} value={tmplModal.creditsRequired||1} onChange={e=>setTmplModal(m=>({...m,creditsRequired:e.target.value}))} disabled={!isAdmin} />
+              <div className={s.formGroup}><label className={s.formLabel}>Prix publication (FCFA)</label>
+                <input type="number" className={s.formInput} value={tmplModal.priceFCFA||500} onChange={e=>setTmplModal(m=>({...m,priceFCFA:e.target.value}))} disabled={!isAdmin} />
               </div>
             </div>
             <div className={s.formGroup}><label className={s.formLabel}>Description</label>

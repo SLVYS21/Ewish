@@ -110,12 +110,6 @@ export default function AdminDashboard() {
             {/* ── Stats row ── */}
             <div className={s.statsRow}>
               <StatCard
-                label="Crédits" emoji="💎"
-                value={user?.credits ?? 0}
-                sub={<span style={{ opacity: .7 }}>Utilisables jusqu'à épuisement</span>}
-                color="#f59e0b"
-              />
-              <StatCard
                 label="Sites totaux" emoji="📁"
                 value={data.publications?.total || 0}
                 sub={`${data.publications?.published || 0} en ligne · ${(data.publications?.total || 0) - (data.publications?.published || 0)} brouillons`}
@@ -130,7 +124,7 @@ export default function AdminDashboard() {
               <StatCard
                 label="Transactions" emoji="💳"
                 value={data.transactions?.length || 0}
-                sub="Achats de crédits"
+                sub="Paiements FeexPay"
                 color="#e11d48"
               />
             </div>
@@ -138,7 +132,7 @@ export default function AdminDashboard() {
             {/* ── Transactions ── */}
             <div className={s.card}>
               <div className={s.cardHead}>
-                <span className={s.cardTitle}>Historique des achats de crédits</span>
+                <span className={s.cardTitle}>Historique des paiements</span>
               </div>
               {data.transactions?.length ? (
                 <div className={s.tableWrap}>
@@ -147,7 +141,6 @@ export default function AdminDashboard() {
                       <tr>
                         <th>Date</th>
                         <th>Montant</th>
-                        <th>Crédits</th>
                         <th>Statut</th>
                       </tr>
                     </thead>
@@ -156,9 +149,6 @@ export default function AdminDashboard() {
                         <tr key={tx._id}>
                           <td data-label="Date" className={s.muted}>{fmtDate(tx.createdAt)}</td>
                           <td data-label="Montant" className={s.bold}>{fmtPrice(tx.amount)}</td>
-                          <td data-label="Crédits">
-                            <span className={s.creditPill}>+{tx.credits}</span>
-                          </td>
                           <td data-label="Statut">
                             {STATUS_BADGE[tx.status?.toLowerCase()] || tx.status}
                           </td>
@@ -168,7 +158,7 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               ) : (
-                <div className={s.emptyWrap}>Aucun achat pour le moment</div>
+                <div className={s.emptyWrap}>Aucun paiement pour le moment</div>
               )}
             </div>
           </>

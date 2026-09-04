@@ -125,6 +125,19 @@ const notify = {
 
   system: (userId, { title, body, actionUrl, actionLabel }) =>
     create({ userId, type: 'system', title, body, actionUrl, actionLabel }),
+
+  dateReminder: (userId, { name, occasion, daysUntil, dateId }) => {
+    const when = daysUntil === 1 ? 'demain' : `dans ${daysUntil} jours`;
+    return create({
+      userId,
+      type: 'date_reminder',
+      title: `${name} — c'est ${when}`,
+      body: `Prépare ta carte pour cette occasion (${occasion}).`,
+      actionUrl: '/ewish-admin/templates',
+      actionLabel: 'Créer la carte',
+      metadata: { name, occasion, daysUntil, dateId: String(dateId || '') },
+    });
+  },
 };
 
 module.exports = { notify, create, ownerUserIdForPublication };

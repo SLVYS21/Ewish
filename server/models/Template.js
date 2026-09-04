@@ -23,7 +23,7 @@ const templateSchema = new mongoose.Schema({
   thumbnail: String,
   price: { type: Number, default: 0, required: true },
   priceLabel: { type: String, default: '' },
-  creditsRequired: { type: Number, default: 1 },
+  priceFCFA: { type: Number, default: 500 },
   emoji:      { type: String, default: '🎁' },
   gradient:   { type: String, default: 'linear-gradient(135deg,#ff9a9e,#fecfef)' },
   highlights: [{ type: String }],

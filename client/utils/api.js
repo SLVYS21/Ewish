@@ -212,8 +212,7 @@ export const duplicatePublication = (id, data) => api.post(`/publications/${id}/
 
 export const unpublishPublication = (id) => api.post(`/publications/${id}/unpublish`, {}, { withCredentials: true });
 
-// ── Billing / Promos ──
-export const applyPromoCode = (code) => api.post('/billing/apply-promo', { code }, { withCredentials: true });
+// ── Promos ──
 /* Preview du discount avant publish (auth optionnelle : si connecté, refuse
    les codes déjà utilisés par cet user). amount = frais de publication en
    FCFA (jamais le cadeau Kado). */
@@ -266,6 +265,12 @@ export const deleteProspect  = (id)        => api.delete(`/prospects/${id}`, { w
 // ── Settings ──
 export const getSettings     = ()           => api.get('/settings');
 export const updateSettings  = (data)       => api.put('/settings', data, { withCredentials: true });
+
+// ── User Dates (rappels d'occasions) ──
+export const getUserDates    = ()           => api.get('/user-dates');
+export const createUserDate  = (data)       => api.post('/user-dates', data);
+export const updateUserDate  = (id, data)   => api.patch(`/user-dates/${id}`, data);
+export const deleteUserDate  = (id)         => api.delete(`/user-dates/${id}`);
 
 // ── Invitations ──
 export const getInvitationContext = (pubId, token) =>

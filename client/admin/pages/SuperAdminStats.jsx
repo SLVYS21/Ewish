@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, BookOpen, Globe, Coins, TrendingUp, Award, DollarSign, History, ArrowUpRight } from 'lucide-react';
+import { Users, BookOpen, Globe, TrendingUp, Award, DollarSign, History } from 'lucide-react';
 import { getSuperAdminStats, getSuperAdminTransactions } from '../../utils/api';
 import PageShell from '../components/PageShell';
 import s from './SuperAdminStats.module.css';
@@ -70,13 +70,6 @@ export default function SuperAdminStats() {
               value={`${publishRate}%`}
               sub={`${stats.publishedPubs} en ligne sur ${stats.totalPubs}`}
               color="#047857"
-            />
-            <KpiCard
-              icon={<Coins size={20} />}
-              label="Crédits en circulation"
-              value={fmtN(stats.totalCredits)}
-              sub="Chez tous les marchands"
-              color="#b45309"
             />
             <KpiCard
               icon={<DollarSign size={20} />}
@@ -150,7 +143,6 @@ export default function SuperAdminStats() {
                     <tr>
                       <th>Marchand</th>
                       <th>Montant</th>
-                      <th>Crédits</th>
                       <th>Statut</th>
                       <th>Date</th>
                     </tr>
@@ -163,7 +155,6 @@ export default function SuperAdminStats() {
                           <div className={s.adminEmail}>{tx.adminId?.email || ''}</div>
                         </td>
                         <td data-label="Montant" className={s.bold}>{fmt(tx.amount)}</td>
-                        <td data-label="Crédits"><span className={s.creditPill}>+{tx.credits}</span></td>
                         <td data-label="Statut">
                           <span className={`${s.badge} ${tx.status === 'SUCCESS' ? s.success : s.failed}`}>
                             {tx.status}

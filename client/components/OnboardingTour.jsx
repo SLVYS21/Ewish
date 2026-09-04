@@ -25,11 +25,6 @@ export default function OnboardingTour({ run, onClose }) {
       placement: 'bottom',
     },
     {
-      target: '#tour-credits',
-      content: 'Certains thèmes premiums nécessitent des crédits. Tu peux consulter ton solde ici.',
-      placement: 'left',
-    },
-    {
       target: '#tour-themes',
       content: "Découvre nos thèmes mis en vedette pour t'inspirer !",
       placement: 'top',

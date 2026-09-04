@@ -130,6 +130,16 @@ const WALLS = [
   },
 ];
 
+/* ── Cartes solo ──────────────────────────────────────────────────────
+   Mapping fixé avec le PM :
+     - Anniversaire → template `birthday` (démo animée existante)
+     - Forever      → template `forever`  (démo animée existante)
+     - Mariage / Baptême / Félicitations / Hommage → template `myenvelope`
+       (card-editor) avec occasion + thème + textes adaptés. L'iframe de
+       la landing pointe alors sur /c/:slug (SPA React), pas sur /site/*.
+   Pour myenvelope : on n'utilise PAS `data` — on remplit les champs plats
+   envelopeOccasion / envelopeTheme / envelopeTexts / envelopeConfetti /
+   envelopeUnboxingBg, exactement comme le fait le card-editor. */
 const CARDS = [
   {
     key: 'birthday_perso',
@@ -165,89 +175,89 @@ const CARDS = [
     style: { primaryColor: '#E11D48', accentColor: '#F5B544', fontFamily: 'Work Sans' },
   },
   {
-    key: 'wedding_perso',
-    customName: 'demo-mariage-solo',
-    templateName: 'forever',
-    title: 'Carte — Mariage Sarah & Marc',
-    data: {
-      recipient: 'Sarah & Marc',
-      titleName: 'Sarah & Marc',
-      message: 'Toutes nos félicitations pour votre magnifique union.',
-      sender: 'Vos amis qui vous aiment 💍',
-    },
-    style: { primaryColor: '#1E2952', accentColor: '#E8A33D', fontFamily: 'Playfair Display' },
-  },
-  {
-    key: 'memorial_perso',
-    customName: 'demo-deces-solo',
-    templateName: 'sanctuary',
-    title: 'Carte — Hommage Gabriel',
-    data: {
-      recipient: 'Gabriel',
-      titleName: 'Gabriel',
-      message: 'En hommage à une personne d\'une bienveillance exceptionnelle.',
-      sender: 'Tes proches, pour toujours 🕊️',
-    },
-    style: { primaryColor: '#5F6A82', accentColor: '#B8A99A', fontFamily: 'Playfair Display' },
-  },
-  {
     key: 'love_perso',
     customName: 'demo-amour-solo',
-    templateName: 'notre-film',
-    title: "Carte — Lettre d'Amour",
+    templateName: 'forever',
+    title: "Carte — Forever, Nour & Amine",
     data: {
-      recipient: 'Mon amour',
-      titleName: 'Mon amour',
-      message: 'Chaque instant avec toi est un souvenir précieux. Merci pour ces années de bonheur.',
-      sender: 'Avec tout mon amour ❤️',
+      recipient: 'Nour',
+      titleName: 'Nour',
+      message: 'Chaque jour à tes côtés est un cadeau. Merci d\'être toi, merci d\'être là.',
+      sender: 'Amine, pour toujours ❤️',
     },
     style: { primaryColor: '#B23A48', accentColor: '#F2B5B5', fontFamily: 'Playfair Display' },
   },
   {
+    key: 'wedding_perso',
+    customName: 'demo-mariage-solo',
+    templateName: 'myenvelope',
+    title: 'Carte — Mariage Sarah & Marc',
+    envelopeOccasion: 'mariage',
+    envelopeTheme: { id: 'floral_champetres', color: '#EDE0CC', texture: 'linen', liner: 'theme' },
+    envelopeTexts: {
+      title:     'Toutes nos félicitations 💍',
+      recipient: 'Sarah & Marc',
+      message:   "En ce jour si particulier, nous vous souhaitons une vie remplie d'amour, de complicité et de moments inoubliables. Que votre union soit aussi belle que votre histoire.",
+      signature: 'Vos amis, avec tendresse',
+      backNote:  'Fait avec amour · myKado',
+    },
+    envelopeConfetti:   'hearts',
+    envelopeUnboxingBg: 'default',
+    style: { primaryColor: '#B4614A', accentColor: '#D4A574', fontFamily: 'Playfair Display' },
+  },
+  {
     key: 'birth_perso',
     customName: 'demo-naissance-solo',
-    templateName: 'birthday',
+    templateName: 'myenvelope',
     title: 'Carte — Baptême de Noah',
-    data: {
-      greeting: 'Bienvenue',
-      name: 'Noah',
-      greetingText: 'Une carte pour saluer ton arrivée.',
-      trackTitle: 'Berceuse',
-      trackArtist: 'Baptême',
-      musicHint: "C'est mieux avec de la musique 🎶",
-      text1: 'Un tout petit être...',
-      waAvatar: 'N',
-      waName: 'Noah',
-      textInChatBox: 'Bienvenue petit ange 👶',
-      text2: 'Attendu.',
-      text3: 'Espéré.',
-      text4: 'Une joie',
-      text4Adjective: 'immense',
-      text5Entry: 'Pour toi,',
-      text5Content: 'Tous nos vœux',
-      smiley: ':)',
-      bigTextPart1: 'B',
-      bigTextPart2: 'B',
-      wishHeading: 'Bienvenue Noah',
-      wishText: 'Que ta vie soit remplie d\'amour et de rires.',
-      outroText: 'Nous t\'aimons déjà.',
-      replayText: 'Rejoue',
-      outroSmiley: ':)',
+    envelopeOccasion: 'naissance',
+    envelopeTheme: { id: 'floral_champetres', color: '#F5EFE5', texture: 'linen', liner: 'blush' },
+    envelopeTexts: {
+      title:     'Bienvenue au monde 👶',
+      recipient: 'Petit Noah',
+      message:   "Toutes nos félicitations pour cette merveilleuse nouvelle. Nous vous souhaitons plein de bonheur, de douceur et de tendres instants avec ce petit trésor.",
+      signature: 'Toute la famille',
+      backNote:  'Fait avec amour · myKado',
     },
-    style: { primaryColor: '#7ECFC9', accentColor: '#F5B5C8', fontFamily: 'Work Sans' },
+    envelopeConfetti:   'stars',
+    envelopeUnboxingBg: 'default',
+    style: { primaryColor: '#7ECFC9', accentColor: '#F5B5C8', fontFamily: 'Playfair Display' },
   },
   {
     key: 'congrats_perso',
     customName: 'demo-felicitations-solo',
-    templateName: 'notre-film',
-    title: 'Carte — Félicitations',
-    data: {
+    templateName: 'myenvelope',
+    title: 'Carte — Félicitations Alexandre',
+    envelopeOccasion: 'felicitations',
+    envelopeTheme: { id: 'confetti_pop', color: '#FF3E88', texture: 'smooth', liner: 'theme' },
+    envelopeTexts: {
+      title:     'Félicitations 🎓',
       recipient: 'Alexandre',
-      titleName: 'Alexandre',
-      message: 'Félicitations pour cette belle réussite. Ton travail acharné porte ses fruits.',
-      sender: 'Tes proches, très fiers de toi',
+      message:   "Bravo pour cette belle réussite ! Elle est méritée et nous sommes très fiers de toi. Continue à briller et à croire en toi.",
+      signature: 'Tes proches, très fiers',
+      backNote:  'Fait avec amour · myKado',
     },
-    style: { primaryColor: '#1E2952', accentColor: '#E8A33D', fontFamily: 'Playfair Display' },
+    envelopeConfetti:   'fireworks',
+    envelopeUnboxingBg: 'default',
+    style: { primaryColor: '#FF3E88', accentColor: '#FFC145', fontFamily: 'Fredoka' },
+  },
+  {
+    key: 'memorial_perso',
+    customName: 'demo-deces-solo',
+    templateName: 'myenvelope',
+    title: 'Carte — Hommage Gabriel',
+    envelopeOccasion: 'condoleances',
+    envelopeTheme: { id: 'chic_gold', color: '#111111', texture: 'smooth', liner: 'ink' },
+    envelopeTexts: {
+      title:     'Sincères condoléances 🕊️',
+      recipient: 'Gabriel',
+      message:   "Dans ce moment difficile, nous pensons très fort à vous. En hommage à une personne d'une bienveillance exceptionnelle, dont le souvenir restera dans nos cœurs.",
+      signature: 'Ses proches, pour toujours',
+      backNote:  'En mémoire · myKado',
+    },
+    envelopeConfetti:   'none',
+    envelopeUnboxingBg: 'default',
+    style: { primaryColor: '#1A1A1A', accentColor: '#C9A961', fontFamily: 'Cormorant Garamond' },
   },
 ];
 
@@ -289,8 +299,14 @@ async function resolveAdminMerchantId() {
 }
 
 async function upsertPublication(entry, brique, merchantId) {
-  const filter = { templateName: entry.templateName, customName: entry.customName };
-  const existing = await Publication.findOne(filter);
+  /* Recherche par slug (unique+sparse) : c'est la seule clé stable quand on
+     re-seed après avoir changé templateName (ex : demo-amour-solo passé de
+     notre-film à forever, demo-mariage-solo passé de forever à myenvelope).
+     Fallback sur (templateName, customName) pour tolérer une pub historique
+     sans slug renseigné. */
+  const existing =
+       (await Publication.findOne({ slug: entry.customName }))
+    || (await Publication.findOne({ templateName: entry.templateName, customName: entry.customName }));
 
   const payload = {
     templateName: entry.templateName,
@@ -305,6 +321,19 @@ async function upsertPublication(entry, brique, merchantId) {
     slug:         entry.customName,
   };
   if (entry.cagnotteConfig) payload.cagnotteConfig = entry.cagnotteConfig;
+
+  /* Champs plats myenvelope — remplis uniquement pour templateName='myenvelope'.
+     Sous-objets shallow-mergés côté modèle (default: () => ({})), donc les
+     laisser undefined sur les autres templates est safe. */
+  if (entry.templateName === 'myenvelope') {
+    if (entry.envelopeOccasion)   payload.envelopeOccasion   = entry.envelopeOccasion;
+    if (entry.envelopeTheme)      payload.envelopeTheme      = entry.envelopeTheme;
+    if (entry.envelopeTexts)      payload.envelopeTexts      = entry.envelopeTexts;
+    if (entry.envelopePhoto)      payload.envelopePhoto      = entry.envelopePhoto;
+    if (entry.envelopeGift)       payload.envelopeGift       = entry.envelopeGift;
+    if (entry.envelopeConfetti)   payload.envelopeConfetti   = entry.envelopeConfetti;
+    if (entry.envelopeUnboxingBg) payload.envelopeUnboxingBg = entry.envelopeUnboxingBg;
+  }
 
   if (existing) {
     Object.assign(existing, payload);

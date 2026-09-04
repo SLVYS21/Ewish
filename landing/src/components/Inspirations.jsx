@@ -1,20 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import s from './Inspirations.module.css';
+import NotoEmoji from './NotoEmoji';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
 
 /* ── Cartes de Groupes (Murs collaboratifs) ─────────────────────
    Chaque catégorie pointe vers une Publication de mur seedée via
    server/seeds/seedDemoLanding.js. L'iframe charge le mur en mode
    ?demo=1 (lecture seule : pas d'ajout de mot, pas de collecte). */
 const TABS_GROUP = [
-  { id: 'birthday_group',    label: 'Anniversaire' },
-  { id: 'wedding_group',     label: 'Mariage' },
-  { id: 'birth_group',       label: 'Baptême' },
-  { id: 'party_group',       label: 'Soirées / Fête' },
-  { id: 'congrats_group',    label: 'Félicitations' },
-  { id: 'memorial_group',    label: 'Hommage' },
-  { id: 'vision_group',      label: 'Vision Board' },
+  { id: 'birthday_group',    label: 'Anniversaire',      icon: 'birthday-cake' },
+  { id: 'wedding_group',     label: 'Mariage',           icon: 'sparkling-heart' },
+  { id: 'birth_group',       label: 'Baptême',           icon: 'ribbon' },
+  { id: 'party_group',       label: 'Soirée / Fête',     icon: 'party-popper' },
+  { id: 'congrats_group',    label: 'Félicitations',     icon: 'trophy' },
+  { id: 'memorial_group',    label: 'Hommage',           icon: 'folded-hands' },
+  { id: 'vision_group',      label: 'Vision Board',      icon: 'sparkles' },
 ];
 
 const DEMOS_GROUP = {
@@ -29,26 +31,32 @@ const DEMOS_GROUP = {
 
 /* ── Cartes Perso (solo) ─────────────────────────────────────── */
 const TABS_PERSONAL = [
-  { id: 'birthday_perso',    label: 'Anniversaire' },
-  { id: 'wedding_perso',     label: 'Mariage' },
-  { id: 'love_perso',        label: "Lettre d'Amour" },
-  { id: 'birth_perso',       label: 'Baptême' },
-  { id: 'congrats_perso',    label: 'Félicitations' },
-  { id: 'memorial_perso',    label: 'Hommage' },
+  { id: 'birthday_perso',    label: 'Anniversaire',      icon: 'birthday-cake' },
+  { id: 'wedding_perso',     label: 'Mariage',           icon: 'sparkling-heart' },
+  { id: 'love_perso',        label: 'Forever',           icon: 'two-hearts' },
+  { id: 'birth_perso',       label: 'Baptême',           icon: 'ribbon' },
+  { id: 'congrats_perso',    label: 'Félicitations',     icon: 'trophy' },
+  { id: 'memorial_perso',    label: 'Hommage',           icon: 'folded-hands' },
 ];
 
 const DEMOS_PERSONAL = {
   birthday_perso:  { templateName: 'birthday',   customName: 'demo-anniversaire-solo' },
-  wedding_perso:   { templateName: 'forever',    customName: 'demo-mariage-solo' },
-  love_perso:      { templateName: 'notre-film', customName: 'demo-amour-solo' },
-  birth_perso:     { templateName: 'birthday',   customName: 'demo-naissance-solo' },
-  congrats_perso:  { templateName: 'notre-film', customName: 'demo-felicitations-solo' },
-  memorial_perso:  { templateName: 'sanctuary',  customName: 'demo-deces-solo' },
+  love_perso:      { templateName: 'forever',    customName: 'demo-amour-solo' },
+  wedding_perso:   { templateName: 'myenvelope', customName: 'demo-mariage-solo' },
+  birth_perso:     { templateName: 'myenvelope', customName: 'demo-naissance-solo' },
+  congrats_perso:  { templateName: 'myenvelope', customName: 'demo-felicitations-solo' },
+  memorial_perso:  { templateName: 'myenvelope', customName: 'demo-deces-solo' },
 };
 
 function buildDemoUrl(demo) {
   if (!demo) return '';
   const { templateName, customName } = demo;
+  /* myenvelope est rendu par la SPA React (route /c/:slug), pas par le
+     serveur Express (canonical.js:17 SPA_TEMPLATES). On pointe donc sur
+     APP_URL au lieu de API_URL pour ces démos. */
+  if (templateName === 'myenvelope') {
+    return `${APP_URL}/c/${customName}?demo=1&noanim=1`;
+  }
   return `${API_URL}/site/${templateName}/${customName}?demo=1&noanim=1`;
 }
 
@@ -81,9 +89,9 @@ export default function Inspirations() {
     <section className={s.section} id="inspirations">
       <div className={`mk-container ${s.container}`}>
 
-        {/* Stylish Toggle — pill color shifts based on mode */}
+        {/* Toggle — plum active pill (Warm Celebration) */}
         <div className={s.toggleWrapper}>
-          <div className={`${s.toggleContainer} ${mode === 'group' ? s.modeGroup : s.modePerso}`}>
+          <div className={s.toggleContainer}>
             <div
               className={s.togglePill}
               style={{ transform: mode === 'group' ? 'translateX(0)' : 'translateX(100%)' }}
@@ -92,7 +100,7 @@ export default function Inspirations() {
               className={`${s.toggleBtn} ${mode === 'group' ? s.toggleBtnActive : ''}`}
               onClick={() => setMode('group')}
             >
-              Cartes de Groupes
+              Cartes de Groupe
             </button>
             <button
               className={`${s.toggleBtn} ${mode === 'personal' ? s.toggleBtnActive : ''}`}
@@ -103,15 +111,20 @@ export default function Inspirations() {
           </div>
         </div>
 
-        {/* Tabs Bar */}
-        <div className={`${s.tabsContainer} ${mode === 'group' ? s.tabsGroup : s.tabsPerso}`}>
+        {/* Category pills — wrap layout, dark active fill */}
+        <div className={s.tabsContainer}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               className={`${s.tabBtn} ${activeTab === tab.id ? s.tabActive : ''}`}
               onClick={() => mode === 'group' ? setActiveTabGroup(tab.id) : setActiveTabPerso(tab.id)}
             >
-              {tab.label}
+              {tab.icon && (
+                <span className={s.tabIcon} aria-hidden>
+                  <NotoEmoji name={tab.icon} size={18} static />
+                </span>
+              )}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>

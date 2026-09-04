@@ -44,12 +44,13 @@ import WallSetup           from "./pages/WallSetup";
 
 import WallClaim           from "./pages/WallClaim";
 import CagnottePage        from "./pages/CagnottePage";
-import CreditsPage         from "./pages/CreditsPage";
 import SharePage           from "./pages/SharePage";
 import TermsPage           from "./pages/TermsPage";
 import PrivacyPage         from "./pages/PrivacyPage";
 import ProfilePage         from "./pages/ProfilePage";
+import DatesPage           from "./pages/DatesPage";
 import DesignSystem        from "./pages/DesignSystem";
+import BrandPage           from "./pages/BrandPage";
 import CreerBrique         from "./pages/CreerBrique";
 import RecipientReveal     from "./pages/RecipientReveal";
 import { ToastProvider }   from "./design-system";
@@ -132,7 +133,6 @@ export default function App() {
             <Route path="templates"        element={<TemplatesGallery />} />
             <Route path="template/:name"   element={<TemplateDetailPage />} />
             <Route path="cagnotte/:id" element={<RequireAuth><CagnottePage /></RequireAuth>} />
-            <Route path="credits"    element={<RequireAuth><CreditsPage /></RequireAuth>} />
             <Route path="wishes"     element={<RequireAuth><AdminWishes /></RequireAuth>} />
             <Route path="publications" element={<RequireAuth><AdminPublications /></RequireAuth>} />
             <Route path="suggestions"  element={<RequireAuth><SuperAdminSuggestions /></RequireAuth>} />
@@ -150,6 +150,7 @@ export default function App() {
             <Route path="super/settings"     element={<RequireSuperAdmin><SuperAdminSettings /></RequireSuperAdmin>} />
             <Route path="super/kyc"          element={<RequireSuperAdmin><SuperAdminKyc /></RequireSuperAdmin>} />
             <Route path="profile"            element={<RequireAuth><ProfilePage /></RequireAuth>} />
+            <Route path="dates"              element={<RequireAuth><DatesPage /></RequireAuth>} />
             <Route path="releases"           element={<RequireAuth><AdminReleaseNotes /></RequireAuth>} />
 
             <Route path="share/:id"          element={<RequireAuth><SharePage /></RequireAuth>} />
@@ -165,6 +166,7 @@ export default function App() {
           <Route path="/terms"   element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/design-system" element={<DesignSystem />} />
+          <Route path="/brand"         element={<BrandPage />} />
           <Route path="/app/creer"     element={<CreerBrique />} />
 
           {/* Recipient Reveal UI for Walls */}

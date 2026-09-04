@@ -440,7 +440,7 @@ export default function TemplateDetailPage() {
                   Ouvrir l'éditeur complet <ArrowRight size={16} />
                 </button>
                 <p style={{ fontSize: 11.5, color: 'var(--mk-ink-3)', textAlign: 'center', lineHeight: 1.5 }}>
-                  Création et édition gratuites. La publication se débloque avec {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}.
+                  Création et édition gratuites. La publication se débloque pour {(tpl.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA.
                 </p>
               </div>
             </>

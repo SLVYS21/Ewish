@@ -231,8 +231,8 @@ export default function EnvelopeEditorLayout() {
                     marginLeft: 6,
                     padding: '2px 7px',
                     borderRadius: 999,
-                    background: '#161311',
-                    color: '#FDE7A5',
+                    background: 'var(--mk-plum-800, #201524)',
+                    color: 'var(--mk-honey-300, #F8BE68)',
                     fontSize: 9,
                     fontWeight: 800,
                     letterSpacing: '.08em',
@@ -254,10 +254,10 @@ export default function EnvelopeEditorLayout() {
           <div className={styles.panelMain}>
             <div className={styles.panelContent} key={activeTab}>
               {activeTab === 'content' && (
-                <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                   <OccasionSelector />
                   <ContentWizard />
-                </>
+                </div>
               )}
               {activeTab === 'style' && <ThemeSelector />}
               {activeTab === 'gift'  && <KadoStep />}

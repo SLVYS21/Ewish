@@ -189,7 +189,7 @@ const publicationSchema = new mongoose.Schema({
 
   /* Code promo appliqué au moment du publish (audit + support).
      promoDiscountFcfa = montant en FCFA déduit des frais de publication
-     (base envelope 1500, plan mur, creditsRequired×500). Ne s'applique
+     (base envelope 1500, plan mur, template.priceFCFA). Ne s'applique
      jamais au cadeau Kado, qui reste facturé au montant plein. */
   promoCode:         { type: String, default: '', uppercase: true, trim: true },
   promoDiscountFcfa: { type: Number, default: 0 },

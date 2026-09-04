@@ -12,7 +12,6 @@ const PLANS = [
     name: 'Gratuit',
     price: '0 FCFA',
     priceFCFA: 0,
-    credits: 0,
     features: [
       'Jusqu\'à 10 mots textuels',
       'Lien de partage',
@@ -29,7 +28,6 @@ const PLANS = [
     name: 'Premium',
     price: '2 500 FCFA',
     priceFCFA: 2500,
-    credits: 5,
     icon: <Sparkles size={16} />,
     features: [
       'Jusqu\'à 100 mots',
@@ -44,7 +42,6 @@ const PLANS = [
     name: 'Illimité',
     price: '10 000 FCFA',
     priceFCFA: 10000,
-    credits: 20,
     icon: <InfinityIcon size={16} />,
     features: [
       'Mots infinis',
@@ -63,9 +60,7 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
   const { openCheckout, feexpayModal } = useFeexPay();
 
   const plan = PLANS.find(p => p.id === selectedPlan);
-  const userCredits = user?.credits || 0;
   const canBypass = user?.canBypassPaywall === true;
-  const hasEnoughCredits = plan.credits === 0 || userCredits >= plan.credits || canBypass;
 
   /* Promo réduit le prix du plan (jamais un plan gratuit). Reset auto si
      l'user change de plan (le discount recompté n'aurait plus de sens). */
@@ -78,36 +73,21 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
   };
 
   const handleContinue = () => {
-    if (plan.credits === 0 || canBypass) {
+    if (plan.priceFCFA === 0 || canBypass) {
       onConfirm(selectedPlan);
       return;
     }
-    /* Chemin promo : force FeexPay (le serveur refuse la combinaison promo+crédits).
-       Si le promo ramène le prix à 0, on publie sans checkout. */
-    if (promo && promoDiscount > 0) {
-      if (priceAfterPromo === 0) {
-        onConfirm(selectedPlan, undefined, promo.code);
-        return;
-      }
-      openCheckout({
-        amount:      priceAfterPromo,
-        description: `myKado — Mur ${plan.name} (code ${promo.code})`,
-        customId:    pubId ? `wall:${pubId}` : `wall_${Date.now()}`,
-        onSuccess: ({ reference }) => onConfirm(selectedPlan, reference, promo.code),
-      });
+    if (priceAfterPromo === 0) {
+      onConfirm(selectedPlan, undefined, promo?.code);
       return;
     }
-    if (hasEnoughCredits) {
-      /* Chemin crédits legacy — le serveur déduira. */
-      onConfirm(selectedPlan);
-      return;
-    }
-    /* Chemin FeexPay — checkout direct au montant du plan. */
     openCheckout({
-      amount:      plan.priceFCFA,
-      description: `myKado — Mur ${plan.name}`,
+      amount:      priceAfterPromo,
+      description: promo
+        ? `myKado — Mur ${plan.name} (code ${promo.code})`
+        : `myKado — Mur ${plan.name}`,
       customId:    pubId ? `wall:${pubId}` : `wall_${Date.now()}`,
-      onSuccess: ({ reference }) => onConfirm(selectedPlan, reference),
+      onSuccess: ({ reference }) => onConfirm(selectedPlan, reference, promo?.code),
     });
   };
 
@@ -181,9 +161,7 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
               des plans est scrollée sur petits écrans. */}
           <div className={s.footer}>
             <div className={s.balance}>
-              {userCredits > 0
-                ? <>Solde crédits : <strong>{userCredits}</strong></>
-                : <>Paiement Mobile Money ou carte</>}
+              Paiement Mobile Money ou carte
             </div>
 
             <button
@@ -194,13 +172,11 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
               {loading ? (
                 <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication en cours…</>
               ) : (
-                plan.credits === 0
+                plan.priceFCFA === 0
                   ? `Publier en ${plan.name}`
                   : canBypass
                     ? `Publier gratuitement (Mode testeur)`
-                    : hasEnoughCredits
-                      ? `Publier avec ${plan.credits} crédits`
-                      : `Payer ${plan.priceFCFA.toLocaleString('fr-FR')} FCFA`
+                    : `Payer ${priceAfterPromo.toLocaleString('fr-FR')} FCFA`
               )}
             </button>
           </div>

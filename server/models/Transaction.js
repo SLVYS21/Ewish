@@ -15,10 +15,6 @@ const transactionSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  credits: {
-    type: Number,
-    required: true
-  },
   status: {
     type: String,
     enum: ['SUCCESS', 'FAILED', 'PENDING'],

@@ -401,30 +401,42 @@ export default function Envelope({ theme, open = false, showBack = false, onSeal
             }} />
           </div>
 
-          {/* ----- C. WAX SEAL — affixed to the apex when closed ----- */}
-          {!open && (
-            <div
-              className={`env-wax ${onSealClick ? 'is-clickable' : ''}`}
-              onClick={onSealClick ? (e) => { e.stopPropagation(); onSealClick(); } : undefined}
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '86%',
-                width: '18%',
-                aspectRatio: '1 / 1',
-                transform: 'translate(-50%, -50%) translateZ(3px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10,
-                cursor: onSealClick ? 'pointer' : 'default',
-                animation: onSealClick ? 'ce-seal-pulse 2s ease-in-out infinite' : 'none',
-                filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.42))',
-              }}
-            >
-              <WaxSealSVG color={env.waxSeal.color} letter={env.waxSeal.letter} seed={1701} />
-            </div>
-          )}
+        </div>
+      )}
+
+      {/* ===== 7. WAX SEAL — rendered as a sibling of env-body so it is not
+           clipped by the top-flap's 3D face stack. The seal used to live
+           inside .env-top-flap (top: 86% of flap). Under perspective, the
+           preserve-3d re-ordering pushed the seal behind the flap's front
+           face and only the ~8px protruding under the apex was visible
+           (the "small red crescent" bug on /c/:slug — see screenshot).
+           Positioned at ~50% envelope Y (= 86% × 58% flap) to keep the
+           exact same visual anchor as before. ============================ */}
+      {!showBack && !open && (
+        <div
+          className={`env-wax ${onSealClick ? 'is-clickable' : ''}`}
+          onClick={onSealClick ? (e) => { e.stopPropagation(); onSealClick(); } : undefined}
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: '18%',
+            aspectRatio: '1 / 1',
+            /* translateZ pushes the seal in front of both the top-flap
+               (zIndex 6, translateZ 0) and its face-stack. Required in
+               perspective contexts (UnboxingView / CardPublicView) where
+               3D depth beats DOM order. */
+            transform: 'translate(-50%, -50%) translateZ(20px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 20,
+            cursor: onSealClick ? 'pointer' : 'default',
+            animation: onSealClick ? 'ce-seal-pulse 2s ease-in-out infinite' : 'none',
+            filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.42))',
+          }}
+        >
+          <WaxSealSVG color={env.waxSeal.color} letter={env.waxSeal.letter} seed={1701} />
         </div>
       )}
     </div>

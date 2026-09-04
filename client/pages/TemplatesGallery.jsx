@@ -189,7 +189,7 @@ export default function TemplatesGallery() {
                     <div className="tpl-desc">{tpl.description || ''}</div>
                     <div className="tpl-meta">
                       <span className="badge badge-cost">
-                        {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
+                        {(tpl.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA
                       </span>
                       <button className="btn btn-soft btn-sm" onClick={e => { e.stopPropagation(); openTemplate(invitationTemplates, tpl); }}>
                         Choisir <ArrowRight size={13} />
@@ -259,7 +259,7 @@ export default function TemplatesGallery() {
                       <div className="tpl-desc">{tpl.description || ''}</div>
                       <div className="tpl-meta">
                         <span className="badge badge-cost">
-                          {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
+                          {(tpl.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mk-accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                           Aperçu <ArrowRight size={13} />
@@ -307,7 +307,7 @@ export default function TemplatesGallery() {
                     <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--mk-ink)' }}>{tpl.label || tpl.name}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
                       <span style={{ font: '800 11px Inter, sans-serif', background: 'var(--mk-line)', color: 'var(--mk-ink-2)', padding: '4px 10px', borderRadius: '999px' }}>
-                        {tpl.creditsRequired ?? 1} crédit{(tpl.creditsRequired ?? 1) > 1 ? 's' : ''}
+                        {(tpl.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA
                       </span>
                       <span style={{ font: '700 13px Inter, sans-serif', color: 'var(--mk-accent)' }}>Aperçu ›</span>
                     </div>

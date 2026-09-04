@@ -12,10 +12,8 @@ export default function SuperAdminPromos() {
   const [form, setForm] = useState({
     code: '',
     description: '',
-    isCreditGift: true,
-    creditAmount: 10,
     type: 'percent',
-    value: 0,
+    value: 10,
     maxUses: 1,
   });
 
@@ -39,16 +37,11 @@ export default function SuperAdminPromos() {
       const payload = {
         code: form.code,
         description: form.description,
-        isCreditGift: form.isCreditGift,
+        type: form.type,
+        value: form.value,
         maxUses: form.maxUses > 0 ? form.maxUses : null,
       };
-      if (form.isCreditGift) {
-        payload.creditAmount = form.creditAmount;
-      } else {
-        payload.type = form.type;
-        payload.value = form.value;
-      }
-      
+
       await createPromo(payload);
       setModalOpen(false);
       load();
@@ -68,7 +61,7 @@ export default function SuperAdminPromos() {
   };
 
   return (
-    <PageShell title="Codes Promo" subtitle="Gérer les codes cadeaux et réductions">
+    <PageShell title="Codes Promo" subtitle="Gérer les codes de réduction sur les paiements">
       <div className={s.toolbar}>
         <button className={s.btnPrimary} onClick={() => setModalOpen(true)}>
           <Plus size={18} /> Créer un code
@@ -85,8 +78,7 @@ export default function SuperAdminPromos() {
             <thead>
               <tr>
                 <th>Code</th>
-                <th>Type</th>
-                <th>Valeur</th>
+                <th>Réduction</th>
                 <th>Utilisations</th>
                 <th>Statut</th>
                 <th>Actions</th>
@@ -96,12 +88,7 @@ export default function SuperAdminPromos() {
               {promos.map(p => (
                 <tr key={p._id}>
                   <td style={{fontWeight: 'bold'}}>{p.code}</td>
-                  <td>
-                    {p.isCreditGift 
-                      ? <span className={`${s.badge} ${s.badgeGift}`}>Cadeau Crédits</span> 
-                      : <span className={`${s.badge} ${s.badgeDiscount}`}>Réduction</span>}
-                  </td>
-                  <td>{p.isCreditGift ? `+${p.creditAmount} cr` : `${p.value}${p.type === 'percent' ? '%' : ' FCFA'}`}</td>
+                  <td>{p.value}{p.type === 'percent' ? '%' : ' FCFA'}</td>
                   <td>{p.usedCount} / {p.maxUses || '∞'}</td>
                   <td>{p.active ? 'Actif' : 'Inactif'}</td>
                   <td>
@@ -132,34 +119,20 @@ export default function SuperAdminPromos() {
                 <label>Description</label>
                 <input className={s.input} value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Facultatif" />
               </div>
-              
-              <div className={s.field}>
-                <label className={s.checkboxField}>
-                  <input type="checkbox" checked={form.isCreditGift} onChange={e => setForm({...form, isCreditGift: e.target.checked})} />
-                  C'est un cadeau de crédits gratuits
-                </label>
-              </div>
 
-              {form.isCreditGift ? (
-                <div className={s.field}>
-                  <label>Nombre de crédits offerts</label>
-                  <input type="number" required min="1" className={s.input} value={form.creditAmount} onChange={e => setForm({...form, creditAmount: parseInt(e.target.value) || 0})} />
+              <div style={{display: 'flex', gap: '10px'}}>
+                <div className={s.field} style={{flex: 1}}>
+                  <label>Type de réduction</label>
+                  <select className={s.input} value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
+                    <option value="percent">Pourcentage (%)</option>
+                    <option value="fixed">Montant Fixe (FCFA)</option>
+                  </select>
                 </div>
-              ) : (
-                <div style={{display: 'flex', gap: '10px'}}>
-                  <div className={s.field} style={{flex: 1}}>
-                    <label>Type de réduction</label>
-                    <select className={s.input} value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
-                      <option value="percent">Pourcentage (%)</option>
-                      <option value="fixed">Montant Fixe (FCFA)</option>
-                    </select>
-                  </div>
-                  <div className={s.field} style={{flex: 1}}>
-                    <label>Valeur</label>
-                    <input type="number" required min="1" className={s.input} value={form.value} onChange={e => setForm({...form, value: parseInt(e.target.value) || 0})} />
-                  </div>
+                <div className={s.field} style={{flex: 1}}>
+                  <label>Valeur</label>
+                  <input type="number" required min="1" className={s.input} value={form.value} onChange={e => setForm({...form, value: parseInt(e.target.value) || 0})} />
                 </div>
-              )}
+              </div>
 
               <div className={s.field}>
                 <label>Nombre maximum d'utilisations (0 = illimité)</label>

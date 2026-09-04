@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowRight, Play } from 'lucide-react';
 import s from './Hero.module.css';
 import NotoEmoji from './NotoEmoji';
 
@@ -114,10 +115,14 @@ export default function Hero({ onCreate }) {
 
           <div className={s.actions}>
             <button className={s.demoBtn} onClick={onCreate}>
-              Créer une carte
+              <span>Créer une carte</span>
+              <ArrowRight size={18} strokeWidth={2.4} aria-hidden />
             </button>
             <a href="#inspirations" className={s.secondaryBtn}>
-              Explorer les démos
+              <span className={s.playCircle} aria-hidden>
+                <Play size={12} strokeWidth={0} fill="currentColor" />
+              </span>
+              <span>Explorer les démos</span>
             </a>
           </div>
         </div>

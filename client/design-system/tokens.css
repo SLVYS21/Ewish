@@ -1,140 +1,174 @@
 /* ================================================================
    myKado — Design System Tokens
-   Direction : Hybride C+A (Afro-Modern Elegance + ergonomie Editorial)
-   Base : fond blanc, UX-first, cohérence complète
+   Direction : WARM CELEBRATION (canonique — voir BRAND.md)
+   ─────────────────────────────────────────────────────────────────
+   Palette centrale :
+     • Coral terracotta #E25B45  (primary, festive heartbeat)
+     • Warm honey     #F8BE68  (secondary, keepsakes dorés)
+     • Plum espresso  #201524  (ink primaire, jamais de gris cold)
+     • Paper noble    #FDFBF7  (surface principale, coton fin)
    ================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
   /* ─────────────────────────────────────────────────────────
-     COULEURS — Palettes brand (10 pas chacune)
+     RAW PALETTE — Warm Celebration
      ───────────────────────────────────────────────────────── */
 
-  /* Indigo (primaire) */
-  --mk-indigo-50:  #F0F2F7;
-  --mk-indigo-100: #DFE3EE;
-  --mk-indigo-200: #B8C0D8;
-  --mk-indigo-300: #8792B8;
-  --mk-indigo-400: #5B6994;
-  --mk-indigo-500: #354270;
-  --mk-indigo-600: #263258;
-  --mk-indigo-700: #1E2952;  /* BASE brand */
-  --mk-indigo-800: #171F3F;
-  --mk-indigo-900: #0F1428;
+  /* Coral (primaire — battement du cœur festif) */
+  --mk-coral-50:  #FEF5F2;
+  --mk-coral-100: #FDF0ED;   /* coral-subtle */
+  --mk-coral-200: #F9CFC5;
+  --mk-coral-300: #F19A87;
+  --mk-coral-400: #F46A54;   /* vivid — hover */
+  --mk-coral-500: #E25B45;   /* BASE brand */
+  --mk-coral-600: #C94A37;   /* pressed */
+  --mk-coral-700: #A83A2A;
+  --mk-coral-800: #7C2A1E;
+  --mk-coral-900: #4A1810;
 
-  /* Or / Brass (accent chaud) */
-  --mk-gold-50:  #FDF7EA;
-  --mk-gold-100: #F9EBC7;
-  --mk-gold-200: #F2D68A;
-  --mk-gold-300: #ECC15A;
-  --mk-gold-400: #E8A33D;  /* BASE brand */
-  --mk-gold-500: #C88B2D;
-  --mk-gold-600: #9F6D22;
-  --mk-gold-700: #77521B;
-  --mk-gold-800: #513815;
-  --mk-gold-900: #2E1F0B;
+  /* Honey (secondaire — cadeaux, jalons dorés) */
+  --mk-honey-50:  #FEF9EF;
+  --mk-honey-100: #FEF7EC;   /* gold-subtle */
+  --mk-honey-200: #FCE5B3;
+  --mk-honey-300: #F8BE68;   /* honey soft — hover */
+  --mk-honey-400: #F0AC4C;
+  --mk-honey-500: #E9A23B;   /* BASE secondary */
+  --mk-honey-600: #C4831F;
+  --mk-honey-700: #9B6316;
+  --mk-honey-800: #6E440F;
+  --mk-honey-900: #3F2708;
 
-  /* Argile / Clay (accent secondaire) */
-  --mk-clay-50:  #FBEEEE;
-  --mk-clay-100: #F5D5D5;
-  --mk-clay-200: #E9A6A6;
-  --mk-clay-300: #DA7373;
-  --mk-clay-400: #CB4E4E;
-  --mk-clay-500: #C13B3B;  /* BASE */
-  --mk-clay-600: #A02C2C;
-  --mk-clay-700: #7C2020;
-  --mk-clay-800: #571818;
-  --mk-clay-900: #310D0D;
+  /* Plum (ink — jamais de gris) */
+  --mk-plum-50:  #F5F0F2;
+  --mk-plum-100: #E6DBE0;
+  --mk-plum-200: #C8B5BE;
+  --mk-plum-300: #A18893;
+  --mk-plum-400: #78606C;
+  --mk-plum-500: #58413D;   /* on-surface-variant */
+  --mk-plum-600: #3D2A32;
+  --mk-plum-700: #2D1E27;
+  --mk-plum-800: #201524;   /* BASE ink */
+  --mk-plum-900: #1B181E;   /* espresso */
 
-  /* Stone chaud (neutres) */
-  --mk-stone-50:  #FAF7F0;
-  --mk-stone-100: #F3EEE1;
-  --mk-stone-200: #E5DDC9;
-  --mk-stone-300: #CFC3A7;
-  --mk-stone-400: #A79979;
-  --mk-stone-500: #7D7156;
-  --mk-stone-600: #5F553F;
-  --mk-stone-700: #453E2E;
-  --mk-stone-800: #2C2820;
-  --mk-stone-900: #161311;  /* INK */
+  /* Paper (surfaces — coton fin, papier crème, sable) */
+  --mk-paper-noble:  #FDFBF7;   /* surface principale */
+  --mk-paper-cream:  #F7F3EE;   /* élévation +1 */
+  --mk-paper-sand:   #EFE9E0;   /* élévation +2 (keepsakes) */
+  --mk-paper-white:  #FFFFFF;   /* pour cards internes sur crème */
 
-  /* Forest (success uniquement) */
+  /* États */
   --mk-forest-50:  #EDF3EF;
   --mk-forest-500: #4A7060;
-  --mk-forest-700: #2E4A3B;  /* BASE success */
+  --mk-forest-700: #2E4A3B;   /* success */
   --mk-forest-900: #172A21;
 
-  /* ─────────────────────────────────────────────────────────
-     COULEURS — Tokens sémantiques (à utiliser dans le code)
-     ───────────────────────────────────────────────────────── */
+  --mk-error-50:   #FFF1F0;
+  --mk-error-500:  #E5484D;
+  --mk-error-700:  #BA1A1A;   /* error base */
+  --mk-error-900:  #7C1010;
 
-  --mk-surface-base:      #FFFFFF;
-  --mk-surface-muted:     var(--mk-stone-50);
-  --mk-surface-elevated:  #FFFFFF;
-  --mk-surface-inverted:  var(--mk-indigo-700);
-
-  --mk-text-primary:      var(--mk-stone-900);
-  --mk-text-secondary:    var(--mk-stone-700);
-  --mk-text-tertiary:     var(--mk-stone-500);
-  --mk-text-inverted:     #FFFFFF;
-  --mk-text-brand:        var(--mk-indigo-700);
-  --mk-text-accent-gold:  var(--mk-gold-600);
-
-  --mk-border-subtle:     var(--mk-stone-100);
-  --mk-border-default:    var(--mk-stone-200);
-  --mk-border-strong:     var(--mk-stone-300);
-  --mk-border-focus:      var(--mk-indigo-700);
-
-  --mk-action-primary:         var(--mk-indigo-700);
-  --mk-action-primary-hover:   var(--mk-indigo-600);
-  --mk-action-primary-press:   var(--mk-indigo-800);
-  --mk-action-secondary:       var(--mk-clay-500);
-  --mk-action-secondary-hover: var(--mk-clay-600);
-  --mk-action-accent-gold:     var(--mk-gold-400);
-
-  --mk-state-success: var(--mk-forest-700);
-  --mk-state-warning: var(--mk-gold-500);
-  --mk-state-error:   var(--mk-clay-600);
-  --mk-state-info:    var(--mk-indigo-500);
+  --mk-info-500:   #354270;
+  --mk-info-700:   #263258;
 
   /* ─────────────────────────────────────────────────────────
-     TYPOGRAPHIE
+     TOKENS SÉMANTIQUES — à utiliser dans le code
      ───────────────────────────────────────────────────────── */
 
-  --mk-font-serif: 'Fraunces', ui-serif, Georgia, serif;
-  --mk-font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --mk-font-mono:  'DM Mono', ui-monospace, Menlo, monospace;
+  /* Surfaces */
+  --mk-surface-base:      var(--mk-paper-noble);
+  --mk-surface-muted:     var(--mk-paper-cream);
+  --mk-surface-sunk:      var(--mk-paper-sand);
+  --mk-surface-elevated:  var(--mk-paper-white);
+  --mk-surface-inverted:  var(--mk-plum-800);
 
-  /* Type scale — format: size / line-height (letter-spacing géré via classes utility) */
-  --mk-type-display-2xl: 72px;
+  /* Texte */
+  --mk-text-primary:      var(--mk-plum-800);
+  --mk-text-secondary:    var(--mk-plum-500);
+  --mk-text-tertiary:     var(--mk-plum-400);
+  --mk-text-muted:        rgba(32, 21, 36, 0.4);   /* placeholder */
+  --mk-text-inverted:     var(--mk-paper-noble);
+  --mk-text-brand:        var(--mk-coral-500);
+  --mk-text-accent-gold:  var(--mk-honey-600);
+
+  /* Bordures */
+  --mk-border-warm:        rgba(32, 21, 36, 0.08);
+  --mk-border-warm-strong: rgba(32, 21, 36, 0.14);
+  --mk-border-subtle:      var(--mk-border-warm);
+  --mk-border-default:     var(--mk-border-warm-strong);
+  --mk-border-strong:      rgba(32, 21, 36, 0.20);
+  --mk-border-focus:       var(--mk-coral-500);
+
+  /* Actions */
+  --mk-action-primary:         var(--mk-coral-500);
+  --mk-action-primary-hover:   var(--mk-coral-400);
+  --mk-action-primary-press:   var(--mk-coral-600);
+  --mk-action-primary-soft:    var(--mk-coral-100);
+  --mk-action-secondary:       var(--mk-plum-800);
+  --mk-action-secondary-hover: var(--mk-plum-700);
+  --mk-action-accent-gold:     var(--mk-honey-500);
+  --mk-action-accent-gold-hover: var(--mk-honey-300);
+  --mk-action-accent-gold-soft:  var(--mk-honey-100);
+
+  /* États sémantiques */
+  --mk-state-success:      var(--mk-forest-700);
+  --mk-state-success-soft: var(--mk-forest-50);
+  --mk-state-warning:      var(--mk-honey-500);
+  --mk-state-warning-soft: var(--mk-honey-100);
+  --mk-state-error:        var(--mk-error-700);
+  --mk-state-error-soft:   var(--mk-error-50);
+  --mk-state-info:         var(--mk-info-500);
+
+  /* ─────────────────────────────────────────────────────────
+     TYPOGRAPHIE — Epilogue (display) + Plus Jakarta Sans (UI)
+     ───────────────────────────────────────────────────────── */
+
+  --mk-font-display: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+  --mk-font-sans:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mk-font-mono:    'DM Mono', ui-monospace, Menlo, monospace;
+
+  /* Legacy alias — d'anciens composants réfèrent --mk-font-serif */
+  --mk-font-serif:   var(--mk-font-display);
+
+  /* Type scale (harmonisé avec BRAND.md) */
+  --mk-type-hero:        56px;
+  --mk-type-hero-mobile: 36px;
+  --mk-type-display-2xl: 72px;   /* legacy — mappé sur hero */
   --mk-type-display-xl:  60px;
   --mk-type-display-lg:  48px;
-  --mk-type-h1:          36px;
-  --mk-type-h2:          30px;
-  --mk-type-h3:          24px;
+  --mk-type-h1:          40px;
+  --mk-type-h1-mobile:   28px;
+  --mk-type-h2:          28px;
+  --mk-type-h3:          22px;
   --mk-type-h4:          20px;
   --mk-type-h5:          18px;
-  --mk-type-body-lg:     18px;
-  --mk-type-body:        16px;
-  --mk-type-body-sm:     14px;
+  --mk-type-body-lg:     17px;
+  --mk-type-body:        15px;
+  --mk-type-body-sm:     13px;
   --mk-type-caption:     13px;
+  --mk-type-label-lg:    14px;
+  --mk-type-label-md:    12px;
+  --mk-type-label-tag:   11px;
   --mk-type-micro:       12px;
 
   /* Line-heights */
-  --mk-lh-tight:   1.05;   /* display */
-  --mk-lh-snug:    1.2;    /* headings */
+  --mk-lh-tight:   1.05;
+  --mk-lh-snug:    1.15;
   --mk-lh-normal:  1.4;
-  --mk-lh-relaxed: 1.6;    /* body */
+  --mk-lh-relaxed: 1.6;
 
   /* Letter-spacing */
   --mk-tracking-tighter: -0.03em;
-  --mk-tracking-tight:   -0.01em;
+  --mk-tracking-tight:   -0.015em;
+  --mk-tracking-snug:    -0.01em;
   --mk-tracking-normal:  0;
-  --mk-tracking-wide:    0.08em;
+  --mk-tracking-wide:    0.02em;
+  --mk-tracking-wider:   0.06em;
+  --mk-tracking-widest:  0.10em;
 
   /* ─────────────────────────────────────────────────────────
-     SPACING (base 4px)
+     SPACING (base 4px, échelle BRAND.md)
      ───────────────────────────────────────────────────────── */
 
   --mk-space-0:    0;
@@ -143,27 +177,27 @@
   --mk-space-1-5:  6px;
   --mk-space-2:    8px;
   --mk-space-3:    12px;
-  --mk-space-4:    16px;  /* base unit */
+  --mk-space-4:    16px;
   --mk-space-5:    20px;
   --mk-space-6:    24px;
   --mk-space-8:    32px;
   --mk-space-10:   40px;
   --mk-space-12:   48px;
   --mk-space-16:   64px;
+  --mk-space-18:   72px;
   --mk-space-20:   80px;
   --mk-space-24:   96px;
   --mk-space-32:   128px;
-  --mk-space-40:   160px;
 
   /* Sémantiques */
-  --mk-space-container-x-mobile:  20px;
-  --mk-space-container-x-tablet:  32px;
-  --mk-space-container-x-desktop: 48px;
-  --mk-space-container-max:       1200px;
+  --mk-space-container-x-mobile:  16px;
+  --mk-space-container-x-tablet:  24px;
+  --mk-space-container-x-desktop: 32px;
+  --mk-space-container-max:       1240px;
   --mk-space-container-max-narrow: 720px;
   --mk-space-container-max-marketing: 1280px;
 
-  --mk-space-section-y-mobile:  64px;
+  --mk-space-section-y-mobile:  72px;
   --mk-space-section-y-desktop: 128px;
   --mk-space-hero-y-mobile:     80px;
   --mk-space-hero-y-desktop:    160px;
@@ -182,48 +216,53 @@
   --mk-space-grid-gap-loose: 32px;
 
   /* ─────────────────────────────────────────────────────────
-     RADIUS
+     RADIUS — courbes généreuses, tactiles, keepsake
      ───────────────────────────────────────────────────────── */
 
   --mk-radius-none: 0;
   --mk-radius-xs:   4px;
   --mk-radius-sm:   8px;
-  --mk-radius-md:   12px;
-  --mk-radius-lg:   16px;
-  --mk-radius-xl:   20px;
-  --mk-radius-2xl:  28px;
+  --mk-radius-md:   14px;
+  --mk-radius-lg:   20px;
+  --mk-radius-xl:   28px;
+  --mk-radius-2xl:  36px;
+  --mk-radius-3xl:  48px;
   --mk-radius-full: 9999px;
 
   /* ─────────────────────────────────────────────────────────
-     SHADOWS (warm — teinte stone-800 au lieu de black)
+     SHADOWS — ambiance chaude (teinte plum), pas de noir
      ───────────────────────────────────────────────────────── */
 
-  --mk-shadow-xs: 0 1px 2px 0 rgba(45, 32, 14, 0.04);
-  --mk-shadow-sm: 0 2px 4px -1px rgba(45, 32, 14, 0.06),
-                  0 1px 2px -1px rgba(45, 32, 14, 0.04);
-  --mk-shadow-md: 0 4px 12px -2px rgba(45, 32, 14, 0.08),
-                  0 2px 4px -2px rgba(45, 32, 14, 0.04);
-  --mk-shadow-lg: 0 12px 24px -6px rgba(45, 32, 14, 0.10),
-                  0 4px 8px -4px rgba(45, 32, 14, 0.06);
-  --mk-shadow-xl: 0 24px 48px -12px rgba(45, 32, 14, 0.14),
-                  0 8px 16px -8px rgba(45, 32, 14, 0.08);
-  --mk-shadow-2xl: 0 32px 64px -16px rgba(45, 32, 14, 0.18),
-                   0 12px 24px -12px rgba(45, 32, 14, 0.10);
+  --mk-shadow-xs: 0 1px 2px rgba(32, 21, 36, 0.04);
+  --mk-shadow-sm: 0 4px 12px -2px rgba(32, 21, 36, 0.06),
+                  0 2px 4px -2px rgba(32, 21, 36, 0.03);
+  --mk-shadow-md: 0 12px 36px -8px rgba(32, 21, 36, 0.08),
+                  0 4px 12px -2px rgba(32, 21, 36, 0.04);
+  --mk-shadow-lg: 0 24px 48px -12px rgba(32, 21, 36, 0.12),
+                  0 8px 16px -8px rgba(32, 21, 36, 0.06);
+  --mk-shadow-xl: 0 32px 64px -16px rgba(32, 21, 36, 0.16),
+                  0 12px 24px -12px rgba(32, 21, 36, 0.08);
+  --mk-shadow-2xl: 0 48px 96px -24px rgba(32, 21, 36, 0.22),
+                   0 16px 32px -16px rgba(32, 21, 36, 0.12);
 
-  --mk-shadow-brand: 0 12px 32px -8px rgba(30, 41, 82, 0.25);
-  --mk-shadow-gold:  0 8px 24px -6px rgba(232, 163, 61, 0.35);
+  /* Glows signature (autour des CTAs coral + keepsakes gold) */
+  --mk-shadow-coral: 0 8px 24px rgba(226, 91, 69, 0.28);
+  --mk-shadow-honey: 0 8px 24px rgba(233, 162, 59, 0.24);
+  --mk-shadow-brand: var(--mk-shadow-coral);        /* legacy alias */
+  --mk-shadow-gold:  var(--mk-shadow-honey);        /* legacy alias */
 
-  --mk-ring-focus:       0 0 0 3px rgba(30, 41, 82, 0.25);
-  --mk-ring-focus-inset: inset 0 0 0 2px rgba(30, 41, 82, 0.6);
-  --mk-ring-error:       0 0 0 3px rgba(160, 44, 44, 0.25);
+  /* Focus rings */
+  --mk-ring-focus:       0 0 0 4px rgba(226, 91, 69, 0.15);
+  --mk-ring-focus-inset: inset 0 0 0 2px rgba(226, 91, 69, 0.6);
+  --mk-ring-error:       0 0 0 4px rgba(186, 26, 26, 0.15);
 
   /* ─────────────────────────────────────────────────────────
-     MOTION
+     MOTION — courbes emphase + spring
      ───────────────────────────────────────────────────────── */
 
   --mk-duration-instant:   0ms;
   --mk-duration-fast:      150ms;
-  --mk-duration-base:      250ms;
+  --mk-duration-base:      240ms;   /* 240ms = signature Warm Celebration */
   --mk-duration-slow:      400ms;
   --mk-duration-slower:    600ms;
   --mk-duration-story:     1000ms;
@@ -237,10 +276,10 @@
   --mk-ease-emphasis:  cubic-bezier(0.16, 1, 0.3, 1);
   --mk-ease-bounce:    cubic-bezier(0.68, -0.55, 0.27, 1.55);
 
-  --mk-motion-hover:     var(--mk-duration-fast) var(--mk-ease-out);
-  --mk-motion-focus:     var(--mk-duration-fast) var(--mk-ease-out);
-  --mk-motion-state:     var(--mk-duration-base) var(--mk-ease-out);
-  --mk-motion-overlay:   var(--mk-duration-slow) var(--mk-ease-emphasis);
+  --mk-motion-hover:     var(--mk-duration-fast)  var(--mk-ease-out);
+  --mk-motion-focus:     var(--mk-duration-fast)  var(--mk-ease-out);
+  --mk-motion-state:     var(--mk-duration-base)  var(--mk-ease-emphasis);
+  --mk-motion-overlay:   var(--mk-duration-slow)  var(--mk-ease-emphasis);
   --mk-motion-reveal:    var(--mk-duration-slower) var(--mk-ease-spring);
   --mk-motion-celebrate: var(--mk-duration-celebrate) var(--mk-ease-emphasis);
 
@@ -269,6 +308,175 @@
   --mk-z-popover:    1060;
   --mk-z-toast:      1070;
   --mk-z-tooltip:    1080;
+
+  /* ═════════════════════════════════════════════════════════
+     LEGACY ALIASES — remappés sur Warm Celebration
+     À terme : nettoyer les usages et supprimer ces alias.
+     ═════════════════════════════════════════════════════════ */
+
+  /* Ancienne palette "Kado mascotte" (rose #FF5470) → coral */
+  --mk-rose:        var(--mk-coral-500);
+  --mk-rose-2:      var(--mk-coral-400);
+  --mk-rose-soft:   var(--mk-coral-200);
+  --mk-rose-pale:   var(--mk-coral-100);
+  --mk-rose-deep:   var(--mk-coral-600);
+  --mk-rose-edge:   var(--mk-coral-700);
+  --mk-accent:      var(--mk-coral-500);
+  --mk-accent-soft: var(--mk-coral-200);
+  --mk-accent-pale: var(--mk-coral-100);
+  --mk-accent-deep: var(--mk-coral-600);
+  --mk-sh-accent:   var(--mk-shadow-coral);
+
+  /* Ancienne palette "Redesign" */
+  --mk-cream:    var(--mk-paper-noble);
+  --mk-blush:    var(--mk-coral-50);
+  --mk-blush-2:  var(--mk-coral-200);
+  --mk-lilac-bg: var(--mk-paper-cream);
+  --mk-paper:    var(--mk-paper-white);
+
+  /* Accents secondaires legacy */
+  --mk-lilac:       var(--mk-plum-600);
+  --mk-lilac-soft:  var(--mk-paper-cream);
+  --mk-mint:        var(--mk-forest-700);
+  --mk-mint-soft:   var(--mk-forest-50);
+  --mk-butter:      var(--mk-honey-600);
+  --mk-butter-soft: var(--mk-honey-100);
+  --mk-gold:        var(--mk-honey-500);
+  --mk-gold-hi:     var(--mk-honey-400);
+  --mk-peach:       var(--mk-coral-300);
+  --mk-peach-soft:  var(--mk-coral-100);
+  --mk-sky:         var(--mk-info-500);
+  --mk-sky-soft:    #E1E7F5;
+  --mk-ribbon:      var(--mk-honey-500);
+  --mk-ribbon-dark: var(--mk-honey-700);
+  --mk-ribbon-hi:   var(--mk-honey-300);
+
+  /* Ink legacy */
+  --mk-ink:   var(--mk-plum-800);
+  --mk-ink-2: var(--mk-plum-500);
+  --mk-ink-3: var(--mk-plum-400);
+  --mk-ink-4: var(--mk-plum-300);
+
+  /* Lignes legacy */
+  --mk-line:        var(--mk-border-warm);
+  --mk-line-2:      var(--mk-border-warm-strong);
+  --mk-line-strong: var(--mk-border-strong);
+
+  /* Radii legacy */
+  --mk-r-xs:   var(--mk-radius-sm);   /* 10 → 8 */
+  --mk-r-sm:   var(--mk-radius-md);   /* 14 */
+  --mk-r-md:   var(--mk-radius-lg);   /* 20 */
+  --mk-r-lg:   var(--mk-radius-xl);   /* 28 */
+  --mk-r-xl:   var(--mk-radius-2xl);  /* 36 */
+  --mk-r-pill: var(--mk-radius-full);
+
+  /* Shadows legacy */
+  --mk-sh-1: var(--mk-shadow-xs);
+  --mk-sh-2: var(--mk-shadow-sm);
+  --mk-sh-3: var(--mk-shadow-md);
+  --mk-sh-rose:   var(--mk-shadow-coral);
+  --mk-sh-lilac:  var(--mk-shadow-md);
+  --mk-sh-butter: var(--mk-shadow-honey);
+
+  /* Legacy handwriting (encore utilisé sur certaines pages) */
+  --mk-display: var(--mk-font-display);
+  --mk-body:    var(--mk-font-sans);
+  --mk-hand:    'Caveat', cursive;   /* conservé pour éléments manuscrits */
+
+  /* Alias historiques ultra-génériques */
+  --brand:        var(--mk-coral-500);
+  --brand-light:  var(--mk-coral-100);
+  --brand-dark:   var(--mk-coral-600);
+  --accent:       var(--mk-honey-500);
+  --accent-light: var(--mk-honey-100);
+  --green:        var(--mk-forest-700);
+  --red:          var(--mk-error-700);
+
+  --bg:       var(--mk-surface-base);
+  --surface:  var(--mk-surface-elevated);
+  --surface2: var(--mk-surface-muted);
+  --border:   var(--mk-border-warm);
+  --border-focus: var(--mk-coral-500);
+
+  --text:   var(--mk-text-primary);
+  --text-2: var(--mk-text-secondary);
+  --text-3: var(--mk-text-tertiary);
+
+  --radius-sm: var(--mk-radius-sm);
+  --radius:    var(--mk-radius-md);
+  --radius-lg: var(--mk-radius-lg);
+
+  --shadow-sm:    var(--mk-shadow-xs);
+  --shadow:       var(--mk-shadow-sm);
+  --shadow-lg:    var(--mk-shadow-md);
+  --shadow-brand: var(--mk-shadow-coral);
+
+  --font: var(--mk-font-sans);
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ═════════════════════════════════════════════════════════
+     LEGACY PALETTE ALIASES — ancienne direction "Hybride C+A"
+     (Indigo / Gold / Clay / Stone / Forest)
+     Remappés sur Warm Celebration pour éviter les régressions
+     dans landing/ et pages/ client/ qui référencent encore
+     ces raw tokens (~200 usages restants à migrer).
+     ═════════════════════════════════════════════════════════ */
+
+  /* Indigo (ancien primary) → Plum (nouveau ink) */
+  --mk-indigo-50:  var(--mk-plum-50);
+  --mk-indigo-100: var(--mk-plum-100);
+  --mk-indigo-200: var(--mk-plum-200);
+  --mk-indigo-300: var(--mk-plum-300);
+  --mk-indigo-400: var(--mk-plum-400);
+  --mk-indigo-500: var(--mk-plum-500);
+  --mk-indigo-600: var(--mk-plum-600);
+  --mk-indigo-700: var(--mk-plum-800);   /* était #1E2952 → plum #201524 */
+  --mk-indigo-800: var(--mk-plum-900);
+  --mk-indigo-900: var(--mk-plum-900);
+
+  /* Gold (ancien accent chaud) → Honey */
+  --mk-gold-50:  var(--mk-honey-50);
+  --mk-gold-100: var(--mk-honey-100);
+  --mk-gold-200: var(--mk-honey-200);
+  --mk-gold-300: var(--mk-honey-200);
+  --mk-gold-400: var(--mk-honey-500);   /* était #E8A33D → honey #E9A23B */
+  --mk-gold-500: var(--mk-honey-600);
+  --mk-gold-600: var(--mk-honey-700);
+  --mk-gold-700: var(--mk-honey-700);
+  --mk-gold-800: var(--mk-honey-800);
+  --mk-gold-900: var(--mk-honey-900);
+
+  /* Clay (ancien secondary rouge) → Coral */
+  --mk-clay-50:  var(--mk-coral-50);
+  --mk-clay-100: var(--mk-coral-100);
+  --mk-clay-200: var(--mk-coral-200);
+  --mk-clay-300: var(--mk-coral-300);
+  --mk-clay-400: var(--mk-coral-400);
+  --mk-clay-500: var(--mk-coral-500);   /* était #C13B3B → coral #E25B45 */
+  --mk-clay-600: var(--mk-coral-600);
+  --mk-clay-700: var(--mk-coral-700);
+  --mk-clay-800: var(--mk-coral-800);
+  --mk-clay-900: var(--mk-coral-900);
+
+  /* Stone (anciens neutres warm) → Paper + Plum */
+  --mk-stone-50:  var(--mk-paper-noble);
+  --mk-stone-100: var(--mk-paper-cream);
+  --mk-stone-200: var(--mk-paper-sand);
+  --mk-stone-300: var(--mk-plum-100);
+  --mk-stone-400: var(--mk-plum-300);
+  --mk-stone-500: var(--mk-plum-500);
+  --mk-stone-600: var(--mk-plum-600);
+  --mk-stone-700: var(--mk-plum-700);
+  --mk-stone-800: var(--mk-plum-800);
+  --mk-stone-900: var(--mk-plum-800);
+
+  /* Forest (success — inchangé) */
+  --mk-forest-100: var(--mk-forest-50);
+  --mk-forest-200: var(--mk-forest-50);
+  --mk-forest-300: var(--mk-forest-500);
+  --mk-forest-400: var(--mk-forest-500);
+  --mk-forest-600: var(--mk-forest-700);
+  --mk-forest-800: var(--mk-forest-900);
 }
 
 /* Prefers reduced motion — flatten toutes durées expressives */

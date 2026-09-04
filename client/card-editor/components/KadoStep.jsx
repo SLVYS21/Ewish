@@ -27,10 +27,10 @@ export default function KadoStep() {
           textAlign: 'center',
           gap: 14,
           padding: '32px 22px 30px',
-          borderRadius: 20,
-          background: 'linear-gradient(160deg, #FFF7DE 0%, #FDE7A5 100%)',
-          border: '1.5px solid #E5C97A',
-          boxShadow: '0 10px 30px -14px rgba(184,139,42,.35)',
+          borderRadius: 28,
+          background: 'linear-gradient(160deg, var(--mk-honey-50, #FEF9EF) 0%, var(--mk-honey-100, #FEF7EC) 100%)',
+          border: '1px solid var(--mk-border-warm-strong, rgba(32, 21, 36, 0.14))',
+          boxShadow: 'var(--mk-shadow-honey, 0 8px 24px rgba(233, 162, 59, 0.24))',
         }}
       >
         <span
@@ -43,8 +43,8 @@ export default function KadoStep() {
             gap: 6,
             padding: '5px 10px',
             borderRadius: 999,
-            background: '#161311',
-            color: '#FDE7A5',
+            background: 'var(--mk-plum-800, #201524)',
+            color: 'var(--mk-honey-300, #F8BE68)',
             fontSize: 10.5,
             fontWeight: 800,
             letterSpacing: '.08em',
@@ -63,8 +63,8 @@ export default function KadoStep() {
             borderRadius: '50%',
             display: 'grid',
             placeItems: 'center',
-            background: 'radial-gradient(circle at 30% 30%, #FFF6C7 0%, #F2C866 70%, #B58A2A 100%)',
-            boxShadow: '0 8px 22px -8px rgba(184,139,42,.55)',
+            background: 'radial-gradient(circle at 30% 30%, var(--mk-honey-200, #FCE5B3) 0%, var(--mk-honey-400, #F0AC4C) 70%, var(--mk-honey-700, #9B6316) 100%)',
+            boxShadow: 'var(--mk-shadow-honey, 0 8px 24px rgba(233, 162, 59, 0.24))',
           }}
         >
           <NotoEmoji name="wrapped-gift" size={44} />
@@ -73,10 +73,11 @@ export default function KadoStep() {
         <h2
           style={{
             margin: 0,
-            fontFamily: 'var(--mk-display)',
+            fontFamily: 'var(--mk-font-display, Epilogue)',
             fontSize: 22,
             lineHeight: 1.15,
-            color: '#5A4318',
+            letterSpacing: '-0.01em',
+            color: 'var(--mk-plum-800, #201524)',
           }}
         >
           Le cadeau à gratter arrive bientôt
@@ -88,7 +89,7 @@ export default function KadoStep() {
             maxWidth: 340,
             fontSize: 13.5,
             lineHeight: 1.55,
-            color: '#7A5C24',
+            color: 'var(--mk-plum-500, #58413D)',
           }}
         >
           On peaufine la carte à gratter dorée qui cachera un vrai montant
@@ -103,11 +104,11 @@ export default function KadoStep() {
             gap: 8,
             padding: '10px 16px',
             borderRadius: 999,
-            background: 'rgba(255,255,255,.7)',
-            border: '1px solid rgba(184,139,42,.35)',
+            background: 'rgba(253, 251, 247, 0.75)',
+            border: '1px solid var(--mk-border-warm, rgba(32, 21, 36, 0.08))',
             fontSize: 12,
             fontWeight: 700,
-            color: '#7A5C24',
+            color: 'var(--mk-plum-800, #201524)',
           }}
         >
           <LucideSparkles size={14} />

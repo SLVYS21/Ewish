@@ -37,7 +37,7 @@ export default function NewWish() {
     getTemplates()
       .then(r => { setTemplates(r.data); if (r.data.length > 0) setSelected(r.data[0]); })
       .catch(() => {
-        const fb = [{ name: 'birthday', label: 'Anniversaire', creditsRequired: 1, desc: 'Pour fêter une nouvelle année.' }];
+        const fb = [{ name: 'birthday', label: 'Anniversaire', priceFCFA: 500, desc: 'Pour fêter une nouvelle année.' }];
         setTemplates(fb); setSelected(fb[0]);
       });
   }, []);
@@ -61,9 +61,6 @@ export default function NewWish() {
         },
         style: selected.defaultStyle || {},
       });
-      if (user?.role === 'merchant') {
-        setUser({ ...user, credits: Math.max(0, (user.credits || 0) - (selected.creditsRequired || 1)) });
-      }
       navigate(`/ewish-admin/ewish/edit/${res.data._id}`);
     } catch (e) {
       /* La création de publication (POST /publications) ne fait plus de
@@ -81,9 +78,6 @@ export default function NewWish() {
           <ArrowLeft size={16} /> Retour
         </Link>
         <div className={styles.logo}>my<span>Kado</span></div>
-        {user?.role === 'merchant' && (
-          <div className={styles.creditsChip}>💎 {user?.credits ?? 0} crédit{(user?.credits ?? 0) !== 1 ? 's' : ''}</div>
-        )}
       </header>
 
       <div className={styles.body}>
@@ -130,7 +124,7 @@ export default function NewWish() {
                     <div className={styles.tplName}>{tpl.label}</div>
                     {tpl.description && <div className={styles.tplDesc}>{tpl.description}</div>}
                   </div>
-                  <span className={styles.tplCredits}>💎 {tpl.creditsRequired || 1}</span>
+                  <span className={styles.tplCredits}>{(tpl.priceFCFA ?? 500).toLocaleString('fr-FR')} FCFA</span>
                 </div>
               </button>
             );

@@ -1,10 +1,11 @@
 /* ================================================================
-   myKado — Primitive components styles
+   myKado — Primitive components
+   Direction : WARM CELEBRATION (voir BRAND.md)
    Basé sur design-system/tokens.css
    ================================================================ */
 
 /* ═══════════════════════════════════════════════════════════════
-   BUTTON
+   BUTTON — pill par défaut, glow signature sur variants festifs
    ═══════════════════════════════════════════════════════════════ */
 
 .mk-btn {
@@ -31,21 +32,23 @@
 .mk-btn[aria-disabled="true"] {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 .mk-btn:focus-visible {
   outline: none;
   box-shadow: var(--mk-ring-focus);
 }
 
-/* Sizes */
+/* ── Sizes ── */
 .mk-btn--sm {
   font-size: 13px;
-  padding: 6px 12px;
-  min-height: 32px;
+  padding: 8px 14px;
+  min-height: 34px;
 }
 .mk-btn--md {
   font-size: 15px;
-  padding: 10px 20px;
+  padding: 11px 22px;
   min-height: 44px;
 }
 .mk-btn--lg {
@@ -54,66 +57,87 @@
   min-height: 52px;
 }
 
-/* Variants */
+/* ── Primary — Festive Coral (signature) ── */
 .mk-btn--primary {
-  background: var(--mk-action-primary);
-  color: var(--mk-text-inverted);
+  background: var(--mk-coral-500);
+  color: var(--mk-paper-noble);
+  box-shadow: var(--mk-shadow-coral);
 }
 .mk-btn--primary:hover:not(:disabled) {
-  background: var(--mk-action-primary-hover);
-  box-shadow: var(--mk-shadow-brand);
-  transform: translateY(-1px);
+  background: var(--mk-coral-400);
+  transform: translateY(-1px) scale(1.015);
+  box-shadow: 0 12px 32px rgba(226, 91, 69, 0.35);
 }
 .mk-btn--primary:active:not(:disabled) {
-  background: var(--mk-action-primary-press);
+  background: var(--mk-coral-600);
+  transform: translateY(0) scale(1);
+  box-shadow: var(--mk-shadow-coral);
+}
+
+/* ── Secondary — Midnight Plum (autoritaire, admin/checkpoints) ── */
+.mk-btn--secondary {
+  background: var(--mk-plum-800);
+  color: var(--mk-paper-noble);
+}
+.mk-btn--secondary:hover:not(:disabled) {
+  background: var(--mk-plum-700);
+  transform: translateY(-1px);
+  box-shadow: var(--mk-shadow-md);
+}
+.mk-btn--secondary:active:not(:disabled) {
+  background: var(--mk-plum-900);
   transform: translateY(0);
 }
 
-.mk-btn--secondary {
-  background: transparent;
-  color: var(--mk-action-secondary);
-  border-color: var(--mk-action-secondary);
-}
-.mk-btn--secondary:hover:not(:disabled) {
-  background: var(--mk-clay-50);
-  border-color: var(--mk-action-secondary-hover);
-  color: var(--mk-action-secondary-hover);
-}
-
-.mk-btn--tertiary {
-  background: var(--mk-surface-muted);
-  color: var(--mk-text-primary);
-  border-color: var(--mk-border-default);
-}
-.mk-btn--tertiary:hover:not(:disabled) {
-  background: var(--mk-stone-100);
-  border-color: var(--mk-border-strong);
-}
-
+/* ── Tertiary — Warm Ghost (stroke chaud, remplit coral au hover) ── */
+.mk-btn--tertiary,
 .mk-btn--ghost {
   background: transparent;
   color: var(--mk-text-primary);
+  border-color: var(--mk-border-warm-strong);
 }
+.mk-btn--tertiary:hover:not(:disabled),
 .mk-btn--ghost:hover:not(:disabled) {
-  background: var(--mk-stone-50);
+  background: var(--mk-coral-100);
+  border-color: var(--mk-coral-300);
+  color: var(--mk-coral-700);
+}
+.mk-btn--tertiary:active:not(:disabled),
+.mk-btn--ghost:active:not(:disabled) {
+  background: var(--mk-coral-200);
 }
 
+/* Ghost pur (sans stroke) — pour toolbars serrées */
+.mk-btn--ghost-plain {
+  background: transparent;
+  color: var(--mk-text-secondary);
+  border-color: transparent;
+}
+.mk-btn--ghost-plain:hover:not(:disabled) {
+  background: var(--mk-paper-cream);
+  color: var(--mk-text-primary);
+}
+
+/* ── Gold — keepsakes, milestones dorés ── */
 .mk-btn--gold {
-  background: var(--mk-action-accent-gold);
-  color: var(--mk-stone-900);
+  background: var(--mk-honey-500);
+  color: var(--mk-plum-800);
+  box-shadow: var(--mk-shadow-honey);
 }
 .mk-btn--gold:hover:not(:disabled) {
-  background: var(--mk-gold-500);
-  box-shadow: var(--mk-shadow-gold);
-  transform: translateY(-1px);
+  background: var(--mk-honey-300);
+  transform: translateY(-1px) scale(1.015);
+  box-shadow: 0 12px 32px rgba(233, 162, 59, 0.32);
 }
 
+/* ── Danger ── */
 .mk-btn--danger {
-  background: var(--mk-state-error);
-  color: var(--mk-text-inverted);
+  background: var(--mk-error-700);
+  color: var(--mk-paper-noble);
 }
 .mk-btn--danger:hover:not(:disabled) {
-  background: var(--mk-clay-700);
+  background: var(--mk-error-500);
+  box-shadow: 0 8px 24px rgba(186, 26, 26, 0.28);
 }
 
 .mk-btn--full { width: 100%; }
@@ -122,8 +146,12 @@
   aspect-ratio: 1;
 }
 
+.mk-btn__spinner {
+  animation: spin 0.8s linear infinite;
+}
+
 /* ═══════════════════════════════════════════════════════════════
-   INPUT / TEXTAREA / SELECT
+   INPUT / TEXTAREA / SELECT — radius-lg (20px), focus ring coral
    ═══════════════════════════════════════════════════════════════ */
 
 .mk-input,
@@ -135,9 +163,9 @@
   font-size: var(--mk-type-body);
   line-height: 1.4;
   color: var(--mk-text-primary);
-  background: var(--mk-surface-base);
-  border: 1px solid var(--mk-border-default);
-  border-radius: var(--mk-radius-sm);
+  background: var(--mk-surface-elevated);
+  border: 1.5px solid rgba(32, 21, 36, 0.10);
+  border-radius: var(--mk-radius-lg);
   transition: border-color var(--mk-motion-focus),
               box-shadow var(--mk-motion-focus);
   appearance: none;
@@ -156,27 +184,27 @@
 
 .mk-input::placeholder,
 .mk-textarea::placeholder {
-  color: var(--mk-text-tertiary);
+  color: var(--mk-text-muted);
 }
 
 .mk-input:hover,
 .mk-textarea:hover,
 .mk-select:hover {
-  border-color: var(--mk-border-strong);
+  border-color: rgba(32, 21, 36, 0.18);
 }
 
 .mk-input:focus,
 .mk-textarea:focus,
 .mk-select:focus {
   outline: none;
-  border-color: var(--mk-border-focus);
+  border-color: var(--mk-coral-500);
   box-shadow: var(--mk-ring-focus);
 }
 
 .mk-input:disabled,
 .mk-textarea:disabled,
 .mk-select:disabled {
-  background: var(--mk-surface-muted);
+  background: var(--mk-paper-cream);
   color: var(--mk-text-tertiary);
   cursor: not-allowed;
 }
@@ -184,7 +212,7 @@
 .mk-input--error,
 .mk-textarea--error,
 .mk-select--error {
-  border-color: var(--mk-state-error);
+  border-color: var(--mk-error-700);
 }
 .mk-input--error:focus,
 .mk-textarea--error:focus,
@@ -194,7 +222,7 @@
 
 .mk-select {
   padding-right: 44px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237D7156' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2358413d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
   background-size: 20px;
@@ -208,20 +236,20 @@
 }
 .mk-field__label {
   font-family: var(--mk-font-sans);
-  font-size: var(--mk-type-caption);
-  font-weight: 500;
+  font-size: var(--mk-type-label-lg);
+  font-weight: 600;
   color: var(--mk-text-primary);
 }
 .mk-field__hint {
   font-family: var(--mk-font-sans);
-  font-size: var(--mk-type-caption);
+  font-size: var(--mk-type-body-sm);
   color: var(--mk-text-tertiary);
   margin-top: var(--mk-space-form-hint-gap);
 }
 .mk-field__error {
   font-family: var(--mk-font-sans);
-  font-size: var(--mk-type-caption);
-  color: var(--mk-state-error);
+  font-size: var(--mk-type-body-sm);
+  color: var(--mk-error-700);
   margin-top: var(--mk-space-form-hint-gap);
   display: flex;
   align-items: center;
@@ -255,9 +283,9 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border: 1.5px solid var(--mk-border-strong);
+  border: 1.5px solid var(--mk-border-warm-strong);
   border-radius: var(--mk-radius-xs);
-  background: var(--mk-surface-base);
+  background: var(--mk-surface-elevated);
   transition: all var(--mk-motion-state);
   flex-shrink: 0;
 }
@@ -265,11 +293,11 @@
   opacity: 0;
   transform: scale(0.6);
   transition: opacity var(--mk-motion-state), transform var(--mk-motion-state);
-  stroke: white;
+  stroke: var(--mk-paper-noble);
 }
 .mk-checkbox__native:checked + .mk-checkbox__box {
-  background: var(--mk-action-primary);
-  border-color: var(--mk-action-primary);
+  background: var(--mk-coral-500);
+  border-color: var(--mk-coral-500);
 }
 .mk-checkbox__native:checked + .mk-checkbox__box svg {
   opacity: 1;
@@ -308,9 +336,9 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border: 1.5px solid var(--mk-border-strong);
+  border: 1.5px solid var(--mk-border-warm-strong);
   border-radius: var(--mk-radius-full);
-  background: var(--mk-surface-base);
+  background: var(--mk-surface-elevated);
   transition: all var(--mk-motion-state);
   flex-shrink: 0;
 }
@@ -319,12 +347,12 @@
   width: 10px;
   height: 10px;
   border-radius: var(--mk-radius-full);
-  background: var(--mk-action-primary);
+  background: var(--mk-coral-500);
   transform: scale(0);
   transition: transform var(--mk-motion-state);
 }
 .mk-radio__native:checked + .mk-radio__dot {
-  border-color: var(--mk-action-primary);
+  border-color: var(--mk-coral-500);
 }
 .mk-radio__native:checked + .mk-radio__dot::after {
   transform: scale(1);
@@ -357,7 +385,7 @@
   width: 40px;
   height: 24px;
   border-radius: var(--mk-radius-full);
-  background: var(--mk-stone-300);
+  background: var(--mk-plum-200);
   transition: background var(--mk-motion-state);
   flex-shrink: 0;
 }
@@ -368,12 +396,12 @@
   width: 20px;
   height: 20px;
   border-radius: var(--mk-radius-full);
-  background: var(--mk-surface-base);
+  background: var(--mk-paper-noble);
   box-shadow: var(--mk-shadow-sm);
   transition: transform var(--mk-motion-state);
 }
 .mk-switch__native:checked + .mk-switch__track {
-  background: var(--mk-action-primary);
+  background: var(--mk-coral-500);
 }
 .mk-switch__native:checked + .mk-switch__track .mk-switch__thumb {
   transform: translateX(16px);
@@ -381,3 +409,62 @@
 .mk-switch__native:focus-visible + .mk-switch__track {
   box-shadow: var(--mk-ring-focus);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CHIP / TAG — pill, warm border, active plum ink
+   ═══════════════════════════════════════════════════════════════ */
+
+.mk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mk-space-1-5);
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-label-md);
+  font-weight: 600;
+  color: var(--mk-text-primary);
+  background: var(--mk-surface-elevated);
+  border: 1px solid var(--mk-border-warm);
+  padding: 8px 14px;
+  min-height: 32px;
+  border-radius: var(--mk-radius-full);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--mk-motion-hover);
+  white-space: nowrap;
+}
+.mk-chip:hover { border-color: var(--mk-border-warm-strong); }
+.mk-chip--active {
+  background: var(--mk-plum-800);
+  color: var(--mk-paper-noble);
+  border-color: var(--mk-plum-800);
+}
+.mk-chip--festive {
+  background: var(--mk-coral-100);
+  color: var(--mk-coral-600);
+  border-color: var(--mk-coral-300);
+}
+.mk-chip--lg { min-height: 36px; padding: 10px 16px; font-size: var(--mk-type-label-lg); }
+
+/* ═══════════════════════════════════════════════════════════════
+   BADGE — non-interactive status
+   ═══════════════════════════════════════════════════════════════ */
+
+.mk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-label-tag);
+  font-weight: 700;
+  letter-spacing: var(--mk-tracking-wider);
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--mk-radius-full);
+  white-space: nowrap;
+}
+.mk-badge--success { background: var(--mk-forest-50);  color: var(--mk-forest-700); }
+.mk-badge--warning { background: var(--mk-honey-100);  color: var(--mk-honey-700); }
+.mk-badge--error   { background: var(--mk-error-50);   color: var(--mk-error-700); }
+.mk-badge--coral   { background: var(--mk-coral-100);  color: var(--mk-coral-600); }
+.mk-badge--plum    { background: var(--mk-plum-800);   color: var(--mk-paper-noble); }
+.mk-badge--outline { background: transparent; border: 1px solid var(--mk-border-warm-strong); color: var(--mk-text-secondary); text-transform: none; letter-spacing: 0; font-weight: 600; }

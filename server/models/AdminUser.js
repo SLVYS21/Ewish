@@ -7,7 +7,6 @@ const adminUserSchema = new mongoose.Schema({
   name:     { type: String, default: 'Admin' },
   role:     { type: String, enum: ['super_admin', 'admin', 'merchant'], default: 'admin' },
   merchantId:{ type: String, index: true },
-  credits:   { type: Number, default: 0 },
   lastLogin: { type: Date },
   kycStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
   kycName:   { type: String, default: '' },
@@ -40,13 +39,13 @@ adminUserSchema.methods.comparePassword = function(plain) {
 
 adminUserSchema.methods.toSafeObject = function() {
   const {
-    _id, email, name, role, merchantId, credits, lastLogin, createdAt,
+    _id, email, name, role, merchantId, lastLogin, createdAt,
     kycStatus, kycName, kycMethod, kycPhone,
     kycDocumentUrl, kycSelfieUrl, kycSubmittedAt, kycRejectionReason,
     onboardingHome, onboardingCardEditor,
   } = this;
   return {
-    _id, email, name, role, merchantId, credits, lastLogin, createdAt,
+    _id, email, name, role, merchantId, lastLogin, createdAt,
     kycStatus, kycName, kycMethod, kycPhone,
     kycDocumentUrl, kycSelfieUrl, kycSubmittedAt, kycRejectionReason,
     onboardingHome, onboardingCardEditor,

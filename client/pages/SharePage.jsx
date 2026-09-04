@@ -7,12 +7,13 @@ import {
 import { useAuth } from '../admin/context/AuthContext';
 import {
   ArrowLeft, Check, Copy, RefreshCw, Download, Link2, Edit3,
-  Lock, Zap, Coins, Eye, Palette, X, MessageSquare, Mail, Phone, Gift,
+  Lock, Zap, Eye, Palette, X, MessageSquare, Mail, Phone, Gift,
   Sparkles, PenLine, QrCode, FileText, Video,
 } from 'lucide-react';
 import QRExport from '../components/QRExport';
 import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
 import WallPublishModal from '../components/WallPublishModal';
+import useFeexPay from '../utils/useFeexPay';
 
 /* ─── constants ─── */
 const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-craft','wall-of-wishes-space']);
@@ -333,40 +334,43 @@ function Toast({ message }) {
 
 /* ─── Unlock view ─── */
 export function UnlockView({ pub, onUnlocked }) {
-  const { user, setUser } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [unlocking, setUnlocking] = useState(false);
   const [err, setErr] = useState('');
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const { openCheckout, feexpayModal } = useFeexPay();
 
   const isWall = WALL_NAMES.has(pub?.templateName);
-  const cost = pub?.creditsRequired ?? 1;
-  const credits = user?.credits ?? 0;
+  const priceFCFA = pub?.priceFCFA ?? 500;
   const canBypass = user?.canBypassPaywall === true;
-  const enough = credits >= cost || canBypass;
 
-  /* Chemin non-mur : publication crédit legacy (1 crédit, plan free implicite). */
-  const handleUnlockLegacy = async () => {
-    if (!enough) { navigate('/ewish-admin/credits'); return; }
+  const publish = async (feexpayReference) => {
     setUnlocking(true); setErr('');
     try {
-      await publishPublication(pub._id);
-      if (setUser && !canBypass) setUser(prev => ({ ...prev, credits: (prev.credits ?? 0) - cost }));
+      await publishPublication(pub._id, feexpayReference ? { feexpayReference } : {});
       onUnlocked();
     } catch (e) {
       setErr(e.response?.data?.error || 'Erreur lors de la publication');
     } finally { setUnlocking(false); }
   };
 
+  /* Chemin non-mur : checkout FeexPay direct pour priceFCFA (ou publish gratuit si testeur). */
+  const handleUnlockLegacy = () => {
+    if (canBypass || priceFCFA === 0) { publish(); return; }
+    openCheckout({
+      amount: priceFCFA,
+      description: `myKado — ${pub?.title || pub?.templateName || 'Publication'}`,
+      customId: `card_${pub._id}`,
+      onSuccess: ({ reference }) => publish(reference),
+    });
+  };
+
   /* Chemin mur : passe par WallPublishModal → choix de plan (free/premium/
-     infinite) + éventuel checkout FeexPay. Le "Débloquer pour 1 crédit"
-     précédent forçait le plan free sans laisser le choix. */
-  const handleWallPublishConfirm = async (planType, feexpayReference) => {
+     infinite) + éventuel checkout FeexPay. */
+  const handleWallPublishConfirm = async (planType, feexpayReference, promoCode) => {
     setUnlocking(true); setErr('');
     try {
-      await publishPublication(pub._id, { planType, feexpayReference });
-      /* Le solde crédits peut avoir bougé selon le plan choisi ; on laisse
-         le contexte auth se resynchroniser au prochain fetch user. */
+      await publishPublication(pub._id, { planType, feexpayReference, promoCode });
       setShowPlanModal(false);
       onUnlocked();
     } catch (e) {
@@ -441,32 +445,21 @@ export function UnlockView({ pub, onUnlocked }) {
               ? <><Zap size={16} /> Publier le mur</>
               : canBypass
                 ? <><Zap size={16} /> Publier gratuitement (Testeur)</>
-                : enough
-                  ? <><Zap size={16} /> Débloquer avec {cost} crédit{cost > 1 ? 's' : ''}</>
-                  : <><Coins size={16} /> Recharger mes crédits</>
+                : <><Zap size={16} /> Publier pour {priceFCFA.toLocaleString('fr-FR')} FCFA</>
           }
         </button>
-        {/* Pour les murs, le solde crédits ne détermine plus l'action
-            (le modal propose free/premium/infinite + Mobile Money). On
-            n'affiche donc plus la mention crédits en-dessous du CTA. */}
-        {!isWall && !canBypass && (
-          <p style={{ fontSize: 12, color: 'var(--mk-ink-3)' }}>
-            Il te reste <strong style={{ color: enough ? 'var(--mk-mint)' : 'var(--mk-accent)' }}>{credits} crédit{credits > 1 ? 's' : ''}</strong>
-            {enough
-              ? `  il t'en restera ${credits - cost} après.`
-              : `  il t'en faut ${cost}.`}
-          </p>
-        )}
       </div>
 
       {isWall && showPlanModal && (
         <WallPublishModal
           pubId={pub?._id}
+          templateName={pub?.templateName}
           onClose={() => !unlocking && setShowPlanModal(false)}
           onConfirm={handleWallPublishConfirm}
           loading={unlocking}
         />
       )}
+      {feexpayModal}
     </div>
   );
 }
