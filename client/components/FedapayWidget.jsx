@@ -3,24 +3,27 @@ import { prepareFedapayCheckout } from '../utils/api';
 import { FEDAPAY_CHECKOUT_JS_URL, getFedapayProduct } from '../data/fedapay';
 
 /* ================================================================
-   FedapayWidget — Checkout.js embedded, widget-created transaction.
+   FedapayWidget — Checkout.js OVERLAY (bouton "Payer X FCFA").
    ---------------------------------------------------------------
-   Flow (aligné sur la doc officielle fedapay-reactjs) :
+   Comportement :
      1. Au mount → POST /api/fedapay/prepare { product|amount, pubId }
         → { publicKey, transaction: { amount, description, custom_metadata },
-            currency, callback_url }.
-     2. Charge le script https://cdn.fedapay.com/checkout.js
-        (une seule fois pour tout le document, hoisted sur window.FedaPay).
-     3. FedaPay.init({ public_key, transaction, currency, callback_url,
-        container, onComplete }) → le widget crée la Transaction lui-même
-        avec la clé publique et collecte les infos customer (email/phone)
-        dans son propre formulaire.
-     4. onComplete avec CHECKOUT_COMPLETED → onPurchaseComplete(transactionId).
+            currency }.
+     2. Charge le script https://cdn.fedapay.com/checkout.js (une seule
+        fois pour tout le document, hoisted sur window.FedaPay).
+     3. FedaPay.init('#buttonId', { public_key, transaction, currency,
+        onComplete }) — Checkout.js s'attache au bouton et ouvre son
+        OVERLAY plein écran lorsque l'user clique. Pas d'iframe embarquée
+        dans le modal parent.
+     4. onComplete/CHECKOUT_COMPLETED → onPurchaseComplete(transactionId).
+        DIALOG_DISMISSED → FedaPay referme lui-même son overlay.
 
-   Pourquoi pas de pré-création serveur : FedaPay refuse tout Customer
-   avec un email déjà pris ("email n'est pas disponible"). Le widget
-   gère cette collecte lui-même en réutilisant automatiquement le
-   Customer existant côté FedaPay.
+   Pourquoi overlay et pas embed :
+     - Le mode embed forçait une iframe de 720px dans le footer du modal
+       parent → contenu tronqué, footer non scrollable, bouton "Annuler"
+       de FedaPay incapable de fermer le modal parent.
+     - En overlay, FedaPay gère son propre modal plein écran → scroll,
+       fermeture par croix/backdrop, focus trap : tout est natif.
 
    Props : { product | (amount, description, purpose), pubId,
              onPurchaseComplete(id), onError(err) }
@@ -50,6 +53,10 @@ function loadCheckoutScript() {
   return checkoutScriptPromise;
 }
 
+function formatAmount(n) {
+  return Number(n || 0).toLocaleString('fr-FR');
+}
+
 export default function FedapayWidget({
   product,          // 'card' | 'wall_simple' | 'wall_premium' — catalogue produit fixe
   amount,           // number — montant custom (override product)
@@ -59,39 +66,40 @@ export default function FedapayWidget({
   onPurchaseComplete,
   onError,
 }) {
-  const useCustom  = typeof amount === 'number' && amount > 0;
+  const useCustom   = typeof amount === 'number' && amount > 0;
   const productMeta = useCustom ? null : getFedapayProduct(product);
-  const containerKey = useCustom ? `custom-${amount}` : product;
-  const containerId  = `fedapay-embed-${pubId || 'default'}-${containerKey}`;
-  const notifiedRef = useRef(false);
+  const buttonKey   = useCustom ? `custom-${amount}` : product;
+  const buttonId    = `fedapay-pay-${pubId || 'default'}-${buttonKey}`;
+
+  const notifiedRef  = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [state, setState] = useState({ status: 'loading', error: null });
+  const [state, setState] = useState({ status: 'loading', error: null, amount: null });
 
   useEffect(() => {
     if (!useCustom && !productMeta) {
-      setState({ status: 'error', error: `Produit inconnu : ${product}` });
+      setState({ status: 'error', error: `Produit inconnu : ${product}`, amount: null });
       return;
     }
     if (!pubId) {
-      setState({ status: 'error', error: 'pubId requis' });
+      setState({ status: 'error', error: 'pubId requis', amount: null });
       return;
     }
 
     let cancelled = false;
     notifiedRef.current = false;
-    setState({ status: 'loading', error: null });
+    setState({ status: 'loading', error: null, amount: null });
 
     (async () => {
       try {
         /* 1. Récupérer la config validée serveur (publicKey + transaction
-              + custom_metadata avec pubId) — pas de Transaction.create. */
+              + custom_metadata avec pubId). */
         const payload = useCustom
           ? { amount, description, purpose: purpose || 'custom', pubId }
           : { product, pubId };
         const { data } = await prepareFedapayCheckout(payload);
         if (cancelled) return;
 
-        const { publicKey, transaction, currency, customer } = data;
+        const { publicKey, transaction, currency } = data;
         if (!publicKey || !transaction?.amount) {
           throw new Error('Réponse serveur invalide (publicKey/transaction manquant)');
         }
@@ -100,17 +108,13 @@ export default function FedapayWidget({
         const FedaPay = await loadCheckoutScript();
         if (cancelled) return;
 
-        /* 3. Init embedded — le widget crée la Transaction avec la clé
-              publique et collecte les infos customer dans son formulaire.
-              Options alignées sur l'exemple officiel fedapay-reactjs :
-                { public_key, transaction, currency, customer, container, onComplete }
-              L'option `customer` (facultative) pré-remplit les champs
-              email/phone/nom sans créer de Customer côté FedaPay. */
-        const initOptions = {
+        /* 3. Init overlay — Checkout.js s'attache au bouton via son ID
+              et ouvre son overlay plein écran au clic. Pas de `container`
+              → pas d'iframe embarquée. */
+        FedaPay.init(`#${buttonId}`, {
           public_key: publicKey,
           transaction,          // { amount, description, custom_metadata }
           currency,             // { iso: 'XOF' }
-          container: `#${containerId}`,
           onComplete: (reason, tx) => {
             if (notifiedRef.current) return;
             if (reason === FedaPay.CHECKOUT_COMPLETED) {
@@ -118,17 +122,16 @@ export default function FedapayWidget({
               try { onPurchaseComplete?.(tx?.id); }
               catch (err) { onError?.(err); }
             }
-            /* DIALOG_DISMISSED — on ne fait rien, l'user peut retenter. */
+            /* DIALOG_DISMISSED — FedaPay referme son overlay tout seul,
+               on ne fait rien côté modal parent. */
           },
-        };
-        if (customer) initOptions.customer = customer;
-        FedaPay.init(initOptions);
+        });
 
-        setState({ status: 'ready', error: null });
+        setState({ status: 'ready', error: null, amount: transaction.amount });
       } catch (err) {
         if (cancelled) return;
         const msg = err?.response?.data?.error || err?.message || 'Impossible de préparer le paiement';
-        setState({ status: 'error', error: msg });
+        setState({ status: 'error', error: msg, amount: null });
         onError?.(err);
       }
     })();
@@ -141,25 +144,15 @@ export default function FedapayWidget({
 
   if (!useCustom && !productMeta) return null;
 
+  const resolvedAmount = state.amount ?? (useCustom ? amount : productMeta?.amount);
+  const ctaText = state.status === 'loading'
+    ? 'Préparation du paiement…'
+    : `Payer ${formatAmount(resolvedAmount)} FCFA`;
+
   return (
     <div className="mk-fedapay-host" style={{ width: '100%' }}>
-      {/* Force l'iframe injectée par Checkout.js à remplir tout le
-          container. Sans ça, Checkout.js applique parfois une hauteur
-          fixe interne trop petite (~360px) qui coupe le formulaire. */}
-      <style>{`
-        .mk-fedapay-host iframe {
-          width: 100% !important;
-          min-height: 720px !important;
-          border: 0 !important;
-        }
-      `}</style>
-      {state.status === 'loading' && (
-        <div className="mk-fedapay-loading" style={{ padding: 24, textAlign: 'center', color: 'var(--mk-ink-2, #666)' }}>
-          Chargement du paiement…
-        </div>
-      )}
       {state.status === 'error' && (
-        <div className="mk-fedapay-error" style={{ padding: 16, borderRadius: 12, background: '#fee', color: '#a00', fontSize: 13, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+        <div className="mk-fedapay-error" style={{ padding: 12, borderRadius: 10, background: '#fee', color: '#a00', fontSize: 13, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <span>{state.error}</span>
           <button
             type="button"
@@ -173,18 +166,25 @@ export default function FedapayWidget({
           </button>
         </div>
       )}
-      {/* Container FedaPay — présent dès le mount ET dimensionné avant
-          l'init pour que Checkout.js puisse mesurer le container quand
-          il monte son iframe. minHeight = 720 pour afficher la page
-          complète (choix opérateur MoMo + form) sans scroll interne
-          dans l'iframe. */}
-      <div
-        id={containerId}
+      <button
+        id={buttonId}
+        type="button"
+        disabled={state.status !== 'ready'}
         style={{
-          minHeight: 720,
           width: '100%',
+          padding: '14px 24px',
+          borderRadius: 10,
+          border: 'none',
+          background: state.status === 'ready' ? 'var(--mk-accent, #E11D48)' : '#c9c4d6',
+          color: '#fff',
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: state.status === 'ready' ? 'pointer' : 'not-allowed',
+          transition: 'background .2s, transform .2s',
         }}
-      />
+      >
+        {ctaText}
+      </button>
     </div>
   );
 }

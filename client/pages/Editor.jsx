@@ -20,7 +20,9 @@ import {
   QrCode, Sparkles, Coffee, Blocks, MailOpen, ClipboardList,
   Megaphone, Info, Copy, Check, X, RefreshCw, Gift, ArrowLeft, ChevronRight,
   Shield, Lock, MessageSquare, Palette, Share2, LayoutTemplate, HelpCircle,
+  Link2, Mail, MessageCircle,
 } from 'lucide-react';
+import NotoEmoji from '../components/NotoEmoji';
 import KycModal from '../components/KycModal';
 import MSheet from '../components/MSheet';
 import PromoInput from '../components/PromoInput';
@@ -969,9 +971,14 @@ export default function Editor() {
       await doPublishRequest();
       setPublishing(false);
     } catch (e) {
-      /* 402 avec priceFCFA → l'user complète le paiement via le widget
-         FedaPay rendu dans le modal (voir showFedapayCard plus bas). */
-      if (e.response?.status !== 402 || !e.response.data?.priceFCFA) {
+      /* 402 avec priceFCFA → on ouvre le publish modal, qui rend le
+         widget FedaPay (voir showFedapayCard plus bas). Sans ça, les
+         entry-points qui appellent handlePublish directement (bouton
+         Publier de l'étape Share, autoPublish URL, mobile sheet)
+         restaient bloqués sur un 402 silencieux. */
+      if (e.response?.status === 402 && e.response.data?.priceFCFA) {
+        setIsPublishModalOpen(true);
+      } else {
         alert(e.response?.data?.error || 'Publish failed');
       }
       setPublishing(false);
@@ -1361,15 +1368,21 @@ export default function Editor() {
                 highlight
                 defaultOpen
               >
-                <KadoExtras
-                  gift={gift}
-                  onChange={handleGiftChange}
-                  recipientName={data.name || data.titleName || ''}
-                  paidGiftFcfa={Number(pub?.paidGiftFcfa) || 0}
-                  isPublished={!!pub?.published}
-                  onPayTopUp={handlePublish}
-                  publishing={publishing}
-                />
+                {/* Feature verrouillée — activation prévue plus tard. Le composant
+                    interactif KadoExtras reste défini plus haut mais n'est pas
+                    rendu tant que la fonctionnalité n'est pas déployée. */}
+                <div className={styles.kadoComingSoon}>
+                  <div className={styles.kadoComingSoonIcon}>
+                    <NotoEmoji name="wrapped-gift" size={40} loop />
+                  </div>
+                  <div className={styles.kadoComingSoonBody}>
+                    <div className={styles.kadoComingSoonTitle}>Bientôt disponible</div>
+                    <div className={styles.kadoComingSoonText}>
+                      Ton destinataire pourra gratter une carte dorée pour révéler un
+                      montant surprise. On finalise l'expérience — ça débarque très vite.
+                    </div>
+                  </div>
+                </div>
               </AccordionCard>
               <AccordionCard icon={Megaphone} title="Lien de promotion" sub="Bouton myKado discret" color="#047857">
                 <BrandingTab
@@ -1614,7 +1627,9 @@ export default function Editor() {
             {!pub?.published ? (
               <>
                 <div className={styles.partageBanner}>
-                  <div className={styles.partageBannerEmoji}>🎉</div>
+                  <div className={styles.partageBannerIcon}>
+                    <NotoEmoji name="party-popper" size={44} loop />
+                  </div>
                   <div className={styles.partageBannerTitle}>Prêt(e) à partager ?</div>
                   <div className={styles.partageBannerSub}>Publie pour obtenir ton lien magique + QR Code personnalisable</div>
                 </div>
@@ -1625,16 +1640,18 @@ export default function Editor() {
                 </button>
                 <div className={styles.partageLockedList}>
                   {[
-                    { emoji: '🖼️', label: 'QR Code personnalisé', sub: 'Cœur, cercle, myKado…' },
-                    { emoji: '🔗', label: 'Lien court magique',   sub: 'mykado.store/s/sophie-25' },
-                    { emoji: '💬', label: 'Partager sur WhatsApp', sub: 'Avec aperçu auto' },
-                    { emoji: '📧', label: 'Envoyer par email',    sub: 'Liste de contacts' },
-                  ].map((item, i) => (
+                    { Icon: QrCode,        label: 'QR Code personnalisé',  sub: 'Cœur, cercle, myKado…' },
+                    { Icon: Link2,         label: 'Lien court magique',    sub: 'mykado.store/s/sophie-25' },
+                    { Icon: MessageCircle, label: 'Partager sur WhatsApp', sub: 'Avec aperçu auto' },
+                    { Icon: Mail,          label: 'Envoyer par email',     sub: 'Liste de contacts' },
+                  ].map(({ Icon, label, sub }, i) => (
                     <div key={i} className={styles.partageLockedRow}>
-                      <div className={styles.partageLockedIcon}>{item.emoji}</div>
+                      <div className={styles.partageLockedIcon}>
+                        <Icon size={18} strokeWidth={1.75} />
+                      </div>
                       <div className={styles.partageLockedInfo}>
-                        <div className={styles.partageLockedLabel}>{item.label}</div>
-                        <div className={styles.partageLockedSub}>{item.sub}</div>
+                        <div className={styles.partageLockedLabel}>{label}</div>
+                        <div className={styles.partageLockedSub}>{sub}</div>
                       </div>
                       <Lock size={14} className={styles.partageLockedLock} />
                     </div>
@@ -1823,28 +1840,28 @@ export default function Editor() {
                       />
                     )}
                     {showFedapayCard ? (
-                      /* Checkout.js FedaPay embedded. Product fixe `card`
-                         quand pas de gift ; amount custom (1000+gift) sinon.
-                         Transaction pré-créée serveur avec custom_metadata.pubId.
-                         onComplete → handleFedapayPurchaseCard. */
+                      /* FedaPay overlay — amount mode systématique pour que
+                         le promo + template.priceFCFA + gift soient tous
+                         reflétés dans le montant réel débité (le catalogue
+                         "card" fixe à 1000 FCFA ignorait promo et template
+                         price). Le `key` force remount quand publishPriceFcfa
+                         change → nouvelle transaction. */
                       <div style={{ marginTop: 4 }}>
-                        {giftIncluded ? (
-                          <FedapayWidget
-                            amount={publishPriceFcfa}
-                            description={`myKado — ${pub?.title || 'Carte'} + cadeau ${giftFcfa.toLocaleString('fr-FR')} FCFA`}
-                            purpose="card_gift"
-                            pubId={id}
-                            user={user}
-                            onPurchaseComplete={handleFedapayPurchaseCard}
-                          />
-                        ) : (
-                          <FedapayWidget
-                            product="card"
-                            pubId={id}
-                            user={user}
-                            onPurchaseComplete={handleFedapayPurchaseCard}
-                          />
-                        )}
+                        <FedapayWidget
+                          key={`card-${publishPriceFcfa}-${appliedPromo?.code || 'nopromo'}`}
+                          amount={publishPriceFcfa}
+                          description={
+                            giftIncluded
+                              ? `myKado — ${pub?.title || 'Carte'} + cadeau ${giftFcfa.toLocaleString('fr-FR')} FCFA`
+                              : (appliedPromo?.code
+                                  ? `myKado — ${pub?.title || 'Carte'} (promo ${appliedPromo.code})`
+                                  : `myKado — ${pub?.title || 'Carte'}`)
+                          }
+                          purpose={giftIncluded ? 'card_gift' : 'card'}
+                          pubId={id}
+                          user={user}
+                          onPurchaseComplete={handleFedapayPurchaseCard}
+                        />
                       </div>
                     ) : (
                       <button

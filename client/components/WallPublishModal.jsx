@@ -179,18 +179,34 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
             </div>
 
             {showWidget ? (
-              /* Checkout.js FedaPay embedded — transaction pré-créée
-                 serveur (custom_metadata.pubId), formulaire rendu dans
-                 le container du widget. Le `key` force remount quand
-                 le plan change (premium ↔ illimité) → nouvelle
-                 transaction avec le bon montant. */
-              <FedapayWidget
-                key={fedapayProduct}
-                product={fedapayProduct}
-                pubId={pubId}
-                user={user}
-                onPurchaseComplete={handleFedapayPurchase}
-              />
+              /* FedaPay overlay — le `key` force remount quand le plan
+                 change (premium ↔ illimité) ou quand le promo entre/sort,
+                 → nouvelle transaction avec le bon montant.
+                 Deux modes :
+                 - Sans promo : `product` catalogue (validation plan côté
+                   serveur via FEDAPAY_PRODUCT_MAP).
+                 - Avec promo : `amount` custom = priceAfterPromo — le
+                   serveur revérifie le promo et compare sale.amount ≥
+                   expected. */
+              promoDiscount > 0 ? (
+                <FedapayWidget
+                  key={`${fedapayProduct}-${promo.code}`}
+                  amount={priceAfterPromo}
+                  description={`Publication mur ${plan.name} (promo ${promo.code})`}
+                  purpose={`wall_${selectedPlan}`}
+                  pubId={pubId}
+                  user={user}
+                  onPurchaseComplete={handleFedapayPurchase}
+                />
+              ) : (
+                <FedapayWidget
+                  key={fedapayProduct}
+                  product={fedapayProduct}
+                  pubId={pubId}
+                  user={user}
+                  onPurchaseComplete={handleFedapayPurchase}
+                />
+              )
             ) : (
               <button
                 className={s.submitBtn}

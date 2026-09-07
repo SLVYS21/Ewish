@@ -229,9 +229,51 @@
 .extraCardChevron { transition: transform 0.2s; flex-shrink: 0; }
 .extraCardBody   { border-top: 1px solid var(--border); }
 
+/* ── Kado à gratter — coming soon placeholder ─────────────────────────
+   Rendu à la place du composant interactif tant que la feature n'est
+   pas livrée. Cohérent avec le badge "Bientôt" affiché dans le header
+   de l'AccordionCard. */
+.kadoComingSoon {
+  display: flex;
+  gap: var(--mk-space-3);
+  align-items: flex-start;
+  padding: var(--mk-space-4);
+}
+.kadoComingSoonIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--mk-radius-full);
+  background: linear-gradient(135deg, var(--mk-honey-100) 0%, var(--mk-honey-200) 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--mk-shadow-honey), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.kadoComingSoonBody { flex: 1; min-width: 0; }
+.kadoComingSoonTitle {
+  font-family: var(--mk-font-display);
+  font-style: italic;
+  font-size: var(--mk-type-h5);
+  font-weight: 600;
+  letter-spacing: var(--mk-tracking-snug);
+  color: var(--mk-text-primary);
+  line-height: var(--mk-lh-snug);
+  margin-bottom: var(--mk-space-1);
+}
+.kadoComingSoonText {
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-body-sm);
+  color: var(--mk-text-secondary);
+  line-height: var(--mk-lh-normal);
+}
+
 /* ── Share step ── */
 .shareStep {
-  display: flex; flex-direction: column; gap: 12px; padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mk-space-4);
+  padding: var(--mk-space-4);
 }
 
 /* Inline share wrapper — forces share-grid to single column inside editor panel
@@ -264,14 +306,35 @@
 .shareHeroSub       { font-size: 0.75rem; color: #555; }
 
 .sharePublishBtn {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  width: 100%; padding: 13px; border-radius: 12px; border: none;
-  background: linear-gradient(135deg, var(--brand), var(--accent)); color: #fff;
-  font-size: 0.88rem; font-weight: 700; cursor: pointer;
-  font-family: var(--font); transition: transform 0.2s, opacity 0.2s;
-  box-shadow: 0 4px 14px rgba(225,29,72,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mk-space-2);
+  width: 100%;
+  padding: 14px var(--mk-space-5);
+  border-radius: var(--mk-radius-full);
+  border: none;
+  background: var(--mk-action-primary);
+  color: var(--mk-text-inverted);
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-label-lg);
+  font-weight: 700;
+  letter-spacing: var(--mk-tracking-snug);
+  cursor: pointer;
+  box-shadow: var(--mk-shadow-coral);
+  transition: transform var(--mk-motion-hover),
+              background var(--mk-motion-hover),
+              box-shadow var(--mk-motion-hover);
 }
-.sharePublishBtn:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
+.sharePublishBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--mk-action-primary-hover);
+  box-shadow: var(--mk-shadow-lg), var(--mk-shadow-coral);
+}
+.sharePublishBtn:active:not(:disabled) {
+  transform: translateY(0);
+  background: var(--mk-action-primary-press);
+}
 .sharePublishBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .shareLinkBox {
@@ -911,28 +974,104 @@
   font-size: 12px; color: var(--mk-ink-2); line-height: 1.5;
 }
 
-/* ── Partage section (pre-publish) ── */
+/* ── Partage section (pre-publish) — Warm Celebration ─────────────────
+   Objectif : mettre en scène l'anticipation de la publication.
+   Surface "keepsake" crème avec halo honey, chip animé party-popper,
+   liste de perks verrouillés en paper-elevated + icônes Lucide. */
 .partageBanner {
-  border-radius: 18px; padding: 20px 16px; text-align: center;
-  background: linear-gradient(135deg, #FFD7E0, #FFB3C1);
+  border-radius: var(--mk-radius-xl);
+  padding: var(--mk-space-6) var(--mk-space-4) var(--mk-space-5);
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(233, 162, 59, 0.22) 0%, transparent 65%),
+    var(--mk-surface-muted);
+  border: 1px solid var(--mk-border-warm);
+  box-shadow: var(--mk-shadow-sm);
 }
-.partageBannerEmoji { font-size: 44px; margin-bottom: 6px; }
-.partageBannerTitle { font-family: var(--mk-display); font-style: italic; font-size: 22px; color: #9C1632; line-height: 1.1; margin-bottom: 4px; }
-.partageBannerSub { font-size: 13px; color: #9C1632; opacity: .85; }
+.partageBannerIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--mk-space-3);
+  border-radius: var(--mk-radius-full);
+  background: linear-gradient(135deg, var(--mk-honey-100) 0%, var(--mk-honey-200) 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--mk-shadow-honey), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.partageBannerTitle {
+  font-family: var(--mk-font-display);
+  font-style: italic;
+  font-size: var(--mk-type-h3);
+  font-weight: 600;
+  letter-spacing: var(--mk-tracking-tight);
+  color: var(--mk-text-primary);
+  line-height: var(--mk-lh-snug);
+  margin-bottom: var(--mk-space-1);
+}
+.partageBannerSub {
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-body-sm);
+  color: var(--mk-text-secondary);
+  line-height: var(--mk-lh-normal);
+  max-width: 32ch;
+  margin: 0 auto;
+}
 
-.partageLockedList { display: flex; flex-direction: column; gap: 8px; }
-.partageLockedRow {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; border-radius: 14px;
-  background: #fff; border: 1.5px solid var(--mk-line-2);
-  opacity: .55;
+.partageLockedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mk-space-2);
 }
-.partageLockedIcon { font-size: 22px; width: 36px; text-align: center; }
-.partageLockedInfo { flex: 1; }
-.partageLockedLabel { font-weight: 700; font-size: 13px; color: var(--mk-ink); }
-.partageLockedSub { font-size: 11px; color: var(--mk-ink-3); }
-.partageLockedLock { color: var(--mk-ink-3); flex-shrink: 0; }
-.partageNote { font-size: 11.5px; color: var(--mk-ink-3); text-align: center; }
+.partageLockedRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-3);
+  padding: var(--mk-space-3) var(--mk-space-4);
+  border-radius: var(--mk-radius-lg);
+  background: var(--mk-surface-elevated);
+  border: 1px solid var(--mk-border-warm);
+  opacity: 0.6;
+  transition: opacity var(--mk-motion-hover);
+}
+.partageLockedIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mk-radius-md);
+  background: var(--mk-action-accent-gold-soft);
+  color: var(--mk-honey-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.partageLockedInfo { flex: 1; min-width: 0; }
+.partageLockedLabel {
+  font-family: var(--mk-font-sans);
+  font-weight: 600;
+  font-size: var(--mk-type-body-sm);
+  color: var(--mk-text-primary);
+  line-height: var(--mk-lh-snug);
+  margin-bottom: 2px;
+}
+.partageLockedSub {
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-label-md);
+  color: var(--mk-text-tertiary);
+  line-height: var(--mk-lh-normal);
+}
+.partageLockedLock {
+  color: var(--mk-text-tertiary);
+  flex-shrink: 0;
+}
+.partageNote {
+  font-family: var(--mk-font-sans);
+  font-size: var(--mk-type-label-md);
+  color: var(--mk-text-tertiary);
+  text-align: center;
+  padding: 0 var(--mk-space-2);
+  line-height: var(--mk-lh-normal);
+}
 
 /* ── Full share page button ── */
 .btnShareFull {

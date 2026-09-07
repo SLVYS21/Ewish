@@ -181,28 +181,26 @@ function ShareStep({ onOpenUnboxing }, ref) {
           )}
 
           {showFedapayWidget ? (
-            /* Checkout.js FedaPay embedded — transaction pré-créée serveur
-               (custom_metadata.pubId=draftId). Gift XOF attaché → amount
-               custom (1000 + gift), sinon produit catalogue `card`.
-               onComplete → handleFedapayPurchase → publishCard. */
+            /* FedaPay overlay — amount mode systématique pour que le promo
+               et le gift soient tous deux reflétés dans le montant réel
+               débité (le catalogue produit ignorait le promo). Le `key`
+               force remount quand `totalFcfa` change → nouvelle transaction. */
             <div className="ce-fedapay-wrap" style={{ marginTop: 20 }}>
-              {giftIncluded ? (
-                <FedapayWidget
-                  amount={totalFcfa}
-                  description={`myKado — Carte + cadeau ${formatAmount(gift.amount, gift.currency)}`}
-                  purpose="card_gift"
-                  pubId={draftId}
-                  user={user}
-                  onPurchaseComplete={handleFedapayPurchase}
-                />
-              ) : (
-                <FedapayWidget
-                  product="card"
-                  pubId={draftId}
-                  user={user}
-                  onPurchaseComplete={handleFedapayPurchase}
-                />
-              )}
+              <FedapayWidget
+                key={`card-${totalFcfa}-${promo?.code || 'nopromo'}`}
+                amount={totalFcfa}
+                description={
+                  giftIncluded
+                    ? `myKado — Carte + cadeau ${formatAmount(gift.amount, gift.currency)}`
+                    : (promo?.code
+                        ? `myKado — Publication carte (promo ${promo.code})`
+                        : 'myKado — Publication carte')
+                }
+                purpose={giftIncluded ? 'card_gift' : 'card'}
+                pubId={draftId}
+                user={user}
+                onPurchaseComplete={handleFedapayPurchase}
+              />
             </div>
           ) : (
             <button className="ce-cta" onClick={startPublish}>
