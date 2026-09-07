@@ -130,6 +130,59 @@
   50% { transform: scale(1.15); opacity: 1; }
 }
 
+/* Rappels : bouton cloche discret dans le hero, seulement quand l'utilisateur
+   n'a encore aucune date enregistrée. Se fond dans le décor (glass wash paper)
+   avec un double halo honey qui pulse en continu pour attirer l'œil sans
+   crier. Disparaît dès la première date ajoutée. */
+.heroRemindBtn {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(253, 251, 247, 0.14);
+  border: 1px solid rgba(253, 251, 247, 0.22);
+  color: var(--mk-paper-noble);
+  cursor: pointer;
+  transition: background .18s var(--mk-ease-out), transform .18s var(--mk-ease-out);
+}
+.heroRemindBtn:hover {
+  background: rgba(253, 251, 247, 0.24);
+  transform: translateY(-1px);
+}
+.heroRemindBtn:focus-visible {
+  outline: 2px solid var(--mk-honey-300);
+  outline-offset: 3px;
+}
+.heroRemindBtn::before,
+.heroRemindBtn::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--mk-honey-300);
+  opacity: 0;
+  pointer-events: none;
+  animation: mk-remind-ring 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.heroRemindBtn::after {
+  animation-delay: 1.3s;
+}
+@keyframes mk-remind-ring {
+  0%   { transform: scale(0.85); opacity: 0; }
+  15%  { opacity: 0.75; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroRemindBtn::before,
+  .heroRemindBtn::after { animation: none; }
+}
+
 /* ── Section heading ─────────────────────────────────────────────── */
 .section { display: flex; flex-direction: column; gap: 14px; }
 .sectionHead {
@@ -658,6 +711,10 @@
   .heroDot {
     right: 5%;
     top: 70%;
+  }
+  .heroRemindBtn {
+    width: 36px;
+    height: 36px;
   }
 
   .announce { padding: 16px; gap: 12px; border-radius: 18px; }

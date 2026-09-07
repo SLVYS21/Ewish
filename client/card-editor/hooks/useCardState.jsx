@@ -142,7 +142,7 @@ export const CardStateProvider = ({ children }) => {
   }), [occasionId, themeId, envelopeColor, envelopeTexture, linerChoice,
        texts, photo, gift, confettiStyle, unboxingBg]);
 
-  const publishCard = useCallback(async ({ feexpayReference, promoCode } = {}) => {
+  const publishCard = useCallback(async ({ fedapayTransactionId, promoCode } = {}) => {
     setPublishState('publishing');
     setPublishError(null);
     let workingId = draftId;
@@ -167,12 +167,12 @@ export const CardStateProvider = ({ children }) => {
       }
 
       // Flag it as published so /c/:slug resolves it. Server returns 402 if
-      // the FCFA fee (1500 + gift) hasn't been paid — the caller retries with
-      // a feexpayReference obtained from the FeexPay widget. promoCode réduit
-      // le socle 1500 côté serveur (jamais le gift).
+      // le FCFA fee (1000 + gift) n'a pas été payé — le caller retente
+      // avec un fedapayTransactionId obtenu du widget FedaPay. promoCode
+      // réduit le socle 1000 côté serveur (jamais le gift).
       const publishBody = {};
-      if (feexpayReference) publishBody.feexpayReference = feexpayReference;
-      if (promoCode)        publishBody.promoCode        = promoCode;
+      if (fedapayTransactionId) publishBody.fedapayTransactionId = fedapayTransactionId;
+      if (promoCode)            publishBody.promoCode            = promoCode;
       const publishRes = await publishPublication(workingId, publishBody);
       const finalPub = publishRes?.data || null;
 
@@ -182,13 +182,17 @@ export const CardStateProvider = ({ children }) => {
     } catch (err) {
       const data = err?.response?.data || {};
       const message = data.error || err?.message || 'Erreur inconnue';
-      setPublishError(message);
-      setPublishState('error');
-      // Surface the price so the caller can open FeexPay when payment is required.
-      // workingId is fresh (created above if needed) — safer than reading stale draftId.
+      /* PAYMENT_REQUIRED n'est pas une erreur, c'est le flow normal :
+         le draft est créé, le user va payer via le widget FedaPay rendu
+         inline (ShareStep). On retourne à l'état 'idle' pour que le
+         widget s'affiche à la place du bouton "Payer". */
       if (data.code === 'PAYMENT_REQUIRED') {
+        setPublishState('idle');
+        setPublishError(null);
         return { ok: false, paymentRequired: true, priceFCFA: data.priceFCFA, pubId: workingId };
       }
+      setPublishError(message);
+      setPublishState('error');
       return { ok: false, error: message };
     }
   }, [buildEnvelopePayload, texts.title, texts.subtitle, draftId]);
@@ -198,35 +202,6 @@ export const CardStateProvider = ({ children }) => {
     setPublishedPub(null);
     setPublishError(null);
   }, []);
-
-  /* payGiftTopUp : carte déjà publiée, l'utilisateur augmente le gift.
-     On PATCH la nouvelle valeur (champ envelopeGift plat) puis on retente
-     publishPublication. Le serveur renvoie 402 avec priceFCFA = delta
-     (owedGiftFcfa) — le caller (KadoStep) ouvre FeexPay pour cette portion. */
-  const payGiftTopUp = useCallback(async ({ feexpayReference } = {}) => {
-    const workingId = publishedPub?._id || draftId;
-    if (!workingId) return { ok: false, error: 'Publication introuvable.' };
-    try {
-      await updatePublication(workingId, {
-        envelopeGift: {
-          enabled:  !!gift.enabled,
-          amount:   Number(gift.amount) || 0,
-          currency: gift.currency || 'XOF',
-          message:  gift.message || '',
-        },
-      });
-      const res = await publishPublication(workingId, feexpayReference ? { feexpayReference } : {});
-      const finalPub = res?.data || null;
-      if (finalPub) setPublishedPub(finalPub);
-      return { ok: true, pub: finalPub };
-    } catch (err) {
-      const data = err?.response?.data || {};
-      if (data.code === 'PAYMENT_REQUIRED') {
-        return { ok: false, paymentRequired: true, priceFCFA: data.priceFCFA, topUp: !!data.topUp, pubId: workingId };
-      }
-      return { ok: false, error: data.error || err?.message || 'Erreur' };
-    }
-  }, [gift, publishedPub, draftId]);
 
   /* Reopen an existing publication (used when arriving at /card-editor?id=XXX
      from the Dashboard). Fetches the pub, hydrates every editor field, and
@@ -413,7 +388,7 @@ export const CardStateProvider = ({ children }) => {
     confettiStyle, setConfettiStyle,
     unboxingBg, setUnboxingBg,
     gift, setGift,
-    publishState, publishedPub, publishError, publishCard, resetPublish, payGiftTopUp,
+    publishState, publishedPub, publishError, publishCard, resetPublish,
     loadPublicationById,
     draftId, saveStatus,
     theme,

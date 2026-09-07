@@ -165,11 +165,26 @@
 
 .price {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   font-family: var(--serif);
   font-variation-settings: 'opsz' 96;
   line-height: 1;
+}
+.priceFrom {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.65;
+}
+.priceRow {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
 }
 .priceValue {
   font-size: 44px;

@@ -17,10 +17,11 @@
   width: 100%;
   max-width: 500px;
   /* Borne verticale : le modal ne peut jamais dépasser la hauteur du
-     viewport (moins le padding de l'overlay). Combiné à `overflow:hidden`
-     et au layout flex-column, ça permet à .body de scroller sans que le
-     .footer (CTA) ne sorte de l'écran. */
-  max-height: calc(100vh - 40px);
+     viewport visible (moins le padding de l'overlay). `dvh` gère
+     dynamiquement la barre d'adresse iOS/Android (contrairement à
+     `vh` qui compte la hauteur totale, adresse bar incluse → sur
+     mobile ça poussait le footer sous la zone visible). */
+  max-height: calc(100dvh - 40px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -31,6 +32,11 @@
 @keyframes modal-pop {
   0% { transform: scale(0.95); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+  0%   { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
 }
 
 .header {
@@ -205,10 +211,35 @@
 }
 
 @media (max-width: 520px) {
+  /* Bottom sheet mobile — l'overlay ne centre plus, il colle le
+     modal en bas de l'écran (align-items: flex-end) et supprime
+     le padding pour laisser le modal prendre toute la largeur.
+     Le modal devient une feuille qui remonte du bas, coins hauts
+     arrondis, jamais au-delà de 92dvh (la barre iOS reste visible
+     et l'user garde un repère haut pour dismisser). */
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .modal {
+    max-height: 92dvh;
+    max-width: none;
+    border-radius: 16px 16px 0 0;
+    animation: modal-slide-up 0.28s cubic-bezier(0.32, 0.72, 0.24, 1);
+  }
+  /* iOS Safari — force le momentum scroll dans .body pour que le
+     scroll interne fonctionne au touch même quand le contenu
+     dépasse. Sans ça, on peut se retrouver à ne pas pouvoir
+     atteindre le footer (widget FedaPay) sur les petits écrans. */
+  .body {
+    -webkit-overflow-scrolling: touch;
+  }
   .footer {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+    /* Padding bas + safe-area pour ne pas coller au home indicator iOS. */
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
   .balance {
     text-align: center;

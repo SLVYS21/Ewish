@@ -35,9 +35,18 @@ app.use(cors({
   credentials: true,   // Required for cookies cross-domain
 }));
 
+app.use(cookieParser());
+
+/* ─── FedaPay ─────────────────────────────────────────────────
+   Monté AVANT express.json() : POST /api/fedapay/webhook applique
+   son propre express.raw() pour vérifier la signature HMAC via
+   Webhook.constructEvent(). Les autres routes (create-transaction,
+   verify, find-sale) posent leur propre express.json() localement.
+   ────────────────────────────────────────────────────────── */
+app.use('/api/fedapay', require('./routes/fedapay'));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const REACT_DIST = path.join(__dirname, '../client/dist');

@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, X, MoreHorizontal, ChevronDown,
+  ArrowRight, X, MoreHorizontal, ChevronDown, Bell,
 } from 'lucide-react';
-import { getPublications, getTemplates, patchOnboarding } from '../utils/api';
+import { getPublications, getTemplates, patchOnboarding, getUserDates } from '../utils/api';
 import { useAuth } from '../admin/context/AuthContext';
 import Kado from '../components/Kado';
 import ConfettiBurst from '../components/ConfettiBurst';
@@ -204,6 +204,7 @@ export default function Dashboard() {
   const [pubs,      setPubs]      = useState([]);
   const [templates, setTemplates] = useState([]);
   const [loading,   setLoading]   = useState(true);
+  const [datesCount, setDatesCount] = useState(null);
   const [themesTab, setThemesTab] = useState('walls'); // 'walls' | 'cards'
   const [announceOpen, setAnnounceOpen] = useState(true);
   const [promoOpen, setPromoOpen] = useState(true);
@@ -260,6 +261,9 @@ export default function Dashboard() {
       .catch(() => {})
       .finally(() => setLoading(false));
     getTemplates().then(r => setTemplates(r.data || [])).catch(() => {});
+    getUserDates()
+      .then(r => setDatesCount(Array.isArray(r.data) ? r.data.length : 0))
+      .catch(() => setDatesCount(0));
   }, []);
 
   const featuredThemes = useMemo(() => {
@@ -298,7 +302,7 @@ export default function Dashboard() {
         onStart={handleWelcomeStart}
         onSkip={handleWelcomeSkip}
       />
-      <OnboardingTour run={tourRun} onClose={handleTourClose} />
+      <OnboardingTour run={tourRun} showDatesStep={datesCount === 0} onClose={handleTourClose} />
 
       {/* Preview fullscreen avec swipe entre templates featured */}
       {pickerState && (
@@ -325,6 +329,18 @@ export default function Dashboard() {
               RAVI DE TE REVOIR
             </span>
           </div>
+          {datesCount === 0 && (
+            <button
+              id="tour-dates"
+              type="button"
+              className={s.heroRemindBtn}
+              onClick={() => navigate('/ewish-admin/dates')}
+              aria-label="Ajouter une date de rappel"
+              title="Ne rate plus jamais une date qui compte"
+            >
+              <Bell size={18} strokeWidth={2.2} />
+            </button>
+          )}
         </div>
         
         <div className={s.heroContent}>

@@ -627,6 +627,32 @@ a, [role="button"] { color: inherit; text-decoration: none; touch-action: manipu
 .premade-row { display: flex; align-items: center; gap: 13px; padding: 13px; border: 1.5px solid var(--mk-border-warm); border-radius: var(--mk-radius-lg); background: var(--mk-surface-elevated); width: 100%; text-align: left; transition: border-color .15s var(--mk-ease-out), transform .15s var(--mk-ease-out); cursor: pointer; }
 .premade-row:hover { border-color: var(--mk-border-warm-strong); transform: translateX(2px); }
 .premade-row.on { border-color: var(--mk-coral-500); box-shadow: var(--mk-ring-focus); }
+
+/* ============================================================
+   .mk-fedapay-host — wrapper du Checkout.js FedaPay embedded.
+   ---------------------------------------------------------
+   FedaPay rend son propre formulaire (input phone, MoMo/carte,
+   bouton "Payer") dans le container `#fedapay-embed-*`. Leur
+   style est déjà cohérent — on scope juste le layout (largeur
+   pleine, stacking context au-dessus du preview du card-editor).
+   ============================================================ */
+.mk-fedapay-host {
+  width: 100%;
+  display: block;
+  position: relative;
+  z-index: 1000;
+}
+
+.mk-fedapay-host iframe {
+  width: 100% !important;
+  border: 0 !important;
+}
+
+/* Variante card-editor : petit décrochage top pour respirer
+   après le PromoInput / price-card. */
+.ce-fedapay-wrap {
+  margin-top: 20px;
+}
 .premade-swatch { width: 48px; height: 48px; border-radius: var(--mk-radius-md); flex-shrink: 0; position: relative; overflow: hidden; }
 
 /* Responsive */

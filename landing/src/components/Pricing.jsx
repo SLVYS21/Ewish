@@ -3,10 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ShieldCheck, Heart, Users, Gift, Sparkles } from 'lucide-react';
 import s from './Pricing.module.css';
 
+/* Pricing myKado v2 (2026-09-05) :
+   - Carte : tarif unique 1 000 FCFA (~1,50 € / 1.99 USD), toutes cartes confondues.
+   - Mur   : à partir de 2 500 FCFA (~3,90 € / 4.99 USD). Les 10 premiers mots
+             sont offerts pour tout mur créé.
+   - Cadeau : montant libre, commission fixe (affiché "Variable"). */
 const PRICES = {
-  XOF: { carte: { price: '1 500', unit: 'XOF' }, mur: { price: '3 000', unit: 'XOF' }, cadeau: { price: 'Variable', unit: '' } },
-  EUR: { carte: { price: '2,50', unit: '€' },   mur: { price: '4,90', unit: '€' },   cadeau: { price: 'Variable', unit: '' } },
-  USD: { carte: { price: '2.99', unit: 'USD' }, mur: { price: '5.99', unit: 'USD' }, cadeau: { price: 'Variable', unit: '' } },
+  XOF: { carte: { price: '1 000', unit: 'FCFA' }, mur: { price: '2 500', unit: 'FCFA', from: true }, cadeau: { price: 'Variable', unit: '' } },
+  EUR: { carte: { price: '1,50', unit: '€' },     mur: { price: '3,90', unit: '€',    from: true }, cadeau: { price: 'Variable', unit: '' } },
+  USD: { carte: { price: '1.99', unit: 'USD' },   mur: { price: '4.99', unit: 'USD',  from: true }, cadeau: { price: 'Variable', unit: '' } },
 };
 
 const CURRENCIES = [
@@ -32,7 +37,7 @@ const PLANS = [
     Icon: Users,
     tint: 'indigo',
     desc: 'Un mur illimité, toute une famille ou une équipe.',
-    features: ['Contributeurs illimités', 'Photos, GIFs, audios', 'Cagnotte intégrée', '4 vues de projection'],
+    features: ['10 premiers mots offerts', 'Contributeurs illimités', 'Photos, GIFs, audios', 'Cagnotte intégrée', '4 vues de projection'],
     ctaLabel: 'Créer un mur',
     featured: true,
   },
@@ -138,8 +143,11 @@ export default function Pricing({ onCreate }) {
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <span className={s.priceValue}>{p.price}</span>
-                    {p.unit && <span className={s.priceUnit}>{p.unit}</span>}
+                    {p.from && <span className={s.priceFrom}>À partir de</span>}
+                    <span className={s.priceRow}>
+                      <span className={s.priceValue}>{p.price}</span>
+                      {p.unit && <span className={s.priceUnit}>{p.unit}</span>}
+                    </span>
                   </motion.div>
                 </AnimatePresence>
 

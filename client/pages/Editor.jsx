@@ -15,7 +15,7 @@ import InvitationTab from '../components/InvitationTab';
 import RsvpManager from '../components/RsvpManager';
 import ClientTab from '../components/ClientTab';
 import QRCodeModal from '../components/QRCodeModal';
-import useFeexPay from '../utils/useFeexPay';
+import FedapayWidget from '../components/FedapayWidget';
 import {
   QrCode, Sparkles, Coffee, Blocks, MailOpen, ClipboardList,
   Megaphone, Info, Copy, Check, X, RefreshCw, Gift, ArrowLeft, ChevronRight,
@@ -31,7 +31,7 @@ import styles from './Editor.module.css';
 /* Prix plancher d'une carte publiée (aligné card-editor / server publication.js
    pour myenvelope). Utilisé pour afficher le breakdown dans la modal de paiement
    avant que le serveur ne renvoie sa 402. */
-const CARD_PUBLISH_FEE_FCFA = 1500;
+const CARD_PUBLISH_FEE_FCFA = 1000;
 
 /* ─── Guided steps ────────────────────────────────────────────── */
 const STEPS = [
@@ -190,7 +190,7 @@ function BrandingTab({ show, url, text, onToggle, onUrlChange, onTextChange }) {
    Post-publication : si le gift a ete augmente depuis le dernier paiement
    (paidGiftFcfa), on affiche un CTA "Payer X FCFA" qui declenche onPayTopUp
    (handlePublish) : le serveur repond 402 avec le delta et le front ouvre
-   FeexPay pour cette portion seulement. */
+   FedaPay pour cette portion seulement (top-up via widget inline). */
 function KadoExtras({ gift, onChange, recipientName, paidGiftFcfa = 0, isPublished = false, onPayTopUp, publishing = false }) {
   const cfg = findCurrency(gift.currency);
   const amount = Number(gift.amount) || 0;
@@ -228,7 +228,7 @@ function KadoExtras({ gift, onChange, recipientName, paidGiftFcfa = 0, isPublish
       </div>
 
       {/* Top-up CTA : la carte est deja en ligne mais le nouveau montant Kado
-         n'a pas encore ete provisionne cote FeexPay. */}
+         n'a pas encore ete provisionne cote FedaPay. */}
       {showTopUp && (
         <div style={{
           background: 'linear-gradient(135deg, #FFF7DE 0%, #FDE7A5 100%)',
@@ -424,8 +424,10 @@ function KadoExtras({ gift, onChange, recipientName, paidGiftFcfa = 0, isPublish
 
 /* AccordionCard (extras step)
    - badge : petit chip a droite du titre (ex: "Recommande")
+   - badgeVariant : 'default' (badge coloré basé sur color) ou 'coming-soon'
+     (plum + honey, aligné avec le tag "Bientôt" du card-editor et du wall).
    - highlight : fond legerement teinte + bordure marquee, pour sortir du lot */
-function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = false, badge, highlight = false }) {
+function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = false, badge, badgeVariant = 'default', highlight = false }) {
   const [open, setOpen] = useState(defaultOpen);
   const cardStyle = {
     borderColor: highlight ? color + '80' : (open ? color + '50' : undefined),
@@ -433,6 +435,9 @@ function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = 
     background: highlight ? `linear-gradient(135deg, ${color}0f 0%, transparent 60%)` : undefined,
     boxShadow: highlight ? `0 4px 18px ${color}22` : undefined,
   };
+  const badgeStyle = badgeVariant === 'coming-soon'
+    ? { background: 'var(--mk-plum-800, #201524)', color: 'var(--mk-honey-300, #F8BE68)' }
+    : { background: color, color: '#fff' };
   return (
     <div className={styles.extraCard} style={cardStyle}>
       <button className={styles.extraCardHeader} onClick={() => setOpen(o => !o)}>
@@ -445,7 +450,8 @@ function AccordionCard({ icon: Icon, title, sub, color, children, defaultOpen = 
             {badge && (
               <span style={{
                 fontSize: 9, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                color: '#fff', background: color, padding: '2px 6px', borderRadius: 999,
+                padding: '2px 7px', borderRadius: 999, lineHeight: 1.4,
+                ...badgeStyle,
               }}>{badge}</span>
             )}
           </div>
@@ -498,7 +504,6 @@ export default function Editor() {
   const [isPanelOpen, setIsPanelOpen]           = useState(true);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [showQrModal, setShowQrModal]           = useState(false);
-  const { openCheckout, feexpayModal } = useFeexPay();
   const [cagnotte, setCagnotte]               = useState(false);
   const [cagnotteGoal, setCagnotteGoal]       = useState(250000);
   const [cagnotteName, setCagnotteName]       = useState('');
@@ -898,7 +903,7 @@ export default function Editor() {
   };
 
   /* publish : deux étapes séparées pour permettre la re-entrée avec
-     un feexpayReference après paiement, sans re-sauvegarder les data. */
+     un fedapayTransactionId après paiement, sans re-sauvegarder les data. */
   const savePublicationDraft = () => {
     const draftPayload = {
       data, style: { ...style, backgrounds }, decorations, jarConfig, widgets,
@@ -928,10 +933,10 @@ export default function Editor() {
     return updatePublication(id, draftPayload);
   };
 
-  const doPublishRequest = async (feexpayReference) => {
+  const doPublishRequest = async (fedapayTransactionId) => {
     if (id === 'draft') return; // Should not happen directly for unauthenticated drafts
     const body = {};
-    if (feexpayReference) body.feexpayReference = feexpayReference;
+    if (fedapayTransactionId) body.fedapayTransactionId = fedapayTransactionId;
     if (appliedPromo?.code) body.promoCode = appliedPromo.code;
     const r = await publishPublication(id, body);
     setPublishedUrl(r.data.url);
@@ -964,24 +969,11 @@ export default function Editor() {
       await doPublishRequest();
       setPublishing(false);
     } catch (e) {
-      /* 402 avec priceFCFA → checkout FeexPay puis retry publish avec la ref.
-         On garde publishing:true tant que le checkout est ouvert. */
-      if (e.response?.status === 402 && e.response.data?.priceFCFA) {
-        const { priceFCFA } = e.response.data;
-        openCheckout({
-          amount:      priceFCFA,
-          description: `myKado  ${pub?.title || 'Publication'}`,
-          customId:    `pub:${id}`,
-          onSuccess: async ({ reference }) => {
-            try { await doPublishRequest(reference); }
-            catch (err) { alert(err.response?.data?.error || 'Publish failed après paiement'); }
-            finally { setPublishing(false); }
-          },
-          onFailure: () => setPublishing(false),
-        });
-        return;
+      /* 402 avec priceFCFA → l'user complète le paiement via le widget
+         FedaPay rendu dans le modal (voir showFedapayCard plus bas). */
+      if (e.response?.status !== 402 || !e.response.data?.priceFCFA) {
+        alert(e.response?.data?.error || 'Publish failed');
       }
-      alert(e.response?.data?.error || 'Publish failed');
       setPublishing(false);
     }
   };
@@ -1005,6 +997,32 @@ export default function Editor() {
   const handleGiftChange = (patch) => {
     const nextGift = { ...gift, ...patch };
     handleDataChange('gift', nextGift);
+  };
+
+  /* ── FedaPay (wish cards) ────────────────────────────────────────
+     Checkout.js FedaPay embedded. Deux modes :
+       - Sans gift → produit catalogue `card` (1 000 FCFA).
+       - Avec gift XOF → amount custom (1 000 + gift) + purpose `card_gift`.
+     onComplete → doPublishRequest(fedapayTransactionId).
+     ---------------------------------------------------------------
+     Widget affiché quand : pas mur, pas envelope, pas testeur bypass,
+     prix > 0. */
+  const isWallTpl = pub?.templateName?.startsWith('wall-of-wishes');
+  const showFedapayCard =
+    isPublishModalOpen
+    && !pub?.published
+    && !isWallTpl
+    && pub?.templateName !== 'myenvelope'
+    && !user?.canBypassPaywall
+    && publishPriceFcfa > 0
+    && id !== 'draft'
+    && !publishing;
+
+  const handleFedapayPurchaseCard = async (transactionId) => {
+    setPublishing(true);
+    try { await doPublishRequest(transactionId); }
+    catch (err) { alert(err.response?.data?.error || 'Publish failed après paiement FedaPay'); }
+    finally { setPublishing(false); }
   };
 
   /* visibility helpers */
@@ -1330,14 +1348,16 @@ export default function Editor() {
                 </AccordionCard>
               )}
               {/* Kado : mis en avant en tête d'extras + accordion ouvert par défaut,
-                  parce que noyé dans la liste il passait inaperçu. Le badge doré et
-                  le hero interne le vendent comme feature à part entière. */}
+                  parce que noyé dans la liste il passait inaperçu. Le badge "Bientôt"
+                  aligne cette surface avec le card-editor et le wall où le kado est
+                  déjà annoncé comme fonctionnalité à venir. */}
               <AccordionCard
                 icon={Gift}
                 title="Kado à gratter"
                 sub="Ajoute une surprise que ton proche va gratter"
                 color="#c9a84c"
-                badge="Recommandé"
+                badge="Bientôt"
+                badgeVariant="coming-soon"
                 highlight
                 defaultOpen
               >
@@ -1739,7 +1759,7 @@ export default function Editor() {
       {/* ── Publish Modal ─────────────────────────────────────────────
          Pré-paiement : breakdown du prix (base + Kado) + bouton "Payer & publier".
          Le clic déclenche handlePublish qui, si le server répond 402
-         PAYMENT_REQUIRED, ouvre le checkout FeexPay. Une fois publié, on affiche
+         PAYMENT_REQUIRED, le widget FedaPay ci-dessous prend le relais. Une fois publié, on affiche
          le lien / QR classique (utile aussi quand on rouvre depuis Share step). */}
       {isPublishModalOpen && (
         <div className={styles.publishModalOverlay} onClick={() => setIsPublishModalOpen(false)}>
@@ -1802,19 +1822,45 @@ export default function Editor() {
                         disabled={publishing}
                       />
                     )}
-                    <button
-                      className={styles.modalConfirm}
-                      style={{ padding: '13px', borderRadius: 12, fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 }}
-                      onClick={handlePublish}
-                      disabled={publishing}
-                    >
-                      <Sparkles size={16} />
-                      {user?.canBypassPaywall && !giftIncluded
-                        ? 'Publier gratuitement (Testeur)'
-                        : publishPriceFcfa === 0
-                          ? 'Publier gratuitement'
-                          : `Payer ${(user?.canBypassPaywall ? giftFcfa : publishPriceFcfa).toLocaleString('fr-FR')} FCFA & publier`}
-                    </button>
+                    {showFedapayCard ? (
+                      /* Checkout.js FedaPay embedded. Product fixe `card`
+                         quand pas de gift ; amount custom (1000+gift) sinon.
+                         Transaction pré-créée serveur avec custom_metadata.pubId.
+                         onComplete → handleFedapayPurchaseCard. */
+                      <div style={{ marginTop: 4 }}>
+                        {giftIncluded ? (
+                          <FedapayWidget
+                            amount={publishPriceFcfa}
+                            description={`myKado — ${pub?.title || 'Carte'} + cadeau ${giftFcfa.toLocaleString('fr-FR')} FCFA`}
+                            purpose="card_gift"
+                            pubId={id}
+                            user={user}
+                            onPurchaseComplete={handleFedapayPurchaseCard}
+                          />
+                        ) : (
+                          <FedapayWidget
+                            product="card"
+                            pubId={id}
+                            user={user}
+                            onPurchaseComplete={handleFedapayPurchaseCard}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        className={styles.modalConfirm}
+                        style={{ padding: '13px', borderRadius: 12, fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 }}
+                        onClick={handlePublish}
+                        disabled={publishing}
+                      >
+                        <Sparkles size={16} />
+                        {user?.canBypassPaywall && !giftIncluded
+                          ? 'Publier gratuitement (Testeur)'
+                          : publishPriceFcfa === 0
+                            ? 'Publier gratuitement'
+                            : `Payer ${(user?.canBypassPaywall ? giftFcfa : publishPriceFcfa).toLocaleString('fr-FR')} FCFA & publier`}
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -2025,8 +2071,6 @@ export default function Editor() {
       {showQrCollect && pub.published && (
         <QRCodeModal url={`${import.meta.env.VITE_API_URL}/collect/${id}`} onClose={() => setShowQrCollect(false)} />
       )}
-
-      {feexpayModal}
 
       {showKyc && (
         <KycModal

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Check, Loader2, Sparkles, Infinity as InfinityIcon } from 'lucide-react';
 import { useAuth } from '../admin/context/AuthContext';
-import useFeexPay from '../utils/useFeexPay';
+import FedapayWidget from './FedapayWidget';
 import PromoInput from './PromoInput';
 import s from './WallPublishModal.module.css';
 
@@ -57,10 +57,16 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
   const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState('free');
   const [promo, setPromo] = useState(null); // { code, discount, finalPrice }
-  const { openCheckout, feexpayModal } = useFeexPay();
 
   const plan = PLANS.find(p => p.id === selectedPlan);
   const canBypass = user?.canBypassPaywall === true;
+
+  /* Mapping plan applicatif → produit FedaPay.
+     - premium (2 500 FCFA)  → wall_simple
+     - infinite (10 000 FCFA) → wall_premium */
+  const fedapayProduct = selectedPlan === 'premium'
+    ? 'wall_simple'
+    : selectedPlan === 'infinite' ? 'wall_premium' : null;
 
   /* Promo réduit le prix du plan (jamais un plan gratuit). Reset auto si
      l'user change de plan (le discount recompté n'aurait plus de sens). */
@@ -72,6 +78,12 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
     setPromo(null);
   };
 
+  /* Handler CTA classique — utilisé UNIQUEMENT pour :
+     - plan gratuit
+     - bypass paywall (testeurs / super_admin)
+     - promo 100%
+     Pour les plans payants standards, le Checkout.js FedaPay prend
+     le relais (rendu à la place de ce bouton). */
   const handleContinue = () => {
     if (plan.priceFCFA === 0 || canBypass) {
       onConfirm(selectedPlan);
@@ -79,17 +91,19 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
     }
     if (priceAfterPromo === 0) {
       onConfirm(selectedPlan, undefined, promo?.code);
-      return;
     }
-    openCheckout({
-      amount:      priceAfterPromo,
-      description: promo
-        ? `myKado — Mur ${plan.name} (code ${promo.code})`
-        : `myKado — Mur ${plan.name}`,
-      customId:    pubId ? `wall:${pubId}` : `wall_${Date.now()}`,
-      onSuccess: ({ reference }) => onConfirm(selectedPlan, reference, promo?.code),
-    });
   };
+
+  /* Callback FedaPay — onComplete/CHECKOUT_COMPLETED nous donne le
+     transactionId. On enchaîne onConfirm avec fedapayTransactionId
+     → le parent (WallSetup) appelle publishPublication qui vérifie
+     la FedapaySale (posée par le webhook signé) et publie. */
+  const handleFedapayPurchase = (transactionId) => {
+    onConfirm(selectedPlan, undefined, promo?.code, { fedapayTransactionId: transactionId });
+  };
+
+  /* Décide si on affiche le CTA classique ou le widget FedaPay. */
+  const showWidget = plan.priceFCFA > 0 && !canBypass && priceAfterPromo > 0 && fedapayProduct && pubId;
 
   return (
     <>
@@ -164,25 +178,39 @@ export default function WallPublishModal({ onClose, onConfirm, loading, pubId, t
               Paiement Mobile Money ou carte
             </div>
 
-            <button
-              className={s.submitBtn}
-              onClick={handleContinue}
-              disabled={loading}
-            >
-              {loading ? (
-                <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication en cours…</>
-              ) : (
-                plan.priceFCFA === 0
-                  ? `Publier en ${plan.name}`
-                  : canBypass
-                    ? `Publier gratuitement (Mode testeur)`
-                    : `Payer ${priceAfterPromo.toLocaleString('fr-FR')} FCFA`
-              )}
-            </button>
+            {showWidget ? (
+              /* Checkout.js FedaPay embedded — transaction pré-créée
+                 serveur (custom_metadata.pubId), formulaire rendu dans
+                 le container du widget. Le `key` force remount quand
+                 le plan change (premium ↔ illimité) → nouvelle
+                 transaction avec le bon montant. */
+              <FedapayWidget
+                key={fedapayProduct}
+                product={fedapayProduct}
+                pubId={pubId}
+                user={user}
+                onPurchaseComplete={handleFedapayPurchase}
+              />
+            ) : (
+              <button
+                className={s.submitBtn}
+                onClick={handleContinue}
+                disabled={loading}
+              >
+                {loading ? (
+                  <><Loader2 size={16} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication en cours…</>
+                ) : (
+                  plan.priceFCFA === 0
+                    ? `Publier en ${plan.name}`
+                    : canBypass
+                      ? `Publier gratuitement (Mode testeur)`
+                      : `Publier avec code promo`
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
-      {feexpayModal}
     </>
   );
 }

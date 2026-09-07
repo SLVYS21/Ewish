@@ -1,5 +1,6 @@
 import Navbar     from './components/Navbar';
 import Hero       from './components/Hero';
+import Story      from './components/Story';
 import Analogy    from './components/Analogy';
 import HowItWorks from './components/HowItWorks';
 import Pricing    from './components/Pricing';
@@ -32,6 +33,10 @@ export default function App() {
       <Navbar onCreate={() => handleCreate('/create')} onLogin={handleLogin} />
       <main id="main">
         <Hero       onCreate={() => handleCreate('/create')} />
+        <Story      onDemoClick={() => {
+          const el = document.getElementById('inspirations');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }} />
         <Inspirations onStartCreate={handleCreate} />
         <Analogy />
         <QrStories />

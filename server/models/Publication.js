@@ -180,7 +180,7 @@ const publicationSchema = new mongoose.Schema({
   brandingText: { type: String,  default: '' },      // texte custom (WhatsApp ou landing)
 
   isPaid:      { type: Boolean, default: false },
-  /* Montant Kado deja provisionne via FeexPay (en FCFA). Sert au top-up :
+  /* Montant Kado deja provisionne via FedaPay (en FCFA). Sert au top-up :
      si l'utilisateur augmente data.gift.amount apres publication, on facture
      seulement le delta (currentGiftFcfa - paidGiftFcfa). Voir publication.js
      endpoint /publish. */

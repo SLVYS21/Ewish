@@ -4,7 +4,7 @@ import { Joyride, STATUS } from 'react-joyride';
 /* On ne monte le composant Joyride que quand run=true : évite les side-effects
    (portails, observers, layout mesures) au mount inactif — un crash silencieux
    dans ces phases peut faire clignoter le tree parent. */
-export default function OnboardingTour({ run, onClose }) {
+export default function OnboardingTour({ run, showDatesStep = false, onClose }) {
   if (!run) return null;
 
   const steps = [
@@ -19,6 +19,11 @@ export default function OnboardingTour({ run, onClose }) {
       content: "C'est ici que tout commence ! Tu peux créer une carte animée, ou bien un mur collaboratif à plusieurs mains.",
       placement: 'bottom',
     },
+    ...(showDatesStep ? [{
+      target: '#tour-dates',
+      content: "Ajoute les dates qui comptent (anniversaires, mariages…) — on te préviendra pile à temps pour préparer ta carte.",
+      placement: 'bottom',
+    }] : []),
     {
       target: '#tour-recent',
       content: 'Retrouve ici toutes tes créations récentes (brouillons ou en ligne).',

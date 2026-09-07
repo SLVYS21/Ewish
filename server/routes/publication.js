@@ -9,7 +9,55 @@ const Promo = require('../models/Promo');
 const slugify = require('slugify');
 const { requireAdmin, requireOptionalAdmin } = require('../middleware/auth');
 const { slugify: mkSlugify, isValidSlug, generateUniqueSlug } = require('../utils/slug');
-const feexpay = require('../services/feexpay');
+const FedapaySale = require('../models/FedapaySale');
+
+/* Mapping produit FedaPay (clé custom_metadata.product) → { kind, amount, plan? }.
+   Doit rester aligné avec server/routes/fedapay.js (PRODUCT_MAP) et
+   client/data/fedapay.js. */
+const FEDAPAY_PRODUCT_MAP = {
+  card:         { kind: 'card',           amount: 1000  },
+  wall_simple:  { kind: 'wall_premium',   amount: 2500,  plan: 'premium'  },
+  wall_premium: { kind: 'wall_infinite',  amount: 10000, plan: 'infinite' },
+};
+
+/* Vérifie qu'une transaction FedaPay existe, est approuvée, et couvre
+   le montant attendu. Retourne { ok, code, message, sale }.
+   Deux modes :
+     - Product fixe (catalogue) → valide product + amount + plan.
+     - Custom amount (purpose défini) → valide juste amount >= expected. */
+async function verifyFedapayPurchase(transactionId, expectedAmount, expectedPlan) {
+  const sale = await FedapaySale.findOne({ transactionId: Number(transactionId) }).lean();
+  if (!sale) {
+    return {
+      ok: false,
+      code: 'FEDAPAY_WEBHOOK_NOT_RECEIVED',
+      message: 'Paiement FedaPay non encore confirmé côté serveur. Réessaie dans quelques secondes.',
+    };
+  }
+  const productKey = sale.customMetadata?.product;
+  const purpose    = sale.customMetadata?.purpose;
+  const mapping    = FEDAPAY_PRODUCT_MAP[productKey];
+
+  if (!mapping && !purpose) {
+    return { ok: false, code: 'FEDAPAY_UNKNOWN_PRODUCT', message: 'Produit FedaPay inconnu.' };
+  }
+  if (sale.amount < expectedAmount) {
+    return {
+      ok: false,
+      code: 'FEDAPAY_UNDERPAID',
+      message: `Montant payé (${sale.amount} FCFA) inférieur au prix requis (${expectedAmount} FCFA).`,
+    };
+  }
+  /* Le check plan ne s'applique qu'aux produits catalogue (murs). */
+  if (expectedPlan && mapping?.plan && mapping.plan !== expectedPlan) {
+    return {
+      ok: false,
+      code: 'FEDAPAY_PLAN_MISMATCH',
+      message: `Le produit FedaPay acheté correspond au plan "${mapping.plan}", pas à "${expectedPlan}".`,
+    };
+  }
+  return { ok: true, sale, mapping };
+}
 
 /* SPA-only virtual templates that live entirely on the client.
    They have no record in the Template collection and are free to publish. */
@@ -298,7 +346,8 @@ router.patch('/:id', requireOptionalAdmin, async (req, res) => {
 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
-    if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+    const currentMerchantId = req.admin?.merchantId || (req.admin?.id ? String(req.admin.id) : null);
+    if (existing.merchantId && req.admin?.role === 'merchant' && existing.merchantId !== currentMerchantId) {
       return res.status(403).json({ error: 'Accès refusé' });
     }
 
@@ -385,11 +434,15 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
 
     const existing = await Publication.findById(req.params.id).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
-    if (req.admin?.role === 'merchant' && existing.merchantId !== req.admin.merchantId) {
+    const currentMerchantId = req.admin?.merchantId || (req.admin?.id ? String(req.admin.id) : null);
+    if (existing.merchantId && req.admin?.role === 'merchant' && existing.merchantId !== currentMerchantId) {
       return res.status(403).json({ error: 'Accès refusé' });
     }
+    if (!existing.merchantId && currentMerchantId) {
+      await Publication.findByIdAndUpdate(req.params.id, { merchantId: currentMerchantId });
+    }
 
-    const { planType, feexpayReference, promoCode: rawPromoCode } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
+    const { planType, fedapayTransactionId, promoCode: rawPromoCode } = req.body; // planType optionnel : 'free' | 'premium' | 'infinite'
     const promoCodeInput = rawPromoCode ? String(rawPromoCode).trim().toUpperCase() : '';
     const isWallTemplate = existing.templateName?.startsWith('wall-of-wishes');
     const isEnvelope     = existing.templateName === 'myenvelope';
@@ -398,7 +451,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
        - myenvelope : lit existing.envelopeGift (nouveau schéma typé)
        - autres     : lit existing.data.gift (legacy)
        Fallback data.gift sur myenvelope pendant la fenêtre de migration.
-       Un montant XOF > 0 déclenche l'escrow FeexPay quel que soit le rôle,
+       Un montant XOF > 0 déclenche l'escrow FedaPay quel que soit le rôle,
        pour éviter les cadeaux gratuits non provisionnés. */
     const giftCfg  = isEnvelope
       ? (existing.envelopeGift?.enabled ? existing.envelopeGift : (existing.data?.gift || {}))
@@ -407,7 +460,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       ? Math.floor(Number(giftCfg.amount))
       : 0;
     /* Top-up : si la carte est déjà publiée, on ne facture QUE le delta Kado
-       (owedGiftFcfa) sans re-facturer le socle 1500. Sans ce champ, ajouter un
+       (owedGiftFcfa) sans re-facturer le socle 1000. Sans ce champ, ajouter un
        Kado après publication passait gratuitement. Voir Publication.paidGiftFcfa. */
     const paidGiftFcfa = Number(existing.paidGiftFcfa) || 0;
     const owedGiftFcfa = Math.max(0, giftFcfa - paidGiftFcfa);
@@ -456,14 +509,14 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
     }
 
     /* -------------------------------------------------------------------
-       Escrow FeexPay — deux cas :
-       - First publish (needsFirstEscrow) : 1500 FCFA base + éventuel Kado.
+       Escrow FedaPay — deux cas :
+       - First publish (needsFirstEscrow) : 1000 FCFA base + éventuel Kado.
        - Top-up (needsGiftTopUp) : uniquement le delta Kado non provisionné.
        Le bypass super_admin ne s'applique pas ici : le cadeau doit être
        réellement provisionné (Transaction.adminId required).
        ------------------------------------------------------------------- */
     if (requiresEscrow) {
-      let baseFee = canBypass ? 0 : 1500;
+      let baseFee = canBypass ? 0 : 1000;
 
       /* Promo appliqué au socle uniquement (pas au gift, pas au top-up).
          On valide ici pour catcher "expiré/épuisé/déjà utilisé" + minOrder. */
@@ -478,11 +531,11 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
 
       const envelopePrice = needsFirstEscrow ? (baseFee + giftFcfa) : owedGiftFcfa;
 
-      /* Bypass paywall + aucun cadeau → rien à provisionner, on publie gratuitement.
-         Sans ce court-circuit on renverrait PAYMENT_REQUIRED avec priceFCFA:0 et
-         le client resterait bloqué (FeexPay ne s'ouvre pas pour un montant nul). */
+      /* Bypass paywall + aucun cadeau → rien à provisionner, on publie
+         gratuitement. Sinon on exige un fedapayTransactionId (webhook posé
+         par server/routes/fedapay.js) qui couvre envelopePrice. */
       if (envelopePrice > 0) {
-        if (!feexpayReference) {
+        if (!fedapayTransactionId) {
           return res.status(402).json({
             error: needsGiftTopUp
               ? `Paiement requis pour le nouveau cadeau : ${envelopePrice} FCFA.`
@@ -493,42 +546,23 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
           });
         }
 
-        /* Vérification FeexPay (idempotent : ne re-vérifie pas si Transaction SUCCESS). */
-        const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
-        if (!existingTx || existingTx.status !== 'SUCCESS') {
-          let verifyRes;
-          try {
-            verifyRes = await feexpay.verify(feexpayReference);
-          } catch (err) {
-            console.error('[publish] FeexPay verify failed', err.message);
-            return res.status(502).json({
-              error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
-              code:  'FEEXPAY_UNAVAILABLE',
-            });
-          }
-          if (verifyRes.status !== 'SUCCESSFUL') {
-            return res.status(402).json({
-              error: 'Paiement FeexPay non confirmé.',
-              code:  'FEEXPAY_NOT_SUCCESSFUL',
-              status: verifyRes.status,
-            });
-          }
-          if (verifyRes.amount < envelopePrice) {
-            return res.status(402).json({
-              error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${envelopePrice} FCFA).`,
-              code:  'FEEXPAY_UNDERPAID',
-            });
-          }
-          const tx = existingTx || new Transaction({
-            adminId:       req.admin.id,
-            transactionId: feexpayReference,
-            amount:        verifyRes.amount,
-            source:        'feexpay',
-            paymentData:   verifyRes.raw,
-          });
-          tx.status = 'SUCCESS';
-          await tx.save();
+        const cv = await verifyFedapayPurchase(fedapayTransactionId, envelopePrice);
+        if (!cv.ok) {
+          const httpStatus = cv.code === 'FEDAPAY_WEBHOOK_NOT_RECEIVED' ? 409 : 402;
+          return res.status(httpStatus).json({ error: cv.message, code: cv.code });
         }
+        await Transaction.updateOne(
+          { transactionId: String(fedapayTransactionId) },
+          { $setOnInsert: {
+              transactionId: String(fedapayTransactionId),
+              adminId:       req.admin.id,
+              amount:        cv.sale.amount,
+              source:        'fedapay',
+              paymentData:   cv.sale.rawPayload,
+              status:        'SUCCESS',
+            } },
+          { upsert: true },
+        );
       }
       priceFCFA = envelopePrice;
     }
@@ -538,7 +572,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
        - Mur : dépend du plan choisi (free / premium / infinite).
        - Carte legacy (non-mur, pas encore payée) : template.priceFCFA.
        - Free / carte déjà payée : 0.
-       Bypass si `requiresEscrow` : le paiement Kado FeexPay a déjà été validé
+       Bypass si `requiresEscrow` : le paiement Kado FedaPay a déjà été validé
        plus haut, on ne facture pas en plus.
        ------------------------------------------------------------------- */
     if (!requiresEscrow && req.admin?.id) {
@@ -565,7 +599,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       }
 
       if (priceFCFA > 0) {
-        if (!feexpayReference) {
+        if (!fedapayTransactionId) {
           return res.status(402).json({
             error: promo
               ? `Paiement requis : ${priceFCFA} FCFA (code ${promo.code} appliqué).`
@@ -575,41 +609,30 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
             ...(promo ? { promoApplied: promo.code, promoDiscountFcfa } : {}),
           });
         }
-        const existingTx = await Transaction.findOne({ transactionId: feexpayReference });
-        if (!existingTx || existingTx.status !== 'SUCCESS') {
-          let verifyRes;
-          try {
-            verifyRes = await feexpay.verify(feexpayReference);
-          } catch (err) {
-            console.error('[publish] FeexPay verify failed', err.message);
-            return res.status(502).json({
-              error: 'Impossible de vérifier le paiement FeexPay. Réessaie dans un instant.',
-              code:  'FEEXPAY_UNAVAILABLE',
-            });
-          }
-          if (verifyRes.status !== 'SUCCESSFUL') {
-            return res.status(402).json({
-              error: 'Paiement FeexPay non confirmé.',
-              code:  'FEEXPAY_NOT_SUCCESSFUL',
-              status: verifyRes.status,
-            });
-          }
-          if (verifyRes.amount < priceFCFA) {
-            return res.status(402).json({
-              error: `Montant payé (${verifyRes.amount} FCFA) inférieur au prix requis (${priceFCFA} FCFA).`,
-              code:  'FEEXPAY_UNDERPAID',
-            });
-          }
-          const tx = existingTx || new Transaction({
-            adminId:       req.admin.id,
-            transactionId: feexpayReference,
-            amount:        verifyRes.amount,
-            source:        'feexpay',
-            paymentData:   verifyRes.raw,
-          });
-          tx.status = 'SUCCESS';
-          await tx.save();
+
+        /* Pour les murs, on valide aussi que le produit FedaPay acheté
+           correspond au plan sélectionné (premium ou infinite). */
+        const cv = await verifyFedapayPurchase(
+          fedapayTransactionId,
+          priceFCFA,
+          isWallTemplate ? finalPlanType : null,
+        );
+        if (!cv.ok) {
+          const httpStatus = cv.code === 'FEDAPAY_WEBHOOK_NOT_RECEIVED' ? 409 : 402;
+          return res.status(httpStatus).json({ error: cv.message, code: cv.code });
         }
+        await Transaction.updateOne(
+          { transactionId: String(fedapayTransactionId) },
+          { $setOnInsert: {
+              transactionId: String(fedapayTransactionId),
+              adminId:       req.admin.id,
+              amount:        cv.sale.amount,
+              source:        'fedapay',
+              paymentData:   cv.sale.rawPayload,
+              status:        'SUCCESS',
+            } },
+          { upsert: true },
+        );
       }
     }
 
@@ -625,7 +648,7 @@ router.post('/:id/publish', requireOptionalAdmin, async (req, res) => {
       updateFields.isPaid = true;
     }
     if (requiresEscrow) {
-      // Après un escrow FeexPay réussi (first ou top-up), le montant provisionné
+      // Après un escrow FedaPay réussi (first ou top-up), le montant provisionné
       // est aligné sur le gift courant.
       updateFields.paidGiftFcfa = giftFcfa;
     }

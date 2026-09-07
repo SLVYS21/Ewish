@@ -3,9 +3,10 @@ import { useCardState } from '../hooks/useCardState';
 import { ShareView, buildShareUrl } from '../../pages/SharePage';
 import { getShortLink } from '../../utils/api';
 import { formatAmount, findCurrency } from '../data/currencies';
-import useFeexPay from '../../utils/useFeexPay';
+import FedapayWidget from '../../components/FedapayWidget';
 import NotoEmoji from '../../components/NotoEmoji';
 import PromoInput from '../../components/PromoInput';
+import QuickAuthModal from '../../components/QuickAuthModal';
 import {
   LucideSparkles, LucideRotateCcw, LucideGift, LucideEye, LucidePlay,
 } from 'lucide-react';
@@ -13,25 +14,27 @@ import {
 /*
  * Step 5 — Aperçu et Partage.
  * - Big "voir le rendu final" hero to preview the unboxing before commit
- * - Publish button opens the FeexPay checkout for (1500 FCFA + gift amount)
- * - Once published, reuses the shared ShareView (QR + social buttons)
+ * - Toujours FedaPay Checkout.js embedded : produit fixe `card` (1000 FCFA)
+ *   quand pas de cadeau, montant custom (1000 + gift) quand cadeau XOF
+ *   attaché. Transaction pré-créée serveur avec custom_metadata.pubId=draftId.
+ *   onComplete fournit transactionId → publishCard({ fedapayTransactionId }).
  */
 
 import { useAuth } from '../../admin/context/AuthContext';
 
-const CARD_PUBLISH_FEE_FCFA = 1500;
+const CARD_PUBLISH_FEE_FCFA = 1000;
 
 function ShareStep({ onOpenUnboxing }, ref) {
   const { user } = useAuth();
   const {
     texts, occasion, gift,
     publishState, publishedPub, publishError,
-    publishCard, resetPublish,
+    publishCard, resetPublish, draftId,
   } = useCardState();
 
   const [shortCode, setShortCode] = useState('');
   const [promo, setPromo]         = useState(null); // { code, discount, finalPrice }
-  const { openCheckout, feexpayModal } = useFeexPay();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Resolve a shortCode once published (for the "code court" section of ShareView).
   useEffect(() => {
@@ -48,7 +51,7 @@ function ShareStep({ onOpenUnboxing }, ref) {
   const published  = publishState === 'published';
   const errored    = publishState === 'error';
 
-  // Total price to display + charge : 1500 base + gift (XOF only, other currencies
+  // Total price to display + charge : 1000 base + gift (XOF only, other currencies
   // stay symbolic — see server side publication.js). Le promo réduit le socle
   // uniquement (jamais le gift), aligné avec la règle serveur.
   const giftCfg = findCurrency(gift.currency);
@@ -58,32 +61,33 @@ function ShareStep({ onOpenUnboxing }, ref) {
   const baseAfterPromo = Math.max(0, CARD_PUBLISH_FEE_FCFA - promoDiscount);
   const totalFcfa = baseAfterPromo + giftFcfa;
 
+  /* Handler fallback — utilisé pour bypass paywall / promo 100% /
+     création initiale du draft / prompt auth. Pour les cas payants
+     connectés, le widget FedaPay rendu inline gère le paiement. */
   const startPublish = async () => {
-    /* Try publishing first — if the server has already been paid (isPaid) it
-       skips the payment gate and we're done immediately. Otherwise we get a
-       PAYMENT_REQUIRED code and open FeexPay with the returned priceFCFA. */
-    const promoCode = promo?.code || undefined;
-    const first = await publishCard({ promoCode });
-    if (first?.ok) return;
-
-    if (first?.paymentRequired && first?.priceFCFA) {
-      const finalize = async ({ reference }) => {
-        resetPublish();
-        await publishCard({ feexpayReference: reference, promoCode });
-      };
-      openCheckout({
-        amount:      first.priceFCFA,
-        description: giftIncluded
-          ? `myKado — Carte + cadeau ${formatAmount(gift.amount, gift.currency)}`
-          : 'myKado — Publication de carte',
-        customId:    first.pubId ? `envelope:${first.pubId}` : `envelope_${Date.now()}`,
-        onSuccess:   finalize,
-        onFailure:   (err) => {
-          // eslint-disable-next-line no-console
-          console.warn('[card-editor] FeexPay failed:', err?.message || err);
-        },
-      });
+    if (!user) {
+      setShowAuthModal(true);
+      return;
     }
+    const promoCode = promo?.code || undefined;
+    await publishCard({ promoCode });
+  };
+
+  /* Le widget FedaPay est rendu quand : idle + connecté + non-bypass + prix > 0 +
+     draft déjà créé (pubId requis pour custom_metadata). */
+  const showFedapayWidget = idle
+    && !!user
+    && !user?.canBypassPaywall
+    && totalFcfa > 0
+    && !!draftId;
+
+  /* Callback FedaPay — onComplete/CHECKOUT_COMPLETED nous donne le
+     transactionId. On enchaîne publishCard({ fedapayTransactionId }) —
+     le serveur vérifie que la FedapaySale existe (posée par le webhook
+     signé) et publie. Si le webhook n'est pas encore arrivé, le serveur
+     renvoie 409 et le user peut retry (rare). */
+  const handleFedapayPurchase = async (transactionId) => {
+    await publishCard({ fedapayTransactionId: transactionId, promoCode: promo?.code });
   };
 
   /* Expose startPublish au parent (EnvelopeEditorLayout) pour que le bouton
@@ -176,14 +180,40 @@ function ShareStep({ onOpenUnboxing }, ref) {
             />
           )}
 
-          <button className="ce-cta" onClick={startPublish}>
-            <LucideSparkles size={18} />
-            {user?.canBypassPaywall && !giftIncluded
-              ? 'Publier gratuitement (Testeur)'
-              : totalFcfa === 0
-                ? 'Publier gratuitement'
-                : `Payer ${(user?.canBypassPaywall ? giftFcfa : totalFcfa).toLocaleString('fr-FR')} FCFA & publier`}
-          </button>
+          {showFedapayWidget ? (
+            /* Checkout.js FedaPay embedded — transaction pré-créée serveur
+               (custom_metadata.pubId=draftId). Gift XOF attaché → amount
+               custom (1000 + gift), sinon produit catalogue `card`.
+               onComplete → handleFedapayPurchase → publishCard. */
+            <div className="ce-fedapay-wrap" style={{ marginTop: 20 }}>
+              {giftIncluded ? (
+                <FedapayWidget
+                  amount={totalFcfa}
+                  description={`myKado — Carte + cadeau ${formatAmount(gift.amount, gift.currency)}`}
+                  purpose="card_gift"
+                  pubId={draftId}
+                  user={user}
+                  onPurchaseComplete={handleFedapayPurchase}
+                />
+              ) : (
+                <FedapayWidget
+                  product="card"
+                  pubId={draftId}
+                  user={user}
+                  onPurchaseComplete={handleFedapayPurchase}
+                />
+              )}
+            </div>
+          ) : (
+            <button className="ce-cta" onClick={startPublish}>
+              <LucideSparkles size={18} />
+              {user?.canBypassPaywall && !giftIncluded
+                ? 'Publier gratuitement (Testeur)'
+                : totalFcfa === 0
+                  ? 'Publier gratuitement'
+                  : `Payer ${(user?.canBypassPaywall ? giftFcfa : totalFcfa).toLocaleString('fr-FR')} FCFA & publier`}
+            </button>
+          )}
         </>
       )}
 
@@ -221,7 +251,14 @@ function ShareStep({ onOpenUnboxing }, ref) {
         </div>
       )}
 
-      {feexpayModal}
+      <QuickAuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthed={() => setShowAuthModal(false)}
+        title="Connexion requise pour payer"
+        subtitle="Connecte-toi ou crée un compte pour finaliser le paiement et retrouver ta carte."
+      />
+
     </div>
   );
 }

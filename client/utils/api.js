@@ -167,6 +167,18 @@ export const getOrderByPublication = (pubId) => api.get(`/orders/by-publication/
 // ── Analytics ──
 export const getAnalytics = (period) => api.get('/analytics', { params: { period }, withCredentials: true });
 
+// ── FedaPay ──
+/* prepareFedapayCheckout renvoie la config à passer telle quelle à
+   FedaPay.init() côté widget. Le widget crée la Transaction lui-même
+   avec la clé publique — plus de collision d'email possible sur le
+   Customer et pas d'appel serveur→FedaPay pour la création. */
+export const prepareFedapayCheckout = (payload) =>
+  api.post('/fedapay/prepare', payload, { withCredentials: true });
+export const verifyFedapayTransaction = (transactionId) =>
+  api.get(`/fedapay/verify/${transactionId}`, { withCredentials: true });
+export const findFedapaySaleByPvar = (pvar) =>
+  api.get(`/fedapay/find-sale/${pvar}`, { withCredentials: true });
+
 // ── Promos ──
 export const getPromos = () => api.get('/promo', { withCredentials: true });
 export const createPromo = (data) => api.post('/promo', data, { withCredentials: true });

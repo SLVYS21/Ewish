@@ -207,13 +207,6 @@ export default function Inspirations() {
             allow="autoplay; fullscreen"
             loading="lazy"
           />
-
-          {/* Click-shield : bloque tout tap/click qui atteindrait les boutons
-              "Ajouter"/"Participer" du mur. Le mur a déjà un demoMode côté
-              serveur mais les CTA restent visuellement tapables — cet overlay
-              évite le doute "je clique et rien ne se passe". Sur desktop on
-              autorise l'interaction (hover, scroll interne). */}
-          <div className={s.demoShield} aria-hidden />
         </div>
 
       </div>

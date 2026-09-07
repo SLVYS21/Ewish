@@ -95,9 +95,9 @@ export default function Hero({ onCreate }) {
           </div>
 
           <h1 className={s.h1}>
-            <span className={s.line1}>Faites de chaque occasion un</span>
+            <span className={s.line1}>Rendez son jour</span>
             <span className={s.line2}>
-              souvenir <span className={s.highlightStatic}>inoubliable.</span>
+              <span className={s.highlightStatic}>inoubliable.</span>
               <span className={s.emotionSlot} aria-hidden="true">
                 {EMOTION_EMOJIS.map((name, i) => (
                   <span
@@ -112,8 +112,8 @@ export default function Hero({ onCreate }) {
           </h1>
 
           <p className={s.sub}>
-            Un <strong>mur collaboratif</strong> où tout le monde dépose mots, photos & vidéos —
-            ou une <strong>carte solo animée</strong>, à ouvrir comme un cadeau.
+            Un <strong>mur collaboratif</strong> où ses proches déposent mots, photos et vidéos —
+            ou une <strong>carte animée</strong> à lui offrir comme un cadeau.
             Un lien, un QR, un souvenir gardé pour toujours.
           </p>
 

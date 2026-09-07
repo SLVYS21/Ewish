@@ -44,6 +44,7 @@ const CODEPOINTS = {
   'love-letter':        '1f48c',
   'envelope-heart':     '1f48c',
   'ribbon':             '1f380',
+  'baby':               '1f476',
   'lock':               '1f512',
   'unlock':             '1f513',
   'check':              '2705',

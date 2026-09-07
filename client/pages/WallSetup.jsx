@@ -789,11 +789,14 @@ export default function WallSetup() {
     setShowPublishModal(true);
   };
 
-  const handlePublishConfirm = async (planType, feexpayReference) => {
+  const handlePublishConfirm = async (planType, _feexpayRef, promoCode, opts = {}) => {
     setPublishing(true);
     setPubError('');
     try {
-      const res = await publishPublication(id, { planType, feexpayReference });
+      const body = { planType };
+      if (promoCode)                    body.promoCode            = promoCode;
+      if (opts?.fedapayTransactionId)   body.fedapayTransactionId = opts.fedapayTransactionId;
+      const res = await publishPublication(id, body);
       setPub(res.data);
       setShowPublishModal(false);
       setShowSuccessScreen(true);

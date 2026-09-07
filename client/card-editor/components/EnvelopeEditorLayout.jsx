@@ -87,21 +87,26 @@ function FooterAction({ activeTab, setActiveTab, canPublish, publishState, onPub
       </div>
     );
   }
-  const errored = publishState === 'error';
-  return (
-    <div className="ee-panel-footer">
-      <button
-        type="button"
-        className="ee-footer-btn ee-footer-btn-primary"
-        onClick={onPublish}
-        disabled={!canPublish}
-        title={!canPublish ? 'Renseigne d\'abord le destinataire' : undefined}
-      >
-        <LucideSend size={16} />
-        <span>{errored ? 'Réessayer la publication' : 'Publier & Partager'}</span>
-      </button>
-    </div>
-  );
+  if (publishState === 'error') {
+    return (
+      <div className="ee-panel-footer">
+        <button
+          type="button"
+          className="ee-footer-btn ee-footer-btn-primary"
+          onClick={onPublish}
+          disabled={!canPublish}
+        >
+          <LucideSend size={16} />
+          <span>Réessayer la publication</span>
+        </button>
+      </div>
+    );
+  }
+  /* Idle state sur share tab → le CTA principal (widget FedaPay ou
+     bouton fallback) vit DANS ShareStep. Ne pas afficher un second
+     "Publier & Partager" ici — c'était une redondance qui doublait
+     l'action et perturbait l'user. */
+  return null;
 }
 
 export default function EnvelopeEditorLayout() {
@@ -195,16 +200,23 @@ export default function EnvelopeEditorLayout() {
             <span>{previewOpen ? 'Éditer' : 'Aperçu'}</span>
           </button>
 
-          <button
-            type="button"
-            className={styles.btnPublish}
-            onClick={() => setActiveTab('share')}
-            disabled={!canPublish}
-            title={!canPublish ? 'Renseigne d\'abord le destinataire' : 'Publier & partager'}
-          >
-            <LucideSend size={14} />
-            <span>Publier</span>
-          </button>
+          {/* Bouton "Publier" du header = nav-shortcut vers la tab share.
+              Inutile quand on y est déjà — on l'affiche uniquement sur
+              les autres tabs pour éviter la redondance avec le CTA
+              principal (widget FedaPay / bouton startPublish) qui vit
+              dans ShareStep. */}
+          {activeTab !== 'share' && (
+            <button
+              type="button"
+              className={styles.btnPublish}
+              onClick={() => setActiveTab('share')}
+              disabled={!canPublish}
+              title={!canPublish ? 'Renseigne d\'abord le destinataire' : 'Publier & partager'}
+            >
+              <LucideSend size={14} />
+              <span>Publier</span>
+            </button>
+          )}
         </div>
       </header>
 

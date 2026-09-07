@@ -13,7 +13,7 @@ import {
 import QRExport from '../components/QRExport';
 import PersonalizeLinkModal from '../components/PersonalizeLinkModal';
 import WallPublishModal from '../components/WallPublishModal';
-import useFeexPay from '../utils/useFeexPay';
+import FedapayWidget from '../components/FedapayWidget';
 
 /* ─── constants ─── */
 const WALL_NAMES = new Set(['wall-of-wishes','wall-of-wishes-3d','wall-of-wishes-modern','wall-of-wishes-craft','wall-of-wishes-space']);
@@ -338,39 +338,37 @@ export function UnlockView({ pub, onUnlocked }) {
   const [unlocking, setUnlocking] = useState(false);
   const [err, setErr] = useState('');
   const [showPlanModal, setShowPlanModal] = useState(false);
-  const { openCheckout, feexpayModal } = useFeexPay();
+  const [showLegacyWidget, setShowLegacyWidget] = useState(false);
 
   const isWall = WALL_NAMES.has(pub?.templateName);
   const priceFCFA = pub?.priceFCFA ?? 500;
   const canBypass = user?.canBypassPaywall === true;
 
-  const publish = async (feexpayReference) => {
+  const publish = async (fedapayTransactionId) => {
     setUnlocking(true); setErr('');
     try {
-      await publishPublication(pub._id, feexpayReference ? { feexpayReference } : {});
+      await publishPublication(pub._id, fedapayTransactionId ? { fedapayTransactionId } : {});
       onUnlocked();
     } catch (e) {
       setErr(e.response?.data?.error || 'Erreur lors de la publication');
     } finally { setUnlocking(false); }
   };
 
-  /* Chemin non-mur : checkout FeexPay direct pour priceFCFA (ou publish gratuit si testeur). */
+  /* Chemin non-mur : bypass/gratuit → publish direct, sinon on affiche le
+     widget FedaPay inline (amount custom = priceFCFA de la publication). */
   const handleUnlockLegacy = () => {
     if (canBypass || priceFCFA === 0) { publish(); return; }
-    openCheckout({
-      amount: priceFCFA,
-      description: `myKado — ${pub?.title || pub?.templateName || 'Publication'}`,
-      customId: `card_${pub._id}`,
-      onSuccess: ({ reference }) => publish(reference),
-    });
+    setShowLegacyWidget(true);
   };
 
   /* Chemin mur : passe par WallPublishModal → choix de plan (free/premium/
-     infinite) + éventuel checkout FeexPay. */
-  const handleWallPublishConfirm = async (planType, feexpayReference, promoCode) => {
+     infinite) + widget FedaPay pour les plans payants. */
+  const handleWallPublishConfirm = async (planType, _feexpayRef, promoCode, opts = {}) => {
     setUnlocking(true); setErr('');
     try {
-      await publishPublication(pub._id, { planType, feexpayReference, promoCode });
+      const body = { planType, promoCode };
+      if (opts?.fedapayTransactionId) body.fedapayTransactionId = opts.fedapayTransactionId;
+      await publishPublication(pub._id, body);
       setShowPlanModal(false);
       onUnlocked();
     } catch (e) {
@@ -431,23 +429,37 @@ export function UnlockView({ pub, onUnlocked }) {
         ))}
       </div>
 
-      <div style={{ margin: '22px 0 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <div style={{ margin: '22px 0 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%', maxWidth: 420 }}>
         {err && <p style={{ fontSize: 12, color: 'var(--mk-accent)', fontWeight: 700 }}>{err}</p>}
-        <button
-          className="btn btn-primary btn-lg"
-          onClick={handlePrimaryClick}
-          disabled={unlocking}
-          style={{ minWidth: 240, justifyContent: 'center' }}
-        >
-          {unlocking
-            ? <><RefreshCw size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
-            : isWall
-              ? <><Zap size={16} /> Publier le mur</>
-              : canBypass
-                ? <><Zap size={16} /> Publier gratuitement (Testeur)</>
-                : <><Zap size={16} /> Publier pour {priceFCFA.toLocaleString('fr-FR')} FCFA</>
-          }
-        </button>
+
+        {showLegacyWidget && !isWall ? (
+          /* Widget FedaPay inline pour unlock legacy (non-mur) —
+             amount = priceFCFA de la publication (5 000 par défaut). */
+          <FedapayWidget
+            amount={priceFCFA}
+            description={`myKado — ${pub?.title || pub?.templateName || 'Publication'}`}
+            purpose="legacy_unlock"
+            pubId={pub?._id}
+            user={user}
+            onPurchaseComplete={(txId) => publish(txId)}
+          />
+        ) : (
+          <button
+            className="btn btn-primary btn-lg"
+            onClick={handlePrimaryClick}
+            disabled={unlocking}
+            style={{ minWidth: 240, justifyContent: 'center' }}
+          >
+            {unlocking
+              ? <><RefreshCw size={15} style={{ animation: 'mk-spin .75s linear infinite' }} /> Publication…</>
+              : isWall
+                ? <><Zap size={16} /> Publier le mur</>
+                : canBypass
+                  ? <><Zap size={16} /> Publier gratuitement (Testeur)</>
+                  : <><Zap size={16} /> Publier pour {priceFCFA.toLocaleString('fr-FR')} FCFA</>
+            }
+          </button>
+        )}
       </div>
 
       {isWall && showPlanModal && (
@@ -459,7 +471,6 @@ export function UnlockView({ pub, onUnlocked }) {
           loading={unlocking}
         />
       )}
-      {feexpayModal}
     </div>
   );
 }
