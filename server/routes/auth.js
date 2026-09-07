@@ -2,8 +2,11 @@ const router  = require('express').Router();
 const jwt     = require('jsonwebtoken');
 const crypto  = require('crypto');
 const fetch   = require('node-fetch');
+const { OAuth2Client } = require('google-auth-library');
 const AdminUser = require('../models/AdminUser');
 const { requireAdmin } = require('../middleware/auth');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // POST /api/auth/register (Create a merchant account)
 router.post('/register', async (req, res) => {
@@ -85,12 +88,14 @@ router.post('/google', async (req, res) => {
     const { credential } = req.body;
     if (!credential) return res.status(400).json({ error: 'Token manquant' });
 
-    const gRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-    const info = await gRes.json();
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const info = ticket.getPayload();
 
-    if (!gRes.ok || !info.sub) return res.status(401).json({ error: 'Token Google invalide' });
-    if (process.env.GOOGLE_CLIENT_ID && info.aud !== process.env.GOOGLE_CLIENT_ID) {
-      return res.status(401).json({ error: 'Token Google invalide (audience)' });
+    if (!info || !info.sub || !info.email) {
+      return res.status(401).json({ error: 'Token Google invalide' });
     }
 
     let user = await AdminUser.findOne({
