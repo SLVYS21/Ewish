@@ -95,7 +95,7 @@ export default function Hero({ onCreate }) {
           </div>
 
           <h1 className={s.h1}>
-            <span className={s.line1}>Rendez son jour</span>
+            <span className={s.line1}>offrez la petite attention</span>
             <span className={s.line2}>
               <span className={s.highlightStatic}>inoubliable.</span>
               <span className={s.emotionSlot} aria-hidden="true">
