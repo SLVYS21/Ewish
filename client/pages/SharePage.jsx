@@ -935,24 +935,43 @@ export function ShareView({ pub, shortCode, setShortCode, shareUrl, isWall, onSl
       }
 
       /* 1. Convertir les stickers locaux (.webp/.gif) en PNG base64 via Canvas
-            car react-pdf ne supporte ni le WebP, ni le chemin relatif. */
-      const convertToPng = (url) => new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
+            car react-pdf ne supporte ni le WebP, ni le chemin relatif.
+            fetch → blob → createImageBitmap contourne le cache tainting :
+            un <img crossOrigin> peut hériter d'une entrée cache sans headers
+            CORS et taint le canvas. Passer par blob repart d'une requête
+            propre, donc toDataURL('image/png') fonctionne à coup sûr. */
+      const convertToPng = async (url) => {
+        try {
+          const abs = url.startsWith('/') ? (window.location.origin + url) : url;
+          const res = await fetch(abs, { cache: 'reload', mode: 'cors', credentials: 'omit' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const blob = await res.blob();
+          const bitmap = await createImageBitmap(blob);
           const canvas = document.createElement('canvas');
-          canvas.width = img.width; canvas.height = img.height;
-          canvas.getContext('2d').drawImage(img, 0, 0);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = () => resolve(url);
-        img.src = url.startsWith('/') ? (window.location.origin + url) : url;
-      });
+          canvas.width = bitmap.width;
+          canvas.height = bitmap.height;
+          canvas.getContext('2d').drawImage(bitmap, 0, 0);
+          bitmap.close?.();
+          return canvas.toDataURL('image/png');
+        } catch (e) {
+          console.warn('[PDF] Sticker conversion failed:', url, e);
+          return null;
+        }
+      };
 
       for (let i = 0; i < wishes.length; i++) {
         const w = wishes[i];
         if (w.mediaType === 'sticker' && w.photoUrl && !w.photoUrl.startsWith('data:')) {
-          w.photoUrl = await convertToPng(w.photoUrl);
+          const dataUrl = await convertToPng(w.photoUrl);
+          if (dataUrl) {
+            w.photoUrl = dataUrl;
+          } else {
+            /* Conversion KO → on retire le média pour éviter que react-pdf
+               tente une URL relative qu'il ne sait pas résoudre (rendrait
+               une case vide sans erreur visible). */
+            w.photoUrl = '';
+            w.mediaType = 'none';
+          }
         }
       }
 

@@ -221,6 +221,11 @@ const s = StyleSheet.create({
     marginBottom: 12,
     objectFit: 'contain',
   },
+  posterMedia: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+  },
   wishText: {
     fontFamily: 'Caveat',
     fontSize: 14,
@@ -358,21 +363,28 @@ const s = StyleSheet.create({
 });
 
 /* ─── Sous-composants ─── */
-function WishPhoto({ w }) {
+function WishPhoto({ w, variant = 'note' }) {
   const hasImage = (w.mediaType === 'photo' || w.mediaType === 'gif') && w.photoUrl;
   const hasSticker = w.mediaType === 'sticker' && w.photoUrl;
   const hasVideo = w.mediaType === 'video' && w.videoUrl;
+  const isPoster = variant === 'poster';
+  const photoStyle   = isPoster ? s.posterMedia : s.wishPhoto;
+  const stickerStyle = isPoster ? s.posterMedia : s.wishSticker;
   if (hasSticker) {
-    // Force f_png pour les stickers (évite les WebP/SVG non gérés)
-    return <Image src={cldThumb(w.photoUrl, 'w_300,f_png')} style={s.wishSticker} />;
+    /* Sticker : si data URL (déjà converti côté SharePage via canvas),
+       on l'utilise tel quel — sinon on tente cldThumb (Cloudinary). */
+    const src = w.photoUrl.startsWith('data:')
+      ? w.photoUrl
+      : cldThumb(w.photoUrl, 'w_300,f_png');
+    return <Image src={src} style={stickerStyle} />;
   }
   if (hasImage) {
     // Force f_jpg because react-pdf does not support WebP/AVIF well.
-    return <Image src={cldThumb(w.photoUrl, 'c_fill,g_auto,w_900,h_680,q_auto,f_jpg')} style={s.wishPhoto} />;
+    return <Image src={cldThumb(w.photoUrl, 'c_fill,g_auto,w_900,h_680,q_auto,f_jpg')} style={photoStyle} />;
   }
   if (hasVideo) {
     const p = videoPoster(w.videoUrl);
-    return p ? <Image src={p} style={s.wishPhoto} /> : null;
+    return p ? <Image src={p} style={photoStyle} /> : null;
   }
   return null;
 }
@@ -402,7 +414,7 @@ function PosterWishNote({ w, index }) {
     <View style={[s.posterWish, { transform: `rotate(${rot}deg)` }]}>
       {(w.photoUrl || w.videoUrl) ? (
          <View style={{ width: 90, height: 90, marginBottom: 8, borderRadius: 4, overflow: 'hidden' }}>
-            <WishPhoto w={w} />
+            <WishPhoto w={w} variant="poster" />
          </View>
       ) : null}
       <Text style={{ fontFamily: 'Caveat', fontSize: 18, color, textAlign: 'center', lineHeight: 1.3 }}>
